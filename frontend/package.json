@@ -27,12 +27,18 @@
   "dependencies": {
     "@rollup/plugin-json": "^4.1.0",
     "@smui/button": "^6.0.0-beta.13",
+    "@smui/card": "^6.0.0-beta.13",
     "@smui/circular-progress": "^6.0.0-beta.13",
     "@smui/data-table": "^6.0.0-beta.13",
+    "@smui/layout-grid": "^6.0.0-beta.13",
+    "@smui/list": "^6.0.0-beta.13",
+    "@smui/paper": "^6.0.0-beta.13",
     "@smui/select": "^6.0.0-beta.13",
+    "arquero": "^4.8.8",
     "highlightjs": "^9.16.2",
     "sirv-cli": "^2.0.0",
     "svelte-highlight": "^5.2.0",
-    "svelte-material-ui": "^6.0.0-beta.13"
+    "svelte-material-ui": "^6.0.0-beta.13",
+    "svelte-spa-router": "^3.2.0"
   }
 }

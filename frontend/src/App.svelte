@@ -1,56 +1,31 @@
 <script lang="ts">
-  import DataTable, { Head, Body, Row, Cell } from "@smui/data-table";
-  import Select, { Option } from "@smui/select";
-  import Button, { Label } from "@smui/button";
-  import CircularProgress from "@smui/circular-progress";
-  import Highlight from "svelte-highlight";
-  import python from "svelte-highlight/src/languages/python";
   import github from "svelte-highlight/src/styles/github";
   import * as aq from "arquero";
-  import { select_option } from "svelte/internal";
+  import List, {
+    Item,
+    Text,
+    Separator,
+    PrimaryText,
+    SecondaryText,
+  } from "@smui/list";
 
-  let models = [];
-  let metrics = [];
-  let metric = "";
-  let results = [];
+  import Slices from "./Slices.svelte";
+  import Slicers from "./Slicers.svelte";
+  import Tests from "./Tests.svelte";
+  import Results from "./Results.svelte";
+  import Router, { location } from "svelte-spa-router";
+  import Home from "./Home.svelte";
 
-  let code = "";
-  let test = "";
+  const routes = {
+    "/": Home,
+    "/slicers/": Slicers,
+    "/tests/": Tests,
+    "/tests/:test": Tests,
+    "/slices/": Slices,
+    "/results/": Results,
+    "*": Home,
+  };
 
-  let runningAnalysis = false;
-
-  async function getResults() {
-    let r = await fetch("/api/results");
-    let results: Test[] = JSON.parse(await r.json());
-    Object.keys(results[0]).forEach((d) => {
-      if (d.startsWith("model_")) {
-        models.push(d);
-      }
-    });
-    metrics = [...new Set(results.map((d) => d.test))];
-    metric = metrics[0];
-    results = [...results];
-  }
-
-  getResults();
-
-  fetch("/api/tests")
-    .then((d) => d.json())
-    .then((d) => {
-      d = JSON.parse(d);
-      d = d[0];
-      console.log(d);
-      test = d;
-    });
-
-  fetch("/api/slicers")
-    .then((d) => d.json())
-    .then((d) => {
-      d = JSON.parse(d);
-      d = d[0];
-      console.log(d);
-      code = d;
-    });
   fetch("/api/data")
     .then((d) => d.arrayBuffer())
     .then((d) => {
@@ -59,20 +34,16 @@
       console.log(data.totalRows());
     });
 
-  function runAnalysis() {
-    runningAnalysis = true;
+  let tab = $location.split("/")[1];
+  if (!tab) tab = "home";
 
-    fetch("/api/runanalysis", {
-      method: "POST",
-    })
-      .then((d) => d.json())
-      .then((d) => {
-        console.log(d);
-      });
-
-    setTimeout(() => {
-      runningAnalysis = false;
-    }, 1000);
+  function updateTab(t) {
+    tab = t;
+    if (t === "home") {
+      window.location.hash = "";
+    } else {
+      window.location.hash = "#/" + t + "/";
+    }
   }
 </script>
 
@@ -80,77 +51,112 @@
   {@html github}
 </svelte:head>
 
+<header>
+  <h1>MLTest</h1>
+</header>
 <main>
-  <h1>Results</h1>
-  <Button on:click={() => runAnalysis()} variant="outlined">
-    <Label>Run Analysis</Label>
-  </Button>
-  {#if runningAnalysis}
-    <CircularProgress style="height: 32px; width: 32px;" indeterminate />
-  {/if}
-  {#if code.length > 0}
+  <div id="side-menu">
+    <List class="demo-list">
+      <Item activated={tab === "home"} on:SMUI:action={() => updateTab("home")}>
+        <Text>
+          <PrimaryText>Home</PrimaryText>
+          <!-- <SecondaryText>Data slicing functions</SecondaryText> -->
+        </Text>
+      </Item>
+      <Separator />
+      <Item
+        activated={tab === "slicers"}
+        on:SMUI:action={() => updateTab("slicers")}
+      >
+        <Text>
+          <PrimaryText>Slicers</PrimaryText>
+          <SecondaryText>Data slicing functions</SecondaryText>
+        </Text>
+      </Item>
+      <Separator />
+      <Item
+        activated={tab === "tests"}
+        on:SMUI:action={() => updateTab("tests")}
+      >
+        <Text>
+          <PrimaryText>Tests</PrimaryText>
+          <SecondaryText>Testing functions</SecondaryText>
+        </Text>
+      </Item>
+      <Separator />
+      <Item
+        activated={tab === "slices"}
+        on:SMUI:action={() => updateTab("slices")}
+      >
+        <Text>
+          <PrimaryText>Slices</PrimaryText>
+          <SecondaryText>Generated slices</SecondaryText>
+        </Text>
+      </Item>
+      <Separator />
+      <Item
+        activated={tab === "results"}
+        on:SMUI:action={() => updateTab("results")}
+      >
+        <Text>
+          <PrimaryText>Results</PrimaryText>
+          <SecondaryText>Test results on slices</SecondaryText>
+        </Text>
+      </Item>
+      <Separator />
+    </List>
+  </div>
+  <div id="main">
+    <Router {routes} />
+    <!-- {#if tab === "Slicers"}
+      <Slicers />
+    {:else if tab === "Tests"}
+      <Tests />
+    {:else if tab === "Slices"}
+      <Slices />
+    {:else}
+      <Results />
+    {/if} -->
+    <!-- {#if code.length > 0}
     <Highlight language={python} {code} />
   {/if}
   {#if test.length > 0}
     <Highlight language={python} code={test} />
-  {/if}
-  <div class="table-container">
-    <Select bind:value={metric} label="Select Metric">
-      {#each metrics as m}
-        <Option value={m}>{m}</Option>
-      {/each}
-    </Select>
-    <DataTable sortable table$aria-label="People list" style="max-width: 100%;">
-      <Head>
-        <Row>
-          <Cell>Slice</Cell>
-          <Cell>Test</Cell>
-          <Cell numeric>Size</Cell>
-          {#each models as m}
-            <Cell numeric><b>model:</b>{m.substring(6)}</Cell>
-          {/each}
-        </Row>
-      </Head>
-      <Body>
-        {#each results as res}
-          <Row>
-            <Cell>{res.slice}</Cell>
-            <Cell>{res.test}</Cell>
-            <Cell>{res.size}</Cell>
-            {#each models as m}
-              <Cell numeric>{res[m].toFixed(2)}%</Cell>
-            {/each}
-          </Row>
-        {/each}
-      </Body>
-    </DataTable>
+  {/if} -->
   </div>
 </main>
 
 <style>
   main {
+    display: flex;
+    flex-direction: row;
     text-align: left;
-    padding: 1em;
     max-width: 240px;
-    margin: 0 auto;
+  }
+
+  header {
+    background: #ebdffc;
+    padding: 1em;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  #side-menu {
+    width: 200px;
+    border-right: 1px solid #e0e0e0;
+    height: calc(100vh - 74px);
+  }
+
+  #main {
+    margin-left: 20px;
   }
 
   h1 {
-    color: #ff3e00;
-    text-transform: uppercase;
-    font-size: 4em;
-    font-weight: 100;
+    margin: 0px;
   }
 
   @media (min-width: 640px) {
     main {
       max-width: none;
     }
-  }
-  .table-container {
-    margin: 0px auto;
-    display: flex;
-    flex-direction: column;
-    width: fit-content;
   }
 </style>
