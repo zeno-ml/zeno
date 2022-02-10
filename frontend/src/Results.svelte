@@ -1,62 +1,32 @@
 <script lang="ts">
   import DataTable, { Head, Body, Row, Cell } from "@smui/data-table";
   import Select, { Option } from "@smui/select";
-  import Button, { Label } from "@smui/button";
-  import CircularProgress from "@smui/circular-progress";
 
   import { results } from "./stores";
 
-  function sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-  async function runAnalysis() {
-    if (runningAnalysis) return;
-    runningAnalysis = true;
-
-    let d = await fetch("/api/runanalysis", {
-      method: "POST",
-    });
-    d = await d.json();
-    let ready = false;
-    while (!ready) {
-      let r = await fetch("/api/getresults");
-      r = await r.json();
-      if (r.loading) {
-        await sleep(1000);
-      } else {
-        ready = true;
-        runningAnalysis = false;
-        let res = JSON.parse(r);
-        models = [];
-        Object.keys(res[0]).forEach((d) => {
-          if (d.startsWith("model_")) {
-            models.push(d);
-          }
-        });
-        tests = [...new Set(res.map((d) => d.test))];
-        selectedTest = tests[0];
-        results.set(res);
-      }
-    }
-  }
-
-  let runningAnalysis = false;
   let selectedTest = "";
   let models = [];
   let tests = [];
+
+  let res = [];
+
+  results.subscribe((d) => {
+    if (d.data.length === 0) return;
+    let r = JSON.parse(d.data);
+    models = [];
+    Object.keys(r[0]).forEach((d) => {
+      if (d.startsWith("model_")) {
+        models.push(d);
+      }
+    });
+    tests = [...new Set(r.map((d) => d.test))];
+    selectedTest = tests[0];
+    res = r;
+  });
 </script>
 
 <h2>Results</h2>
 <h5>Results of tests run on slices</h5>
-<div>
-  <Button on:click={() => runAnalysis()} variant="outlined">
-    <Label>Run Analysis</Label>
-  </Button>
-  {#if runningAnalysis}
-    <CircularProgress style="height: 32px; width: 32px;" indeterminate />
-  {/if}
-</div>
 <div class="table-container">
   <Select bind:value={selectedTest} label="Select Metric">
     {#each tests as m}
@@ -75,16 +45,18 @@
       </Row>
     </Head>
     <Body>
-      {#each $results.filter((d) => d.test == selectedTest) as res}
-        <Row>
-          <Cell>{res.slice}</Cell>
-          <Cell>{res.test}</Cell>
-          <Cell numeric>{res.size}</Cell>
-          {#each models as m}
-            <Cell numeric>{res[m].toFixed(2)}%</Cell>
-          {/each}
-        </Row>
-      {/each}
+      {#if res.length > 0}
+        {#each res.filter((d) => d.test == selectedTest) as r}
+          <Row>
+            <Cell><a href="/#/slices/{r.slice}">{r.slice}</a></Cell>
+            <Cell><a href="/#/tests/{r.test}">{r.test}</a></Cell>
+            <Cell numeric>{r.size}</Cell>
+            {#each models as m}
+              <Cell numeric>{r[m].toFixed(2)}%</Cell>
+            {/each}
+          </Row>
+        {/each}
+      {/if}
     </Body>
   </DataTable>
 </div>

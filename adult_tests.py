@@ -1,17 +1,22 @@
-from mltest import mltest, mlslicer, mlmodel
+from mltest import tester, slicer, load_model, predictor
 
 
-@mlmodel
-def default(ent):
+@load_model
+def load_model(model_name):
+    return ""
+
+
+@predictor
+def predict(model, ent):
     return ent['out']
 
 
-@mlslicer(['accuracy', 'false_positive'])
+@slicer(['accuracy', 'false_positive'])
 def under_25(df):
     return df[df['age'] < 25]
 
 
-@mlslicer(['accuracy'])
+@slicer(['accuracy'])
 def education(df):
     filts = []
     for v in df['education'].unique():
@@ -19,16 +24,16 @@ def education(df):
     return filts
 
 
-@mlslicer(['accuracy'])
+@slicer(['accuracy'])
 def over_50(df):
     return df[df['age'] > 50]
 
 
-@mltest
-def accuracy(df, pred):
+@tester
+def accuracy(df, pred, _):
     return df[df['income'] == df['out']].shape[0] / df.shape[0] * 100
 
 
-@mltest
-def false_positive(df, pred):
+@tester
+def false_positive(df, pred, _):
     return df[(df['income'] == "<=50K") & (df['out'] == ">50K")].shape[0] / df.shape[0] * 100

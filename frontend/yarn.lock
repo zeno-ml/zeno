@@ -2189,6 +2189,11 @@ svelte-spa-router@^3.2.0:
   dependencies:
     regexparam "2.0.0"
 
+svelte-websocket-store@^1.1.20:
+  version "1.1.20"
+  resolved "https://registry.yarnpkg.com/svelte-websocket-store/-/svelte-websocket-store-1.1.20.tgz#3d1e726c3c69443fa481eb5530b35cce4be7d41b"
+  integrity sha512-ejdr2vlQk0QogAEGhrDBuMn6cRMUZut7jb+RI9XIktQxLHypsJ64UlkTwSnLlmXYyhByLczvn/OPB1mo593hgQ==
+
 svelte2tsx@^0.4.11:
   version "0.4.14"
   resolved "https://registry.yarnpkg.com/svelte2tsx/-/svelte2tsx-0.4.14.tgz#6c3d65eee8d00d6de2c061e836c6bb4f0c6c43b8"

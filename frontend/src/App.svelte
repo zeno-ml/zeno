@@ -8,6 +8,8 @@
     PrimaryText,
     SecondaryText,
   } from "@smui/list";
+  import Button, { Label } from "@smui/button";
+  import CircularProgress from "@smui/circular-progress";
 
   import Slices from "./Slices.svelte";
   import Slicers from "./Slicers.svelte";
@@ -16,12 +18,19 @@
   import Router, { location } from "svelte-spa-router";
   import Home from "./Home.svelte";
 
+  import { results } from "./stores";
+  import { onMount } from "svelte";
+
+  let runningAnalysis = false;
+  let status = "ready";
+
   const routes = {
     "/": Home,
     "/slicers/": Slicers,
     "/tests/": Tests,
-    "/tests/:test": Tests,
+    "/tests/:test?": Tests,
     "/slices/": Slices,
+    "/slices/:slicer?": Slices,
     "/results/": Results,
     "*": Home,
   };
@@ -37,6 +46,11 @@
   let tab = $location.split("/")[1];
   if (!tab) tab = "home";
 
+  location.subscribe((d) => {
+    tab = d.split("/")[1];
+    if (!tab) tab = "home";
+  });
+
   function updateTab(t) {
     tab = t;
     if (t === "home") {
@@ -45,6 +59,23 @@
       window.location.hash = "#/" + t + "/";
     }
   }
+
+  async function runAnalysis() {
+    if (runningAnalysis) return;
+    runningAnalysis = true;
+    results.set("hello");
+  }
+
+  onMount(() => {
+    runAnalysis();
+  });
+
+  results.subscribe((r) => {
+    status = r.status;
+    if (r.data.length !== 0) {
+      runningAnalysis = false;
+    }
+  });
 </script>
 
 <svelte:head>
@@ -52,7 +83,7 @@
 </svelte:head>
 
 <header>
-  <h1>MLTest</h1>
+  <h1>tester</h1>
 </header>
 <main>
   <div id="side-menu">
@@ -60,9 +91,11 @@
       <Item activated={tab === "home"} on:SMUI:action={() => updateTab("home")}>
         <Text>
           <PrimaryText>Home</PrimaryText>
-          <!-- <SecondaryText>Data slicing functions</SecondaryText> -->
+          <SecondaryText>Overview of tests</SecondaryText>
         </Text>
       </Item>
+      <Separator />
+      <br />
       <Separator />
       <Item
         activated={tab === "slicers"}
@@ -83,6 +116,8 @@
           <SecondaryText>Testing functions</SecondaryText>
         </Text>
       </Item>
+      <Separator />
+      <br />
       <Separator />
       <Item
         activated={tab === "slices"}
@@ -105,24 +140,16 @@
       </Item>
       <Separator />
     </List>
+    <div>
+      {#if runningAnalysis}
+        <CircularProgress style="height: 32px; width: 32px;" indeterminate />
+        <br />
+        <p>{@html status}</p>
+      {/if}
+    </div>
   </div>
   <div id="main">
     <Router {routes} />
-    <!-- {#if tab === "Slicers"}
-      <Slicers />
-    {:else if tab === "Tests"}
-      <Tests />
-    {:else if tab === "Slices"}
-      <Slices />
-    {:else}
-      <Results />
-    {/if} -->
-    <!-- {#if code.length > 0}
-    <Highlight language={python} {code} />
-  {/if}
-  {#if test.length > 0}
-    <Highlight language={python} code={test} />
-  {/if} -->
   </div>
 </main>
 
@@ -131,7 +158,6 @@
     display: flex;
     flex-direction: row;
     text-align: left;
-    max-width: 240px;
   }
 
   header {
@@ -148,6 +174,7 @@
 
   #main {
     margin-left: 20px;
+    width: calc(100vw - 300px);
   }
 
   h1 {
