@@ -5,26 +5,29 @@
   import Highlight from "svelte-highlight";
   import python from "svelte-highlight/src/languages/python";
 
-  import { tests } from "./stores";
+  import { testers } from "./stores";
 
   export let params = {};
 
   onMount(() => {
-    fetch("/api/tests")
+    fetch("/api/testers")
       .then((d) => d.json())
-      .then((d) => tests.set(JSON.parse(d)));
+      .then((d) => testers.set(JSON.parse(d) as Tester[]));
   });
+
+  testers.subscribe((d) => console.log(d));
 </script>
 
 <h2>Tests</h2>
 <h5>Testing functions</h5>
-{#each params.test ? Object.entries($tests).filter((ent) => ent[0] == params.test) : Object.entries($tests) as test}
+{#each params.test ? $testers.filter((t) => t.name == params.test) : $testers as test}
   <Paper>
     <p>
-      <b>{test[0]}</b> <a href="/#/results?metrics={test[0]}">see results</a>
+      <b>{test.name}</b>
+      <a href="/#/results?metrics={test.name}">see results</a>
       <!-- <a href={"/#/tests/" + test[0]}>{test[1].slices.length} slices</a> -->
     </p>
-    <Highlight language={python} code={test[1]} />
+    <Highlight language={python} code={test.source} />
   </Paper>
   <br />
 {/each}

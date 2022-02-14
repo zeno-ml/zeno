@@ -1,11 +1,15 @@
-from mltest import slicer, tester, load_model, predictor
-from cifar import Net
+from zeno_decorators import slicer, tester, load_model, predictor
+from cifar.model import Net
+import torchvision.transforms as transforms
 import torch
+import PIL
 
-# sentiment_rob_large = pipeline(
-#     "sentiment-analysis", model="siebert/sentiment-roberta-large-english")
-# sentiment_rob_small = pipeline(
-#     "sentiment-analysis", model="cardiffnlp/twitter-roberta-base-sentiment")
+transform = transforms.Compose(
+    [transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+
+classes = ('airplane', 'automobile', 'bird', 'cat',
+           'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 
 @load_model
@@ -17,19 +21,24 @@ def load_model(model_path):
 
 @predictor
 def predict(model, instances):
+    imgs = torch.stack([transform(PIL.Image.open(i)) for i in instances])
+    with torch.no_grad():
+        out = model(imgs)
+    return [classes[i] for i in torch.argmax(out, dim=1).detach().numpy()]
 
 
 @slicer(['accuracy'])
-def short(df):
-    return df[df['content'].str.len() < 100]
+def overall(df):
+    return df
 
 
 @slicer(['accuracy'])
-def small_set(df):
-    return df.sample(100)
+def by_class(df):
+    return [(c, df[df['label'] == c]) for c in classes]
 
 
 @tester
 def accuracy(df, model, id_col):
-    df['out'] = model(df[id_col])
-    return df[df['label'] == df['out']].shape[0] / df.shape[0] * 100
+    out = model(df)
+    df['out'] = out
+    return df[df['label'] == df['out']].shape[0] / (df.shape[0] + .0000001) * 100

@@ -20,6 +20,25 @@
         "--batch-size",
         "10"
       ]
+    },
+    {
+      "name": "MLTest CIFAR",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/zeno.py",
+      "args": [
+        "--test-files",
+        "./cifar_tests.py",
+        "--metadata",
+        "cifar/cifar_pred.csv",
+        "--models",
+        "./cifar/cifar_net.pth",
+        "./cifar/cifar_net_1.pth",
+        "--data-path",
+        "./cifar/cif/test/",
+        "--batch-size",
+        "10"
+      ]
     }
   ]
 }

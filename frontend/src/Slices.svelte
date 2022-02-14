@@ -13,7 +13,7 @@
       fetch("/api/slices")
         .then((d) => d.json())
         .then((d) => {
-          let out = JSON.parse(d);
+          let out = JSON.parse(d) as Slice[];
           out.sort((a, b) => b.size - a.size);
           slices.set(out);
         });

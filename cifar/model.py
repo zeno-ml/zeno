@@ -52,7 +52,7 @@ def run():
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
-    for epoch in range(1):  # loop over the dataset multiple times
+    for epoch in range(5):  # loop over the dataset multiple times
 
         running_loss = 0.0
         for i, data in enumerate(trainloader, 0):
@@ -76,7 +76,7 @@ def run():
 
     print('Finished Training')
 
-    PATH = './cifar_net_1.pth'
+    PATH = './cifar_net_5.pth'
     torch.save(net.state_dict(), PATH)
 
 

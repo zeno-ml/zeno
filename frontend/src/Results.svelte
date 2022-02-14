@@ -2,24 +2,25 @@
   import DataTable, { Head, Body, Row, Cell } from "@smui/data-table";
   import Select, { Option } from "@smui/select";
 
-  import { results } from "./stores";
+  import { wsResponse } from "./stores";
 
   let selectedTest = "";
   let models = [];
   let tests = [];
 
-  let res = [];
+  let res: Result[] = [];
 
-  results.subscribe((d) => {
-    if (d.data.length === 0) return;
-    let r = JSON.parse(d.data);
+  wsResponse.subscribe((d: WSResponse) => {
+    let r = JSON.parse(d.results) as Result[];
+    if (r.length === 0) return;
+    console.log(d.results, r);
     models = [];
-    Object.keys(r[0]).forEach((d) => {
+    Object.keys(r[0].modelResults).forEach((d) => {
       if (d.startsWith("model_")) {
         models.push(d);
       }
     });
-    tests = [...new Set(r.map((d) => d.test))];
+    tests = [...new Set(r.map((d) => d.testerName))];
     selectedTest = tests[0];
     res = r;
   });
@@ -46,13 +47,13 @@
     </Head>
     <Body>
       {#if res.length > 0}
-        {#each res.filter((d) => d.test == selectedTest) as r}
+        {#each res.filter((d) => d.testerName == selectedTest) as r}
           <Row>
-            <Cell><a href="/#/slices/{r.slice}">{r.slice}</a></Cell>
-            <Cell><a href="/#/tests/{r.test}">{r.test}</a></Cell>
-            <Cell numeric>{r.size}</Cell>
+            <Cell><a href="/#/slices/{r.sliceName}">{r.sliceName}</a></Cell>
+            <Cell><a href="/#/tests/{r.testerName}">{r.testerName}</a></Cell>
+            <Cell numeric>{r.sliceSize}</Cell>
             {#each models as m}
-              <Cell numeric>{r[m].toFixed(2)}%</Cell>
+              <Cell numeric>{r.modelResults[m].toFixed(2)}%</Cell>
             {/each}
           </Row>
         {/each}

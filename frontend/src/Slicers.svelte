@@ -6,22 +6,24 @@
 
   import { slicers } from "./stores";
 
+  slicers.subscribe((d) => console.log(d));
+
   onMount(() => {
     fetch("/api/slicers")
       .then((d) => d.json())
-      .then((d) => slicers.set(JSON.parse(d)));
+      .then((d) => slicers.set(JSON.parse(d) as Slicer[]));
   });
 </script>
 
 <h2>Slicers</h2>
 <h5>Slicing functions and sample instances</h5>
-{#each Object.entries($slicers) as sli}
+{#each $slicers as sli}
   <Paper>
     <p>
-      <b>{sli[0]}</b>,
-      <a href={"/#/slices/" + sli[0]}>{sli[1].slices.length} slices</a>
+      <b>{sli.name}</b>,
+      <a href={"/#/slices/" + sli.name}>{sli.slices.length} slices</a>
     </p>
-    <Highlight language={python} code={sli[1].fn} />
+    <Highlight language={python} code={sli.source} />
   </Paper>
   <br />
 {/each}

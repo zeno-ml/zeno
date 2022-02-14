@@ -1,4 +1,4 @@
-from mltest import slicer, tester, load_model, predictor
+from zeno_decorators import slicer, tester, load_model, predictor
 from transformers import pipeline
 
 # sentiment_rob_large = pipeline(

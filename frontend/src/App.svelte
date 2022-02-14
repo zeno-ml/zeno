@@ -18,7 +18,7 @@
   import Router, { location } from "svelte-spa-router";
   import Home from "./Home.svelte";
 
-  import { results } from "./stores";
+  import { wsResponse } from "./stores";
   import { onMount } from "svelte";
 
   let runningAnalysis = false;
@@ -35,13 +35,13 @@
     "*": Home,
   };
 
-  fetch("/api/data")
-    .then((d) => d.arrayBuffer())
-    .then((d) => {
-      let data = aq.fromArrow(d);
-      console.log(data.columnNames());
-      console.log(data.totalRows());
-    });
+  // fetch("/api/data")
+  //   .then((d) => d.arrayBuffer())
+  //   .then((d) => {
+  //     let data = aq.fromArrow(d);
+  //     console.log(data.columnNames());
+  //     console.log(data.totalRows());
+  //   });
 
   let tab = $location.split("/")[1];
   if (!tab) tab = "home";
@@ -63,16 +63,16 @@
   async function runAnalysis() {
     if (runningAnalysis) return;
     runningAnalysis = true;
-    results.set("hello");
+    wsResponse.set({ status: "waiting", results: [] });
   }
 
   onMount(() => {
     runAnalysis();
   });
 
-  results.subscribe((r) => {
+  wsResponse.subscribe((r) => {
     status = r.status;
-    if (r.data.length !== 0) {
+    if (r.status === "done") {
       runningAnalysis = false;
     }
   });
@@ -83,7 +83,7 @@
 </svelte:head>
 
 <header>
-  <h1>tester</h1>
+  <h1>Zeno.AI</h1>
 </header>
 <main>
   <div id="side-menu">
@@ -158,6 +158,7 @@
     display: flex;
     flex-direction: row;
     text-align: left;
+    padding-bottom: 50px;
   }
 
   header {
