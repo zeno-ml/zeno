@@ -5,11 +5,21 @@ import torch
 import PIL
 
 transform = transforms.Compose(
-    [transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+    [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+)
 
-classes = ('airplane', 'automobile', 'bird', 'cat',
-           'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+classes = (
+    "airplane",
+    "automobile",
+    "bird",
+    "cat",
+    "deer",
+    "dog",
+    "frog",
+    "horse",
+    "ship",
+    "truck",
+)
 
 
 @load_model
@@ -27,18 +37,17 @@ def predict(model, instances):
     return [classes[i] for i in torch.argmax(out, dim=1).detach().numpy()]
 
 
-@slicer(['accuracy'])
+@slicer(["accuracy"])
 def overall(df):
     return df
 
 
-@slicer(['accuracy'])
+@slicer(["accuracy"])
 def by_class(df):
-    return [(c, df[df['label'] == c]) for c in classes]
+    return [(c, df[df["label"] == c]) for c in classes]
 
 
 @tester
 def accuracy(df, model, id_col):
     out = model(df)
-    df['out'] = out
-    return df[df['label'] == df['out']].shape[0] / (df.shape[0] + .0000001) * 100
+    return df[df["label"] == out].shape[0] / (df.shape[0] + 0.0000001) * 100

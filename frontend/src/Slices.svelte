@@ -2,12 +2,13 @@
   import { onMount } from "svelte";
   import Accordion, { Panel, Header, Content } from "@smui-extra/accordion";
 
-  import ImageList from "./ImageList.svelte";
-
   import { slices } from "./stores";
+  import Samples from "./samples/Samples.svelte";
 
   export let params = {};
 
+  let open = -1;
+  $: console.log(open);
   onMount(() => {
     if ($slices.length === 0) {
       fetch("/api/slices")
@@ -26,8 +27,8 @@
 
 <div class="accordion-container">
   <Accordion style="width:100%">
-    {#each params.slicer ? $slices.filter((d) => d.slicer === params.slicer) : $slices as sli}
-      <Panel>
+    {#each params.slicer ? $slices.filter((d) => d.name === params.slicer) : $slices as sli, i}
+      <Panel on:SMUIAccordionHeader:activate={() => (open = i)}>
         <Header>
           {sli.name}
           <span slot="description">
@@ -35,7 +36,9 @@
           </span>
         </Header>
         <Content>
-          <ImageList />
+          {#if open === i}
+            <Samples {sli} />
+          {/if}
         </Content>
       </Panel>
     {/each}

@@ -35,14 +35,6 @@
     "*": Home,
   };
 
-  // fetch("/api/data")
-  //   .then((d) => d.arrayBuffer())
-  //   .then((d) => {
-  //     let data = aq.fromArrow(d);
-  //     console.log(data.columnNames());
-  //     console.log(data.totalRows());
-  //   });
-
   let tab = $location.split("/")[1];
   if (!tab) tab = "home";
 
@@ -83,7 +75,8 @@
 </svelte:head>
 
 <header>
-  <h1>Zeno.AI</h1>
+  <img style="width:150px" src="zeno.png" />
+  <!-- <h1>Zeno.AI</h1> -->
 </header>
 <main>
   <div id="side-menu">

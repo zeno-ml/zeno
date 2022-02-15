@@ -39,6 +39,20 @@
         "--batch-size",
         "10"
       ]
+    },
+    {
+      "name": "MLTest Adult",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/zeno.py",
+      "args": [
+        "--test-files",
+        "./adult_tests.py",
+        "--metadata",
+        "adult/adult_pred.csv",
+        "--models",
+        "default"
+      ]
     }
   ]
 }

@@ -24,6 +24,7 @@ def slicer(tests):
         @functools.wraps(func)
         def _wrapper(*args, **kwargs):
             return func(*args, **kwargs)
+
         _wrapper.slicer = True
         _wrapper.tests = tests
         return _wrapper

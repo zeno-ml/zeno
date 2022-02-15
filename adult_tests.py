@@ -1,4 +1,4 @@
-from mltest import tester, slicer, load_model, predictor
+from zeno_decorators import tester, slicer, load_model, predictor
 
 
 @load_model

@@ -1,12 +1,7 @@
 <script lang="ts">
   import Paper from "@smui/paper";
-  import { onMount } from "svelte";
 
-  // onMount(() => {
-  //   fetch("/api/slicers")
-  //     .then((d) => d.json())
-  //     .then((d) => slicers.set(JSON.parse(d)));
-  // });
+  export let entries;
 </script>
 
 <div class="container">
