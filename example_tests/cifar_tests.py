@@ -66,7 +66,7 @@ def load_data(df_metadata, id_col, data_path):
 
 
 # Return slice of data with associated metrics to calculate
-@slicer(["accuracy", ("rotate", "accuracy")])
+@slicer(["accuracy", ("rotate", "accuracy"), ("flip", "accuracy")])
 def small_sample(_, df):
     return df.sample(10)
 
@@ -75,7 +75,7 @@ def overall(_, df):
     return df
 
 @slicer(["accuracy"])
-def medium_sample(_, df):
+def medium_sample(data: List, metadata: DataFrame):
     return df.sample(100)
 
 
@@ -90,11 +90,10 @@ def rotate(data, df_metadata):
 
 
 @metric
-def accuracy(data, df_metadata, output):
-    out = model(df)
+def accuracy(metadata, output):
     return df[df["label"] == out].shape[0] / (df.shape[0] + 0.0000001) * 100
 
 @metric
-def switch(data, df_metadata, output, m_data, m_df_metadata, m_output):
+def switch(metadata, output, m_data, m_df_metadata, m_output):
     return sum([1 for i in range(len(output)) if output[i] != m_output[i]])
     
