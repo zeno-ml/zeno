@@ -29,9 +29,8 @@ jobs:
         run: |
           poetry run pytest tests/
       # - name: Build docs
-      #   uses: ammaraskar/sphinx-action@master
-      #   with:
-      #     docs-folder: "docs/"
+        run: |
+          poetry run sphinx-build -b html docs docs/_build
       - name: Deploy docs
         uses: peaceiris/actions-gh-pages@v3
         with:

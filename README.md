@@ -1,4 +1,4 @@
-# Zeno - Behavioral testing of AI/ML
+# Zeno - Behavioral testing of AI/ML ![example workflow](https://github.com/cabreraalex/zeno/actions/workflows/zeno-ci.yml/badge.svg)
 
 ## Development
 
@@ -26,7 +26,7 @@ Please install [`Poetry`](https://python-poetry.org/docs/master/#installing-with
 
 `make html`
 
-`sphinx autobuild docs docs/_build/html`
+`sphinx-autobuild docs docs/_build/html`
 
 ### Deployment
 
