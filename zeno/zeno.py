@@ -2,15 +2,14 @@ import asyncio
 import importlib
 import os
 import shelve
+import sys
 import threading
-from concurrent.futures import ThreadPoolExecutor
 from inspect import getmembers, getsource, isfunction
-from typing import List
+from typing import Callable, Dict, List
 
 import pandas as pd
 import pyarrow as pa
 from pandas import DataFrame
-from pyarrow import csv
 from watchdog.observers import Observer
 
 from .util import TestFileUpdateHandler, cached_model_builder
@@ -197,9 +196,13 @@ class Zeno(object):
                 transform = None
                 if type(test) in (list, tuple):
                     transform, test = test
-                # TODO: check if test is a tuple, if so run the mutation and pass both outputs to the test.
+                # TODO: check if test is a tuple, if so
+                # run the mutation and pass both outputs to the test.
 
-                self.status = "Running test {0} ({1}/{2}) for slice {3} ({4}/{5}), {6} instances".format(
+                self.status = (
+                    "Running test {0} ({1}/{2}) "
+                    + "for slice {3} ({4}/{5}), {6} instances"
+                ).format(
                     test,
                     str(j + 1),
                     str(len(sli.tests)),

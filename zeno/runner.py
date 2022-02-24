@@ -1,5 +1,5 @@
 import argparse
-from multiprocessing import Manager, Pipe, Process
+from multiprocessing import Pipe, Process
 
 from .server import run_background_processor, run_server
 

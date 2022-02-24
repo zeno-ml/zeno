@@ -4,7 +4,7 @@
 
 ### Environment
 
-Please install `Poetry` and use VSCode as your editor.
+Please install [`Poetry`](https://python-poetry.org/docs/master/#installing-with-the-official-installer) and use VSCode as your editor.
 
 ### Install
 
