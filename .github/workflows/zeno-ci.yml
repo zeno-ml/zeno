@@ -29,9 +29,9 @@ jobs:
         run: |
           poetry run pytest tests/
       - name: Build docs
-        run: |
-          cd docs
-          make html
+        uses: ammaraskar/sphinx-action@master
+        with:
+          docs-folder: "docs/"
       - name: Deploy docs
         uses: peaceiris/actions-gh-pages@v3
         with:
