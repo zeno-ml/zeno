@@ -18,6 +18,13 @@ parser.add_argument(
     "--data-path", dest="data_path", nargs="?", default="", help="Filepath of files"
 )
 parser.add_argument(
+    "--cache-path",
+    dest="cache_path",
+    nargs="?",
+    default="./.zeno_cache/",
+    help="Desination folder for cache files",
+)
+parser.add_argument(
     "--id-column",
     dest="id_column",
     default="id",

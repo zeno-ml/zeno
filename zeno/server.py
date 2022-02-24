@@ -19,6 +19,7 @@ def run_background_processor(conn, args):
         batch_size=args.batch_size,
         id_column=args.id_column,
         data_path=args.data_path,
+        cache_path=args.cache_path,
     )
 
     zeno.start_processing()

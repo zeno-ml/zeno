@@ -1,6 +1,8 @@
 # Zeno - Behavioral testing of AI/ML
 
-### Development Environment
+## Development
+
+### Environment
 
 Please install Conda (or MiniForge) and use VSCode as your editor.
 
@@ -12,6 +14,8 @@ Please install Conda (or MiniForge) and use VSCode as your editor.
 Install symlinked version for development.
 
 `pip install -e .`
+
+### Docs
 
 ### Deployment
 

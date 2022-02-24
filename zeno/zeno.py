@@ -112,6 +112,7 @@ class Zeno(object):
         batch_size=16,
         id_column="id",
         data_path="",
+        cache_path="",
     ):
         self.metadata_path = metadata_path
         self.test_files = test_files
@@ -119,6 +120,8 @@ class Zeno(object):
         self.batch_size = batch_size
         self.id_column = id_column
         self.data_path = data_path
+        self.cache_path = cache_path
+        os.makedirs(self.cache_path, exist_ok=False)
         self.status = "Initializing"
 
         self.slicers: Dict[str, Slicer] = {}
@@ -172,12 +175,18 @@ class Zeno(object):
         model_caches = {}
         for i, model_name in enumerate(self.model_names):
             model_caches[model_name] = shelve.open(
-                ".model_" + model_name.replace("/", "_") + str(i) + ".cache",
+                os.path.join(
+                    self.cache_path,
+                    (".model_" + model_name.replace("/", "_") + str(i) + ".cache"),
+                ),
                 writeback=True,
             )
 
         result_cache = shelve.open(
-            ".mltest_" + self.metadata_path.replace("/", "_"), writeback=True
+            os.path.join(
+                self.cache_path, (".mltest_" + self.metadata_path.replace("/", "_"))
+            ),
+            writeback=True,
         )
 
         self.results = []
@@ -209,14 +218,14 @@ class Zeno(object):
                         ]
                     else:
                         out = cached_model_builder(
-                                model_name,
-                                model_caches[model_name],
-                                self.loaded_models,
-                                self.model_loader,
-                                self.batch_size,
-                                self.id_column,
-                                self.data_path,
-                            )(sli.data)
+                            model_name,
+                            model_caches[model_name],
+                            self.loaded_models,
+                            self.model_loader,
+                            self.batch_size,
+                            self.id_column,
+                            self.data_path,
+                        )(sli.data)
                         output = self.metrics[test].func(
                             sli.data,
                             out,
