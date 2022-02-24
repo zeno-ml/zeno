@@ -30,9 +30,9 @@ jobs:
           poetry run pytest tests/
       - name: Build docs
         run: |
-          poetry run sphinx-build -b html docs docs/_build
+          poetry run sphinx-build -b html docs docs/_build/html
       - name: Deploy docs
-        uses: peaceiris/actions-gh-pages@v3
+        uses: JamesIves/github-pages-deploy-action@v4.2.5
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs/_build/html
+          branch: gh-pages # The branch the action should deploy to.
+          folder: docs/_build/html # The folder the action should deploy.
