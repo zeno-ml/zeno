@@ -16,20 +16,23 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"  # Compatible python versions must be declared here
+python = "^3.8" 
 pandas = "^1.4.1"
 pyarrow = "^7.0.0"
 watchdog = "^2.1.6"
 uvicorn = "^0.17.5"
 fastapi = "^0.74.1"
-black = "^22.1.0"
-flake8 = "^4.0.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
 pytest-cov = "^2.4"
 torch = "^1.10.2"
 torchvision = "^0.11.3"
+Sphinx = "^4.4.0"
+sphinx-autobuild = "^2021.3.14"
+sphinx-rtd-theme = "^1.0.0"
+black = "^22.1.0"
+flake8 = "^4.0.1"
 
 [tool.poetry.scripts]
 zeno = "zeno.runner:main"

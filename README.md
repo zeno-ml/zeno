@@ -14,7 +14,19 @@ Please install [`Poetry`](https://python-poetry.org/docs/master/#installing-with
 
 `poetry run zeno`
 
+### Linting
+
+`poetry run flake8 zeno/`
+
+### Testing
+
+`poetry run pytest tests/`
+
 ### Docs
+
+`make html`
+
+`sphinx autobuild docs docs/_build/html`
 
 ### Deployment
 

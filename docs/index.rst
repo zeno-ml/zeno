@@ -10,7 +10,19 @@ Welcome to Zeno's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+API
+********************************
 
+.. automodule:: zeno 
+   :members:
+   :undoc-members:
+
+Internal API
+********************************
+
+.. automodule:: zeno.zeno 
+   :members:
+   :undoc-members:
 
 Indices and tables
 ==================

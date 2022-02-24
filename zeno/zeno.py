@@ -16,7 +16,13 @@ from .util import TestFileUpdateHandler, cached_model_builder
 
 
 class Slicer:
-    def __init__(self, name, func):
+    def __init__(self, name: str, func: Callable):
+        """Create a slicer
+
+        Args:
+            name: Function name
+            func: Slicer function
+        """
         self.name = name
         self.func = func
         self.metrics = func.metrics

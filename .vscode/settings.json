@@ -2,6 +2,6 @@
   "python.defaultInterpreterPath": "/opt/anaconda3/envs/zeno/bin/python",
   "python.formatting.provider": "black",
   "python.linting.flake8Enabled": true,
-  "python.linting.flake8Args": ["--extend-ignore=E203", "--max-line-length=88"],
+  "autoDocstring.docstringFormat": "google",
   "editor.wordWrapColumn": 88
 }
