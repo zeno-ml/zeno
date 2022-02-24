@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "zeno"
+version = "0.0.1"
+description = "Behavioral testing of AI/ML"
+license = "MIT"
+authors = ["Ángel Alexander Cabrera <alex.cabrera@gmail.com>"]
+readme = "README.md"  # Markdown files are supported
+repository = "https://github.com/cabreraalex/zeno"
+homepage = "https://github.com/cabreraalex/zeno"
+keywords = ["ml", "testing"]
+packages = [
+    { include = "zeno" },
+]
+include = [
+    "zeno/frontend/**/*"
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"  # Compatible python versions must be declared here
+pandas = "^1.4.1"
+pyarrow = "^7.0.0"
+watchdog = "^2.1.6"
+uvicorn = "^0.17.5"
+fastapi = "^0.74.1"
+black = "^22.1.0"
+flake8 = "^4.0.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^3.0"
+pytest-cov = "^2.4"
+torch = "^1.10.2"
+torchvision = "^0.11.3"
+
+[tool.poetry.scripts]
+zeno = "zeno.runner:main"

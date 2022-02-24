@@ -4,21 +4,20 @@
 
 ### Environment
 
-Please install Conda (or MiniForge) and use VSCode as your editor.
+Please install `Poetry` and use VSCode as your editor.
 
 ### Install
 
-`conda env create --file environment.yml`
-`conda activate zeno`
+`poetry install`
 
-Install symlinked version for development.
+### Running
 
-`pip install -e .`
+`poetry run zeno`
 
 ### Docs
 
 ### Deployment
 
-Test bundled package with
+Create a bundled package with:
 
-`python setup.py sdist`
+`poetry build`
