@@ -10,7 +10,7 @@ Welcome to Zeno's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-API
+API Decorators
 ********************************
 
 .. automodule:: zeno 
