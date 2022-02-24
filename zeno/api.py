@@ -6,36 +6,45 @@ def load_model(func):
     def _wrapper(*args, **kwargs):
         return func(*args, **kwargs)
 
-    _wrapper.loader = True
+    _wrapper.load_model = True
     return _wrapper
 
 
-def predictor(func):
+def load_data(func):
     @functools.wraps(func)
     def _wrapper(*args, **kwargs):
         return func(*args, **kwargs)
 
-    _wrapper.predictor = True
+    _wrapper.load_data = True
     return _wrapper
 
 
-def slicer(tests):
+def slicer(metrics):
     def _decorate(func):
         @functools.wraps(func)
         def _wrapper(*args, **kwargs):
             return func(*args, **kwargs)
 
         _wrapper.slicer = True
-        _wrapper.tests = tests
+        _wrapper.metrics = metrics
         return _wrapper
 
     return _decorate
 
 
-def tester(func):
+def transform(func):
     @functools.wraps(func)
     def _wrapper(*args, **kwargs):
         return func(*args, **kwargs)
 
-    _wrapper.tester = True
+    _wrapper.transform = True
+    return _wrapper
+
+
+def metric(func):
+    @functools.wraps(func)
+    def _wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    _wrapper.metric = True
     return _wrapper

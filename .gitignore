@@ -1,9 +1,10 @@
+example_tests/models/cifar/cif/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 
-cifar/cif/
 # C extensions
 *.so
 

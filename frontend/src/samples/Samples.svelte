@@ -3,6 +3,7 @@
   import SamplesImages from "./SamplesImages.svelte";
   import SamplesTable from "./SamplesTable.svelte";
   import { fromArrow } from "arquero";
+  import Tooltip, { Wrapper } from "@smui/tooltip";
 
   export let sli;
 
@@ -19,7 +20,18 @@
 <div class="container">
   {#if table}
     {#each table.objects() as row}
-      <img src="/static/{row.id}" />
+      <Wrapper>
+        <img
+          src="/static/{row.id}"
+          alt="Image thumbnail for instance {row.id}"
+        />
+        <Tooltip>
+          {#each Object.keys(row) as key}
+            {key} : {row[key]}
+            <br />
+          {/each}
+        </Tooltip>
+      </Wrapper>
     {/each}
   {/if}
 

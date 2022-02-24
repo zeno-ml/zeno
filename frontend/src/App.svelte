@@ -1,6 +1,6 @@
 <script lang="ts">
   import github from "svelte-highlight/src/styles/github";
-  import * as aq from "arquero";
+  // import * as aq from "arquero";
   import List, {
     Item,
     Text,
@@ -8,8 +8,10 @@
     PrimaryText,
     SecondaryText,
   } from "@smui/list";
-  import Button, { Label } from "@smui/button";
   import CircularProgress from "@smui/circular-progress";
+  import IconButton, { Icon } from "@smui/icon-button";
+  import { Svg } from "@smui/common/elements";
+  import { mdiGithub } from "@mdi/js";
 
   import Slices from "./Slices.svelte";
   import Slicers from "./Slicers.svelte";
@@ -75,8 +77,17 @@
 </svelte:head>
 
 <header>
-  <img style="width:150px" src="zeno.png" />
-  <!-- <h1>Zeno.AI</h1> -->
+  <img
+    style="width:150px"
+    src="zeno.png"
+    alt="Square spiral logo next to 'Zeno'"
+  />
+
+  <IconButton href="https://github.com/cabreraalex/zeno">
+    <Icon component={Svg} viewBox="0 0 24 24">
+      <path fill="currentColor" d={mdiGithub} />
+    </Icon>
+  </IconButton>
 </header>
 <main>
   <div id="side-menu">
@@ -133,7 +144,7 @@
       </Item>
       <Separator />
     </List>
-    <div>
+    <div class="status">
       {#if runningAnalysis}
         <CircularProgress style="height: 32px; width: 32px;" indeterminate />
         <br />
@@ -154,8 +165,12 @@
     padding-bottom: 50px;
   }
 
+  .status {
+    padding: 15px;
+  }
+
   header {
-    background: #ebdffc;
+    background: var(--mdc-theme-background);
     padding: 1em;
     border-bottom: 1px solid #e0e0e0;
   }
@@ -171,13 +186,20 @@
     width: calc(100vw - 300px);
   }
 
-  h1 {
-    margin: 0px;
+  header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-right: 50px;
   }
 
   @media (min-width: 640px) {
     main {
       max-width: none;
     }
+  }
+
+  img {
+    align-self: center;
   }
 </style>

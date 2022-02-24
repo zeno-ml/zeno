@@ -1,61 +1,26 @@
-#!/usr/bin/env python3
-
-import argparse
 import asyncio
 import json
 import os
 import sys
-from multiprocessing import Manager, Pipe, Process
 
 import uvicorn
 from fastapi import FastAPI, WebSocket
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 
-from zeno_api import Zeno
-
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--test-files",
-    dest="test_files",
-    nargs="+",
-    help="Python files with slicers or testers",
-)
-parser.add_argument(
-    "--models", dest="models", nargs="+", help="Paths or names of models"
-)
-parser.add_argument("--metadata", dest="metadata", nargs=1, help="Csv of metadata")
-parser.add_argument(
-    "--data-path", dest="data_path", nargs="?", default="", help="Filepath of files"
-)
-parser.add_argument(
-    "--id-column",
-    dest="id_column",
-    default="id",
-    nargs="?",
-    help="Column with ID to retrieve data files AND use for caching",
-)
-parser.add_argument(
-    "--batch-size",
-    dest="batch_size",
-    nargs="?",
-    default=64,
-    type=int,
-    help="Batch size for predictions",
-)
+from .zeno import Zeno
 
 
-def run_processor(conn, args):
+def run_background_processor(conn, args):
     zeno = Zeno(
         metadata_path=args.metadata[0],
         test_files=args.test_files,
         models=args.models,
-        # batch_size=args.batch_size,
+        batch_size=args.batch_size,
         id_column=args.id_column,
         data_path=args.data_path,
     )
 
-    zeno.initialize_watchdog()
     zeno.start_processing()
 
     while True:
@@ -113,7 +78,7 @@ def run_server(conn, args):
     if args.data_path != "":
         app.mount("/static", StaticFiles(directory=args.data_path), name="static")
     app.mount("/api", api_app)
-    app.mount("/", StaticFiles(directory="frontend/public", html=True), name="base")
+    app.mount("/", StaticFiles(directory="./frontend", html=True), name="base")
 
     @api_app.get("/slicers")
     def get_slicers():
@@ -154,21 +119,3 @@ def run_server(conn, args):
                 await websocket.send_json({"status": res[0], "results": res[1]})
 
     uvicorn.run(app, host="localhost", port=8000)
-
-
-if __name__ == "__main__":
-    args = parser.parse_args()
-
-    server_conn, processor_conn = Pipe()
-    server_process = Process(target=run_server, args=(server_conn, args))
-    processing_process = Process(
-        target=run_processor,
-        args=(
-            processor_conn,
-            args,
-        ),
-    )
-
-    server_process.start()
-    processing_process.start()
-    server_process.join()

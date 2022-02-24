@@ -5,6 +5,7 @@ import shelve
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from inspect import getmembers, getsource, isfunction
+from typing import List
 
 import pandas as pd
 import pyarrow as pa
@@ -12,43 +13,46 @@ from pandas import DataFrame
 from pyarrow import csv
 from watchdog.observers import Observer
 
-from zeno_util import TestFileUpdateHandler, cached_model_builder
+from .util import TestFileUpdateHandler, cached_model_builder
 
 
 class Slicer:
     def __init__(self, name, func):
         self.name = name
         self.func = func
+        self.metrics = func.metrics
         self.source = getsource(self.func)
-        self.data: DataFrame = None
-        self.slices: Dict[Slice] = {}
+        self.slices = []
 
-    def slice_data(self, data):
-        slicer_output = self.func(data)
+    def slice_data(self, data, metadata):
+        slicer_output = self.func(data, metadata)
 
+        slices_to_return = {}
         # If slicer returns multiple slices, create a slice for each
         if type(slicer_output) == list:
             for output_slice in slicer_output:
                 # Join slice names with backslash
                 name = ".".join([self.name, output_slice[0]])
-                self.slices[name] = Slice(
+                self.slices.append(name)
+                slices_to_return[name] = Slice(
                     name,
                     output_slice[1],
                     output_slice[1].shape[0],
-                    self.func.tests,
+                    self.metrics,
                     self.name,
                 )
         # Otherwise, add the single slice
         else:
-            self.slices[self.name] = Slice(
+            self.slices.append(self.name)
+            slices_to_return[self.name] = Slice(
                 self.name,
                 slicer_output,
                 slicer_output.shape[0],
-                self.func.tests,
+                self.metrics,
                 self.name,
             )
 
-        return self.slices
+        return slices_to_return
 
 
 class Slice:
@@ -63,7 +67,14 @@ class Slice:
         return self.name
 
 
-class Tester:
+class Metric:
+    def __init__(self, name, func):
+        self.name = (name,)
+        self.func = func
+        self.source = getsource(self.func)
+
+
+class Transform:
     def __init__(self, name, func):
         self.name = (name,)
         self.func = func
@@ -71,14 +82,20 @@ class Tester:
 
 
 class Result:
-    def __init__(self, tester_name, slice_name, slice_size):
-        self.tester_name = tester_name
-        self.slice_name = slice_name
+    def __init__(self, metric: str, transform: str, sli: str, slice_size: int):
+        self.metric = metric
+        self.transform = transform
+        self.sli = sli
+
         self.slice_size = slice_size
-        self.model_results = {}
+
+        self.model_results: Dict[str, float] = {}
 
     def set_model_outputs(self, model_results):
         self.model_results = model_results
+
+    def get_model_names(self):
+        return list(self.model_results.keys())
 
     def __str__(self):
         return "Test {0} for slice {1}, size {2}".format(
@@ -89,9 +106,9 @@ class Result:
 class Zeno(object):
     def __init__(
         self,
-        metadata_path,
-        test_files,
-        models,
+        metadata_path: str,
+        test_files: List[str],
+        models: List[str],
         batch_size=16,
         id_column="id",
         data_path="",
@@ -104,15 +121,17 @@ class Zeno(object):
         self.data_path = data_path
         self.status = "Initializing"
 
-        self.slicers: Dict[Slicer] = {}
-        self.testers: Dict[Tester] = {}
-        self.slices: Dict[Slice] = {}
+        self.slicers: Dict[str, Slicer] = {}
+        self.transforms: Dict[str, Transform] = {}
+        self.metrics: Dict[str, Metric] = {}
+
+        self.slices: Dict[str, Slice] = {}
 
         self.model_loader: Callable = None
-        self.model_predictor: Callable = None
+        self.data_loader: Callable = None
 
-        self.loaded_models = {}
-        self.model_caches = {}
+        self.loaded_models: Dict[str, Callable] = {}
+        self.model_caches: Dict[str, Callable] = {}
 
         self.results = []
         self.res_runner = None
@@ -121,15 +140,18 @@ class Zeno(object):
 
         # Read metadata as Pandas for slicing
         self.metadata_df: DataFrame = pd.read_csv(metadata_path)
+        self.data = []
 
     def start_processing(self):
-        self.parse_testing_files()
-        self.run_tests()
+        self.__initialize_watchdog()
+        self.__parse_testing_files()
+        self.__run_tests()
 
-    async def process(self):
+    async def __process(self):
         print("running analysis")
 
-        self.slice_data()
+        self.data = self.data_loader(self.metadata_df, self.id_column, self.data_path)
+        self.__slice_data()
 
         if len(self.loaded_models) == 0:
             for i, model_name in enumerate(self.model_names):
@@ -162,6 +184,12 @@ class Zeno(object):
         # Run all testing functions on slices
         for i, sli in enumerate(self.slices.values()):
             for j, test in enumerate(sli.tests):
+
+                transform = None
+                if type(test) in (list, tuple):
+                    transform, test = test
+                # TODO: check if test is a tuple, if so run the mutation and pass both outputs to the test.
+
                 self.status = "Running test {0} ({1}/{2}) for slice {3} ({4}/{5}), {6} instances".format(
                     test,
                     str(j + 1),
@@ -172,30 +200,34 @@ class Zeno(object):
                     str(sli.data.shape[0]),
                 )
 
-                if sli.name + test in result_cache:
-                    self.results.append(result_cache[sli.name + test])
-                else:
-                    res = Result(test, sli.name, sli.size)
-                    model_outputs = {}
-                    for model_name in self.model_names:
-                        model_outputs["model_" + model_name] = self.testers[test].func(
-                            sli.data,
-                            cached_model_builder(
+                res = Result(test, None, sli.name, sli.size)
+                model_outputs = {}
+                for model_name in self.model_names:
+                    if sli.name + test + model_name in result_cache:
+                        model_outputs["model_" + model_name] = result_cache[
+                            sli.name + test + model_name
+                        ]
+                    else:
+                        out = cached_model_builder(
                                 model_name,
                                 model_caches[model_name],
                                 self.loaded_models,
-                                self.model_predictor,
+                                self.model_loader,
                                 self.batch_size,
                                 self.id_column,
                                 self.data_path,
-                            ),
+                            )(sli.data)
+                        output = self.metrics[test].func(
+                            sli.data,
+                            out,
                             self.id_column,
                         )
+                        model_outputs["model_" + model_name] = output
+                        result_cache[sli.name + test + model_name] = output
 
-                        model_caches[model_name].sync()
-                    res.set_model_outputs(model_outputs)
-                    result_cache[sli.name + test] = res
-                    self.results.append(res)
+                model_caches[model_name].sync()
+                res.set_model_outputs(model_outputs)
+                self.results.append(res)
 
         for model_name in self.model_names:
             model_caches[model_name].close()
@@ -203,11 +235,13 @@ class Zeno(object):
 
         self.status = "done"
 
-    def parse_testing_files(self):
+    def __parse_testing_files(self):
         self.model_loader = None
-        self.model_predictor = None
+        self.data_loader = None
+
         self.slicers = {}
-        self.testers = {}
+        self.metrics = {}
+        self.transforms = {}
 
         for test_file in self.test_files:
             spec = importlib.util.spec_from_file_location("module.name", test_file)
@@ -216,37 +250,43 @@ class Zeno(object):
 
             for func_name, func in getmembers(test_module):
                 if isfunction(func):
-                    if hasattr(func, "loader"):
+                    if hasattr(func, "load_model"):
                         if self.model_loader is None:
                             self.model_loader = func
                         else:
                             print("Multiple model loaders found, can only have one")
                             sys.exit(1)
-                    if hasattr(func, "predictor"):
-                        if self.model_predictor is None:
-                            self.model_predictor = func
+                    if hasattr(func, "load_data"):
+                        if self.data_loader is None:
+                            self.data_loader = func
                         else:
-                            print("Multiple model predictors found, can only have one")
+                            print("Multiple data loaders found, can only have one")
                             sys.exit(1)
                     if hasattr(func, "slicer"):
                         self.slicers[func_name] = Slicer(func_name, func)
-                    if hasattr(func, "tester"):
-                        self.testers[func_name] = Tester(func_name, func)
+                    if hasattr(func, "transform"):
+                        self.transforms[func_name] = Transform(func_name, func)
+                    if hasattr(func, "metric"):
+                        self.metrics[func_name] = Metric(func_name, func)
 
-    def run_tests(self):
+    def __run_tests(self):
         if not self._loop:
             self._loop = asyncio.new_event_loop()
             threading.Thread(target=self._loop.run_forever, daemon=True).start()
-        self._loop.call_soon_threadsafe(asyncio.create_task, self.process())
+        self._loop.call_soon_threadsafe(asyncio.create_task, self.__process())
 
-    def slice_data(self):
+    def __slice_data(self):
         self.slices = {}
+
         for name, slicer in self.slicers.items():
             self.status = "Slicing data for " + name
-            self.slices = {**self.slices, **slicer.slice_data(self.metadata_df)}
+            self.slices = {
+                **self.slices,
+                **slicer.slice_data(self.data, self.metadata_df),
+            }
         self.status = "Done slicing"
 
-    def initialize_watchdog(self):
+    def __initialize_watchdog(self):
         observer = Observer()
         event_handler = TestFileUpdateHandler(
             [os.path.abspath(t) for t in self.test_files], self.start_processing
@@ -261,15 +301,11 @@ class Zeno(object):
 
     def get_sample(self, sli):
         df = self.slices[sli].data.sample(20)
-        print(df.shape)
         df_arrow = pa.Table.from_pandas(df)
         buf = pa.BufferOutputStream()
         with pa.ipc.new_file(buf, df_arrow.schema) as writer:
             writer.write_table(df_arrow)
         return bytes(buf.getvalue())
-
-    def get_results(self):
-        return (self.status, self.results)
 
     def get_metadata_path(self):
         return self.metadata_path

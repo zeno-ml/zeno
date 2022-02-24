@@ -2,9 +2,11 @@ from watchdog.events import FileSystemEventHandler
 import os
 
 
-def cached_model_builder(model_name, cache, loaded_models, model_predictor, batch_size, idx, data_path):
+def cached_model_builder(
+    model_name, cache, loaded_models, model_predictor, batch_size, idx, data_path
+):
     def cached_model(instances):
-        outputs = [None]*len(instances)
+        outputs = [None] * len(instances)
         to_predict = []
         predicted = []
 
@@ -20,14 +22,14 @@ def cached_model_builder(model_name, cache, loaded_models, model_predictor, batc
 
         if len(to_predict) > 0:
             if len(to_predict) < batch_size:
-                predicted = model_predictor(
-                    loaded_models[model_name],
-                    to_predict)
+                predicted = model_predictor(loaded_models[model_name], to_predict)
             else:
                 for i in range(0, len(to_predict), batch_size):
-                    predicted.extend(model_predictor(
-                        loaded_models[model_name],
-                        to_predict[i:i+batch_size]))
+                    predicted.extend(
+                        model_predictor(
+                            loaded_models[model_name], to_predict[i : i + batch_size]
+                        )
+                    )
 
             j = 0
             for i, inst in enumerate(outputs):
@@ -48,9 +50,4 @@ class TestFileUpdateHandler(FileSystemEventHandler):
 
     def on_modified(self, event):
         if os.path.abspath(event.src_path) in self.files:
-            print('updated!')
             self.callback()
-            # update_file(event.src_path)
-            # test_task.set_status("running")
-            # global file_changed
-            # file_changed = True
