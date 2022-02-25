@@ -38,6 +38,7 @@ mypy = "^0.931"
 pyright = "^0.0.13"
 jupyter-book = "^0.12.2"
 usort = "^1.0.1"
+sphinx-autodoc-typehints = "^1.17.0"
 
 [tool.poetry.scripts]
 zeno = "zeno.runner:main"
