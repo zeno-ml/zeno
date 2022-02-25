@@ -1,5 +1,6 @@
-from watchdog.events import FileSystemEventHandler
 import os
+
+from watchdog.events import FileSystemEventHandler  # type: ignore
 
 
 def cached_model_builder(

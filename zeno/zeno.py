@@ -1,18 +1,17 @@
 import asyncio
-import importlib
 import os
 import shelve
 import sys
 import threading
+from importlib import util
 from inspect import getmembers, getsource, isfunction
-from typing import Callable, Dict, List
+from typing import Any, Callable, Dict, List, Union
 
-import pandas as pd
-import pyarrow as pa
-from pandas import DataFrame
-from watchdog.observers import Observer
+import pandas as pd  # type: ignore
+import pyarrow as pa  # type: ignore
+from watchdog.observers import Observer  # type: ignore
 
-from .util import TestFileUpdateHandler, cached_model_builder
+from .util import cached_model_builder, TestFileUpdateHandler
 
 
 class Slicer:
@@ -25,9 +24,10 @@ class Slicer:
         """
         self.name = name
         self.func = func
-        self.metrics = func.metrics
+
+        self.metrics = func.metrics  # type: ignore
         self.source = getsource(self.func)
-        self.slices = []
+        self.slices: List[str] = []
 
     def slice_data(self, data, metadata):
         slicer_output = self.func(data, metadata)
@@ -104,7 +104,7 @@ class Result:
 
     def __str__(self):
         return "Test {0} for slice {1}, size {2}".format(
-            self.tester_name, self.slice_name, self.slice_size
+            self.metric, self.sli, self.slice_size
         )
 
 
@@ -135,20 +135,20 @@ class Zeno(object):
 
         self.slices: Dict[str, Slice] = {}
 
-        self.model_loader: Callable = None
-        self.data_loader: Callable = None
+        self.model_loader: Union[Callable, None]
+        self.data_loader: Union[Callable, None]
 
         self.loaded_models: Dict[str, Callable] = {}
         self.model_caches: Dict[str, Callable] = {}
 
-        self.results = []
+        self.results: List[Result] = []
         self.res_runner = None
 
         self._loop = None
 
         # Read metadata as Pandas for slicing
-        self.metadata_df: DataFrame = pd.read_csv(metadata_path)
-        self.data = []
+        self.metadata_df = pd.read_csv(metadata_path)
+        self.data: List[Any] = []
 
     def start_processing(self):
         self.__initialize_watchdog()
@@ -158,7 +158,10 @@ class Zeno(object):
     async def __process(self):
         print("running analysis")
 
-        self.data = self.data_loader(self.metadata_df, self.id_column, self.data_path)
+        if self.data_loader:
+            self.data = self.data_loader(
+                self.metadata_df, self.id_column, self.data_path
+            )
         self.__slice_data()
 
         if len(self.loaded_models) == 0:
@@ -174,7 +177,8 @@ class Zeno(object):
                         )
                     )
                 )
-                self.loaded_models[model_name] = self.model_loader(model_name)
+                if self.model_loader:
+                    self.loaded_models[model_name] = self.model_loader(model_name)
 
         # Create cache files for models
         model_caches = {}
@@ -218,7 +222,7 @@ class Zeno(object):
                     str(sli.data.shape[0]),
                 )
 
-                res = Result(test, None, sli.name, sli.size)
+                res = Result(test, "a", sli.name, sli.size)
                 model_outputs = {}
                 for model_name in self.model_names:
                     if sli.name + test + model_name in result_cache:
@@ -243,7 +247,7 @@ class Zeno(object):
                         model_outputs["model_" + model_name] = output
                         result_cache[sli.name + test + model_name] = output
 
-                model_caches[model_name].sync()
+                    model_caches[model_name].sync()
                 res.set_model_outputs(model_outputs)
                 self.results.append(res)
 
@@ -262,9 +266,9 @@ class Zeno(object):
         self.transforms = {}
 
         for test_file in self.test_files:
-            spec = importlib.util.spec_from_file_location("module.name", test_file)
-            test_module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(test_module)
+            spec = util.spec_from_file_location("module.name", test_file)
+            test_module = util.module_from_spec(spec)  # type: ignore
+            spec.loader.exec_module(test_module)  # type: ignore
 
             for func_name, func in getmembers(test_module):
                 if isfunction(func):
@@ -328,11 +332,8 @@ class Zeno(object):
     def get_metadata_path(self):
         return self.metadata_path
 
-    def get_metadata_bytes(self):
-        return self.metadata_bytes
-
-    def get_testers(self):
-        return self.testers.values()
+    def get_metrics(self):
+        return self.metrics.values()
 
     def get_results(self):
         return self.results

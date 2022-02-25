@@ -1,7 +1,7 @@
 import asyncio
 import json
 
-import uvicorn
+import uvicorn  # type: ignore
 from fastapi import FastAPI, WebSocket
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
@@ -33,7 +33,7 @@ def run_background_processor(conn, args):
                         {
                             "name": s.name,
                             "source": s.source,
-                            "slices": list(s.slices.keys()),
+                            "slices": s.slices,
                         }
                         for s in slicers
                     ]
@@ -41,7 +41,7 @@ def run_background_processor(conn, args):
             )
 
         if case == "GET_TESTERS":
-            testers = zeno.get_testers()
+            testers = zeno.get_metrics()
             conn.send(
                 json.dumps([{"name": s.name, "source": s.source} for s in testers])
             )
@@ -50,8 +50,8 @@ def run_background_processor(conn, args):
             slices = zeno.get_slices()
             conn.send(json.dumps([{"name": s.name, "size": s.size} for s in slices]))
 
-        if case == "GET_DATA":
-            conn.send(zeno.get_metadata_bytes())
+        # if case == "GET_DATA":
+        #     conn.send(zeno.get_metadata_bytes())
 
         if case == "GET_SAMPLE":
             conn.send(zeno.get_sample(options))
@@ -60,8 +60,8 @@ def run_background_processor(conn, args):
             res = zeno.get_results()
             res = [
                 {
-                    "testerName": r.tester_name,
-                    "sliceName": r.slice_name,
+                    "testerName": r.metric,
+                    "sliceName": r.sli,
                     "sliceSize": r.slice_size,
                     "modelResults": r.model_results,
                 }
@@ -117,4 +117,4 @@ def run_server(conn, args):
                 previous_status = res[1]
                 await websocket.send_json({"status": res[0], "results": res[1]})
 
-    uvicorn.run(app, host="localhost", port=8000)
+    uvicorn.run(app, host="localhost", port=8000)  # type: ignore

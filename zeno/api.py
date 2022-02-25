@@ -1,5 +1,5 @@
 import functools
-from typing import Union, Tuple
+from typing import Tuple, Union
 
 
 def load_model(func):
