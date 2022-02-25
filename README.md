@@ -1,4 +1,4 @@
-# Zeno - Behavioral testing of AI/ML ![example workflow](https://github.com/cabreraalex/zeno/actions/workflows/zeno-ci.yml/badge.svg)
+# Zeno - Behavioral testing of AI/ML ![example workflow](https://github.com/cabreraalex/zeno/actions/workflows/test.yml/badge.svg)
 
 ## Development
 
