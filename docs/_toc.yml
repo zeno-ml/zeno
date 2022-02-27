@@ -4,5 +4,6 @@
 format: jb-book
 root: intro
 chapters:
-  - file: markdown
+  - file: decorators
   - file: api
+  - file: interface

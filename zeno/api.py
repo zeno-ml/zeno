@@ -21,10 +21,17 @@ def load_data(func):
 
 
 def slicer(metrics: Union[str, Tuple[str, str]]):
-    """Decorator for slicing functions
+    """Decorator for slicing functions.
 
     Args:
-        metrics: A metric or [tranform, metric] tuple.
+        metrics: A list of metrics or [tranform, metric] tuples.
+
+
+    Example::
+
+        @slicer(["accuracy"], ["rotate", "false_positive"])
+        def small_sample(data, metadata):
+            return data.sample(10), metadata
     """
 
     def _decorate(func):

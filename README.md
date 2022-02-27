@@ -8,28 +8,28 @@ Please install [`Poetry`](https://python-poetry.org/docs/master/#installing-with
 
 ### Install
 
+Suggest setting poetry to install the virtual env locally, which VSCode can use directly:
+
+`poetry config virtualenvs.in-project true`
+
 `poetry install`
 
 ### Running
 
 `poetry run zeno`
 
-### Linting
+### Formatting and Linting
 
-`poetry run flake8 zeno/`
+`make`
 
 ### Testing
 
-`poetry run pytest tests/`
+`make test`
 
-### Docs
+### Build Docs
 
-`make html`
+`make book`
 
-`sphinx-autobuild docs docs/_build/html`
+### Build and Deploy
 
-### Deployment
-
-Create a bundled package with:
-
-`poetry build`
+`make build`

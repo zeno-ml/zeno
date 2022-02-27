@@ -1,13 +1,7 @@
-API Decorators
+Command Line
 ********************************
 
-.. automodule:: zeno 
-   :members:
-   :undoc-members:
-
-Internal API
-********************************
-
-.. automodule:: zeno.zeno 
-   :members:
-   :undoc-members:
+.. argparse::
+   :module: zeno 
+   :func: __create_parser
+   :prog: zeno 

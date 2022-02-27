@@ -5,37 +5,22 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "MLTest",
+      "name": "zeno cifar",
       "type": "python",
       "request": "launch",
-      "program": "${workspaceFolder}/mlserve.py",
-      "args": [
-        "--tests",
-        "./amazon_tests.py",
-        "--data",
-        "sentiment/amazon_pred.csv",
-        "--models",
-        "siebert/sentiment-roberta-large-english",
-        "cardiffnlp/twitter-roberta-base-sentiment",
-        "--batch-size",
-        "10"
-      ]
-    },
-    {
-      "name": "MLTest CIFAR",
-      "type": "python",
-      "request": "launch",
-      "program": "${workspaceFolder}/zeno.py",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno.runner",
       "args": [
         "--test-files",
-        "./cifar_tests.py",
+        "./examples/cifar_tests.py",
         "--metadata",
-        "cifar/cifar_pred.csv",
+        "./examples/models/cifar/cifar_pred.csv",
         "--models",
-        "./cifar/cifar_net.pth",
-        "./cifar/cifar_net_1.pth",
+        "./examples/models/cifar/cifar_net_1.pth",
+        "./examples/models/cifar/cifar_net_2.pth",
+        "./examples/models/cifar/cifar_net_5.pth",
         "--data-path",
-        "./cifar/cif/test/",
+        "./examples/models/cifar/cif/test/",
         "--batch-size",
         "10"
       ]

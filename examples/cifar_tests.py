@@ -2,14 +2,15 @@ import PIL
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
 import os
 import torchvision.transforms as transforms
+from typing import List
 from zeno import load_data, load_model, metric, slicer, transform
 
 transform_image = transforms.Compose(
     [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
 )
+
 
 class Net(nn.Module):
     def __init__(self):
@@ -30,6 +31,7 @@ class Net(nn.Module):
         x = self.fc3(x)
         return x
 
+
 classes = (
     "airplane",
     "automobile",
@@ -42,6 +44,7 @@ classes = (
     "ship",
     "truck",
 )
+
 
 # Return a prediction function that returns output given input
 @load_model
@@ -58,11 +61,11 @@ def load_model(model_path):
     return pred
 
 
-# Given metadata table, ID column, and data path, return list of data instances for metadata table
+# Given metadata table, ID column, and data path,
+# return list of data instances for metadata table
 @load_data
 def load_data(df_metadata, id_col, data_path):
     return [PIL.Image.open(os.path.join(data_path, img)) for img in df_metadata[id_col]]
-
 
 
 # Return slice of data with associated metrics to calculate
@@ -70,18 +73,21 @@ def load_data(df_metadata, id_col, data_path):
 def small_sample(_, df):
     return df.sample(10)
 
+
 @slicer(["accuracy"])
 def overall(_, df):
     return df
 
+
 @slicer(["accuracy"])
-def medium_sample(data: List, metadata: DataFrame):
+def medium_sample(data: List, metadata):
     return df.sample(100)
 
 
 @slicer(["accuracy"])
 def by_class(_, df):
     return [(c, df[df["label"] == c]) for c in classes]
+
 
 @transform
 def rotate(data, df_metadata):
@@ -93,7 +99,7 @@ def rotate(data, df_metadata):
 def accuracy(metadata, output):
     return df[df["label"] == out].shape[0] / (df.shape[0] + 0.0000001) * 100
 
+
 @metric
 def switch(metadata, output, m_data, m_df_metadata, m_output):
     return sum([1 for i in range(len(output)) if output[i] != m_output[i]])
-    

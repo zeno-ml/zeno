@@ -1,11 +1,15 @@
-# Welcome to your Jupyter Book
+# Zeno
 
-This is a small sample book to give you a feel for how book content is
-structured.
-It shows off a few of the major file types, as well as some sample content.
-It does not go in-depth into any particular topic - check out [the Jupyter Book documentation](https://jupyterbook.org) for more information.
+Zeno is an API and interface for evaluating machine learning models.
+You first define how you expect a model to behave for subsets of data, and optionally after transformations.
+The UI then allows you to explore and compare the results across models.
 
-Check out the content pages bundled with this sample book to see more.
+## Quickstart
+
+Write functions.
+
+## Table of Contents
 
 ```{tableofcontents}
+
 ```

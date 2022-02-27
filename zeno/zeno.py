@@ -126,7 +126,7 @@ class Zeno(object):
         self.id_column = id_column
         self.data_path = data_path
         self.cache_path = cache_path
-        os.makedirs(self.cache_path, exist_ok=False)
+        os.makedirs(self.cache_path, exist_ok=True)
         self.status = "Initializing"
 
         self.slicers: Dict[str, Slicer] = {}
