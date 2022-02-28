@@ -1,7 +1,5 @@
 <script lang="ts">
   import Paper from "@smui/paper";
-
-  export let entries;
 </script>
 
 <div class="container">

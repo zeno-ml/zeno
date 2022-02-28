@@ -17,10 +17,11 @@
   import Slicers from "./Slicers.svelte";
   import Tests from "./Tests.svelte";
   import Results from "./Results.svelte";
+  import ResultView from "./ResultView.svelte";
   import Router, { location } from "svelte-spa-router";
   import Home from "./Home.svelte";
 
-  import { wsResponse } from "./stores";
+  import { wsResponse, results, models, metric_names } from "./stores";
   import { onMount } from "svelte";
 
   let runningAnalysis = false;
@@ -34,6 +35,7 @@
     "/slices/": Slices,
     "/slices/:slicer?": Slices,
     "/results/": Results,
+    "/result/:id?": ResultView,
     "*": Home,
   };
 
@@ -69,6 +71,22 @@
     if (r.status === "done") {
       runningAnalysis = false;
     }
+    if (r.results.length > 0) {
+      let res = JSON.parse(r.results) as Result[];
+      if (res.length === 0) return;
+      let m = [];
+      Object.keys(res[0].modelResults).forEach((d) => m.push(d));
+      results.set(res);
+      models.set(m);
+    }
+  });
+  onMount(() => {
+    fetch("/api/metrics")
+      .then((d) => d.json())
+      .then((d) => {
+        d = JSON.parse(d);
+        metric_names.set(d.map((m) => m.name));
+      });
   });
 </script>
 

@@ -37,6 +37,7 @@ book-strict:
 build:
 	@echo "==> 👷‍♀️ Build"
 	@poetry build -vvv
+	@cd frontend && npm run build
 
 .PHONY: check
 check:

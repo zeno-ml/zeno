@@ -1,4 +1,4 @@
-name: Test
+name: CI Tests
 
 on:
   push:
@@ -12,6 +12,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
@@ -27,6 +29,12 @@ jobs:
         run: make typecheck
       - name: Check Poetry
         run: make check
+
+      - name: Build frontend
+        run: |
+          cd frontend/
+          npm i
+          npm run build
 
   lint:
     runs-on: ubuntu-latest

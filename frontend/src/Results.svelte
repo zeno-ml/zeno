@@ -1,19 +1,19 @@
 <script lang="ts">
+  import type { View } from "svelte-vega";
   import DataTable, { Head, Body, Row, Cell } from "@smui/data-table";
   import SegmentedButton, { Segment } from "@smui/segmented-button";
   import Select, { Option } from "@smui/select";
   import { Label } from "@smui/common";
-  import { VegaLite, View } from "svelte-vega";
+  import { VegaLite } from "svelte-vega";
   import { LayerCake, Svg, Html } from "layercake";
 
-  import { wsResponse } from "./stores";
+  import { results, models, metric_names } from "./stores";
   import BeeswarmForce from "./BeeswarmForce.svelte";
   import AxisX from "./AxisX.svelte";
   import Tooltip from "./Tooltip.svelte";
 
-  let selectedTest = "accuracy";
-  let models = [];
-  let tests = [];
+  let selectedMetric = $metric_names[0];
+
   let views: View[] = [];
   $: {
     views.forEach((view) => {
@@ -28,10 +28,7 @@
   let choices = ["table", "strip", "beeswarm"];
   let choice = "table";
 
-  let res: Result[] = [];
-
   let evt = {};
-  $: console.log(evt);
 
   let schema = {
     $schema: "https://vega.github.io/schema/vega-lite/v5.json",
@@ -59,31 +56,17 @@
       },
     },
   };
-
-  wsResponse.subscribe((d: WSResponse) => {
-    let r = JSON.parse(d.results) as Result[];
-    if (r.length === 0) return;
-    models = [];
-    Object.keys(r[0].modelResults).forEach((d) => {
-      if (d.startsWith("model_")) {
-        models.push(d);
-      }
-    });
-    tests = [...new Set(r.map((d) => d.testerName))];
-    selectedTest = tests[0];
-    res = r;
-  });
 </script>
 
 <div class="results-header">
   <h2>Results</h2>
   <div class="buttons-container">
     <Select
-      bind:value={selectedTest}
+      bind:value={selectedMetric}
       label="Select Metric"
       style="margin-right: 20px;"
     >
-      {#each tests as m}
+      {#each $metric_names as m}
         <Option value={m}>{m}</Option>
       {/each}
     </Select>
@@ -105,21 +88,23 @@
       <Head>
         <Row>
           <Cell>Slice</Cell>
+          <Cell>Transform</Cell>
           <Cell>Test</Cell>
           <Cell>Size</Cell>
-          {#each models as m}
+          {#each $models as m}
             <Cell numeric><b>model:</b>{m.substring(6)}</Cell>
           {/each}
         </Row>
       </Head>
       <Body>
-        {#if res.length > 0}
-          {#each res.filter((d) => d.testerName == selectedTest) as r}
-            <Row>
-              <Cell><a href="/#/slices/{r.sliceName}">{r.sliceName}</a></Cell>
-              <Cell><a href="/#/tests/{r.testerName}">{r.testerName}</a></Cell>
+        {#if $results.length > 0}
+          {#each $results.filter((d) => d.metric == selectedMetric) as r}
+            <Row on:click={() => (window.location.hash = "#/result/" + r.id)}>
+              <Cell><a href="/#/slices/{r.slice}">{r.slice}</a></Cell>
+              <Cell>{r.transform}</Cell>
+              <Cell><a href="/#/tests/{r.metric}">{r.metric}</a></Cell>
               <Cell numeric>{r.sliceSize}</Cell>
-              {#each models as m}
+              {#each $models as m}
                 <Cell numeric>{r.modelResults[m].toFixed(2)}%</Cell>
               {/each}
             </Row>
@@ -129,16 +114,16 @@
     </DataTable>
   </div>
 {:else if choice === "strip"}
-  {#each models as m, i}
+  {#each $models as m, i}
     <p><i>{m}</i></p>
     <VegaLite
       bind:view={views[i]}
       spec={schema}
       data={{
-        table: res
-          .filter((r) => r.testerName == selectedTest)
+        table: $results
+          .filter((r) => r.metric == selectedMetric)
           .map((r) => ({
-            slice: r.sliceName,
+            slice: r.slice,
             value: (r.modelResults[m] / 100).toFixed(2),
             size: r.sliceSize,
           })),
@@ -147,13 +132,13 @@
     />
   {/each}
 {:else if choice === "beeswarm"}
-  {#each models as m, i}
+  {#each $models as m, i}
     <div id="bee-container">
       <LayerCake
-        data={res
-          .filter((r) => r.testerName == selectedTest)
+        data={$results
+          .filter((r) => r.metric == selectedMetric)
           .map((r) => ({
-            slice: r.sliceName,
+            slice: r.slice,
             value: (r.modelResults[m] / 100).toFixed(2),
             size: r.sliceSize,
           }))}

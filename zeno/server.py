@@ -2,6 +2,7 @@ import asyncio
 import json
 
 import os
+
 import uvicorn  # type: ignore
 from fastapi import FastAPI, WebSocket
 from fastapi.responses import Response
@@ -41,7 +42,7 @@ def run_background_processor(conn, args):
                 )
             )
 
-        if case == "GET_TESTERS":
+        if case == "GET_METRICS":
             testers = zeno.get_metrics()
             conn.send(
                 json.dumps([{"name": s.name, "source": s.source} for s in testers])
@@ -61,8 +62,10 @@ def run_background_processor(conn, args):
             res = zeno.get_results()
             res = [
                 {
-                    "testerName": r.metric,
-                    "sliceName": r.sli,
+                    "id": hash(r),
+                    "metric": r.metric,
+                    "transform": r.transform,
+                    "slice": r.sli,
                     "sliceSize": r.slice_size,
                     "modelResults": r.model_results,
                 }
@@ -105,9 +108,9 @@ def run_server(conn, args):
         conn.send(("GET_SAMPLE", sli))
         return Response(content=conn.recv())
 
-    @api_app.get("/testers")
-    def get_testers():
-        conn.send(("GET_TESTERS", ""))
+    @api_app.get("/metrics")
+    def get_metrics():
+        conn.send(("GET_METRICS", ""))
         return conn.recv()
 
     @api_app.get("/data")

@@ -4,7 +4,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import os
 import torchvision.transforms as transforms
-from typing import List
 from zeno import load_data, load_model, metric, slicer, transform
 
 transform_image = transforms.Compose(
@@ -71,7 +70,7 @@ def overall(_, metadata):
     return metadata.index
 
 
-@slicer(["accuracy"])
+@slicer(["accuracy", ("rotate", "accuracy")])
 def medium_sample(_, metadata):
     return metadata.sample(100).index
 
@@ -82,8 +81,8 @@ def by_class(_, df):
 
 
 @transform
-def rotate(data):
-    return [img.rotate(90, PIL.Image.NEAREST, expand=1) for img in data]
+def rotate(data, metadata):
+    return [img.rotate(90, PIL.Image.NEAREST, expand=1) for img in data], metadata
 
 
 @metric

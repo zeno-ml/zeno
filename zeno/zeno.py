@@ -81,43 +81,42 @@ class Slice:
 
 class Metric:
     def __init__(self, name, func):
-        self.name = (name,)
+        self.name = name
         self.func = func
         self.source = getsource(self.func)
 
 
 class Transform:
     def __init__(self, name, func):
-        self.name = (name,)
+        self.name = name
         self.func = func
         self.source = getsource(self.func)
 
     def transform(self, data, metadata):
-        self.t_data, self.t_metadata = self.func(data, metadata)
+        return self.func(data, metadata)
 
 
 class Result:
-    def __init__(
-        self, metric: str, transform: Optional[Transform], sli: str, slice_size: int
-    ):
-        self.metric = metric
-        self.transform = transform
+    def __init__(self, sli: str, transform: str, metric: str, slice_size: int):
         self.sli = sli
-
+        self.transform = transform
+        self.metric = metric
         self.slice_size = slice_size
 
         self.model_results: Dict[str, float] = {}
 
-    def set_model_outputs(self, model_results):
-        self.model_results = model_results
+        self.id: int = hash(self.sli + self.transform + self.metric)
 
-    def get_model_names(self):
-        return list(self.model_results.keys())
+    def set_result(self, model: str, result: float):
+        self.model_results[model] = result
 
     def __str__(self):
-        return "Test {0} for slice {1}, size {2}".format(
-            self.metric, self.sli, self.slice_size
+        return "Test {0} for slice {1}, transform {2}, size {3}".format(
+            self.metric, self.sli, self.transform, self.slice_size
         )
+
+    def __hash__(self):
+        return self.id
 
 
 class Zeno(object):
@@ -279,6 +278,10 @@ class Zeno(object):
                 if type(metric) in (list, tuple):
                     transform = self.transforms[metric[0]]
                     metric = metric[1]
+                if transform is not None:
+                    t_name = transform.name
+                else:
+                    t_name = ""
 
                 self.status = (
                     "Running test {0} ({1}/{2}) "
@@ -293,13 +296,12 @@ class Zeno(object):
                     str(sli.size),
                 )
 
-                res = Result(metric, transform, sli.name, sli.size)
-                model_outputs = {}
+                res = Result(sli.name, t_name, metric, sli.size)
                 for model_name in self.model_names:
-                    if sli.name + metric + model_name in result_cache:
-                        model_outputs["model_" + model_name] = result_cache[
-                            sli.name + metric + model_name
-                        ]
+                    if str(hash(res)) + model_name in result_cache:
+                        res.set_result(
+                            model_name, result_cache[str(hash(res)) + model_name]
+                        )
                     else:
                         out = cached_model(
                             self.__get_data(sli.sliced_indices),
@@ -327,13 +329,11 @@ class Zeno(object):
                             result = self.metrics[metric].func(
                                 out, self.__get_metadata(sli.sliced_indices)
                             )
-                        model_outputs["model_" + model_name] = result
 
-                        #: TODO: add transform
-                        result_cache[sli.name + metric + model_name] = result
+                        res.set_result(model_name, result)
+                        result_cache[str(hash(res)) + model_name] = result
 
                     model_caches[model_name].sync()
-                res.set_model_outputs(model_outputs)
                 self.results.append(res)
 
         for model_name in self.model_names:

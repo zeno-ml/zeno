@@ -25,10 +25,12 @@ interface Slice {
 }
 
 interface Result {
-  testerName: string;
-  sliceName: string;
+  id: int;
+  metric: string;
+  transform: string;
+  slice: string;
   sliceSize: number;
-  modelResults: any[];
+  modelResults: { property: float }[];
 }
 
 interface WSResponse {
