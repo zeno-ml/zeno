@@ -70,7 +70,3 @@ def main():
     background_process.start()
 
     server_process.join()
-
-
-if __name__ == "__main__":
-    main()

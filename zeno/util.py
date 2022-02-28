@@ -1,47 +1,42 @@
 import os
+from typing import Any, Callable, List
 
 from watchdog.events import FileSystemEventHandler  # type: ignore
 
 
-def cached_model_builder(
-    model_name, cache, loaded_models, model_predictor, batch_size, idx, data_path
+def cached_model(
+    data: List[Any],
+    data_ids: List[int],
+    model_cache,
+    model: Callable,
+    batch_size: int,
 ):
-    def cached_model(instances):
-        outputs = [None] * len(instances)
-        to_predict = []
-        predicted = []
+    outputs: Any = [None] * len(data_ids)
+    to_predict = []
+    predicted = []
 
-        # Get all instances from cache possible
-        for i, inst in enumerate(instances[idx].to_list()):
-            if inst in cache:
-                outputs[i] = cache.get(inst)
-            else:
-                if data_path:
-                    to_predict.append(os.path.join(data_path, inst))
-                else:
-                    to_predict.append(inst)
+    # Get all instances from cache possible
+    for i, inst in enumerate(data_ids):
+        if inst in model_cache:
+            outputs[i] = model_cache.get(inst)
+        else:
+            to_predict.append(data[i])
 
-        if len(to_predict) > 0:
-            if len(to_predict) < batch_size:
-                predicted = model_predictor(loaded_models[model_name], to_predict)
-            else:
-                for i in range(0, len(to_predict), batch_size):
-                    predicted.extend(
-                        model_predictor(
-                            loaded_models[model_name], to_predict[i : i + batch_size]
-                        )
-                    )
+    if len(to_predict) > 0:
+        if len(to_predict) < batch_size:
+            predicted = model(to_predict)
+        else:
+            for i in range(0, len(to_predict), batch_size):
+                predicted.extend(model(to_predict[i : i + batch_size]))
 
-            j = 0
-            for i, inst in enumerate(outputs):
-                if inst is None:
-                    outputs[i] = predicted[j]
-                    cache[instances.iloc[i][idx]] = outputs[i]
-                    j = j + 1
+        j = 0
+        for i, inst in enumerate(outputs):
+            if inst is None:
+                outputs[i] = predicted[j]
+                model_cache[data_ids[i]] = outputs[i]
+                j = j + 1
 
-        return outputs
-
-    return cached_model
+    return outputs
 
 
 class TestFileUpdateHandler(FileSystemEventHandler):

@@ -13,7 +13,7 @@ The subset can be created either from the raw data or metdata DataFrame.
 ```python
 # A list of metric functions or (transform function, metric function) tuples.
 @slicer(["Metric 1", ("Transform 1", "Metric 1"), "Metric 2"])
-def slicing_func(data: List[Any], metadata: DataFrame) -> DataFrame:
+def slicing_func(data: List[Any], metadata: DataFrame) -> List[int]:
 ```
 
 Examples:
@@ -28,6 +28,23 @@ def dark_images(data, metadata):
     return [img for img in data if img.brightness() < 0.1]
 ```
 
+**Transform**
+
+Functions with the `transform` decorator return a list of transformed data.
+
+```python
+@transform
+def transform(data: List[T], metadata: DataFrame) -> List[T], DataFrame:
+```
+
+Examples:
+
+```python
+@transform
+def rotate(images):
+    return [img.rotate(90) for img in images]
+```
+
 **Metric**
 
 Functions with the `metric` decorator return a float between 0 and 1.
@@ -36,13 +53,13 @@ Optionally, metric functions can take the original output and metadata for insta
 
 ```python
 @metric
-def metric_func(output, metadata) -> float:
+def metric_func(output: List[Any], metadata: DataFrame) -> float:
 
 @metric
-def metric_func(output, metadata, orig_output) -> float:
+def metric_func(output: List[Any], metadata: DataFrame, orig_output: List[Any]) -> float:
 
 @metric
-def metric_func(output, metadata, orig_output, orig_metadata) -> float:
+def metric_func(output: List[Any], metadata: DataFrame, orig_output: List[Any], orig_metadata: DataFrame) -> float:
 ```
 
 Examples:
@@ -81,10 +98,11 @@ def load_model(model_path):
 **Load Data**
 
 Functions with the `load_data` decorator should return a list of data instances, e.g. images or text strings, that can be predicted by the function returned from `load_model`.
+To get the column with ID labels, use `metadata.index`.
 
 ```python
 @load_data
-def load_data(metadata: DataFrame, id_column: str, data_path: str) -> List[Any]
+def load_data(metadata: DataFrame, data_path: str) -> List[Any]
 ```
 
 Examples:

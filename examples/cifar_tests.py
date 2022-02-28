@@ -61,45 +61,35 @@ def load_model(model_path):
     return pred
 
 
-# Given metadata table, ID column, and data path,
-# return list of data instances for metadata table
 @load_data
 def load_data(df_metadata, id_col, data_path):
     return [PIL.Image.open(os.path.join(data_path, img)) for img in df_metadata[id_col]]
 
 
-# Return slice of data with associated metrics to calculate
-@slicer(["accuracy", ("rotate", "accuracy"), ("flip", "accuracy")])
-def small_sample(_, df):
-    return df.sample(10)
+@slicer(["accuracy"])
+def overall(_, metadata):
+    return metadata.index
 
 
 @slicer(["accuracy"])
-def overall(_, df):
-    return df
-
-
-@slicer(["accuracy"])
-def medium_sample(data: List, metadata):
-    return df.sample(100)
+def medium_sample(_, metadata):
+    return metadata.sample(100).index
 
 
 @slicer(["accuracy"])
 def by_class(_, df):
-    return [(c, df[df["label"] == c]) for c in classes]
+    return [(c, df[df["label"] == c].index) for c in classes]
 
 
 @transform
-def rotate(data, df_metadata):
-    # return data, df_metadata
-    return [img.rotate(90, PIL.Image.NEAREST, expand=1) for img in data], df_metadata
+def rotate(data):
+    return [img.rotate(90, PIL.Image.NEAREST, expand=1) for img in data]
 
 
 @metric
-def accuracy(metadata, output):
-    return df[df["label"] == out].shape[0] / (df.shape[0] + 0.0000001) * 100
-
-
-@metric
-def switch(metadata, output, m_data, m_df_metadata, m_output):
-    return sum([1 for i in range(len(output)) if output[i] != m_output[i]])
+def accuracy(output, metadata):
+    return (
+        metadata[metadata["label"] == output].shape[0]
+        / (metadata.shape[0] + 0.0000001)
+        * 100
+    )

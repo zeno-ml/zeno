@@ -9,7 +9,7 @@
       "type": "python",
       "request": "launch",
       "cwd": "${workspaceFolder}",
-      "module": "zeno.runner",
+      "module": "zeno",
       "args": [
         "--test-files",
         "./examples/cifar_tests.py",

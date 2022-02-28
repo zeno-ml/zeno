@@ -1,6 +1,7 @@
 import asyncio
 import json
 
+import os
 import uvicorn  # type: ignore
 from fastapi import FastAPI, WebSocket
 from fastapi.responses import Response
@@ -74,10 +75,20 @@ def run_server(conn, args):
     app = FastAPI(title="Frontend API")
     api_app = FastAPI(title="Backend API")
 
+    print(os.listdir("."))
+    print()
+
     if args.data_path != "":
         app.mount("/static", StaticFiles(directory=args.data_path), name="static")
     app.mount("/api", api_app)
-    app.mount("/", StaticFiles(directory="./frontend", html=True), name="base")
+    app.mount(
+        "/",
+        StaticFiles(
+            directory=os.path.dirname(os.path.realpath(__file__)) + "/frontend",
+            html=True,
+        ),
+        name="base",
+    )
 
     @api_app.get("/slicers")
     def get_slicers():

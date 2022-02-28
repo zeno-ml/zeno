@@ -5,13 +5,14 @@ import sys
 import threading
 from importlib import util
 from inspect import getmembers, getsource, isfunction
-from typing import Any, Callable, Dict, List, Union
+from operator import itemgetter
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import pandas as pd  # type: ignore
 import pyarrow as pa  # type: ignore
 from watchdog.observers import Observer  # type: ignore
 
-from .util import cached_model_builder, TestFileUpdateHandler
+from .util import cached_model, TestFileUpdateHandler
 
 
 class Slicer:
@@ -31,28 +32,34 @@ class Slicer:
 
     def slice_data(self, data, metadata):
         slicer_output = self.func(data, metadata)
+        if not isinstance(slicer_output, list):
+            slicer_output = slicer_output.to_list()
 
         slices_to_return = {}
-        # If slicer returns multiple slices, create a slice for each
-        if type(slicer_output) == list:
+        # Can either be of the from [index list] or [(name, index list)..]
+        if (
+            len(slicer_output) > 0
+            and isinstance(slicer_output[0], tuple)
+            or isinstance(slicer_output[0], list)
+        ):
             for output_slice in slicer_output:
+                indices = list(output_slice[1])
                 # Join slice names with backslash
                 name = ".".join([self.name, output_slice[0]])
                 self.slices.append(name)
                 slices_to_return[name] = Slice(
                     name,
-                    output_slice[1],
-                    output_slice[1].shape[0],
+                    indices,
+                    len(indices),
                     self.metrics,
                     self.name,
                 )
-        # Otherwise, add the single slice
         else:
             self.slices.append(self.name)
             slices_to_return[self.name] = Slice(
                 self.name,
                 slicer_output,
-                slicer_output.shape[0],
+                len(slicer_output),
                 self.metrics,
                 self.name,
             )
@@ -61,9 +68,9 @@ class Slicer:
 
 
 class Slice:
-    def __init__(self, name, data, size, tests, slicer):
+    def __init__(self, name, sliced_indices, size, tests, slicer):
         self.name = name
-        self.data = data
+        self.sliced_indices = sliced_indices
         self.size = size
         self.tests = tests
         self.slicer = slicer
@@ -85,9 +92,14 @@ class Transform:
         self.func = func
         self.source = getsource(self.func)
 
+    def transform(self, data, metadata):
+        self.t_data, self.t_metadata = self.func(data, metadata)
+
 
 class Result:
-    def __init__(self, metric: str, transform: str, sli: str, slice_size: int):
+    def __init__(
+        self, metric: str, transform: Optional[Transform], sli: str, slice_size: int
+    ):
         self.metric = metric
         self.transform = transform
         self.sli = sli
@@ -155,107 +167,20 @@ class Zeno(object):
         self.__parse_testing_files()
         self.__run_tests()
 
-    async def __process(self):
-        print("running analysis")
+    def __initialize_watchdog(self):
+        # Watch for updated test files.
 
-        if self.data_loader:
-            self.data = self.data_loader(
-                self.metadata_df, self.id_column, self.data_path
-            )
-        self.__slice_data()
-
-        if len(self.loaded_models) == 0:
-            for i, model_name in enumerate(self.model_names):
-                self.set_status(
-                    " ".join(
-                        (
-                            "Loading model ",
-                            model_name,
-                            str(i + 1),
-                            "/",
-                            str(len(self.model_names)),
-                        )
-                    )
-                )
-                if self.model_loader:
-                    self.loaded_models[model_name] = self.model_loader(model_name)
-
-        # Create cache files for models
-        model_caches = {}
-        for i, model_name in enumerate(self.model_names):
-            model_caches[model_name] = shelve.open(
-                os.path.join(
-                    self.cache_path,
-                    (".model_" + model_name.replace("/", "_") + str(i) + ".cache"),
-                ),
-                writeback=True,
-            )
-
-        result_cache = shelve.open(
-            os.path.join(
-                self.cache_path, (".mltest_" + self.metadata_path.replace("/", "_"))
-            ),
-            writeback=True,
+        observer = Observer()
+        event_handler = TestFileUpdateHandler(
+            [os.path.abspath(t) for t in self.test_files], self.start_processing
         )
-
-        self.results = []
-        # Run all testing functions on slices
-        for i, sli in enumerate(self.slices.values()):
-            for j, test in enumerate(sli.tests):
-
-                transform = None
-                if type(test) in (list, tuple):
-                    transform, test = test
-                # TODO: check if test is a tuple, if so
-                # run the mutation and pass both outputs to the test.
-
-                self.status = (
-                    "Running test {0} ({1}/{2}) "
-                    + "for slice {3} ({4}/{5}), {6} instances"
-                ).format(
-                    test,
-                    str(j + 1),
-                    str(len(sli.tests)),
-                    sli.name,
-                    str(i + 1),
-                    str(len(self.slices.items())),
-                    str(sli.data.shape[0]),
-                )
-
-                res = Result(test, "a", sli.name, sli.size)
-                model_outputs = {}
-                for model_name in self.model_names:
-                    if sli.name + test + model_name in result_cache:
-                        model_outputs["model_" + model_name] = result_cache[
-                            sli.name + test + model_name
-                        ]
-                    else:
-                        out = cached_model_builder(
-                            model_name,
-                            model_caches[model_name],
-                            self.loaded_models,
-                            self.model_loader,
-                            self.batch_size,
-                            self.id_column,
-                            self.data_path,
-                        )(sli.data)
-                        output = self.metrics[test].func(
-                            sli.data,
-                            out,
-                            self.id_column,
-                        )
-                        model_outputs["model_" + model_name] = output
-                        result_cache[sli.name + test + model_name] = output
-
-                    model_caches[model_name].sync()
-                res.set_model_outputs(model_outputs)
-                self.results.append(res)
-
-        for model_name in self.model_names:
-            model_caches[model_name].close()
-        result_cache.close()
-
-        self.status = "done"
+        folders_logged = []
+        for test in self.test_files:
+            folder = os.path.dirname(test)
+            if folder not in folders_logged:
+                folders_logged.append(folder)
+                observer.schedule(event_handler, folder, recursive=True)
+        observer.start()
 
     def __parse_testing_files(self):
         self.model_loader = None
@@ -295,7 +220,127 @@ class Zeno(object):
         if not self._loop:
             self._loop = asyncio.new_event_loop()
             threading.Thread(target=self._loop.run_forever, daemon=True).start()
-        self._loop.call_soon_threadsafe(asyncio.create_task, self.__process())
+        self._loop.call_soon_threadsafe(
+            asyncio.create_task, self.__slice_and_calulate_metrics()
+        )
+
+    async def __slice_and_calulate_metrics(self):
+        print("running analysis")
+
+        if self.data_loader:
+            self.data = self.data_loader(
+                self.metadata_df, self.id_column, self.data_path
+            )
+        self.__slice_data()
+
+        if len(self.loaded_models) == 0:
+            for i, model_name in enumerate(self.model_names):
+                self.set_status(
+                    " ".join(
+                        (
+                            "Loading model ",
+                            model_name,
+                            str(i + 1),
+                            "/",
+                            str(len(self.model_names)),
+                        )
+                    )
+                )
+                if self.model_loader:
+                    self.loaded_models[model_name] = self.model_loader(model_name)
+
+        # Create cache files for models
+        model_caches = {}
+        for i, model_name in enumerate(self.model_names):
+            model_caches[model_name] = shelve.open(
+                os.path.join(
+                    self.cache_path,
+                    (".model_" + model_name.replace("/", "_") + str(i) + ".cache"),
+                ),
+                writeback=True,
+            )
+
+        # create cache file for results
+        result_cache = shelve.open(
+            os.path.join(
+                self.cache_path, (".mltest_" + self.metadata_path.replace("/", "_"))
+            ),
+            writeback=True,
+        )
+
+        # TODO: create cache file for transforms.
+
+        self.results = []
+        # Run all testing functions on slices
+        for i, sli in enumerate(self.slices.values()):
+            for j, metric in enumerate(sli.tests):
+
+                transform = None
+                if type(metric) in (list, tuple):
+                    transform = self.transforms[metric[0]]
+                    metric = metric[1]
+
+                self.status = (
+                    "Running test {0} ({1}/{2}) "
+                    + "for slice {3} ({4}/{5}), {6} instances"
+                ).format(
+                    metric,
+                    str(j + 1),
+                    str(len(sli.tests)),
+                    sli.name,
+                    str(i + 1),
+                    str(len(self.slices.items())),
+                    str(sli.size),
+                )
+
+                res = Result(metric, transform, sli.name, sli.size)
+                model_outputs = {}
+                for model_name in self.model_names:
+                    if sli.name + metric + model_name in result_cache:
+                        model_outputs["model_" + model_name] = result_cache[
+                            sli.name + metric + model_name
+                        ]
+                    else:
+                        out = cached_model(
+                            self.__get_data(sli.sliced_indices),
+                            self.__get_metadata(sli.sliced_indices)[
+                                self.id_column
+                            ].to_list(),
+                            model_caches[model_name],
+                            self.loaded_models[model_name],
+                            self.batch_size,
+                        )
+                        if transform is not None:
+                            t_data, t_metadata = transform.transform(  # type: ignore
+                                self.__get_data(sli.sliced_indices),
+                                self.__get_metadata(sli.sliced_indices),
+                            )
+                            out_t = cached_model(
+                                t_data,
+                                t_metadata[self.id_column].to_list(),
+                                model_caches[model_name],
+                                self.loaded_models[model_name],
+                                self.batch_size,
+                            )
+                            result = self.metrics[metric].func(out_t, t_metadata)
+                        else:
+                            result = self.metrics[metric].func(
+                                out, self.__get_metadata(sli.sliced_indices)
+                            )
+                        model_outputs["model_" + model_name] = result
+
+                        #: TODO: add transform
+                        result_cache[sli.name + metric + model_name] = result
+
+                    model_caches[model_name].sync()
+                res.set_model_outputs(model_outputs)
+                self.results.append(res)
+
+        for model_name in self.model_names:
+            model_caches[model_name].close()
+        result_cache.close()
+
+        self.status = "done"
 
     def __slice_data(self):
         self.slices = {}
@@ -308,21 +353,8 @@ class Zeno(object):
             }
         self.status = "Done slicing"
 
-    def __initialize_watchdog(self):
-        observer = Observer()
-        event_handler = TestFileUpdateHandler(
-            [os.path.abspath(t) for t in self.test_files], self.start_processing
-        )
-        folders_logged = []
-        for test in self.test_files:
-            folder = os.path.dirname(test)
-            if folder not in folders_logged:
-                folders_logged.append(folder)
-                observer.schedule(event_handler, folder, recursive=True)
-        observer.start()
-
     def get_sample(self, sli):
-        df = self.slices[sli].data.sample(20)
+        df = self.__get_metadata(self.slices[sli].sliced_indices).sample(20)
         df_arrow = pa.Table.from_pandas(df)
         buf = pa.BufferOutputStream()
         with pa.ipc.new_file(buf, df_arrow.schema) as writer:
@@ -352,3 +384,9 @@ class Zeno(object):
 
     def set_status(self, status):
         self.status = status
+
+    def __get_data(self, indices):
+        return itemgetter(*indices)(self.data)
+
+    def __get_metadata(self, indices):
+        return self.metadata_df.iloc[indices]  # type: ignore
