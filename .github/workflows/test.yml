@@ -41,6 +41,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
+      - uses: actions/setup-node@v2
       - uses: psf/black@stable
         with:
           src: "./zeno"
@@ -48,3 +49,7 @@ jobs:
       - uses: py-actions/flake8@v2
         with:
           path: "./zeno"
+      - name: ESLint
+        run: |
+          cd frontend/
+          eslint ./src/

@@ -15,7 +15,7 @@ lint:
 .PHONY: typecheck
 typecheck:
 	@echo "==> ✅ Type checks"
-	@make mypy pyright
+	@make mypy pyright eslint
 
 .PHONY: mypy
 mypy:
@@ -24,6 +24,10 @@ mypy:
 .PHONY: pyright
 pyright:
 	@poetry run pyright zeno 
+
+.PHONY: eslint
+eslint:
+	@cd frontend && eslint ./src/
 
 book:
 	@echo "==> 📕 Book"

@@ -1,61 +1,22 @@
 <script lang="ts">
-  import type { View } from "svelte-vega";
   import DataTable, { Head, Body, Row, Cell } from "@smui/data-table";
   import SegmentedButton, { Segment } from "@smui/segmented-button";
   import Select, { Option } from "@smui/select";
   import { Label } from "@smui/common";
-  import { VegaLite } from "svelte-vega";
   import { LayerCake, Svg, Html } from "layercake";
 
   import { results, models, metric_names } from "./stores";
   import BeeswarmForce from "./BeeswarmForce.svelte";
   import AxisX from "./AxisX.svelte";
   import Tooltip from "./Tooltip.svelte";
+  import Strip from "./Strip.svelte";
 
-  let selectedMetric = $metric_names[0];
-
-  let views: View[] = [];
-  $: {
-    views.forEach((view) => {
-      if (view) {
-        view.width(500);
-        view.height(50);
-        view.runAsync();
-      }
-    });
-  }
+  $: selectedMetric = $metric_names[0];
 
   let choices = ["table", "strip", "beeswarm"];
   let choice = "table";
 
-  let evt = {};
-
-  let schema = {
-    $schema: "https://vega.github.io/schema/vega-lite/v5.json",
-    mark: {
-      type: "tick",
-      thickness: 3,
-      height: 30,
-      tooltip: { content: "data" },
-    },
-    data: {
-      name: "table",
-    },
-    encoding: {
-      x: {
-        field: "value",
-        type: "quantitative",
-        title: "",
-        scale: {
-          type: "linear",
-          domain: [0, 1],
-        },
-        axis: {
-          format: ".0%",
-        },
-      },
-    },
-  };
+  let evt = [];
 </script>
 
 <div class="results-header">
@@ -98,7 +59,7 @@
       </Head>
       <Body>
         {#if $results.length > 0}
-          {#each $results.filter((d) => d.metric == selectedMetric) as r}
+          {#each $results.filter((d) => d.metric === selectedMetric) as r}
             <Row on:click={() => (window.location.hash = "#/result/" + r.id)}>
               <Cell><a href="/#/slices/{r.slice}">{r.slice}</a></Cell>
               <Cell>{r.transform}</Cell>
@@ -115,28 +76,11 @@
   </div>
 {:else if choice === "strip"}
   {#each $models as m, i}
-    <p><i>{m}</i></p>
-    <VegaLite
-      bind:view={views[i]}
-      spec={schema}
-      data={{
-        table: $results
-          .filter((r) => r.metric == selectedMetric)
-          .map((r) => ({
-            slice: r.slice,
-            value: (r.modelResults[m] / 100).toFixed(2),
-            size: r.sliceSize,
-          })),
-      }}
-      options={{ actions: false }}
-    />
-  {/each}
-{:else if choice === "beeswarm"}
-  {#each $models as m, i}
     <div id="bee-container">
+      <h5>{m}</h5>
       <LayerCake
         data={$results
-          .filter((r) => r.metric == selectedMetric)
+          .filter((r) => r.metric === selectedMetric)
           .map((r) => ({
             slice: r.slice,
             value: (r.modelResults[m] / 100).toFixed(2),
@@ -146,9 +90,58 @@
         z="slice"
         xDomain={[0, 1]}
       >
-        <Html><Tooltip {evt} /></Html>
+        <Html>
+          {#if evt[i]}
+            <Tooltip evt={evt[i]} let:detail>
+              <p>slice: {detail.props.slice}</p>
+              <p>instances: {detail.props.size}</p>
+            </Tooltip>
+          {/if}
+        </Html>
         <Svg>
-          <BeeswarmForce r={6} on:mousemove={(d) => (evt = d)} />
+          <Strip
+            on:mouseout={() => (evt = [])}
+            on:mousemove={(e) => (evt[i] = e)}
+          />
+          <AxisX
+            baseline={true}
+            tickMarks={true}
+            formatTick={(d) => d * 100 + "%"}
+          />
+        </Svg>
+      </LayerCake>
+    </div>
+  {/each}
+{:else if choice === "beeswarm"}
+  {#each $models as m, i}
+    <div id="bee-container">
+      <h5>{m}</h5>
+      <LayerCake
+        data={$results
+          .filter((r) => r.metric === selectedMetric)
+          .map((r) => ({
+            slice: r.slice,
+            value: (r.modelResults[m] / 100).toFixed(2),
+            size: r.sliceSize,
+          }))}
+        x="value"
+        z="slice"
+        xDomain={[0, 1]}
+      >
+        <Html>
+          {#if evt[i]}
+            <Tooltip evt={evt[i]} let:detail>
+              <p>slice: {detail.props.slice}</p>
+              <p>instances: {detail.props.size}</p>
+            </Tooltip>
+          {/if}
+        </Html>
+        <Svg>
+          <BeeswarmForce
+            r={6}
+            on:mouseout={() => (evt = [])}
+            on:mousemove={(e) => (evt[i] = e)}
+          />
           <AxisX
             baseline={true}
             tickMarks={true}
@@ -162,9 +155,9 @@
 
 <style>
   #bee-container {
-    width: 100%;
+    width: 50%;
     padding: 30px;
-    height: 100px;
+    height: 75px;
   }
   .table-container {
     margin: 0px auto;

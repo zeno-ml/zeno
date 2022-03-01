@@ -63,7 +63,7 @@
 </script>
 
 <g class="bee-group">
-  {#each simulation.nodes() as node}
+  {#each simulation.nodes() as node, i}
     <circle
       fill={$zGet(node)}
       {stroke}
@@ -71,8 +71,10 @@
       cx={node.x}
       cy={node.y}
       {r}
-      on:mouseover={(e) => dispatch("mousemove", { e, props: { a: "hi" } })}
-      on:focus={(e) => dispatch("mousemove", { e, props: { a: "hi" } })}
+      on:mouseover={(e) => dispatch("mousemove", { e, props: $data[i] })}
+      on:focus={(e) => dispatch("mousemove", { e, props: $data[i] })}
+      on:mouseout={() => dispatch("mouseout", {})}
+      on:blur={() => dispatch("mouseout", {})}
     >
       {#if getTitle}
         <title>{getTitle(node)}</title>

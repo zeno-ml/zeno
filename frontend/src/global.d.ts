@@ -14,7 +14,7 @@ interface Slicer {
   slices: string[];
 }
 
-interface Tester {
+interface Metric {
   name: string;
   source: string;
 }
@@ -35,5 +35,5 @@ interface Result {
 
 interface WSResponse {
   status: string;
-  results: string;
+  results: Result[];
 }

@@ -53,6 +53,8 @@
   }
 </script>
 
+/** eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 <g class="axis x-axis" class:snapTicks>
   {#each tickVals as tick, i}
     <g
@@ -83,8 +85,8 @@
   {#if baseline === true}
     <line
       class="baseline"
-      y1={$height + 0.5}
-      y2={$height + 0.5}
+      y1={parseFloat($height) + 0.5}
+      y2={parseFloat($height) + 0.5}
       x1="0"
       x2={$width}
     />

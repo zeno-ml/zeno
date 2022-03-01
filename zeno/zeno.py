@@ -6,7 +6,7 @@ import threading
 from importlib import util
 from inspect import getmembers, getsource, isfunction
 from operator import itemgetter
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Union
 
 import pandas as pd  # type: ignore
 import pyarrow as pa  # type: ignore
@@ -300,7 +300,8 @@ class Zeno(object):
                 for model_name in self.model_names:
                     if str(hash(res)) + model_name in result_cache:
                         res.set_result(
-                            model_name, result_cache[str(hash(res)) + model_name]
+                            model_name,
+                            result_cache[str(hash(res)) + model_name],  # type: ignore
                         )
                     else:
                         out = cached_model(

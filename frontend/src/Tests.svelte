@@ -12,7 +12,7 @@
   onMount(() => {
     fetch("/api/metrics")
       .then((d) => d.json())
-      .then((d) => metrics.set(JSON.parse(d) as Tester[]));
+      .then((d) => metrics.set(JSON.parse(d) as Metric[]));
   });
 
   metrics.subscribe((d) => console.log(d));
@@ -20,7 +20,7 @@
 
 <h2>Tests</h2>
 <h5>Testing functions</h5>
-{#each params.metric ? $metrics.filter((t) => t.name == params.metric) : $metrics as test}
+{#each params.metric ? $metrics.filter((t) => t.name === params.metric) : $metrics as test}
   <Paper>
     <p>
       <b>{test.name}</b>

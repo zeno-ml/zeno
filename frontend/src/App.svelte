@@ -1,6 +1,5 @@
 <script lang="ts">
   import github from "svelte-highlight/src/styles/github";
-  // import * as aq from "arquero";
   import List, {
     Item,
     Text,
@@ -21,11 +20,10 @@
   import Router, { location } from "svelte-spa-router";
   import Home from "./Home.svelte";
 
-  import { wsResponse, results, models, metric_names } from "./stores";
+  import { wsResponse, metric_names, status } from "./stores";
   import { onMount } from "svelte";
 
   let runningAnalysis = false;
-  let status = "ready";
 
   const routes = {
     "/": Home,
@@ -40,14 +38,18 @@
   };
 
   let tab = $location.split("/")[1];
-  if (!tab) tab = "home";
+  if (!tab) {
+    tab = "home";
+  }
 
   location.subscribe((d) => {
     tab = d.split("/")[1];
-    if (!tab) tab = "home";
+    if (!tab) {
+      tab = "home";
+    }
   });
 
-  function updateTab(t) {
+  function updateTab(t: string) {
     tab = t;
     if (t === "home") {
       window.location.hash = "";
@@ -56,36 +58,33 @@
     }
   }
 
-  async function runAnalysis() {
-    if (runningAnalysis) return;
+  function runAnalysis() {
+    if (runningAnalysis) {
+      return;
+    }
     runningAnalysis = true;
-    wsResponse.set({ status: "waiting", results: [] });
+    wsResponse.set("start websocket");
   }
 
   onMount(() => {
     runAnalysis();
   });
 
-  wsResponse.subscribe((r) => {
-    status = r.status;
-    if (r.status === "done") {
+  status.subscribe((s) => {
+    if (s === "done") {
       runningAnalysis = false;
     }
-    if (r.results.length > 0) {
-      let res = JSON.parse(r.results) as Result[];
-      if (res.length === 0) return;
-      let m = [];
-      Object.keys(res[0].modelResults).forEach((d) => m.push(d));
-      results.set(res);
-      models.set(m);
-    }
   });
+
   onMount(() => {
     fetch("/api/metrics")
       .then((d) => d.json())
-      .then((d) => {
-        d = JSON.parse(d);
-        metric_names.set(d.map((m) => m.name));
+      .then((d: string) => {
+        let metrics = JSON.parse(d) as Metric[];
+        metric_names.set(metrics.map((m) => m.name));
+      })
+      .catch((e) => {
+        console.log(e);
       });
   });
 </script>

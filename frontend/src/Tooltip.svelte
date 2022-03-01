@@ -6,8 +6,6 @@
   /** @type {Object} evt - A svelte event created via [`dispatch`](https://svelte.dev/docs#createEventDispatcher) with event information under `evt.detail.e`. */
   export let evt = {};
 
-  $: console.log(evt);
-
   /** @type {Number} [offset=-35] - A y-offset from the hover point, in pixels. */
   export let offset = -35;
 </script>
@@ -16,7 +14,7 @@
   <div
     class="tooltip"
     style="
-      top:{evt.detail.e.layerY + offset}px;
+      top:{parseInt(evt.detail.e.layerY) + offset}px;
       left:{evt.detail.e.layerX}px;
     "
   >
