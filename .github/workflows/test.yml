@@ -13,15 +13,18 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
+      - uses: actions/setup-python@v2
         with:
           python-version: 3.9
+
       - name: Install Poetry
         uses: snok/install-poetry@v1.3
       - name: Install dependencies
         run: poetry install --no-interaction
+      - name: Install NPM packages
+        run: |
+          cd frontend/
+          npm i
 
       - name: Run tests
         run: poetry run pytest zeno
@@ -33,7 +36,6 @@ jobs:
       - name: Build frontend
         run: |
           cd frontend/
-          npm i
           npm run build
 
   lint:
@@ -41,11 +43,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
-      - uses: actions/setup-node@v2
-      - name: NPM install
-        run: |
-          cd frontend/
-          npm i
       - uses: psf/black@stable
         with:
           src: "./zeno"
@@ -53,7 +50,3 @@ jobs:
       - uses: py-actions/flake8@v2
         with:
           path: "./zeno"
-      - name: ESLint
-        run: |
-          cd frontend/
-          eslint ./src/
