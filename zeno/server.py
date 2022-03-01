@@ -71,7 +71,7 @@ def run_background_processor(conn, args):
                 }
                 for r in res
             ]
-            conn.send((zeno.get_status(), json.dumps(res)))
+            conn.send((zeno.get_status(), res))
 
 
 def run_server(conn, args):

@@ -9,8 +9,9 @@
   } from "@smui/list";
   import CircularProgress from "@smui/circular-progress";
   import IconButton, { Icon } from "@smui/icon-button";
+  import Tooltip, { Wrapper } from "@smui/tooltip";
   import { Svg } from "@smui/common/elements";
-  import { mdiGithub } from "@mdi/js";
+  import { mdiGithub, mdiApi } from "@mdi/js";
 
   import Slices from "./Slices.svelte";
   import Slicers from "./Slicers.svelte";
@@ -100,11 +101,24 @@
     alt="Square spiral logo next to 'Zeno'"
   />
 
-  <IconButton href="https://github.com/cabreraalex/zeno">
-    <Icon component={Svg} viewBox="0 0 24 24">
-      <path fill="currentColor" d={mdiGithub} />
-    </Icon>
-  </IconButton>
+  <div>
+    <Wrapper>
+      <IconButton href="https://cabreraalex.github.io/zeno/intro.html">
+        <Icon component={Svg} viewBox="0 0 24 24">
+          <path fill="currentColor" d={mdiApi} />
+        </Icon>
+      </IconButton>
+      <Tooltip>read the documentation</Tooltip>
+    </Wrapper>
+    <Wrapper>
+      <IconButton href="https://github.com/cabreraalex/zeno">
+        <Icon component={Svg} viewBox="0 0 24 24">
+          <path fill="currentColor" d={mdiGithub} />
+        </Icon>
+      </IconButton>
+      <Tooltip>see the code on GitHub</Tooltip>
+    </Wrapper>
+  </div>
 </header>
 <main>
   <div id="side-menu">

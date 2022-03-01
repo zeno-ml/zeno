@@ -156,6 +156,7 @@
 <style>
   #bee-container {
     width: 50%;
+    min-width: 400px;
     padding: 30px;
     height: 75px;
   }
