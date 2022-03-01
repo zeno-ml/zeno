@@ -27,7 +27,7 @@ pyright:
 
 .PHONY: eslint
 eslint:
-	@cd frontend && eslint ./src/
+	@cd frontend && ./node_modules/.bin/eslint ./src/
 
 book:
 	@echo "==> 📕 Book"
