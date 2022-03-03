@@ -6,4 +6,23 @@ root: intro
 chapters:
   - file: decorators
   - file: api
-  - file: interface
+  - file: example_test_functions
+    sections:
+      - file: model_loaders/model_loaders
+        sections:
+          - file: model_loaders/pytorch
+      - file: data_loaders/data_loaders
+        sections:
+          - file: data_loaders/image_loader
+      - file: slicers/slicers
+        sections:
+          - file: slicers/images
+      - file: transforms/transforms
+        sections:
+          - file: transforms/images
+      - file: metrics/metrics
+        sections:
+          - file: metrics/classification
+  - file: example_analyses/example_analyses
+    sections:
+      - file: example_analyses/cifar

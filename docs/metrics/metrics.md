@@ -1,0 +1,7 @@
+(metrics)=
+
+# Metrics
+
+```{tableofcontents}
+
+```

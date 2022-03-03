@@ -1,0 +1,7 @@
+(slicers)=
+
+# Slicers
+
+```{tableofcontents}
+
+```
