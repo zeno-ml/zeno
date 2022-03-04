@@ -24,6 +24,7 @@ interface Metric {
 interface Slice {
   name: string;
   size: number;
+  id_column: string;
   table: ?ColumnTable;
 }
 
@@ -34,6 +35,7 @@ interface Result {
   slice: string;
   sliceSize: number;
   modelNames: string[];
+  modelIds: int[];
   modelResults: { property: float }[];
 }
 

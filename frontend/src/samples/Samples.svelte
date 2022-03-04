@@ -2,34 +2,19 @@
   import type ColumnTable from "arquero/dist/types/table/column-table";
 
   import Tooltip, { Wrapper } from "@smui/tooltip";
+  import Button from "@smui/button";
 
   export let id_col: string;
   export let table: ColumnTable;
 
-  console.log("hi");
-
-  // slices.subscribe((s) => {
-  //   if (s.size === 0) {
-  //     return;
-  //   }
-  //   slice = s.get(sli);
-  //   console.log(s, slice);
-  //   if (!slice.table) {
-  //     fetch("/api/table/" + slice.name)
-  //       .then((d) => d.arrayBuffer())
-  //       .then((d) => {
-  //         slice.table = fromArrow(d);
-  //         s.set(sli, slice);
-  //         slices.set(s);
-  //       })
-  //       .catch((e) => console.log(e));
-  //   }
-  // });
-
   let n = 20;
 </script>
 
-<button on:click={() => (n += 10)}>See more</button>
+<Button
+  on:click={() => (n += 10)}
+  variant="outlined"
+  style="margin-bottom: 20px;">See more</Button
+>
 <div class="container">
   {#each table.slice(0, n).objects() as row}
     <Wrapper>

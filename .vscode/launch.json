@@ -19,6 +19,7 @@
         "./examples/models/cifar/cifar_net_1.pth",
         "./examples/models/cifar/cifar_net_2.pth",
         "./examples/models/cifar/cifar_net_5.pth",
+        "./examples/models/cifar/cifar_net_10.pth",
         "--data-path",
         "./examples/models/cifar/cif/test/",
         "--batch-size",

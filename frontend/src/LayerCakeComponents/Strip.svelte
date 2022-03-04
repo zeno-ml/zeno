@@ -2,14 +2,15 @@
   @component
   Generates an SVG Strip plot.
  -->
-<script>
-  import { getContext } from "svelte";
-  import { createEventDispatcher } from "svelte";
+<script lang="ts">
+  import { createEventDispatcher, getContext } from "svelte";
+  const { data, xGet, z, height } = getContext("LayerCake");
 
-  const { data, xGet, height } = getContext("LayerCake");
+  /** @type {number} [strokeWidth=1] - The circle's stroke width in pixels. */
+  export let strokeWidth: number = 5;
 
-  /** @type {Number} [strokeWidth=1] - The circle's stroke width in pixels. */
-  export let strokeWidth = 5;
+  /** @type {string[]} [clicked=[]] - List of currently selected instances. */
+  export let clicked: string[] = [];
 
   const dispatch = createEventDispatcher();
 </script>
@@ -21,12 +22,20 @@
       y={10}
       width={strokeWidth}
       height={$height - 20}
-      fill="rgba(0, 0, 0, 0.5)"
+      fill={clicked.includes($z(d)) ? "red" : "rgba(0, 0, 0, 0.5)"}
       on:mouseover={(e) => dispatch("mousemove", { e, props: $data[i] })}
       on:focus={(e) => dispatch("mousemove", { e, props: $data[i] })}
       on:mouseout={() => dispatch("mouseout", {})}
       on:blur={() => dispatch("mouseout", {})}
-      on:click={() => dispatch("click", { props: $data[i] })}
+      on:click={() => {
+        if (clicked.includes($z(d))) {
+          clicked.splice(clicked.indexOf($z(d)), 1);
+        } else {
+          clicked.push($z(d));
+        }
+        clicked = [...clicked];
+        dispatch("click", { props: $data[i] });
+      }}
     />
   {/each}
 </g>

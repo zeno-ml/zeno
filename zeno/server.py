@@ -50,7 +50,14 @@ def run_background_processor(conn, args):
 
         if case == "GET_SLICES":
             slices = zeno.get_slices()
-            conn.send(json.dumps([{"name": s.name, "size": s.size} for s in slices]))
+            conn.send(
+                json.dumps(
+                    [
+                        {"name": s.name, "size": s.size, "id_column": zeno.id_column}
+                        for s in slices
+                    ]
+                )
+            )
 
         # if case == "GET_DATA":
         #     conn.send(zeno.get_metadata_bytes())
@@ -72,6 +79,7 @@ def run_background_processor(conn, args):
                     "sliceSize": r.slice_size,
                     "modelResults": r.model_results,
                     "modelNames": r.model_names,
+                    "modelIds": list(r.model_results.keys()),
                 }
                 for r in res
             ]

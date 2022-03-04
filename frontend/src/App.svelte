@@ -1,28 +1,28 @@
 <script lang="ts">
-  import github from "svelte-highlight/src/styles/github";
+  import { mdiApi, mdiGithub } from "@mdi/js";
+  import CircularProgress from "@smui/circular-progress";
+  import { Svg } from "@smui/common/elements";
+  import IconButton, { Icon } from "@smui/icon-button";
   import List, {
     Item,
-    Text,
-    Separator,
     PrimaryText,
     SecondaryText,
+    Separator,
+    Text,
   } from "@smui/list";
-  import CircularProgress from "@smui/circular-progress";
-  import IconButton, { Icon } from "@smui/icon-button";
   import Tooltip, { Wrapper } from "@smui/tooltip";
-  import { Svg } from "@smui/common/elements";
-  import { mdiGithub, mdiApi } from "@mdi/js";
+  import { onMount } from "svelte";
+  import github from "svelte-highlight/src/styles/github";
+  import Router, { location } from "svelte-spa-router";
 
-  import Slices from "./Slices.svelte";
-  import Slicers from "./Slicers.svelte";
+  import Home from "./Home.svelte";
   import Metrics from "./Metrics.svelte";
   import Results from "./Results.svelte";
   import ResultView from "./ResultView.svelte";
-  import Router, { location } from "svelte-spa-router";
-  import Home from "./Home.svelte";
+  import Slicers from "./Slicers.svelte";
+  import Slices from "./Slices.svelte";
 
-  import { status, metrics, slices, wsResponse } from "./stores";
-  import { onMount } from "svelte";
+  import { metrics, slices, status, wsResponse } from "./stores";
 
   const routes = {
     "/": Home,

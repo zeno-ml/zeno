@@ -89,7 +89,7 @@
           .filter((r) => r.metric === selectedMetric)
           .map((r) => ({
             slice: r.slice,
-            value: (r.modelResults[m] / 100).toFixed(2),
+            value: r.modelResults[r.modelIds[i]].toFixed(2) / 100,
             size: r.sliceSize,
           }))}
         x="value"
@@ -127,7 +127,7 @@
           .filter((r) => r.metric === selectedMetric)
           .map((r) => ({
             slice: r.slice,
-            value: (r.modelResults[m] / 100).toFixed(2),
+            value: r.modelResults[r.modelIds[i]].toFixed(2),
             size: r.sliceSize,
           }))}
         x="value"

@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { fromArrow } from "arquero";
-
   import { results } from "./stores";
   import { LayerCake, Svg, Html } from "layercake";
   import Samples from "./samples/Samples.svelte";
@@ -16,23 +14,85 @@
   export let params: { id: string };
 
   let table: ColumnTable;
-  let splitTables: [ColumnTable, ColumnTable];
-
+  let splitTables: ColumnTable[] = [];
   let evt;
   let res: Result;
   results.subscribe((r) => {
     res = r.filter((d) => d.id === parseInt(params.id))[0];
   });
 
+  let clicked: string[] = [];
+  $: if (clicked.length > 2) {
+    clicked.splice(1, 1);
+    clicked = [...clicked];
+  }
+  $: if (
+    clicked.length > 0 &&
+    clicked.length < 3 &&
+    splitTables.length !== clicked.length * clicked.length
+  ) {
+    clicked.forEach((model_hash) => {
+      if (!table.columnNames().includes("model" + model_hash)) {
+        fetch("/api/model_outputs/" + res.id + "/" + model_hash)
+          .then((d) => d.json())
+          .then((d) => {
+            let model_outs = JSON.parse(d);
+            table = table.assign(
+              aq.table({ ["model" + model_hash]: model_outs })
+            );
+            updateSplitTables();
+          });
+      }
+    });
+    updateSplitTables();
+  } else if (clicked.length === 0) {
+    splitTables = [];
+  }
+
+  function updateSplitTables() {
+    if (clicked.length === 1) {
+      splitTables = [
+        table.filter(aq.escape((d) => d["model" + clicked[0]] === 1)),
+        table.filter(aq.escape((d) => d["model" + clicked[0]] === 0)),
+      ];
+    } else if (clicked.length === 2) {
+      splitTables = [
+        table.filter(
+          aq.escape(
+            (d) =>
+              d["model" + clicked[0]] === 1 && d["model" + clicked[1]] === 1
+          )
+        ),
+        table.filter(
+          aq.escape(
+            (d) =>
+              d["model" + clicked[0]] === 1 && d["model" + clicked[1]] === 0
+          )
+        ),
+        table.filter(
+          aq.escape(
+            (d) =>
+              d["model" + clicked[0]] === 0 && d["model" + clicked[1]] === 1
+          )
+        ),
+        table.filter(
+          aq.escape(
+            (d) =>
+              d["model" + clicked[0]] === 0 && d["model" + clicked[1]] === 0
+          )
+        ),
+      ];
+    }
+  }
+
   slices.subscribe((s) => {
     if (s.size > 0) {
-      console.log(s.get(res.slice).table);
       let slice = s.get(res.slice);
       if (!slice.table) {
         fetch("/api/table/" + slice.name)
           .then((d) => d.arrayBuffer())
           .then((d) => {
-            table = fromArrow(d);
+            table = aq.fromArrow(d);
             slice.table = table;
             s.set(res.slice, slice);
             slices.set(s);
@@ -42,20 +102,12 @@
     }
   });
 
-  function setClicked(e) {
-    console.log(e.detail.props);
-    fetch("/api/model_outputs/" + res.id + "/" + e.detail.props.model_hash)
-      .then((d) => d.json())
-      .then((d) => {
-        let model_outs = JSON.parse(d);
-        table = $slices
-          .get(res.slice)
-          .table.assign(aq.table({ ["model"]: model_outs }));
-        splitTables = [
-          table.filter((d) => d["model"] === 1),
-          table.filter((d) => d["model"] === 0),
-        ];
-      });
+  $: if (res && clicked.length > 0) {
+    console.log(
+      res.modelIds,
+      clicked,
+      res.modelIds.indexOf(parseInt(clicked[0]))
+    );
   }
 </script>
 
@@ -79,7 +131,7 @@
         model_hash: model_hash,
       }))}
       x="value"
-      z="model"
+      z="model_hash"
       xDomain={[0, 100]}
     >
       <Html>
@@ -92,9 +144,9 @@
       </Html>
       <Svg>
         <Strip
+          bind:clicked
           on:mouseout={() => (evt = "")}
           on:mousemove={(e) => (evt = e)}
-          on:click={(e) => setClicked(e)}
         />
         <AxisX baseline={true} tickMarks={true} formatTick={(d) => d + "%"} />
       </Svg>
@@ -102,19 +154,56 @@
   </div>
 {/if}
 <hr style="margin-top: 50px" />
-{#if splitTables}
+{#if splitTables && splitTables.length === 2}
+  <p>
+    {res.modelNames[res.modelIds.indexOf(parseInt(clicked[0]))]
+      .split(/[\\/]/)
+      .pop()}
+  </p>
   <div style="display: inline-flex">
     <div style="width: 50%">
-      <h1>Positive</h1>
+      <p><b>Positive</b></p>
       <Samples id_col="id" table={splitTables[0]} />
     </div>
     <div style="width: 50%">
-      <h1>Negative</h1>
+      <p><b>Negative</b></p>
       <Samples id_col="id" table={splitTables[1]} />
     </div>
   </div>
+{:else if splitTables && splitTables.length === 4}
+  <div style="display: inline-flex; align-items: center">
+    <p style="margin-right: 20px;">
+      {res.modelNames[res.modelIds.indexOf(parseInt(clicked[1]))]
+        .split(/[\\/]/)
+        .pop()}
+    </p>
+    <div>
+      <p>
+        {res.modelNames[res.modelIds.indexOf(parseInt(clicked[0]))]
+          .split(/[\\/]/)
+          .pop()}
+      </p>
+      <div style="display: inline-flex">
+        <div style="width: 50%">
+          <p><b>Positive</b></p>
+          <Samples id_col="id" table={splitTables[0]} />
+        </div>
+        <div style="width: 50%">
+          <p><b>Negative</b></p>
+          <Samples id_col="id" table={splitTables[1]} />
+        </div>
+      </div>
+      <div style="display: inline-flex">
+        <div style="width: 50%">
+          <Samples id_col="id" table={splitTables[2]} />
+        </div>
+        <div style="width: 50%">
+          <Samples id_col="id" table={splitTables[3]} />
+        </div>
+      </div>
+    </div>
+  </div>
 {:else if table}
-  <h1>{res.slice}</h1>
   <Samples id_col="id" {table} />
 {/if}
 
