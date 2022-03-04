@@ -1,5 +1,7 @@
 /// <reference types="svelte" />
 
+import type ColumnTable from "arquero/dist/types/table/column-table";
+
 interface Test {
   test: string;
   slice: string;
@@ -22,6 +24,7 @@ interface Metric {
 interface Slice {
   name: string;
   size: number;
+  table: ?ColumnTable;
 }
 
 interface Result {
@@ -30,6 +33,7 @@ interface Result {
   transform: string;
   slice: string;
   sliceSize: number;
+  modelNames: string[];
   modelResults: { property: float }[];
 }
 

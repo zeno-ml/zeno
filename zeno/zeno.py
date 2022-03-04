@@ -9,10 +9,9 @@ from operator import itemgetter
 from typing import Any, Callable, Dict, List, Union
 
 import pandas as pd  # type: ignore
-import pyarrow as pa  # type: ignore
 from watchdog.observers import Observer  # type: ignore
 
-from .util import cached_model, TestFileUpdateHandler
+from .util import cached_model, get_arrow_bytes, TestFileUpdateHandler
 
 
 class Slicer:
@@ -103,12 +102,27 @@ class Result:
         self.metric = metric
         self.slice_size = slice_size
 
-        self.model_results: Dict[str, float] = {}
+        self.model_names: List[str] = []
+        self.model_results: Dict[int, float] = {}
+        self.model_metric_outputs: Dict[int, list] = {}
 
-        self.id: int = hash(self.sli + self.transform + self.metric)
+        self.id: int = int(hash(self.sli + self.transform + self.metric) / 10000)
 
-    def set_result(self, model: str, result: float):
-        self.model_results[model] = result
+    def set_result(self, model: str, result: Union[pd.Series, list]):
+        self.model_names.append(model)
+        model_hash = int(hash(model) / 10000)
+        if isinstance(result, pd.Series):
+            self.model_metric_outputs[model_hash] = result.astype(int).to_list()
+        elif len(result) > 0 and isinstance(result[0], bool):
+            self.model_metric_outputs[model_hash] = [
+                1 if r is True else 0 for r in result
+            ]
+
+        self.model_results[model_hash] = (
+            sum(self.model_metric_outputs[model_hash])
+            / len(self.model_metric_outputs[model_hash])
+            * 100
+        )
 
     def __str__(self):
         return "Test {0} for slice {1}, transform {2}, size {3}".format(
@@ -152,7 +166,7 @@ class Zeno(object):
         self.loaded_models: Dict[str, Callable] = {}
         self.model_caches: Dict[str, Callable] = {}
 
-        self.results: List[Result] = []
+        self.results: Dict[int, Result] = {}
         self.res_runner = None
 
         self._loop = None
@@ -269,7 +283,7 @@ class Zeno(object):
 
         # TODO: create cache file for transforms.
 
-        self.results = []
+        self.results = {}
         # Run all testing functions on slices
         for i, sli in enumerate(self.slices.values()):
             for j, metric in enumerate(sli.tests):
@@ -335,7 +349,7 @@ class Zeno(object):
                         result_cache[str(hash(res)) + model_name] = result
 
                     model_caches[model_name].sync()
-                self.results.append(res)
+                self.results[res.id] = res
 
         for model_name in self.model_names:
             model_caches[model_name].close()
@@ -354,13 +368,15 @@ class Zeno(object):
             }
         self.status = "Done slicing"
 
-    def get_sample(self, sli):
-        df = self.__get_metadata(self.slices[sli].sliced_indices).sample(20)
-        df_arrow = pa.Table.from_pandas(df)
-        buf = pa.BufferOutputStream()
-        with pa.ipc.new_file(buf, df_arrow.schema) as writer:
-            writer.write_table(df_arrow)
-        return bytes(buf.getvalue())
+    def get_table(self, sli):
+        df = self.__get_metadata(self.slices[sli].sliced_indices)
+        return get_arrow_bytes(df)
+
+    def get_model_outputs(self, opts):
+        res, model_hash = opts
+        # TODO: figure out hash issue, truncates on frontend
+        result = self.results[int(res)]
+        return result.model_metric_outputs[int(model_hash)]
 
     def get_metadata_path(self):
         return self.metadata_path
@@ -369,7 +385,7 @@ class Zeno(object):
         return self.metrics.values()
 
     def get_results(self):
-        return self.results
+        return self.results.values()
 
     def get_slicers(self):
         return self.slicers.values()

@@ -15,28 +15,29 @@
 
   import Slices from "./Slices.svelte";
   import Slicers from "./Slicers.svelte";
-  import Tests from "./Tests.svelte";
+  import Metrics from "./Metrics.svelte";
   import Results from "./Results.svelte";
   import ResultView from "./ResultView.svelte";
   import Router, { location } from "svelte-spa-router";
   import Home from "./Home.svelte";
 
-  import { wsResponse, metric_names, status } from "./stores";
+  import { status, metrics, slices, wsResponse } from "./stores";
   import { onMount } from "svelte";
-
-  let runningAnalysis = false;
 
   const routes = {
     "/": Home,
     "/slicers/": Slicers,
-    "/tests/": Tests,
-    "/tests/:test?": Tests,
+    "/tests/": Metrics,
+    "/tests/:test?": Metrics,
     "/slices/": Slices,
     "/slices/:slicer?": Slices,
     "/results/": Results,
     "/result/:id?": ResultView,
     "*": Home,
   };
+
+  let runningAnalysis = true;
+  let fetchedSlices = false;
 
   let tab = $location.split("/")[1];
   if (!tab) {
@@ -59,34 +60,35 @@
     }
   }
 
-  function runAnalysis() {
-    if (runningAnalysis) {
-      return;
-    }
-    runningAnalysis = true;
-    wsResponse.set("start websocket");
-  }
-
   onMount(() => {
-    runAnalysis();
+    wsResponse.set({
+      status: "connecting",
+      results: [],
+    } as WSResponse);
   });
 
   status.subscribe((s) => {
+    if (!fetchedSlices && (s === "done" || s.startsWith("Running test"))) {
+      fetchedSlices = true;
+      fetch("/api/slices")
+        .then((d) => d.json())
+        .then((d) => {
+          const out = JSON.parse(d) as Slice[];
+          const retMap = new Map<string, Slice>();
+          out.forEach((s) => {
+            retMap.set(s.name, s);
+          });
+          slices.set(retMap);
+        });
+      fetch("/api/metrics")
+        .then((d) => d.json())
+        .then((d) => metrics.set(JSON.parse(d) as Metric[]));
+    }
     if (s === "done") {
       runningAnalysis = false;
+    } else {
+      runningAnalysis = true;
     }
-  });
-
-  onMount(() => {
-    fetch("/api/metrics")
-      .then((d) => d.json())
-      .then((d: string) => {
-        let metrics = JSON.parse(d) as Metric[];
-        metric_names.set(metrics.map((m) => m.name));
-      })
-      .catch((e) => {
-        console.log(e);
-      });
   });
 </script>
 
@@ -147,8 +149,8 @@
         on:SMUI:action={() => updateTab("tests")}
       >
         <Text>
-          <PrimaryText>Tests</PrimaryText>
-          <SecondaryText>Testing functions</SecondaryText>
+          <PrimaryText>Metrics</PrimaryText>
+          <SecondaryText>Metric functions</SecondaryText>
         </Text>
       </Item>
       <Separator />
@@ -179,7 +181,7 @@
       {#if runningAnalysis}
         <CircularProgress style="height: 32px; width: 32px;" indeterminate />
         <br />
-        <p>{@html status}</p>
+        <p>{@html $status}</p>
       {/if}
     </div>
   </div>

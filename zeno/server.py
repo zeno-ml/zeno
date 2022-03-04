@@ -55,8 +55,11 @@ def run_background_processor(conn, args):
         # if case == "GET_DATA":
         #     conn.send(zeno.get_metadata_bytes())
 
-        if case == "GET_SAMPLE":
-            conn.send(zeno.get_sample(options))
+        if case == "GET_TABLE":
+            conn.send(zeno.get_table(options))
+
+        if case == "GET_MODEL_OUTPUTS":
+            conn.send(json.dumps(zeno.get_model_outputs(options)))
 
         if case == "GET_RESULTS":
             res = zeno.get_results()
@@ -68,6 +71,7 @@ def run_background_processor(conn, args):
                     "slice": r.sli,
                     "sliceSize": r.slice_size,
                     "modelResults": r.model_results,
+                    "modelNames": r.model_names,
                 }
                 for r in res
             ]
@@ -77,9 +81,6 @@ def run_background_processor(conn, args):
 def run_server(conn, args):
     app = FastAPI(title="Frontend API")
     api_app = FastAPI(title="Backend API")
-
-    print(os.listdir("."))
-    print()
 
     if args.data_path != "":
         app.mount("/static", StaticFiles(directory=args.data_path), name="static")
@@ -94,27 +95,32 @@ def run_server(conn, args):
     )
 
     @api_app.get("/slicers")
-    def get_slicers():
+    async def get_slicers():
         conn.send(("GET_SLICERS", ""))
         return conn.recv()
 
     @api_app.get("/slices")
-    def get_slices():
+    async def get_slices():
         conn.send(("GET_SLICES", ""))
         return conn.recv()
 
-    @api_app.get("/sample/{sli}")
-    def get_sample(sli):
-        conn.send(("GET_SAMPLE", sli))
+    @api_app.get("/table/{sli}")
+    async def get_table(sli):
+        conn.send(("GET_TABLE", sli))
         return Response(content=conn.recv())
 
+    @api_app.get("/model_outputs/{res}/{model}")
+    async def get_model_outputs(res, model):
+        conn.send(("GET_MODEL_OUTPUTS", (res, model)))
+        return conn.recv()
+
     @api_app.get("/metrics")
-    def get_metrics():
+    async def get_metrics():
         conn.send(("GET_METRICS", ""))
         return conn.recv()
 
     @api_app.get("/data")
-    def get_data():
+    async def get_data():
         conn.send(("GET_DATA", ""))
         return Response(content=conn.recv())
 
@@ -123,7 +129,7 @@ def run_server(conn, args):
         await websocket.accept()
         previous_status = ""
         while True:
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(1)
             conn.send(("GET_RESULTS", ""))
             res = conn.recv()
             if res[1] != previous_status:

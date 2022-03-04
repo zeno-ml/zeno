@@ -1,25 +1,13 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import Accordion, { Panel, Header, Content } from "@smui-extra/accordion";
 
-  import { slices } from "./stores";
   import Samples from "./samples/Samples.svelte";
 
-  export let params = {};
+  import { slices } from "./stores";
+
+  export let params: { slicer: string } = { slicer: "" };
 
   let open = -1;
-  $: console.log(open);
-  onMount(() => {
-    if ($slices.length === 0) {
-      fetch("/api/slices")
-        .then((d) => d.json())
-        .then((d) => {
-          let out = JSON.parse(d) as Slice[];
-          out.sort((a, b) => b.size - a.size);
-          slices.set(out);
-        });
-    }
-  });
 </script>
 
 <h2>Slices</h2>
@@ -27,21 +15,23 @@
 
 <div class="accordion-container">
   <Accordion style="width:100%">
-    {#each params.slicer ? $slices.filter((d) => d.name === params.slicer) : $slices as sli, i}
-      <Panel on:SMUIAccordionHeader:activate={() => (open = i)}>
-        <Header>
-          {sli.name}
-          <span slot="description">
-            {sli.size} instances
-          </span>
-        </Header>
-        <Content>
-          {#if open === i}
-            <Samples {sli} />
-          {/if}
-        </Content>
-      </Panel>
-    {/each}
+    {#if $slices.size > 0}
+      {#each params.slicer ? [$slices[params.slicer]] : [...$slices.values()] as sli, i}
+        <Panel on:SMUIAccordionHeader:activate={() => (open = i)}>
+          <Header>
+            {sli.name}
+            <span slot="description">
+              {sli.size} instances
+            </span>
+          </Header>
+          <Content>
+            {#if open === i}
+              <Samples sli={sli.name} />
+            {/if}
+          </Content>
+        </Panel>
+      {/each}
+    {/if}
   </Accordion>
 </div>
 

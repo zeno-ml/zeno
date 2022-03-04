@@ -1,7 +1,17 @@
 import os
 from typing import Any, Callable, List
 
+import pyarrow as pa  # type: ignore
+
 from watchdog.events import FileSystemEventHandler  # type: ignore
+
+
+def get_arrow_bytes(df):
+    df_arrow = pa.Table.from_pandas(df)
+    buf = pa.BufferOutputStream()
+    with pa.ipc.new_file(buf, df_arrow.schema) as writer:
+        writer.write_table(df_arrow)
+    return bytes(buf.getvalue())
 
 
 def cached_model(

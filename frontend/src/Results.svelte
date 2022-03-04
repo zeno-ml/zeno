@@ -5,16 +5,21 @@
   import { Label } from "@smui/common";
   import { LayerCake, Svg, Html } from "layercake";
 
-  import { results, models, metric_names } from "./stores";
-  import BeeswarmForce from "./BeeswarmForce.svelte";
-  import AxisX from "./AxisX.svelte";
-  import Tooltip from "./Tooltip.svelte";
-  import Strip from "./Strip.svelte";
+  import { results, models, metrics } from "./stores";
+  import BeeswarmForce from "./LayerCakeComponents/BeeswarmForce.svelte";
+  import AxisX from "./LayerCakeComponents/AxisX.svelte";
+  import Tooltip from "./LayerCakeComponents/Tooltip.svelte";
+  import Strip from "./LayerCakeComponents/Strip.svelte";
 
-  $: selectedMetric = $metric_names[0];
+  $: metric_names = $metrics.map((m) => m.name);
+  $: selectedMetric = metric_names[0];
 
   let choices = ["table", "strip", "beeswarm"];
   let choice = "table";
+
+  results.subscribe((d) => console.log(d));
+  $: console.log(selectedMetric);
+  $: console.log($metrics);
 
   let evt = [];
 </script>
@@ -27,7 +32,7 @@
       label="Select Metric"
       style="margin-right: 20px;"
     >
-      {#each $metric_names as m}
+      {#each metric_names as m}
         <Option value={m}>{m}</Option>
       {/each}
     </Select>
@@ -43,6 +48,7 @@
     </SegmentedButton>
   </div>
 </div>
+
 {#if choice === "table"}
   <div class="table-container">
     <DataTable sortable table$aria-label="People list" style="max-width: 100%;">
@@ -53,7 +59,7 @@
           <Cell>Test</Cell>
           <Cell>Size</Cell>
           {#each $models as m}
-            <Cell numeric><b>model:</b>{m.substring(6)}</Cell>
+            <Cell numeric><b>m:</b>{m.split(/[\\/]/).pop()}</Cell>
           {/each}
         </Row>
       </Head>
@@ -65,8 +71,8 @@
               <Cell>{r.transform}</Cell>
               <Cell><a href="/#/tests/{r.metric}">{r.metric}</a></Cell>
               <Cell numeric>{r.sliceSize}</Cell>
-              {#each $models as m}
-                <Cell numeric>{r.modelResults[m].toFixed(2)}%</Cell>
+              {#each Object.keys(r.modelResults) as ent}
+                <Cell numeric>{r.modelResults[ent].toFixed(2)}%</Cell>
               {/each}
             </Row>
           {/each}
@@ -77,7 +83,7 @@
 {:else if choice === "strip"}
   {#each $models as m, i}
     <div id="bee-container">
-      <h5>{m}</h5>
+      <h5>{m.split(/[\\/]/).pop()}</h5>
       <LayerCake
         data={$results
           .filter((r) => r.metric === selectedMetric)

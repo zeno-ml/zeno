@@ -26,6 +26,7 @@
       on:focus={(e) => dispatch("mousemove", { e, props: $data[i] })}
       on:mouseout={() => dispatch("mouseout", {})}
       on:blur={() => dispatch("mouseout", {})}
+      on:click={() => dispatch("click", { props: $data[i] })}
     />
   {/each}
 </g>

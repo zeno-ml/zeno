@@ -87,8 +87,4 @@ def rotate(data, metadata):
 
 @metric
 def accuracy(output, metadata):
-    return (
-        metadata[metadata["label"] == output].shape[0]
-        / (metadata.shape[0] + 0.0000001)
-        * 100
-    )
+    return metadata["label"] == output
