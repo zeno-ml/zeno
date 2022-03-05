@@ -22,7 +22,11 @@
       y={10}
       width={strokeWidth}
       height={$height - 20}
-      fill={clicked.includes($z(d)) ? "red" : "rgba(0, 0, 0, 0.5)"}
+      fill={clicked[0] === $z(d)
+        ? "red"
+        : clicked[1] === $z(d)
+        ? "purple"
+        : "rgba(0, 0, 0, 0.5)"}
       on:mouseover={(e) => dispatch("mousemove", { e, props: $data[i] })}
       on:focus={(e) => dispatch("mousemove", { e, props: $data[i] })}
       on:mouseout={() => dispatch("mouseout", {})}

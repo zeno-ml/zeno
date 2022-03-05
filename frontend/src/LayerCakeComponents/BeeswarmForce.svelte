@@ -7,7 +7,7 @@
   import { forceSimulation, forceX, forceY, forceCollide } from "d3-force";
   import { createEventDispatcher } from "svelte";
 
-  const { data, xGet, height, zGet } = getContext("LayerCake");
+  const { data, xGet, zGet, height } = getContext("LayerCake");
 
   const nodes = $data.map((d) => ({ ...d }));
 
@@ -44,7 +44,10 @@
         .y($height / 2)
         .strength(yStrength)
     )
-    .force("collide", forceCollide(r))
+    .force(
+      "collide",
+      forceCollide().radius((d) => $zGet(d))
+    )
     .stop();
 
   $: {
@@ -65,12 +68,12 @@
 <g class="bee-group">
   {#each simulation.nodes() as node, i}
     <circle
-      fill={$zGet(node)}
+      fill="black"
       {stroke}
       stroke-width={strokeWidth}
       cx={node.x}
       cy={node.y}
-      {r}
+      r={$zGet(node)}
       on:mouseover={(e) => dispatch("mousemove", { e, props: $data[i] })}
       on:focus={(e) => dispatch("mousemove", { e, props: $data[i] })}
       on:mouseout={() => dispatch("mouseout", {})}

@@ -25,6 +25,7 @@ interface Slice {
   name: string;
   size: number;
   id_column: string;
+  label_column: string;
   table: ?ColumnTable;
 }
 

@@ -17,6 +17,7 @@
   let splitTables: ColumnTable[] = [];
   let evt;
   let res: Result;
+  $: slice = res ? (slice = $slices.get(res.slice)) : "";
   results.subscribe((r) => {
     res = r.filter((d) => d.id === parseInt(params.id))[0];
   });
@@ -38,7 +39,10 @@
           .then((d) => {
             let model_outs = JSON.parse(d);
             table = table.assign(
-              aq.table({ ["model" + model_hash]: model_outs })
+              aq.table({
+                ["metric" + model_hash]: model_outs.metric,
+                ["model" + model_hash]: model_outs.output,
+              })
             );
             updateSplitTables();
           });
@@ -52,33 +56,33 @@
   function updateSplitTables() {
     if (clicked.length === 1) {
       splitTables = [
-        table.filter(aq.escape((d) => d["model" + clicked[0]] === 1)),
-        table.filter(aq.escape((d) => d["model" + clicked[0]] === 0)),
+        table.filter(aq.escape((d) => d["metric" + clicked[0]] === 1)),
+        table.filter(aq.escape((d) => d["metric" + clicked[0]] === 0)),
       ];
     } else if (clicked.length === 2) {
       splitTables = [
         table.filter(
           aq.escape(
             (d) =>
-              d["model" + clicked[0]] === 1 && d["model" + clicked[1]] === 1
+              d["metric" + clicked[0]] === 1 && d["metric" + clicked[1]] === 1
           )
         ),
         table.filter(
           aq.escape(
             (d) =>
-              d["model" + clicked[0]] === 1 && d["model" + clicked[1]] === 0
+              d["metric" + clicked[0]] === 1 && d["metric" + clicked[1]] === 0
           )
         ),
         table.filter(
           aq.escape(
             (d) =>
-              d["model" + clicked[0]] === 0 && d["model" + clicked[1]] === 1
+              d["metric" + clicked[0]] === 0 && d["metric" + clicked[1]] === 1
           )
         ),
         table.filter(
           aq.escape(
             (d) =>
-              d["model" + clicked[0]] === 0 && d["model" + clicked[1]] === 0
+              d["metric" + clicked[0]] === 0 && d["metric" + clicked[1]] === 0
           )
         ),
       ];
@@ -101,14 +105,6 @@
       }
     }
   });
-
-  $: if (res && clicked.length > 0) {
-    console.log(
-      res.modelIds,
-      clicked,
-      res.modelIds.indexOf(parseInt(clicked[0]))
-    );
-  }
 </script>
 
 {#if res}
@@ -163,20 +159,34 @@
   <div style="display: inline-flex">
     <div style="width: 50%">
       <p><b>Positive</b></p>
-      <Samples id_col="id" table={splitTables[0]} />
+      <Samples
+        id_col={slice.id_column}
+        table={splitTables[0]}
+        label_col={slice.label_column}
+        output_col={"model" + clicked[0]}
+      />
     </div>
     <div style="width: 50%">
       <p><b>Negative</b></p>
-      <Samples id_col="id" table={splitTables[1]} />
+      <Samples
+        id_col={slice.id_column}
+        table={splitTables[1]}
+        label_col={slice.label_column}
+        output_col={"model" + clicked[0]}
+      />
     </div>
   </div>
 {:else if splitTables && splitTables.length === 4}
   <div style="display: inline-flex; align-items: center">
-    <p style="margin-right: 20px;">
-      {res.modelNames[res.modelIds.indexOf(parseInt(clicked[1]))]
-        .split(/[\\/]/)
-        .pop()}
-    </p>
+    <div>
+      <p><b>Positive</b></p>
+      <p style="margin-right: 20px;">
+        {res.modelNames[res.modelIds.indexOf(parseInt(clicked[1]))]
+          .split(/[\\/]/)
+          .pop()}
+      </p>
+      <p><b>Negative</b></p>
+    </div>
     <div>
       <p>
         {res.modelNames[res.modelIds.indexOf(parseInt(clicked[0]))]
@@ -186,25 +196,49 @@
       <div style="display: inline-flex">
         <div style="width: 50%">
           <p><b>Positive</b></p>
-          <Samples id_col="id" table={splitTables[0]} />
+          <Samples
+            id_col={slice.id_column}
+            label_col={slice.label_column}
+            table={splitTables[0]}
+            output_col={"model" + clicked[0]}
+            second_output_col={"model" + clicked[1]}
+          />
         </div>
         <div style="width: 50%">
           <p><b>Negative</b></p>
-          <Samples id_col="id" table={splitTables[1]} />
+          <Samples
+            id_col={slice.id_column}
+            label_col={slice.label_column}
+            table={splitTables[1]}
+            output_col={"model" + clicked[0]}
+            second_output_col={"model" + clicked[1]}
+          />
         </div>
       </div>
       <div style="display: inline-flex">
         <div style="width: 50%">
-          <Samples id_col="id" table={splitTables[2]} />
+          <Samples
+            id_col={slice.id_column}
+            label_col={slice.label_column}
+            table={splitTables[2]}
+            output_col={"model" + clicked[0]}
+            second_output_col={"model" + clicked[1]}
+          />
         </div>
         <div style="width: 50%">
-          <Samples id_col="id" table={splitTables[3]} />
+          <Samples
+            id_col={slice.id_column}
+            label_col={slice.label_column}
+            table={splitTables[3]}
+            output_col={"model" + clicked[0]}
+            second_output_col={"model" + clicked[1]}
+          />
         </div>
       </div>
     </div>
   </div>
 {:else if table}
-  <Samples id_col="id" {table} />
+  <Samples id_col={slice.id_column} label_col={slice.label_column} {table} />
 {/if}
 
 <style>

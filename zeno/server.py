@@ -12,12 +12,14 @@ from .zeno import Zeno
 
 
 def run_background_processor(conn, args):
+    print(args.__dict__)
     zeno = Zeno(
         metadata_path=args.metadata[0],
-        test_files=args.test_files,
+        test_files=args.__dict__["test-files"],
         models=args.models,
         batch_size=args.batch_size,
         id_column=args.id_column,
+        label_column=args.label_column,
         data_path=args.data_path,
         cache_path=args.cache_path,
     )
@@ -53,7 +55,12 @@ def run_background_processor(conn, args):
             conn.send(
                 json.dumps(
                     [
-                        {"name": s.name, "size": s.size, "id_column": zeno.id_column}
+                        {
+                            "name": s.name,
+                            "size": s.size,
+                            "id_column": zeno.id_column,
+                            "label_column": zeno.label_column,
+                        }
                         for s in slices
                     ]
                 )

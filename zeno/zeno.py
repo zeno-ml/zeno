@@ -4,7 +4,7 @@ import shelve
 import sys
 import threading
 from importlib import util
-from inspect import getmembers, getsource, isfunction
+from inspect import getmembers, getsource, isfunction, signature
 from operator import itemgetter
 from typing import Any, Callable, Dict, List, Union
 
@@ -29,8 +29,12 @@ class Slicer:
         self.source = getsource(self.func)
         self.slices: List[str] = []
 
-    def slice_data(self, data, metadata):
-        slicer_output = self.func(data, metadata)
+    def slice_data(self, data, metadata, label_column):
+        if len(signature(self.func).parameters) == 3:
+            slicer_output = self.func(data, metadata, label_column)
+        else:
+            slicer_output = self.func(data, metadata)
+
         if not isinstance(slicer_output, list):
             slicer_output = slicer_output.to_list()
 
@@ -103,14 +107,17 @@ class Result:
         self.slice_size = slice_size
 
         self.model_names: List[str] = []
+        self.model_outputs: Dict[int, list] = {}
         self.model_results: Dict[int, float] = {}
         self.model_metric_outputs: Dict[int, list] = {}
 
         self.id: int = int(hash(self.sli + self.transform + self.metric) / 10000)
 
-    def set_result(self, model: str, result: Union[pd.Series, list]):
+    def set_result(self, model: str, outputs: list, result: Union[pd.Series, list]):
         self.model_names.append(model)
+
         model_hash = int(hash(model) / 10000)
+        self.model_outputs[model_hash] = outputs
         if isinstance(result, pd.Series):
             self.model_metric_outputs[model_hash] = result.astype(int).to_list()
         elif len(result) > 0 and isinstance(result[0], bool):
@@ -141,6 +148,7 @@ class Zeno(object):
         models: List[str],
         batch_size=16,
         id_column="id",
+        label_column="label",
         data_path="",
         cache_path="",
     ):
@@ -149,6 +157,7 @@ class Zeno(object):
         self.model_names = models
         self.batch_size = batch_size
         self.id_column = id_column
+        self.label_column = label_column
         self.data_path = data_path
         self.cache_path = cache_path
         os.makedirs(self.cache_path, exist_ok=True)
@@ -311,6 +320,7 @@ class Zeno(object):
                 )
 
                 res = Result(sli.name, t_name, metric, sli.size)
+                metric_func = self.metrics[metric].func
                 for model_name in self.model_names:
                     if str(hash(res)) + model_name in result_cache:
                         res.set_result(
@@ -339,13 +349,25 @@ class Zeno(object):
                                 self.loaded_models[model_name],
                                 self.batch_size,
                             )
-                            result = self.metrics[metric].func(out_t, t_metadata)
+                            if len(signature(metric_func).parameters) == 3:
+                                result = metric_func(
+                                    out_t, t_metadata, self.label_column
+                                )
+                            else:
+                                result = metric_func(out_t, t_metadata)
                         else:
-                            result = self.metrics[metric].func(
-                                out, self.__get_metadata(sli.sliced_indices)
-                            )
+                            if len(signature(metric_func).parameters) == 3:
+                                result = metric_func(
+                                    out,
+                                    self.__get_metadata(sli.sliced_indices),
+                                    self.label_column,
+                                )
+                            else:
+                                result = metric_func(
+                                    out, self.__get_metadata(sli.sliced_indices)
+                                )
 
-                        res.set_result(model_name, result)
+                        res.set_result(model_name, out, result)
                         result_cache[str(hash(res)) + model_name] = result
 
                     model_caches[model_name].sync()
@@ -364,7 +386,7 @@ class Zeno(object):
             self.status = "Slicing data for " + name
             self.slices = {
                 **self.slices,
-                **slicer.slice_data(self.data, self.metadata_df),
+                **slicer.slice_data(self.data, self.metadata_df, self.label_column),
             }
         self.status = "Done slicing"
 
@@ -376,7 +398,10 @@ class Zeno(object):
         res, model_hash = opts
         # TODO: figure out hash issue, truncates on frontend
         result = self.results[int(res)]
-        return result.model_metric_outputs[int(model_hash)]
+        return {
+            "metric": result.model_metric_outputs[int(model_hash)],
+            "output": result.model_outputs[int(model_hash)],
+        }
 
     def get_metadata_path(self):
         return self.metadata_path

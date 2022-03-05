@@ -121,18 +121,20 @@
 {:else if choice === "beeswarm"}
   {#each $models as m, i}
     <div id="bee-container">
-      <h5>{m}</h5>
+      <h5>{m.split(/[\\/]/).pop()}</h5>
       <LayerCake
         data={$results
           .filter((r) => r.metric === selectedMetric)
           .map((r) => ({
             slice: r.slice,
-            value: r.modelResults[r.modelIds[i]].toFixed(2),
+            value: r.modelResults[r.modelIds[i]].toFixed(2) / 100,
             size: r.sliceSize,
           }))}
         x="value"
-        z="slice"
+        z="size"
         xDomain={[0, 1]}
+        zDomain={[null, null]}
+        zRange={[5, 10]}
       >
         <Html>
           {#if evt[i]}

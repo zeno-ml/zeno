@@ -76,8 +76,8 @@ def medium_sample(_, metadata):
 
 
 @slicer(["accuracy"])
-def by_class(_, df):
-    return [(c, df[df["label"] == c].index) for c in classes]
+def by_class(_, df, label_col):
+    return [(c, df[df[label_col] == c].index) for c in classes]
 
 
 @transform
@@ -86,5 +86,5 @@ def rotate(data, metadata):
 
 
 @metric
-def accuracy(output, metadata):
-    return metadata["label"] == output
+def accuracy(output, metadata, label_col):
+    return metadata[label_col] == output
