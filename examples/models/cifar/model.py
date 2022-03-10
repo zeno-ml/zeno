@@ -36,12 +36,16 @@ def run():
 
     batch_size = 4
 
-    trainset = torchvision.datasets.ImageFolder(root="./cif/train", transform=transform)
+    trainset = torchvision.datasets.ImageFolder(
+        root="~/dev/data/cifar/train", transform=transform
+    )
     trainloader = torch.utils.data.DataLoader(
         trainset, batch_size=batch_size, shuffle=True, num_workers=2
     )
 
-    testset = torchvision.datasets.ImageFolder(root="./cif/test", transform=transform)
+    testset = torchvision.datasets.ImageFolder(
+        root="~/dev/data/cifar/test", transform=transform
+    )
     testloader = torch.utils.data.DataLoader(
         testset, batch_size=batch_size, shuffle=False, num_workers=2
     )

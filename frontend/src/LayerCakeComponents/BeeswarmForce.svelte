@@ -11,9 +11,6 @@
 
   const nodes = $data.map((d) => ({ ...d }));
 
-  /** @type {Number} [r=4] - The circle radius size in pixels. */
-  export let r = 4;
-
   /** @type {Number} [strokeWidth=1] - The circle's stroke width in pixels. */
   export let strokeWidth = 1;
 

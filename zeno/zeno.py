@@ -5,13 +5,324 @@ import sys
 import threading
 from importlib import util
 from inspect import getmembers, getsource, isfunction, signature
-from operator import itemgetter
-from typing import Any, Callable, Dict, List, Union
+from typing import Callable, Dict, List, Union
 
-import pandas as pd  # type: ignore
+import pandas as pd
 from watchdog.observers import Observer  # type: ignore
 
-from .util import cached_model, get_arrow_bytes, TestFileUpdateHandler
+from .util import cached_process, get_arrow_bytes, TestFileUpdateHandler
+
+
+class Zeno(object):
+    def __init__(
+        self,
+        metadata_path: str,
+        test_files: List[str],
+        models: List[str],
+        batch_size=16,
+        id_column="id",
+        label_column="label",
+        data_path="",
+        cache_path="",
+    ):
+        self.metadata_path = metadata_path
+        self.test_files = test_files
+        self.model_names = models
+        self.batch_size = batch_size
+        self.id_column = id_column
+        self.label_column = label_column
+        self.data_path = data_path
+        self.cache_path = cache_path
+        os.makedirs(self.cache_path, exist_ok=True)
+
+        self.status: str = "Initializing"
+
+        self.model_loader: Callable
+        self.data_loader: Callable
+
+        # Key is name of preprocess function
+        self.preprocessors: Dict[str, Preprocessor] = {}
+        # Key is name of slicer function
+        self.slicers: Dict[str, Slicer] = {}
+        # Key is name of transform function
+        self.transforms: Dict[str, Transform] = {}
+        # Key is name of metric function
+        self.metrics: Dict[str, Metric] = {}
+        # Key is name of slice
+        self.slices: Dict[str, Slice] = {}
+        # Key is result.id, hash of properties
+        self.results: Dict[int, Result] = {}
+
+        # Read metadata as Pandas for slicing
+        self.metadata = pd.read_csv(metadata_path)
+
+        self._loop = None
+        self.__initialize_watchdog()
+
+    def __initialize_watchdog(self):
+        # Watch for updated test files.
+
+        observer = Observer()
+        event_handler = TestFileUpdateHandler(
+            [os.path.abspath(t) for t in self.test_files], self.start_processing
+        )
+        folders_logged = []
+        for test in self.test_files:
+            folder = os.path.dirname(test)
+            if folder not in folders_logged:
+                folders_logged.append(folder)
+                observer.schedule(event_handler, folder, recursive=True)
+        observer.start()
+
+    def start_processing(self):
+        self.__parse_testing_files()
+        self.__run_tests()
+
+    def __parse_testing_files(self):
+        model_loader = None
+        data_loader = None
+
+        self.slicers = {}
+        self.metrics = {}
+        self.transforms = {}
+
+        for test_file in self.test_files:
+            spec = util.spec_from_file_location("module.name", test_file)
+            test_module = util.module_from_spec(spec)  # type: ignore
+            spec.loader.exec_module(test_module)  # type: ignore
+
+            for func_name, func in getmembers(test_module):
+                if isfunction(func):
+                    if hasattr(func, "load_model"):
+                        if model_loader is None:
+                            model_loader = func
+                        else:
+                            print("Multiple model loaders found, can only have one")
+                            sys.exit(1)
+                    if hasattr(func, "load_data"):
+                        if data_loader is None:
+                            data_loader = func
+                        else:
+                            print("Multiple data loaders found, can only have one")
+                            sys.exit(1)
+                    if hasattr(func, "preprocess"):
+                        self.preprocessors[func_name] = Preprocessor(func_name, func)
+                    if hasattr(func, "slicer"):
+                        self.slicers[func_name] = Slicer(func_name, func)
+                    if hasattr(func, "transform"):
+                        self.transforms[func_name] = Transform(func_name, func)
+                    if hasattr(func, "metric"):
+                        self.metrics[func_name] = Metric(func_name, func)
+
+        if not model_loader:
+            print("ERROR: No model loader found")
+            sys.exit(1)
+        else:
+            self.model_loader = model_loader
+
+        if not data_loader:
+            print("ERROR: No data loader found")
+            sys.exit(1)
+        else:
+            self.data_loader = data_loader
+
+    def __run_tests(self):
+        if self._loop:
+            self._loop.close()
+        self._loop = asyncio.new_event_loop()
+        threading.Thread(target=self._loop.run_forever, daemon=True).start()
+        self._loop.call_soon_threadsafe(asyncio.create_task, self.__run_test_pipeline())
+
+    async def __run_test_pipeline(self):
+        self.__preprocess_data()
+        self.__slice_data()
+        self.__calculate_metrics()
+
+    def __preprocess_data(self):
+        for name, preprocess in self.preprocessors.items():
+            self.status = "Running preprocessor " + name
+            cache = shelve.open(
+                os.path.join(
+                    self.cache_path,
+                    (
+                        ".model_preprocess_"
+                        + self.metadata_path.replace("/", "_")
+                        + name
+                    ),
+                ),
+                writeback=True,
+            )
+            output = cached_process(
+                self.data_loader,
+                self.metadata,
+                preprocess.func,
+                cache,
+                self.batch_size,
+                self.id_column,
+                self.data_path,
+            )
+            if not isinstance(output, list):
+                print("ERROR: preprocess function must return a list")
+                sys.exit(1)
+            self.metadata[name] = output
+        self.status = "Done preprocessing"
+
+    def __slice_data(self):
+        self.slices = {}
+
+        for name, slicer in self.slicers.items():
+            self.status = "Slicing data for " + name
+            self.slices = {
+                **self.slices,
+                **slicer.slice_data(self.metadata, self.label_column),
+            }
+        self.status = "Done slicing"
+
+    def __calculate_metrics(self):
+        results_cache = self.__open_cache(
+            ".results_" + os.path.basename(self.metadata_path)
+        )
+
+        self.results = {}
+        for i, model_name in enumerate(self.model_names):
+            self.status = "Loading model {0}, {1}/{2}".format(
+                model_name, str(i + 1), str(len(self.model_names))
+            )
+
+            model = self.model_loader(model_name)
+            model_cache = self.__open_cache(".model_" + os.path.basename(model_name))
+
+            for j, sli in enumerate(self.slices.values()):
+                for k, metric in enumerate(sli.metrics):
+
+                    transform = None
+                    if type(metric) in (list, tuple):
+                        transform = self.transforms[metric[0]]
+                        metric = metric[1]
+                    if transform is not None:
+                        transform_name = transform.name
+                    else:
+                        transform_name = ""
+
+                    self.status = (
+                        "Model {0}/{1}: Slice {2}/{3} ({4}),"
+                        + " test {5}/{6} ({7}), {8} instances"
+                    ).format(
+                        str(i + 1),
+                        str(len(self.model_names)),
+                        str(j + 1),
+                        str(len(self.slices.items())),
+                        sli.name,
+                        str(k + 1),
+                        str(len(sli.metrics)),
+                        metric,
+                        str(sli.size),
+                    )
+
+                    if i == 0:
+                        res = Result(sli.name, transform_name, metric, sli.size)
+                    else:
+                        res = self.results[
+                            int(hash(sli.name + transform_name + metric) / 10000)
+                        ]
+
+                    metric_func = self.metrics[metric].func
+
+                    if str(hash(res)) + model_name in results_cache:
+                        res.set_result(
+                            model_name,
+                            results_cache[str(hash(res)) + model_name],  # type: ignore
+                        )
+                    else:
+                        out = cached_process(
+                            self.data_loader,
+                            self.metadata.iloc[sli.sliced_indices],
+                            model,
+                            model_cache,
+                            self.batch_size,
+                            self.id_column,
+                            self.data_path,
+                        )
+
+                        # TODO: figure out how to cache transform outputs.
+                        # if transform is not None:
+                        #     t_data, t_metadata = transform.transform(  # type: ignore
+                        #         self.__get_data(sli.sliced_indices),
+                        #         self.__get_metadata(sli.sliced_indices),
+                        #     )
+                        #     out_t = cached_model(
+                        #         t_data,
+                        #         t_metadata[self.id_column].to_list(),
+                        #         cache,
+                        #         self.loaded_models[model_name],
+                        #         self.batch_size,
+                        #     )
+                        #     if len(signature(metric_func).parameters) == 3:
+                        #         result = metric_func(
+                        #             out_t, t_metadata, self.label_column
+                        #         )
+                        #     else:
+                        #         result = metric_func(out_t, t_metadata)
+                        # else:
+
+                        if len(signature(metric_func).parameters) == 3:
+                            result = metric_func(
+                                out,
+                                self.metadata.iloc[sli.sliced_indices],
+                                self.label_column,
+                            )
+                        else:
+                            result = metric_func(
+                                out,
+                                self.metadata.iloc[sli.sliced_indices],
+                            )
+
+                        res.set_result(model_name, out, result)
+                        self.results[res.id] = res
+                        results_cache[str(hash(res)) + model_name] = result
+            model_cache.close()
+        results_cache.close()
+        self.status = "Done"
+
+    def get_table(self, sli):
+        df = self.metadata.iloc[self.slices[sli].sliced_indices]
+        return get_arrow_bytes(df)
+
+    def get_model_outputs(self, opts):
+        res, model_hash = opts
+        # TODO: figure out hash issue, truncates on frontend
+        result = self.results[int(res)]
+        return {
+            "metric": result.model_metric_outputs[int(model_hash)],
+            "output": result.model_outputs[int(model_hash)],
+        }
+
+    def get_metadata_path(self):
+        return self.metadata_path
+
+    def get_metrics(self):
+        return self.metrics.values()
+
+    def get_results(self):
+        return self.results.values()
+
+    def get_slicers(self):
+        return self.slicers.values()
+
+    def get_slices(self):
+        return self.slices.values()
+
+    def get_slice(self, sli):
+        return self.slices[sli]
+
+    def get_status(self):
+        return self.status
+
+    def __open_cache(self, name):
+        return shelve.open(
+            os.path.join(self.cache_path, name),
+            writeback=True,
+        )
 
 
 class Slicer:
@@ -29,11 +340,11 @@ class Slicer:
         self.source = getsource(self.func)
         self.slices: List[str] = []
 
-    def slice_data(self, data, metadata, label_column):
-        if len(signature(self.func).parameters) == 3:
-            slicer_output = self.func(data, metadata, label_column)
+    def slice_data(self, metadata: pd.DataFrame, label_column: str):
+        if len(signature(self.func).parameters) == 2:
+            slicer_output = self.func(metadata, label_column)
         else:
-            slicer_output = self.func(data, metadata)
+            slicer_output = self.func(metadata)
 
         if not isinstance(slicer_output, list):
             slicer_output = slicer_output.to_list()
@@ -70,12 +381,26 @@ class Slicer:
         return slices_to_return
 
 
+class Preprocessor:
+    def __init__(self, name: str, func: Callable):
+        self.name = name
+        self.func = func
+        self.source = getsource(self.func)
+
+
 class Slice:
-    def __init__(self, name, sliced_indices, size, tests, slicer):
+    def __init__(
+        self,
+        name: str,
+        sliced_indices: List[int],
+        size: int,
+        metrics: List[str],
+        slicer: str,
+    ):
         self.name = name
         self.sliced_indices = sliced_indices
         self.size = size
-        self.tests = tests
+        self.metrics = metrics
         self.slicer = slicer
 
     def get_name(self):
@@ -83,20 +408,17 @@ class Slice:
 
 
 class Metric:
-    def __init__(self, name, func):
+    def __init__(self, name: str, func: Callable):
         self.name = name
         self.func = func
         self.source = getsource(self.func)
 
 
 class Transform:
-    def __init__(self, name, func):
+    def __init__(self, name: str, func: Callable):
         self.name = name
         self.func = func
         self.source = getsource(self.func)
-
-    def transform(self, data, metadata):
-        return self.func(data, metadata)
 
 
 class Result:
@@ -107,6 +429,8 @@ class Result:
         self.slice_size = slice_size
 
         self.model_names: List[str] = []
+
+        # Keys are hash of model name
         self.model_outputs: Dict[int, list] = {}
         self.model_results: Dict[int, float] = {}
         self.model_metric_outputs: Dict[int, list] = {}
@@ -138,297 +462,3 @@ class Result:
 
     def __hash__(self):
         return self.id
-
-
-class Zeno(object):
-    def __init__(
-        self,
-        metadata_path: str,
-        test_files: List[str],
-        models: List[str],
-        batch_size=16,
-        id_column="id",
-        label_column="label",
-        data_path="",
-        cache_path="",
-    ):
-        self.metadata_path = metadata_path
-        self.test_files = test_files
-        self.model_names = models
-        self.batch_size = batch_size
-        self.id_column = id_column
-        self.label_column = label_column
-        self.data_path = data_path
-        self.cache_path = cache_path
-        os.makedirs(self.cache_path, exist_ok=True)
-        self.status = "Initializing"
-
-        self.slicers: Dict[str, Slicer] = {}
-        self.transforms: Dict[str, Transform] = {}
-        self.metrics: Dict[str, Metric] = {}
-
-        self.slices: Dict[str, Slice] = {}
-
-        self.model_loader: Union[Callable, None]
-        self.data_loader: Union[Callable, None]
-
-        self.loaded_models: Dict[str, Callable] = {}
-        self.model_caches: Dict[str, Callable] = {}
-
-        self.results: Dict[int, Result] = {}
-        self.res_runner = None
-
-        self._loop = None
-
-        # Read metadata as Pandas for slicing
-        self.metadata_df = pd.read_csv(metadata_path)
-        self.data: List[Any] = []
-
-    def start_processing(self):
-        self.__initialize_watchdog()
-        self.__parse_testing_files()
-        self.__run_tests()
-
-    def __initialize_watchdog(self):
-        # Watch for updated test files.
-
-        observer = Observer()
-        event_handler = TestFileUpdateHandler(
-            [os.path.abspath(t) for t in self.test_files], self.start_processing
-        )
-        folders_logged = []
-        for test in self.test_files:
-            folder = os.path.dirname(test)
-            if folder not in folders_logged:
-                folders_logged.append(folder)
-                observer.schedule(event_handler, folder, recursive=True)
-        observer.start()
-
-    def __parse_testing_files(self):
-        self.model_loader = None
-        self.data_loader = None
-
-        self.slicers = {}
-        self.metrics = {}
-        self.transforms = {}
-
-        for test_file in self.test_files:
-            spec = util.spec_from_file_location("module.name", test_file)
-            test_module = util.module_from_spec(spec)  # type: ignore
-            spec.loader.exec_module(test_module)  # type: ignore
-
-            for func_name, func in getmembers(test_module):
-                if isfunction(func):
-                    if hasattr(func, "load_model"):
-                        if self.model_loader is None:
-                            self.model_loader = func
-                        else:
-                            print("Multiple model loaders found, can only have one")
-                            sys.exit(1)
-                    if hasattr(func, "load_data"):
-                        if self.data_loader is None:
-                            self.data_loader = func
-                        else:
-                            print("Multiple data loaders found, can only have one")
-                            sys.exit(1)
-                    if hasattr(func, "slicer"):
-                        self.slicers[func_name] = Slicer(func_name, func)
-                    if hasattr(func, "transform"):
-                        self.transforms[func_name] = Transform(func_name, func)
-                    if hasattr(func, "metric"):
-                        self.metrics[func_name] = Metric(func_name, func)
-
-    def __run_tests(self):
-        if not self._loop:
-            self._loop = asyncio.new_event_loop()
-            threading.Thread(target=self._loop.run_forever, daemon=True).start()
-        self._loop.call_soon_threadsafe(
-            asyncio.create_task, self.__slice_and_calulate_metrics()
-        )
-
-    async def __slice_and_calulate_metrics(self):
-        print("running analysis")
-
-        if self.data_loader:
-            self.data = self.data_loader(
-                self.metadata_df, self.id_column, self.data_path
-            )
-        self.__slice_data()
-
-        if len(self.loaded_models) == 0:
-            for i, model_name in enumerate(self.model_names):
-                self.set_status(
-                    " ".join(
-                        (
-                            "Loading model ",
-                            model_name,
-                            str(i + 1),
-                            "/",
-                            str(len(self.model_names)),
-                        )
-                    )
-                )
-                if self.model_loader:
-                    self.loaded_models[model_name] = self.model_loader(model_name)
-
-        # Create cache files for models
-        model_caches = {}
-        for i, model_name in enumerate(self.model_names):
-            model_caches[model_name] = shelve.open(
-                os.path.join(
-                    self.cache_path,
-                    (".model_" + model_name.replace("/", "_") + str(i) + ".cache"),
-                ),
-                writeback=True,
-            )
-
-        # create cache file for results
-        result_cache = shelve.open(
-            os.path.join(
-                self.cache_path, (".mltest_" + self.metadata_path.replace("/", "_"))
-            ),
-            writeback=True,
-        )
-
-        # TODO: create cache file for transforms.
-
-        self.results = {}
-        # Run all testing functions on slices
-        for i, sli in enumerate(self.slices.values()):
-            for j, metric in enumerate(sli.tests):
-
-                transform = None
-                if type(metric) in (list, tuple):
-                    transform = self.transforms[metric[0]]
-                    metric = metric[1]
-                if transform is not None:
-                    t_name = transform.name
-                else:
-                    t_name = ""
-
-                self.status = (
-                    "Running test {0} ({1}/{2}) "
-                    + "for slice {3} ({4}/{5}), {6} instances"
-                ).format(
-                    metric,
-                    str(j + 1),
-                    str(len(sli.tests)),
-                    sli.name,
-                    str(i + 1),
-                    str(len(self.slices.items())),
-                    str(sli.size),
-                )
-
-                res = Result(sli.name, t_name, metric, sli.size)
-                metric_func = self.metrics[metric].func
-                for model_name in self.model_names:
-                    if str(hash(res)) + model_name in result_cache:
-                        res.set_result(
-                            model_name,
-                            result_cache[str(hash(res)) + model_name],  # type: ignore
-                        )
-                    else:
-                        out = cached_model(
-                            self.__get_data(sli.sliced_indices),
-                            self.__get_metadata(sli.sliced_indices)[
-                                self.id_column
-                            ].to_list(),
-                            model_caches[model_name],
-                            self.loaded_models[model_name],
-                            self.batch_size,
-                        )
-                        if transform is not None:
-                            t_data, t_metadata = transform.transform(  # type: ignore
-                                self.__get_data(sli.sliced_indices),
-                                self.__get_metadata(sli.sliced_indices),
-                            )
-                            out_t = cached_model(
-                                t_data,
-                                t_metadata[self.id_column].to_list(),
-                                model_caches[model_name],
-                                self.loaded_models[model_name],
-                                self.batch_size,
-                            )
-                            if len(signature(metric_func).parameters) == 3:
-                                result = metric_func(
-                                    out_t, t_metadata, self.label_column
-                                )
-                            else:
-                                result = metric_func(out_t, t_metadata)
-                        else:
-                            if len(signature(metric_func).parameters) == 3:
-                                result = metric_func(
-                                    out,
-                                    self.__get_metadata(sli.sliced_indices),
-                                    self.label_column,
-                                )
-                            else:
-                                result = metric_func(
-                                    out, self.__get_metadata(sli.sliced_indices)
-                                )
-
-                        res.set_result(model_name, out, result)
-                        result_cache[str(hash(res)) + model_name] = result
-
-                    model_caches[model_name].sync()
-                self.results[res.id] = res
-
-        for model_name in self.model_names:
-            model_caches[model_name].close()
-        result_cache.close()
-
-        self.status = "done"
-
-    def __slice_data(self):
-        self.slices = {}
-
-        for name, slicer in self.slicers.items():
-            self.status = "Slicing data for " + name
-            self.slices = {
-                **self.slices,
-                **slicer.slice_data(self.data, self.metadata_df, self.label_column),
-            }
-        self.status = "Done slicing"
-
-    def get_table(self, sli):
-        df = self.__get_metadata(self.slices[sli].sliced_indices)
-        return get_arrow_bytes(df)
-
-    def get_model_outputs(self, opts):
-        res, model_hash = opts
-        # TODO: figure out hash issue, truncates on frontend
-        result = self.results[int(res)]
-        return {
-            "metric": result.model_metric_outputs[int(model_hash)],
-            "output": result.model_outputs[int(model_hash)],
-        }
-
-    def get_metadata_path(self):
-        return self.metadata_path
-
-    def get_metrics(self):
-        return self.metrics.values()
-
-    def get_results(self):
-        return self.results.values()
-
-    def get_slicers(self):
-        return self.slicers.values()
-
-    def get_slices(self):
-        return self.slices.values()
-
-    def get_slice(self, sli):
-        return self.slices[sli]
-
-    def get_status(self):
-        return self.status
-
-    def set_status(self, status):
-        self.status = status
-
-    def __get_data(self, indices):
-        return itemgetter(*indices)(self.data)
-
-    def __get_metadata(self, indices):
-        return self.metadata_df.iloc[indices]  # type: ignore

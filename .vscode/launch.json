@@ -20,23 +20,29 @@
         "./examples/models/cifar/cifar_net_5.pth",
         "./examples/models/cifar/cifar_net_10.pth",
         "--data-path",
-        "./examples/models/cifar/cif/test/",
+        "~/dev/data/cifar/test/",
         "--batch-size",
         "10"
       ]
     },
     {
-      "name": "MLTest Adult",
+      "name": "zeno object",
       "type": "python",
       "request": "launch",
-      "program": "${workspaceFolder}/zeno.py",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
       "args": [
-        "--test-files",
-        "./adult_tests.py",
+        "./examples/object_tests.py",
         "--metadata",
-        "adult/adult_pred.csv",
+        "./examples/validation-images.csv",
         "--models",
-        "default"
+        "a",
+        "--data-path",
+        "~/dev/data/open-images/validation/",
+        "--batch-size",
+        "10",
+        "--id-column",
+        "ImageID"
       ]
     }
   ]

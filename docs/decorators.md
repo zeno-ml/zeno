@@ -7,6 +7,10 @@ The Zeno API has 5 decorator functions: two for loading data and models, and thr
 You can pass any number of files with decorated functions to Zeno, but you **must have one and only one of both the load_model and load_data function**.
 You may have as many of the testing functions as you may like.
 
+```{tableofcontents}
+
+```
+
 ## Loading Functions
 
 There are two functions for describing how Zeno should run models and load data.
@@ -52,8 +56,30 @@ See [Data Loaders](data_loaders) for real-world examples.
 
 ## Testing Functions
 
-The two core functions for writing tests are `slicer` and `metric` functions.
-`slicer` functions return subsets of data for which certain `metric` functions should be calculated.
+The four core functions for writing tests are `preprocess`, `slicer`, `transform` and `metric`.
+`preprocess` runs a function, e.g. extracting metadata, on each instance.
+The `slicer` function return subsets of data for which certain `metric` functions should be calculated.
+An optional `transform` function can be provided to modify instances before they are passed to the `metric` functions.
+
+### Preprocess
+
+Functions with the `preprocess` decorator return a new column derived from the original data and metadata.
+It can be used to extract metadata from an instance
+
+```python
+@preprocess
+def preprocessor(data: List[Any], metadata: DataFrame) -> Union[Series, List]:
+```
+
+Example:
+
+```python
+@preprocess
+def get_objects(data, metadata):
+    return [ObjectDetector(inst) for inst in data]
+```
+
+See [Preprocessors](preprocessors) for real-world examples.
 
 ### Slicer
 
@@ -64,19 +90,15 @@ The parameters to the decorator should either be the name of a metric or a tuple
 ```python
 # A list of metric functions or (transform function, metric function) tuples.
 @slicer(["Metric 1", ("Transform 1", "Metric 1"), "Metric 2"])
-def slicing_func(data: List[Any], metadata: DataFrame) -> List[int]:
+def slicing_func(metadata: DataFrame) -> List[int]:
 ```
 
 Example:
 
 ```python
 @slicer(["accuracy", "false_positive", ("rotate", "accuracy")])
-def small_sample(data, metadata):
-    return metadata.sample(n=10)
-
-@slicer(["accuracy", ("brighten", "switch_percentage")])
-def dark_images(data, metadata):
-    return [img for img in data if img.brightness() < 0.1]
+def small_sample(metadata):
+    return metadata.sample(n=10).index
 ```
 
 See [Slicers](slicers) for real-world examples.

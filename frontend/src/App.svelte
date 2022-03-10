@@ -68,7 +68,7 @@
   });
 
   status.subscribe((s) => {
-    if (!fetchedSlices && (s === "done" || s.startsWith("Running test"))) {
+    if (!fetchedSlices && (s === "Done" || s.startsWith("Running test"))) {
       fetchedSlices = true;
       fetch("/api/slices")
         .then((d) => d.json())
@@ -84,7 +84,7 @@
         .then((d) => d.json())
         .then((d) => metrics.set(JSON.parse(d) as Metric[]));
     }
-    if (s === "done") {
+    if (s === "Done") {
       runningAnalysis = false;
     } else {
       runningAnalysis = true;

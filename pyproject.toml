@@ -24,6 +24,7 @@ watchdog = "^2.1.6"
 uvicorn = "^0.17.5"
 fastapi = "^0.74.1"
 websockets = "^10.2"
+pandas-stubs = "^1.2.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"

@@ -27,11 +27,16 @@ jobs:
           npm i
 
       - name: Run tests
-        run: poetry run pytest zeno
+        run: poetry run pytest --cov=./ --cov-report=xml zeno
       - name: Check types
         run: make typecheck
       - name: Check Poetry
         run: make check
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2.1.0
+        with:
+          fail_ci_if_error: true
 
       - name: Build frontend
         run: |

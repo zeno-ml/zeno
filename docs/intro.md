@@ -32,7 +32,7 @@ The tests are connected as follows. Slices are optionally passed to transforms, 
 
 ```{image} flow.png
 :alt: flow
-:width: 400px
+:width: 500px
 :align: center
 ```
 

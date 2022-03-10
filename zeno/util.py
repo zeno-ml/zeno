@@ -1,8 +1,8 @@
 import os
-from typing import Any, Callable, List
+from typing import Any, Callable
 
+import pandas as pd
 import pyarrow as pa  # type: ignore
-
 from watchdog.events import FileSystemEventHandler  # type: ignore
 
 
@@ -14,39 +14,46 @@ def get_arrow_bytes(df):
     return bytes(buf.getvalue())
 
 
-def cached_model(
-    data: List[Any],
-    data_ids: List[int],
-    model_cache,
-    model: Callable,
+# Used for preprocess and model outputs.
+def cached_process(
+    data_loader: Callable,
+    df: pd.DataFrame,
+    fn: Callable,
+    cache,
     batch_size: int,
+    id_column: str,
+    data_path: str,
 ):
-    outputs: Any = [None] * len(data_ids)
-    to_predict = []
-    predicted = []
+    final_outputs: Any = [None] * df.shape[0]
+    to_output = []
+    outputs = []
 
     # Get all instances from cache possible
-    for i, inst in enumerate(data_ids):
-        if inst in model_cache:
-            outputs[i] = model_cache.get(inst)
+    for i, inst in enumerate(list(df[id_column])):
+        if inst in cache:
+            final_outputs[i] = cache[inst]
         else:
-            to_predict.append(data[i])
+            to_output.append(i)
 
-    if len(to_predict) > 0:
-        if len(to_predict) < batch_size:
-            predicted = model(to_predict)
+    if len(to_output) > 0:
+        if len(to_output) < batch_size:
+            data = data_loader(df.iloc[to_output], id_column, data_path)
+            outputs = fn(data)
         else:
-            for i in range(0, len(to_predict), batch_size):
-                predicted.extend(model(to_predict[i : i + batch_size]))
+            for i in range(0, len(to_output), batch_size):
+                data = data_loader(
+                    df.iloc[to_output[i : i + batch_size]], id_column, data_path
+                )
+                outputs.extend(fn(data))
 
         j = 0
-        for i, inst in enumerate(outputs):
+        for i, inst in enumerate(final_outputs):
             if inst is None:
-                outputs[i] = predicted[j]
-                model_cache[data_ids[i]] = outputs[i]
+                final_outputs[i] = outputs[j]
+                cache[df.iloc[i][id_column]] = final_outputs[i]
                 j = j + 1
 
-    return outputs
+    return final_outputs
 
 
 class TestFileUpdateHandler(FileSystemEventHandler):

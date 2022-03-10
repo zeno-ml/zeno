@@ -20,6 +20,15 @@ def load_data(func):
     return _wrapper
 
 
+def preprocess(func):
+    @functools.wraps(func)
+    def _wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    _wrapper.preprocess = True
+    return _wrapper
+
+
 def slicer(metrics: Union[str, Tuple[str, str]]):
     """Decorator for slicing functions.
 

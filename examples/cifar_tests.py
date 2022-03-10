@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import os
 import torchvision.transforms as transforms
-from zeno import load_data, load_model, metric, slicer, transform
+from zeno import load_data, load_model, metric, slicer, transform, preprocess
 
 transform_image = transforms.Compose(
     [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
@@ -45,6 +45,23 @@ classes = (
 )
 
 
+def get_brightness(im):
+    im_grey = im.convert("LA")  # convert to grayscale
+    width, height = im.size
+
+    total = 0
+    for i in range(0, width):
+        for j in range(0, height):
+            total += im_grey.getpixel((i, j))[0]
+
+    return total / (width * height)
+
+
+@preprocess
+def brightness(images):
+    return [get_brightness(im) for im in images]
+
+
 # Return a prediction function that returns output given input
 @load_model
 def load_model(model_path):
@@ -66,23 +83,28 @@ def load_data(df_metadata, id_col, data_path):
 
 
 @slicer(["accuracy"])
-def overall(_, metadata):
+def overall(metadata):
     return metadata.index
 
 
-@slicer(["accuracy", ("rotate", "accuracy")])
-def medium_sample(_, metadata):
-    return metadata.sample(100).index
+@slicer(["accuracy"])
+def low_brightness(metadata):
+    return metadata[metadata["brightness"] < 80].index
+
+
+# @slicer(["accuracy", ("rotate", "accuracy")])
+# def medium_sample(metadata):
+#     return metadata.sample(100).index
 
 
 @slicer(["accuracy"])
-def by_class(_, df, label_col):
-    return [(c, df[df[label_col] == c].index) for c in classes]
+def by_class(metadata, label_col):
+    return [(c, metadata[metadata[label_col] == c].index) for c in classes]
 
 
-@transform
-def rotate(data, metadata):
-    return [img.rotate(90, PIL.Image.NEAREST, expand=1) for img in data], metadata
+# @transform
+# def rotate(data, metadata):
+#     return [img.rotate(90, PIL.Image.NEAREST, expand=1) for img in data], metadata
 
 
 @metric

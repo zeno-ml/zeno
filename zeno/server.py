@@ -1,6 +1,5 @@
 import asyncio
 import json
-
 import os
 
 import uvicorn  # type: ignore
@@ -147,9 +146,9 @@ def run_server(conn, args):
             await asyncio.sleep(1)
             conn.send(("GET_RESULTS", ""))
             res = conn.recv()
-            if res[1] != previous_status:
+            if res[0] != previous_status:
                 print("status: ", res[0])
-                previous_status = res[1]
+                previous_status = res[0]
                 await websocket.send_json({"status": res[0], "results": res[1]})
 
     uvicorn.run(app, host="localhost", port=8000)  # type: ignore

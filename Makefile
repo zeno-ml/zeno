@@ -1,9 +1,14 @@
-all: lint typecheck check
+all: lint typecheck cover book check
 
 .PHONY: test
 test:
 	@echo "==> 🧪 Tests"
 	@poetry run pytest -svv zeno/tests/
+
+.PHONY: cover
+cover:
+	@echo "==> 🧪 Tests with Coverage =="
+	@poetry run pytest --cov=zeno --cov-report=term-missing ./zeno
 
 .PHONY: lint
 lint:

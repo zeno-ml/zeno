@@ -47,7 +47,11 @@
           </Header>
           <Content>
             {#if open === i && sli.table}
-              <Samples id_col={sli.id_column} table={sli.table} />
+              <Samples
+                id_col={sli.id_column}
+                label_col={sli.label_column}
+                table={sli.table}
+              />
             {/if}
           </Content>
         </Panel>

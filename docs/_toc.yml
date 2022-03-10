@@ -14,6 +14,7 @@ chapters:
       - file: data_loaders/data_loaders
         sections:
           - file: data_loaders/image_loader
+      - file: preprocessors/preprocessors
       - file: slicers/slicers
         sections:
           - file: slicers/images
