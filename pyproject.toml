@@ -27,7 +27,7 @@ websockets = "^10.2"
 pandas-stubs = "^1.2.0"
 
 [tool.poetry.dev-dependencies]
-pytest = "^3.0"
+pytest = "^7.0"
 pytest-cov = "^2.4"
 torch = "^1.10.2"
 torchvision = "^0.11.3"
