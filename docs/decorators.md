@@ -105,11 +105,11 @@ See [Slicers](slicers) for real-world examples.
 
 ### Transform
 
-Functions with the `transform` decorator take a list of instances and return transformed data and metadata.
+Functions with the `transform` decorator take a list of instances and return transformed data.
 
 ```python
 @transform
-def transform(data: List[T], metadata: DataFrame) -> List[T], DataFrame:
+def transform(data: List[T]) -> List[T]:
 ```
 
 Example:

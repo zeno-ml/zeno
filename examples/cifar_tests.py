@@ -87,24 +87,36 @@ def overall(metadata):
     return metadata.index
 
 
-@slicer(["accuracy"])
+@slicer(["accuracy", ("rotate", "accuracy")])
 def low_brightness(metadata):
     return metadata[metadata["brightness"] < 80].index
 
 
 # @slicer(["accuracy", ("rotate", "accuracy")])
-# def medium_sample(metadata):
-#     return metadata.sample(100).index
+# def low_brightness_frog(metadata, label_col):
+#     return metadata[
+#         (metadata["brightness"] < 80) & (metadata[label_col] == "frog")
+#     ].index
 
 
 @slicer(["accuracy"])
-def by_class(metadata, label_col):
-    return [(c, metadata[metadata[label_col] == c].index) for c in classes]
+def cat(metadata):
+    return metadata[metadata["label"] == "cat"].index
 
 
-# @transform
-# def rotate(data, metadata):
-#     return [img.rotate(90, PIL.Image.NEAREST, expand=1) for img in data], metadata
+@slicer(["accuracy"])
+def dog(metadata):
+    return metadata[metadata["label"] == "dog"].index
+
+
+# @slicer(["accuracy"])
+# def by_class(metadata, label_col):
+#     return [(c, metadata[metadata[label_col] == c].index) for c in classes]
+
+
+@transform
+def rotate(data):
+    return [img.rotate(90, PIL.Image.NEAREST, expand=1) for img in data]
 
 
 @metric

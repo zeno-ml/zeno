@@ -68,8 +68,9 @@
   });
 
   status.subscribe((s) => {
-    if (!fetchedSlices && (s === "Done" || s.startsWith("Running test"))) {
+    if (!fetchedSlices && (s === "Done" || s.startsWith("Model"))) {
       fetchedSlices = true;
+      console.log("get stuff?");
       fetch("/api/slices")
         .then((d) => d.json())
         .then((d) => {

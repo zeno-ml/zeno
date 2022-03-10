@@ -17,7 +17,6 @@
   let choices = ["table", "strip", "beeswarm"];
   let choice = "table";
 
-  results.subscribe((d) => console.log(d));
   $: console.log(selectedMetric);
   $: console.log($metrics);
 
@@ -89,7 +88,9 @@
           .filter((r) => r.metric === selectedMetric)
           .map((r) => ({
             slice: r.slice,
-            value: r.modelResults[r.modelIds[i]].toFixed(2) / 100,
+            value: r.modelIds[i]
+              ? r.modelResults[r.modelIds[i]].toFixed(2) / 100
+              : -1,
             size: r.sliceSize,
           }))}
         x="value"
@@ -127,7 +128,9 @@
           .filter((r) => r.metric === selectedMetric)
           .map((r) => ({
             slice: r.slice,
-            value: r.modelResults[r.modelIds[i]].toFixed(2) / 100,
+            value: r.modelIds[i]
+              ? r.modelResults[r.modelIds[i]].toFixed(2) / 100
+              : -1,
             size: r.sliceSize,
           }))}
         x="value"
@@ -146,7 +149,6 @@
         </Html>
         <Svg>
           <BeeswarmForce
-            r={6}
             on:mouseout={() => (evt = [])}
             on:mousemove={(e) => (evt[i] = e)}
           />

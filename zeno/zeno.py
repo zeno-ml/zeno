@@ -128,9 +128,10 @@ class Zeno(object):
 
     def __run_tests(self):
         if self._loop:
-            self._loop.close()
+            self._loop.stop()
         self._loop = asyncio.new_event_loop()
-        threading.Thread(target=self._loop.run_forever, daemon=True).start()
+        self._thread = threading.Thread(target=self._loop.run_forever, daemon=True)
+        self._thread.start()
         self._loop.call_soon_threadsafe(asyncio.create_task, self.__run_test_pipeline())
 
     async def __run_test_pipeline(self):
@@ -179,10 +180,6 @@ class Zeno(object):
         self.status = "Done slicing"
 
     def __calculate_metrics(self):
-        results_cache = self.__open_cache(
-            ".results_" + os.path.basename(self.metadata_path)
-        )
-
         self.results = {}
         for i, model_name in enumerate(self.model_names):
             self.status = "Loading model {0}, {1}/{2}".format(
@@ -201,8 +198,10 @@ class Zeno(object):
                         metric = metric[1]
                     if transform is not None:
                         transform_name = transform.name
+                        transform_fn = transform.func
                     else:
                         transform_name = ""
+                        transform_fn = None
 
                     self.status = (
                         "Model {0}/{1}: Slice {2}/{3} ({4}),"
@@ -220,7 +219,9 @@ class Zeno(object):
                     )
 
                     if i == 0:
-                        res = Result(sli.name, transform_name, metric, sli.size)
+                        res = Result(
+                            sli.name, transform_name, metric, sli.size, self.model_names
+                        )
                     else:
                         res = self.results[
                             int(hash(sli.name + transform_name + metric) / 10000)
@@ -228,60 +229,32 @@ class Zeno(object):
 
                     metric_func = self.metrics[metric].func
 
-                    if str(hash(res)) + model_name in results_cache:
-                        res.set_result(
-                            model_name,
-                            results_cache[str(hash(res)) + model_name],  # type: ignore
+                    out = cached_process(
+                        self.data_loader,
+                        self.metadata.iloc[sli.sliced_indices],
+                        model,
+                        model_cache,
+                        self.batch_size,
+                        self.id_column,
+                        self.data_path,
+                        transform=transform_fn,
+                    )
+
+                    if len(signature(metric_func).parameters) == 3:
+                        result = metric_func(
+                            out,
+                            self.metadata.iloc[sli.sliced_indices],
+                            self.label_column,
                         )
                     else:
-                        out = cached_process(
-                            self.data_loader,
+                        result = metric_func(
+                            out,
                             self.metadata.iloc[sli.sliced_indices],
-                            model,
-                            model_cache,
-                            self.batch_size,
-                            self.id_column,
-                            self.data_path,
                         )
 
-                        # TODO: figure out how to cache transform outputs.
-                        # if transform is not None:
-                        #     t_data, t_metadata = transform.transform(  # type: ignore
-                        #         self.__get_data(sli.sliced_indices),
-                        #         self.__get_metadata(sli.sliced_indices),
-                        #     )
-                        #     out_t = cached_model(
-                        #         t_data,
-                        #         t_metadata[self.id_column].to_list(),
-                        #         cache,
-                        #         self.loaded_models[model_name],
-                        #         self.batch_size,
-                        #     )
-                        #     if len(signature(metric_func).parameters) == 3:
-                        #         result = metric_func(
-                        #             out_t, t_metadata, self.label_column
-                        #         )
-                        #     else:
-                        #         result = metric_func(out_t, t_metadata)
-                        # else:
-
-                        if len(signature(metric_func).parameters) == 3:
-                            result = metric_func(
-                                out,
-                                self.metadata.iloc[sli.sliced_indices],
-                                self.label_column,
-                            )
-                        else:
-                            result = metric_func(
-                                out,
-                                self.metadata.iloc[sli.sliced_indices],
-                            )
-
-                        res.set_result(model_name, out, result)
-                        self.results[res.id] = res
-                        results_cache[str(hash(res)) + model_name] = result
+                    res.set_result(model_name, out, result)
+                    self.results[res.id] = res
             model_cache.close()
-        results_cache.close()
         self.status = "Done"
 
     def get_table(self, sli):
@@ -419,13 +392,19 @@ class Metric:
 
 
 class Result:
-    def __init__(self, sli: str, transform: str, metric: str, slice_size: int):
+    def __init__(
+        self,
+        sli: str,
+        transform: str,
+        metric: str,
+        slice_size: int,
+        model_names: List[str],
+    ):
         self.sli = sli
         self.transform = transform
         self.metric = metric
         self.slice_size = slice_size
-
-        self.model_names: List[str] = []
+        self.model_names = model_names
 
         # Keys are hash of model name
         self.model_outputs: Dict[int, list] = {}
@@ -435,8 +414,6 @@ class Result:
         self.id: int = int(hash(self.sli + self.transform + self.metric) / 10000)
 
     def set_result(self, model: str, outputs: list, result: Union[pd.Series, list]):
-        self.model_names.append(model)
-
         model_hash = int(hash(model) / 10000)
         self.model_outputs[model_hash] = outputs
         if isinstance(result, pd.Series):
