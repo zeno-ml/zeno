@@ -4,5 +4,6 @@
   "python.linting.flake8Enabled": true,
   "autoDocstring.docstringFormat": "google",
   "editor.wordWrapColumn": 88,
-  "eslint.validate": ["javascript", "javascriptreact", "svelte"]
+  "eslint.validate": ["javascript", "javascriptreact", "svelte"],
+  "python.testing.pytestEnabled": true
 }

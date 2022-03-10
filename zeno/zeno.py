@@ -403,18 +403,15 @@ class Slice:
         self.metrics = metrics
         self.slicer = slicer
 
-    def get_name(self):
-        return self.name
 
-
-class Metric:
+class Transform:
     def __init__(self, name: str, func: Callable):
         self.name = name
         self.func = func
         self.source = getsource(self.func)
 
 
-class Transform:
+class Metric:
     def __init__(self, name: str, func: Callable):
         self.name = name
         self.func = func
