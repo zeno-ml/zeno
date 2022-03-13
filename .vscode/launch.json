@@ -11,7 +11,7 @@
       "cwd": "${workspaceFolder}",
       "module": "zeno",
       "args": [
-        "./examples/cifar_tests.py",
+        "./examples/cifar",
         "--metadata",
         "./examples/models/cifar/cifar_pred.csv",
         "--models",

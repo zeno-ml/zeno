@@ -18,13 +18,15 @@ exclude = ["zeno/tests/*"]
 
 [tool.poetry.dependencies]
 python = "^3.8" 
-pandas = "^1.4.1"
+pandas = "^1.4.0"
 pyarrow = "^7.0.0"
 watchdog = "^2.1.6"
 uvicorn = "^0.17.5"
 fastapi = "^0.75.0"
 websockets = "^10.2"
 pandas-stubs = "^1.2.0"
+ray = "^1.11.0"
+modin = "^0.13.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.0.1"

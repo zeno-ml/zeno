@@ -77,7 +77,7 @@
           const out = JSON.parse(d) as Slice[];
           const retMap = new Map<string, Slice>();
           out.forEach((s) => {
-            retMap.set(s.name, s);
+            retMap.set(s.name.join(""), s);
           });
           slices.set(retMap);
         });

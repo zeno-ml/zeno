@@ -5,6 +5,7 @@ import sys
 import threading
 from importlib import util
 from inspect import getmembers, getsource, isfunction, signature
+from pathlib import Path
 from typing import Callable, Dict, List, Union
 
 import pandas as pd
@@ -16,9 +17,9 @@ from .util import cached_process, get_arrow_bytes, TestFileUpdateHandler
 class Zeno(object):
     def __init__(
         self,
-        metadata_path: str,
-        test_files: List[str],
-        models: List[str],
+        metadata_path: Path,
+        test_files: List[Path],
+        models: List[Path],
         batch_size=16,
         id_column="id",
         label_column="label",
@@ -37,8 +38,8 @@ class Zeno(object):
 
         self.status: str = "Initializing"
 
-        self.model_loader: Callable
-        self.data_loader: Callable
+        self.model_loader: Callable = None  # type: ignore
+        self.data_loader: Callable = None  # type: ignore
 
         # Key is name of preprocess function
         self.preprocessors: Dict[str, Preprocessor] = {}
@@ -53,11 +54,11 @@ class Zeno(object):
         # Key is result.id, hash of properties
         self.results: Dict[int, Result] = {}
 
-        # Read metadata as Pandas for slicing
-        self.metadata = pd.read_csv(metadata_path)
-
         self._loop = None
         self.__initialize_watchdog()
+
+        # Read metadata as Pandas for slicing
+        self.metadata = pd.read_csv(metadata_path)
 
     def __initialize_watchdog(self):
         # Watch for updated test files.
@@ -79,52 +80,68 @@ class Zeno(object):
         self.__run_tests()
 
     def __parse_testing_files(self):
-        model_loader = None
-        data_loader = None
-
+        self.data_loader = None  # type: ignore
+        self.model_loader = None  # type: ignore
         self.slicers = {}
         self.metrics = {}
         self.transforms = {}
 
         for test_file in self.test_files:
-            spec = util.spec_from_file_location("module.name", test_file)
-            test_module = util.module_from_spec(spec)  # type: ignore
-            spec.loader.exec_module(test_module)  # type: ignore
+            if test_file.is_dir():
+                [
+                    self.__parse_testing_file(f, test_file)
+                    for f in list(test_file.rglob("*.py"))
+                ]
+            else:
+                self.__parse_testing_file(test_file, test_file.parents[0])
 
-            for func_name, func in getmembers(test_module):
-                if isfunction(func):
-                    if hasattr(func, "load_model"):
-                        if model_loader is None:
-                            model_loader = func
-                        else:
-                            print("Multiple model loaders found, can only have one")
-                            sys.exit(1)
-                    if hasattr(func, "load_data"):
-                        if data_loader is None:
-                            data_loader = func
-                        else:
-                            print("Multiple data loaders found, can only have one")
-                            sys.exit(1)
-                    if hasattr(func, "preprocess"):
-                        self.preprocessors[func_name] = Preprocessor(func_name, func)
-                    if hasattr(func, "slicer"):
-                        self.slicers[func_name] = Slicer(func_name, func)
-                    if hasattr(func, "transform"):
-                        self.transforms[func_name] = Transform(func_name, func)
-                    if hasattr(func, "metric"):
-                        self.metrics[func_name] = Metric(func_name, func)
-
-        if not model_loader:
+        if not self.model_loader:
             print("ERROR: No model loader found")
             sys.exit(1)
-        else:
-            self.model_loader = model_loader
 
-        if not data_loader:
+        if not self.data_loader:
             print("ERROR: No data loader found")
             sys.exit(1)
-        else:
-            self.data_loader = data_loader
+
+    def __parse_testing_file(self, test_file: Path, base_path: Path):
+        print(
+            test_file,
+            test_file.relative_to(base_path),
+            test_file.relative_to(base_path).parts,
+        )
+
+        spec = util.spec_from_file_location("module.name", test_file)
+        test_module = util.module_from_spec(spec)  # type: ignore
+        spec.loader.exec_module(test_module)  # type: ignore
+
+        for func_name, func in getmembers(test_module):
+            if isfunction(func):
+                if hasattr(func, "load_model"):
+                    if self.model_loader is None:
+                        self.model_loader = func
+                    else:
+                        print("Multiple model loaders found, can only have one")
+                        sys.exit(1)
+                if hasattr(func, "load_data"):
+                    if self.data_loader is None:
+                        self.data_loader = func
+                    else:
+                        print("Multiple data loaders found, can only have one")
+                        sys.exit(1)
+                if hasattr(func, "preprocess"):
+                    self.preprocessors[func_name] = Preprocessor(func_name, func)
+                if hasattr(func, "slicer"):
+                    path_names = list(test_file.relative_to(base_path).parts)
+                    path_names[-1] = path_names[-1][0:-3]
+                    self.slicers[func_name] = Slicer(
+                        func_name,
+                        func,
+                        [*path_names, func_name],
+                    )
+                if hasattr(func, "transform"):
+                    self.transforms[func_name] = Transform(func_name, func)
+                if hasattr(func, "metric"):
+                    self.metrics[func_name] = Metric(func_name, func)
 
     def __run_tests(self):
         if self._loop:
@@ -147,7 +164,7 @@ class Zeno(object):
                     self.cache_path,
                     (
                         ".model_preprocess_"
-                        + self.metadata_path.replace("/", "_")
+                        + str(self.metadata_path).replace("/", "_")
                         + name
                     ),
                 ),
@@ -224,7 +241,10 @@ class Zeno(object):
                         )
                     else:
                         res = self.results[
-                            int(hash(sli.name + transform_name + metric) / 10000)
+                            int(
+                                hash("".join(sli.name) + transform_name + metric)
+                                / 10000
+                            )
                         ]
 
                     metric_func = self.metrics[metric].func
@@ -258,6 +278,7 @@ class Zeno(object):
         self.status = "Done"
 
     def get_table(self, sli):
+        print(sli)
         df = self.metadata.iloc[self.slices[sli].sliced_indices]
         return get_arrow_bytes(df)
 
@@ -299,15 +320,10 @@ class Zeno(object):
 
 
 class Slicer:
-    def __init__(self, name: str, func: Callable):
-        """Create a slicer
-
-        Args:
-            name: Function name
-            func: Slicer function
-        """
+    def __init__(self, name: str, func: Callable, name_list: List[str]):
         self.name = name
         self.func = func
+        self.name_list = name_list
 
         self.metrics = func.metrics  # type: ignore
         self.source = getsource(self.func)
@@ -332,19 +348,19 @@ class Slicer:
             for output_slice in slicer_output:
                 indices = list(output_slice[1])
                 # Join slice names with backslash
-                name = ".".join([self.name, output_slice[0]])
-                self.slices.append(name)
-                slices_to_return[name] = Slice(
-                    name,
+                name_list = [*self.name_list, output_slice[0]]
+                self.slices.append("".join(name_list))
+                slices_to_return["".join(name_list)] = Slice(
+                    [*self.name_list, output_slice[0]],
                     indices,
                     len(indices),
                     self.metrics,
                     self.name,
                 )
         else:
-            self.slices.append(self.name)
-            slices_to_return[self.name] = Slice(
-                self.name,
+            self.slices.append("".join(self.name_list))
+            slices_to_return["".join(self.name_list)] = Slice(
+                self.name_list,
                 slicer_output,
                 len(slicer_output),
                 self.metrics,
@@ -364,7 +380,7 @@ class Preprocessor:
 class Slice:
     def __init__(
         self,
-        name: str,
+        name: List[str],
         sliced_indices: List[int],
         size: int,
         metrics: List[str],
@@ -394,11 +410,11 @@ class Metric:
 class Result:
     def __init__(
         self,
-        sli: str,
+        sli: List[str],
         transform: str,
         metric: str,
         slice_size: int,
-        model_names: List[str],
+        model_names: List[Path],
     ):
         self.sli = sli
         self.transform = transform
@@ -411,9 +427,11 @@ class Result:
         self.model_results: Dict[int, float] = {}
         self.model_metric_outputs: Dict[int, list] = {}
 
-        self.id: int = int(hash(self.sli + self.transform + self.metric) / 10000)
+        self.id: int = int(
+            hash("".join(self.sli) + self.transform + self.metric) / 10000
+        )
 
-    def set_result(self, model: str, outputs: list, result: Union[pd.Series, list]):
+    def set_result(self, model: Path, outputs: list, result: Union[pd.Series, list]):
         model_hash = int(hash(model) / 10000)
         self.model_outputs[model_hash] = outputs
         if isinstance(result, pd.Series):

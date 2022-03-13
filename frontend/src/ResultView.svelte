@@ -17,7 +17,7 @@
   let splitTables: ColumnTable[] = [];
   let evt;
   let res: Result;
-  $: slice = res ? (slice = $slices.get(res.slice)) : "";
+  $: slice = res ? (slice = $slices.get(res.slice.join(""))) : "";
   results.subscribe((r) => {
     res = r.filter((d) => d.id === parseInt(params.id))[0];
   });
@@ -91,14 +91,16 @@
 
   slices.subscribe((s) => {
     if (s.size > 0) {
-      let slice = s.get(res.slice);
+      console.log(s, res.slice);
+      let slice = s.get(res.slice.join(""));
+      console.log(slice);
       if (!slice.table) {
-        fetch("/api/table/" + slice.name)
+        fetch("/api/table/" + slice.name.join(""))
           .then((d) => d.arrayBuffer())
           .then((d) => {
             table = aq.fromArrow(d);
             slice.table = table;
-            s.set(res.slice, slice);
+            s.set(res.slice.join(""), slice);
             slices.set(s);
           })
           .catch((e) => console.log(e));

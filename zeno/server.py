@@ -11,7 +11,6 @@ from .zeno import Zeno
 
 
 def run_background_processor(conn, args):
-    print(args.__dict__)
     zeno = Zeno(
         metadata_path=args.metadata[0],
         test_files=args.__dict__["test-files"],
@@ -34,7 +33,7 @@ def run_background_processor(conn, args):
                 json.dumps(
                     [
                         {
-                            "name": s.name,
+                            "name": s.name_list,
                             "source": s.source,
                             "slices": s.slices,
                         }
@@ -84,7 +83,7 @@ def run_background_processor(conn, args):
                     "slice": r.sli,
                     "sliceSize": r.slice_size,
                     "modelResults": r.model_results,
-                    "modelNames": r.model_names,
+                    "modelNames": [str(n) for n in r.model_names],
                     "modelIds": list(r.model_results.keys()),
                 }
                 for r in res

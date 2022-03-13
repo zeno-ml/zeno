@@ -1,5 +1,6 @@
 import argparse
 from multiprocessing import Pipe, Process
+from pathlib import Path
 
 from .server import run_background_processor, run_server
 
@@ -12,26 +13,34 @@ def __create_parser():
         "test-files",
         metavar="test_files",
         nargs="+",
-        help="Python files with annotated functions such as slicers and metrics.",
+        type=Path,
+        help="Directory or Python files with annotated functions"
+        + "such as slicers and metrics.",
     )
     group_a.add_argument(
-        "--metadata", nargs=1, help="CSV with metadata for each instance."
+        "--metadata", nargs=1, type=Path, help="CSV with metadata for each instance."
     )
     group_a.add_argument(
         "--data-path",
         dest="data_path",
         nargs="?",
+        type=Path,
         default="",
         help="Folder with data instances identified"
         + "by the id-column option in the metadata file.",
     )
     group_a.add_argument(
-        "--models", dest="models", nargs="+", help="Paths to models for testing"
+        "--models",
+        dest="models",
+        type=Path,
+        nargs="+",
+        help="Paths to models for testing",
     )
     group_b.add_argument(
         "--id-column",
         dest="id_column",
         default="id",
+        type=str,
         nargs="?",
         help="Column with the ID used retrieve data files AND for caching",
     )
@@ -39,6 +48,7 @@ def __create_parser():
         "--label-column",
         dest="label_column",
         default="label",
+        type=str,
         nargs="?",
         help="Column with the ground truth label for instances.",
     )
@@ -54,6 +64,7 @@ def __create_parser():
         "--cache-path",
         dest="cache_path",
         nargs="?",
+        type=Path,
         default="./.zeno_cache/",
         help="Folder for caching results of slicers and metrics.",
     )

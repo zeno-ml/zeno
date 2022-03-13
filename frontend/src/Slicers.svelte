@@ -21,7 +21,7 @@
   <Paper>
     <p>
       <b>{sli.name}</b>,
-      <a href={"/#/slices/" + sli.name}>{sli.slices.length} slices</a>
+      <a href={"/#/slices/" + sli.name.join("")}>{sli.slices.length} slices</a>
     </p>
     <Highlight language={python} code={sli.source} />
   </Paper>

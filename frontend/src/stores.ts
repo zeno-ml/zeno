@@ -1,4 +1,5 @@
 import { derived, writable, type Writable, type Readable } from "svelte/store";
+
 import websocketStore from "svelte-websocket-store";
 
 export const metrics = writable([] as Metric[]);
@@ -7,15 +8,22 @@ export const slicers = writable([] as Slicer[]);
 
 export const slices = writable(new Map<string, Slice>());
 
-export const wsResponse: Writable<WSResponse> = websocketStore("ws://localhost:8000/api/results", {"status": "connecting", results: []});
-export const status = derived(wsResponse, $wsResponse => $wsResponse.status, "connecting");
+export const wsResponse: Writable<WSResponse> = websocketStore(
+  "ws://localhost:8000/api/results",
+  { status: "connecting", results: [] }
+);
+export const status = derived(
+  wsResponse,
+  ($wsResponse) => $wsResponse.status,
+  "connecting"
+);
 export const results: Readable<Result[]> = derived(
   wsResponse,
   ($r) => {
     if ($r.results.length > 0) {
       return $r.results;
     } else {
-      return []
+      return [];
     }
   },
   [] as Result[]

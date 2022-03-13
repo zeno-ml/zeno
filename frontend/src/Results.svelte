@@ -3,9 +3,10 @@
   import SegmentedButton, { Segment } from "@smui/segmented-button";
   import Select, { Option } from "@smui/select";
   import { Label } from "@smui/common";
+  import Chip, { Text, Set as ChipSet } from "@smui/chips";
   import { LayerCake, Svg, Html } from "layercake";
 
-  import { results, models, metrics } from "./stores";
+  import { results, models, metrics, slices } from "./stores";
   import BeeswarmForce from "./LayerCakeComponents/BeeswarmForce.svelte";
   import AxisX from "./LayerCakeComponents/AxisX.svelte";
   import Tooltip from "./LayerCakeComponents/Tooltip.svelte";
@@ -66,9 +67,18 @@
         {#if $results.length > 0}
           {#each $results.filter((d) => d.metric === selectedMetric) as r}
             <Row on:click={() => (window.location.hash = "#/result/" + r.id)}>
-              <Cell><a href="/#/slices/{r.slice}">{r.slice}</a></Cell>
+              <!-- <Cell><a href="/#/slices/{r.slice.join('')}">{r.slice}</a></Cell> -->
+              <Cell>
+                <ChipSet chips={r.slice} let:chip>
+                  <Chip {chip} on:click={(e) => e.stopPropagation()}>
+                    <Text>
+                      {chip}
+                    </Text>
+                  </Chip>
+                </ChipSet>
+              </Cell>
               <Cell>{r.transform}</Cell>
-              <Cell><a href="/#/tests/{r.metric}">{r.metric}</a></Cell>
+              <Cell>{r.metric}</Cell>
               <Cell numeric>{r.sliceSize}</Cell>
               {#each Object.keys(r.modelResults) as ent}
                 <Cell numeric>{r.modelResults[ent].toFixed(2)}%</Cell>
