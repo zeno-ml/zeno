@@ -38,29 +38,24 @@ The tests are connected as follows. Slices are optionally passed to transforms, 
 
 ## Quickstart
 
-Install [Poetry](https://python-poetry.org/), clone the repository, and install Zeno:
-
 ```bash
-git clone https://github.com/cabreraalex/zeno
-cd zeno
-poetry install
+pip install zenoml
 ```
 
 Next, create at least one testing file with both a `load_model` and `load_data` function.
-Additionally add any number of tests using the `slicer`, `transform` and `metric` functions.
+Additionally add any number of tests using the `preprocess`, `slicer`, `transform` and `metric` functions.
 See [Writing Tests](writing_tests) for details on each of these functions.
 
-Run the tests and load the ui with the zeno command using Poetry:
+Run the tests and load the ui with the zeno command:
 
 ```bash
-poetry run zeno
-    test.py
+zeno test.py
     --metadata data.csv
     --data-path data
     --models model.pth
 ```
 
-See [Running Tests](api) for the various command line options.
+See [Running Tests](api) for the various command line options and [Test Examples](test-examples) for various example tests.
 
 ## Table of Contents
 

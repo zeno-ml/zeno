@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "zeno"
+name = "zenoml"
 version = "0.0.1"
-description = "Behavioral testing of AI/ML"
+description = "Behavioral Testing for Machine Learning"
 license = "MIT"
 authors = ["Ángel Alexander Cabrera <alex.cabrera@gmail.com>"]
 readme = "README.md"  # Markdown files are supported

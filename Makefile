@@ -52,6 +52,11 @@ build:
 check:
 	@poetry check
 
+.PHONY: publish
+publish: build
+	@echo "==> 📰 Publish"
+	@poetry publish
+
 .PHONY: clean
 clean:
 	@poetry run jupyter-book clean docs
