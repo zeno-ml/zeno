@@ -6,7 +6,7 @@
   import Chip, { Text, Set as ChipSet } from "@smui/chips";
   import { LayerCake, Svg, Html } from "layercake";
 
-  import { results, models, metrics, slices } from "./stores";
+  import { results, models, metrics } from "./stores";
   import BeeswarmForce from "./LayerCakeComponents/BeeswarmForce.svelte";
   import AxisX from "./LayerCakeComponents/AxisX.svelte";
   import Tooltip from "./LayerCakeComponents/Tooltip.svelte";

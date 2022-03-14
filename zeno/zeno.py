@@ -335,8 +335,10 @@ class Slicer:
         else:
             slicer_output = self.func(metadata)
 
-        if not isinstance(slicer_output, list):
-            slicer_output = slicer_output.to_list()
+        if isinstance(slicer_output, pd.DataFrame):
+            slicer_output = slicer_output.index
+
+        slicer_output = list(slicer_output)
 
         slices_to_return = {}
         # Can either be of the from [index list] or [(name, index list)..]

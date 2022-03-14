@@ -5,6 +5,7 @@ import torch.nn.functional as F
 import os
 import torchvision.transforms as transforms
 from zeno import load_data, load_model, metric, slicer, transform, preprocess
+import pandas as pd
 
 transform_image = transforms.Compose(
     [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
@@ -88,20 +89,20 @@ def overall(metadata):
 
 
 @slicer(["accuracy", ("rotate", "accuracy")])
-def low_brightness(metadata):
-    return metadata[metadata["brightness"] < 80].index
+def low_brightness(metadata: pd.DataFrame):
+    return metadata[metadata["brightness"] < 80]
 
 
 @slicer(["accuracy", ("rotate", "accuracy")])
 def low_brightness_frog(metadata, label_col):
-    return metadata[
-        (metadata["brightness"] < 80) & (metadata[label_col] == "frog")
-    ].index
+    return list(
+        metadata[(metadata["brightness"] < 80) & (metadata[label_col] == "frog")].index
+    )
 
 
 @slicer(["accuracy"])
 def cat(metadata):
-    return metadata[metadata["label"] == "cat"].index
+    return metadata[metadata["label"] == "cat"]
 
 
 @slicer(["accuracy"])

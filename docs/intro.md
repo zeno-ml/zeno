@@ -54,7 +54,7 @@ Run the tests and load the ui with the zeno command using Poetry:
 
 ```bash
 poetry run zeno
-    --test_files test.py
+    test.py
     --metadata data.csv
     --data-path data
     --models model.pth

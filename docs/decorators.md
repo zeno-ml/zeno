@@ -83,14 +83,14 @@ See [Preprocessors](preprocessors) for real-world examples.
 
 ### Slicer
 
-Functions with the `slicer` decorator return a subset of data.
-The subset can be created either from the raw data or metdata DataFrame.
+Functions with the `slicer` decorator return a subset of data derived form metadata values.
 The parameters to the decorator should either be the name of a metric or a tuple specifying a transform function and metric function.
+The function should return either a list of indices or the sliced DataFrame.
 
 ```python
 # A list of metric functions or (transform function, metric function) tuples.
 @slicer(["Metric 1", ("Transform 1", "Metric 1"), "Metric 2"])
-def slicing_func(metadata: DataFrame) -> List[int]:
+def slicing_func(metadata: DataFrame) -> Union[DataFrame, List[int]]:
 ```
 
 Example:
