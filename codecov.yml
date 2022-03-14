@@ -2,4 +2,4 @@ codecov:
   token: 1616e4f7-7480-406d-bf63-5fa889bbadb6
 coverage:
   status:
-    patch: false
+    informational: true
