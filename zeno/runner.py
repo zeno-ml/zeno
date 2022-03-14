@@ -18,7 +18,11 @@ def __create_parser():
         + "such as slicers and metrics.",
     )
     group_a.add_argument(
-        "--metadata", nargs=1, type=Path, help="CSV with metadata for each instance."
+        "--metadata",
+        nargs=1,
+        type=Path,
+        help="CSV or Parquet file with metadata for each instance,"
+        + " at minimum a column with file names.",
     )
     group_a.add_argument(
         "--data-path",

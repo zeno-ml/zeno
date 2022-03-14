@@ -19,8 +19,22 @@ jobs:
 
       - name: Install Poetry
         uses: snok/install-poetry@v1.3
+      - name: Cache Poetry virtualenv
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: ~/.virtualenvs
+          key: poetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            poetry-${{ hashFiles('**/poetry.lock') }}
+      - name: Set Poetry config
+        run: |
+          poetry config settings.virtualenvs.in-project false
+          poetry config settings.virtualenvs.path ~/.virtualenvs
       - name: Install dependencies
         run: poetry install --no-interaction
+        if: steps.cache.outputs.cache-hit != 'true'
+
       - name: Install NPM packages
         run: |
           cd frontend/

@@ -58,7 +58,16 @@ class Zeno(object):
         self.__initialize_watchdog()
 
         # Read metadata as Pandas for slicing
-        self.metadata = pd.read_csv(metadata_path)
+        if metadata_path.suffix == ".csv":
+            self.metadata = pd.read_csv(metadata_path)
+        elif metadata_path.suffix == ".parquet":
+            self.metadata = pd.read_parquet(metadata_path)
+        else:
+            print(
+                "ERROR: extension of "
+                + metadata_path.suffix
+                + " not one of .csv or .parquet"
+            )
 
     def __initialize_watchdog(self):
         # Watch for updated test files.
