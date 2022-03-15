@@ -33,7 +33,7 @@
     "@mdi/js": "^6.5.95",
     "@smui-extra/accordion": "^6.0.0-beta.13",
     "@smui/button": "^6.0.0-beta.13",
-    "@smui/card": "^6.0.0-beta.13",
+    "@smui/card": "^6.0.0-beta.15",
     "@smui/chips": "^6.0.0-beta.15",
     "@smui/circular-progress": "^6.0.0-beta.13",
     "@smui/data-table": "^6.0.0-beta.13",
