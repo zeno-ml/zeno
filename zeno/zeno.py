@@ -6,7 +6,7 @@ import threading
 from importlib import util
 from inspect import getmembers, getsource, isfunction, signature
 from pathlib import Path
-from typing import Callable, Dict, List, Union
+from typing import Callable, Dict, List, Tuple, Union
 
 import pandas as pd
 from watchdog.observers import Observer  # type: ignore
@@ -70,8 +70,6 @@ class Zeno(object):
             )
 
     def __initialize_watchdog(self):
-        # Watch for updated test files.
-
         observer = Observer()
         event_handler = TestFileUpdateHandler(
             [os.path.abspath(t) for t in self.test_files], self.start_processing
@@ -113,12 +111,6 @@ class Zeno(object):
             sys.exit(1)
 
     def __parse_testing_file(self, test_file: Path, base_path: Path):
-        print(
-            test_file,
-            test_file.relative_to(base_path),
-            test_file.relative_to(base_path).parts,
-        )
-
         spec = util.spec_from_file_location("module.name", test_file)
         test_module = util.module_from_spec(spec)  # type: ignore
         spec.loader.exec_module(test_module)  # type: ignore
@@ -286,44 +278,46 @@ class Zeno(object):
             model_cache.close()
         self.status = "Done"
 
-    def get_table(self, sli):
-        print(sli)
+    def get_table(self, sli: str):
+        """Get the metadata DataFrame for a given slice.
+
+        Args:
+            sli (str): Name of the slice
+
+        Returns:
+            bytes: Arrow-encoded table of slice metadata
+        """
         df = self.metadata.iloc[self.slices[sli].sliced_indices]
         return get_arrow_bytes(df)
 
-    def get_model_outputs(self, opts):
-        res, model_hash = opts
+    def get_model_outputs(self, opts: Tuple[int, int]):
+        """Get outputs for a certain model in a certain result.
+
+        Args:
+            opts (Tuple[int, int]): The result and model hash
+
+        Returns:
+            Dict: JSON-like item with the metric and output values
+        """
+        result_hash, model_hash = opts
         # TODO: figure out hash issue, truncates on frontend
-        result = self.results[int(res)]
+        result = self.results[int(result_hash)]
         return {
             "metric": result.model_metric_outputs[int(model_hash)],
             "output": result.model_outputs[int(model_hash)],
         }
 
-    def get_metadata_path(self):
-        return self.metadata_path
+    def __open_cache(self, path: str):
+        """Get shelve cache for a path
 
-    def get_metrics(self):
-        return self.metrics.values()
+        Args:
+            path (str): Filename for the cache file
 
-    def get_results(self):
-        return self.results.values()
-
-    def get_slicers(self):
-        return self.slicers.values()
-
-    def get_slices(self):
-        return self.slices.values()
-
-    def get_slice(self, sli):
-        return self.slices[sli]
-
-    def get_status(self):
-        return self.status
-
-    def __open_cache(self, name):
+        Returns:
+            Shelf: Cache dict
+        """
         return shelve.open(
-            os.path.join(self.cache_path, name),
+            os.path.join(self.cache_path, path),
             writeback=True,
         )
 
@@ -456,11 +450,6 @@ class Result:
             sum(self.model_metric_outputs[model_hash])
             / len(self.model_metric_outputs[model_hash])
             * 100
-        )
-
-    def __str__(self):
-        return "Test {0} for slice {1}, transform {2}, size {3}".format(
-            self.metric, self.sli, self.transform, self.slice_size
         )
 
     def __hash__(self):

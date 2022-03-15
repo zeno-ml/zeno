@@ -28,7 +28,7 @@ def run_background_processor(conn, args):
         case, options = conn.recv()
 
         if case == "GET_SLICERS":
-            slicers = zeno.get_slicers()
+            slicers = zeno.slicers.values()
             conn.send(
                 json.dumps(
                     [
@@ -43,13 +43,13 @@ def run_background_processor(conn, args):
             )
 
         if case == "GET_METRICS":
-            testers = zeno.get_metrics()
+            testers = zeno.metrics.values()
             conn.send(
                 json.dumps([{"name": s.name, "source": s.source} for s in testers])
             )
 
         if case == "GET_SLICES":
-            slices = zeno.get_slices()
+            slices = zeno.slices.values()
             conn.send(
                 json.dumps(
                     [
@@ -64,9 +64,6 @@ def run_background_processor(conn, args):
                 )
             )
 
-        # if case == "GET_DATA":
-        #     conn.send(zeno.get_metadata_bytes())
-
         if case == "GET_TABLE":
             conn.send(zeno.get_table(options))
 
@@ -74,7 +71,7 @@ def run_background_processor(conn, args):
             conn.send(json.dumps(zeno.get_model_outputs(options)))
 
         if case == "GET_RESULTS":
-            res = zeno.get_results()
+            res = zeno.results.values()
             res = [
                 {
                     "id": hash(r),
@@ -88,7 +85,7 @@ def run_background_processor(conn, args):
                 }
                 for r in res
             ]
-            conn.send((zeno.get_status(), res))
+            conn.send((zeno.status, res))
 
 
 def run_server(conn, args):

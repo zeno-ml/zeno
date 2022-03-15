@@ -38,10 +38,6 @@ book:
 	@echo "==> 📕 Book"
 	@poetry run jupyter-book build docs
 
-.PHONY: book-strict
-book-strict:
-	@poetry run jupyter-book build -W -n --keep-going docs
-
 .PHONY: build
 build:
 	@echo "==> 👷‍♀️ Build"
