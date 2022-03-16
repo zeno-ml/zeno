@@ -14,7 +14,7 @@
     "@rollup/plugin-node-resolve": "^11.0.0",
     "@rollup/plugin-typescript": "^8.0.0",
     "@smui/tooltip": "^6.0.0-beta.14",
-    "@tsconfig/svelte": "^2.0.0",
+    "@tsconfig/svelte": "^3.0.0",
     "@typescript-eslint/eslint-plugin": "^5.13.0",
     "eslint": "^8.11.0",
     "eslint-plugin-svelte3": "^3.4.1",
