@@ -18,9 +18,6 @@
   let choices = ["table", "strip", "beeswarm"];
   let choice = "table";
 
-  $: console.log(selectedMetric);
-  $: console.log($metrics);
-
   let evt = [];
 </script>
 

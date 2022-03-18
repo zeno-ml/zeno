@@ -17,7 +17,8 @@
 
   import Home from "./Home.svelte";
   import Metrics from "./Metrics.svelte";
-  import Results from "./Results.svelte";
+  import NewResults from "./NewResults.svelte";
+  // import Results from "./Results.svelte";
   import ResultView from "./ResultView.svelte";
   import Slicers from "./Slicers.svelte";
   import Slices from "./Slices.svelte";
@@ -31,7 +32,7 @@
     "/tests/:test?": Metrics,
     "/slices/": Slices,
     "/slices/:slicer?": Slices,
-    "/results/": Results,
+    "/results/": NewResults,
     "/result/:id?": ResultView,
     "*": Home,
   };
