@@ -1,9 +1,9 @@
+import torchvision.transforms as transforms
 import PIL
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import os
-import torchvision.transforms as transforms
 from zeno import load_data, load_model, metric
 
 transform_image = transforms.Compose(
