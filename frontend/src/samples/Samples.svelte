@@ -4,10 +4,10 @@
   import Tooltip, { Wrapper } from "@smui/tooltip";
   import Button from "@smui/button";
 
-  export let id_col: string;
-  export let label_col: string;
-  export let output_col: string = "";
-  export let second_output_col: string = "";
+  export let idCol: string;
+  export let labelCol: string;
+  export let modelACol: string = "";
+  export let modelBCol: string = "";
   export let table: ColumnTable;
 
   let n = 20;
@@ -23,8 +23,8 @@
     <div class="box">
       <Wrapper>
         <img
-          src="/static/{row[id_col]}"
-          alt="Image thumbnail for instance {row[id_col]}"
+          src="/static/{row[idCol]}"
+          alt="Image thumbnail for instance {row[idCol]}"
         />
         <Tooltip>
           {#each Object.keys(row) as key}
@@ -34,14 +34,14 @@
         </Tooltip>
       </Wrapper>
       <br />
-      <span class="label">{row[label_col]} </span>
-      {#if output_col}
+      <span class="label">{row[labelCol]} </span>
+      {#if modelACol}
         <br />
-        <span class="output">{row[output_col]} </span>
+        <span class="output">{row[modelACol]} </span>
       {/if}
-      {#if second_output_col}
+      {#if modelBCol}
         <br />
-        <span class="second_output">{row[second_output_col]} </span>
+        <span class="second_output">{row[modelBCol]} </span>
       {/if}
     </div>
   {/each}

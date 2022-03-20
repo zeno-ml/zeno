@@ -77,7 +77,7 @@ def run_background_processor(conn, args):
                     "transform": r.transform,
                     "slice": r.sli,
                     "sliceSize": r.slice_size,
-                    "modelResults": r.model_results,
+                    "modelResults": r.model_metrics,
                     "modelNames": [str(n) for n in r.model_names],
                 }
                 for r in res

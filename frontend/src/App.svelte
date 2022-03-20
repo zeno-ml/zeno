@@ -14,11 +14,9 @@
   import { onMount } from "svelte";
   import github from "svelte-highlight/src/styles/github";
   import Router, { location } from "svelte-spa-router";
-
   import Home from "./Home.svelte";
   import Results from "./Results.svelte";
   import Slices from "./Slices.svelte";
-
   import { metrics, slices, status, wsResponse } from "./stores";
 
   const routes = {
@@ -61,9 +59,9 @@
   });
 
   status.subscribe((s) => {
+    // If running analysis or done, get the slices and metrics.
     if (!fetchedSlices && (s === "Done" || s.startsWith("Model"))) {
       fetchedSlices = true;
-      console.log("get stuff?");
       fetch("/api/slices")
         .then((d) => d.json())
         .then((d) => {
@@ -125,30 +123,6 @@
           <SecondaryText>Overview of tests</SecondaryText>
         </Text>
       </Item>
-      <Separator />
-      <!-- <br />
-      <Separator />
-      <Item
-        activated={tab === "slicers"}
-        on:SMUI:action={() => updateTab("slicers")}
-      >
-        <Text>
-          <PrimaryText>Slicers</PrimaryText>
-          <SecondaryText>Data slicing functions</SecondaryText>
-        </Text>
-      </Item>
-      <Separator />
-      <Item
-        activated={tab === "tests"}
-        on:SMUI:action={() => updateTab("tests")}
-      >
-        <Text>
-          <PrimaryText>Metrics</PrimaryText>
-          <SecondaryText>Metric functions</SecondaryText>
-        </Text>
-      </Item>
-      <Separator />
-      <br /> -->
       <Separator />
       <Item
         activated={tab === "slices"}

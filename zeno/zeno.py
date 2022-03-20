@@ -1,6 +1,5 @@
 import asyncio
 import os
-import shelve
 import sys
 import threading
 from importlib import util
@@ -68,6 +67,8 @@ class Zeno(object):
                 + metadata_path.suffix
                 + " not one of .csv or .parquet"
             )
+        self.metadata[id_column].astype(str)
+        self.metadata.set_index(self.id_column, inplace=True)
 
     def __initialize_watchdog(self):
         observer = Observer()
@@ -160,35 +161,27 @@ class Zeno(object):
     def __preprocess_data(self):
         for preprocessor in self.preprocessors:
             self.status = "Running preprocessor " + preprocessor.name
-            cache = shelve.open(
-                os.path.join(
-                    self.cache_path,
-                    (
-                        ".model_preprocess_"
-                        + str(self.metadata_path).replace("/", "_")
-                        + preprocessor.name
-                    ),
-                ),
-                writeback=True,
+            cache_path = Path(
+                self.cache_path,
+                "preprocess_"
+                + preprocessor.name
+                + "_"
+                + str(self.metadata_path).replace("/", "_"),
             )
-            output = cached_process(
-                self.data_loader,
+            cached_process(
                 self.metadata,
+                self.metadata.index,
+                preprocessor.name,
+                cache_path,
                 preprocessor.func,
-                cache,
-                self.batch_size,
-                self.id_column,
+                self.data_loader,
                 self.data_path,
+                self.batch_size,
             )
-            if not isinstance(output, list):
-                print("ERROR: preprocess function must return a list")
-                sys.exit(1)
-            self.metadata[preprocessor.name] = output
         self.status = "Done preprocessing"
 
     def __slice_data(self):
         self.slices = {}
-
         for name, slicer in self.slicers.items():
             self.status = "Slicing data for " + name
             self.slices = {
@@ -205,7 +198,6 @@ class Zeno(object):
             )
 
             model = self.model_loader(model_name)
-            model_cache = self.__open_cache(".model_" + os.path.basename(model_name))
 
             for j, sli in enumerate(self.slices.values()):
                 for k, metric in enumerate(sli.metrics):
@@ -231,6 +223,7 @@ class Zeno(object):
                         metric,
                         str(sli.size),
                     )
+                    print(self.status)
 
                     if i == 0:
                         res = Result(
@@ -250,32 +243,43 @@ class Zeno(object):
 
                     metric_func = self.metrics[metric]
 
-                    out = cached_process(
-                        self.data_loader,
-                        self.metadata.iloc[sli.sliced_indices],
+                    cached_process(
+                        self.metadata,
+                        sli.sliced_indices,
+                        str(model_name),
+                        Path(
+                            self.cache_path,
+                            "model_"
+                            + str(model_name).replace("/", "_")
+                            + "_"
+                            + str(self.metadata_path).replace("/", "_"),
+                        ),
                         model,
-                        model_cache,
-                        self.batch_size,
-                        self.id_column,
+                        self.data_loader,
                         self.data_path,
+                        self.batch_size,
                         transform=transform,
                     )
 
                     if len(signature(metric_func).parameters) == 3:
                         result = metric_func(
-                            out,
-                            self.metadata.iloc[sli.sliced_indices],
+                            self.metadata.loc[
+                                sli.sliced_indices, str(model_name)
+                            ].tolist(),
+                            self.metadata.loc[sli.sliced_indices],
                             self.label_column,
                         )
                     else:
                         result = metric_func(
-                            out,
-                            self.metadata.iloc[sli.sliced_indices],
+                            self.metadata.loc[
+                                sli.sliced_indices, str(model_name)
+                            ].tolist(),
+                            self.metadata.loc[sli.sliced_indices],
                         )
 
-                    res.set_result(model_name, out, result)
+                    res.set_result(model_name, result)
                     self.results[res.id] = res
-            model_cache.close()
+        # print(self.metadata.sample(100))
         self.status = "Done"
 
     def get_table(self, sli: str):
@@ -287,7 +291,7 @@ class Zeno(object):
         Returns:
             bytes: Arrow-encoded table of slice metadata
         """
-        df = self.metadata.iloc[self.slices[sli].sliced_indices]
+        df = self.metadata.loc[self.slices[sli].sliced_indices]
         return get_arrow_bytes(df)
 
     def get_result(self):
@@ -311,20 +315,6 @@ class Zeno(object):
         #     "output": result.model_outputs[int(model_hash)],
         # }
 
-    def __open_cache(self, path: str):
-        """Get shelve cache for a path
-
-        Args:
-            path (str): Filename for the cache file
-
-        Returns:
-            Shelf: Cache dict
-        """
-        return shelve.open(
-            os.path.join(self.cache_path, path),
-            writeback=True,
-        )
-
 
 class Slicer:
     def __init__(self, name: str, func: Callable, name_list: List[str]):
@@ -345,8 +335,6 @@ class Slicer:
         if isinstance(slicer_output, pd.DataFrame):
             slicer_output = slicer_output.index
 
-        slicer_output = list(slicer_output)
-
         slices_to_return = {}
         # Can either be of the from [index list] or [(name, index list)..]
         if (
@@ -355,7 +343,7 @@ class Slicer:
             or isinstance(slicer_output[0], list)
         ):
             for output_slice in slicer_output:
-                indices = list(output_slice[1])
+                indices = output_slice[1]
                 # Join slice names with backslash
                 name_list = [*self.name_list, output_slice[0]]
                 self.slices.append("".join(name_list))
@@ -390,7 +378,7 @@ class Slice:
     def __init__(
         self,
         name: List[str],
-        sliced_indices: List[int],
+        sliced_indices: pd.Index,
         size: int,
         metrics: List[str],
         slicer: str,
@@ -432,17 +420,15 @@ class Result:
         self.model_names = model_names
 
         # Keys are hash of model name
-        self.model_outputs: Dict[str, list] = {}
-        self.model_results: Dict[str, float] = {}
+        self.model_metrics: Dict[str, float] = {}
         self.model_metric_outputs: Dict[str, list] = {}
 
         self.id: int = int(
             hash("".join(self.sli) + self.transform + self.metric) / 10000
         )
 
-    def set_result(self, model: Path, outputs: list, result: Union[pd.Series, list]):
+    def set_result(self, model: Path, result: Union[pd.Series, list]):
         model_name = str(model)
-        self.model_outputs[model_name] = outputs
         if isinstance(result, pd.Series):
             self.model_metric_outputs[model_name] = result.astype(int).to_list()
         elif len(result) > 0 and isinstance(result[0], bool):
@@ -450,7 +436,7 @@ class Result:
                 1 if r is True else 0 for r in result
             ]
 
-        self.model_results[model_name] = (
+        self.model_metrics[model_name] = (
             sum(self.model_metric_outputs[model_name])
             / len(self.model_metric_outputs[model_name])
             * 100
