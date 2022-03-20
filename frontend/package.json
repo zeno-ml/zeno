@@ -42,6 +42,7 @@
     "@smui/layout-grid": "^6.0.0-beta.13",
     "@smui/list": "^6.0.0-beta.15",
     "@smui/paper": "^6.0.0-beta.13",
+    "@smui/ripple": "^6.0.0-beta.15",
     "@smui/segmented-button": "^6.0.0-beta.14",
     "@smui/select": "^6.0.0-beta.13",
     "arquero": "^4.8.8",

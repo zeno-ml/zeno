@@ -16,24 +16,16 @@
   import Router, { location } from "svelte-spa-router";
 
   import Home from "./Home.svelte";
-  import Metrics from "./Metrics.svelte";
-  import NewResults from "./NewResults.svelte";
-  // import Results from "./Results.svelte";
-  import ResultView from "./ResultView.svelte";
-  import Slicers from "./Slicers.svelte";
+  import Results from "./Results.svelte";
   import Slices from "./Slices.svelte";
 
   import { metrics, slices, status, wsResponse } from "./stores";
 
   const routes = {
     "/": Home,
-    "/slicers/": Slicers,
-    "/tests/": Metrics,
-    "/tests/:test?": Metrics,
     "/slices/": Slices,
     "/slices/:slicer?": Slices,
-    "/results/": NewResults,
-    "/result/:id?": ResultView,
+    "/results/": Results,
     "*": Home,
   };
 
@@ -134,7 +126,7 @@
         </Text>
       </Item>
       <Separator />
-      <br />
+      <!-- <br />
       <Separator />
       <Item
         activated={tab === "slicers"}
@@ -156,7 +148,7 @@
         </Text>
       </Item>
       <Separator />
-      <br />
+      <br /> -->
       <Separator />
       <Item
         activated={tab === "slices"}

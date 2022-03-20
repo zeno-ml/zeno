@@ -1,198 +1,108 @@
 <script lang="ts">
-  import DataTable, { Head, Body, Row, Cell } from "@smui/data-table";
-  import SegmentedButton, { Segment } from "@smui/segmented-button";
   import Select, { Option } from "@smui/select";
-  import { Label } from "@smui/common";
-  import Chip, { Text, Set as ChipSet } from "@smui/chips";
-  import { LayerCake, Svg, Html } from "layercake";
+  import ResultCell from "./ResultCell.svelte";
+  import Samples from "./samples/Samples.svelte";
 
-  import { results, models, metrics } from "./stores";
-  import BeeswarmForce from "./LayerCakeComponents/BeeswarmForce.svelte";
-  import AxisX from "./LayerCakeComponents/AxisX.svelte";
-  import Tooltip from "./LayerCakeComponents/Tooltip.svelte";
-  import Strip from "./LayerCakeComponents/Strip.svelte";
+  import { metrics, models, results, slices } from "./stores";
+  import { ResultNode, appendChild } from "./util";
+
+  import { fromArrow } from "arquero";
 
   $: metric_names = $metrics.map((m) => m.name);
   $: selectedMetric = metric_names[0];
 
-  let choices = ["table", "strip", "beeswarm"];
-  let choice = "table";
+  let modelA;
+  let modelB = "";
+  models.subscribe((m) => (!modelA && m.length > 0 ? (modelA = m[0]) : ""));
 
-  let evt = [];
+  let selected = "";
+  let resultHierarchy: ResultNode = new ResultNode("root", 0, {});
+  $: slice = selected ? (slice = $slices.get(selected)) : "";
+
+  results.subscribe((res) => {
+    if (res.length > 0) {
+      res = res.filter((r) => r.transform === "");
+      res.forEach((r) => {
+        appendChild(resultHierarchy, r);
+      });
+      resultHierarchy = resultHierarchy;
+    }
+  });
+
+  let table;
+  $: if (selected) {
+    // TODO: cache this table in results
+    if (!slice.table) {
+      fetch("/api/table/" + selected)
+        .then((d) => d.arrayBuffer())
+        .then((d) => {
+          table = fromArrow(d);
+          slice.table = table;
+          $slices.set(selected, slice);
+          slices.set($slices);
+        })
+        .catch((e) => console.log(e));
+    } else {
+      table = slice.table;
+    }
+  }
 </script>
 
-<div class="results-header">
-  <h2>Results</h2>
-  <div class="buttons-container">
-    <Select
-      bind:value={selectedMetric}
-      label="Select Metric"
-      style="margin-right: 20px;"
-    >
-      {#each metric_names as m}
+<div class="style-div">
+  <Select
+    bind:value={selectedMetric}
+    label="Select Metric"
+    style="margin-right: 20px;"
+  >
+    {#each metric_names as m}
+      <Option value={m}>{m}</Option>
+    {/each}
+  </Select>
+  {#if $models && modelA}
+    <Select bind:value={modelA} label="Model A" style="margin-right: 20px;">
+      {#each $models as m}
         <Option value={m}>{m}</Option>
       {/each}
     </Select>
-    <SegmentedButton
-      segments={choices}
-      let:segment
-      singleSelect
-      bind:selected={choice}
-    >
-      <Segment {segment}>
-        <Label>{segment}</Label>
-      </Segment>
-    </SegmentedButton>
-  </div>
+    <Select bind:value={modelB} label="Model B" style="margin-right: 20px;">
+      {#each [...$models, ""] as m}
+        <Option value={m}>{m}</Option>
+      {/each}
+    </Select>
+  {/if}
 </div>
 
-{#if choice === "table"}
-  <div class="table-container">
-    <DataTable sortable table$aria-label="People list" style="max-width: 100%;">
-      <Head>
-        <Row>
-          <Cell>Slice</Cell>
-          <Cell>Transform</Cell>
-          <Cell>Test</Cell>
-          <Cell>Size</Cell>
-          {#each $models as m}
-            <Cell numeric><b>m:</b>{m.split(/[\\/]/).pop()}</Cell>
-          {/each}
-        </Row>
-      </Head>
-      <Body>
-        {#if $results.length > 0}
-          {#each $results.filter((d) => d.metric === selectedMetric) as r}
-            <Row on:click={() => (window.location.hash = "#/result/" + r.id)}>
-              <!-- <Cell><a href="/#/slices/{r.slice.join('')}">{r.slice}</a></Cell> -->
-              <Cell>
-                <ChipSet chips={r.slice} let:chip>
-                  <Chip {chip} on:click={(e) => e.stopPropagation()}>
-                    <Text>
-                      {chip}
-                    </Text>
-                  </Chip>
-                </ChipSet>
-              </Cell>
-              <Cell>{r.transform}</Cell>
-              <Cell>{r.metric}</Cell>
-              <Cell numeric>{r.sliceSize}</Cell>
-              {#each Object.keys(r.modelResults) as ent}
-                <Cell numeric>{r.modelResults[ent].toFixed(2)}%</Cell>
-              {/each}
-            </Row>
-          {/each}
-        {/if}
-      </Body>
-    </DataTable>
-  </div>
-{:else if choice === "strip"}
-  {#each $models as m, i}
-    <div id="bee-container">
-      <h5>{m.split(/[\\/]/).pop()}</h5>
-      <LayerCake
-        data={$results
-          .filter((r) => r.metric === selectedMetric)
-          .map((r) => ({
-            slice: r.slice,
-            value: r.modelIds[i]
-              ? r.modelResults[r.modelIds[i]].toFixed(2) / 100
-              : -1,
-            size: r.sliceSize,
-          }))}
-        x="value"
-        z="slice"
-        xDomain={[0, 1]}
-      >
-        <Html>
-          {#if evt[i]}
-            <Tooltip evt={evt[i]} let:detail>
-              <p>slice: {detail.props.slice}</p>
-              <p>instances: {detail.props.size}</p>
-            </Tooltip>
-          {/if}
-        </Html>
-        <Svg>
-          <Strip
-            on:mouseout={() => (evt = [])}
-            on:mousemove={(e) => (evt[i] = e)}
-          />
-          <AxisX
-            baseline={true}
-            tickMarks={true}
-            formatTick={(d) => d * 100 + "%"}
-          />
-        </Svg>
-      </LayerCake>
+<div id="container">
+  {#if resultHierarchy}
+    <div style:margin-right="10px">
+      <ResultCell
+        resultNode={resultHierarchy}
+        bind:selected
+        {modelA}
+        {modelB}
+      />
     </div>
-  {/each}
-{:else if choice === "beeswarm"}
-  {#each $models as m, i}
-    <div id="bee-container">
-      <h5>{m.split(/[\\/]/).pop()}</h5>
-      <LayerCake
-        data={$results
-          .filter((r) => r.metric === selectedMetric)
-          .map((r) => ({
-            slice: r.slice,
-            value: r.modelIds[i]
-              ? r.modelResults[r.modelIds[i]].toFixed(2) / 100
-              : -1,
-            size: r.sliceSize,
-          }))}
-        x="value"
-        z="size"
-        xDomain={[0, 1]}
-        zDomain={[null, null]}
-        zRange={[5, 10]}
-      >
-        <Html>
-          {#if evt[i]}
-            <Tooltip evt={evt[i]} let:detail>
-              <p>slice: {detail.props.slice}</p>
-              <p>instances: {detail.props.size}</p>
-            </Tooltip>
-          {/if}
-        </Html>
-        <Svg>
-          <BeeswarmForce
-            on:mouseout={() => (evt = [])}
-            on:mousemove={(e) => (evt[i] = e)}
-          />
-          <AxisX
-            baseline={true}
-            tickMarks={true}
-            formatTick={(d) => d * 100 + "%"}
-          />
-        </Svg>
-      </LayerCake>
+  {/if}
+  {#if selected && table}
+    <div>
+      <Samples
+        id_col={slice.id_column}
+        label_col={slice.label_column}
+        {table}
+      />
     </div>
-  {/each}
-{/if}
+  {/if}
+</div>
 
 <style>
-  #bee-container {
-    width: 50%;
-    min-width: 400px;
-    padding: 30px;
-    height: 75px;
-  }
-  .table-container {
-    margin: 0px auto;
-    display: flex;
-    flex-direction: column;
-    width: fit-content;
-  }
-  .results-header {
-    width: 100%;
+  #container {
+    margin-top: 30px;
     display: flex;
     flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
   }
-
-  .buttons-container {
-    display: flex;
-    align-items: flex-end;
+  .style-div {
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e0e0e0;
+    width: 100%;
   }
 </style>

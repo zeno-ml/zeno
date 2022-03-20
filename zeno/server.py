@@ -44,9 +44,7 @@ def run_background_processor(conn, args):
 
         if case == "GET_METRICS":
             testers = zeno.metrics.values()
-            conn.send(
-                json.dumps([{"name": s.name, "source": s.source} for s in testers])
-            )
+            conn.send(json.dumps([{"name": s.__name__, "source": ""} for s in testers]))
 
         if case == "GET_SLICES":
             slices = zeno.slices.values()
@@ -81,7 +79,6 @@ def run_background_processor(conn, args):
                     "sliceSize": r.slice_size,
                     "modelResults": r.model_results,
                     "modelNames": [str(n) for n in r.model_names],
-                    "modelIds": list(r.model_results.keys()),
                 }
                 for r in res
             ]
