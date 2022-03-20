@@ -26,7 +26,6 @@ interface Result {
   slice: string[];
   sliceSize: number;
   modelNames: string[];
-  modelIds: int[];
   modelResults: { property: float }[];
 }
 

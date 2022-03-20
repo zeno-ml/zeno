@@ -6,9 +6,12 @@
   import IconButton, { Icon } from "@smui/icon-button";
   import Checkbox from "@smui/checkbox";
   import FormField from "@smui/form-field";
+  import Ripple from "@smui/ripple";
 
   export let resultNode: ResultNode;
   export let selected;
+  export let modelA;
+  export let modelB;
 
   let expand = [];
   let checked = [];
@@ -24,10 +27,11 @@
     {#each Object.entries(resultNode.children) as [name, node], i}
       {#if isLeaf(node)}
         <div
+          use:Ripple={{ surface: true, color: "primary" }}
           class="cell parent {selected === node.result.slice.join('')
             ? 'selected'
             : ''}"
-          style:margin-left={node.depth * 10 + 10 + "px"}
+          style:margin-left={node.depth * 10 + "px"}
           on:click={() =>
             selected === node.result.slice.join("")
               ? (selected = "")
@@ -41,13 +45,22 @@
             </div>
             <div class="group" style:width="100%">
               <span>{name}</span>
-              <span>{node.result.modelResults}</span>
-              <span>{node.result.sliceSize.toLocaleString()}</span>
+              <div>
+                <span style:margin-right="10px">
+                  A: {node.result.modelResults[modelA].toFixed(2)}%
+                  {#if modelB}
+                    <span style:margin-left="10px">
+                      B: {node.result.modelResults[modelB].toFixed(2)}%
+                    </span>
+                  {/if}
+                </span>
+                <span>{node.result.sliceSize.toLocaleString()}</span>
+              </div>
             </div>
           </div>
         </div>
       {:else}
-        <div class="cell leaf" style="margin-left: {node.depth * 10 + 10}px">
+        <div class="cell leaf" style="margin-left: {node.depth * 10}px">
           <div class="group">
             <div style:margin-right="5px">
               <FormField on:click={(e) => e.stopPropagation()}>
@@ -73,7 +86,7 @@
           </div>
         </div>
         {#if expand[i]}
-          <svelte:self resultNode={node} bind:selected />
+          <svelte:self resultNode={node} bind:selected {modelA} {modelB} />
         {/if}
       {/if}
     {/each}
@@ -99,7 +112,6 @@
     align-items: center;
   }
   .selected {
-    border-color: green;
-    background: rgba(0, 255, 0, 0.1);
+    background: #ebdffc;
   }
 </style>
