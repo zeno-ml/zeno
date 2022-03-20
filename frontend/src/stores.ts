@@ -1,16 +1,20 @@
-import { derived, writable, type Writable, type Readable } from "svelte/store";
-
-import websocketStore from "svelte-websocket-store";
+import { table as aqTable } from "arquero";
+import { websocketStore } from "svelte-websocket-store";
+import { derived, writable, type Readable, type Writable } from "svelte/store";
 
 export const metrics = writable([] as Metric[]);
-export const metric_names = writable([] as string[]);
 export const slicers = writable([] as Slicer[]);
-
 export const slices = writable(new Map<string, Slice>());
+export const table = writable(aqTable({}));
 
 export const wsResponse: Writable<WSResponse> = websocketStore(
   "ws://localhost:8000/api/results",
-  { status: "connecting", results: [] }
+  {
+    status: "connecting",
+    results: [],
+    id_column: "",
+    label_column: "",
+  } as WSResponse
 );
 export const status = derived(
   wsResponse,

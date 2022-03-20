@@ -14,9 +14,6 @@ interface Metric {
 interface Slice {
   name: string[];
   size: number;
-  id_column: string;
-  label_column: string;
-  table: ?ColumnTable;
 }
 
 interface Result {
@@ -31,5 +28,7 @@ interface Result {
 
 interface WSResponse {
   status: string;
+  id_column: string;
+  label_column: string;
   results: Result[];
 }
