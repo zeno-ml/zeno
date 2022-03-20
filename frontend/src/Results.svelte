@@ -37,6 +37,7 @@
         .then((d) => d.arrayBuffer())
         .then((d) => {
           table = fromArrow(d);
+          console.log(table);
           slice.table = table;
           $slices.set(selected, slice);
           slices.set($slices);
@@ -86,8 +87,10 @@
   {#if selected && table}
     <div>
       <Samples
-        id_col={slice.id_column}
-        label_col={slice.label_column}
+        idCol={slice.id_column}
+        labelCol={slice.label_column}
+        modelACol={modelA}
+        modelBCol={modelB}
         {table}
       />
     </div>

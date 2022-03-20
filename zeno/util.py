@@ -1,5 +1,6 @@
 import os
-from typing import Any, Callable, Union
+from pathlib import Path
+from typing import Callable, Union
 
 import pandas as pd
 import pyarrow as pa  # type: ignore
@@ -16,55 +17,41 @@ def get_arrow_bytes(df):
 
 # Used for preprocess and model outputs.
 def cached_process(
-    data_loader: Callable,
     df: pd.DataFrame,
+    ids: pd.Index,
+    column_name: str,
+    cache_path: Path,
     fn: Callable,
-    cache,
-    batch_size: int,
-    id_column: str,
+    data_loader: Callable,
     data_path: str,
+    batch_size: int,
     transform: Union[Callable, None] = None,
 ):
-    final_outputs: Any = [None] * df.shape[0]
-    to_output = []
-    outputs = []
+    if column_name not in df.columns:
+        try:
+            df.loc[:, column_name] = pd.read_pickle(cache_path)
+        except FileNotFoundError:
+            df.loc[:, column_name] = [pd.NA] * df.shape[0]
 
-    # Get all instances from cache possible
-    for i, inst in enumerate(list(df[id_column])):
-        if transform:
-            inst = inst + "_T"
-        if inst in cache:
-            final_outputs[i] = cache[inst]
-        else:
-            to_output.append(i)
+    to_predict_indices = df.loc[pd.isna(df[column_name]), :].index.intersection(ids)
 
-    if len(to_output) > 0:
-        if len(to_output) < batch_size:
-            data = data_loader(df.iloc[to_output], id_column, data_path)
+    if len(to_predict_indices) > 0:
+        if len(to_predict_indices) < batch_size:
+            data = data_loader(df.loc[to_predict_indices], data_path)
             if transform:
                 data = transform(data)
-            outputs = fn(data)
+            df.loc[to_predict_indices, column_name] = fn(data)
+            df[column_name].to_pickle(cache_path)
         else:
-            for i in range(0, len(to_output), batch_size):
+            for i in range(0, len(to_predict_indices), batch_size):
                 data = data_loader(
-                    df.iloc[to_output[i : i + batch_size]], id_column, data_path
+                    df.loc[to_predict_indices[i : i + batch_size]],
+                    data_path,
                 )
                 if transform:
                     data = transform(data)
-                outputs.extend(fn(data))
-
-        j = 0
-        for i, inst in enumerate(final_outputs):
-            if inst is None:
-                final_outputs[i] = outputs[j]
-                if transform:
-                    cache[df.iloc[i][id_column] + "_T"] = final_outputs[i]
-                else:
-                    cache[df.iloc[i][id_column]] = final_outputs[i]
-
-                j = j + 1
-
-    return final_outputs
+                df.loc[to_predict_indices[i : i + batch_size], column_name] = fn(data)
+                df[column_name].to_pickle(cache_path)
 
 
 class TestFileUpdateHandler(FileSystemEventHandler):
