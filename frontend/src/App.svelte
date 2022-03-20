@@ -55,6 +55,8 @@
     wsResponse.set({
       status: "connecting",
       results: [],
+      id_column: "",
+      label_column: "",
     } as WSResponse);
   });
 

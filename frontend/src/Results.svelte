@@ -3,7 +3,14 @@
   import ResultCell from "./ResultCell.svelte";
   import Samples from "./samples/Samples.svelte";
 
-  import { metrics, models, results, slices } from "./stores";
+  import {
+    metrics,
+    models,
+    results,
+    slices,
+    table,
+    wsResponse,
+  } from "./stores";
   import { ResultNode, appendChild } from "./util";
 
   import { fromArrow } from "arquero";
@@ -29,23 +36,19 @@
     }
   });
 
-  let table;
-  $: if (selected) {
-    // TODO: cache this table in results
-    if (!slice.table) {
-      fetch("/api/table/" + selected)
-        .then((d) => d.arrayBuffer())
-        .then((d) => {
-          table = fromArrow(d);
-          console.log(table);
-          slice.table = table;
-          $slices.set(selected, slice);
-          slices.set($slices);
-        })
-        .catch((e) => console.log(e));
-    } else {
-      table = slice.table;
-    }
+  $: if (selected && slice) {
+    fetch("/api/table/", {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({ name: slice.name }),
+    })
+      .then((d) => d.arrayBuffer())
+      .then((d) => {
+        table.set(fromArrow(d));
+      })
+      .catch((e) => console.log(e));
   }
 </script>
 
@@ -87,11 +90,11 @@
   {#if selected && table}
     <div>
       <Samples
-        idCol={slice.id_column}
-        labelCol={slice.label_column}
+        idCol={$wsResponse.id_column}
+        labelCol={$wsResponse.label_column}
         modelACol={modelA}
         modelBCol={modelB}
-        {table}
+        table={$table}
       />
     </div>
   {/if}

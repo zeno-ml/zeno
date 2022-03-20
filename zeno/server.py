@@ -1,6 +1,8 @@
 import asyncio
 import json
 import os
+from typing import List
+from pydantic import BaseModel
 
 import uvicorn  # type: ignore
 from fastapi import FastAPI, WebSocket
@@ -8,6 +10,10 @@ from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 
 from .zeno import Zeno
+
+
+class Slice(BaseModel):
+    name: List[str]
 
 
 def run_background_processor(conn, args):
@@ -82,7 +88,7 @@ def run_background_processor(conn, args):
                 }
                 for r in res
             ]
-            conn.send((zeno.status, res))
+            conn.send((zeno.status, res, zeno.id_column, zeno.label_column))
 
 
 def run_server(conn, args):
@@ -111,9 +117,14 @@ def run_server(conn, args):
         conn.send(("GET_SLICES", ""))
         return conn.recv()
 
-    @api_app.get("/table/{sli}")
-    async def get_table(sli):
-        conn.send(("GET_TABLE", sli))
+    # @api_app.get("/table/{sli}")
+    # async def get_table(sli):
+    #     conn.send(("GET_TABLE", sli))
+    #     return Response(content=conn.recv())
+
+    @api_app.post("/table/")
+    async def get_table(sli: Slice):
+        conn.send(("GET_TABLE", "".join(sli.name)))
         return Response(content=conn.recv())
 
     @api_app.get("/model_outputs/{res}/{model}")
@@ -142,6 +153,13 @@ def run_server(conn, args):
             if res[0] != previous_status:
                 print("status: ", res[0])
                 previous_status = res[0]
-                await websocket.send_json({"status": res[0], "results": res[1]})
+                await websocket.send_json(
+                    {
+                        "status": res[0],
+                        "results": res[1],
+                        "id_column": res[2],
+                        "label_column": res[3],
+                    }
+                )
 
     uvicorn.run(app, host="localhost", port=8000)  # type: ignore
