@@ -14,25 +14,16 @@
   import { onMount } from "svelte";
   import github from "svelte-highlight/src/styles/github";
   import Router, { location } from "svelte-spa-router";
-
   import Home from "./Home.svelte";
-  import Metrics from "./Metrics.svelte";
   import Results from "./Results.svelte";
-  import ResultView from "./ResultView.svelte";
-  import Slicers from "./Slicers.svelte";
   import Slices from "./Slices.svelte";
-
   import { metrics, slices, status, wsResponse } from "./stores";
 
   const routes = {
     "/": Home,
-    "/slicers/": Slicers,
-    "/tests/": Metrics,
-    "/tests/:test?": Metrics,
     "/slices/": Slices,
     "/slices/:slicer?": Slices,
     "/results/": Results,
-    "/result/:id?": ResultView,
     "*": Home,
   };
 
@@ -64,13 +55,15 @@
     wsResponse.set({
       status: "connecting",
       results: [],
+      id_column: "",
+      label_column: "",
     } as WSResponse);
   });
 
   status.subscribe((s) => {
+    // If running analysis or done, get the slices and metrics.
     if (!fetchedSlices && (s === "Done" || s.startsWith("Model"))) {
       fetchedSlices = true;
-      console.log("get stuff?");
       fetch("/api/slices")
         .then((d) => d.json())
         .then((d) => {
@@ -132,30 +125,6 @@
           <SecondaryText>Overview of tests</SecondaryText>
         </Text>
       </Item>
-      <Separator />
-      <br />
-      <Separator />
-      <Item
-        activated={tab === "slicers"}
-        on:SMUI:action={() => updateTab("slicers")}
-      >
-        <Text>
-          <PrimaryText>Slicers</PrimaryText>
-          <SecondaryText>Data slicing functions</SecondaryText>
-        </Text>
-      </Item>
-      <Separator />
-      <Item
-        activated={tab === "tests"}
-        on:SMUI:action={() => updateTab("tests")}
-      >
-        <Text>
-          <PrimaryText>Metrics</PrimaryText>
-          <SecondaryText>Metric functions</SecondaryText>
-        </Text>
-      </Item>
-      <Separator />
-      <br />
       <Separator />
       <Item
         activated={tab === "slices"}

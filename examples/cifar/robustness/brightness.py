@@ -36,7 +36,7 @@ def brightness(images):
     return [get_brightness(im) for im in images]
 
 
-@slicer(["accuracy", ("rotate", "accuracy")])
+@slicer(["accuracy"])
 def low_brightness(metadata):
     return metadata[metadata["brightness"] < 80].index
 
@@ -46,39 +46,11 @@ def white_border(metadata):
     return metadata[metadata["brightness"] > 200].index
 
 
-@slicer(["accuracy"])
-def low_brightness_frog(metadata, label_col):
-    return metadata[
-        (metadata["brightness"] < 80) & (metadata[label_col] == "frog")
-    ].index
-
-
-@slicer(["accuracy"])
-def low_brightness_cat(metadata, label_col):
-    return metadata[
-        (metadata["brightness"] < 80) & (metadata[label_col] == "cat")
-    ].index
-
-
-@slicer(["accuracy"])
-def high_brightness_cat(metadata, label_col):
-    return metadata[
-        (metadata["brightness"] > 150) & (metadata[label_col] == "cat")
-    ].index
-
-
-@slicer(["accuracy"])
-def high_brightness_frog(metadata, label_col):
-    return metadata[
-        (metadata["brightness"] > 150) & (metadata[label_col] == "frog")
-    ].index
+@transform
+def blur(data):
+    return [img.filter(PIL.ImageFilter.BLUR) for img in data]
 
 
 @transform
 def rotate(data):
     return [img.rotate(90, PIL.Image.NEAREST, expand=1) for img in data]
-
-
-@transform
-def blur(data):
-    return [img.filter(PIL.ImageFilter.BLUR) for img in data]

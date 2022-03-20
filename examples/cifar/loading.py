@@ -1,9 +1,9 @@
+import torchvision.transforms as transforms
 import PIL
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import os
-import torchvision.transforms as transforms
 from zeno import load_data, load_model, metric
 
 transform_image = transforms.Compose(
@@ -60,8 +60,8 @@ def load_model(model_path):
 
 
 @load_data
-def load_data(df_metadata, id_col, data_path):
-    return [PIL.Image.open(os.path.join(data_path, img)) for img in df_metadata[id_col]]
+def load_data(df_metadata, data_path):
+    return [PIL.Image.open(os.path.join(data_path, img)) for img in df_metadata.index]
 
 
 @metric

@@ -1,6 +1,5 @@
 import asyncio
 import os
-import shelve
 import sys
 import threading
 from importlib import util
@@ -42,13 +41,13 @@ class Zeno(object):
         self.data_loader: Callable = None  # type: ignore
 
         # Key is name of preprocess function
-        self.preprocessors: Dict[str, Preprocessor] = {}
+        self.preprocessors: List[Preprocessor] = []
         # Key is name of slicer function
         self.slicers: Dict[str, Slicer] = {}
         # Key is name of transform function
-        self.transforms: Dict[str, Transform] = {}
+        self.transforms: Dict[str, Callable] = {}
         # Key is name of metric function
-        self.metrics: Dict[str, Metric] = {}
+        self.metrics: Dict[str, Callable] = {}
         # Key is name of slice
         self.slices: Dict[str, Slice] = {}
         # Key is result.id, hash of properties
@@ -68,6 +67,8 @@ class Zeno(object):
                 + metadata_path.suffix
                 + " not one of .csv or .parquet"
             )
+        self.metadata[id_column].astype(str)
+        self.metadata.set_index(self.id_column, inplace=True)
 
     def __initialize_watchdog(self):
         observer = Observer()
@@ -130,7 +131,7 @@ class Zeno(object):
                         print("Multiple data loaders found, can only have one")
                         sys.exit(1)
                 if hasattr(func, "preprocess"):
-                    self.preprocessors[func_name] = Preprocessor(func_name, func)
+                    self.preprocessors.append(Preprocessor(func_name, func))
                 if hasattr(func, "slicer"):
                     path_names = list(test_file.relative_to(base_path).parts)
                     path_names[-1] = path_names[-1][0:-3]
@@ -140,9 +141,9 @@ class Zeno(object):
                         [*path_names, func_name],
                     )
                 if hasattr(func, "transform"):
-                    self.transforms[func_name] = Transform(func_name, func)
+                    self.transforms[func_name] = func
                 if hasattr(func, "metric"):
-                    self.metrics[func_name] = Metric(func_name, func)
+                    self.metrics[func_name] = func
 
     def __run_tests(self):
         if self._loop:
@@ -158,37 +159,29 @@ class Zeno(object):
         self.__calculate_metrics()
 
     def __preprocess_data(self):
-        for name, preprocess in self.preprocessors.items():
-            self.status = "Running preprocessor " + name
-            cache = shelve.open(
-                os.path.join(
-                    self.cache_path,
-                    (
-                        ".model_preprocess_"
-                        + str(self.metadata_path).replace("/", "_")
-                        + name
-                    ),
-                ),
-                writeback=True,
+        for preprocessor in self.preprocessors:
+            self.status = "Running preprocessor " + preprocessor.name
+            cache_path = Path(
+                self.cache_path,
+                "preprocess_"
+                + preprocessor.name
+                + "_"
+                + str(self.metadata_path).replace("/", "_"),
             )
-            output = cached_process(
-                self.data_loader,
+            cached_process(
                 self.metadata,
-                preprocess.func,
-                cache,
-                self.batch_size,
-                self.id_column,
+                self.metadata.index,
+                preprocessor.name,
+                cache_path,
+                preprocessor.func,
+                self.data_loader,
                 self.data_path,
+                self.batch_size,
             )
-            if not isinstance(output, list):
-                print("ERROR: preprocess function must return a list")
-                sys.exit(1)
-            self.metadata[name] = output
         self.status = "Done preprocessing"
 
     def __slice_data(self):
         self.slices = {}
-
         for name, slicer in self.slicers.items():
             self.status = "Slicing data for " + name
             self.slices = {
@@ -205,21 +198,16 @@ class Zeno(object):
             )
 
             model = self.model_loader(model_name)
-            model_cache = self.__open_cache(".model_" + os.path.basename(model_name))
 
             for j, sli in enumerate(self.slices.values()):
                 for k, metric in enumerate(sli.metrics):
 
                     transform = None
+                    transform_name = ""
                     if type(metric) in (list, tuple):
                         transform = self.transforms[metric[0]]
+                        transform_name = transform.__name__
                         metric = metric[1]
-                    if transform is not None:
-                        transform_name = transform.name
-                        transform_fn = transform.func
-                    else:
-                        transform_name = ""
-                        transform_fn = None
 
                     self.status = (
                         "Model {0}/{1}: Slice {2}/{3} ({4}),"
@@ -235,10 +223,15 @@ class Zeno(object):
                         metric,
                         str(sli.size),
                     )
+                    print(self.status)
 
                     if i == 0:
                         res = Result(
-                            sli.name, transform_name, metric, sli.size, self.model_names
+                            sli.name,
+                            transform_name,
+                            metric,
+                            sli.size,
+                            self.model_names,
                         )
                     else:
                         res = self.results[
@@ -248,34 +241,45 @@ class Zeno(object):
                             )
                         ]
 
-                    metric_func = self.metrics[metric].func
+                    metric_func = self.metrics[metric]
 
-                    out = cached_process(
-                        self.data_loader,
-                        self.metadata.iloc[sli.sliced_indices],
+                    cached_process(
+                        self.metadata,
+                        sli.sliced_indices,
+                        str(model_name),
+                        Path(
+                            self.cache_path,
+                            "model_"
+                            + str(model_name).replace("/", "_")
+                            + "_"
+                            + str(self.metadata_path).replace("/", "_"),
+                        ),
                         model,
-                        model_cache,
-                        self.batch_size,
-                        self.id_column,
+                        self.data_loader,
                         self.data_path,
-                        transform=transform_fn,
+                        self.batch_size,
+                        transform=transform,
                     )
 
                     if len(signature(metric_func).parameters) == 3:
                         result = metric_func(
-                            out,
-                            self.metadata.iloc[sli.sliced_indices],
+                            self.metadata.loc[
+                                sli.sliced_indices, str(model_name)
+                            ].tolist(),
+                            self.metadata.loc[sli.sliced_indices],
                             self.label_column,
                         )
                     else:
                         result = metric_func(
-                            out,
-                            self.metadata.iloc[sli.sliced_indices],
+                            self.metadata.loc[
+                                sli.sliced_indices, str(model_name)
+                            ].tolist(),
+                            self.metadata.loc[sli.sliced_indices],
                         )
 
-                    res.set_result(model_name, out, result)
+                    res.set_result(model_name, result)
                     self.results[res.id] = res
-            model_cache.close()
+        # print(self.metadata.sample(100))
         self.status = "Done"
 
     def get_table(self, sli: str):
@@ -287,8 +291,11 @@ class Zeno(object):
         Returns:
             bytes: Arrow-encoded table of slice metadata
         """
-        df = self.metadata.iloc[self.slices[sli].sliced_indices]
+        df = self.metadata.loc[self.slices[sli].sliced_indices]
         return get_arrow_bytes(df)
+
+    def get_result(self):
+        return {}
 
     def get_model_outputs(self, opts: Tuple[int, int]):
         """Get outputs for a certain model in a certain result.
@@ -299,27 +306,14 @@ class Zeno(object):
         Returns:
             Dict: JSON-like item with the metric and output values
         """
-        result_hash, model_hash = opts
+        # result_hash, model_hash = opts
         # TODO: figure out hash issue, truncates on frontend
-        result = self.results[int(result_hash)]
-        return {
-            "metric": result.model_metric_outputs[int(model_hash)],
-            "output": result.model_outputs[int(model_hash)],
-        }
-
-    def __open_cache(self, path: str):
-        """Get shelve cache for a path
-
-        Args:
-            path (str): Filename for the cache file
-
-        Returns:
-            Shelf: Cache dict
-        """
-        return shelve.open(
-            os.path.join(self.cache_path, path),
-            writeback=True,
-        )
+        # result = self.results[int(result_hash)]
+        return opts
+        # return {
+        #     "metric": result.model_metric_outputs[int(model_hash)],
+        #     "output": result.model_outputs[int(model_hash)],
+        # }
 
 
 class Slicer:
@@ -341,8 +335,6 @@ class Slicer:
         if isinstance(slicer_output, pd.DataFrame):
             slicer_output = slicer_output.index
 
-        slicer_output = list(slicer_output)
-
         slices_to_return = {}
         # Can either be of the from [index list] or [(name, index list)..]
         if (
@@ -351,7 +343,7 @@ class Slicer:
             or isinstance(slicer_output[0], list)
         ):
             for output_slice in slicer_output:
-                indices = list(output_slice[1])
+                indices = output_slice[1]
                 # Join slice names with backslash
                 name_list = [*self.name_list, output_slice[0]]
                 self.slices.append("".join(name_list))
@@ -386,7 +378,7 @@ class Slice:
     def __init__(
         self,
         name: List[str],
-        sliced_indices: List[int],
+        sliced_indices: pd.Index,
         size: int,
         metrics: List[str],
         slicer: str,
@@ -428,27 +420,25 @@ class Result:
         self.model_names = model_names
 
         # Keys are hash of model name
-        self.model_outputs: Dict[int, list] = {}
-        self.model_results: Dict[int, float] = {}
-        self.model_metric_outputs: Dict[int, list] = {}
+        self.model_metrics: Dict[str, float] = {}
+        self.model_metric_outputs: Dict[str, list] = {}
 
         self.id: int = int(
             hash("".join(self.sli) + self.transform + self.metric) / 10000
         )
 
-    def set_result(self, model: Path, outputs: list, result: Union[pd.Series, list]):
-        model_hash = int(hash(model) / 10000)
-        self.model_outputs[model_hash] = outputs
+    def set_result(self, model: Path, result: Union[pd.Series, list]):
+        model_name = str(model)
         if isinstance(result, pd.Series):
-            self.model_metric_outputs[model_hash] = result.astype(int).to_list()
+            self.model_metric_outputs[model_name] = result.astype(int).to_list()
         elif len(result) > 0 and isinstance(result[0], bool):
-            self.model_metric_outputs[model_hash] = [
+            self.model_metric_outputs[model_name] = [
                 1 if r is True else 0 for r in result
             ]
 
-        self.model_results[model_hash] = (
-            sum(self.model_metric_outputs[model_hash])
-            / len(self.model_metric_outputs[model_hash])
+        self.model_metrics[model_name] = (
+            sum(self.model_metric_outputs[model_name])
+            / len(self.model_metric_outputs[model_name])
             * 100
         )
 
