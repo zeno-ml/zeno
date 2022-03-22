@@ -1,4 +1,4 @@
-from ..zeno import Metric, Preprocessor, Transform
+from ..classes import Metric, Preprocessor, Transform
 
 
 def test_preprocessor():

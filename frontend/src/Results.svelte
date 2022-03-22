@@ -14,6 +14,7 @@
   import { ResultNode, appendChild } from "./util";
 
   import { fromArrow } from "arquero";
+  import Button from "@smui/button";
 
   $: metric_names = $metrics.map((m) => m.name);
   $: selectedMetric = metric_names[0];
@@ -23,10 +24,12 @@
   models.subscribe((m) => (!modelA && m.length > 0 ? (modelA = m[0]) : ""));
 
   let selected = "";
+  let checked: Map<string, string[]> = new Map();
   let resultHierarchy: ResultNode = new ResultNode("root", 0, {});
   $: slice = selected ? (slice = $slices.get(selected)) : "";
 
   results.subscribe((res) => {
+    console.log(res);
     if (res.length > 0) {
       res = res.filter((r) => r.transform === "");
       res.forEach((r) => {
@@ -36,6 +39,7 @@
     }
   });
 
+  // TODO: Cache one table.
   $: if (selected && slice) {
     fetch("/api/table/", {
       method: "POST",
@@ -49,6 +53,10 @@
         table.set(fromArrow(d));
       })
       .catch((e) => console.log(e));
+  }
+
+  function requestSlice() {
+    return 0;
   }
 </script>
 
@@ -82,9 +90,15 @@
       <ResultCell
         resultNode={resultHierarchy}
         bind:selected
+        bind:checked
         {modelA}
         {modelB}
       />
+      {#if selected}
+        <div style:margin-right="10px" style:margin-top="10px">
+          <Button on:click={() => requestSlice()}>New Slice</Button>
+        </div>
+      {/if}
     </div>
   {/if}
   {#if selected && table}

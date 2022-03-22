@@ -11,24 +11,17 @@
     Text,
   } from "@smui/list";
   import Tooltip, { Wrapper } from "@smui/tooltip";
-  import { onMount } from "svelte";
   import github from "svelte-highlight/src/styles/github";
   import Router, { location } from "svelte-spa-router";
   import Home from "./Home.svelte";
   import Results from "./Results.svelte";
-  import Slices from "./Slices.svelte";
-  import { metrics, slices, status, wsResponse } from "./stores";
+  import { metrics, slices, status } from "./stores";
 
   const routes = {
     "/": Home,
-    "/slices/": Slices,
-    "/slices/:slicer?": Slices,
     "/results/": Results,
     "*": Home,
   };
-
-  let runningAnalysis = true;
-  let fetchedSlices = false;
 
   let tab = $location.split("/")[1];
   if (!tab) {
@@ -51,14 +44,8 @@
     }
   }
 
-  onMount(() => {
-    wsResponse.set({
-      status: "connecting",
-      results: [],
-      id_column: "",
-      label_column: "",
-    } as WSResponse);
-  });
+  let runningAnalysis = true;
+  let fetchedSlices = false;
 
   status.subscribe((s) => {
     // If running analysis or done, get the slices and metrics.

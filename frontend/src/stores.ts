@@ -16,7 +16,7 @@ export const wsResponse: Writable<WSResponse> = websocketStore(
     label_column: "",
   } as WSResponse
 );
-export const status = derived(
+export const status: Readable<string> = derived(
   wsResponse,
   ($wsResponse) => $wsResponse.status,
   "connecting"
@@ -32,11 +32,12 @@ export const results: Readable<Result[]> = derived(
   },
   [] as Result[]
 );
-export const models = derived(
+
+export const models: Readable<string[]> = derived(
   results,
   (r: Result[]) => {
     if (r.length > 0) {
-      return r[0].modelNames;
+      return Object.keys(r[0].modelResults);
     } else {
       return [];
     }

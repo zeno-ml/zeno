@@ -22,8 +22,12 @@ interface Result {
   transform: string;
   slice: string[];
   sliceSize: number;
-  modelNames: string[];
-  modelResults: { property: float }[];
+  modelResults: Map<string, ModelResult>;
+}
+
+interface ModelResult {
+  metric: float;
+  transform_metric: float;
 }
 
 interface WSResponse {
