@@ -1,19 +1,15 @@
 import asyncio
 import json
 import os
-from typing import List
-from pydantic import BaseModel
 
 import uvicorn  # type: ignore
 from fastapi import FastAPI, WebSocket
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 
+from zeno.classes import AnalysisModel, SliceModel
+
 from .zeno import Zeno
-
-
-class Slice(BaseModel):
-    name: List[str]
 
 
 def run_background_processor(conn, args):
@@ -33,46 +29,27 @@ def run_background_processor(conn, args):
     while True:
         case, options = conn.recv()
 
-        if case == "GET_SLICERS":
-            slicers = zeno.slicers.values()
-            conn.send(
-                json.dumps(
-                    [
-                        {
-                            "name": s.name_list,
-                            "source": s.source,
-                            "slices": s.slices,
-                        }
-                        for s in slicers
-                    ]
-                )
-            )
+        if case == "GET_SLICES":
+            slices = zeno.slices.values()
+            ret = [
+                {
+                    "name": s.name,
+                    "size": s.size,
+                }
+                for s in slices
+            ]
+
+            conn.send(json.dumps(ret))
 
         if case == "GET_METRICS":
             testers = zeno.metrics.values()
             conn.send(json.dumps([{"name": s.__name__, "source": ""} for s in testers]))
 
-        if case == "GET_SLICES":
-            slices = zeno.slices.values()
-            conn.send(
-                json.dumps(
-                    [
-                        {
-                            "name": s.name,
-                            "size": s.size,
-                            "id_column": zeno.id_column,
-                            "label_column": zeno.label_column,
-                        }
-                        for s in slices
-                    ]
-                )
-            )
-
         if case == "GET_TABLE":
             conn.send(zeno.get_table(options))
 
-        if case == "GET_MODEL_OUTPUTS":
-            conn.send(json.dumps(zeno.get_model_outputs(options)))
+        if case == "RUN_ANALYSIS":
+            conn.send(zeno.get_result(options.requests))
 
         if case == "GET_RESULTS":
             res = zeno.results.values()
@@ -84,7 +61,6 @@ def run_background_processor(conn, args):
                     "slice": r.sli,
                     "sliceSize": r.slice_size,
                     "modelResults": r.model_metrics,
-                    "modelNames": [str(n) for n in r.model_names],
                 }
                 for r in res
             ]
@@ -107,29 +83,9 @@ def run_server(conn, args):
         name="base",
     )
 
-    @api_app.get("/slicers")
-    async def get_slicers():
-        conn.send(("GET_SLICERS", ""))
-        return conn.recv()
-
     @api_app.get("/slices")
     async def get_slices():
         conn.send(("GET_SLICES", ""))
-        return conn.recv()
-
-    # @api_app.get("/table/{sli}")
-    # async def get_table(sli):
-    #     conn.send(("GET_TABLE", sli))
-    #     return Response(content=conn.recv())
-
-    @api_app.post("/table/")
-    async def get_table(sli: Slice):
-        conn.send(("GET_TABLE", "".join(sli.name)))
-        return Response(content=conn.recv())
-
-    @api_app.get("/model_outputs/{res}/{model}")
-    async def get_model_outputs(res, model):
-        conn.send(("GET_MODEL_OUTPUTS", (res, model)))
         return conn.recv()
 
     @api_app.get("/metrics")
@@ -137,10 +93,15 @@ def run_server(conn, args):
         conn.send(("GET_METRICS", ""))
         return conn.recv()
 
-    @api_app.get("/data")
-    async def get_data():
-        conn.send(("GET_DATA", ""))
+    @api_app.post("/table/")
+    async def get_table(sli: SliceModel):
+        conn.send(("GET_TABLE", "".join(sli.name)))
         return Response(content=conn.recv())
+
+    @api_app.post("/analysis/")
+    async def run_analysis(sli: AnalysisModel):
+        conn.send(("RUN_ANALYSIS", sli))
+        return json.dumps("{}")
 
     @api_app.websocket("/results")
     async def results_websocket(websocket: WebSocket):

@@ -9,17 +9,19 @@
   import Ripple from "@smui/ripple";
 
   export let resultNode: ResultNode;
-  export let selected;
-  export let modelA;
-  export let modelB;
+  export let selected: string;
+  export let checked: Map<string, string[]>;
+  export let modelA: string;
+  export let modelB: string;
 
   let expand = [];
-  let checked = [];
   if (resultNode.children) {
     expand = new Array(Object.keys(resultNode.children).length).fill(false);
-    checked = new Array(Object.keys(resultNode.children).length).fill(false);
   }
   console.log(resultNode);
+  $: if (checked.size > 2) {
+    checked.delete([...checked.keys()][0]);
+  }
 </script>
 
 <div>
@@ -40,7 +42,18 @@
           <div class="group" style:width="100%">
             <div style:margin-right="5px">
               <FormField on:click={(e) => e.stopPropagation()}>
-                <Checkbox bind:checked={checked[i]} />
+                <Checkbox
+                  checked={checked.has(node.result.slice.join(""))}
+                  on:click={() => {
+                    checked.has(node.result.slice.join(""))
+                      ? checked.delete(node.result.slice.join(""))
+                      : checked.set(
+                          node.result.slice.join(""),
+                          node.result.slice
+                        );
+                    checked = new Map(checked);
+                  }}
+                />
               </FormField>
             </div>
             <div class="group" style:width="100%">
@@ -62,11 +75,6 @@
       {:else}
         <div class="cell leaf" style="margin-left: {node.depth * 10}px">
           <div class="group">
-            <div style:margin-right="5px">
-              <FormField on:click={(e) => e.stopPropagation()}>
-                <Checkbox bind:checked={checked[i]} />
-              </FormField>
-            </div>
             {name}
           </div>
           <div class="group">
@@ -86,7 +94,13 @@
           </div>
         </div>
         {#if expand[i]}
-          <svelte:self resultNode={node} bind:selected {modelA} {modelB} />
+          <svelte:self
+            resultNode={node}
+            bind:selected
+            bind:checked
+            {modelA}
+            {modelB}
+          />
         {/if}
       {/if}
     {/each}
