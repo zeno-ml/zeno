@@ -1,11 +1,8 @@
-import os
 from pathlib import Path
-from typing import Callable, List, Union
+from typing import Callable, Union
 
 import pandas as pd
 import pyarrow as pa  # type: ignore
-from watchdog.events import FileSystemEventHandler  # type: ignore
-from watchdog.observers import Observer  # type: ignore
 
 
 def get_arrow_bytes(df):
@@ -53,27 +50,3 @@ def cached_process(
                     data = transform(data)
                 df.loc[to_predict_indices[i : i + batch_size], column_name] = fn(data)
                 df[column_name].to_pickle(cache_path)
-
-
-class TestFileUpdateHandler(FileSystemEventHandler):
-    def __init__(self, files, callback):
-        self.files = files
-        self.callback = callback
-
-    def on_modified(self, event):
-        if os.path.abspath(event.src_path) in self.files:
-            self.callback()
-
-
-def initialize_watchdog(test_files: List[Path], callback: Callable):
-    observer = Observer()
-    event_handler = TestFileUpdateHandler(
-        [os.path.abspath(t) for t in test_files], callback
-    )
-    folders_logged = []
-    for test in test_files:
-        folder = os.path.dirname(test)
-        if folder not in folders_logged:
-            folders_logged.append(folder)
-            observer.schedule(event_handler, folder, recursive=True)
-    observer.start()

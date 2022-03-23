@@ -10,7 +10,7 @@ from typing import Callable, Dict, List
 import pandas as pd
 
 from .classes import Preprocessor, Result, ResultRequest, Slice, Slicer
-from .util import cached_process, get_arrow_bytes, initialize_watchdog
+from .util import cached_process, get_arrow_bytes
 
 
 class Zeno(object):
@@ -54,9 +54,6 @@ class Zeno(object):
         # Key is result.id, hash of properties
         self.results: Dict[int, Result] = {}
 
-        self._loop = None
-        initialize_watchdog(self.test_files, self.start_processing)
-
         # Read metadata as Pandas for slicing
         if metadata_path.suffix == ".csv":
             self.metadata = pd.read_csv(metadata_path)
@@ -68,6 +65,7 @@ class Zeno(object):
                 + metadata_path.suffix
                 + " not one of .csv or .parquet"
             )
+
         self.metadata[id_column].astype(str)
         self.metadata.set_index(self.id_column, inplace=True)
 
