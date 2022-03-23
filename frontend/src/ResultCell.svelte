@@ -13,12 +13,12 @@
   export let checked: Map<string, string[]>;
   export let modelA: string;
   export let modelB: string;
+  export let expandAll: boolean = false;
 
   let expand = [];
   if (resultNode.children) {
     expand = new Array(Object.keys(resultNode.children).length).fill(false);
   }
-  console.log(resultNode);
   $: if (checked.size > 2) {
     checked.delete([...checked.keys()][0]);
   }
@@ -30,14 +30,15 @@
       {#if isLeaf(node)}
         <div
           use:Ripple={{ surface: true, color: "primary" }}
-          class="cell parent {selected === node.result.slice.join('')
+          class="cell parent {selected ===
+          node.result.slice.map((d) => d.join('')).join('')
             ? 'selected'
             : ''}"
           style:margin-left={node.depth * 10 + "px"}
           on:click={() =>
-            selected === node.result.slice.join("")
+            selected === node.result.slice.map((d) => d.join("")).join("")
               ? (selected = "")
-              : (selected = node.result.slice.join(""))}
+              : (selected = node.result.slice.map((d) => d.join("")).join(""))}
         >
           <div class="group" style:width="100%">
             <div style:margin-right="5px">
@@ -93,11 +94,12 @@
             </IconButton>
           </div>
         </div>
-        {#if expand[i]}
+        {#if expand[i] || expandAll}
           <svelte:self
             resultNode={node}
             bind:selected
             bind:checked
+            {expandAll}
             {modelA}
             {modelB}
           />

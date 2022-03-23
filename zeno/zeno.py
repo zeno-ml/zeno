@@ -140,21 +140,25 @@ class Zeno(object):
         )
         _thread.start()
 
+    def __run_analysis(self, reqs: List[ResultRequest]):
+        # TODO: listen for interruption, stop processing and run again.
+        _thread = threading.Thread(
+            target=asyncio.run, args=(self.__calculate_metrics(reqs),)
+        )
+        _thread.start()
+
     # def __run_one_test(self):
 
     async def __run_test_pipeline(self):
         self.__preprocess_data()
         self.__slice_data()
         reqs: List[ResultRequest] = []
-        for m in self.model_names:
-            for s in self.slices.values():
-                for met in self.metrics.keys():
-                    reqs.append(
-                        ResultRequest(
-                            slices=[s.name], metric=met, model=str(m), transform=""
-                        )
-                    )
-        self.__calculate_metrics(reqs)
+        for s in self.slices.values():
+            for met in self.metrics.keys():
+                reqs.append(
+                    ResultRequest(slices=s.name, metric=met, model="", transform="")
+                )
+        await self.__calculate_metrics(reqs)
 
     def __preprocess_data(self):
         """Run preprocessors on every instance."""
@@ -190,17 +194,35 @@ class Zeno(object):
             }
         self.status = "Done slicing"
 
-    def __calculate_metrics(self, requests: List[ResultRequest]):
+    async def __calculate_metrics(self, requests: List[ResultRequest]):
         """Calculate result for each requested combination."""
-        self.results = {}
+        requests_all_models = []
+        for r in requests:
+            requests_all_models.extend(
+                [
+                    ResultRequest(
+                        slices=r.slices, metric=r.metric, model=str(m), transform=""
+                    )
+                    for m in self.model_names
+                ]
+            )
+        requests = requests_all_models
+
+        self.status = "working"
         for i, request in enumerate(requests):
-            slice_names, metric_name, model_name = (
+            slice_name, metric_name, model_name = (
                 request.slices,
                 request.metric,
                 request.model,
             )
-            slice_name = slice_names[0]
-            sli = self.slices["".join(slice_name)]
+            try:
+                sli = self.slices["".join(["".join(d) for d in slice_name])]
+            except KeyError:
+                index = self.slices["".join(slice_name[0])].sliced_indices.intersection(
+                    self.slices["".join(slice_name[1])].sliced_indices
+                )
+                sli = Slice(slice_name, index, len(index), "")
+                self.slices["".join(["".join(d) for d in slice_name])] = sli
 
             self.status = ("Test {0}/{1}: Slice {2}, Metric {3}, Model {4}").format(
                 str(i + 1),
@@ -212,7 +234,10 @@ class Zeno(object):
 
             self.__calculate_outputs(sli)
 
-            res_hash = int(hash("".join(slice_name) + "" + metric_name) / 10000)
+            res_hash = int(
+                hash("".join(["".join(d) for d in slice_name]) + "" + metric_name)
+                / 10000
+            )
             if res_hash in self.results:
                 res = self.results[res_hash]
             else:
@@ -240,7 +265,7 @@ class Zeno(object):
 
             res.set_result(model_name, result)
             self.results[res.id] = res
-        self.status = "Done"
+        self.status = "Done " + str(hash(str(requests)))
 
     def __calculate_outputs(self, sli: Slice):
         """Calculate model outputs for each slice."""
@@ -276,9 +301,11 @@ class Zeno(object):
         Returns:
             bytes: Arrow-encoded table of slice metadata
         """
-        df = self.metadata.loc[self.slices[sli].sliced_indices]
+        name = "".join(["".join(d) for d in sli])
+        df = self.metadata.loc[self.slices[name].sliced_indices]
         return get_arrow_bytes(df)
 
     def get_result(self, requests: List[ResultRequest]):
         """Start processing for given slices, metrics, and models."""
-        return requests
+        self.__run_analysis(requests)
+        return "running analysis"

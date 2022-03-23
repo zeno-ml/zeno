@@ -3,7 +3,8 @@ import json
 import os
 
 import uvicorn  # type: ignore
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, Request, WebSocket
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 
@@ -95,13 +96,13 @@ def run_server(conn, args):
 
     @api_app.post("/table/")
     async def get_table(sli: SliceModel):
-        conn.send(("GET_TABLE", "".join(sli.name)))
+        conn.send(("GET_TABLE", sli.name))
         return Response(content=conn.recv())
 
     @api_app.post("/analysis/")
     async def run_analysis(sli: AnalysisModel):
         conn.send(("RUN_ANALYSIS", sli))
-        return json.dumps("{}")
+        return conn.recv()
 
     @api_app.websocket("/results")
     async def results_websocket(websocket: WebSocket):
@@ -122,5 +123,15 @@ def run_server(conn, args):
                         "label_column": res[3],
                     }
                 )
+
+    @api_app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(
+        request: Request, exc: RequestValidationError
+    ):
+
+        exc_str = f"{exc}".replace("\n", " ").replace("   ", " ")
+        # or logger.error(f'{exc}')
+        print(request, exc_str)
+        return
 
     uvicorn.run(app, host="localhost", port=8000)  # type: ignore

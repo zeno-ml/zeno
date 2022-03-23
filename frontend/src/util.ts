@@ -19,7 +19,7 @@ export class ResultNode {
 
 // Recursive function for creating result tree.
 export function appendChild(parent: ResultNode, child: Result) {
-  const name = child.slice;
+  const name = child.slice[0];
 
   // Add a leaf node.
   if (name.length === parent.depth + 1) {

@@ -26,16 +26,27 @@
   let selected = "";
   let checked: Map<string, string[]> = new Map();
   let resultHierarchy: ResultNode = new ResultNode("root", 0, {});
-  $: slice = selected ? (slice = $slices.get(selected)) : "";
+  let comboResults: ResultNode = new ResultNode("combinations", 0, {});
+  let expandAll = false;
+  let slice = {};
+  $: slice = selected ? $slices.get(selected) : {};
 
   results.subscribe((res) => {
-    console.log(res);
     if (res.length > 0) {
-      res = res.filter((r) => r.transform === "");
-      res.forEach((r) => {
+      const fullRes = res.filter(
+        (r) => r.transform === "" && r.slice.length === 1
+      );
+      fullRes.forEach((r) => {
         appendChild(resultHierarchy, r);
       });
       resultHierarchy = resultHierarchy;
+
+      res
+        .filter((r) => r.transform === "" && r.slice.length > 1)
+        .forEach((r) => {
+          let n = r.slice.map((d: string[]) => d[d.length - 1]).join(" + ");
+          comboResults.children[n] = new ResultNode(n, 1, null, r);
+        });
     }
   });
 
@@ -56,7 +67,19 @@
   }
 
   function requestSlice() {
-    return 0;
+    const request = {
+      slices: [...checked.values()].map((d) => d[0]),
+      metric: selectedMetric,
+      model: modelA,
+      transform: "",
+    };
+    fetch("/api/analysis/", {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({ requests: [request] }),
+    }).catch((e) => console.log(e));
   }
 </script>
 
@@ -87,16 +110,35 @@
 <div id="container">
   {#if resultHierarchy}
     <div style:margin-right="10px">
+      <div class="button-block">
+        <Button variant="outlined" on:click={() => (expandAll = !expandAll)}>
+          {expandAll ? "Collapse all" : "Expand all"}
+        </Button>
+        {#if checked.size > 0}
+          <Button variant="outlined" on:click={() => requestSlice()}
+            >New Slice</Button
+          >
+        {/if}
+      </div>
       <ResultCell
         resultNode={resultHierarchy}
         bind:selected
         bind:checked
+        {expandAll}
         {modelA}
         {modelB}
       />
-      {#if selected}
-        <div style:margin-right="10px" style:margin-top="10px">
-          <Button on:click={() => requestSlice()}>New Slice</Button>
+      {#if Object.keys(comboResults.children).length > 0}
+        <p>Combination Slices</p>
+        <div>
+          <ResultCell
+            resultNode={comboResults}
+            bind:selected
+            bind:checked
+            {expandAll}
+            {modelA}
+            {modelB}
+          />
         </div>
       {/if}
     </div>
@@ -116,7 +158,7 @@
 
 <style>
   #container {
-    margin-top: 30px;
+    margin-top: 20px;
     display: flex;
     flex-direction: row;
   }
@@ -124,5 +166,11 @@
     padding-bottom: 20px;
     border-bottom: 1px solid #e0e0e0;
     width: 100%;
+  }
+  .button-block {
+    display: flex;
+    flex-direction: row;
+    margin-left: 10px;
+    margin-bottom: 10px;
   }
 </style>

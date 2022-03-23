@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 
 class SliceModel(BaseModel):
-    name: List[str]
+    name: List[List[str]]
 
 
 class ResultRequest(BaseModel):
@@ -31,7 +31,7 @@ class Preprocessor:
 class Slice:
     def __init__(
         self,
-        name: List[str],
+        name: List[List[str]],
         sliced_indices: pd.Index,
         size: int,
         slicer: str,
@@ -59,7 +59,7 @@ class Metric:
 class Result:
     def __init__(
         self,
-        sli: List[str],
+        sli: List[List[str]],
         transform: str,
         metric: str,
         slice_size: int,
@@ -76,7 +76,8 @@ class Result:
         self.model_metric_outputs: Dict[str, list] = {}
 
         self.id: int = int(
-            hash("".join(self.sli) + self.transform + self.metric) / 10000
+            hash("".join("".join(d) for d in sli) + self.transform + self.metric)
+            / 10000
         )
 
     def set_result(self, model_name: str, result: Union[pd.Series, list]):
@@ -128,7 +129,7 @@ class Slicer:
                 name_list = [*self.name_list, output_slice[0]]
                 self.slices.append("".join(name_list))
                 slices_to_return["".join(name_list)] = Slice(
-                    [*self.name_list, output_slice[0]],
+                    [[*self.name_list, output_slice[0]]],
                     indices,
                     len(indices),
                     self.name,
@@ -136,7 +137,7 @@ class Slicer:
         else:
             self.slices.append("".join(self.name_list))
             slices_to_return["".join(self.name_list)] = Slice(
-                self.name_list,
+                [self.name_list],
                 slicer_output,
                 len(slicer_output),
                 self.name,

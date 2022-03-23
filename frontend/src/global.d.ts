@@ -12,7 +12,7 @@ interface Metric {
 }
 
 interface Slice {
-  name: string[];
+  name: string[][];
   size: number;
 }
 
@@ -20,7 +20,7 @@ interface Result {
   id: int;
   metric: string;
   transform: string;
-  slice: string[];
+  slice: string[string[]];
   sliceSize: number;
   modelResults: Map<string, ModelResult>;
 }
@@ -35,4 +35,11 @@ interface WSResponse {
   id_column: string;
   label_column: string;
   results: Result[];
+}
+
+interface ResultRequest {
+  slices: string[][];
+  metric: string;
+  model: string;
+  transform: string;
 }

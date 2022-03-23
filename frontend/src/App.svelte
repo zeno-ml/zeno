@@ -15,7 +15,7 @@
   import Router, { location } from "svelte-spa-router";
   import Home from "./Home.svelte";
   import Results from "./Results.svelte";
-  import { metrics, slices, status } from "./stores";
+  import { metrics, results, slices, status } from "./stores";
 
   const routes = {
     "/": Home,
@@ -49,7 +49,7 @@
 
   status.subscribe((s) => {
     // If running analysis or done, get the slices and metrics.
-    if (!fetchedSlices && (s === "Done" || s.startsWith("Model"))) {
+    if (!fetchedSlices && (s.startsWith("Done") || s.startsWith("Model"))) {
       fetchedSlices = true;
       fetch("/api/slices")
         .then((d) => d.json())
@@ -57,7 +57,7 @@
           const out = JSON.parse(d) as Slice[];
           const retMap = new Map<string, Slice>();
           out.forEach((s) => {
-            retMap.set(s.name.join(""), s);
+            retMap.set(s.name.map((d) => d.join("")).join(""), s);
           });
           slices.set(retMap);
         });
@@ -65,12 +65,14 @@
         .then((d) => d.json())
         .then((d) => metrics.set(JSON.parse(d) as Metric[]));
     }
-    if (s === "Done") {
+    if (s.startsWith("Done")) {
       runningAnalysis = false;
     } else {
       runningAnalysis = true;
     }
   });
+
+  results.subscribe((d) => console.log(d));
 </script>
 
 <svelte:head>
