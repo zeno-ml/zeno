@@ -1,29 +1,31 @@
-export class ResultNode {
+import { metrics, models, ready, settings } from "./stores";
+
+export class SliceNode {
   name: string;
   depth: number;
-  children: Record<string, ResultNode>;
-  result: Result;
+  children: Record<string, SliceNode>;
+  slice: Slice;
 
   constructor(
     name: string,
     depth: number,
-    children?: Record<string, ResultNode>,
-    result?: Result
+    children?: Record<string, SliceNode>,
+    slice?: Slice
   ) {
     this.name = name;
     this.depth = depth;
-    this.result = result;
+    this.slice = slice;
     this.children = children;
   }
 }
 
 // Recursive function for creating result tree.
-export function appendChild(parent: ResultNode, child: Result) {
-  const name = child.slice[0];
+export function appendChild(parent: SliceNode, child: Slice) {
+  const name = child.name[0];
 
   // Add a leaf node.
   if (name.length === parent.depth + 1) {
-    parent.children[name[parent.depth]] = new ResultNode(
+    parent.children[name[parent.depth]] = new SliceNode(
       name[parent.depth],
       parent.depth + 1,
       null,
@@ -37,7 +39,7 @@ export function appendChild(parent: ResultNode, child: Result) {
   if (childNode) {
     childNode[name[parent.depth]] = appendChild(childNode, child);
   } else {
-    parent.children[name[parent.depth]] = new ResultNode(
+    parent.children[name[parent.depth]] = new SliceNode(
       name[parent.depth],
       parent.depth + 1,
       {},
@@ -47,7 +49,7 @@ export function appendChild(parent: ResultNode, child: Result) {
   }
 }
 
-export function isLeaf(node: ResultNode) {
+export function isLeaf(node: SliceNode) {
   if (!node.children) {
     return true;
   } else {
@@ -55,7 +57,7 @@ export function isLeaf(node: ResultNode) {
   }
 }
 
-export function leafCount(node: ResultNode) {
+export function leafCount(node: SliceNode) {
   if (!node.children) {
     return 1;
   }
@@ -64,4 +66,55 @@ export function leafCount(node: ResultNode) {
     count += leafCount(node);
   });
   return count;
+}
+
+export function sliceEquals(s1: string[][], s2: string[][]) {
+  if (s1.length !== s2.length) {
+    return false;
+  }
+  const s1String = s1.map((s) => s.join(""));
+  const s2String = s2.map((s) => s.join(""));
+  for (let i = 0; i < s1.length; i++) {
+    let localEquals = false;
+    for (let j = 0; j < s2.length; j++) {
+      if (s1String[i] === s2String[j]) {
+        localEquals = true;
+        break;
+      }
+    }
+    if (!localEquals) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export function initialFetch() {
+  const fetchSettings = fetch("/api/settings")
+    .then((r) => r.json())
+    .then((s) => settings.set(JSON.parse(s)));
+  const fetchModels = fetch("/api/models")
+    .then((d) => d.json())
+    .then((d) => {
+      models.set(JSON.parse(d));
+    });
+  const fetchMetrics = fetch("/api/metrics")
+    .then((d) => d.json())
+    .then((d) => {
+      metrics.set(JSON.parse(d));
+    });
+
+  const allRequests = Promise.all([fetchSettings, fetchModels, fetchMetrics]);
+
+  // attach then() handler to the allData Promise
+  allRequests.then(() => ready.set(true));
+}
+
+export function updateTab(t: string) {
+  if (t === "home") {
+    window.location.hash = "";
+  } else {
+    window.location.hash = "#/" + t + "/";
+  }
+  return t;
 }

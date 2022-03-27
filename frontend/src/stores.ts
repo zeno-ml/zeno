@@ -1,46 +1,73 @@
-import { table as aqTable } from "arquero";
-import { websocketStore } from "svelte-websocket-store";
 import { derived, writable, type Readable, type Writable } from "svelte/store";
+import { InternMap } from "internmap";
+import { websocketStore } from "svelte-websocket-store";
+import type ColumnTable from "arquero/dist/types/table/column-table";
+import * as aq from "arquero";
 
-export const metrics = writable([] as Metric[]);
-export const slicers = writable([] as Slicer[]);
-export const slices = writable(new Map<string, Slice>());
-export const table = writable(aqTable({}));
+export const settings: Writable<Settings> = writable(null);
+export const metrics = writable(null);
+export const models = writable(null);
+export const ready: Writable<boolean> = writable(false);
 
 export const wsResponse: Writable<WSResponse> = websocketStore(
   "ws://localhost:8000/api/results",
   {
     status: "connecting",
     results: [],
-    id_column: "",
-    label_column: "",
+    slices: [],
   } as WSResponse
 );
+
 export const status: Readable<string> = derived(
   wsResponse,
   ($wsResponse) => $wsResponse.status,
   "connecting"
 );
-export const results: Readable<Result[]> = derived(
+
+export const results: Readable<InternMap<ResultKey, Result>> = derived(
   wsResponse,
-  ($r) => {
-    if ($r.results.length > 0) {
-      return $r.results;
+  ($wsResponse) => {
+    if ($wsResponse.results.length > 0) {
+      const newMap = new InternMap<ResultKey, Result>([], JSON.stringify);
+      $wsResponse.results.forEach((res) => {
+        newMap.set(
+          {
+            slice: res.slice,
+            transform: res.transform,
+            metric: res.metric,
+          },
+          res
+        );
+      });
+      return newMap;
     } else {
-      return [];
+      return new InternMap<ResultKey, Result>();
     }
   },
-  [] as Result[]
+  new InternMap<ResultKey, Result>()
 );
 
-export const models: Readable<string[]> = derived(
-  results,
-  (r: Result[]) => {
-    if (r.length > 0) {
-      return Object.keys(r[0].modelResults);
+export const slices: Readable<InternMap<string[][], Slice>> = derived(
+  wsResponse,
+  ($wsResponse) => {
+    if ($wsResponse.slices.length > 0) {
+      const retMap = new InternMap<string[][], Slice>();
+      $wsResponse.slices.forEach((s) => {
+        retMap.set(s.name, s);
+      });
+      return retMap;
     } else {
-      return [];
+      return new InternMap<string[][], Slice>();
     }
-  },
-  [] as string[]
+  }
 );
+
+slices.subscribe((d) => console.log(d));
+
+export const table: Writable<ColumnTable> = writable(aq.table({}));
+
+wsResponse.subscribe(() => {
+  fetch("/api/table")
+    .then((d) => d.arrayBuffer())
+    .then((d) => table.set(aq.fromArrow(d)));
+});

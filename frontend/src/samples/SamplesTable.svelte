@@ -4,8 +4,6 @@
   export let entries;
 
   $: table = aq.fromArrow(entries.arrayBuffer());
-
-  $: console.log(table);
 </script>
 
 <div class="container" />

@@ -4,11 +4,13 @@
   import Tooltip, { Wrapper } from "@smui/tooltip";
   import Button from "@smui/button";
 
-  export let idCol: string;
-  export let labelCol: string;
+  import { settings } from "../stores";
+
   export let modelACol: string = "";
   export let modelBCol: string = "";
   export let table: ColumnTable;
+
+  $: console.log($settings, table.objects());
 
   let n = 20;
 </script>
@@ -23,8 +25,8 @@
     <div class="box">
       <Wrapper>
         <img
-          src="/static/{row[idCol]}"
-          alt="Image thumbnail for instance {row[idCol]}"
+          src="/static/{row[$settings.idColumn]}"
+          alt="Image thumbnail for instance {row[$settings.idColumn]}"
         />
         <Tooltip>
           {#each Object.keys(row) as key}
@@ -34,7 +36,7 @@
         </Tooltip>
       </Wrapper>
       <br />
-      <span class="label">{row[labelCol]} </span>
+      <span class="label">{row[$settings.labelColumn]} </span>
       {#if modelACol}
         <br />
         <span class="output">{row[modelACol]} </span>

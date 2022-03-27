@@ -48,6 +48,7 @@
     "arquero": "^4.8.8",
     "d3-force": "^3.0.0",
     "highlightjs": "^9.16.2",
+    "internmap": "^2.0.3",
     "layercake": "^6.0.2",
     "sirv-cli": "^2.0.0",
     "svelte-highlight": "^5.2.0",

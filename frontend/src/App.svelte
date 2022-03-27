@@ -11,22 +11,24 @@
     Text,
   } from "@smui/list";
   import Tooltip, { Wrapper } from "@smui/tooltip";
-  import github from "svelte-highlight/src/styles/github";
+  import { onMount } from "svelte";
   import Router, { location } from "svelte-spa-router";
   import Home from "./Home.svelte";
   import Results from "./Results.svelte";
-  import { metrics, results, slices, status } from "./stores";
+  import { status } from "./stores";
+  import { initialFetch, updateTab } from "./util";
+
+  let runningAnalysis = true;
+  let tab = $location.split("/")[1];
+  if (!tab) {
+    tab = "home";
+  }
 
   const routes = {
     "/": Home,
     "/results/": Results,
     "*": Home,
   };
-
-  let tab = $location.split("/")[1];
-  if (!tab) {
-    tab = "home";
-  }
 
   location.subscribe((d) => {
     tab = d.split("/")[1];
@@ -35,36 +37,7 @@
     }
   });
 
-  function updateTab(t: string) {
-    tab = t;
-    if (t === "home") {
-      window.location.hash = "";
-    } else {
-      window.location.hash = "#/" + t + "/";
-    }
-  }
-
-  let runningAnalysis = true;
-  let fetchedSlices = false;
-
   status.subscribe((s) => {
-    // If running analysis or done, get the slices and metrics.
-    if (!fetchedSlices && (s.startsWith("Done") || s.startsWith("Model"))) {
-      fetchedSlices = true;
-      fetch("/api/slices")
-        .then((d) => d.json())
-        .then((d) => {
-          const out = JSON.parse(d) as Slice[];
-          const retMap = new Map<string, Slice>();
-          out.forEach((s) => {
-            retMap.set(s.name.map((d) => d.join("")).join(""), s);
-          });
-          slices.set(retMap);
-        });
-      fetch("/api/metrics")
-        .then((d) => d.json())
-        .then((d) => metrics.set(JSON.parse(d) as Metric[]));
-    }
     if (s.startsWith("Done")) {
       runningAnalysis = false;
     } else {
@@ -72,12 +45,8 @@
     }
   });
 
-  results.subscribe((d) => console.log(d));
+  onMount(() => initialFetch());
 </script>
-
-<svelte:head>
-  {@html github}
-</svelte:head>
 
 <header>
   <img
@@ -108,7 +77,10 @@
 <main>
   <div id="side-menu">
     <List class="demo-list">
-      <Item activated={tab === "home"} on:SMUI:action={() => updateTab("home")}>
+      <Item
+        activated={tab === "home"}
+        on:SMUI:action={() => (tab = updateTab("home"))}
+      >
         <Text>
           <PrimaryText>Home</PrimaryText>
           <SecondaryText>Overview of tests</SecondaryText>
@@ -116,18 +88,8 @@
       </Item>
       <Separator />
       <Item
-        activated={tab === "slices"}
-        on:SMUI:action={() => updateTab("slices")}
-      >
-        <Text>
-          <PrimaryText>Slices</PrimaryText>
-          <SecondaryText>Generated slices</SecondaryText>
-        </Text>
-      </Item>
-      <Separator />
-      <Item
         activated={tab === "results"}
-        on:SMUI:action={() => updateTab("results")}
+        on:SMUI:action={() => (tab = updateTab("results"))}
       >
         <Text>
           <PrimaryText>Results</PrimaryText>

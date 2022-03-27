@@ -21,7 +21,7 @@ Functions with the `load_model` decorator should return a function that takes a 
 
 ```python
 @load_model
-def load_model(model_path: str) -> Callable
+def load_model(model_path: Path) -> Callable
 ```
 
 Example:

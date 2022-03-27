@@ -1,14 +1,14 @@
 /// <reference types="svelte" />
 
-interface Slicer {
-  name: string[];
-  source: string;
-  slices: string[];
+interface Settings {
+  idColumn: string;
+  labelColumn: string;
 }
 
-interface Metric {
-  name: string;
-  source: string;
+interface WSResponse {
+  status: string;
+  results: Result[];
+  slices: Slice[];
 }
 
 interface Slice {
@@ -16,30 +16,22 @@ interface Slice {
   size: number;
 }
 
-interface Result {
-  id: int;
-  metric: string;
-  transform: string;
-  slice: string[string[]];
-  sliceSize: number;
-  modelResults: Map<string, ModelResult>;
-}
-
-interface ModelResult {
-  metric: float;
-  transform_metric: float;
-}
-
-interface WSResponse {
-  status: string;
-  id_column: string;
-  label_column: string;
-  results: Result[];
-}
-
 interface ResultRequest {
   slices: string[][];
   metric: string;
   model: string;
   transform: string;
+}
+
+interface ResultKey {
+  slice: string[string[]];
+  transform: string;
+  metric: string;
+}
+
+interface Result {
+  slice: string[string[]];
+  transform: string;
+  metric: string;
+  modelResults?: Map<string, ModelResult>;
 }

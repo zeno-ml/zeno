@@ -10,7 +10,7 @@ from typing import Callable, Dict, List
 import pandas as pd
 
 from .classes import Preprocessor, Result, ResultRequest, Slice, Slicer
-from .util import cached_process, get_arrow_bytes
+from .util import cached_process, get_arrow_bytes, slice_data
 
 
 class Zeno(object):
@@ -36,6 +36,8 @@ class Zeno(object):
         os.makedirs(self.cache_path, exist_ok=True)
 
         self.status: str = "Initializing"
+        self.__done_slicing = threading.Event()
+        self.__cancel_event = threading.Event()
 
         self.model_loader: Callable = None  # type: ignore
         self.data_loader: Callable = None  # type: ignore
@@ -70,8 +72,11 @@ class Zeno(object):
         self.metadata.set_index(self.id_column, inplace=True)
 
     def start_processing(self):
+        """Parse testing files and start preprocessing and slicing data."""
+        self.__preprocess_data()
         self.__parse_testing_files()
-        self.__run_tests()
+        self.__thread = threading.Thread(target=asyncio.run, args=(self.__slice(),))
+        self.__thread.start()
 
     def __parse_testing_files(self):
         self.data_loader = None  # type: ignore
@@ -131,32 +136,9 @@ class Zeno(object):
                 if hasattr(func, "metric"):
                     self.metrics[func_name] = func
 
-    def __run_tests(self):
-        # TODO: listen for interruption, stop processing and run again.
-        _thread = threading.Thread(
-            target=asyncio.run, args=(self.__run_test_pipeline(),)
-        )
-        _thread.start()
-
-    def __run_analysis(self, reqs: List[ResultRequest]):
-        # TODO: listen for interruption, stop processing and run again.
-        _thread = threading.Thread(
-            target=asyncio.run, args=(self.__calculate_metrics(reqs),)
-        )
-        _thread.start()
-
-    # def __run_one_test(self):
-
-    async def __run_test_pipeline(self):
-        self.__preprocess_data()
+    async def __slice(self):
         self.__slice_data()
-        reqs: List[ResultRequest] = []
-        for s in self.slices.values():
-            for met in self.metrics.keys():
-                reqs.append(
-                    ResultRequest(slices=s.name, metric=met, model="", transform="")
-                )
-        await self.__calculate_metrics(reqs)
+        self.__done_slicing.set()
 
     def __preprocess_data(self):
         """Run preprocessors on every instance."""
@@ -188,26 +170,32 @@ class Zeno(object):
             self.status = "Slicing data for " + name
             self.slices = {
                 **self.slices,
-                **slicer.slice_data(self.metadata, self.label_column),
+                **slice_data(self.metadata, slicer, self.label_column),
             }
         self.status = "Done slicing"
 
-    async def __calculate_metrics(self, requests: List[ResultRequest]):
+    def run_analysis(self, reqs: List[ResultRequest]):
+        if self.__cancel_event:
+            self.__cancel_event.set()
+            self.__thread.join()
+        self.__cancel_event = threading.Event()
+        self.__thread = threading.Thread(
+            target=asyncio.run,
+            args=(self.__calculate_metrics(reqs, self.__cancel_event),),
+        )
+        self.__thread.start()
+
+    async def __calculate_metrics(
+        self, requests: List[ResultRequest], cancel_event: threading.Event
+    ):
         """Calculate result for each requested combination."""
-        requests_all_models = []
-        for r in requests:
-            requests_all_models.extend(
-                [
-                    ResultRequest(
-                        slices=r.slices, metric=r.metric, model=str(m), transform=""
-                    )
-                    for m in self.model_names
-                ]
-            )
-        requests = requests_all_models
+        self.__done_slicing.wait()
 
         self.status = "working"
         for i, request in enumerate(requests):
+            if cancel_event.is_set():
+                return
+
             slice_name, metric_name, model_name = (
                 request.slices,
                 request.metric,
@@ -216,10 +204,10 @@ class Zeno(object):
             try:
                 sli = self.slices["".join(["".join(d) for d in slice_name])]
             except KeyError:
-                index = self.slices["".join(slice_name[0])].sliced_indices.intersection(
-                    self.slices["".join(slice_name[1])].sliced_indices
+                index = self.slices["".join(slice_name[0])].index.intersection(
+                    self.slices["".join(slice_name[1])].index
                 )
-                sli = Slice(slice_name, index, len(index), "")
+                sli = Slice(slice_name, index)
                 self.slices["".join(["".join(d) for d in slice_name])] = sli
 
             self.status = ("Test {0}/{1}: Slice {2}, Metric {3}, Model {4}").format(
@@ -230,7 +218,7 @@ class Zeno(object):
                 model_name,
             )
 
-            self.__calculate_outputs(sli)
+            self.__calculate_outputs(sli, model_name)
 
             res_hash = int(
                 hash("".join(["".join(d) for d in slice_name]) + "" + metric_name)
@@ -244,66 +232,51 @@ class Zeno(object):
                     "",
                     metric_name,
                     sli.size,
-                    self.model_names,
                 )
 
             metric_func = self.metrics[metric_name]
 
             if len(signature(metric_func).parameters) == 3:
                 result = metric_func(
-                    self.metadata.loc[sli.sliced_indices, str(model_name)].tolist(),
-                    self.metadata.loc[sli.sliced_indices],
+                    self.metadata.loc[sli.index, str(model_name)].tolist(),
+                    self.metadata.loc[sli.index],
                     self.label_column,
                 )
             else:
                 result = metric_func(
-                    self.metadata.loc[sli.sliced_indices, str(model_name)].tolist(),
-                    self.metadata.loc[sli.sliced_indices],
+                    self.metadata.loc[sli.index, str(model_name)].tolist(),
+                    self.metadata.loc[sli.index],
                 )
 
             res.set_result(model_name, result)
             self.results[res.id] = res
         self.status = "Done " + str(hash(str(requests)))
 
-    def __calculate_outputs(self, sli: Slice):
+    def __calculate_outputs(self, sli: Slice, model_name: str):
         """Calculate model outputs for each slice."""
-        for i, model_name in enumerate(self.model_names):
-            self.status = "Loading model {0}, {1}/{2}".format(
-                model_name, str(i + 1), str(len(self.model_names))
-            )
-            model = self.model_loader(model_name)
+        model = self.model_loader(Path(model_name))
 
-            cached_process(
-                self.metadata,
-                sli.sliced_indices,
-                str(model_name),
-                Path(
-                    self.cache_path,
-                    "model_"
-                    + str(model_name).replace("/", "_")
-                    + "_"
-                    + str(self.metadata_path).replace("/", "_"),
-                ),
-                model,
-                self.data_loader,
-                self.data_path,
-                self.batch_size,
-            )
+        cached_process(
+            self.metadata,
+            sli.index,
+            str(model_name),
+            Path(
+                self.cache_path,
+                "model_"
+                + str(model_name).replace("/", "_")
+                + "_"
+                + str(self.metadata_path).replace("/", "_"),
+            ),
+            model,
+            self.data_loader,
+            self.data_path,
+            self.batch_size,
+        )
 
-    def get_table(self, sli: str):
+    def get_table(self):
         """Get the metadata DataFrame for a given slice.
-
-        Args:
-            sli (str): Name of the slice
 
         Returns:
             bytes: Arrow-encoded table of slice metadata
         """
-        name = "".join(["".join(d) for d in sli])
-        df = self.metadata.loc[self.slices[name].sliced_indices]
-        return get_arrow_bytes(df)
-
-    def get_result(self, requests: List[ResultRequest]):
-        """Start processing for given slices, metrics, and models."""
-        self.__run_analysis(requests)
-        return "running analysis"
+        return get_arrow_bytes(self.metadata)

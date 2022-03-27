@@ -2,13 +2,11 @@ import asyncio
 import json
 import os
 
-import uvicorn  # type: ignore
-from fastapi import FastAPI, Request, WebSocket
-from fastapi.exceptions import RequestValidationError
+from fastapi import FastAPI, WebSocket
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 
-from zeno.classes import AnalysisModel, SliceModel
+from zeno.classes import AnalysisModel
 
 from .zeno import Zeno
 
@@ -30,42 +28,48 @@ def run_background_processor(conn, args):
     while True:
         case, options = conn.recv()
 
-        if case == "GET_SLICES":
-            slices = zeno.slices.values()
-            ret = [
-                {
-                    "name": s.name,
-                    "size": s.size,
-                }
-                for s in slices
-            ]
+        if case == "GET_SETTINGS":
+            conn.send(
+                json.dumps(
+                    {"idColumn": zeno.id_column, "labelColumn": zeno.label_column}
+                )
+            )
 
-            conn.send(json.dumps(ret))
+        elif case == "GET_METRICS":
+            conn.send(json.dumps([s.__name__ for s in zeno.metrics.values()]))
 
-        if case == "GET_METRICS":
-            testers = zeno.metrics.values()
-            conn.send(json.dumps([{"name": s.__name__, "source": ""} for s in testers]))
+        elif case == "GET_MODELS":
+            conn.send(json.dumps([str(n) for n in zeno.model_names]))
 
-        if case == "GET_TABLE":
-            conn.send(zeno.get_table(options))
+        elif case == "GET_TABLE":
+            conn.send(zeno.get_table())
 
-        if case == "RUN_ANALYSIS":
-            conn.send(zeno.get_result(options.requests))
+        elif case == "RUN_ANALYSIS":
+            zeno.run_analysis(options.requests)
+            conn.send("")
 
-        if case == "GET_RESULTS":
+        elif case == "GET_RESULTS":
             res = zeno.results.values()
             res = [
                 {
-                    "id": hash(r),
                     "metric": r.metric,
                     "transform": r.transform,
                     "slice": r.sli,
-                    "sliceSize": r.slice_size,
                     "modelResults": r.model_metrics,
                 }
                 for r in res
             ]
-            conn.send((zeno.status, res, zeno.id_column, zeno.label_column))
+
+            sls = zeno.slices.values()
+            slices = [
+                {
+                    "name": s.name,
+                    "size": s.size,
+                }
+                for s in sls
+            ]
+
+            conn.send((zeno.status, res, slices))
 
 
 def run_server(conn, args):
@@ -74,6 +78,7 @@ def run_server(conn, args):
 
     if args.data_path != "":
         app.mount("/static", StaticFiles(directory=args.data_path), name="static")
+
     app.mount("/api", api_app)
     app.mount(
         "/",
@@ -83,6 +88,11 @@ def run_server(conn, args):
         ),
         name="base",
     )
+
+    @api_app.get("/settings")
+    async def get_settings():
+        conn.send(("GET_SETTINGS", ""))
+        return conn.recv()
 
     @api_app.get("/slices")
     async def get_slices():
@@ -94,12 +104,17 @@ def run_server(conn, args):
         conn.send(("GET_METRICS", ""))
         return conn.recv()
 
-    @api_app.post("/table/")
-    async def get_table(sli: SliceModel):
-        conn.send(("GET_TABLE", sli.name))
+    @api_app.get("/models")
+    async def get_models():
+        conn.send(("GET_MODELS", ""))
+        return conn.recv()
+
+    @api_app.get("/table")
+    async def get_table():
+        conn.send(("GET_TABLE", ""))
         return Response(content=conn.recv())
 
-    @api_app.post("/analysis/")
+    @api_app.post("/analysis")
     async def run_analysis(sli: AnalysisModel):
         conn.send(("RUN_ANALYSIS", sli))
         return conn.recv()
@@ -119,19 +134,6 @@ def run_server(conn, args):
                     {
                         "status": res[0],
                         "results": res[1],
-                        "id_column": res[2],
-                        "label_column": res[3],
+                        "slices": res[2],
                     }
                 )
-
-    @api_app.exception_handler(RequestValidationError)
-    async def validation_exception_handler(
-        request: Request, exc: RequestValidationError
-    ):
-
-        exc_str = f"{exc}".replace("\n", " ").replace("   ", " ")
-        # or logger.error(f'{exc}')
-        print(request, exc_str)
-        return
-
-    uvicorn.run(app, host="localhost", port=8000)  # type: ignore

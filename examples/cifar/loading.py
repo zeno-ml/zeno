@@ -67,3 +67,8 @@ def load_data(df_metadata, data_path):
 @metric
 def accuracy(output, metadata, label_col):
     return metadata[label_col] == output
+
+
+@metric
+def failure(output, metadata, label_col):
+    return metadata[label_col] != output

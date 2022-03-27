@@ -1,98 +1,144 @@
 <script lang="ts">
+  import Button from "@smui/button";
   import Select, { Option } from "@smui/select";
+  import * as aq from "arquero";
+  import type ColumnTable from "arquero/dist/types/table/column-table";
   import ResultCell from "./ResultCell.svelte";
   import Samples from "./samples/Samples.svelte";
+  import { metrics, models, ready, slices, table } from "./stores";
+  import { appendChild, SliceNode } from "./util";
+  import { InternMap, InternSet } from "internmap";
 
-  import {
-    metrics,
-    models,
-    results,
-    slices,
-    table,
-    wsResponse,
-  } from "./stores";
-  import { ResultNode, appendChild } from "./util";
+  let modelA: string = "";
+  let modelB: string = "";
+  let selectedMetric: string = "";
+  let filteredTable = aq.table({});
 
-  import { fromArrow } from "arquero";
-  import Button from "@smui/button";
-
-  $: metric_names = $metrics.map((m) => m.name);
-  $: selectedMetric = metric_names[0];
-
-  let modelA;
-  let modelB = "";
-  models.subscribe((m) => (!modelA && m.length > 0 ? (modelA = m[0]) : ""));
-
-  let selected = "";
-  let checked: Map<string, string[]> = new Map();
-  let resultHierarchy: ResultNode = new ResultNode("root", 0, {});
-  let comboResults: ResultNode = new ResultNode("combinations", 0, {});
+  let selected: string[][] = [];
+  let checked: InternSet<string[][]> = new InternSet();
   let expandAll = false;
-  let slice = {};
-  $: slice = selected ? $slices.get(selected) : {};
 
-  results.subscribe((res) => {
-    if (res.length > 0) {
-      const fullRes = res.filter(
-        (r) => r.transform === "" && r.slice.length === 1
-      );
-      fullRes.forEach((r) => {
-        appendChild(resultHierarchy, r);
-      });
-      resultHierarchy = resultHierarchy;
+  let sliceTree: SliceNode = new SliceNode("root", 0, {});
+  let comboSliceTree: SliceNode = new SliceNode("combinations", 0, {});
 
-      res
-        .filter((r) => r.transform === "" && r.slice.length > 1)
-        .forEach((r) => {
-          let n = r.slice.map((d: string[]) => d[d.length - 1]).join(" + ");
-          comboResults.children[n] = new ResultNode(n, 1, null, r);
-        });
+  $: if ($ready) {
+    modelB;
+    modelA;
+    selectedMetric;
+    getResults([...$slices.values()]);
+  }
+
+  slices.subscribe((sls) => {
+    if (sls.size > 0) {
+      setupTree(sls);
     }
   });
 
-  // TODO: Cache one table.
-  $: if (selected && slice) {
-    fetch("/api/table/", {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify({ name: slice.name }),
-    })
-      .then((d) => d.arrayBuffer())
-      .then((d) => {
-        table.set(fromArrow(d));
-      })
-      .catch((e) => console.log(e));
+  table.subscribe((t) => updateFilteredTable(t));
+  $: if (selected) {
+    updateFilteredTable($table);
   }
 
-  function requestSlice() {
-    const request = {
-      slices: [...checked.values()].map((d) => d[0]),
-      metric: selectedMetric,
-      model: modelA,
-      transform: "",
-    };
+  $: if (checked.size > 2) {
+    checked.delete([...checked.values()][0]);
+  }
+
+  function setupTree(slices: InternMap<string[][], Slice>) {
+    const slis: Slice[] = [...slices.values()];
+    getResults(slis);
+    let singleSlices = slis.filter((s) => s.name.length === 1);
+    singleSlices.forEach((r) => {
+      appendChild(sliceTree, r);
+    });
+    sliceTree = sliceTree;
+
+    slis
+      .filter((r) => r.name.length > 1)
+      .forEach((r) => {
+        console.log(r);
+        let n = r.name.map((d: string[]) => d[d.length - 1]).join(" + ");
+        comboSliceTree.children[n] = new SliceNode(n, 1, null, r);
+      });
+  }
+
+  function getResults(sls: Slice[]) {
+    // TODO: figure out weird update.
+    if (!selectedMetric) {
+      selectedMetric = $metrics[0];
+    }
+
+    // TODO: Check results and only request new ones if needed.
+    let requests = [];
+    sls.forEach((s) => {
+      requests.push({
+        slices: s.name,
+        metric: selectedMetric,
+        model: modelA,
+        transform: "",
+      });
+      if (modelB) {
+        requests.push({
+          slices: s.name,
+          metric: selectedMetric,
+          model: modelB,
+          transform: "",
+        });
+      }
+    });
+
     fetch("/api/analysis/", {
       method: "POST",
       headers: {
         "Content-type": "application/json",
       },
-      body: JSON.stringify({ requests: [request] }),
+      body: JSON.stringify({ requests: requests }),
     }).catch((e) => console.log(e));
+  }
+
+  function getResult() {
+    getResults([
+      {
+        name: Array.from(checked.values()).map((s) => s[0]),
+        size: 0,
+      },
+    ]);
+  }
+
+  function updateFilteredTable(t: ColumnTable) {
+    if (selected.length === 0 || !$ready) {
+      return;
+    }
+    let slice = $slices.get(selected);
+    if (!slice) {
+      return;
+    }
+    if (slice.name.length === 1) {
+      filteredTable = t.filter(
+        aq.escape((r) => r["zenoslice_" + slice.name[0].join("")] === 1)
+      );
+    } else if (slice.name.length > 1) {
+      filteredTable = t;
+      slice.name.forEach((s) => {
+        filteredTable = filteredTable.filter(
+          aq.escape((r) => r["zenoslice_" + s.join("")] === 1)
+        );
+      });
+    }
   }
 </script>
 
 <div class="style-div">
-  <Select
-    bind:value={selectedMetric}
-    label="Select Metric"
-    style="margin-right: 20px;"
-  >
-    {#each metric_names as m}
-      <Option value={m}>{m}</Option>
-    {/each}
-  </Select>
+  {#if $metrics}
+    <Select
+      bind:value={selectedMetric}
+      label="Select Metric"
+      style="margin-right: 20px;"
+    >
+      {#each $metrics as m}
+        <Option value={m}>{m}</Option>
+      {/each}
+    </Select>
+  {/if}
   {#if $models && modelA}
     <Select bind:value={modelA} label="Model A" style="margin-right: 20px;">
       {#each $models as m}
@@ -108,50 +154,48 @@
 </div>
 
 <div id="container">
-  {#if resultHierarchy}
+  {#if sliceTree}
     <div style:margin-right="10px">
       <div class="button-block">
         <Button variant="outlined" on:click={() => (expandAll = !expandAll)}>
           {expandAll ? "Collapse all" : "Expand all"}
         </Button>
         {#if checked.size > 0}
-          <Button variant="outlined" on:click={() => requestSlice()}
+          <Button variant="outlined" on:click={() => getResult()}
             >New Slice</Button
           >
         {/if}
       </div>
-      <ResultCell
-        resultNode={resultHierarchy}
-        bind:selected
-        bind:checked
-        {expandAll}
-        {modelA}
-        {modelB}
-      />
-      {#if Object.keys(comboResults.children).length > 0}
+      {#each Object.values(sliceTree.children) as node}
+        <ResultCell
+          sliceNode={node}
+          bind:selected
+          bind:checked
+          {expandAll}
+          {modelA}
+          {modelB}
+          metric={selectedMetric}
+        />
+      {/each}
+      {#if Object.keys(comboSliceTree.children).length > 0}
         <p>Combination Slices</p>
-        <div>
+        {#each Object.values(comboSliceTree.children) as node}
           <ResultCell
-            resultNode={comboResults}
+            sliceNode={node}
             bind:selected
             bind:checked
             {expandAll}
             {modelA}
             {modelB}
+            metric={selectedMetric}
           />
-        </div>
+        {/each}
       {/if}
     </div>
   {/if}
   {#if selected && table}
     <div>
-      <Samples
-        idCol={$wsResponse.id_column}
-        labelCol={$wsResponse.label_column}
-        modelACol={modelA}
-        modelBCol={modelB}
-        table={$table}
-      />
+      <Samples modelACol={modelA} modelBCol={modelB} table={filteredTable} />
     </div>
   {/if}
 </div>
