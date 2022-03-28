@@ -36,12 +36,13 @@ def brightness(images):
     return [get_brightness(im) for im in images]
 
 
-@slicer(["accuracy"])
+@slicer
 def low_brightness(metadata):
+    print(metadata.head())
     return metadata[metadata["brightness"] < 80].index
 
 
-@slicer(["accuracy"])
+@slicer
 def white_border(metadata):
     return metadata[metadata["brightness"] > 200].index
 

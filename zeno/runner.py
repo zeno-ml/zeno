@@ -7,9 +7,7 @@ from .server import run_background_processor, run_server
 
 def __create_parser():
     parser = argparse.ArgumentParser(description="Evaluate ML systems.")
-    group_a = parser.add_argument_group("Core test options")
-    group_b = parser.add_argument_group("Additional options")
-    group_a.add_argument(
+    parser.add_argument(
         "test-files",
         metavar="test_files",
         nargs="+",
@@ -17,14 +15,14 @@ def __create_parser():
         help="Directory or Python files with annotated functions"
         + "such as slicers and metrics.",
     )
-    group_a.add_argument(
+    parser.add_argument(
         "--metadata",
         nargs=1,
         type=Path,
         help="CSV or Parquet file with metadata for each instance,"
         + " at minimum a column with file names.",
     )
-    group_a.add_argument(
+    parser.add_argument(
         "--data-path",
         dest="data_path",
         nargs="?",
@@ -33,14 +31,14 @@ def __create_parser():
         help="Folder with data instances identified"
         + "by the id-column option in the metadata file.",
     )
-    group_a.add_argument(
+    parser.add_argument(
         "--models",
         dest="models",
         type=Path,
         nargs="+",
         help="Paths to models for testing",
     )
-    group_b.add_argument(
+    parser.add_argument(
         "--id-column",
         dest="id_column",
         default="id",
@@ -48,7 +46,7 @@ def __create_parser():
         nargs="?",
         help="Column with the ID used retrieve data files AND for caching",
     )
-    group_b.add_argument(
+    parser.add_argument(
         "--label-column",
         dest="label_column",
         default="label",
@@ -56,7 +54,7 @@ def __create_parser():
         nargs="?",
         help="Column with the ground truth label for instances.",
     )
-    group_b.add_argument(
+    parser.add_argument(
         "--batch-size",
         dest="batch_size",
         nargs="?",
@@ -64,7 +62,7 @@ def __create_parser():
         type=int,
         help="Batch size of passed model predictions",
     )
-    group_b.add_argument(
+    parser.add_argument(
         "--cache-path",
         dest="cache_path",
         nargs="?",

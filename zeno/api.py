@@ -1,5 +1,4 @@
 import functools
-from typing import Tuple, Union
 
 
 def load_model(func):
@@ -29,30 +28,13 @@ def preprocess(func):
     return _wrapper
 
 
-def slicer(metrics: Union[str, Tuple[str, str]]):
-    """Decorator for slicing functions.
+def slicer(func):
+    @functools.wraps(func)
+    def _wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
 
-    Args:
-        metrics: A list of metrics or [tranform, metric] tuples.
-
-
-    Example::
-
-        @slicer(["accuracy"], ["rotate", "false_positive"])
-        def small_sample(data, metadata):
-            return data.sample(10), metadata
-    """
-
-    def _decorate(func):
-        @functools.wraps(func)
-        def _wrapper(*args, **kwargs):
-            return func(*args, **kwargs)
-
-        _wrapper.slicer = True
-        _wrapper.metrics = metrics
-        return _wrapper
-
-    return _decorate
+    _wrapper.slicer = True
+    return _wrapper
 
 
 def transform(func):

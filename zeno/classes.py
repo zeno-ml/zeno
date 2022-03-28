@@ -91,6 +91,8 @@ class Result:
             self.model_metric_outputs[model_name] = [
                 1 if r is True else 0 for r in result
             ]
+        elif len(result) > 0 and isinstance(result[0], int):
+            self.model_metric_outputs[model_name] = result
 
         if len(self.model_metric_outputs[model_name]) == 0:
             self.model_metrics[model_name] = 0

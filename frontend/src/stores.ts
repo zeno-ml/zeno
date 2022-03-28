@@ -62,8 +62,6 @@ export const slices: Readable<InternMap<string[][], Slice>> = derived(
   }
 );
 
-slices.subscribe((d) => console.log(d));
-
 export const table: Writable<ColumnTable> = writable(aq.table({}));
 
 wsResponse.subscribe(() => {

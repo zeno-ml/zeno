@@ -10,8 +10,6 @@
   export let modelBCol: string = "";
   export let table: ColumnTable;
 
-  $: console.log($settings, table.objects());
-
   let n = 20;
 </script>
 
@@ -26,6 +24,7 @@
       <Wrapper>
         <img
           src="/static/{row[$settings.idColumn]}"
+          style:max-width="200px"
           alt="Image thumbnail for instance {row[$settings.idColumn]}"
         />
         <Tooltip>

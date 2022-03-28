@@ -1,22 +1,22 @@
-from zeno import slicer, transform, preprocess
+from zeno import slicer
 
 
-@slicer(["accuracy", ("blur", "accuracy")])
+@slicer
 def overall(metadata):
     return metadata.index
 
 
-@slicer(["accuracy", ("blur", "accuracy")])
+@slicer
 def cat(metadata):
     return metadata[metadata["label"] == "cat"].index
 
 
-@slicer(["accuracy", ("blur", "accuracy")])
+@slicer
 def frog(metadata):
     return metadata[metadata["label"] == "frog"].index
 
 
-@slicer(["accuracy", ("blur", "accuracy")])
+@slicer
 def dog(metadata):
     return metadata[metadata["label"] == "dog"].index
 

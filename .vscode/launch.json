@@ -20,29 +20,27 @@
         "./examples/models/cifar/cifar_net_5.pth",
         "./examples/models/cifar/cifar_net_10.pth",
         "--data-path",
-        "~/dev/data/cifar/test/",
-        "--batch-size",
-        "10"
+        "~/dev/data/cifar/test/"
       ]
     },
     {
-      "name": "zeno object",
+      "name": "zeno coco",
       "type": "python",
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "module": "zeno",
       "args": [
-        "./examples/object_tests.py",
+        "./examples/coco",
         "--metadata",
-        "./examples/validation-images.csv",
+        "./examples/models/coco/coco.parquet",
         "--models",
         "a",
         "--data-path",
-        "~/dev/data/open-images/validation/",
+        "/Users/acabrera/dev/data/coco-2014/val2014",
         "--batch-size",
-        "10",
+        "64",
         "--id-column",
-        "ImageID"
+        "file_name"
       ]
     }
   ]

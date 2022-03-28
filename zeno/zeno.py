@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 import sys
 import threading
@@ -25,6 +26,7 @@ class Zeno(object):
         data_path="",
         cache_path="",
     ):
+        logging.basicConfig(level=logging.INFO)
         self.metadata_path = metadata_path
         self.test_files = test_files
         self.model_names = models
@@ -62,20 +64,20 @@ class Zeno(object):
         elif metadata_path.suffix == ".parquet":
             self.metadata = pd.read_parquet(metadata_path)
         else:
-            print(
-                "ERROR: extension of "
-                + metadata_path.suffix
-                + " not one of .csv or .parquet"
+            logging.error(
+                "Extension of " + metadata_path.suffix + " not one of .csv or .parquet"
             )
+            sys.exit(1)
 
         self.metadata[id_column].astype(str)
         self.metadata.set_index(self.id_column, inplace=True)
 
     def start_processing(self):
         """Parse testing files and start preprocessing and slicing data."""
-        self.__preprocess_data()
         self.__parse_testing_files()
-        self.__thread = threading.Thread(target=asyncio.run, args=(self.__slice(),))
+        self.__thread = threading.Thread(
+            target=asyncio.run, args=(self.__preprocess_and_slice(),)
+        )
         self.__thread.start()
 
     def __parse_testing_files(self):
@@ -95,11 +97,11 @@ class Zeno(object):
                 self.__parse_testing_file(test_file, test_file.parents[0])
 
         if not self.model_loader:
-            print("ERROR: No model loader found")
+            logging.error("No model loader found")
             sys.exit(1)
 
         if not self.data_loader:
-            print("ERROR: No data loader found")
+            logging.error("No data loader found")
             sys.exit(1)
 
     def __parse_testing_file(self, test_file: Path, base_path: Path):
@@ -113,13 +115,13 @@ class Zeno(object):
                     if self.model_loader is None:
                         self.model_loader = func
                     else:
-                        print("Multiple model loaders found, can only have one")
+                        logging.error("Multiple model loaders found, can only have one")
                         sys.exit(1)
                 if hasattr(func, "load_data"):
                     if self.data_loader is None:
                         self.data_loader = func
                     else:
-                        print("Multiple data loaders found, can only have one")
+                        logging.error("Multiple data loaders found, can only have one")
                         sys.exit(1)
                 if hasattr(func, "preprocess"):
                     self.preprocessors.append(Preprocessor(func_name, func))
@@ -136,7 +138,8 @@ class Zeno(object):
                 if hasattr(func, "metric"):
                     self.metrics[func_name] = func
 
-    async def __slice(self):
+    async def __preprocess_and_slice(self):
+        self.__preprocess_data()
         self.__slice_data()
         self.__done_slicing.set()
 

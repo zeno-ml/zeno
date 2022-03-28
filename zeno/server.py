@@ -1,7 +1,9 @@
 import asyncio
 import json
+import logging
 import os
 
+import uvicorn  # type: ignore
 from fastapi import FastAPI, WebSocket
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
@@ -128,7 +130,7 @@ def run_server(conn, args):
             conn.send(("GET_RESULTS", ""))
             res = conn.recv()
             if res[0] != previous_status:
-                print("status: ", res[0])
+                logging.info("Status: ", res[0])
                 previous_status = res[0]
                 await websocket.send_json(
                     {
@@ -137,3 +139,5 @@ def run_server(conn, args):
                         "slices": res[2],
                     }
                 )
+
+    uvicorn.run(app, host="localhost", port=8000)  # type: ignore

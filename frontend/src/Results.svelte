@@ -14,6 +14,13 @@
   let selectedMetric: string = "";
   let filteredTable = aq.table({});
 
+  ready.subscribe((r) => {
+    if (r) {
+      modelA = $models[0];
+      selectedMetric = $metrics[0];
+    }
+  });
+
   let selected: string[][] = [];
   let checked: InternSet<string[][]> = new InternSet();
   let expandAll = false;
@@ -21,7 +28,7 @@
   let sliceTree: SliceNode = new SliceNode("root", 0, {});
   let comboSliceTree: SliceNode = new SliceNode("combinations", 0, {});
 
-  $: if ($ready) {
+  $: if ($ready && modelA && selectedMetric && $slices.size > 0) {
     modelB;
     modelA;
     selectedMetric;
@@ -29,7 +36,7 @@
   }
 
   slices.subscribe((sls) => {
-    if (sls.size > 0) {
+    if (sls.size > 0 && modelA && selectedMetric) {
       setupTree(sls);
     }
   });
@@ -139,7 +146,7 @@
       {/each}
     </Select>
   {/if}
-  {#if $models && modelA}
+  {#if $models}
     <Select bind:value={modelA} label="Model A" style="margin-right: 20px;">
       {#each $models as m}
         <Option value={m}>{m}</Option>
