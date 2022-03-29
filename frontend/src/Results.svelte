@@ -5,7 +5,7 @@
   import type ColumnTable from "arquero/dist/types/table/column-table";
   import ResultCell from "./ResultCell.svelte";
   import Samples from "./samples/Samples.svelte";
-  import { metrics, models, ready, slices, table } from "./stores";
+  import { metrics, models, ready, results, slices, table } from "./stores";
   import { appendChild, SliceNode } from "./util";
   import { InternMap, InternSet } from "internmap";
 
@@ -77,13 +77,21 @@
     // TODO: Check results and only request new ones if needed.
     let requests = [];
     sls.forEach((s) => {
-      requests.push({
-        slices: s.name,
-        metric: selectedMetric,
-        model: modelA,
+      let rKey = {
+        slice: s.name,
         transform: "",
-      });
-      if (modelB) {
+        metric: selectedMetric,
+      } as ResultKey;
+      let res: Result = $results.get(rKey);
+      if (!res || (res && !res.modelResults[modelA])) {
+        requests.push({
+          slices: s.name,
+          metric: selectedMetric,
+          model: modelA,
+          transform: "",
+        });
+      }
+      if (modelB && (!res || (res && !res.modelResults[modelB]))) {
         requests.push({
           slices: s.name,
           metric: selectedMetric,
@@ -168,9 +176,11 @@
           {expandAll ? "Collapse all" : "Expand all"}
         </Button>
         {#if checked.size > 0}
-          <Button variant="outlined" on:click={() => getResult()}
-            >New Slice</Button
-          >
+          <div style:margin-left="10px">
+            <Button variant="outlined" on:click={() => getResult()}
+              >New Slice</Button
+            >
+          </div>
         {/if}
       </div>
       {#each Object.values(sliceTree.children) as node}

@@ -1,6 +1,7 @@
 /// <reference types="svelte" />
 
 interface Settings {
+  task: string;
   idColumn: string;
   labelColumn: string;
 }

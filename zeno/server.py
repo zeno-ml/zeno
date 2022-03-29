@@ -16,6 +16,7 @@ from .zeno import Zeno
 def run_background_processor(conn, args):
     zeno = Zeno(
         metadata_path=args.metadata[0],
+        task=args.task[0],
         test_files=args.__dict__["test-files"],
         models=args.models,
         batch_size=args.batch_size,
@@ -33,7 +34,11 @@ def run_background_processor(conn, args):
         if case == "GET_SETTINGS":
             conn.send(
                 json.dumps(
-                    {"idColumn": zeno.id_column, "labelColumn": zeno.label_column}
+                    {
+                        "task": zeno.task,
+                        "idColumn": zeno.id_column,
+                        "labelColumn": zeno.label_column,
+                    }
                 )
             )
 

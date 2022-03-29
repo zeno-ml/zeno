@@ -12,6 +12,8 @@
       "module": "zeno",
       "args": [
         "./examples/cifar",
+        "--task",
+        "image-classification",
         "--metadata",
         "./examples/models/cifar/cifar_pred.csv",
         "--models",
@@ -33,6 +35,8 @@
         "./examples/coco",
         "--metadata",
         "./examples/models/coco/coco.parquet",
+        "--task",
+        "object-detection",
         "--models",
         "a",
         "--data-path",

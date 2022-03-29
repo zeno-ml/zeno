@@ -4,6 +4,8 @@ from pathlib import Path
 
 from .server import run_background_processor, run_server
 
+TASK_TYPES = ["image-classification", "object-detection"]
+
 
 def __create_parser():
     parser = argparse.ArgumentParser(description="Evaluate ML systems.")
@@ -14,6 +16,14 @@ def __create_parser():
         type=Path,
         help="Directory or Python files with annotated functions"
         + "such as slicers and metrics.",
+    )
+    parser.add_argument(
+        "--task",
+        nargs=1,
+        choices=TASK_TYPES,
+        type=str,
+        help="CSV or Parquet file with metadata for each instance,"
+        + " at minimum a column with file names.",
     )
     parser.add_argument(
         "--metadata",

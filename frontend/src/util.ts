@@ -95,18 +95,12 @@ export function initialFetch() {
     .then((s) => settings.set(JSON.parse(s)));
   const fetchModels = fetch("/api/models")
     .then((d) => d.json())
-    .then((d) => {
-      models.set(JSON.parse(d));
-    });
+    .then((d) => models.set(JSON.parse(d)));
   const fetchMetrics = fetch("/api/metrics")
     .then((d) => d.json())
-    .then((d) => {
-      metrics.set(JSON.parse(d));
-    });
+    .then((d) => metrics.set(JSON.parse(d)));
 
   const allRequests = Promise.all([fetchSettings, fetchModels, fetchMetrics]);
-
-  // attach then() handler to the allData Promise
   allRequests.then(() => ready.set(true));
 }
 

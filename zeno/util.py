@@ -34,7 +34,6 @@ def cached_process(
             df.loc[:, column_name] = pd.read_pickle(cache_path)
         except FileNotFoundError:
             df.loc[:, column_name] = [pd.NA] * df.shape[0]
-
     to_predict_indices = df.loc[pd.isna(df[column_name]), :].index.intersection(ids)
 
     if len(to_predict_indices) > 0:
@@ -75,13 +74,11 @@ def slice_data(metadata: pd.DataFrame, slicer: Slicer, label_column: str):
         for output_slice in slicer_output:
             indices = output_slice[1]
             name_list = [*slicer.name_list, output_slice[0]]
-            arr = np.zeros(len(metadata), dtype=int)
-            arr[indices] = 1
-            metadata.loc[:, "zenoslice_" + "".join(slicer.name_list)] = pd.Series(
-                np.zeros(len(metadata)), dtype=int
+            metadata.loc[:, "zenoslice_" + "".join(name_list)] = pd.Series(
+                np.zeros(len(metadata), dtype=int), dtype=int
             )
-            metadata.loc[:, "zenoslice_" + "".join(slicer.name_list)] = 1
-            slices["".join(name_list)] = Slice([name_list], slicer_output)
+            metadata.loc[indices, "zenoslice_" + "".join(name_list)] = 1
+            slices["".join(name_list)] = Slice([name_list], indices)
     else:
         metadata.loc[:, "zenoslice_" + "".join(slicer.name_list)] = pd.Series(
             np.zeros(len(metadata), dtype=int), dtype=int

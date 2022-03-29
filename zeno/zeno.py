@@ -18,6 +18,7 @@ class Zeno(object):
     def __init__(
         self,
         metadata_path: Path,
+        task: str,
         test_files: List[Path],
         models: List[Path],
         batch_size=16,
@@ -28,6 +29,7 @@ class Zeno(object):
     ):
         logging.basicConfig(level=logging.INFO)
         self.metadata_path = metadata_path
+        self.task = task
         self.test_files = test_files
         self.model_names = models
         self.batch_size = batch_size
@@ -220,7 +222,6 @@ class Zeno(object):
                 metric_name,
                 model_name,
             )
-
             self.__calculate_outputs(sli, model_name)
 
             res_hash = int(

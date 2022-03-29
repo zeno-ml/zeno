@@ -30,6 +30,8 @@
     });
     slice = $slices.get(sliceNode.slice.name);
   }
+
+  $: expandAll ? (expanded = true) : (expanded = false);
 </script>
 
 <div>
@@ -103,7 +105,7 @@
           </IconButton>
         </div>
       </div>
-      {#if expanded || expandAll}
+      {#if expanded}
         {#each Object.values(sliceNode.children) as child}
           <svelte:self
             sliceNode={child}
@@ -123,9 +125,8 @@
 <style>
   .cell {
     border: 1px solid #e0e0e0;
-    /* border-radius: 4px; */
     padding: 10px;
-    min-width: 350px;
+    min-width: 400px;
     width: fit-content;
     display: flex;
     flex-direction: row;

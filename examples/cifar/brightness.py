@@ -38,7 +38,6 @@ def brightness(images):
 
 @slicer
 def low_brightness(metadata):
-    print(metadata.head())
     return metadata[metadata["brightness"] < 80].index
 
 
