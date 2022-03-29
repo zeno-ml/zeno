@@ -11,7 +11,7 @@
   "devDependencies": {
     "@rollup/plugin-commonjs": "^17.0.0",
     "@rollup/plugin-json": "^4.1.0",
-    "@rollup/plugin-node-resolve": "^11.0.0",
+    "@rollup/plugin-node-resolve": "^13.1.3",
     "@rollup/plugin-typescript": "^8.0.0",
     "@smui/data-table": "^6.0.0-beta.15",
     "@smui/tooltip": "^6.0.0-beta.14",
