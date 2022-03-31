@@ -10,6 +10,7 @@
   import ObjectDetection from "./ObjectDetection.svelte";
 
   import { settings, ready } from "../stores";
+  import AudioClassification from "./AudioClassification.svelte";
 
   export let modelACol: string = "";
   export let modelBCol: string = "";
@@ -90,6 +91,12 @@
       />
     {:else if $settings.task === "text-classification"}
       <TextClassification
+        table={table.slice(start, end).objects()}
+        {modelACol}
+        {modelBCol}
+      />
+    {:else if $settings.task === "audio-classification"}
+      <AudioClassification
         table={table.slice(start, end).objects()}
         {modelACol}
         {modelBCol}

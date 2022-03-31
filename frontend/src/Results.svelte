@@ -128,9 +128,7 @@
     if (!slice) {
       return;
     }
-    console.log(slice);
     if (slice.name.length === 1) {
-      console.log(t, t.objects());
       filteredTable = t.filter(
         aq.escape((r) => r["zenoslice_" + slice.name[0].join("")] === 1)
       );

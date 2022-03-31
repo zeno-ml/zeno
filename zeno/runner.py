@@ -4,7 +4,12 @@ from pathlib import Path
 
 from .server import run_background_processor, run_server
 
-TASK_TYPES = ["image-classification", "object-detection", "text-classification"]
+TASK_TYPES = [
+    "image-classification",
+    "object-detection",
+    "text-classification",
+    "audio-classification",
+]
 
 
 def __create_parser():

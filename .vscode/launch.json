@@ -65,6 +65,26 @@
         "--batch-size",
         "20"
       ]
+    },
+    {
+      "name": "zenofsdd",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": [
+        "./examples/fsdd",
+        "--metadata",
+        "./examples/models/fsdd/fsdd.csv",
+        "--task",
+        "audio-classification",
+        "--models",
+        "a",
+        "--data-path",
+        "/Users/acabrera/dev/data/free-spoken-digit-dataset/recordings",
+        "--batch-size",
+        "20"
+      ]
     }
   ]
 }
