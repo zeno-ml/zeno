@@ -156,12 +156,16 @@ class Zeno(object):
                 + "_"
                 + str(self.metadata_path).replace("/", "_"),
             )
+
+            def fn_loader():
+                return preprocessor.func
+
             cached_process(
                 self.metadata,
                 self.metadata.index,
                 preprocessor.name,
                 cache_path,
-                preprocessor.func,
+                fn_loader,
                 self.data_loader,
                 self.data_path,
                 self.batch_size,
@@ -197,6 +201,8 @@ class Zeno(object):
         self.__done_slicing.wait()
 
         self.status = "working"
+        # TODO: sort by model to decrease model loads -
+        # or save models in memory? CUDA considerations?
         for i, request in enumerate(requests):
             if cancel_event.is_set():
                 return
@@ -258,7 +264,9 @@ class Zeno(object):
 
     def __calculate_outputs(self, sli: Slice, model_name: str):
         """Calculate model outputs for each slice."""
-        model = self.model_loader(Path(model_name))
+
+        def fn_loader():
+            return self.model_loader(model_name)
 
         cached_process(
             self.metadata,
@@ -271,7 +279,7 @@ class Zeno(object):
                 + "_"
                 + str(self.metadata_path).replace("/", "_"),
             ),
-            model,
+            fn_loader,
             self.data_loader,
             self.data_path,
             self.batch_size,
@@ -283,4 +291,4 @@ class Zeno(object):
         Returns:
             bytes: Arrow-encoded table of slice metadata
         """
-        return get_arrow_bytes(self.metadata)
+        return get_arrow_bytes(self.metadata, self.id_column)

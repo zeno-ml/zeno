@@ -44,7 +44,6 @@
       runningAnalysis = true;
     }
   });
-
   onMount(() => initialFetch());
 </script>
 

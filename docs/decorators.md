@@ -21,7 +21,7 @@ Functions with the `load_model` decorator should return a function that takes a 
 
 ```python
 @load_model
-def load_model(model_path: Path) -> Callable
+def load_model(model_path: Path) -> Callable[Any[], Any[]]
 ```
 
 Example:
@@ -29,7 +29,13 @@ Example:
 ```python
 @load_model
 def load_model(model_path):
-    return lambda data: model.predict(data)
+    """We return a new function to be able to process the output of the model correctly"""
+    model = load_model(model_path)
+    def pred(instances):
+        outputs = model(instances)
+        processed = process(outputs)
+        return processed
+    return model
 ```
 
 See [Model Loaders](model_loaders) for real-world examples.
@@ -37,19 +43,19 @@ See [Model Loaders](model_loaders) for real-world examples.
 ### Load Data
 
 Functions with the `load_data` decorator should return a list of data instances, e.g. images or text strings, that are passed to the function returned from `load_model`.
-`id_col` is a parameter passed to the zeno command specifying the column with instance paths in the `data_path` folder, e.g. `data/train/0.jpg` in `images/`.
+Use the index of the dataframe, e.g. `metadata.index` to get the column with instance paths in the `data_path` folder, e.g. `data/train/0.jpg` in `images/`.
 
 ```python
 @load_data
-def load_data(metadata: DataFrame, id_col: str, data_path: str) -> List[Any]
+def load_data(metadata: DataFrame, data_path: str) -> List[Any]
 ```
 
 Example:
 
 ```python
 @load_data
-def load_data(df_metadata, id_col, data_path):
-    return [PIL.Image.open(os.path.join(data_path, img)) for img in df_metadata[id_col]]
+def load_data(df_metadata, data_path):
+    return [PIL.Image.open(os.path.join(data_path, img)) for img in df_metadata.index]
 ```
 
 See [Data Loaders](data_loaders) for real-world examples.
@@ -68,7 +74,7 @@ It can be used to extract metadata from an instance
 
 ```python
 @preprocess
-def preprocessor(data: List[Any], metadata: DataFrame) -> Union[Series, List]:
+def preprocessor(data: List[Any]) -> Union[pd.Series, List]:
 ```
 
 Example:
@@ -88,15 +94,14 @@ The parameters to the decorator should either be the name of a metric or a tuple
 The function should return either a list of indices or the sliced DataFrame.
 
 ```python
-# A list of metric functions or (transform function, metric function) tuples.
-@slicer(["Metric 1", ("Transform 1", "Metric 1"), "Metric 2"])
-def slicing_func(metadata: DataFrame) -> Union[DataFrame, List[int]]:
+@slicer
+def slicing_func(metadata: DataFrame) -> Union[pd.DataFrame, pd.Index]:
 ```
 
 Example:
 
 ```python
-@slicer(["accuracy", "false_positive", ("rotate", "accuracy")])
+@slicer
 def small_sample(metadata):
     return metadata.sample(n=10).index
 ```
@@ -130,25 +135,15 @@ Optionally, metric functions can take the original output and metadata for insta
 
 ```python
 @metric
-def metric_func(output: List[Any], metadata: DataFrame) -> float:
-
-@metric
-def metric_func(output: List[Any], metadata: DataFrame, orig_output: List[Any]) -> float:
-
-@metric
-def metric_func(output: List[Any], metadata: DataFrame, orig_output: List[Any], orig_metadata: DataFrame) -> float:
+def metric_func(output: List[Any], metadata: DataFrame, label_col: str) -> Union[pd.DataFrame, pd.Index, List[Any]]:
 ```
 
 Example:
 
 ```python
 @metric
-def accuracy(output, metadata):
-    return metadata[metadata["label"] == output].shape[0] / (metadata.shape[0])
-
-@metric
-def switch_percentage(output, metadata, orig_output):
-    return (output != orig_output).sum() / metadata.shape[0]
+def accuracy(output, metadata, label_col):
+    return metadata[metadata[label_col] == output]]
 ```
 
 See [Metrics](metrics) for real-world examples.

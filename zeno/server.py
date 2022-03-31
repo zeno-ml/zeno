@@ -1,6 +1,5 @@
 import asyncio
 import json
-import logging
 import os
 
 import uvicorn  # type: ignore
@@ -135,7 +134,7 @@ def run_server(conn, args):
             conn.send(("GET_RESULTS", ""))
             res = conn.recv()
             if res[0] != previous_status:
-                logging.info("Status: ", res[0])
+                print("status: " + res[0])
                 previous_status = res[0]
                 await websocket.send_json(
                     {

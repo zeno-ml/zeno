@@ -4,17 +4,21 @@ from typing import Callable, Union
 
 import numpy as np
 import pandas as pd
-import pyarrow as pa  # type: ignore
+
+# import pyarrow as pa  # type: ignore
 
 from zeno.classes import Slice, Slicer  # type: ignore
 
 
-def get_arrow_bytes(df):
-    df_arrow = pa.Table.from_pandas(df)
-    buf = pa.BufferOutputStream()
-    with pa.ipc.new_file(buf, df_arrow.schema) as writer:
-        writer.write_table(df_arrow)
-    return bytes(buf.getvalue())
+def get_arrow_bytes(df, id_col):
+    # df_arrow = pa.Table.from_pandas(df)
+    # buf = pa.BufferOutputStream()
+    # with pa.ipc.new_file(buf, df_arrow.schema) as writer:
+    #     writer.write_table(df_arrow)
+    # return bytes(buf.getvalue())
+    df[id_col] = df.index
+    js = df.to_json()
+    return js
 
 
 # Used for preprocess and model outputs.
@@ -23,7 +27,7 @@ def cached_process(
     ids: pd.Index,
     column_name: str,
     cache_path: Path,
-    fn: Callable,
+    fn_loader: Callable,
     data_loader: Callable,
     data_path: str,
     batch_size: int,
@@ -37,6 +41,7 @@ def cached_process(
     to_predict_indices = df.loc[pd.isna(df[column_name]), :].index.intersection(ids)
 
     if len(to_predict_indices) > 0:
+        fn = fn_loader()
         if len(to_predict_indices) < batch_size:
             data = data_loader(df.loc[to_predict_indices], data_path)
             if transform:
@@ -66,11 +71,14 @@ def slice_data(metadata: pd.DataFrame, slicer: Slicer, label_column: str):
 
     slices = {}
     # Can either be of the from [index list] or [(name, index list)..]
-    if (
-        len(slicer_output) > 0
-        and isinstance(slicer_output[0], tuple)
-        or isinstance(slicer_output[0], list)
-    ):
+    if isinstance(slicer_output, pd.Index) and len(slicer_output) == 0:
+        metadata.loc[:, "zenoslice_" + "".join(slicer.name_list)] = pd.Series(
+            np.zeros(len(metadata), dtype=int), dtype=int
+        )
+        slices["".join(slicer.name_list)] = Slice([slicer.name_list], slicer_output)
+    elif (
+        isinstance(slicer_output[0], tuple) or isinstance(slicer_output[0], list)
+    ) and len(slicer_output) > 0:
         for output_slice in slicer_output:
             indices = output_slice[1]
             name_list = [*slicer.name_list, output_slice[0]]

@@ -23,9 +23,9 @@ pyarrow = "^7.0.0"
 uvicorn = "^0.17.5"
 fastapi = "^0.75.0"
 websockets = "^10.2"
-pandas-stubs = "^1.2.0"
 
 [tool.poetry.dev-dependencies]
+pandas-stubs = "^1.2.0"
 pytest = "^7.1.1"
 pytest-cov = "^3.0"
 torch = "^1.11.0"
@@ -41,6 +41,10 @@ jupyter-book = "^0.12.2"
 usort = "^1.0.1"
 sphinx-autodoc-typehints = "^1.17.0"
 sphinx-argparse = "^0.3.1"
+opencv-python = "^4.5.5"
+tqdm = "^4.63.1"
+seaborn = "^0.11.2"
+transformers = "^4.17.0"
 
 [tool.poetry.scripts]
 zeno = "zeno.runner:main"

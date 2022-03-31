@@ -4,7 +4,7 @@ from pathlib import Path
 
 from .server import run_background_processor, run_server
 
-TASK_TYPES = ["image-classification", "object-detection"]
+TASK_TYPES = ["image-classification", "object-detection", "text-classification"]
 
 
 def __create_parser():
@@ -22,8 +22,7 @@ def __create_parser():
         nargs=1,
         choices=TASK_TYPES,
         type=str,
-        help="CSV or Parquet file with metadata for each instance,"
-        + " at minimum a column with file names.",
+        help="The type of task to be analyzed.",
     )
     parser.add_argument(
         "--metadata",

@@ -66,6 +66,12 @@ export const table: Writable<ColumnTable> = writable(aq.table({}));
 
 wsResponse.subscribe(() => {
   fetch("/api/table")
-    .then((d) => d.arrayBuffer())
-    .then((d) => table.set(aq.fromArrow(d)));
+    .then((d) => d.json())
+    .then((d) => {
+      const x = {};
+      Object.keys(d).forEach((k) => {
+        x[k] = Object.values(d[k]);
+      });
+      table.set(aq.fromJSON(x));
+    });
 });

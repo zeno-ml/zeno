@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "zeno cifar",
+      "name": "zenocifar",
       "type": "python",
       "request": "launch",
       "cwd": "${workspaceFolder}",
@@ -26,7 +26,7 @@
       ]
     },
     {
-      "name": "zeno coco",
+      "name": "zenococo",
       "type": "python",
       "request": "launch",
       "cwd": "${workspaceFolder}",
@@ -42,9 +42,28 @@
         "--data-path",
         "/Users/acabrera/dev/data/coco-2014/val2014",
         "--batch-size",
-        "64",
+        "20",
         "--id-column",
         "file_name"
+      ]
+    },
+    {
+      "name": "zenoreviews",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": [
+        "./examples/reviews/",
+        "--metadata",
+        "./examples/models/sentiment/amazon_pred.parquet",
+        "--task",
+        "text-classification",
+        "--models",
+        "distilbert-base-uncased-finetuned-sst-2-english",
+        "fabriceyhc/bert-base-uncased-amazon_polarity",
+        "--batch-size",
+        "20"
       ]
     }
   ]

@@ -1,19 +1,40 @@
 from zeno import load_model, load_data, metric
 from PIL import Image
 import os
+import torch
+
+
+# @load_model
+# def load_model(model_path):
+#     def pred(instances):
+#         return [1] * len(instances)
+
+#     return pred
 
 
 @load_model
-def load_model(model_path):
+def torchhub(model_path):
+    # Model
+    model = torch.hub.load(
+        "ultralytics/yolov3", "yolov3"
+    )  # or yolov3-spp, yolov3-tiny, custom
+
     def pred(instances):
-        return [1] * len(instances)
+        results = model(instances).pred
+        # Results
+        res = []
+        for r in results:
+            r_temp = r.tolist()
+            for ent in r_temp:
+                del ent[4]
+            res.append(r_temp)
+        return res
 
     return pred
 
 
 @load_data
 def load_data(df_metadata, data_path):
-    print(df_metadata.index, data_path)
     return [Image.open(os.path.join(data_path, img)) for img in df_metadata.index]
 
 
