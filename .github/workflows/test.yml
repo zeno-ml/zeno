@@ -65,7 +65,7 @@ jobs:
       - uses: psf/black@stable
         with:
           src: "./zeno"
-          version: "22.1.0"
+          version: "22.3.0"
       - uses: py-actions/flake8@v2
         with:
           path: "./zeno"
