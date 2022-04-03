@@ -1,4 +1,8 @@
 <script lang="ts">
+  import Checkbox from "@smui/checkbox";
+
+  import FormField from "@smui/form-field";
+
   import Paper from "@smui/paper";
 
   import Tooltip, { Wrapper } from "@smui/tooltip";
@@ -8,12 +12,19 @@
   export let modelACol;
   export let modelBCol;
 
-  $: console.log(table.map((d) => d[modelACol]));
+  let showLabel = true;
+  let showModelA = true;
+  let showModelB = true;
+
+  $: console.log(table);
 
   let canvases: HTMLCanvasElement[] = [];
   let imgs: HTMLImageElement[] = [];
   $: {
     table;
+    showLabel;
+    showModelA;
+    showModelB;
     drawImages();
   }
   function drawImages() {
@@ -28,17 +39,26 @@
           let ctx = canvases[i].getContext("2d");
           ctx.imageSmoothingEnabled = true;
           ctx.drawImage(img, 0, 0);
-          let boxes = table[i][$settings.labelColumn];
-          ctx.strokeStyle = "purple";
-          ctx.lineWidth = 3;
-          boxes.forEach((box) => {
-            ctx.strokeRect(box[0], box[1], box[0] + box[2], box[1] + box[3]);
-          });
-          if (t[modelACol]) {
+          if (showLabel) {
+            let boxes = table[i][$settings.labelColumn];
+            ctx.strokeStyle = "purple";
+            ctx.lineWidth = 3;
+            boxes.forEach((box) => {
+              ctx.strokeRect(box[0], box[1], box[2], box[3]);
+            });
+          }
+          if (t[modelACol] && showModelA) {
             ctx.strokeStyle = "orange";
             ctx.lineWidth = 3;
             t[modelACol].forEach((box) => {
-              ctx.strokeRect(box[0], box[1], box[0] + box[2], box[1] + box[3]);
+              ctx.strokeRect(box[0], box[1], box[2], box[3]);
+            });
+          }
+          if (t[modelBCol] && showModelB) {
+            ctx.strokeStyle = "green";
+            ctx.lineWidth = 3;
+            t[modelACol].forEach((box) => {
+              ctx.strokeRect(box[0], box[1], box[2], box[3]);
             });
           }
         }
@@ -49,6 +69,21 @@
   }
 </script>
 
+<div>
+  <!-- <FormField>
+    <Checkbox bind:showLabel />
+    <span slot="label">label</span>
+  </FormField>
+  <FormField>
+    <Checkbox bind:showModelA />
+    <span slot="label">model A</span>
+  </FormField>
+  <FormField>
+    <Checkbox bind:showModelB />
+    <span slot="label">model B</span>
+  </FormField> -->
+</div>
+<br />
 {#each table as row, i}
   <div class="box">
     <Paper square>

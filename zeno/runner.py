@@ -84,6 +84,14 @@ def __create_parser():
         default="./.zeno_cache/",
         help="Folder for caching results of slicers and metrics.",
     )
+    parser.add_argument(
+        "--port",
+        dest="port",
+        nargs="?",
+        type=int,
+        default=8000,
+        help="IP port to run Zeno on.",
+    )
     return parser
 
 

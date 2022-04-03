@@ -22,7 +22,9 @@
         "./examples/models/cifar/cifar_net_5.pth",
         "./examples/models/cifar/cifar_net_10.pth",
         "--data-path",
-        "~/dev/data/cifar/test/"
+        "~/dev/data/cifar/test/",
+        "--port",
+        "8000"
       ]
     },
     {
@@ -38,13 +40,16 @@
         "--task",
         "object-detection",
         "--models",
-        "a",
+        "yolov3",
+        "yolov5",
         "--data-path",
         "/Users/acabrera/dev/data/coco-2014/val2014",
         "--batch-size",
         "20",
         "--id-column",
-        "file_name"
+        "file_name",
+        "--port",
+        "8001"
       ]
     },
     {
@@ -63,7 +68,9 @@
         "distilbert-base-uncased-finetuned-sst-2-english",
         "fabriceyhc/bert-base-uncased-amazon_polarity",
         "--batch-size",
-        "20"
+        "20",
+        "--port",
+        "8002"
       ]
     },
     {
@@ -83,7 +90,9 @@
         "--data-path",
         "/Users/acabrera/dev/data/free-spoken-digit-dataset/recordings",
         "--batch-size",
-        "20"
+        "20",
+        "--port",
+        "8003"
       ]
     }
   ]

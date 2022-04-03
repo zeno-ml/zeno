@@ -15,9 +15,12 @@ import torch
 @load_model
 def torchhub(model_path):
     # Model
-    model = torch.hub.load(
-        "ultralytics/yolov3", "yolov3"
-    )  # or yolov3-spp, yolov3-tiny, custom
+    if model_path == "yolov3":
+        model = torch.hub.load(
+            "ultralytics/yolov3", "yolov3"
+        )  # or yolov3-spp, yolov3-tiny, custom
+    elif model_path == "yolov5":
+        model = torch.hub.load("ultralytics/yolov5", "yolov5s", force_reload=True)
 
     def pred(instances):
         results = model(instances).pred

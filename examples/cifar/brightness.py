@@ -3,7 +3,7 @@ from zeno import slicer, transform, preprocess
 
 
 def get_brightness(im):
-    im_grey = im.convert("LA")  # convert to grayscale
+    im_grey = im.convert("LA")
     width, height = im.size
 
     total = 0
@@ -15,7 +15,7 @@ def get_brightness(im):
 
 
 def get_border_brightness(im):
-    im_grey = im.convert("LA")  # convert to grayscale
+    im_grey = im.convert("LA")
     width, height = im.size
 
     total = 0

@@ -1,11 +1,5 @@
-from zeno import slicer, transform, preprocess
-from PIL import Image
+from zeno import slicer, preprocess
 import numpy as np
-
-
-def get_color_distribution(im: Image):
-    arr = np.array(im)
-    return [arr.mean(axis=(0, 1))]
 
 
 def red_pixels(im):

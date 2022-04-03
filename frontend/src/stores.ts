@@ -10,7 +10,7 @@ export const models = writable(null);
 export const ready: Writable<boolean> = writable(false);
 
 export const wsResponse: Writable<WSResponse> = websocketStore(
-  "ws://localhost:8000/api/results",
+  `ws://localhost:${location.port}/api/results`,
   {
     status: "connecting",
     results: [],

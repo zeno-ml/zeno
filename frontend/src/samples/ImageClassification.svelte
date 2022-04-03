@@ -41,16 +41,16 @@
 
 <style>
   .label {
-    font-size: 9px;
-    color: rgba(0, 0, 0, 0.5);
+    font-size: 10px;
+    color: rgba(0, 0, 0, 0.75);
   }
   .output {
-    font-size: 9px;
-    color: rgba(255, 0, 0, 0.5);
+    font-size: 10px;
+    color: rgb(155, 81, 224);
   }
   .second_output {
-    font-size: 9px;
-    color: rgba(255, 0, 255, 0.5);
+    font-size: 10px;
+    color: rgba(4, 99, 7, 1);
   }
   .box {
     padding: 10px;

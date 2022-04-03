@@ -37,6 +37,7 @@ def run_background_processor(conn, args):
                         "task": zeno.task,
                         "idColumn": zeno.id_column,
                         "labelColumn": zeno.label_column,
+                        "port": args.port,
                     }
                 )
             )
@@ -144,4 +145,4 @@ def run_server(conn, args):
                     }
                 )
 
-    uvicorn.run(app, host="localhost", port=8000)  # type: ignore
+    uvicorn.run(app, host="localhost", port=args.port)  # type: ignore
