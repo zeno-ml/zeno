@@ -42,7 +42,7 @@ usort = "^1.0.1"
 sphinx-autodoc-typehints = "^1.17.0"
 sphinx-argparse = "^0.3.1"
 opencv-python = "^4.5.5"
-tqdm = "^4.63.1"
+tqdm = "^4.64.0"
 seaborn = "^0.11.2"
 transformers = "^4.17.0"
 
