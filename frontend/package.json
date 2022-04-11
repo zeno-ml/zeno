@@ -17,7 +17,7 @@
     "@smui/tooltip": "^6.0.0-beta.14",
     "@tsconfig/svelte": "^3.0.0",
     "@typescript-eslint/eslint-plugin": "^5.19.0",
-    "eslint": "^8.11.0",
+    "eslint": "^8.13.0",
     "eslint-plugin-svelte3": "^3.4.1",
     "rollup": "^2.3.4",
     "rollup-plugin-css-only": "^3.1.0",
@@ -33,12 +33,12 @@
   "dependencies": {
     "@mdi/js": "^6.5.95",
     "@smui-extra/accordion": "^6.0.0-beta.16",
-    "@smui/button": "^6.0.0-beta.15",
+    "@smui/button": "^6.0.0-beta.16",
     "@smui/card": "^6.0.0-beta.15",
     "@smui/checkbox": "^6.0.0-beta.16",
-    "@smui/chips": "^6.0.0-beta.15",
+    "@smui/chips": "^6.0.0-beta.16",
     "@smui/circular-progress": "^6.0.0-beta.15",
-    "@smui/form-field": "^6.0.0-beta.15",
+    "@smui/form-field": "^6.0.0-beta.16",
     "@smui/layout-grid": "^6.0.0-beta.15",
     "@smui/list": "^6.0.0-beta.16",
     "@smui/paper": "^6.0.0-beta.15",
@@ -52,7 +52,7 @@
     "sirv-cli": "^2.0.0",
     "svelte-material-ui": "^6.0.0-beta.15",
     "svelte-spa-router": "^3.2.0",
-    "svelte-websocket-store": "^1.1.20",
+    "svelte-websocket-store": "^1.1.23",
     "wavesurfer.js": "^6.1.0"
   }
 }
