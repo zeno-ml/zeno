@@ -40,7 +40,7 @@
     "@smui/circular-progress": "^6.0.0-beta.15",
     "@smui/form-field": "^6.0.0-beta.15",
     "@smui/layout-grid": "^6.0.0-beta.15",
-    "@smui/list": "^6.0.0-beta.15",
+    "@smui/list": "^6.0.0-beta.16",
     "@smui/paper": "^6.0.0-beta.15",
     "@smui/ripple": "^6.0.0-beta.15",
     "@smui/segmented-button": "^6.0.0-beta.15",
