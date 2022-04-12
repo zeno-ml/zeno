@@ -37,7 +37,7 @@
     "@smui/card": "^6.0.0-beta.16",
     "@smui/checkbox": "^6.0.0-beta.16",
     "@smui/chips": "^6.0.0-beta.16",
-    "@smui/circular-progress": "^6.0.0-beta.15",
+    "@smui/circular-progress": "^6.0.0-beta.16",
     "@smui/form-field": "^6.0.0-beta.16",
     "@smui/layout-grid": "^6.0.0-beta.16",
     "@smui/list": "^6.0.0-beta.16",
