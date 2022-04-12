@@ -50,7 +50,7 @@
     "d3-force": "^3.0.0",
     "internmap": "^2.0.3",
     "sirv-cli": "^2.0.0",
-    "svelte-material-ui": "^6.0.0-beta.15",
+    "svelte-material-ui": "^6.0.0-beta.16",
     "svelte-spa-router": "^3.2.0",
     "svelte-websocket-store": "^1.1.23",
     "wavesurfer.js": "^6.1.0"
