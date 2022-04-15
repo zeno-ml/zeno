@@ -62,21 +62,24 @@ class Zeno(object):
 
         # Read metadata as Pandas for slicing
         if metadata_path.suffix == ".csv":
-            self.metadata = pd.read_csv(metadata_path)
+            self.df = pd.read_csv(metadata_path)
         elif metadata_path.suffix == ".parquet":
-            self.metadata = pd.read_parquet(metadata_path)
+            self.df = pd.read_parquet(metadata_path)
         else:
             logging.error(
                 "Extension of " + metadata_path.suffix + " not one of .csv or .parquet"
             )
             sys.exit(1)
 
-        self.metadata[id_column].astype(str)
-        self.metadata.set_index(self.id_column, inplace=True)
+        self.df[id_column].astype(str)
+        self.df.set_index(self.id_column, inplace=True)
+
+        self.metadata: List[str] = []
 
     def start_processing(self):
         """Parse testing files and start preprocessing and slicing data."""
         self.__parse_testing_files()
+        self.metadata = [*[p.name for p in self.preprocessors], *list(self.df.columns)]
         self.__thread = threading.Thread(
             target=asyncio.run, args=(self.__preprocess_and_slice(),)
         )
@@ -161,8 +164,8 @@ class Zeno(object):
                 return preprocessor.func
 
             cached_process(
-                self.metadata,
-                self.metadata.index,
+                self.df,
+                self.df.index,
                 preprocessor.name,
                 cache_path,
                 fn_loader,
@@ -179,7 +182,7 @@ class Zeno(object):
             self.status = "Slicing data for " + name
             self.slices = {
                 **self.slices,
-                **slice_data(self.metadata, slicer, self.label_column),
+                **slice_data(self.df, slicer, self.label_column),
             }
         self.status = "Done slicing"
 
@@ -207,19 +210,17 @@ class Zeno(object):
             if cancel_event.is_set():
                 return
 
-            slice_name, metric_name, model_name = (
-                request.slices,
+            slice_name, idxs, metric_name, model_name = (
+                request.slice_name,
+                request.idxs,
                 request.metric,
                 request.model,
             )
             try:
-                sli = self.slices["".join(["".join(d) for d in slice_name])]
+                sli = self.slices[slice_name]
             except KeyError:
-                index = self.slices["".join(slice_name[0])].index.intersection(
-                    self.slices["".join(slice_name[1])].index
-                )
-                sli = Slice(slice_name, index)
-                self.slices["".join(["".join(d) for d in slice_name])] = sli
+                sli = Slice(slice_name, "generated", pd.Index(idxs))
+                self.slices[slice_name] = sli
 
             self.status = ("Test {0}/{1}: Slice {2}, Metric {3}, Model {4}").format(
                 str(i + 1),
@@ -230,10 +231,9 @@ class Zeno(object):
             )
             self.__calculate_outputs(sli, model_name)
 
-            res_hash = int(
-                hash("".join(["".join(d) for d in slice_name]) + "" + metric_name)
-                / 10000
-            )
+            # TODO: add transform
+            res_hash = int(hash(slice_name + "" + metric_name) / 10000)
+
             if res_hash in self.results:
                 res = self.results[res_hash]
             else:
@@ -248,14 +248,14 @@ class Zeno(object):
 
             if len(signature(metric_func).parameters) == 3:
                 result = metric_func(
-                    self.metadata.loc[sli.index, str(model_name)].tolist(),
-                    self.metadata.loc[sli.index],
+                    self.df.loc[sli.index, str(model_name)].tolist(),
+                    self.df.loc[sli.index],
                     self.label_column,
                 )
             else:
                 result = metric_func(
-                    self.metadata.loc[sli.index, str(model_name)].tolist(),
-                    self.metadata.loc[sli.index],
+                    self.df.loc[sli.index, str(model_name)].tolist(),
+                    self.df.loc[sli.index],
                 )
 
             res.set_result(model_name, result)
@@ -269,7 +269,7 @@ class Zeno(object):
             return self.model_loader(model_name)
 
         cached_process(
-            self.metadata,
+            self.df,
             sli.index,
             str(model_name),
             Path(
@@ -291,4 +291,4 @@ class Zeno(object):
         Returns:
             bytes: Arrow-encoded table of slice metadata
         """
-        return get_arrow_bytes(self.metadata, self.id_column)
+        return get_arrow_bytes(self.df, self.id_column)

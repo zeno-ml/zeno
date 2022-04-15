@@ -1,8 +1,4 @@
 <script lang="ts">
-  import Checkbox from "@smui/checkbox";
-
-  import FormField from "@smui/form-field";
-
   import Paper from "@smui/paper";
 
   import Tooltip, { Wrapper } from "@smui/tooltip";
@@ -94,7 +90,7 @@
           bind:this={canvases[i]}
         />
         <Tooltip>
-          {#each Object.keys(row) as key}
+          {#each Object.keys(row).filter((r) => !r.startsWith("zeno")) as key}
             {key} : {row[key]}
             <br />
           {/each}

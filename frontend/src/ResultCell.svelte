@@ -4,16 +4,13 @@
   import { Svg } from "@smui/common/elements";
   import { slide } from "svelte/transition";
   import IconButton, { Icon } from "@smui/icon-button";
-  import Checkbox from "@smui/checkbox";
-  import FormField from "@smui/form-field";
-  import Ripple from "@smui/ripple";
   import { results, slices } from "./stores";
-  import { sliceEquals } from "./util";
   import type { InternSet } from "internmap";
+  import LeafNode from "./LeafNode.svelte";
 
   export let sliceNode: SliceNode;
-  export let selected: string[][];
-  export let checked: InternSet<string[][]>;
+  export let selected: string;
+  export let checked: InternSet<string>;
   export let modelA: string;
   export let modelB: string;
   export let expandAll: boolean = false;
@@ -37,52 +34,17 @@
 <div>
   <div transition:slide>
     {#if isLeaf(sliceNode)}
-      <div
-        use:Ripple={{ surface: true, color: "primary" }}
-        class="cell parent {sliceEquals(selected, sliceNode.slice.name)
-          ? 'selected'
-          : ''}"
-        style:margin-left={sliceNode.depth * 10 + "px"}
-        on:click={() =>
-          sliceEquals(selected, sliceNode.slice.name)
-            ? (selected = [])
-            : (selected = sliceNode.slice.name)}
-      >
-        <div class="group" style:width="100%">
-          <div style:margin-right="5px">
-            <FormField on:click={(e) => e.stopPropagation()}>
-              <Checkbox
-                checked={checked.has(sliceNode.slice.name)}
-                on:click={() => {
-                  checked.has(sliceNode.slice.name)
-                    ? checked.delete(sliceNode.slice.name)
-                    : checked.add(sliceNode.slice.name);
-                  checked = checked;
-                }}
-              />
-            </FormField>
-          </div>
-          <div class="group" style:width="100%">
-            <span>{sliceNode.name}</span>
-            {#if result}
-              <div>
-                <span style:margin-right="10px">
-                  A: {result.modelResults[modelA]
-                    ? result.modelResults[modelA].toFixed(2)
-                    : ""}%
-                  {#if modelB && result.modelResults[modelB]}
-                    <span style:margin-left="10px">
-                      B: {result.modelResults[modelB].toFixed(2)}%
-                    </span>
-                  {/if}
-                </span>
-                {#if slice}
-                  <span>{slice.size.toLocaleString()}</span>
-                {/if}
-              </div>
-            {/if}
-          </div>
-        </div>
+      <div style:margin-left={sliceNode.depth * 10 + "px"}>
+        <LeafNode
+          name={sliceNode.name}
+          fullName={sliceNode.slice.name}
+          {result}
+          size={sliceNode.slice.size}
+          {modelA}
+          {modelB}
+          bind:selected
+          bind:checked
+        />
       </div>
     {:else}
       <div class="cell leaf" style="margin-left: {sliceNode.depth * 10}px">
@@ -138,8 +100,5 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-  }
-  .selected {
-    background: #ebdffc;
   }
 </style>

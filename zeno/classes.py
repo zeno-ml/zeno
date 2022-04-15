@@ -6,7 +6,8 @@ from pydantic import BaseModel
 
 
 class ResultRequest(BaseModel):
-    slices: List[List[str]]
+    slice_name: str
+    idxs: List[str]
     metric: str
     model: str
     transform: str
@@ -38,8 +39,9 @@ class Metric:
 
 
 class Slice:
-    def __init__(self, name: List[List[str]], index: pd.Index):
+    def __init__(self, name: str, slice_type: str, index: pd.Index):
         self.name = name
+        self.slice_type = slice_type
         self.index = index
         self.size = len(index)
 
@@ -54,7 +56,7 @@ class Slicer:
 class Result:
     def __init__(
         self,
-        sli: List[List[str]],
+        sli: str,
         transform: str,
         metric: str,
         slice_size: int,
@@ -62,7 +64,7 @@ class Result:
         """A result is a slice of data, a transform, and a metric.
 
         Args:
-            sli (List[List[str]]): The slice for this result.
+            sli (str): The slice for this result.
             transform (str): The transform for this result.
             metric (str): The metric for this result.
             slice_size (int): _description_

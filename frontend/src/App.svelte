@@ -3,37 +3,32 @@
   import CircularProgress from "@smui/circular-progress";
   import { Svg } from "@smui/common/elements";
   import IconButton, { Icon } from "@smui/icon-button";
-  import List, {
-    Item,
-    PrimaryText,
-    SecondaryText,
-    Separator,
-    Text,
-  } from "@smui/list";
+  import List, { Item, Separator } from "@smui/list";
   import Tooltip, { Wrapper } from "@smui/tooltip";
   import { onMount } from "svelte";
   import Router, { location } from "svelte-spa-router";
-  import Home from "./Home.svelte";
   import Results from "./Results.svelte";
-  import { status } from "./stores";
+  import { settings, status } from "./stores";
   import { initialFetch, updateTab } from "./util";
+  // import { mdiHomeVariantOutline } from "@mdi/js";
+  import { mdiListStatus } from "@mdi/js";
 
   let runningAnalysis = true;
   let tab = $location.split("/")[1];
   if (!tab) {
-    tab = "home";
+    tab = "/";
   }
 
   const routes = {
-    "/": Home,
+    "/": Results,
     "/results/": Results,
-    "*": Home,
+    "*": Results,
   };
 
   location.subscribe((d) => {
     tab = d.split("/")[1];
     if (!tab) {
-      tab = "home";
+      tab = "/";
     }
   });
 
@@ -44,15 +39,33 @@
       runningAnalysis = true;
     }
   });
+
+  settings.subscribe((d) => console.log(d));
   onMount(() => initialFetch());
 </script>
 
 <header>
-  <img
-    style="width:150px"
-    src="zeno.png"
-    alt="Square spiral logo next to 'Zeno'"
-  />
+  <div
+    style="display:flex; flex-direction:inline; align-items:center; justify-content: center;"
+  >
+    <img
+      style="width:150px; margin-right: 50px;"
+      src="zeno.png"
+      alt="Square spiral logo next to 'Zeno'"
+    />
+    <div
+      class="status"
+      style="display:flex; flex-direction:inline; align-items:center; justify-content: center;"
+    >
+      {#if runningAnalysis}
+        <CircularProgress
+          style="height: 32px; width: 32px; margin-right:20px"
+          indeterminate
+        />
+        <span>{@html $status}</span>
+      {/if}
+    </div>
+  </div>
 
   <div>
     <Wrapper>
@@ -75,35 +88,30 @@
 </header>
 <main>
   <div id="side-menu">
-    <List class="demo-list">
-      <Item
+    <List class="demo-list" iconList={true}>
+      <!-- <Item
         activated={tab === "home"}
         on:SMUI:action={() => (tab = updateTab("home"))}
       >
-        <Text>
-          <PrimaryText>Home</PrimaryText>
-          <SecondaryText>Overview of tests</SecondaryText>
-        </Text>
+        <IconButton>
+          <Icon component={Svg} viewBox="0 0 24 24">
+            <path fill="currentColor" d={mdiHomeVariantOutline} />
+          </Icon>
+        </IconButton>
       </Item>
-      <Separator />
+      <Separator /> -->
       <Item
         activated={tab === "results"}
         on:SMUI:action={() => (tab = updateTab("results"))}
       >
-        <Text>
-          <PrimaryText>Results</PrimaryText>
-          <SecondaryText>Test results on slices</SecondaryText>
-        </Text>
+        <IconButton>
+          <Icon component={Svg} viewBox="0 0 24 24">
+            <path fill="currentColor" d={mdiListStatus} />
+          </Icon>
+        </IconButton>
       </Item>
       <Separator />
     </List>
-    <div class="status">
-      {#if runningAnalysis}
-        <CircularProgress style="height: 32px; width: 32px;" indeterminate />
-        <br />
-        <p>{@html $status}</p>
-      {/if}
-    </div>
   </div>
   <div id="main">
     <Router {routes} />
@@ -111,15 +119,17 @@
 </main>
 
 <style>
+  * :global(.demo-list) {
+    max-width: 50px;
+  }
+  * :global(.mdc-deprecated-list-item) {
+    padding-left: 0px;
+  }
   main {
     display: flex;
     flex-direction: row;
     text-align: left;
     padding-bottom: 50px;
-  }
-
-  .status {
-    padding: 15px;
   }
 
   header {
@@ -129,14 +139,14 @@
   }
 
   #side-menu {
-    width: 200px;
+    width: 50px;
     border-right: 1px solid #e0e0e0;
     height: calc(100vh - 74px);
   }
 
   #main {
-    margin-left: 20px;
-    width: calc(100vw - 300px);
+    padding-left: 10px;
+    width: calc(100vw - 50px);
   }
 
   header {

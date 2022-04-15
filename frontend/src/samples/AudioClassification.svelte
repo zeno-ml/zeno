@@ -47,7 +47,7 @@
           alt="Image thumbnail for instance {row[$settings.idColumn]}"
         /> -->
         <Tooltip>
-          {#each Object.keys(row) as key}
+          {#each Object.keys(row).filter((r) => !r.startsWith("zeno")) as key}
             {key} : {row[key]}
             <br />
           {/each}

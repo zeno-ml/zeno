@@ -72,25 +72,31 @@ def slice_data(metadata: pd.DataFrame, slicer: Slicer, label_column: str):
     slices = {}
     # Can either be of the from [index list] or [(name, index list)..]
     if isinstance(slicer_output, pd.Index) and len(slicer_output) == 0:
-        metadata.loc[:, "zenoslice_" + "".join(slicer.name_list)] = pd.Series(
+        metadata.loc[:, "zenoslice_" + ".".join(slicer.name_list)] = pd.Series(
             np.zeros(len(metadata), dtype=int), dtype=int
         )
-        slices["".join(slicer.name_list)] = Slice([slicer.name_list], slicer_output)
+        slices[".".join(slicer.name_list)] = Slice(
+            ".".join(slicer.name_list), "programmatic", slicer_output
+        )
     elif (
         isinstance(slicer_output[0], tuple) or isinstance(slicer_output[0], list)
     ) and len(slicer_output) > 0:
         for output_slice in slicer_output:
             indices = output_slice[1]
             name_list = [*slicer.name_list, output_slice[0]]
-            metadata.loc[:, "zenoslice_" + "".join(name_list)] = pd.Series(
+            metadata.loc[:, "zenoslice_" + ".".join(name_list)] = pd.Series(
                 np.zeros(len(metadata), dtype=int), dtype=int
             )
-            metadata.loc[indices, "zenoslice_" + "".join(name_list)] = 1
-            slices["".join(name_list)] = Slice([name_list], indices)
+            metadata.loc[indices, "zenoslice_" + ".".join(name_list)] = 1
+            slices[".".join(name_list)] = Slice(
+                ".".join(name_list), "programmatic", indices
+            )
     else:
-        metadata.loc[:, "zenoslice_" + "".join(slicer.name_list)] = pd.Series(
+        metadata.loc[:, "zenoslice_" + ".".join(slicer.name_list)] = pd.Series(
             np.zeros(len(metadata), dtype=int), dtype=int
         )
-        metadata.loc[slicer_output, "zenoslice_" + "".join(slicer.name_list)] = 1
-        slices["".join(slicer.name_list)] = Slice([slicer.name_list], slicer_output)
+        metadata.loc[slicer_output, "zenoslice_" + ".".join(slicer.name_list)] = 1
+        slices[".".join(slicer.name_list)] = Slice(
+            ".".join(slicer.name_list), "programmatic", slicer_output
+        )
     return slices

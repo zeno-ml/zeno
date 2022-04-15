@@ -4,7 +4,12 @@ import { websocketStore } from "svelte-websocket-store";
 import type ColumnTable from "arquero/dist/types/table/column-table";
 import * as aq from "arquero";
 
-export const settings: Writable<Settings> = writable(null);
+export const settings: Writable<Settings> = writable({
+  task: "",
+  idColumn: "",
+  labelColumn: "",
+  metadata: [],
+});
 export const metrics = writable(null);
 export const models = writable(null);
 export const ready: Writable<boolean> = writable(false);
@@ -47,17 +52,17 @@ export const results: Readable<InternMap<ResultKey, Result>> = derived(
   new InternMap<ResultKey, Result>()
 );
 
-export const slices: Readable<InternMap<string[][], Slice>> = derived(
+export const slices: Readable<Map<string, Slice>> = derived(
   wsResponse,
   ($wsResponse) => {
     if ($wsResponse.slices.length > 0) {
-      const retMap = new InternMap<string[][], Slice>();
+      const retMap = new Map<string, Slice>();
       $wsResponse.slices.forEach((s) => {
         retMap.set(s.name, s);
       });
       return retMap;
     } else {
-      return new InternMap<string[][], Slice>();
+      return new Map<string, Slice>();
     }
   }
 );

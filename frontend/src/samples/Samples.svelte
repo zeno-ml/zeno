@@ -112,7 +112,4 @@
     flex-wrap: wrap;
     width: 100%;
   }
-  .pagination {
-    border-top-width: 0px !important;
-  }
 </style>

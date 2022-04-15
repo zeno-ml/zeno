@@ -37,6 +37,7 @@ def run_background_processor(conn, args):
                         "task": zeno.task,
                         "idColumn": zeno.id_column,
                         "labelColumn": zeno.label_column,
+                        "metadata": zeno.metadata,
                         "port": args.port,
                     }
                 )
@@ -71,6 +72,7 @@ def run_background_processor(conn, args):
             slices = [
                 {
                     "name": s.name,
+                    "type": s.slice_type,
                     "size": s.size,
                 }
                 for s in sls

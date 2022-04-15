@@ -21,12 +21,16 @@ export class SliceNode {
 
 // Recursive function for creating result tree.
 export function appendChild(parent: SliceNode, child: Slice) {
-  const name = child.name[0];
+  let name = child.name;
+  if (name.startsWith("zenoslice_")) {
+    name = name.slice(9);
+  }
+  const name_parts = name.split(".");
 
   // Add a leaf node.
-  if (name.length === parent.depth + 1) {
-    parent.children[name[parent.depth]] = new SliceNode(
-      name[parent.depth],
+  if (name_parts.length === parent.depth + 1) {
+    parent.children[name_parts[parent.depth]] = new SliceNode(
+      name_parts[parent.depth],
       parent.depth + 1,
       null,
       child
@@ -35,17 +39,17 @@ export function appendChild(parent: SliceNode, child: Slice) {
   }
 
   // If child exists, add to it. Else, create it and add to it.
-  const childNode = parent.children[name[parent.depth]];
+  const childNode = parent.children[name_parts[parent.depth]];
   if (childNode) {
-    childNode[name[parent.depth]] = appendChild(childNode, child);
+    childNode[name_parts[parent.depth]] = appendChild(childNode, child);
   } else {
-    parent.children[name[parent.depth]] = new SliceNode(
-      name[parent.depth],
+    parent.children[name_parts[parent.depth]] = new SliceNode(
+      name_parts[parent.depth],
       parent.depth + 1,
       {},
       null
     );
-    appendChild(parent.children[name[parent.depth]], child);
+    appendChild(parent.children[name_parts[parent.depth]], child);
   }
 }
 
@@ -66,27 +70,6 @@ export function leafCount(node: SliceNode) {
     count += leafCount(node);
   });
   return count;
-}
-
-export function sliceEquals(s1: string[][], s2: string[][]) {
-  if (s1.length !== s2.length) {
-    return false;
-  }
-  const s1String = s1.map((s) => s.join(""));
-  const s2String = s2.map((s) => s.join(""));
-  for (let i = 0; i < s1.length; i++) {
-    let localEquals = false;
-    for (let j = 0; j < s2.length; j++) {
-      if (s1String[i] === s2String[j]) {
-        localEquals = true;
-        break;
-      }
-    }
-    if (!localEquals) {
-      return false;
-    }
-  }
-  return true;
 }
 
 export function initialFetch() {

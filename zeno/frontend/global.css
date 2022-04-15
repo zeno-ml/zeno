@@ -114,3 +114,7 @@ span {
   --mdc-segmented-button-selected-ink-color: #ff3e00;
   --mdc-segmented-button-selected-container-fill-color: #ffe6df;
 } */
+
+.mdc-data-table__pagination {
+  border-top-width: 0px;
+}
