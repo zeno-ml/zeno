@@ -1,9 +1,11 @@
+import os
 from inspect import signature
 from pathlib import Path
-from typing import Callable, Union
+from typing import Callable
 
 import numpy as np
 import pandas as pd
+from tqdm import trange  # type: ignore
 
 # import pyarrow as pa  # type: ignore
 
@@ -21,42 +23,103 @@ def get_arrow_bytes(df, id_col):
     return js
 
 
-# Used for preprocess and model outputs.
-def cached_process(
+def cached_inference(
     df: pd.DataFrame,
-    ids: pd.Index,
-    column_name: str,
-    cache_path: Path,
-    fn_loader: Callable,
+    model_name: str,
+    cache_path: str,
+    fn: Callable,
     data_loader: Callable,
     data_path: str,
     batch_size: int,
-    transform: Union[Callable, None] = None,
+):
+    inference_column_name = "zenomodel_" + model_name
+    embedding_column_name = "zenoembedding_" + model_name
+    inference_path = os.path.join(cache_path, inference_column_name + ".pickle")
+    embedding_path = os.path.join(inference_column_name + "_" + ".pickle")
+
+    if inference_column_name not in df.columns:
+        try:
+            df.loc[:, inference_column_name] = pd.read_pickle(inference_path)
+        except FileNotFoundError:
+            df.loc[:, inference_column_name] = [pd.NA] * df.shape[0]
+
+    if embedding_column_name not in df.columns:
+        try:
+            df.loc[:, embedding_column_name] = pd.read_pickle(embedding_path)
+        except FileNotFoundError:
+            df.loc[:, embedding_column_name] = [pd.NA] * df.shape[0]
+    to_predict_indices = df.loc[pd.isna(df[inference_column_name]), :].index
+
+    if len(to_predict_indices) > 0:
+        if len(to_predict_indices) < batch_size:
+            data = data_loader(df.loc[to_predict_indices], data_path)
+            out = fn(data)
+
+            # Check if we also get embedding
+            if type(out) == tuple and len(out) == 2:
+                for i, idx in enumerate(to_predict_indices):
+                    df.at[idx, inference_column_name] = out[0][i]
+                    df.at[idx, embedding_column_name] = out[1][i]
+                df[embedding_column_name].to_pickle(embedding_path)
+                out = out[0]
+            else:
+                df.loc[to_predict_indices, inference_column_name] = out
+            df[inference_column_name].to_pickle(inference_path)
+        else:
+            for i in trange(
+                0, len(to_predict_indices), batch_size, desc="inference batches"
+            ):
+                data = data_loader(
+                    df.loc[to_predict_indices[i : i + batch_size]],
+                    data_path,
+                )
+                out = fn(data)
+
+                if type(out) == tuple and len(out) == 2:
+                    for i, idx in enumerate(to_predict_indices[i : i + batch_size]):
+                        df.at[idx, inference_column_name] = out[0][i]
+                        df.at[idx, embedding_column_name] = out[1][i]
+                    df[embedding_column_name].to_pickle(embedding_path)
+                else:
+                    df.loc[
+                        to_predict_indices[i : i + batch_size], inference_column_name
+                    ] = out
+                df[inference_column_name].to_pickle(inference_path)
+
+
+# Used for preprocess and model outputs.
+def cached_preprocess(
+    df: pd.DataFrame,
+    column_name: str,
+    cache_path: Path,
+    fn: Callable,
+    data_loader: Callable,
+    data_path: str,
+    batch_size: int,
 ):
     if column_name not in df.columns:
         try:
             df.loc[:, column_name] = pd.read_pickle(cache_path)
         except FileNotFoundError:
             df.loc[:, column_name] = [pd.NA] * df.shape[0]
-    to_predict_indices = df.loc[pd.isna(df[column_name]), :].index.intersection(ids)
+    to_predict_indices = df.loc[pd.isna(df[column_name]), :].index
 
     if len(to_predict_indices) > 0:
-        fn = fn_loader()
         if len(to_predict_indices) < batch_size:
             data = data_loader(df.loc[to_predict_indices], data_path)
-            if transform:
-                data = transform(data)
-            df.loc[to_predict_indices, column_name] = fn(data)
+            out = fn(data)
+            df.loc[to_predict_indices, column_name] = out
             df[column_name].to_pickle(cache_path)
         else:
-            for i in range(0, len(to_predict_indices), batch_size):
+            for i in trange(
+                0, len(to_predict_indices), batch_size, desc="preprocessing batches"
+            ):
                 data = data_loader(
                     df.loc[to_predict_indices[i : i + batch_size]],
                     data_path,
                 )
-                if transform:
-                    data = transform(data)
-                df.loc[to_predict_indices[i : i + batch_size], column_name] = fn(data)
+                out = fn(data)
+                df.loc[to_predict_indices[i : i + batch_size], column_name] = out
                 df[column_name].to_pickle(cache_path)
 
 

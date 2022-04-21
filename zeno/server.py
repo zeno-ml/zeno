@@ -7,7 +7,7 @@ from fastapi import FastAPI, WebSocket
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 
-from zeno.classes import AnalysisModel
+from zeno.classes import AnalysisModel, ProjectionRequest
 
 from .zeno import Zeno
 
@@ -16,7 +16,7 @@ def run_background_processor(conn, args):
     zeno = Zeno(
         metadata_path=args.metadata[0],
         task=args.task[0],
-        test_files=args.__dict__["test-files"],
+        test_files=args.tests,
         models=args.models,
         batch_size=args.batch_size,
         id_column=args.id_column,
@@ -55,6 +55,10 @@ def run_background_processor(conn, args):
         elif case == "RUN_ANALYSIS":
             zeno.run_analysis(options.requests)
             conn.send("")
+
+        elif case == "RUN_PROJECTION":
+            res = zeno.run_projection(options.model)
+            conn.send(res)
 
         elif case == "GET_RESULTS":
             res = zeno.results.values()
@@ -126,6 +130,11 @@ def run_server(conn, args):
     @api_app.post("/analysis")
     async def run_analysis(sli: AnalysisModel):
         conn.send(("RUN_ANALYSIS", sli))
+        return conn.recv()
+
+    @api_app.post("/projection")
+    async def run_projection(model: ProjectionRequest):
+        conn.send(("RUN_PROJECTION", model))
         return conn.recv()
 
     @api_app.websocket("/results")

@@ -17,6 +17,10 @@ class AnalysisModel(BaseModel):
     requests: List[ResultRequest]
 
 
+class ProjectionRequest(BaseModel):
+    model: str
+
+
 class Preprocessor:
     def __init__(self, name: str, func: Callable):
         self.name = name

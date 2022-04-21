@@ -11,24 +11,26 @@
   import { settings, status } from "./stores";
   import { initialFetch, updateTab } from "./util";
   // import { mdiHomeVariantOutline } from "@mdi/js";
-  import { mdiListStatus } from "@mdi/js";
+  import { mdiListStatus, mdiGraphql } from "@mdi/js";
+  import Embed from "./Embed.svelte";
 
   let runningAnalysis = true;
   let tab = $location.split("/")[1];
   if (!tab) {
-    tab = "/";
+    tab = "results";
   }
 
   const routes = {
     "/": Results,
     "/results/": Results,
+    "/embed/": Embed,
     "*": Results,
   };
 
   location.subscribe((d) => {
     tab = d.split("/")[1];
     if (!tab) {
-      tab = "/";
+      tab = "results";
     }
   });
 
@@ -49,7 +51,7 @@
     style="display:flex; flex-direction:inline; align-items:center; justify-content: center;"
   >
     <img
-      style="width:150px; margin-right: 50px;"
+      style="width:100px; margin-right: 50px;"
       src="zeno.png"
       alt="Square spiral logo next to 'Zeno'"
     />
@@ -111,6 +113,17 @@
         </IconButton>
       </Item>
       <Separator />
+      <Item
+        activated={tab === "embed"}
+        on:SMUI:action={() => (tab = updateTab("embed"))}
+      >
+        <IconButton>
+          <Icon component={Svg} viewBox="0 0 24 24">
+            <path fill="currentColor" d={mdiGraphql} />
+          </Icon>
+        </IconButton>
+      </Item>
+      <Separator />
     </List>
   </div>
   <div id="main">
@@ -153,7 +166,10 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding-right: 50px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-right: 20px;
+    padding-left: 20px;
   }
 
   @media (min-width: 640px) {

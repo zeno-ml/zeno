@@ -8,10 +8,14 @@ from inspect import getmembers, isfunction, signature
 from pathlib import Path
 from typing import Callable, Dict, List
 
+import numpy as np
+
 import pandas as pd
+import tqdm  # type: ignore
+import umap  # type: ignore
 
 from .classes import Preprocessor, Result, ResultRequest, Slice, Slicer
-from .util import cached_process, get_arrow_bytes, slice_data
+from .util import cached_inference, cached_preprocess, get_arrow_bytes, slice_data
 
 
 class Zeno(object):
@@ -20,7 +24,7 @@ class Zeno(object):
         metadata_path: Path,
         task: str,
         test_files: List[Path],
-        models: List[Path],
+        models: List[str],
         batch_size=16,
         id_column="id",
         label_column="label",
@@ -28,16 +32,23 @@ class Zeno(object):
         cache_path="",
     ):
         logging.basicConfig(level=logging.INFO)
+
         self.metadata_path = metadata_path
         self.task = task
         self.test_files = test_files
-        self.model_names = models
+
+        if os.path.isdir(models[0]):
+            self.model_paths = [
+                os.path.join(models[0], m) for m in os.listdir(models[0])
+            ]
+        else:
+            self.model_paths = models
+        self.model_names = [os.path.basename(p).split(".")[0] for p in self.model_paths]
+
         self.batch_size = batch_size
         self.id_column = id_column
         self.label_column = label_column
         self.data_path = data_path
-        self.cache_path = cache_path
-        os.makedirs(self.cache_path, exist_ok=True)
 
         self.status: str = "Initializing"
         self.__done_slicing = threading.Event()
@@ -70,14 +81,19 @@ class Zeno(object):
                 "Extension of " + metadata_path.suffix + " not one of .csv or .parquet"
             )
             sys.exit(1)
+        self.metadata_name = os.path.basename(metadata_path).split(".")[0]
+        self.cache_path = os.path.join(cache_path, self.metadata_name)
+        os.makedirs(self.cache_path, exist_ok=True)
 
         self.df[id_column].astype(str)
         self.df.set_index(self.id_column, inplace=True)
 
         self.metadata: List[str] = []
 
+        self.done_preprocessing = False
+
     def start_processing(self):
-        """Parse testing files and start preprocessing and slicing data."""
+        """Parse testing files, preprocess, run inference, and slicing data."""
         self.__parse_testing_files()
         self.metadata = [*[p.name for p in self.preprocessors], *list(self.df.columns)]
         self.__thread = threading.Thread(
@@ -145,35 +161,46 @@ class Zeno(object):
 
     async def __preprocess_and_slice(self):
         self.__preprocess_data()
+        self.__get_model_predictions()
         self.__slice_data()
         self.__done_slicing.set()
+        self.done_preprocessing = True
 
     def __preprocess_data(self):
         """Run preprocessors on every instance."""
-        for preprocessor in self.preprocessors:
+        for preprocessor in tqdm.tqdm(self.preprocessors, desc="preprocessors"):
             self.status = "Running preprocessor " + preprocessor.name
             cache_path = Path(
                 self.cache_path,
-                "preprocess_"
-                + preprocessor.name
-                + "_"
-                + str(self.metadata_path).replace("/", "_"),
+                "zenopreprocess_" + preprocessor.name + ".pickle",
             )
 
-            def fn_loader():
-                return preprocessor.func
-
-            cached_process(
+            cached_preprocess(
                 self.df,
-                self.df.index,
                 preprocessor.name,
                 cache_path,
-                fn_loader,
+                preprocessor.func,
                 self.data_loader,
                 self.data_path,
                 self.batch_size,
             )
+
         self.status = "Done preprocessing"
+
+    def __get_model_predictions(self):
+        for model_name in tqdm.tqdm(self.model_paths, desc="models"):
+
+            fn = self.model_loader(model_name)
+
+            cached_inference(
+                self.df,
+                os.path.basename(model_name).split(".")[0],
+                self.cache_path,
+                fn,
+                self.data_loader,
+                self.data_path,
+                self.batch_size,
+            )
 
     def __slice_data(self):
         """Run slicers to create all slices."""
@@ -204,8 +231,6 @@ class Zeno(object):
         self.__done_slicing.wait()
 
         self.status = "working"
-        # TODO: sort by model to decrease model loads -
-        # or save models in memory? CUDA considerations?
         for i, request in enumerate(requests):
             if cancel_event.is_set():
                 return
@@ -229,7 +254,6 @@ class Zeno(object):
                 metric_name,
                 model_name,
             )
-            self.__calculate_outputs(sli, model_name)
 
             # TODO: add transform
             res_hash = int(hash(slice_name + "" + metric_name) / 10000)
@@ -248,42 +272,19 @@ class Zeno(object):
 
             if len(signature(metric_func).parameters) == 3:
                 result = metric_func(
-                    self.df.loc[sli.index, str(model_name)].tolist(),
+                    self.df.loc[sli.index, "zenomodel_" + model_name].tolist(),
                     self.df.loc[sli.index],
                     self.label_column,
                 )
             else:
                 result = metric_func(
-                    self.df.loc[sli.index, str(model_name)].tolist(),
+                    self.df.loc[sli.index, "zenomodel_" + model_name].tolist(),
                     self.df.loc[sli.index],
                 )
 
             res.set_result(model_name, result)
             self.results[res.id] = res
         self.status = "Done " + str(hash(str(requests)))
-
-    def __calculate_outputs(self, sli: Slice, model_name: str):
-        """Calculate model outputs for each slice."""
-
-        def fn_loader():
-            return self.model_loader(model_name)
-
-        cached_process(
-            self.df,
-            sli.index,
-            str(model_name),
-            Path(
-                self.cache_path,
-                "model_"
-                + str(model_name).replace("/", "_")
-                + "_"
-                + str(self.metadata_path).replace("/", "_"),
-            ),
-            fn_loader,
-            self.data_loader,
-            self.data_path,
-            self.batch_size,
-        )
 
     def get_table(self):
         """Get the metadata DataFrame for a given slice.
@@ -292,3 +293,13 @@ class Zeno(object):
             bytes: Arrow-encoded table of slice metadata
         """
         return get_arrow_bytes(self.df, self.id_column)
+
+    def run_projection(self, model):
+        self.status = "Projecting"
+        embeds = np.stack(self.df["embed_" + model].to_numpy())
+        reducer = umap.UMAP()
+        embedding = reducer.fit_transform(embeds)
+        self.df["zenoembed_x"] = embedding[:, 0]  # type: ignore
+        self.df["zenoembed_y"] = embedding[:, 1]  # type: ignore
+        self.status = "Done projecting"
+        return "success"

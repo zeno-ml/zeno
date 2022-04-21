@@ -4,7 +4,7 @@
   "exclude": ["node_modules/*", "__sapper__/*", "public/*"],
   "compilerOptions": {
     "moduleResolution": "node",
-    "target": "es2017",
+    "target": "es2021",
     "importsNotUsedAsValues": "error",
     "preserveValueImports": true,
     "isolatedModules": true,

@@ -13,7 +13,6 @@
   export let checked: InternSet<string>;
   export let modelA: string;
   export let modelB: string;
-  export let expandAll: boolean = false;
   export let metric: string = "";
 
   let expanded: boolean = false;
@@ -27,8 +26,6 @@
     });
     slice = $slices.get(sliceNode.slice.name);
   }
-
-  $: expandAll ? (expanded = true) : (expanded = false);
 </script>
 
 <div>
@@ -73,7 +70,6 @@
             sliceNode={child}
             bind:selected
             bind:checked
-            {expandAll}
             {modelA}
             {modelB}
             {metric}

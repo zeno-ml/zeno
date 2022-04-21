@@ -26,9 +26,9 @@ class Net(nn.Module):
         x = self.pool(F.relu(self.conv2(x)))
         x = torch.flatten(x, 1)  # flatten all dimensions except batch
         x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
-        return x
+        y = F.relu(self.fc2(x))
+        x = self.fc3(y)
+        return x, y
 
 
 classes = (
@@ -53,8 +53,10 @@ def load_model(model_path):
     def pred(instances):
         imgs = torch.stack([transform_image(img) for img in instances])
         with torch.no_grad():
-            out = net(imgs)
-        return [classes[i] for i in torch.argmax(out, dim=1).detach().numpy()]
+            out, emb = net(imgs)
+        return [
+            classes[i] for i in torch.argmax(out, dim=1).detach().numpy()
+        ], emb.detach().numpy()
 
     return pred
 

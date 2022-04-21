@@ -1,9 +1,29 @@
 {
-  // Use IntelliSense to learn about possible attributes.
-  // Hover to view descriptions of existing attributes.
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
+    {
+      "name": "zenocifarpreprocess",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": [
+        "preprocess",
+        "--tests",
+        "./examples/cifar",
+        "--task",
+        "image-classification",
+        "--metadata",
+        "./examples/models/cifar/cifar_pred.csv",
+        "--models",
+        "./examples/models/cifar/cifar_net_1.pth",
+        "./examples/models/cifar/cifar_net_2.pth",
+        "./examples/models/cifar/cifar_net_5.pth",
+        "./examples/models/cifar/cifar_net_10.pth",
+        "--data-path",
+        "~/dev/data/cifar/test/"
+      ]
+    },
     {
       "name": "zenocifar",
       "type": "python",
@@ -11,6 +31,8 @@
       "cwd": "${workspaceFolder}",
       "module": "zeno",
       "args": [
+        "run",
+        "--tests",
         "./examples/cifar",
         "--task",
         "image-classification",
@@ -34,6 +56,8 @@
       "cwd": "${workspaceFolder}",
       "module": "zeno",
       "args": [
+        "run",
+        "--tests",
         "./examples/coco",
         "--metadata",
         "./examples/models/coco/coco.parquet",
@@ -53,12 +77,35 @@
       ]
     },
     {
+      "name": "zenoreviewspreprocess",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": [
+        "preprocess",
+        "--tests",
+        "./examples/reviews/",
+        "--metadata",
+        "./examples/models/sentiment/amazon_pred.parquet",
+        "--task",
+        "text-classification",
+        "--models",
+        "distilbert-base-uncased-finetuned-sst-2-english",
+        "fabriceyhc/bert-base-uncased-amazon_polarity",
+        "--batch-size",
+        "64"
+      ]
+    },
+    {
       "name": "zenoreviews",
       "type": "python",
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "module": "zeno",
       "args": [
+        "run",
+        "--tests",
         "./examples/reviews/",
         "--metadata",
         "./examples/models/sentiment/amazon_pred.parquet",
@@ -80,6 +127,8 @@
       "cwd": "${workspaceFolder}",
       "module": "zeno",
       "args": [
+        "run",
+        "--tests",
         "./examples/fsdd",
         "--metadata",
         "./examples/models/fsdd/fsdd.csv",

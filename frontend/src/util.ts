@@ -1,4 +1,6 @@
+import type ColumnTable from "arquero/dist/types/table/column-table";
 import { metrics, models, ready, settings } from "./stores";
+import * as aq from "arquero";
 
 export class SliceNode {
   name: string;
@@ -84,6 +86,7 @@ export function initialFetch() {
     .then((d) => metrics.set(JSON.parse(d)));
 
   const allRequests = Promise.all([fetchSettings, fetchModels, fetchMetrics]);
+
   allRequests.then(() => ready.set(true));
 }
 
@@ -94,4 +97,36 @@ export function updateTab(t: string) {
     window.location.hash = "#/" + t + "/";
   }
   return t;
+}
+
+export function getSliceTable(
+  name: string,
+  metadata: string[],
+  table: ColumnTable
+) {
+  let tempFilter = name;
+
+  metadata.forEach((m) => {
+    tempFilter = tempFilter.replaceAll("m." + m, 'd["' + m + '"]');
+  });
+
+  table
+    .columnNames()
+    .filter((d) => d.startsWith("zenoslice_"))
+    .forEach((c) => {
+      c = c.substring(10);
+      tempFilter = tempFilter.replaceAll("s." + c, 'd["zenoslice_' + c + '"]');
+    });
+
+  return table.filter(aq.escape((d) => eval(tempFilter)));
+}
+
+export function sendResultRequests(reqs: ResultRequest[]) {
+  fetch("/api/analysis/", {
+    method: "POST",
+    headers: {
+      "Content-type": "application/json",
+    },
+    body: JSON.stringify({ requests: reqs }),
+  }).catch((e) => console.log(e));
 }

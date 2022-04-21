@@ -14,16 +14,29 @@
     slices,
     table,
   } from "./stores";
-  import { appendChild, SliceNode } from "./util";
+  import {
+    appendChild,
+    getSliceTable,
+    sendResultRequests,
+    SliceNode,
+  } from "./util";
   import { InternMap, InternSet } from "internmap";
   import LeafNode from "./LeafNode.svelte";
+  import Filter from "./Filter.svelte";
 
   let modelA: string = "";
   let modelB: string = "";
   let selectedMetric: string = "";
+
   let filteredTable = aq.table({});
   let filter: string = "";
   let filterError: string = "";
+
+  let selected: string = "";
+  let checked: InternSet<string> = new InternSet();
+
+  let sliceTree: SliceNode = new SliceNode("root", 0, {});
+  let comboSliceTree: SliceNode = new SliceNode("combinations", 0, {});
 
   ready.subscribe((r) => {
     if (r) {
@@ -31,31 +44,21 @@
       selectedMetric = $metrics[0];
     }
   });
-
-  let selected: string = "";
-  let checked: InternSet<string> = new InternSet();
-  let expandAll = false;
-
-  let sliceTree: SliceNode = new SliceNode("root", 0, {});
-  let comboSliceTree: SliceNode = new SliceNode("combinations", 0, {});
-
-  $: if ($ready && modelA && selectedMetric && $slices.size > 0) {
-    modelB;
-    modelA;
-    selectedMetric;
-    getResults([...$slices.values()]);
-  }
-
   slices.subscribe((sls) => {
     if (sls.size > 0 && modelA && selectedMetric) {
       setupTree(sls);
     }
   });
-
   table.subscribe((t) => updateFilteredTable(t));
+
   $: {
     selected;
     updateFilteredTable($table);
+  }
+
+  $: if ($ready && modelA && selectedMetric && $slices.size > 0) {
+    modelB;
+    getResults([...$slices.values()]);
   }
 
   $: if (checked.size > 2) {
@@ -73,11 +76,6 @@
   }
 
   function getResults(sls: Slice[]) {
-    // TODO: figure out weird update.
-    if (!selectedMetric) {
-      selectedMetric = $metrics[0];
-    }
-
     // TODO: Check results and only request new ones if needed.
     let requests: ResultRequest[] = [];
     sls.forEach((s) => {
@@ -107,14 +105,7 @@
         });
       }
     });
-
-    fetch("/api/analysis/", {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify({ requests: requests }),
-    }).catch((e) => console.log(e));
+    sendResultRequests(requests);
   }
 
   function updateFilteredTable(t: ColumnTable) {
@@ -125,44 +116,21 @@
       filteredTable = $table.sample(100, { shuffle: false });
       return;
     }
+
     let slice = $slices.get(selected);
     if (slice.type === "programmatic") {
       filteredTable = t.filter(
         aq.escape((r) => r["zenoslice_" + slice.name] === 1)
       );
     } else {
-      let tempFilter = slice.name;
-      $settings.metadata.forEach((m) => {
-        tempFilter = tempFilter.replaceAll(m, "d." + m);
-      });
-      $table
-        .columnNames()
-        .filter((d) => d.startsWith("zenoslice_"))
-        .forEach((c) => {
-          c = c.substring(10);
-          tempFilter = tempFilter.replaceAll(c, 'd["zenoslice_' + c + '"]');
-        });
-      filteredTable = $table.filter(aq.escape((d) => eval(tempFilter)));
+      filteredTable = getSliceTable(selected, $settings.metadata, $table);
     }
   }
 
   function createSlice() {
     filterError = "";
     try {
-      let tempFilter = filter;
-      $settings.metadata.forEach((m) => {
-        tempFilter = tempFilter.replaceAll(m, "d." + m);
-      });
-      $table
-        .columnNames()
-        .filter((d) => d.startsWith("zenoslice_"))
-        .forEach((c) => {
-          c = c.substring(10);
-          tempFilter = tempFilter.replaceAll(c, 'd["zenoslice_' + c + '"]');
-        });
-
-      console.log(tempFilter);
-      let newTable = $table.filter(aq.escape((d) => eval(tempFilter)));
+      const newTable = getSliceTable(filter, $settings.metadata, $table);
       let requests = [];
       requests[0] = {
         slice_name: filter,
@@ -181,36 +149,23 @@
         };
       }
 
-      fetch("/api/analysis/", {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json",
-        },
-        body: JSON.stringify({ requests: requests }),
-      }).catch((e) => console.log(e));
-
+      sendResultRequests(requests);
       filter = "";
     } catch (e) {
       filterError = e;
     }
   }
 
-  // table.subscribe((d) => console.log(d));
+  table.subscribe((d) => console.log(d));
   // slices.subscribe((d) => console.log(d));
   // results.subscribe((d) => console.log(d));
 </script>
 
 <div class="style-div">
-  <div>
-    <input
-      bind:value={filter}
-      on:keypress={(e) => {
-        e.key === "Enter" ? createSlice() : "";
-      }}
-      style:margin-left="10px"
-      type="text"
-      placeholder="Create new slice"
-    />
+  <div style:display="flex" style:flex-direction="inline">
+    <div style:display="flex" style:flex-direction="column">
+      <Filter bind:filter {createSlice} />
+    </div>
     <Button on:click={createSlice}>Create Slice</Button>
     <span>{filterError}</span>
   </div>
@@ -275,7 +230,6 @@
             sliceNode={node}
             bind:selected
             bind:checked
-            {expandAll}
             {modelA}
             {modelB}
             metric={selectedMetric}
@@ -287,7 +241,6 @@
           sliceNode={node}
           bind:selected
           bind:checked
-          {expandAll}
           {modelA}
           {modelB}
           metric={selectedMetric}
@@ -311,7 +264,11 @@
   {/if}
   {#if filteredTable}
     <div id="results">
-      <Samples modelACol={modelA} modelBCol={modelB} table={filteredTable} />
+      <Samples
+        modelACol={"zenomodel_" + modelA}
+        modelBCol={"zenomodel_" + modelB}
+        table={filteredTable}
+      />
     </div>
   {/if}
 </div>
@@ -334,14 +291,6 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-  }
-  input {
-    height: 30px;
-    font-family: consolas;
-    margin-left: 10px;
-    padding-left: 10px;
-    width: 400px;
-    border-color: #e0e0e0;
   }
   .side-container {
     height: calc(100vh - 178px);

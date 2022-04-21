@@ -4,6 +4,8 @@ from pathlib import Path
 
 from .server import run_background_processor, run_server
 
+from .zeno import Zeno
+
 TASK_TYPES = [
     "image-classification",
     "object-detection",
@@ -15,19 +17,19 @@ TASK_TYPES = [
 def __create_parser():
     parser = argparse.ArgumentParser(description="Evaluate ML systems.")
     parser.add_argument(
-        "test-files",
-        metavar="test_files",
-        nargs="+",
-        type=Path,
-        help="Directory or Python files with annotated functions"
-        + "such as slicers and metrics.",
+        "operation",
+        metavar="operation",
+        nargs=1,
+        type=str,
+        choices=["run", "preprocess"],
+        help="Whether to run Zeno or preprocess data.",
     )
     parser.add_argument(
-        "--task",
+        "--tests",
+        dest="tests",
+        type=Path,
         nargs=1,
-        choices=TASK_TYPES,
-        type=str,
-        help="The type of task to be analyzed.",
+        help="Path to folder with Zeno function files.",
     )
     parser.add_argument(
         "--metadata",
@@ -42,15 +44,14 @@ def __create_parser():
         nargs="?",
         type=Path,
         default="",
-        help="Folder with data instances identified"
+        help="Folder or URL with data instances identified"
         + "by the id-column option in the metadata file.",
     )
     parser.add_argument(
         "--models",
         dest="models",
-        type=Path,
         nargs="+",
-        help="Paths to models for testing",
+        help="Directory with model files or list of model files/names.",
     )
     parser.add_argument(
         "--id-column",
@@ -67,6 +68,13 @@ def __create_parser():
         type=str,
         nargs="?",
         help="Column with the ground truth label for instances.",
+    )
+    parser.add_argument(
+        "--task",
+        nargs=1,
+        choices=TASK_TYPES,
+        type=str,
+        help="The type of task to be analyzed.",
     )
     parser.add_argument(
         "--batch-size",
@@ -98,6 +106,21 @@ def __create_parser():
 def main():
     parser = __create_parser()
     args = parser.parse_args()
+
+    if args.operation[0] == "preprocess":
+        zeno = Zeno(
+            metadata_path=args.metadata[0],
+            task=args.task[0],
+            test_files=args.tests,
+            models=args.models,
+            batch_size=args.batch_size,
+            id_column=args.id_column,
+            label_column=args.label_column,
+            data_path=args.data_path,
+            cache_path=args.cache_path,
+        )
+        zeno.start_processing()
+        return
 
     server_conn, processor_conn = Pipe()
 
