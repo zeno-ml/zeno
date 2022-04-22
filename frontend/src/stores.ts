@@ -1,10 +1,4 @@
-import {
-  derived,
-  get,
-  writable,
-  type Readable,
-  type Writable,
-} from "svelte/store";
+import { derived, writable, type Readable, type Writable } from "svelte/store";
 import { InternMap } from "internmap";
 import { websocketStore } from "svelte-websocket-store";
 import type ColumnTable from "arquero/dist/types/table/column-table";
@@ -26,6 +20,7 @@ export const wsResponse: Writable<WSResponse> = websocketStore(
     status: "connecting",
     results: [],
     slices: [],
+    columns: [],
   } as WSResponse
 );
 
@@ -74,17 +69,3 @@ export const slices: Readable<Map<string, Slice>> = derived(
 );
 
 export const table: Writable<ColumnTable> = writable(aq.table({}));
-
-wsResponse.subscribe((w) => {
-  if (w.status.startsWith("Done") && get(table).size === 0) {
-    fetch("/api/table")
-      .then((d) => d.json())
-      .then((d) => {
-        const x = {};
-        Object.keys(d).forEach((k) => {
-          x[k] = Object.values(d[k]);
-        });
-        table.set(aq.fromJSON(x));
-      });
-  }
-});

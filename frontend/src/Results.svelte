@@ -113,7 +113,7 @@
       return;
     }
     if (!selected) {
-      filteredTable = $table.sample(100, { shuffle: false });
+      filteredTable = $table.slice(100);
       return;
     }
 
@@ -155,10 +155,6 @@
       filterError = e;
     }
   }
-
-  table.subscribe((d) => console.log(d));
-  // slices.subscribe((d) => console.log(d));
-  // results.subscribe((d) => console.log(d));
 </script>
 
 <div class="style-div">

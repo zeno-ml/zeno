@@ -29,11 +29,13 @@
       <span class="label">{row[$settings.labelColumn]} </span>
       {#if modelACol}
         <br />
-        <span class="output">A: {row[modelACol]} </span>
+        <span class="output">A: {row[modelACol] ? row[modelACol] : ""} </span>
       {/if}
       {#if modelBCol}
         <br />
-        <span class="second_output">B: {row[modelBCol]} </span>
+        <span class="second_output"
+          >B: {row[modelBCol] ? row[modelBCol] : ""}
+        </span>
       {/if}
     </Paper>
   </div>

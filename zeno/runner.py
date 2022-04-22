@@ -1,9 +1,15 @@
 import argparse
-from multiprocessing import Pipe, Process
+import asyncio
+import json
+import os
 from pathlib import Path
 
-from .server import run_background_processor, run_server
+import uvicorn  # type: ignore
+from fastapi import FastAPI, WebSocket
+from fastapi.responses import Response
+from fastapi.staticfiles import StaticFiles
 
+from .classes import ProjectionRequest, ResultsRequest, TableRequest
 from .zeno import Zeno
 
 TASK_TYPES = [
@@ -106,34 +112,111 @@ def __create_parser():
 def main():
     parser = __create_parser()
     args = parser.parse_args()
+    run_zeno(args)
 
-    if args.operation[0] == "preprocess":
-        zeno = Zeno(
-            metadata_path=args.metadata[0],
-            task=args.task[0],
-            test_files=args.tests,
-            models=args.models,
-            batch_size=args.batch_size,
-            id_column=args.id_column,
-            label_column=args.label_column,
-            data_path=args.data_path,
-            cache_path=args.cache_path,
-        )
-        zeno.start_processing()
-        return
 
-    server_conn, processor_conn = Pipe()
-
-    server_process = Process(target=run_server, args=(server_conn, args))
-    background_process = Process(
-        target=run_background_processor,
-        args=(
-            processor_conn,
-            args,
-        ),
+def run_zeno(args):
+    zeno = Zeno(
+        metadata_path=args.metadata[0],
+        task=args.task[0],
+        test_files=args.tests,
+        models=args.models,
+        batch_size=args.batch_size,
+        id_column=args.id_column,
+        label_column=args.label_column,
+        data_path=args.data_path,
+        cache_path=args.cache_path,
     )
 
-    server_process.start()
-    background_process.start()
+    zeno.start_processing()
+    if args.operation[0] == "preprocess":
+        zeno.done_inference.wait()
+        return
 
-    server_process.join()
+    app = FastAPI(title="Frontend API")
+    api_app = FastAPI(title="Backend API")
+
+    if args.data_path != "":
+        app.mount("/static", StaticFiles(directory=args.data_path), name="static")
+
+    app.mount("/api", api_app)
+    app.mount(
+        "/",
+        StaticFiles(
+            directory=os.path.dirname(os.path.realpath(__file__)) + "/frontend",
+            html=True,
+        ),
+        name="base",
+    )
+
+    @api_app.get("/settings")
+    def get_settings():
+        return json.dumps(
+            {
+                "task": zeno.task,
+                "idColumn": zeno.id_column,
+                "labelColumn": zeno.label_column,
+                "metadata": zeno.metadata,
+                "port": args.port,
+            }
+        )
+
+    @api_app.get("/metrics")
+    def get_metrics():
+        return json.dumps([s.__name__ for s in zeno.metrics.values()])
+
+    @api_app.get("/models")
+    def get_models():
+        return json.dumps([str(n) for n in zeno.model_names])
+
+    @api_app.post("/table")
+    def get_table(columns: TableRequest):
+        return Response(zeno.get_table(columns.columns))
+
+    @api_app.post("/results")
+    def get_results(reqs: ResultsRequest):
+        return zeno.get_results(reqs.requests)
+
+    @api_app.post("/projection")
+    def run_projection(model: ProjectionRequest):
+        return zeno.run_projection(model.model)
+
+    @api_app.websocket("/results")
+    async def results_websocket(websocket: WebSocket):
+        await websocket.accept()
+        previous_status = ""
+        while True:
+            await asyncio.sleep(1)
+            res = zeno.results.values()
+            res = [
+                {
+                    "metric": r.metric,
+                    "transform": r.transform,
+                    "slice": r.sli,
+                    "modelResults": r.model_metrics,
+                }
+                for r in res
+            ]
+
+            sls = zeno.slices.values()
+            slices = [
+                {
+                    "name": s.name,
+                    "type": s.slice_type,
+                    "size": s.size,
+                }
+                for s in sls
+            ]
+
+            if zeno.status != previous_status:
+                previous_status = zeno.status
+                await websocket.send_json(
+                    {
+                        "status": zeno.status,
+                        "results": res,
+                        "slices": slices,
+                        "columns": list(zeno.complete_columns),
+                    }
+                )
+
+    uvicorn.run(app, host="localhost", port=args.port)  # type: ignore

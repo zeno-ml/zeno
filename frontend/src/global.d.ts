@@ -11,6 +11,7 @@ interface WSResponse {
   status: string;
   results: Result[];
   slices: Slice[];
+  columns: string[];
 }
 
 interface Slice {

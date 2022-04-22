@@ -12,8 +12,6 @@
   let showModelA = true;
   let showModelB = true;
 
-  $: console.log(table);
-
   let canvases: HTMLCanvasElement[] = [];
   let imgs: HTMLImageElement[] = [];
   $: {

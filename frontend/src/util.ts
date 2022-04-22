@@ -122,7 +122,7 @@ export function getSliceTable(
 }
 
 export function sendResultRequests(reqs: ResultRequest[]) {
-  fetch("/api/analysis/", {
+  fetch("/api/results", {
     method: "POST",
     headers: {
       "Content-type": "application/json",

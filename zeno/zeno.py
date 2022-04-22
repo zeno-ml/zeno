@@ -5,17 +5,25 @@ import sys
 import threading
 from importlib import util
 from inspect import getmembers, isfunction, signature
+from multiprocessing import Pipe, Process
 from pathlib import Path
 from typing import Callable, Dict, List
 
 import numpy as np
 
 import pandas as pd
-import tqdm  # type: ignore
 import umap  # type: ignore
 
-from .classes import Preprocessor, Result, ResultRequest, Slice, Slicer
-from .util import cached_inference, cached_preprocess, get_arrow_bytes, slice_data
+from .classes import (
+    DataLoader,
+    ModelLoader,
+    Preprocessor,
+    Result,
+    ResultRequest,
+    Slice,
+    Slicer,
+)
+from .util import get_arrow_bytes, preprocess_data, run_inference, slice_data
 
 
 class Zeno(object):
@@ -33,7 +41,6 @@ class Zeno(object):
     ):
         logging.basicConfig(level=logging.INFO)
 
-        self.metadata_path = metadata_path
         self.task = task
         self.test_files = test_files
 
@@ -51,11 +58,9 @@ class Zeno(object):
         self.data_path = data_path
 
         self.status: str = "Initializing"
-        self.__done_slicing = threading.Event()
-        self.__cancel_event = threading.Event()
 
-        self.model_loader: Callable = None  # type: ignore
-        self.data_loader: Callable = None  # type: ignore
+        self.model_loader: ModelLoader = None  # type: ignore
+        self.data_loader: DataLoader = None  # type: ignore
 
         # Key is name of preprocess function
         self.preprocessors: List[Preprocessor] = []
@@ -90,15 +95,15 @@ class Zeno(object):
 
         self.metadata: List[str] = []
 
-        self.done_preprocessing = False
+        self.done_slicing = threading.Event()
+        self.done_inference = threading.Event()
+        self.complete_columns = list(self.df.columns)
 
     def start_processing(self):
         """Parse testing files, preprocess, run inference, and slicing data."""
         self.__parse_testing_files()
         self.metadata = [*[p.name for p in self.preprocessors], *list(self.df.columns)]
-        self.__thread = threading.Thread(
-            target=asyncio.run, args=(self.__preprocess_and_slice(),)
-        )
+        self.__thread = threading.Thread(target=asyncio.run, args=(self.__process(),))
         self.__thread.start()
 
     def __parse_testing_files(self):
@@ -134,18 +139,18 @@ class Zeno(object):
             if isfunction(func):
                 if hasattr(func, "load_model"):
                     if self.model_loader is None:
-                        self.model_loader = func
+                        self.model_loader = ModelLoader(func_name, test_file)
                     else:
                         logging.error("Multiple model loaders found, can only have one")
                         sys.exit(1)
                 if hasattr(func, "load_data"):
                     if self.data_loader is None:
-                        self.data_loader = func
+                        self.data_loader = DataLoader(func_name, test_file)
                     else:
                         logging.error("Multiple data loaders found, can only have one")
                         sys.exit(1)
                 if hasattr(func, "preprocess"):
-                    self.preprocessors.append(Preprocessor(func_name, func))
+                    self.preprocessors.append(Preprocessor(func_name, test_file))
                 if hasattr(func, "slicer"):
                     path_names = list(test_file.relative_to(base_path).parts)
                     path_names[-1] = path_names[-1][0:-3]
@@ -159,48 +164,71 @@ class Zeno(object):
                 if hasattr(func, "metric"):
                     self.metrics[func_name] = func
 
-    async def __preprocess_and_slice(self):
-        self.__preprocess_data()
-        self.__get_model_predictions()
+    async def __process(self):
+        (conn1, conn2) = Pipe()
+        p_preprocess = Process(
+            target=preprocess_data,
+            args=(
+                conn1,
+                self.preprocessors,
+                self.data_path,
+                self.cache_path,
+                self.df,
+                self.data_loader,
+                self.batch_size,
+            ),
+        )
+        p_preprocess.start()
+
+        out = conn2.recv()
+        while out[0] != "Done":
+            self.status = out[0]
+            if out[1] is not None:
+                col = out[0].split(" ")[-1]
+                self.df.loc[:, col] = out[1]
+                self.complete_columns.append(col)
+            out = conn2.recv()
+
         self.__slice_data()
-        self.__done_slicing.set()
-        self.done_preprocessing = True
+        self.done_slicing.set()
+        self.complete_columns.extend(
+            [r for r in self.df.columns if r.startswith("zenoslice_")]
+        )
 
-    def __preprocess_data(self):
-        """Run preprocessors on every instance."""
-        for preprocessor in tqdm.tqdm(self.preprocessors, desc="preprocessors"):
-            self.status = "Running preprocessor " + preprocessor.name
-            cache_path = Path(
-                self.cache_path,
-                "zenopreprocess_" + preprocessor.name + ".pickle",
-            )
-
-            cached_preprocess(
-                self.df,
-                preprocessor.name,
-                cache_path,
-                preprocessor.func,
-                self.data_loader,
+        (conn1, conn2) = Pipe()
+        p_inference = Process(
+            target=run_inference,
+            args=(
+                conn1,
+                self.model_paths,
                 self.data_path,
-                self.batch_size,
-            )
-
-        self.status = "Done preprocessing"
-
-    def __get_model_predictions(self):
-        for model_name in tqdm.tqdm(self.model_paths, desc="models"):
-
-            fn = self.model_loader(model_name)
-
-            cached_inference(
-                self.df,
-                os.path.basename(model_name).split(".")[0],
                 self.cache_path,
-                fn,
+                self.df,
                 self.data_loader,
-                self.data_path,
+                self.model_loader,
                 self.batch_size,
-            )
+            ),
+        )
+        p_inference.start()
+
+        out = conn2.recv()
+        while out[0] != "Done":
+            self.status = out[0]
+            if out[1] is not None:
+                col = out[0].split(" ")[-1]
+                self.df.loc[:, "zenomodel_" + col] = out[1]
+                self.df.loc[:, "zenoembedding_" + col] = out[2]
+                self.complete_columns.append("zenomodel_" + col)
+                res = [r for r in self.results.values() if col in r.model_names]
+                [self.calculate_metrics(r, self.slices[r.sli], col) for r in res]
+            out = conn2.recv()
+
+        self.done_inference.set()
+
+        p_preprocess.join()
+        p_preprocess.close()
+        p_inference.join()
+        p_inference.close()
 
     def __slice_data(self):
         """Run slicers to create all slices."""
@@ -213,28 +241,10 @@ class Zeno(object):
             }
         self.status = "Done slicing"
 
-    def run_analysis(self, reqs: List[ResultRequest]):
-        if self.__cancel_event:
-            self.__cancel_event.set()
-            self.__thread.join()
-        self.__cancel_event = threading.Event()
-        self.__thread = threading.Thread(
-            target=asyncio.run,
-            args=(self.__calculate_metrics(reqs, self.__cancel_event),),
-        )
-        self.__thread.start()
-
-    async def __calculate_metrics(
-        self, requests: List[ResultRequest], cancel_event: threading.Event
-    ):
+    def get_results(self, requests: List[ResultRequest]):
         """Calculate result for each requested combination."""
-        self.__done_slicing.wait()
 
-        self.status = "working"
-        for i, request in enumerate(requests):
-            if cancel_event.is_set():
-                return
-
+        for request in requests:
             slice_name, idxs, metric_name, model_name = (
                 request.slice_name,
                 request.idxs,
@@ -246,14 +256,6 @@ class Zeno(object):
             except KeyError:
                 sli = Slice(slice_name, "generated", pd.Index(idxs))
                 self.slices[slice_name] = sli
-
-            self.status = ("Test {0}/{1}: Slice {2}, Metric {3}, Model {4}").format(
-                str(i + 1),
-                str(len(requests)),
-                slice_name,
-                metric_name,
-                model_name,
-            )
 
             # TODO: add transform
             res_hash = int(hash(slice_name + "" + metric_name) / 10000)
@@ -268,38 +270,52 @@ class Zeno(object):
                     sli.size,
                 )
 
-            metric_func = self.metrics[metric_name]
+            if model_name not in res.model_names:
+                res.model_names.append(model_name)
+            if "zenomodel_" + model_name in self.complete_columns:
+                self.calculate_metrics(res, sli, model_name)
 
-            if len(signature(metric_func).parameters) == 3:
-                result = metric_func(
-                    self.df.loc[sli.index, "zenomodel_" + model_name].tolist(),
-                    self.df.loc[sli.index],
-                    self.label_column,
-                )
-            else:
-                result = metric_func(
-                    self.df.loc[sli.index, "zenomodel_" + model_name].tolist(),
-                    self.df.loc[sli.index],
-                )
-
-            res.set_result(model_name, result)
-            self.results[res.id] = res
         self.status = "Done " + str(hash(str(requests)))
 
-    def get_table(self):
+    def calculate_metrics(self, res: Result, sli: Slice, model_name: str):
+        metric_func = self.metrics[res.metric]
+
+        if len(signature(metric_func).parameters) == 3:
+            result = metric_func(
+                self.df.loc[sli.index, "zenomodel_" + model_name].tolist(),
+                self.df.loc[sli.index],
+                self.label_column,
+            )
+        else:
+            result = metric_func(
+                self.df.loc[sli.index, "zenomodel_" + model_name].tolist(),
+                self.df.loc[sli.index],
+            )
+
+        res.set_result(model_name, result)
+        self.results[res.id] = res
+
+    def __run_umap(self, model):
+        embeds = np.stack(self.df["zenoembedding_" + model].to_numpy())
+        reducer = umap.UMAP()
+        embedding = reducer.fit_transform(embeds)
+        self.df.loc[:, "zenoembed_x"] = embedding[:, 0]  # type: ignore
+        self.df.loc[:, "zenoembed_y"] = embedding[:, 1]  # type: ignore
+        self.complete_columns.append("zenoembed_x")
+        self.complete_columns.append("zenoembed_y")
+        self.status = "Done projecting"
+
+    def run_projection(self, model):
+        self.status = "Running projection for " + model
+        self.__thread = threading.Thread(
+            target=asyncio.run, args=(self.__run_umap(model),)
+        )
+        self.__thread.start()
+
+    def get_table(self, columns):
         """Get the metadata DataFrame for a given slice.
 
         Returns:
             bytes: Arrow-encoded table of slice metadata
         """
-        return get_arrow_bytes(self.df, self.id_column)
-
-    def run_projection(self, model):
-        self.status = "Projecting"
-        embeds = np.stack(self.df["embed_" + model].to_numpy())
-        reducer = umap.UMAP()
-        embedding = reducer.fit_transform(embeds)
-        self.df["zenoembed_x"] = embedding[:, 0]  # type: ignore
-        self.df["zenoembed_y"] = embedding[:, 1]  # type: ignore
-        self.status = "Done projecting"
-        return "success"
+        return get_arrow_bytes(self.df[columns], self.id_column)

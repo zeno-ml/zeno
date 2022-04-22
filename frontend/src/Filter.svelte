@@ -44,15 +44,9 @@
 
 <input
   on:focusin={() => (inputFocused = true)}
-  on:focusout={(e) => {
-    console.log(e);
-    console.log(document.activeElement);
-    // , e.explicitOriginalTarget.parent.class);
-    inputFocused = false;
-  }}
+  on:focusout={() => (inputFocused = false)}
   bind:value={filter}
   on:keydown={(e) => {
-    console.log(e);
     if (e.key === "ArrowDown") {
       suggestionElements[0].focus();
     }

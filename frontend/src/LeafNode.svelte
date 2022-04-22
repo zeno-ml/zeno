@@ -11,8 +11,6 @@
   export let selected;
   export let checked;
   export let fullName = name;
-
-  $: console.log(selected);
 </script>
 
 <div

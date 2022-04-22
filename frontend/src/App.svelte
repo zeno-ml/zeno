@@ -8,11 +8,12 @@
   import { onMount } from "svelte";
   import Router, { location } from "svelte-spa-router";
   import Results from "./Results.svelte";
-  import { settings, status } from "./stores";
+  import { status, table, wsResponse } from "./stores";
   import { initialFetch, updateTab } from "./util";
   // import { mdiHomeVariantOutline } from "@mdi/js";
   import { mdiListStatus, mdiGraphql } from "@mdi/js";
   import Embed from "./Embed.svelte";
+  import * as aq from "arquero";
 
   let runningAnalysis = true;
   let tab = $location.split("/")[1];
@@ -42,7 +43,32 @@
     }
   });
 
-  settings.subscribe((d) => console.log(d));
+  wsResponse.subscribe((w) => {
+    let tableColumns = $table.columnNames();
+    let missingColumns = w.columns.filter((c) => !tableColumns.includes(c));
+    if (missingColumns.length > 0) {
+      fetch("/api/table", {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify({ columns: missingColumns }),
+      })
+        .then((d) => d.json())
+        .then((d) => {
+          const x = {};
+          Object.keys(d).forEach((k) => {
+            x[k] = Object.values(d[k]);
+          });
+          if ($table.size === 0) {
+            table.set(aq.fromJSON(x));
+          } else {
+            table.update((t) => t.assign(aq.fromJSON(x)));
+          }
+        });
+    }
+  });
+
   onMount(() => initialFetch());
 </script>
 

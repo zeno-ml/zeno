@@ -6,6 +6,7 @@
   import Button from "@smui/button";
 
   let scatterplot;
+  let modelA = "";
 
   onMount(() => {
     const canvas = document.querySelector("#canvas");
@@ -19,14 +20,18 @@
       pointSize: 5,
     });
 
-    const points = new Array(10000)
-      .fill()
-      .map(() => [-1 + Math.random() * 2, -1 + Math.random() * 2, "#f8f8f8"]);
+    if ($table.columnNames().includes("zenoembed_x")) {
+      let x = t.column("zenoembed_x").data;
+      let y = t.column("zenoembed_y").data;
+      scatterplot.draw(x.map((x, i) => [x, y[i], "#f8f8f8"]));
+    } else {
+      const points = new Array(10000)
+        .fill()
+        .map(() => [-1 + Math.random() * 2, -1 + Math.random() * 2, "#f8f8f8"]);
 
-    scatterplot.draw(points);
+      scatterplot.draw(points);
+    }
   });
-
-  let modelA = "";
 
   function runProjection() {
     fetch("/api/projection/", {
@@ -37,19 +42,17 @@
       body: JSON.stringify({
         model: modelA,
       }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-      });
+    });
   }
 
   table.subscribe((t) => {
-    if (t.columnNames().includes("zenoembed_x")) {
-      let x = t.column("zenoembed_x").data;
-      let y = t.column("zenoembed_y").data;
-      scatterplot.clear();
-      scatterplot.draw(x.map((x, i) => [x, y[i], "#f8f8f8"]));
+    if (scatterplot) {
+      if (t.columnNames().includes("zenoembed_x")) {
+        let x = t.column("zenoembed_x").data;
+        let y = t.column("zenoembed_y").data;
+        scatterplot.clear();
+        scatterplot.draw(x.map((x, i) => [x, y[i], "#f8f8f8"]));
+      }
     }
   });
 </script>

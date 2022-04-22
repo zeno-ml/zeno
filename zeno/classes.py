@@ -1,4 +1,5 @@
 from inspect import getsource
+from pathlib import Path
 from typing import Callable, Dict, List, Union
 
 import pandas as pd
@@ -13,7 +14,7 @@ class ResultRequest(BaseModel):
     transform: str
 
 
-class AnalysisModel(BaseModel):
+class ResultsRequest(BaseModel):
     requests: List[ResultRequest]
 
 
@@ -21,11 +22,26 @@ class ProjectionRequest(BaseModel):
     model: str
 
 
+class TableRequest(BaseModel):
+    columns: List[str]
+
+
 class Preprocessor:
-    def __init__(self, name: str, func: Callable):
+    def __init__(self, name: str, file_name: Path):
         self.name = name
-        self.func = func
-        self.source = getsource(self.func)
+        self.file_name = file_name
+
+
+class DataLoader:
+    def __init__(self, name: str, file_name: Path):
+        self.name = name
+        self.file_name = file_name
+
+
+class ModelLoader:
+    def __init__(self, name: str, file_name: Path):
+        self.name = name
+        self.file_name = file_name
 
 
 class Transform:
@@ -90,7 +106,9 @@ class Result:
         )
 
     def set_result(self, model_name: str, result: Union[pd.Series, list]):
-        self.model_names.append(model_name)
+        if model_name not in self.model_names:
+            self.model_names.append(model_name)
+
         if isinstance(result, pd.Series):
             self.model_metric_outputs[model_name] = result.astype(int).to_list()
         elif len(result) > 0 and isinstance(result[0], bool):
