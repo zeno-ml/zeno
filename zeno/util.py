@@ -1,17 +1,15 @@
 import os
 from importlib import util
 from inspect import signature
-from multiprocessing.connection import Connection
 from pathlib import Path
-from typing import List
 
 import numpy as np
 import pandas as pd
-from tqdm import tqdm, trange  # type: ignore
-
-# import pyarrow as pa  # type: ignore
+from tqdm import trange  # type: ignore
 
 from .classes import DataLoader, ModelLoader, Preprocessor, Slice, Slicer
+
+# import pyarrow as pa  # type: ignore
 
 
 def get_arrow_bytes(df, id_col):
@@ -33,154 +31,127 @@ def get_function(file_name, function_name):
 
 
 def preprocess_data(
-    conn: Connection,
-    preprocessors: List[Preprocessor],
+    preprocessor: Preprocessor,
     data_path: str,
     cache_path: str,
     df: pd.DataFrame,
     data_loader: DataLoader,
     batch_size: int,
+    pos: int,
 ):
     data_loader_fn = get_function(data_loader.file_name, data_loader.name)
+    preprocessor_fn = get_function(preprocessor.file_name, preprocessor.name)
 
-    for preprocessor in tqdm(preprocessors, desc="preprocessors"):
-        preprocessor_fn = get_function(preprocessor.file_name, preprocessor.name)
+    save_path = Path(
+        cache_path,
+        "zenopreprocess_" + preprocessor.name + ".pickle",
+    )
 
-        conn.send(("Running preprocessor " + preprocessor.name, None))
-        save_path = Path(
-            cache_path,
-            "zenopreprocess_" + preprocessor.name + ".pickle",
-        )
+    try:
+        col = pd.read_pickle(save_path)
+    except FileNotFoundError:
+        col = pd.Series([pd.NA] * df.shape[0], index=df.index)
+    to_predict_indices = col.loc[pd.isna(col)].index
 
-        try:
-            col = pd.read_pickle(save_path)
-        except FileNotFoundError:
-            col = pd.Series([pd.NA] * df.shape[0], index=df.index)
-        to_predict_indices = col.loc[pd.isna(col)].index
-
-        if len(to_predict_indices) > 0:
-            if len(to_predict_indices) < batch_size:
-                data = data_loader_fn(df.loc[to_predict_indices], data_path)
+    if len(to_predict_indices) > 0:
+        if len(to_predict_indices) < batch_size:
+            data = data_loader_fn(df.loc[to_predict_indices], data_path)
+            out = preprocessor_fn(data)
+            col.loc[to_predict_indices] = out
+            col.to_pickle(save_path)
+        else:
+            for i in trange(
+                0,
+                len(to_predict_indices),
+                batch_size,
+                desc="preprocessing " + preprocessor.name,
+                position=pos,
+            ):
+                data = data_loader_fn(
+                    df.loc[to_predict_indices[i : i + batch_size]],
+                    data_path,
+                )
                 out = preprocessor_fn(data)
-                col.loc[to_predict_indices] = out
+                col.loc[to_predict_indices[i : i + batch_size]] = out
                 col.to_pickle(save_path)
-            else:
-                for i in trange(
-                    0, len(to_predict_indices), batch_size, desc="preprocessing batches"
-                ):
-                    conn.send(
-                        (
-                            "Running preprocessor "
-                            + preprocessor.name
-                            + " ( "
-                            + str(i / batch_size)
-                            + "/"
-                            + str(round(len(to_predict_indices) / batch_size))
-                            + " )",
-                            None,
-                        )
-                    )
-                    data = data_loader_fn(
-                        df.loc[to_predict_indices[i : i + batch_size]],
-                        data_path,
-                    )
-                    out = preprocessor_fn(data)
-                    col.loc[to_predict_indices[i : i + batch_size]] = out
-                    col.to_pickle(save_path)
-
-        conn.send(("Finished preprocessor " + preprocessor.name, col))
-    conn.send(("Done", None))
+    return (preprocessor.name, col)
 
 
 def run_inference(
-    conn: Connection,
-    model_paths: List[str],
+    model_path: str,
     data_path: str,
     cache_path: str,
     df: pd.DataFrame,
     data_loader: DataLoader,
     model_loader: ModelLoader,
     batch_size: int,
+    pos: int,
 ):
     data_loader_fn = get_function(data_loader.file_name, data_loader.name)
     model_loader_fn = get_function(model_loader.file_name, model_loader.name)
 
-    for model_path in tqdm(model_paths, desc="models"):
-        model_name = os.path.basename(model_path).split(".")[0]
+    model_name = os.path.basename(model_path).split(".")[0]
 
-        conn.send(("Running inference for " + model_name, None))
-        inference_save_path = Path(
-            cache_path,
-            "zenomodel_" + model_name + ".pickle",
-        )
-        embedding_save_path = Path(
-            cache_path,
-            "zenoembedding_" + model_name + ".pickle",
-        )
+    inference_save_path = Path(
+        cache_path,
+        "zenomodel_" + model_name + ".pickle",
+    )
+    embedding_save_path = Path(
+        cache_path,
+        "zenoembedding_" + model_name + ".pickle",
+    )
 
-        try:
-            inference_col = pd.read_pickle(inference_save_path)
-        except FileNotFoundError:
-            inference_col = pd.Series([pd.NA] * df.shape[0], index=df.index)
-        try:
-            embedding_col = pd.read_pickle(embedding_save_path)
-        except FileNotFoundError:
-            embedding_col = pd.Series([pd.NA] * df.shape[0], index=df.index)
+    try:
+        inference_col = pd.read_pickle(inference_save_path)
+    except FileNotFoundError:
+        inference_col = pd.Series([pd.NA] * df.shape[0], index=df.index)
+    try:
+        embedding_col = pd.read_pickle(embedding_save_path)
+    except FileNotFoundError:
+        embedding_col = pd.Series([pd.NA] * df.shape[0], index=df.index)
 
-        to_predict_indices = inference_col.loc[pd.isna(inference_col)].index
+    to_predict_indices = inference_col.loc[pd.isna(inference_col)].index
 
-        if len(to_predict_indices) > 0:
-            fn = model_loader_fn(model_path)
-            if len(to_predict_indices) < batch_size:
-                data = data_loader_fn(df.loc[to_predict_indices], data_path)
+    if len(to_predict_indices) > 0:
+        fn = model_loader_fn(model_path)
+        if len(to_predict_indices) < batch_size:
+            data = data_loader_fn(df.loc[to_predict_indices], data_path)
+            out = fn(data)
+
+            # Check if we also get embedding
+            if type(out) == tuple and len(out) == 2:
+                for i, idx in enumerate(to_predict_indices):
+                    inference_col.at[idx] = out[0][i]
+                    embedding_col.at[idx] = out[1][i]
+                embedding_col.to_pickle(embedding_save_path)
+                out = out[0]
+            else:
+                inference_col[to_predict_indices] = out
+            inference_col.to_pickle(inference_save_path)
+        else:
+            for i in trange(
+                0,
+                len(to_predict_indices),
+                batch_size,
+                desc="Inference on " + model_name,
+                position=pos,
+            ):
+                data = data_loader_fn(
+                    df.loc[to_predict_indices[i : i + batch_size]], data_path
+                )
                 out = fn(data)
 
                 # Check if we also get embedding
                 if type(out) == tuple and len(out) == 2:
-                    for i, idx in enumerate(to_predict_indices):
+                    for i, idx in enumerate(to_predict_indices[i : i + batch_size]):
                         inference_col.at[idx] = out[0][i]
                         embedding_col.at[idx] = out[1][i]
                     embedding_col.to_pickle(embedding_save_path)
                     out = out[0]
                 else:
-                    inference_col[to_predict_indices] = out
+                    inference_col[to_predict_indices[i : i + batch_size]] = out
                 inference_col.to_pickle(inference_save_path)
-            else:
-                for i in trange(
-                    0, len(to_predict_indices), batch_size, desc="batch inference"
-                ):
-                    conn.send(
-                        (
-                            "Running inference for "
-                            + model_name
-                            + " ( "
-                            + str(i / batch_size)
-                            + "/"
-                            + str(round(len(to_predict_indices) / batch_size))
-                            + " )",
-                            None,
-                        )
-                    )
-
-                    data = data_loader_fn(
-                        df.loc[to_predict_indices[i : i + batch_size]], data_path
-                    )
-                    out = fn(data)
-
-                    # Check if we also get embedding
-                    if type(out) == tuple and len(out) == 2:
-                        for i, idx in enumerate(to_predict_indices[i : i + batch_size]):
-                            inference_col.at[idx] = out[0][i]
-                            embedding_col.at[idx] = out[1][i]
-                        embedding_col.to_pickle(embedding_save_path)
-                        out = out[0]
-                    else:
-                        inference_col[to_predict_indices[i : i + batch_size]] = out
-                    inference_col.to_pickle(inference_save_path)
-        conn.send(
-            ("Finished inference for " + model_name, inference_col, embedding_col)
-        )
-    conn.send(("Done", None))
+    return (model_name, inference_col, embedding_col)
 
 
 def slice_data(metadata: pd.DataFrame, slicer: Slicer, label_column: str):

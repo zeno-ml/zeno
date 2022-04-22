@@ -5,12 +5,11 @@ import sys
 import threading
 from importlib import util
 from inspect import getmembers, isfunction, signature
-from multiprocessing import Pipe, Process
+from multiprocessing import Pool
 from pathlib import Path
 from typing import Callable, Dict, List
 
 import numpy as np
-
 import pandas as pd
 import umap  # type: ignore
 
@@ -165,29 +164,27 @@ class Zeno(object):
                     self.metrics[func_name] = func
 
     async def __process(self):
-        (conn1, conn2) = Pipe()
-        p_preprocess = Process(
-            target=preprocess_data,
-            args=(
-                conn1,
-                self.preprocessors,
-                self.data_path,
-                self.cache_path,
-                self.df,
-                self.data_loader,
-                self.batch_size,
-            ),
-        )
-        p_preprocess.start()
 
-        out = conn2.recv()
-        while out[0] != "Done":
-            self.status = out[0]
-            if out[1] is not None:
-                col = out[0].split(" ")[-1]
-                self.df.loc[:, col] = out[1]
-                self.complete_columns.append(col)
-            out = conn2.recv()
+        self.status = "Running preprocessing"
+        with Pool() as pool:
+            preprocess_outputs = pool.starmap(
+                preprocess_data,
+                [
+                    [
+                        s,
+                        self.data_path,
+                        self.cache_path,
+                        self.df,
+                        self.data_loader,
+                        self.batch_size,
+                        i,
+                    ]
+                    for i, s in enumerate(self.preprocessors)
+                ],
+            )
+            for out in preprocess_outputs:
+                self.df.loc[:, out[0]] = out[1]
+                self.complete_columns.append(out[0])
 
         self.__slice_data()
         self.done_slicing.set()
@@ -195,40 +192,34 @@ class Zeno(object):
             [r for r in self.df.columns if r.startswith("zenoslice_")]
         )
 
-        (conn1, conn2) = Pipe()
-        p_inference = Process(
-            target=run_inference,
-            args=(
-                conn1,
-                self.model_paths,
-                self.data_path,
-                self.cache_path,
-                self.df,
-                self.data_loader,
-                self.model_loader,
-                self.batch_size,
-            ),
-        )
-        p_inference.start()
+        self.status = "Running inference"
+        with Pool() as pool:
+            inference_outputs = pool.starmap(
+                run_inference,
+                [
+                    [
+                        m,
+                        self.data_path,
+                        self.cache_path,
+                        self.df,
+                        self.data_loader,
+                        self.model_loader,
+                        self.batch_size,
+                        i,
+                    ]
+                    for i, m in enumerate(self.model_paths)
+                ],
+            )
+            for out in inference_outputs:
+                self.df.loc[:, "zenomodel_" + out[0]] = out[1]
+                self.df.loc[:, "zenoembedding_" + out[0]] = out[2]
+                self.complete_columns.append("zenomodel_" + out[0])
 
-        out = conn2.recv()
-        while out[0] != "Done":
-            self.status = out[0]
-            if out[1] is not None:
-                col = out[0].split(" ")[-1]
-                self.df.loc[:, "zenomodel_" + col] = out[1]
-                self.df.loc[:, "zenoembedding_" + col] = out[2]
-                self.complete_columns.append("zenomodel_" + col)
-                res = [r for r in self.results.values() if col in r.model_names]
-                [self.calculate_metrics(r, self.slices[r.sli], col) for r in res]
-            out = conn2.recv()
+                res = [r for r in self.results.values() if out[0] in r.model_names]
+                [self.calculate_metrics(r, self.slices[r.sli], out[0]) for r in res]
 
         self.done_inference.set()
-
-        p_preprocess.join()
-        p_preprocess.close()
-        p_inference.join()
-        p_inference.close()
+        self.status = "Done preprocessing"
 
     def __slice_data(self):
         """Run slicers to create all slices."""
@@ -306,11 +297,7 @@ class Zeno(object):
         self.status = "Done projecting"
 
     def run_projection(self, model):
-        self.status = "Running projection for " + model
-        self.__thread = threading.Thread(
-            target=asyncio.run, args=(self.__run_umap(model),)
-        )
-        self.__thread.start()
+        self.__run_umap(model)
 
     def get_table(self, columns):
         """Get the metadata DataFrame for a given slice.
