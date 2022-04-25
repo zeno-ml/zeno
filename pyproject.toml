@@ -28,7 +28,7 @@ tqdm = "^4.64.0"
 
 [tool.poetry.dev-dependencies]
 pandas-stubs = "^1.2.0"
-pytest = "^7.1.1"
+pytest = "^7.1.2"
 pytest-cov = "^3.0"
 torch = "^1.11.0"
 torchvision = "^0.12.0"
