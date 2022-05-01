@@ -48,7 +48,7 @@ jobs:
         run: make check
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2.1.0
+        uses: codecov/codecov-action@v3.1.0
         with:
           fail_ci_if_error: true
 
