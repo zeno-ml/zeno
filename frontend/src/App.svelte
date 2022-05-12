@@ -1,19 +1,26 @@
 <script lang="ts">
-  import { mdiApi, mdiGithub } from "@mdi/js";
+  import {
+    mdiApi,
+    mdiGithub,
+    mdiGraphql,
+    mdiListStatus,
+    mdiTestTube,
+  } from "@mdi/js";
   import CircularProgress from "@smui/circular-progress";
   import { Svg } from "@smui/common/elements";
   import IconButton, { Icon } from "@smui/icon-button";
   import List, { Item, Separator } from "@smui/list";
   import Tooltip, { Wrapper } from "@smui/tooltip";
+  import * as aq from "arquero";
   import { onMount } from "svelte";
   import Router, { location } from "svelte-spa-router";
-  import Results from "./Results.svelte";
-  import { status, table, wsResponse } from "./stores";
-  import { initialFetch, updateTab } from "./util";
-  // import { mdiHomeVariantOutline } from "@mdi/js";
-  import { mdiListStatus, mdiGraphql } from "@mdi/js";
+
   import Embed from "./Embed.svelte";
-  import * as aq from "arquero";
+  import Results from "./Results.svelte";
+  import Tests from "./Tests.svelte";
+
+  import { initialFetch, updateTab } from "./util";
+  import { status, table, wsResponse } from "./stores";
 
   let runningAnalysis = true;
   let tab = $location.split("/")[1];
@@ -25,6 +32,7 @@
     "/": Results,
     "/results/": Results,
     "/embed/": Embed,
+    "/tests/": Tests,
     "*": Results,
   };
 
@@ -117,17 +125,6 @@
 <main>
   <div id="side-menu">
     <List class="demo-list" iconList={true}>
-      <!-- <Item
-        activated={tab === "home"}
-        on:SMUI:action={() => (tab = updateTab("home"))}
-      >
-        <IconButton>
-          <Icon component={Svg} viewBox="0 0 24 24">
-            <path fill="currentColor" d={mdiHomeVariantOutline} />
-          </Icon>
-        </IconButton>
-      </Item>
-      <Separator /> -->
       <Item
         activated={tab === "results"}
         on:SMUI:action={() => (tab = updateTab("results"))}
@@ -146,6 +143,17 @@
         <IconButton>
           <Icon component={Svg} viewBox="0 0 24 24">
             <path fill="currentColor" d={mdiGraphql} />
+          </Icon>
+        </IconButton>
+      </Item>
+      <Separator />
+      <Item
+        activated={tab === "tests"}
+        on:SMUI:action={() => (tab = updateTab("tests"))}
+      >
+        <IconButton>
+          <Icon component={Svg} viewBox="0 0 24 24">
+            <path fill="currentColor" d={mdiTestTube} />
           </Icon>
         </IconButton>
       </Item>

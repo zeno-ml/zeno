@@ -118,7 +118,7 @@ export function getSliceTable(
       tempFilter = tempFilter.replaceAll("s." + c, 'd["zenoslice_' + c + '"]');
     });
 
-  return table.filter(aq.escape((d) => eval(tempFilter)));
+  return table.filter(tempFilter);
 }
 
 export function sendResultRequests(reqs: ResultRequest[]) {

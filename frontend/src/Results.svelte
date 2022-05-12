@@ -56,10 +56,10 @@
     updateFilteredTable($table);
   }
 
-  $: if ($ready && modelA && selectedMetric && $slices.size > 0) {
-    modelB;
-    getResults([...$slices.values()]);
-  }
+  // $: if ($ready && modelA && selectedMetric && $slices.size > 0) {
+  //   modelB;
+  //   getResults([...$slices.values()]);
+  // }
 
   $: if (checked.size > 2) {
     checked.delete([...checked.values()][0]);
@@ -86,24 +86,35 @@
       } as ResultKey;
       let res: Result = $results.get(rKey);
       let t = $table.filter(aq.escape((d) => d["zenoslice_" + s.name] === 1));
-      if (!res || (res && !res.modelResults[modelA])) {
-        requests.push({
-          slice_name: s.name,
-          idxs: t.array($settings.idColumn) as string[],
-          metric: selectedMetric,
-          model: modelA,
-          transform: "",
+      $models.forEach((model) => {
+        $metrics.forEach((metric) => {
+          requests.push({
+            slice_name: s.name,
+            idxs: t.array($settings.idColumn) as string[],
+            metric: metric,
+            model: model,
+            transform: "",
+          });
         });
-      }
-      if (modelB && (!res || (res && !res.modelResults[modelB]))) {
-        requests.push({
-          slice_name: s.name,
-          idxs: t.array($settings.idColumn) as string[],
-          metric: selectedMetric,
-          model: modelB,
-          transform: "",
-        });
-      }
+      });
+      // if (!res || (res && !res.modelResults[modelA])) {
+      //   requests.push({
+      //     slice_name: s.name,
+      //     idxs: t.array($settings.idColumn) as string[],
+      //     metric: selectedMetric,
+      //     model: modelA,
+      //     transform: "",
+      //   });
+      // }
+      // if (modelB && (!res || (res && !res.modelResults[modelB]))) {
+      //   requests.push({
+      //     slice_name: s.name,
+      //     idxs: t.array($settings.idColumn) as string[],
+      //     metric: selectedMetric,
+      //     model: modelB,
+      //     transform: "",
+      //   });
+      // }
     });
     sendResultRequests(requests);
   }

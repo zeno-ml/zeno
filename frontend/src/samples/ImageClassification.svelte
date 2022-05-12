@@ -27,15 +27,13 @@
       </Wrapper>
       <br />
       <span class="label">{row[$settings.labelColumn]} </span>
-      {#if modelACol}
+      {#if modelACol && row[modelACol]}
         <br />
-        <span class="output">A: {row[modelACol] ? row[modelACol] : ""} </span>
+        <span class="output">A: {row[modelACol]} </span>
       {/if}
-      {#if modelBCol}
+      {#if modelBCol && row[modelBCol]}
         <br />
-        <span class="second_output"
-          >B: {row[modelBCol] ? row[modelBCol] : ""}
-        </span>
+        <span class="second_output">B: {row[modelBCol]} </span>
       {/if}
     </Paper>
   </div>

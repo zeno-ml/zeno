@@ -10,8 +10,8 @@ export const settings: Writable<Settings> = writable({
   labelColumn: "",
   metadata: [],
 });
-export const metrics = writable(null);
-export const models = writable(null);
+export const metrics = writable([]);
+export const models = writable([]);
 export const ready: Writable<boolean> = writable(false);
 
 export const wsResponse: Writable<WSResponse> = websocketStore(
