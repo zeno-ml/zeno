@@ -44,6 +44,13 @@ build:
 	@poetry build -vvv
 	@cd frontend && npm run build
 
+.PHONY: install
+install:
+	@echo "==> 📦 Installing"
+	@poetry install
+	@cd frontend && npm i && npm run build
+
+
 .PHONY: check
 check:
 	@poetry check

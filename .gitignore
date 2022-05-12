@@ -1,4 +1,5 @@
 examples/models/cifar/cif
+data/
 .zeno_cache/
 
 # Byte-compiled / optimized / DLL files
