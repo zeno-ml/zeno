@@ -172,7 +172,8 @@
   }
   #canvas {
     width: 50%;
-    height: 100%;
+    min-width: 500px;
+    height: 500px;
     border: 1px solid #e0e0e0;
   }
 </style>

@@ -32,6 +32,7 @@ def get_function(file_name, function_name):
 
 def preprocess_data(
     preprocessor: Preprocessor,
+    col: pd.Series,
     data_path: str,
     cache_path: str,
     df: pd.DataFrame,
@@ -47,10 +48,6 @@ def preprocess_data(
         "zenopreprocess_" + preprocessor.name + ".pickle",
     )
 
-    try:
-        col = pd.read_pickle(save_path)
-    except FileNotFoundError:
-        col = pd.Series([pd.NA] * df.shape[0], index=df.index)
     to_predict_indices = col.loc[pd.isna(col)].index
 
     if len(to_predict_indices) > 0:

@@ -164,27 +164,49 @@ class Zeno(object):
                     self.metrics[func_name] = func
 
     async def __process(self):
-
         self.status = "Running preprocessing"
-        with Pool() as pool:
-            preprocess_outputs = pool.starmap(
-                preprocess_data,
-                [
-                    [
-                        s,
-                        self.data_path,
-                        self.cache_path,
-                        self.df,
-                        self.data_loader,
-                        self.batch_size,
-                        i,
-                    ]
-                    for i, s in enumerate(self.preprocessors)
-                ],
+
+        # Check if we need to preprocess since Pool is expensive
+        preprocessors_to_run = []
+        for preprocessor in self.preprocessors:
+            save_path = Path(
+                self.cache_path,
+                "zenopreprocess_" + preprocessor.name + ".pickle",
             )
-            for out in preprocess_outputs:
-                self.df.loc[:, out[0]] = out[1]
-                self.complete_columns.append(out[0])
+
+            try:
+                self.df.loc[:, preprocessor.name] = pd.read_pickle(save_path)
+            except FileNotFoundError:
+                self.df.loc[:, preprocessor.name] = pd.Series(
+                    [pd.NA] * self.df.shape[0], index=self.df.index
+                )
+
+            if self.df[preprocessor.name].isnull().values.any():
+                preprocessors_to_run.append(preprocessor)
+            else:
+                self.complete_columns.append(preprocessor.name)
+
+        if len(preprocessors_to_run) > 0:
+            with Pool() as pool:
+                preprocess_outputs = pool.starmap(
+                    preprocess_data,
+                    [
+                        [
+                            s,
+                            self.df[s.name],
+                            self.data_path,
+                            self.cache_path,
+                            self.df,
+                            self.data_loader,
+                            self.batch_size,
+                            i,
+                        ]
+                        for i, s in enumerate(self.preprocessors)
+                    ],
+                )
+                for out in preprocess_outputs:
+                    self.df.loc[:, out[0]] = out[1]
+                    self.complete_columns.append(out[0])
 
         self.__slice_data()
         self.done_slicing.set()
@@ -192,31 +214,73 @@ class Zeno(object):
             [r for r in self.df.columns if r.startswith("zenoslice_")]
         )
 
-        self.status = "Running inference"
-        with Pool() as pool:
-            inference_outputs = pool.starmap(
-                run_inference,
-                [
-                    [
-                        m,
-                        self.data_path,
-                        self.cache_path,
-                        self.df,
-                        self.data_loader,
-                        self.model_loader,
-                        self.batch_size,
-                        i,
-                    ]
-                    for i, m in enumerate(self.model_paths)
-                ],
-            )
-            for out in inference_outputs:
-                self.df.loc[:, "zenomodel_" + out[0]] = out[1]
-                self.df.loc[:, "zenoembedding_" + out[0]] = out[2]
-                self.complete_columns.append("zenomodel_" + out[0])
+        # Check if we need to run inference since Pool is expensive
+        models_to_run = []
+        for model_path in self.model_paths:
+            model_name = os.path.basename(model_path).split(".")[0]
 
-                res = [r for r in self.results.values() if out[0] in r.model_names]
-                [self.calculate_metrics(r, self.slices[r.sli], out[0]) for r in res]
+            inference_save_path = Path(
+                self.cache_path,
+                "zenomodel_" + model_name + ".pickle",
+            )
+            embedding_save_path = Path(
+                self.cache_path,
+                "zenoembedding_" + model_name + ".pickle",
+            )
+
+            try:
+                self.df.loc[:, "zenomodel_" + model_name] = pd.read_pickle(
+                    inference_save_path
+                )
+            except FileNotFoundError:
+                self.df.loc[:, "zenomodel_" + model_name] = pd.Series(
+                    [pd.NA] * self.df.shape[0], index=self.df.index
+                )
+            try:
+                self.df.loc[:, "zenoembedding_" + model_name] = pd.read_pickle(
+                    embedding_save_path
+                )
+            except FileNotFoundError:
+                self.df.loc[:, "zenoembedding_" + model_name] = pd.Series(
+                    [pd.NA] * self.df.shape[0], index=self.df.index
+                )
+
+            if (
+                self.df["zenomodel_" + model_name].isnull().values.any()
+                or self.df["zenoembedding_" + model_name].isnull().values.any()
+            ):
+                models_to_run.append(model_path)
+            else:
+                self.complete_columns.append("zenomodel_" + model_name)
+
+        self.status = "Running inference"
+        if len(models_to_run) > 0:
+            with Pool() as pool:
+                inference_outputs = pool.starmap(
+                    run_inference,
+                    [
+                        [
+                            m,
+                            self.data_path,
+                            self.cache_path,
+                            self.df,
+                            self.data_loader,
+                            self.model_loader,
+                            self.batch_size,
+                            i,
+                        ]
+                        for i, m in enumerate(self.model_paths)
+                    ],
+                )
+                for out in inference_outputs:
+                    self.df.loc[:, "zenomodel_" + out[0]] = out[1]
+                    self.df.loc[:, "zenoembedding_" + out[0]] = out[2]
+                    self.complete_columns.append("zenomodel_" + out[0])
+
+        for m in self.model_paths:
+            model_name = os.path.basename(m).split(".")[0]
+            res = [r for r in self.results.values() if model_name in r.model_names]
+            [self.calculate_metrics(r, self.slices[r.sli], model_name) for r in res]
 
         self.done_inference.set()
         self.status = "Done preprocessing"
