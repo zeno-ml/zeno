@@ -79,12 +79,12 @@
     // TODO: Check results and only request new ones if needed.
     let requests: ResultRequest[] = [];
     sls.forEach((s) => {
-      let rKey = {
-        slice: s.name,
-        transform: "",
-        metric: selectedMetric,
-      } as ResultKey;
-      let res: Result = $results.get(rKey);
+      // let rKey = {
+      //   slice: s.name,
+      //   transform: "",
+      //   metric: selectedMetric,
+      // } as ResultKey;
+      // let res: Result = $results.get(rKey);
       let t = $table.filter(aq.escape((d) => d["zenoslice_" + s.name] === 1));
       $models.forEach((model) => {
         $metrics.forEach((metric) => {

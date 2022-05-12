@@ -181,7 +181,7 @@ class Zeno(object):
                     [pd.NA] * self.df.shape[0], index=self.df.index
                 )
 
-            if self.df[preprocessor.name].isnull().values.any():
+            if self.df[preprocessor.name].isnull().any():
                 preprocessors_to_run.append(preprocessor)
             else:
                 self.complete_columns.append(preprocessor.name)
@@ -246,8 +246,8 @@ class Zeno(object):
                 )
 
             if (
-                self.df["zenomodel_" + model_name].isnull().values.any()
-                or self.df["zenoembedding_" + model_name].isnull().values.any()
+                self.df["zenomodel_" + model_name].isnull().any()
+                or self.df["zenoembedding_" + model_name].isnull().any()
             ):
                 models_to_run.append(model_path)
             else:

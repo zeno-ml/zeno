@@ -1,6 +1,5 @@
 import type ColumnTable from "arquero/dist/types/table/column-table";
 import { metrics, models, ready, settings } from "./stores";
-import * as aq from "arquero";
 
 export class SliceNode {
   name: string;
