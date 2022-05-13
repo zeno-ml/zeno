@@ -116,13 +116,21 @@
 
     metadataSelections.forEach((sel, i) => {
       if (sel) {
+        let name;
+        if (i >= $settings.metadata.length) {
+          name =
+            i === $settings.metadata.length
+              ? "zenomodel_" + modelA
+              : "zenomodel_" + modelB;
+        } else {
+          name = $settings.metadata[i];
+        }
+
         if (sel[0] === "range") {
-          let name = $settings.metadata[i];
           tempTable = tempTable.filter(
             aq.escape((r) => r[name] > sel[1] && r[name] < sel[2])
           );
         } else {
-          let name = $settings.metadata[i];
           tempTable = tempTable.filter(
             aq.escape((r) => aq.op.includes(sel.slice(1), r[name], 0))
           );
@@ -253,6 +261,21 @@
         {#each $settings.metadata as name, i}
           <MetadataNode {name} bind:finalSelection={metadataSelections[i]} />
         {/each}
+        {#if modelA}
+          <h4>Outputs</h4>
+          <MetadataNode
+            name={"zenomodel_" + modelA}
+            bind:finalSelection={metadataSelections[$settings.metadata.length]}
+          />
+        {/if}
+        {#if modelB}
+          <MetadataNode
+            name={"zenomodel_" + modelB}
+            bind:finalSelection={metadataSelections[
+              $settings.metadata.length + 1
+            ]}
+          />
+        {/if}
       </div>
     </div>
   {/if}

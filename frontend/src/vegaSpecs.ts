@@ -32,7 +32,7 @@ export const histogramSpec = {
         },
         y: {
           aggregate: "count",
-          axis: { title: "", labelColor: "rgba(0, 0, 0, 0.6)" },
+          axis: { title: "", tickCount: 2, labelColor: "rgba(0, 0, 0, 0.6)" },
         },
         color: { value: "#ddd" },
       },
@@ -82,7 +82,7 @@ export const countSpec = {
     },
     y: {
       aggregate: "count",
-      axis: { title: "", labelColor: "rgba(0, 0, 0, 0.6)" },
+      axis: { title: "", tickCount: 2, labelColor: "rgba(0, 0, 0, 0.6)" },
     },
     fillOpacity: {
       condition: { param: "select", value: 1 },

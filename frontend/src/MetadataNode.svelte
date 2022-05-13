@@ -1,28 +1,44 @@
 <script lang="ts">
-  import { table } from "./stores";
+  import type { View, VegaLiteSpec } from "svelte-vega";
+
   import { VegaLite } from "svelte-vega";
+
+  import { table } from "./stores";
   import { countSpec, histogramSpec } from "./vegaSpecs";
 
   export let name;
   export let finalSelection;
 
   let selection = undefined;
-  let spec = undefined;
-  let view;
+  let spec: VegaLiteSpec = undefined;
+  let view: View;
+  let data = { table: [] };
 
-  const data = {
-    table: [],
-  };
+  function updateData(table) {
+    if (spec && table.column(name)) {
+      let vals = table.column(name).data;
+      let d = vals.map((d) => ({ val: d }));
+      data.table = d;
+      data = data;
+      if (view) {
+        view.data("table", data.table);
+        view.runAsync();
+      }
+    }
+  }
 
   table.subscribe((t) => {
-    if (t.column(name) && data.table.length === 0) {
+    if (t.column(name)) {
       let vals = t.column(name).data;
       spec = isNaN(vals[0]) ? countSpec : histogramSpec;
-      data.table = vals.map((d) => ({ val: d }));
     }
   });
-
-  $: if (view) {
+  $: {
+    name;
+    view;
+    updateData($table);
+  }
+  $: if (view && spec) {
     if (spec === histogramSpec) {
       view.addSignalListener(
         "brush",
@@ -47,7 +63,7 @@
       </span>
     {/if}
   </div>
-  {#if $table.column(name) && spec}
+  {#if $table.column(name) && spec && data.table.length > 0}
     <div
       id="histogram"
       on:mouseup={() => (finalSelection = selection)}
@@ -56,8 +72,8 @@
     >
       <VegaLite
         {spec}
-        bind:view
         {data}
+        bind:view
         options={{ tooltip: true, actions: false, theme: "vox" }}
       />
     </div>
