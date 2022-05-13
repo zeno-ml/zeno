@@ -23,6 +23,7 @@
   import { InternMap, InternSet } from "internmap";
   import LeafNode from "./LeafNode.svelte";
   import Filter from "./Filter.svelte";
+  import MetadataNode from "./MetadataNode.svelte";
 
   let modelA: string = "";
   let modelB: string = "";
@@ -34,6 +35,7 @@
 
   let selected: string = "";
   let checked: InternSet<string> = new InternSet();
+  let metadataSelections = [];
 
   let sliceTree: SliceNode = new SliceNode("root", 0, {});
   let comboSliceTree: SliceNode = new SliceNode("combinations", 0, {});
@@ -55,11 +57,10 @@
     selected;
     updateFilteredTable($table);
   }
-
-  // $: if ($ready && modelA && selectedMetric && $slices.size > 0) {
-  //   modelB;
-  //   getResults([...$slices.values()]);
-  // }
+  $: {
+    metadataSelections;
+    updateFilteredTable($table);
+  }
 
   $: if (checked.size > 2) {
     checked.delete([...checked.values()][0]);
@@ -79,12 +80,6 @@
     // TODO: Check results and only request new ones if needed.
     let requests: ResultRequest[] = [];
     sls.forEach((s) => {
-      // let rKey = {
-      //   slice: s.name,
-      //   transform: "",
-      //   metric: selectedMetric,
-      // } as ResultKey;
-      // let res: Result = $results.get(rKey);
       let t = $table.filter(aq.escape((d) => d["zenoslice_" + s.name] === 1));
       $models.forEach((model) => {
         $metrics.forEach((metric) => {
@@ -97,24 +92,6 @@
           });
         });
       });
-      // if (!res || (res && !res.modelResults[modelA])) {
-      //   requests.push({
-      //     slice_name: s.name,
-      //     idxs: t.array($settings.idColumn) as string[],
-      //     metric: selectedMetric,
-      //     model: modelA,
-      //     transform: "",
-      //   });
-      // }
-      // if (modelB && (!res || (res && !res.modelResults[modelB]))) {
-      //   requests.push({
-      //     slice_name: s.name,
-      //     idxs: t.array($settings.idColumn) as string[],
-      //     metric: selectedMetric,
-      //     model: modelB,
-      //     transform: "",
-      //   });
-      // }
     });
     sendResultRequests(requests);
   }
@@ -123,19 +100,37 @@
     if (!$ready) {
       return;
     }
-    if (!selected) {
-      filteredTable = $table.slice(100);
-      return;
+
+    let tempTable = t;
+
+    if (selected) {
+      let slice = $slices.get(selected);
+      if (slice.type === "programmatic") {
+        tempTable = t.filter(
+          aq.escape((r) => r["zenoslice_" + slice.name] === 1)
+        );
+      } else {
+        tempTable = getSliceTable(selected, $settings.metadata, $table);
+      }
     }
 
-    let slice = $slices.get(selected);
-    if (slice.type === "programmatic") {
-      filteredTable = t.filter(
-        aq.escape((r) => r["zenoslice_" + slice.name] === 1)
-      );
-    } else {
-      filteredTable = getSliceTable(selected, $settings.metadata, $table);
-    }
+    metadataSelections.forEach((sel, i) => {
+      if (sel) {
+        if (sel[0] === "range") {
+          let name = $settings.metadata[i];
+          tempTable = tempTable.filter(
+            aq.escape((r) => r[name] > sel[1] && r[name] < sel[2])
+          );
+        } else {
+          let name = $settings.metadata[i];
+          tempTable = tempTable.filter(
+            aq.escape((r) => aq.op.includes(sel.slice(1), r[name], 0))
+          );
+        }
+      }
+    });
+
+    filteredTable = tempTable;
   }
 
   function createSlice() {
@@ -207,26 +202,25 @@
   {#if sliceTree}
     <div class="side-container">
       <div style:margin-left="10px">
-        <h4>Generated Slices</h4>
-        {#each [...$slices.values()].filter((d) => d.type === "generated") as s}
-          <LeafNode
-            name={s.name}
-            fullName={s.name}
-            result={$results.get({
-              slice: s.name,
-              transform: "",
-              metric: selectedMetric,
-            })}
-            size={s.size}
-            {modelA}
-            {modelB}
-            bind:selected
-            bind:checked
-          />
-          <!-- <div class="cell">
-            {s.name}
-          </div> -->
-        {/each}
+        {#if [...$slices.values()].filter((d) => d.type === "generated").length > 0}
+          <h4>Generated Slices</h4>
+          {#each [...$slices.values()].filter((d) => d.type === "generated") as s}
+            <LeafNode
+              name={s.name}
+              fullName={s.name}
+              result={$results.get({
+                slice: s.name,
+                transform: "",
+                metric: selectedMetric,
+              })}
+              size={s.size}
+              {modelA}
+              {modelB}
+              bind:selected
+              bind:checked
+            />
+          {/each}
+        {/if}
       </div>
 
       <h4 style:margin-left="10px">Slices</h4>
@@ -256,15 +250,8 @@
 
       <div style:margin-left="10px">
         <h4>Metadata</h4>
-        {#each $settings.metadata as m}
-          <div class="cell">
-            {m} -
-            {#if $table.column(m)}
-              Unique values: {$table
-                .rollup({ a: aq.op.array_agg_distinct(m) })
-                .objects()[0]["a"].length}
-            {/if}
-          </div>
+        {#each $settings.metadata as name, i}
+          <MetadataNode {name} bind:finalSelection={metadataSelections[i]} />
         {/each}
       </div>
     </div>
@@ -305,16 +292,5 @@
     min-width: 450px;
     padding-right: 35px;
     margin-right: 15px;
-  }
-  .cell {
-    height: 36px;
-    border: 1px solid #e0e0e0;
-    padding: 10px;
-    min-width: 400px;
-    width: fit-content;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
   }
 </style>
