@@ -16,7 +16,7 @@
   } from "./stores";
   import {
     appendChild,
-    getSliceTable,
+    getFilteredTable,
     sendResultRequests,
     SliceNode,
   } from "./util";
@@ -110,7 +110,13 @@
           aq.escape((r) => r["zenoslice_" + slice.name] === 1)
         );
       } else {
-        tempTable = getSliceTable(selected, $settings.metadata, $table);
+        tempTable = getFilteredTable(
+          selected,
+          $settings.metadata,
+          $table,
+          modelA,
+          modelB
+        );
       }
     }
 
@@ -144,7 +150,13 @@
   function createSlice() {
     filterError = "";
     try {
-      const newTable = getSliceTable(filter, $settings.metadata, $table);
+      const newTable = getFilteredTable(
+        filter,
+        $settings.metadata,
+        $table,
+        modelA,
+        modelB
+      );
       let requests = [];
       requests[0] = {
         slice_name: filter,

@@ -98,16 +98,25 @@ export function updateTab(t: string) {
   return t;
 }
 
-export function getSliceTable(
-  name: string,
+export function getFilteredTable(
+  filter: string,
   metadata: string[],
-  table: ColumnTable
+  table: ColumnTable,
+  modelA: string,
+  modelB: string
 ) {
-  let tempFilter = name;
+  let tempFilter = filter;
 
   metadata.forEach((m) => {
     tempFilter = tempFilter.replaceAll("m." + m, 'd["' + m + '"]');
   });
+
+  if (modelA) {
+    tempFilter = tempFilter.replaceAll("o1", "d.zenomodel_" + modelA);
+  }
+  if (modelB) {
+    tempFilter = tempFilter.replaceAll("o2", "d.zenomodel_" + modelB);
+  }
 
   table
     .columnNames()

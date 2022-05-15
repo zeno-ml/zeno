@@ -20,19 +20,19 @@
       filterSuggestions = [...$slices.keys()]
         .filter((s) => s.startsWith(lastFilter.substring(2)))
         .map((s) => "s." + s);
-      return;
-    }
-    if (lastFilter.startsWith("m.")) {
+    } else if (lastFilter.startsWith("m.")) {
       filterSuggestions = $settings.metadata
         .filter((s) => s.startsWith(lastFilter.substring(2)))
         .map((s) => "m." + s);
-      return;
+    } else {
+      filterSuggestions = [
+        "use JS syntax to filter, e.g &&, >, <",
+        "s - slices",
+        "m - metadata",
+        "o1 - model A output",
+        "o2 - model B output",
+      ];
     }
-    filterSuggestions = [
-      "use JS syntax to filter, e.g &&, >, <",
-      "s - slices",
-      "m - metadata",
-    ];
   }
 
   function setSuggestion(sugg) {
