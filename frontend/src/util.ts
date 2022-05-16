@@ -1,5 +1,5 @@
 import type ColumnTable from "arquero/dist/types/table/column-table";
-import { metrics, models, ready, settings } from "./stores";
+import { metrics, models, ready, results, settings } from "./stores";
 
 export class SliceNode {
   name: string;
@@ -23,9 +23,6 @@ export class SliceNode {
 // Recursive function for creating result tree.
 export function appendChild(parent: SliceNode, child: Slice) {
   let name = child.name;
-  if (name.startsWith("zenoslice_")) {
-    name = name.slice(9);
-  }
   const name_parts = name.split(".");
 
   // Add a leaf node.
@@ -129,12 +126,32 @@ export function getFilteredTable(
   return table.filter(tempFilter);
 }
 
-export function sendResultRequests(reqs: ResultRequest[]) {
+export function updateResults(requests: ResultsRequest[]) {
   fetch("/api/results", {
     method: "POST",
     headers: {
       "Content-type": "application/json",
     },
-    body: JSON.stringify({ requests: reqs }),
-  }).catch((e) => console.log(e));
+    body: JSON.stringify({ requests: requests }),
+  })
+    .then((d) => d.json())
+    .then((res) => {
+      res = JSON.parse(res);
+      results.update((resmap) => {
+        res.forEach((r) => {
+          resmap.set(
+            {
+              slice: r.slice.startsWith("zenoslice_")
+                ? r.slice.slice(10)
+                : r.slice,
+              metric: r.metric,
+              model: r.model,
+            } as ResultKey,
+            r.value
+          );
+        });
+        return resmap;
+      });
+    })
+    .catch((e) => console.log(e));
 }

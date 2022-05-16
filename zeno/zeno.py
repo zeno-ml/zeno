@@ -17,8 +17,7 @@ from .classes import (
     DataLoader,
     ModelLoader,
     Preprocessor,
-    Result,
-    ResultRequest,
+    ResultsRequest,
     Slice,
     Slicer,
 )
@@ -72,8 +71,6 @@ class Zeno(object):
 
         # Key is name of slice
         self.slices: Dict[str, Slice] = {}
-        # Key is result.id, hash of properties
-        self.results: Dict[int, Result] = {}
 
         # Read metadata as Pandas for slicing
         if metadata_path.suffix == ".csv":
@@ -277,11 +274,6 @@ class Zeno(object):
                     self.df.loc[:, "zenoembedding_" + out[0]] = out[2]
                     self.complete_columns.append("zenomodel_" + out[0])
 
-        for m in self.model_paths:
-            model_name = os.path.basename(m).split(".")[0]
-            res = [r for r in self.results.values() if model_name in r.model_names]
-            [self.calculate_metrics(r, self.slices[r.sli], model_name) for r in res]
-
         self.done_inference.set()
         self.status = "Done preprocessing"
 
@@ -296,59 +288,49 @@ class Zeno(object):
             }
         self.status = "Done slicing"
 
-    def get_results(self, requests: List[ResultRequest]):
+    def get_results(self, requests: ResultsRequest):
         """Calculate result for each requested combination."""
 
-        for request in requests:
-            slice_name, idxs, metric_name, model_name = (
-                request.slice_name,
-                request.idxs,
-                request.metric,
-                request.model,
-            )
-            try:
-                sli = self.slices[slice_name]
-            except KeyError:
-                sli = Slice(slice_name, "generated", pd.Index(idxs))
-                self.slices[slice_name] = sli
+        return_metrics = []
+        for request in requests.requests:
+            for metric_name in self.metrics.keys():
+                for model_name in self.model_names:
+                    return_metrics.append(
+                        self.calculate_metrics(
+                            request.idxs, request.sli, metric_name, model_name
+                        )
+                    )
 
-            # TODO: add transform
-            res_hash = int(hash(slice_name + "" + metric_name) / 10000)
+        return return_metrics
 
-            if res_hash in self.results:
-                res = self.results[res_hash]
-            else:
-                res = Result(
-                    slice_name,
-                    "",
-                    metric_name,
-                    sli.size,
-                )
-
-            if model_name not in res.model_names:
-                res.model_names.append(model_name)
-            if "zenomodel_" + model_name in self.complete_columns:
-                self.calculate_metrics(res, sli, model_name)
-
-        self.status = "Done " + str(hash(str(requests)))
-
-    def calculate_metrics(self, res: Result, sli: Slice, model_name: str):
-        metric_func = self.metrics[res.metric]
+    def calculate_metrics(
+        self, idxs: List, name: str, metric_name: str, model_name: str
+    ):
+        metric_func = self.metrics[metric_name]
 
         if len(signature(metric_func).parameters) == 3:
             result = metric_func(
-                self.df.loc[sli.index, "zenomodel_" + model_name].tolist(),
-                self.df.loc[sli.index],
+                self.df.loc[idxs, "zenomodel_" + model_name].tolist(),
+                self.df.loc[idxs],
                 self.label_column,
             )
         else:
             result = metric_func(
-                self.df.loc[sli.index, "zenomodel_" + model_name].tolist(),
-                self.df.loc[sli.index],
+                self.df.loc[idxs, "zenomodel_" + model_name].tolist(),
+                self.df.loc[idxs],
             )
 
-        res.set_result(model_name, result)
-        self.results[res.id] = res
+        if len(result) == 0:
+            result_metric = 0
+        else:
+            result_metric = (sum(result) / len(result)) * 100
+
+        return {
+            "slice": name,
+            "model": model_name,
+            "metric": metric_name,
+            "value": result_metric,
+        }
 
     def __run_umap(self, model):
         embeds = np.stack(self.df["zenoembedding_" + model].to_numpy())

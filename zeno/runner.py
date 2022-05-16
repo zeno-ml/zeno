@@ -175,28 +175,18 @@ def run_zeno(args):
 
     @api_app.post("/results")
     def get_results(reqs: ResultsRequest):
-        return zeno.get_results(reqs.requests)
+        return json.dumps(zeno.get_results(reqs))
 
     @api_app.post("/projection")
     def run_projection(model: ProjectionRequest):
         return zeno.run_projection(model.model)
 
-    @api_app.websocket("/results")
+    @api_app.websocket("/status")
     async def results_websocket(websocket: WebSocket):
         await websocket.accept()
         previous_status = ""
         while True:
             await asyncio.sleep(1)
-            res = zeno.results.values()
-            res = [
-                {
-                    "metric": r.metric,
-                    "transform": r.transform,
-                    "slice": r.sli,
-                    "modelResults": r.model_metrics,
-                }
-                for r in res
-            ]
 
             sls = zeno.slices.values()
             slices = [
@@ -213,7 +203,6 @@ def run_zeno(args):
                 await websocket.send_json(
                     {
                         "status": zeno.status,
-                        "results": res,
                         "slices": slices,
                         "columns": list(zeno.complete_columns),
                     }

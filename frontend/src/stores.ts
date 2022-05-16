@@ -15,10 +15,9 @@ export const models = writable([]);
 export const ready: Writable<boolean> = writable(false);
 
 export const wsResponse: Writable<WSResponse> = websocketStore(
-  `ws://localhost:${location.port}/api/results`,
+  `ws://localhost:${location.port}/api/status`,
   {
     status: "connecting",
-    results: [],
     slices: [],
     columns: [],
   } as WSResponse
@@ -28,29 +27,6 @@ export const status: Readable<string> = derived(
   wsResponse,
   ($wsResponse) => $wsResponse.status,
   "connecting"
-);
-
-export const results: Readable<InternMap<ResultKey, Result>> = derived(
-  wsResponse,
-  ($wsResponse) => {
-    if ($wsResponse.results.length > 0) {
-      const newMap = new InternMap<ResultKey, Result>([], JSON.stringify);
-      $wsResponse.results.forEach((res) => {
-        newMap.set(
-          {
-            slice: res.slice,
-            transform: res.transform,
-            metric: res.metric,
-          },
-          res
-        );
-      });
-      return newMap;
-    } else {
-      return new InternMap<ResultKey, Result>();
-    }
-  },
-  new InternMap<ResultKey, Result>()
 );
 
 export const slices: Readable<Map<string, Slice>> = derived(
@@ -69,3 +45,7 @@ export const slices: Readable<Map<string, Slice>> = derived(
 );
 
 export const table: Writable<ColumnTable> = writable(aq.table({}));
+
+export const results: Writable<InternMap<ResultKey, number>> = writable(
+  new InternMap([], (d) => d.slice + "." + d.metric + "." + d.model)
+);

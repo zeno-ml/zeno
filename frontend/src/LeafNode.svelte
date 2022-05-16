@@ -2,15 +2,29 @@
   import Checkbox from "@smui/checkbox";
   import FormField from "@smui/form-field";
   import Ripple from "@smui/ripple";
+  import { results } from "./stores";
 
   export let name: string;
   export let size: number;
-  export let result;
+  export let metric: string;
   export let modelA: string;
   export let modelB: string;
   export let selected;
   export let checked;
   export let fullName = name;
+
+  $: resultA = $results.get({
+    slice: fullName,
+    metric: metric,
+    model: modelA,
+  } as ResultKey);
+  $: resultB = $results.get({
+    slice: fullName,
+    metric: metric,
+    model: modelB,
+  } as ResultKey);
+
+  $: console.log($results, modelA, metric, fullName, resultA, resultB);
 </script>
 
 <div
@@ -35,15 +49,13 @@
     </div>
     <div class="group" style:width="100%">
       <span>{name}</span>
-      {#if result}
+      {#if resultA}
         <div>
           <span style:margin-right="10px">
-            A: {result.modelResults[modelA]
-              ? result.modelResults[modelA].toFixed(2)
-              : ""}%
-            {#if modelB && result.modelResults[modelB]}
+            A: {resultA.toFixed(2)}%
+            {#if resultB}
               <span style:margin-left="10px">
-                B: {result.modelResults[modelB].toFixed(2)}%
+                B: {resultB.toFixed(2)}%
               </span>
             {/if}
           </span>

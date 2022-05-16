@@ -1,26 +1,21 @@
 <script lang="ts">
+  import type ColumnTable from "arquero/dist/types/table/column-table";
+
   import Button from "@smui/button";
   import Select, { Option } from "@smui/select";
+  import { InternMap, InternSet } from "internmap";
   import * as aq from "arquero";
-  import type ColumnTable from "arquero/dist/types/table/column-table";
-  import ResultCell from "./ResultCell.svelte";
-  import Samples from "./samples/Samples.svelte";
-  import {
-    metrics,
-    models,
-    ready,
-    results,
-    settings,
-    slices,
-    table,
-  } from "./stores";
+
+  import { metrics, models, ready, settings, slices, table } from "./stores";
   import {
     appendChild,
     getFilteredTable,
-    sendResultRequests,
     SliceNode,
+    updateResults,
   } from "./util";
-  import { InternMap, InternSet } from "internmap";
+
+  import ResultCell from "./ResultCell.svelte";
+  import Samples from "./samples/Samples.svelte";
   import LeafNode from "./LeafNode.svelte";
   import Filter from "./Filter.svelte";
   import MetadataNode from "./MetadataNode.svelte";
@@ -37,8 +32,9 @@
   let checked: InternSet<string> = new InternSet();
   let metadataSelections = [];
 
+  let generatedSlices: Slice[] = [];
+
   let sliceTree: SliceNode = new SliceNode("root", 0, {});
-  let comboSliceTree: SliceNode = new SliceNode("combinations", 0, {});
 
   ready.subscribe((r) => {
     if (r) {
@@ -68,32 +64,11 @@
 
   function setupTree(slices: InternMap<string, Slice>) {
     const slis: Slice[] = [...slices.values()];
-    getResults(slis);
     let programmaticSlices = slis.filter((s) => s.type === "programmatic");
     programmaticSlices.forEach((r) => {
       appendChild(sliceTree, r);
     });
     sliceTree = sliceTree;
-  }
-
-  function getResults(sls: Slice[]) {
-    // TODO: Check results and only request new ones if needed.
-    let requests: ResultRequest[] = [];
-    sls.forEach((s) => {
-      let t = $table.filter(aq.escape((d) => d["zenoslice_" + s.name] === 1));
-      $models.forEach((model) => {
-        $metrics.forEach((metric) => {
-          requests.push({
-            slice_name: s.name,
-            idxs: t.array($settings.idColumn) as string[],
-            metric: metric,
-            model: model,
-            transform: "",
-          });
-        });
-      });
-    });
-    sendResultRequests(requests);
   }
 
   function updateFilteredTable(t: ColumnTable) {
@@ -105,7 +80,7 @@
 
     if (selected) {
       let slice = $slices.get(selected);
-      if (slice.type === "programmatic") {
+      if (slice && slice.type === "programmatic") {
         tempTable = t.filter(
           aq.escape((r) => r["zenoslice_" + slice.name] === 1)
         );
@@ -145,6 +120,12 @@
     });
 
     filteredTable = tempTable;
+    updateResults([
+      {
+        sli: "selection",
+        idxs: filteredTable.array($settings.idColumn) as string[],
+      },
+    ]);
   }
 
   function createSlice() {
@@ -157,25 +138,18 @@
         modelA,
         modelB
       );
-      let requests = [];
-      requests[0] = {
-        slice_name: filter,
-        idxs: newTable.array($settings.idColumn) as string[],
-        metric: selectedMetric,
-        model: modelA,
-        transform: "",
-      };
-      if (modelB) {
-        requests[1] = {
-          slice_name: filter,
+      updateResults([
+        {
+          sli: filter,
           idxs: newTable.array($settings.idColumn) as string[],
-          metric: selectedMetric,
-          model: modelA,
-          transform: "",
-        };
-      }
-
-      sendResultRequests(requests);
+        },
+      ]);
+      generatedSlices.push({
+        name: filter,
+        size: newTable.column($settings.idColumn).length,
+        type: "generated",
+      });
+      generatedSlices = [...generatedSlices];
       filter = "";
     } catch (e) {
       filterError = e;
@@ -219,44 +193,23 @@
 </div>
 
 <div id="container">
-  {#if sliceTree}
-    <div class="side-container">
-      <div style:margin-left="10px">
-        {#if [...$slices.values()].filter((d) => d.type === "generated").length > 0}
-          <h4>Generated Slices</h4>
-          {#each [...$slices.values()].filter((d) => d.type === "generated") as s}
-            <LeafNode
-              name={s.name}
-              fullName={s.name}
-              result={$results.get({
-                slice: s.name,
-                transform: "",
-                metric: selectedMetric,
-              })}
-              size={s.size}
-              {modelA}
-              {modelB}
-              bind:selected
-              bind:checked
-            />
-          {/each}
-        {/if}
-      </div>
+  <div class="side-container">
+    <h4>Generated Slices</h4>
+    {#each generatedSlices as s}
+      <LeafNode
+        name={s.name}
+        fullName={s.name}
+        metric={selectedMetric}
+        size={s.size}
+        {modelA}
+        {modelB}
+        bind:selected
+        bind:checked
+      />
+    {/each}
 
-      <h4 style:margin-left="10px">Slices</h4>
-      {#if Object.keys(comboSliceTree.children).length > 0}
-        <p>Generated Slices</p>
-        {#each Object.values(comboSliceTree.children) as node}
-          <ResultCell
-            sliceNode={node}
-            bind:selected
-            bind:checked
-            {modelA}
-            {modelB}
-            metric={selectedMetric}
-          />
-        {/each}
-      {/if}
+    {#if sliceTree}
+      <h4>Slices</h4>
       {#each Object.values(sliceTree.children) as node}
         <ResultCell
           sliceNode={node}
@@ -267,36 +220,36 @@
           metric={selectedMetric}
         />
       {/each}
+    {/if}
 
-      <div style:margin-left="10px">
-        <h4>Metadata</h4>
-        {#each $settings.metadata as name, i}
-          <MetadataNode {name} bind:finalSelection={metadataSelections[i]} />
-        {/each}
-        {#if modelA}
-          <h4>Outputs</h4>
-          <MetadataNode
-            name={"zenomodel_" + modelA}
-            bind:finalSelection={metadataSelections[$settings.metadata.length]}
-          />
-        {/if}
-        {#if modelB}
-          <MetadataNode
-            name={"zenomodel_" + modelB}
-            bind:finalSelection={metadataSelections[
-              $settings.metadata.length + 1
-            ]}
-          />
-        {/if}
-      </div>
-    </div>
-  {/if}
+    <h4>Metadata</h4>
+    {#each $settings.metadata as name, i}
+      <MetadataNode {name} bind:finalSelection={metadataSelections[i]} />
+    {/each}
+
+    {#if modelA}
+      <h4>Outputs</h4>
+      <MetadataNode
+        name={"zenomodel_" + modelA}
+        bind:finalSelection={metadataSelections[$settings.metadata.length]}
+      />
+    {/if}
+
+    {#if modelB}
+      <MetadataNode
+        name={"zenomodel_" + modelB}
+        bind:finalSelection={metadataSelections[$settings.metadata.length + 1]}
+      />
+    {/if}
+  </div>
+
   {#if filteredTable}
     <div id="results">
       <Samples
-        modelACol={"zenomodel_" + modelA}
-        modelBCol={"zenomodel_" + modelB}
+        {modelA}
+        {modelB}
         table={filteredTable}
+        metric={selectedMetric}
       />
     </div>
   {/if}

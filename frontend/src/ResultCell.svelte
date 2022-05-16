@@ -1,11 +1,11 @@
 <script lang="ts">
+  import type { InternSet } from "internmap";
   import { type SliceNode, leafCount, isLeaf } from "./util";
+
   import { mdiChevronDown, mdiChevronUp } from "@mdi/js";
   import { Svg } from "@smui/common/elements";
   import { slide } from "svelte/transition";
   import IconButton, { Icon } from "@smui/icon-button";
-  import { results, slices } from "./stores";
-  import type { InternSet } from "internmap";
   import LeafNode from "./LeafNode.svelte";
 
   export let sliceNode: SliceNode;
@@ -16,16 +16,6 @@
   export let metric: string = "";
 
   let expanded: boolean = false;
-  let result: Result = null;
-  let slice: Slice = null;
-  $: if (sliceNode.slice) {
-    result = $results.get({
-      slice: sliceNode.slice.name,
-      transform: "",
-      metric: metric,
-    });
-    slice = $slices.get(sliceNode.slice.name);
-  }
 </script>
 
 <div>
@@ -35,8 +25,8 @@
         <LeafNode
           name={sliceNode.name}
           fullName={sliceNode.slice.name}
-          {result}
           size={sliceNode.slice.size}
+          {metric}
           {modelA}
           {modelB}
           bind:selected
@@ -44,7 +34,7 @@
         />
       </div>
     {:else}
-      <div class="cell leaf" style="margin-left: {sliceNode.depth * 10}px">
+      <div class="cell leaf" style="margin-left: {sliceNode.depth * 10 - 10}px">
         <div class="group">
           {sliceNode.name}
         </div>

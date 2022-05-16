@@ -9,12 +9,16 @@
   import ImageClassification from "./ImageClassification.svelte";
   import ObjectDetection from "./ObjectDetection.svelte";
 
-  import { settings, ready } from "../stores";
+  import { settings, ready, results } from "../stores";
   import AudioClassification from "./AudioClassification.svelte";
 
-  export let modelACol: string = "";
-  export let modelBCol: string = "";
+  export let modelA: string = "";
+  export let modelB: string = "";
+  export let metric: string;
   export let table: ColumnTable;
+
+  $: modelACol = "zenomodel_" + modelA;
+  $: modelBCol = "zenomodel_" + modelB;
 
   let rowsPerPage = 15;
   let currentPage = 0;
@@ -26,10 +30,29 @@
   $: if (currentPage > lastPage) {
     currentPage = lastPage;
   }
+
+  $: resultA = $results.get({
+    slice: "selection",
+    metric: metric,
+    model: modelA,
+  } as ResultKey);
+  $: resultB = $results.get({
+    slice: "selection",
+    metric: metric,
+    model: modelB,
+  } as ResultKey);
 </script>
 
 {#if table.size > 0}
-  <div>
+  <div
+    class="container"
+    style:align-items="center"
+    style:justify-content="space-between"
+  >
+    <div>
+      <span>{resultA ? "A: " + resultA.toFixed(2) + "%" : ""}</span>
+      <span>{resultB ? "B: " + resultB.toFixed(2) + "%" : ""}</span>
+    </div>
     <Pagination slot="paginate" class="pagination">
       <svelte:fragment slot="rowsPerPage">
         <Label>Rows Per Page</Label>
@@ -75,7 +98,12 @@
     </Pagination>
   </div>
 {/if}
-<div class="container">
+<div
+  class="container"
+  style:height="calc(100vh - 220px)"
+  style:overflow-y="scroll"
+  style:align-content="baseline"
+>
   {#if $ready}
     {#if $settings.task === "image-classification"}
       <ImageClassification

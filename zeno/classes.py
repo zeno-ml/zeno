@@ -7,11 +7,8 @@ from pydantic import BaseModel
 
 
 class ResultRequest(BaseModel):
-    slice_name: str
+    sli: str
     idxs: List[str]
-    metric: str
-    model: str
-    transform: str
 
 
 class ResultsRequest(BaseModel):

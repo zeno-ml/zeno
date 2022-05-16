@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type ColumnTable from "arquero/dist/types/table/column-table";
+
   import {
     mdiApi,
     mdiGithub,
@@ -11,16 +13,16 @@
   import IconButton, { Icon } from "@smui/icon-button";
   import List, { Item, Separator } from "@smui/list";
   import Tooltip, { Wrapper } from "@smui/tooltip";
-  import * as aq from "arquero";
   import { onMount } from "svelte";
   import Router, { location } from "svelte-spa-router";
+  import * as aq from "arquero";
 
   import Embed from "./Embed.svelte";
   import Results from "./Results.svelte";
   import Tests from "./Tests.svelte";
 
-  import { initialFetch, updateTab } from "./util";
-  import { status, table, wsResponse } from "./stores";
+  import { initialFetch, updateResults, updateTab } from "./util";
+  import { settings, status, table, wsResponse } from "./stores";
 
   let runningAnalysis = true;
   let tab = $location.split("/")[1];
@@ -68,11 +70,26 @@
           Object.keys(d).forEach((k) => {
             x[k] = Object.values(d[k]);
           });
+          let t: ColumnTable;
           if ($table.size === 0) {
-            table.set(aq.fromJSON(x));
+            t = aq.fromJSON(x);
+            table.set(t);
           } else {
-            table.update((t) => t.assign(aq.fromJSON(x)));
+            t = $table.assign(aq.fromJSON(x));
+            table.set(t);
           }
+
+          let requests: ResultsRequest[] = [];
+          missingColumns.forEach((c) => {
+            if (c.startsWith("zenoslice_")) {
+              let idxs = t.filter(`d => d["${c}"] !== null`);
+              requests.push({
+                sli: c,
+                idxs: idxs.array($settings.idColumn) as string[],
+              });
+            }
+          });
+          updateResults(requests);
         });
     }
   });
@@ -176,7 +193,6 @@
     display: flex;
     flex-direction: row;
     text-align: left;
-    padding-bottom: 50px;
   }
 
   header {
