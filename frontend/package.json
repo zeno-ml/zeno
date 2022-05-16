@@ -57,6 +57,6 @@
     "svelte-spa-router": "^3.2.0",
     "svelte-vega": "^1.1.0",
     "svelte-websocket-store": "^1.1.24",
-    "wavesurfer.js": "^6.1.0"
+    "wavesurfer.js": "^6.2.0"
   }
 }
