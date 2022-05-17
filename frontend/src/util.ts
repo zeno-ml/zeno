@@ -22,7 +22,7 @@ export class SliceNode {
 
 // Recursive function for creating result tree.
 export function appendChild(parent: SliceNode, child: Slice) {
-  let name = child.name;
+  const name = child.name;
   const name_parts = name.split(".");
 
   // Add a leaf node.

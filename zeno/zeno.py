@@ -321,9 +321,9 @@ class Zeno(object):
             )
 
         if len(result) == 0:
-            result_metric = 0
+            result_metric = 0.0
         else:
-            result_metric = (sum(result) / len(result)) * 100
+            result_metric = (sum(result) / len(result)) * 100.0
 
         return {
             "slice": name,
