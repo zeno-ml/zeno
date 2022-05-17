@@ -23,8 +23,6 @@
     metric: metric,
     model: modelB,
   } as ResultKey);
-
-  $: console.log($results, modelA, metric, fullName, resultA, resultB);
 </script>
 
 <div

@@ -6,23 +6,40 @@
   import IconButton from "@smui/icon-button";
   import SegmentedButton, { Segment } from "@smui/segmented-button";
   import Select, { Option } from "@smui/select";
+  import Chip, { Set as ChipSet, Text } from "@smui/chips";
+  import Button from "@smui/button";
+
+  import { scaleSequential } from "d3-scale";
+  import { interpolatePurples } from "d3-scale-chromatic";
 
   import AudioClassification from "./AudioClassification.svelte";
   import ImageClassification from "./ImageClassification.svelte";
   import ObjectDetection from "./ObjectDetection.svelte";
   import TextClassification from "./TextClassification.svelte";
 
-  import { ready, results, settings } from "../stores";
+  import {
+    ready,
+    results,
+    settings,
+    slices,
+    table as tableStore,
+  } from "../stores";
+  import { getFilteredTable, updateResults } from "src/util";
 
   export let modelA: string = "";
   export let modelB: string = "";
   export let metric: string;
   export let table: ColumnTable;
+  export let checked: Set<string>;
+
+  let rows = [];
+  let columns = [];
 
   let rowsPerPage = 15;
   let currentPage = 0;
   let viewOptions = ["list", "grid"];
   let view = "list";
+  let colorScale = scaleSequential(interpolatePurples).domain([0, 1]);
 
   $: modelACol = "zenomodel_" + modelA;
   $: modelBCol = "zenomodel_" + modelB;
@@ -44,15 +61,84 @@
     metric: metric,
     model: modelB,
   } as ResultKey);
+
+  let gridResults: number[][] = [];
+  let gridSizes: number[][] = [];
+
+  function getIdxs(slice_name: string) {
+    let s = $slices.get(slice_name);
+    if (s) {
+      if (s.type === "programmatic") {
+        return new Set(
+          $tableStore
+            .filter(`d => d["${"zenoslice_" + s.name}"] !== null`)
+            .array($settings.idColumn) as string[]
+        );
+      } else {
+        const newTable = getFilteredTable(
+          s.name,
+          $settings.metadata,
+          $tableStore,
+          modelA,
+          modelB
+        );
+        return new Set(newTable.array($settings.idColumn) as string[]);
+      }
+    }
+  }
+
+  function getGridResults() {
+    let rowIdxs = [];
+    let columnIdxs = [];
+    rows.forEach((r) => {
+      rowIdxs.push(getIdxs(r));
+      gridResults.push([]);
+      gridSizes.push([]);
+    });
+    columns.forEach((c) => columnIdxs.push(getIdxs(c)));
+
+    let requests = [];
+    rowIdxs.forEach((rSet, r) => {
+      columnIdxs.forEach((cSet, c) => {
+        let reqIdxs = [...rSet].filter((element) => cSet.has(element));
+        gridSizes[r][c] = reqIdxs.length;
+        requests.push({
+          sli: "zenogrid_" + r + "_" + c,
+          idxs: reqIdxs,
+        });
+      });
+    });
+    updateResults(requests);
+  }
+
+  $: if (rows.length > 0 && columns.length > 0) {
+    getGridResults();
+  }
+
+  results.subscribe((res) => {
+    let min = 1;
+    let max = 0;
+    for (let r = 0; r < rows.length; r++) {
+      for (let c = 0; c < columns.length; c++) {
+        gridResults[r][c] = res.get({
+          slice: "zenogrid_" + r + "_" + c,
+          metric: metric,
+          model: modelA,
+        } as ResultKey);
+        if (gridResults[r][c] > max) {
+          max = gridResults[r][c];
+        }
+        if (gridResults[r][c] < min) {
+          min = gridResults[r][c];
+        }
+      }
+    }
+    colorScale.domain([min, max]);
+  });
 </script>
 
 {#if table.size > 0}
-  <div
-    class="container"
-    style:align-items="center"
-    style:justify-content="space-between"
-    style:margin-bottom="10px"
-  >
+  <div class="options container">
     <div style:margin-left="10px">
       <span style:margin-right="10px">
         {resultA ? "A: " + resultA.toFixed(2) + "%" : ""}
@@ -145,10 +231,67 @@
     >
   </Pagination>
 {:else}
-  <p>grid</p>
+  <div style:width="100%">
+    <div class="inline">
+      <span style:padding="10px">selected:</span>
+      <ChipSet chips={[...checked.keys()]} let:chip nonInteractive>
+        <Chip {chip}>
+          <Text>{chip}</Text>
+        </Chip>
+      </ChipSet>
+    </div>
+    <div>
+      <Button
+        variant="outlined"
+        on:click={() => {
+          rows = [...checked.keys()];
+          checked = new Set();
+        }}>Set Rows</Button
+      >
+      <Button
+        variant="outlined"
+        on:click={() => {
+          columns = [...checked.keys()];
+          checked = new Set();
+        }}>Set Columns</Button
+      >
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>&nbsp;</th>
+          {#each columns as c}
+            <th>{c}</th>
+          {/each}
+        </tr>
+      </thead>
+      <tbody>
+        {#each rows as r, i}
+          <tr>
+            <td>{r}</td>
+            {#each columns as c, j}
+              {@const res = gridResults[i][j]}
+              {@const size = gridSizes[i][j]}
+              <td style:background-color={colorScale((100 - res) / 4)}>
+                {res ? res.toFixed(2) + "%" : ""}
+                ({size ? size : ""})
+              </td>
+            {/each}
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+  </div>
 {/if}
 
-<style global>
+<style>
+  td {
+    padding: 15px;
+    margin: 5px;
+  }
+  th {
+    padding: 20px;
+  }
   .container {
     display: flex;
     flex-direction: inline;
@@ -160,6 +303,17 @@
     overflow-y: auto;
     align-content: baseline;
     border-bottom: 1px solid rgb(224, 224, 224);
-    border-top: 1px solid rgb(224, 224, 224);
+  }
+  .inline {
+    display: flex;
+    flex-direction: inline;
+    align-items: center;
+  }
+  .options {
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgb(224, 224, 224);
   }
 </style>

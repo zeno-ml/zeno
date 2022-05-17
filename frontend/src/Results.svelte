@@ -1,9 +1,9 @@
 <script lang="ts">
   import type ColumnTable from "arquero/dist/types/table/column-table";
+  import type { InternMap } from "internmap";
 
   import Button from "@smui/button";
   import Select, { Option } from "@smui/select";
-  import { InternMap, InternSet } from "internmap";
   import * as aq from "arquero";
 
   import { metrics, models, ready, settings, slices, table } from "./stores";
@@ -29,10 +29,8 @@
   let filterError: string = "";
 
   let selected: string = "";
-  let checked: InternSet<string> = new InternSet();
+  let checked: Set<string> = new Set();
   let metadataSelections = [];
-
-  let generatedSlices: Slice[] = [];
 
   let sliceTree: SliceNode = new SliceNode("root", 0, {});
 
@@ -58,10 +56,6 @@
     updateFilteredTable($table);
   }
 
-  $: if (checked.size > 2) {
-    checked.delete([...checked.values()][0]);
-  }
-
   function setupTree(slices: InternMap<string, Slice>) {
     const slis: Slice[] = [...slices.values()];
     let programmaticSlices = slis.filter((s) => s.type === "programmatic");
@@ -81,9 +75,7 @@
     if (selected) {
       let slice = $slices.get(selected);
       if (slice && slice.type === "programmatic") {
-        tempTable = t.filter(
-          aq.escape((r) => r["zenoslice_" + slice.name] === 1)
-        );
+        tempTable = t.filter(`(r) => r["${"zenoslice_" + slice.name}"] === 1`);
       } else {
         tempTable = getFilteredTable(
           selected,
@@ -109,7 +101,7 @@
 
         if (sel[0] === "range") {
           tempTable = tempTable.filter(
-            aq.escape((r) => r[name] > sel[1] && r[name] < sel[2])
+            `(r) => r["${name}"] > ${sel[1]} && r["${name}"] < ${sel[2]}`
           );
         } else {
           tempTable = tempTable.filter(
@@ -144,12 +136,14 @@
           idxs: newTable.array($settings.idColumn) as string[],
         },
       ]);
-      generatedSlices.push({
-        name: filter,
-        size: newTable.column($settings.idColumn).length,
-        type: "generated",
+      slices.update((s) => {
+        s.set(filter, {
+          name: filter,
+          size: newTable.size,
+          type: "generated",
+        });
+        return s;
       });
-      generatedSlices = [...generatedSlices];
       filter = "";
     } catch (e) {
       filterError = e;
@@ -198,8 +192,8 @@
 
 <div id="container">
   <div class="side-container">
-    {#each generatedSlices as s}
-      <h4>Generated Slices</h4>
+    <h4>Generated Slices</h4>
+    {#each [...$slices.values()].filter((d) => d.type === "generated") as s}
       <LeafNode
         name={s.name}
         fullName={s.name}
@@ -250,6 +244,7 @@
   {#if filteredTable}
     <div id="results">
       <Samples
+        bind:checked
         {modelA}
         {modelB}
         table={filteredTable}
@@ -262,6 +257,7 @@
 <style>
   #results {
     margin-top: 10px;
+    width: 100%;
     margin-right: 20px;
   }
   #container {

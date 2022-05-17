@@ -169,6 +169,10 @@ def run_zeno(args):
     def get_models():
         return json.dumps([str(n) for n in zeno.model_names])
 
+    @api_app.get("/slices")
+    def get_slices():
+        return json.dumps([str(n) for n in zeno.slices.keys()])
+
     @api_app.post("/table")
     def get_table(columns: TableRequest):
         return Response(zeno.get_table(columns.columns))
@@ -187,23 +191,11 @@ def run_zeno(args):
         previous_status = ""
         while True:
             await asyncio.sleep(1)
-
-            sls = zeno.slices.values()
-            slices = [
-                {
-                    "name": s.name,
-                    "type": s.slice_type,
-                    "size": s.size,
-                }
-                for s in sls
-            ]
-
             if zeno.status != previous_status:
                 previous_status = zeno.status
                 await websocket.send_json(
                     {
                         "status": zeno.status,
-                        "slices": slices,
                         "columns": list(zeno.complete_columns),
                     }
                 )

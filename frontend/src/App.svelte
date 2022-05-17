@@ -12,7 +12,7 @@
   import Header from "./Header.svelte";
   import Results from "./Results.svelte";
   import Tests from "./Tests.svelte";
-  import { settings, table, wsResponse } from "./stores";
+  import { settings, slices, table, wsResponse } from "./stores";
   import { initialFetch, updateResults, updateTab } from "./util";
 
   let tab = $location.split("/")[1];
@@ -65,6 +65,14 @@
           missingColumns.forEach((c) => {
             if (c.startsWith("zenoslice_")) {
               let idxs = t.filter(`d => d["${c}"] !== null`);
+              slices.update((s) => {
+                s.set(c.slice(10), {
+                  name: c.slice(10),
+                  type: "programmatic",
+                  size: idxs.size,
+                });
+                return s;
+              });
               requests.push({
                 sli: c,
                 idxs: idxs.array($settings.idColumn) as string[],

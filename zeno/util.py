@@ -167,7 +167,7 @@ def slice_data(metadata: pd.DataFrame, slicer: Slicer, label_column: str):
             np.zeros(len(metadata), dtype=int), dtype=int
         )
         slices[".".join(slicer.name_list)] = Slice(
-            ".".join(slicer.name_list), "programmatic", slicer_output
+            ".".join(slicer.name_list), slicer_output
         )
     elif (
         isinstance(slicer_output[0], tuple) or isinstance(slicer_output[0], list)
@@ -179,15 +179,13 @@ def slice_data(metadata: pd.DataFrame, slicer: Slicer, label_column: str):
                 np.zeros(len(metadata), dtype=int), dtype=int
             )
             metadata.loc[indices, "zenoslice_" + ".".join(name_list)] = 1
-            slices[".".join(name_list)] = Slice(
-                ".".join(name_list), "programmatic", indices
-            )
+            slices[".".join(name_list)] = Slice(".".join(name_list), indices)
     else:
         metadata.loc[:, "zenoslice_" + ".".join(slicer.name_list)] = pd.Series(
             np.zeros(len(metadata), dtype=int), dtype=int
         )
         metadata.loc[slicer_output, "zenoslice_" + ".".join(slicer.name_list)] = 1
         slices[".".join(slicer.name_list)] = Slice(
-            ".".join(slicer.name_list), "programmatic", slicer_output
+            ".".join(slicer.name_list), slicer_output
         )
     return slices

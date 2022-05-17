@@ -56,9 +56,8 @@ class Metric:
 
 
 class Slice:
-    def __init__(self, name: str, slice_type: str, index: pd.Index):
+    def __init__(self, name: str, index: pd.Index):
         self.name = name
-        self.slice_type = slice_type
         self.index = index
         self.size = len(index)
 
