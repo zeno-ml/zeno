@@ -159,10 +159,14 @@
 
 <div class="style-div">
   <div style:display="flex" style:flex-direction="inline">
-    <div style:display="flex" style:flex-direction="column">
+    <div
+      style:margin-right="10px"
+      style:display="flex"
+      style:flex-direction="column"
+    >
       <Filter bind:filter {createSlice} />
     </div>
-    <Button on:click={createSlice}>Create Slice</Button>
+    <Button variant="outlined" on:click={createSlice}>Create Slice</Button>
     <span>{filterError}</span>
   </div>
   <div>
@@ -194,8 +198,8 @@
 
 <div id="container">
   <div class="side-container">
-    <h4>Generated Slices</h4>
     {#each generatedSlices as s}
+      <h4>Generated Slices</h4>
       <LeafNode
         name={s.name}
         fullName={s.name}
@@ -266,7 +270,7 @@
   }
   .style-div {
     padding-bottom: 15px;
-    padding-top: 15px;
+    padding-top: 5px;
     border-bottom: 1px solid #e0e0e0;
     width: 100%;
     display: flex;
@@ -276,7 +280,7 @@
   }
   .side-container {
     height: calc(100vh - 178px);
-    overflow-y: scroll;
+    overflow-y: auto;
     min-width: 450px;
     padding-right: 35px;
     margin-right: 15px;
