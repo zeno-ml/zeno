@@ -281,4 +281,8 @@
     padding-right: 35px;
     margin-right: 15px;
   }
+  h4 {
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.7);
+  }
 </style>

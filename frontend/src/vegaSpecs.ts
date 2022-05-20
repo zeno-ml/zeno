@@ -39,7 +39,7 @@ export const histogramSpec = {
     },
     {
       transform: [{ filter: { param: "brush" } }],
-      mark: { type: "bar", fill: "#9b51e0" },
+      mark: { type: "bar", fill: "#9b51e0", opacity: 0.5 },
       encoding: {
         x: {
           field: "val",
@@ -68,7 +68,7 @@ export const countSpec = {
     },
     { name: "select", select: { type: "point", encodings: ["x"] } },
   ],
-  mark: { type: "bar", fill: "#9b51e0" },
+  mark: { type: "bar", fill: "#9b51e0", opacity: 0.5 },
   encoding: {
     x: {
       field: "val",
