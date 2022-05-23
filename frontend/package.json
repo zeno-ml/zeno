@@ -31,7 +31,7 @@
     "typescript": "^4.6.4"
   },
   "dependencies": {
-    "@mdi/js": "^6.5.95",
+    "@mdi/js": "^6.7.96",
     "@smui-extra/accordion": "^6.0.0-beta.16",
     "@smui/button": "^6.0.0-beta.16",
     "@smui/card": "^6.0.0-beta.16",
