@@ -16,10 +16,10 @@
     "@smui/data-table": "^6.0.0-beta.16",
     "@smui/tooltip": "^6.0.0-beta.16",
     "@tsconfig/svelte": "^3.0.0",
-    "@typescript-eslint/eslint-plugin": "^5.26.0",
+    "@typescript-eslint/eslint-plugin": "^5.27.0",
     "eslint": "^8.16.0",
     "eslint-plugin-svelte3": "^3.4.1",
-    "rollup": "^2.74.1",
+    "rollup": "^2.75.3",
     "rollup-plugin-css-only": "^3.1.0",
     "rollup-plugin-livereload": "^2.0.0",
     "rollup-plugin-svelte": "^7.0.0",
@@ -57,7 +57,7 @@
     "svelte-material-ui": "^6.0.0-beta.16",
     "svelte-spa-router": "^3.2.0",
     "svelte-vega": "^1.1.0",
-    "svelte-websocket-store": "^1.1.24",
+    "svelte-websocket-store": "^1.1.26",
     "wavesurfer.js": "^6.2.0"
   }
 }
