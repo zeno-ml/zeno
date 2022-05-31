@@ -1,15 +1,6 @@
 from zeno import load_model, load_data, metric
 import os
 import torch
-import torchaudio
-
-
-# @load_model
-# def load_model(model_path):
-#     def pred(instances):
-#         return [1] * len(instances)
-
-#     return pred
 
 number_to_text = {
     0: "zero",

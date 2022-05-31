@@ -53,7 +53,7 @@ def preprocess_data(
     if len(to_predict_indices) > 0:
         if len(to_predict_indices) < batch_size:
             data = data_loader_fn(df.loc[to_predict_indices], data_path)
-            out = preprocessor_fn(data)
+            out = preprocessor_fn(data, df.loc[to_predict_indices])
             col.loc[to_predict_indices] = out
             col.to_pickle(save_path)
         else:
@@ -68,7 +68,7 @@ def preprocess_data(
                     df.loc[to_predict_indices[i : i + batch_size]],
                     data_path,
                 )
-                out = preprocessor_fn(data)
+                out = preprocessor_fn(data, df.loc[to_predict_indices])
                 col.loc[to_predict_indices[i : i + batch_size]] = out
                 col.to_pickle(save_path)
     return (preprocessor.name, col)
@@ -113,7 +113,13 @@ def run_inference(
         fn = model_loader_fn(model_path)
         if len(to_predict_indices) < batch_size:
             data = data_loader_fn(df.loc[to_predict_indices], data_path)
-            out = fn(data)
+
+            if len(signature(fn).parameters) == 3:
+                file_cache_path = os.path.join(cache_path, "zenomodel_" + model_name)
+                os.makedirs(file_cache_path, exist_ok=True)
+                out = fn(data, df.loc[to_predict_indices].index, file_cache_path)
+            else:
+                out = fn(data)
 
             # Check if we also get embedding
             if type(out) == tuple and len(out) == 2:
@@ -136,7 +142,20 @@ def run_inference(
                 data = data_loader_fn(
                     df.loc[to_predict_indices[i : i + batch_size]], data_path
                 )
-                out = fn(data)
+
+                if len(signature(fn).parameters) == 3:
+                    file_cache_path = os.path.join(
+                        cache_path, "zenomodel_" + model_name
+                    )
+
+                    os.makedirs(file_cache_path, exist_ok=True)
+                    out = fn(
+                        data,
+                        df.loc[to_predict_indices[i : i + batch_size]].index,
+                        file_cache_path,
+                    )
+                else:
+                    out = fn(data)
 
                 # Check if we also get embedding
                 if type(out) == tuple and len(out) == 2:

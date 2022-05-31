@@ -29,8 +29,16 @@
 
   table.subscribe((t) => {
     if (t.column(name)) {
-      let vals = t.column(name).data;
-      spec = isNaN(vals[0]) ? countSpec : histogramSpec;
+      let isOrdinal = isNaN(t.column(name).data[0]);
+      let unique = t
+        .rollup({ unique: `d => op.distinct(d["${name}"])` })
+        .object().unique;
+
+      if (isOrdinal) {
+        spec = unique > 20 ? null : countSpec;
+      } else {
+        spec = unique < 20 ? countSpec : histogramSpec;
+      }
     }
   });
   $: {
@@ -60,6 +68,13 @@
       <span>
         {selection ? selection[1].toFixed(2) + " - " : ""}
         {selection ? selection[2].toFixed(2) : ""}
+      </span>
+    {/if}
+    {#if $table.column(name) && !spec}
+      <span style:margin-right="5px">
+        unique values: {$table
+          .rollup({ unique: `d => op.distinct(d["${name}"])` })
+          .object().unique}
       </span>
     {/if}
   </div>

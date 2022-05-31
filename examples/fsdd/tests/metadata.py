@@ -11,8 +11,3 @@ def speaker(df, label_col):
 def number(df, label_col):
     lab = list(df[label_col].unique())
     return [(str(c), df[df[label_col] == c].index) for c in lab]
-
-
-@slicer
-def overall(df):
-    return df

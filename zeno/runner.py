@@ -14,6 +14,7 @@ from .zeno import Zeno
 
 TASK_TYPES = [
     "image-classification",
+    "image-segmentation",
     "object-detection",
     "text-classification",
     "audio-classification",
@@ -139,6 +140,15 @@ def run_zeno(args):
     if args.data_path != "":
         app.mount("/static", StaticFiles(directory=args.data_path), name="static")
 
+    app.mount(
+        "/cache",
+        StaticFiles(
+            directory=os.path.join(
+                args.cache_path, os.path.basename(args.metadata[0]).split(".")[0]
+            )
+        ),
+        name="cache",
+    )
     app.mount("/api", api_app)
     app.mount(
         "/",

@@ -14,6 +14,7 @@
 
   import AudioClassification from "./AudioClassification.svelte";
   import ImageClassification from "./ImageClassification.svelte";
+  import ImageSegmentation from "./ImageSegmentation.svelte";
   import ObjectDetection from "./ObjectDetection.svelte";
   import TextClassification from "./TextClassification.svelte";
 
@@ -162,6 +163,12 @@
     {#if $ready}
       {#if $settings.task === "image-classification"}
         <ImageClassification
+          table={table.slice(start, end).objects()}
+          {modelACol}
+          {modelBCol}
+        />
+      {:else if $settings.task === "image-segmentation"}
+        <ImageSegmentation
           table={table.slice(start, end).objects()}
           {modelACol}
           {modelBCol}

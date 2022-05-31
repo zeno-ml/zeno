@@ -72,7 +72,6 @@
   input {
     height: 30px;
     font-family: consolas;
-    margin-left: 10px;
     padding-left: 10px;
     width: 400px;
     border-color: #e0e0e0;

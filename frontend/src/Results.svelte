@@ -192,19 +192,21 @@
 
 <div id="container">
   <div class="side-container">
-    <h4>Generated Slices</h4>
-    {#each [...$slices.values()].filter((d) => d.type === "generated") as s}
-      <LeafNode
-        name={s.name}
-        fullName={s.name}
-        metric={selectedMetric}
-        size={s.size}
-        {modelA}
-        {modelB}
-        bind:selected
-        bind:checked
-      />
-    {/each}
+    {#if [...$slices.values()].filter((d) => d.type === "generated").length > 0}
+      <h4>Generated Slices</h4>
+      {#each [...$slices.values()].filter((d) => d.type === "generated") as s}
+        <LeafNode
+          name={s.name}
+          fullName={s.name}
+          metric={selectedMetric}
+          size={s.size}
+          {modelA}
+          {modelB}
+          bind:selected
+          bind:checked
+        />
+      {/each}
+    {/if}
 
     {#if sliceTree}
       <h4>Slices</h4>

@@ -49,6 +49,10 @@ opencv-python = "^4.5.5"
 seaborn = "^0.11.2"
 importlib-resources = "^5.7.1"
 transformers = "^4.18.0"
+segmentation-models = "^1.0.1"
+keras = "^2.9.0"
+tensorflow = "^2.9.0"
+librosa = "^0.9.1"
 
 [tool.poetry.scripts]
 zeno = "zeno.runner:main"

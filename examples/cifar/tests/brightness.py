@@ -31,12 +31,12 @@ def get_border_brightness(im):
 
 
 @preprocess
-def brightness(images):
+def brightness(images, _):
     return [get_brightness(im) for im in images]
 
 
 @preprocess
-def border_brightness(images):
+def border_brightness(images, _):
     return [get_border_brightness(im) for im in images]
 
 

@@ -40,7 +40,7 @@ def blue_border_pixels(im):
 
 
 @preprocess
-def red_count(images):
+def red_count(images, _):
     return [red_pixels(im) for im in images]
 
 
@@ -50,7 +50,7 @@ def red(df):
 
 
 @preprocess
-def blue_border_count(images):
+def blue_border_count(images, _):
     return [blue_border_pixels(im) for im in images]
 
 

@@ -129,7 +129,7 @@
       "args": [
         "run",
         "--tests",
-        "./examples/fsdd",
+        "./examples/fsdd/tests",
         "--metadata",
         "./examples/fsdd/fsdd.csv",
         "--task",
@@ -142,6 +142,30 @@
         "20",
         "--port",
         "8003"
+      ]
+    },
+    {
+      "name": "zenosegment",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": [
+        "run",
+        "--tests",
+        "./examples/segmentation/tests",
+        "--metadata",
+        "./examples/segmentation/segmentation.csv",
+        "--task",
+        "image-segmentation",
+        "--models",
+        "/Users/acabrera/dev-research/22-zeno/zeno/examples/segmentation/weights.ckpt",
+        "--data-path",
+        "/Users/acabrera/dev/data/sessile-main-Kvasir-SEG/",
+        "--batch-size",
+        "10",
+        "--port",
+        "8005"
       ]
     }
   ]
