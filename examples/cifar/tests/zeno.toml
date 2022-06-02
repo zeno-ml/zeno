@@ -1,0 +1,12 @@
+tests = "./"
+task = "image-classification"
+metadata = "../cifar_pred.csv"
+models = [
+    "../cifar_net_1.pth",
+    "../cifar_net_2.pth",
+    "../cifar_net_5.pth",
+    "../cifar_net_10.pth"
+]
+data_path = "../../../data/CIFAR-10-images/test/"
+batch_size = 16
+port = 8000

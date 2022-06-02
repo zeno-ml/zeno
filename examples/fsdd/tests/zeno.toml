@@ -1,0 +1,9 @@
+tests = "./"
+task = "audio-classification"
+metadata = "../fsdd.csv"
+models = [
+    "a",
+]
+data_path = "/Users/acabrera/dev/data/free-spoken-digit-dataset/recordings"
+batch_size = 16
+port = 8003

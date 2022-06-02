@@ -42,20 +42,19 @@ The tests are connected as follows. Slices are optionally passed to transforms, 
 pip install zenoml
 ```
 
-Next, create at least one testing file with both a `load_model` and `load_data` function.
-Additionally add any number of tests using the `preprocess`, `slicer`, `transform` and `metric` functions.
-See [Writing Tests](writing_tests) for details on each of these functions.
+Create a folder with at least one Python file including a `load_model` and `load_data` function.
+Add any number of Zeno modules, including the `preprocess`, `slicer`, and `metric` functions.
+See [Writing Tests](writing_tests) for details on each of these modules.
 
-Run the tests and load the ui with the zeno command:
+Next, create a configuration `TOML` file with the required options such as metadata and model file paths. See [API](api) for the configuration options.
+
+Lastly, run Zeno:
 
 ```bash
-zeno test.py
-    --metadata data.csv
-    --data-path data
-    --models model.pth
+zeno config.toml
 ```
 
-See [Running Tests](api) for the various command line options and [Test Examples](test-examples) for various example tests.
+See [Test Examples](test-examples) for various example tests.
 
 ## Table of Contents
 

@@ -26,6 +26,8 @@ websockets = "^10.2"
 umap-learn = "^0.5.3"
 numba = "^0.55"
 tqdm = "^4.64.0"
+omegaconf = "^2.2.2"
+tomli = "^2.0.1"
 
 [tool.poetry.dev-dependencies]
 pandas-stubs = "^1.2.0"

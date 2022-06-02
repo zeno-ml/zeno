@@ -29,25 +29,25 @@ class Zeno(object):
         self,
         metadata_path: Path,
         task: str,
-        test_files: List[Path],
-        models: List[str],
+        tests: Path,
+        models: List[Path],
         batch_size=16,
         id_column="id",
         label_column="label",
         data_path="",
-        cache_path="",
+        cache_path: Path = Path(),
     ):
         logging.basicConfig(level=logging.INFO)
 
         self.task = task
-        self.test_files = test_files
+        self.tests = tests
 
         if os.path.isdir(models[0]):
             self.model_paths = [
                 os.path.join(models[0], m) for m in os.listdir(models[0])
             ]
         else:
-            self.model_paths = models
+            self.model_paths = models  # type: ignore
         self.model_names = [os.path.basename(p).split(".")[0] for p in self.model_paths]
 
         self.batch_size = batch_size
@@ -109,14 +109,10 @@ class Zeno(object):
         self.metrics = {}
         self.transforms = {}
 
-        for test_file in self.test_files:
-            if test_file.is_dir():
-                [
-                    self.__parse_testing_file(f, test_file)
-                    for f in list(test_file.rglob("*.py"))
-                ]
-            else:
-                self.__parse_testing_file(test_file, test_file.parents[0])
+        [
+            self.__parse_testing_file(f, self.tests)
+            for f in list(self.tests.rglob("*.py"))
+        ]
 
         if not self.model_loader:
             logging.error("No model loader found")
@@ -306,6 +302,9 @@ class Zeno(object):
     def calculate_metrics(
         self, idxs: List, name: str, metric_name: str, model_name: str
     ):
+        if "zenomodel_" + model_name not in self.df.columns:
+            return
+
         metric_func = self.metrics[metric_name]
 
         if len(signature(metric_func).parameters) == 3:

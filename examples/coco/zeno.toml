@@ -1,0 +1,10 @@
+tests = "./"
+task = "object-detection"
+metadata = "coco.parquet"
+models = [
+        "yolov3",
+        "yolov5",
+]
+data_path = "/Users/acabrera/dev/data/coco-2014/val2014"
+batch_size = 16
+port = 8001

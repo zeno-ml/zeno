@@ -1,5 +1,5 @@
 from .api import load_data, load_model, metric, preprocess, slicer, transform
-from .runner import __create_parser, run_zeno  # type: ignore
+from .runner import run_zeno
 
 __all__ = [
     "load_data",
