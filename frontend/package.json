@@ -19,7 +19,7 @@
     "@typescript-eslint/eslint-plugin": "^5.27.0",
     "eslint": "^8.16.0",
     "eslint-plugin-svelte3": "^3.4.1",
-    "rollup": "^2.75.3",
+    "rollup": "^2.75.5",
     "rollup-plugin-css-only": "^3.1.0",
     "rollup-plugin-livereload": "^2.0.0",
     "rollup-plugin-svelte": "^7.0.0",
