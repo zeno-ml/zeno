@@ -2,7 +2,7 @@
 
 ![Github Actions CI tests](https://github.com/cabreraalex/zeno/actions/workflows/test.yml/badge.svg)
 ![Github Actions Docs build](https://github.com/cabreraalex/zeno/actions/workflows/book.yml/badge.svg)
-[![codecov](https://codecov.io/gh/cabreraalex/zeno/branch/main/graph/badge.svg?token=7x5oegcwfn)](https://app.codecov.io/gh/cmudig/zeno/)
+[![codecov](https://codecov.io/gh/cmudig/zeno/branch/main/graph/badge.svg?token=7x5oegcwfn)](https://codecov.io/gh/cmudig/zeno)
 [![code style black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 ## Install
