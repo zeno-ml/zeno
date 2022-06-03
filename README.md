@@ -1,4 +1,5 @@
-![zeno.png](zeno.png)
+<img src="./zeno.png" width="400px"/>
+
 ![Github Actions CI tests](https://github.com/cabreraalex/zeno/actions/workflows/test.yml/badge.svg)
 ![Github Actions Docs build](https://github.com/cabreraalex/zeno/actions/workflows/book.yml/badge.svg)
 [![codecov](https://codecov.io/gh/cmudig/zeno/branch/main/graph/badge.svg?token=7x5oegcwfn)](https://codecov.io/gh/cmudig/zeno)
