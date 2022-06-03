@@ -39,7 +39,7 @@
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "module": "zeno",
-      "args": ["./examples/segment/tests/zeno.toml"]
+      "args": ["./examples/segmentation/tests/zeno.toml"]
     }
   ]
 }

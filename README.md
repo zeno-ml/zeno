@@ -2,7 +2,7 @@
 
 ![Github Actions CI tests](https://github.com/cabreraalex/zeno/actions/workflows/test.yml/badge.svg)
 ![Github Actions Docs build](https://github.com/cabreraalex/zeno/actions/workflows/book.yml/badge.svg)
-[![codecov](https://codecov.io/gh/cabreraalex/zeno/branch/main/graph/badge.svg?token=XPT8R98H8J)](https://codecov.io/gh/cabreraalex/zeno)
+[![codecov](https://codecov.io/gh/cabreraalex/zeno/branch/main/graph/badge.svg?token=7x5oegcwfn)](https://app.codecov.io/gh/cmudig/zeno/)
 [![code style black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 ## Install
@@ -22,9 +22,10 @@ After cloning the repository:
 - Install [`Poetry`](https://python-poetry.org/docs/master/#installing-with-the-official-installer), [`nodejs`](https://nodejs.org/en/download/) and use [`VSCode`](https://code.visualstudio.com/) as your editor.
 - `make install`
 
-You should now be able to run `poetry run zeno -h`
+You should now be able to run `poetry run zeno`
 
 To run the CIFAR-10 example:
 
-- `cd data; git clone https://github.com/YoongiKim/CIFAR-10-images`
-- Open the "Run and Debug" sidebar in VSCode (a play button with a bug icon), and run the `zenocifar` configuration.
+- `mkdir data; cd data; git clone https://github.com/YoongiKim/CIFAR-10-images`
+- `poetry run zeno examples/cifar/tests/zeno.toml`
+- For debugging, you can use the "Run and Debug" sidebar in VSCode (a play button with a bug icon), and run the `zenocifar` configuration.

@@ -23,7 +23,6 @@ TASK_TYPES = [
 
 
 def main():
-    print(sys.argv)
     if len(sys.argv) != 2:
         print(
             "ERROR: Zeno take one argument, a configuration TOML file."
@@ -38,11 +37,12 @@ def main():
             args = tomli.load(f)
     except Exception:
         print("ERROR: Failed to read TOML configuration file.")
+        sys.exit(1)
 
     toml_path = os.path.dirname(os.path.abspath(sys.argv[1]))
 
     if "tests" not in args or not os.path.exists(args["tests"]):
-        print("ERROR: Must have 'tests' exntry which is a valid directory.")
+        print("ERROR: Must have 'tests' entry which is a valid directory.")
         sys.exit(1)
     else:
         args["tests"] = Path(os.path.realpath(os.path.join(toml_path, args["tests"])))
