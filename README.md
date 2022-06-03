@@ -13,7 +13,7 @@ Install the Zeno package from PyPI:
 pip install zenoml
 ```
 
-### [Follow the documentation to get started](https://cabreraalex.github.io/zeno/intro.html)
+### [Follow the documentation to get started](https://dig.cmu.edu/zeno/intro.html)
 
 ## Development Quick Start + CIFAR-10 Example
 
