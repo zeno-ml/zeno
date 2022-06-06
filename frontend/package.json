@@ -16,7 +16,7 @@
     "@smui/data-table": "^6.0.0-beta.16",
     "@smui/tooltip": "^6.0.0-beta.16",
     "@tsconfig/svelte": "^3.0.0",
-    "@typescript-eslint/eslint-plugin": "^5.27.0",
+    "@typescript-eslint/eslint-plugin": "^5.27.1",
     "eslint": "^8.17.0",
     "eslint-plugin-svelte3": "^3.4.1",
     "rollup": "^2.75.5",
