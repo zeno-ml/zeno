@@ -85,8 +85,25 @@ def main():
     if "id_column" not in args:
         args["id_column"] = "id"
 
+    if "data_column" not in args:
+        args["data_column"] = "id"
+
     if "label_column" not in args:
         args["label_column"] = "label"
+
+    if "data_type" in args:
+        if args["data_type"] != "path" and args["data_type"] != "raw":
+            print("ERROR: data_type must be one of 'path' or 'raw'")
+            sys.exit(1)
+    else:
+        args["data_type"] = "path"
+
+    if "output_type" in args:
+        if args["output_type"] != "path" and args["output_type"] != "raw":
+            print("ERROR: output_type must be one of 'path' or 'raw'")
+            sys.exit(1)
+    else:
+        args["output_type"] = "raw"
 
     if "cache_path" not in args:
         args["cache_path"] = Path(
@@ -108,7 +125,10 @@ def run_zeno(args):
         models=args["models"],
         batch_size=args["batch_size"],
         id_column=args["id_column"],
+        data_column=args["data_column"],
         label_column=args["label_column"],
+        data_type=args["data_type"],
+        output_type=args["output_type"],
         data_path=args["data_path"],
         cache_path=args["cache_path"],
     )

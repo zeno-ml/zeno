@@ -8,5 +8,7 @@ models = [
     "../cifar_net_10.pth"
 ]
 data_path = "../../../data/CIFAR-10-images/test/"
+data_column = "id"
+data_type = "path"
 batch_size = 16
 port = 8000

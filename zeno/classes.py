@@ -29,6 +29,12 @@ class Preprocessor:
         self.file_name = file_name
 
 
+class Postprocessor:
+    def __init__(self, name: str, file_name: Path):
+        self.name = name
+        self.file_name = file_name
+
+
 class DataLoader:
     def __init__(self, name: str, file_name: Path):
         self.name = name
@@ -39,13 +45,6 @@ class ModelLoader:
     def __init__(self, name: str, file_name: Path):
         self.name = name
         self.file_name = file_name
-
-
-class Transform:
-    def __init__(self, name: str, func: Callable):
-        self.name = name
-        self.func = func
-        self.source = getsource(self.func)
 
 
 class Metric:
@@ -62,18 +61,10 @@ class Slice:
         self.size = len(index)
 
 
-class Slicer:
-    def __init__(self, name: str, func: Callable, name_list: List[str]):
-        self.name = name
-        self.func = func
-        self.name_list = name_list
-
-
 class Result:
     def __init__(
         self,
         sli: str,
-        transform: str,
         metric: str,
         slice_size: int,
     ):
@@ -81,12 +72,10 @@ class Result:
 
         Args:
             sli (str): The slice for this result.
-            transform (str): The transform for this result.
             metric (str): The metric for this result.
             slice_size (int): _description_
         """
         self.sli = sli
-        self.transform = transform
         self.metric = metric
 
         self.slice_size = slice_size

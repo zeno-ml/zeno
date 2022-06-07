@@ -1,4 +1,17 @@
+from dataclasses import dataclass
 import functools
+
+
+@dataclass
+class ZenoOptions:
+    id_column: str
+    data_column: str
+    label_column: str
+    output_column: str
+    data_type: str
+    output_type: str
+    data_path: str
+    output_path: str
 
 
 def load_model(func):
@@ -7,15 +20,6 @@ def load_model(func):
         return func(*args, **kwargs)
 
     _wrapper.load_model = True
-    return _wrapper
-
-
-def load_data(func):
-    @functools.wraps(func)
-    def _wrapper(*args, **kwargs):
-        return func(*args, **kwargs)
-
-    _wrapper.load_data = True
     return _wrapper
 
 
@@ -28,21 +32,12 @@ def preprocess(func):
     return _wrapper
 
 
-def slicer(func):
+def postprocess(func):
     @functools.wraps(func)
     def _wrapper(*args, **kwargs):
         return func(*args, **kwargs)
 
-    _wrapper.slicer = True
-    return _wrapper
-
-
-def transform(func):
-    @functools.wraps(func)
-    def _wrapper(*args, **kwargs):
-        return func(*args, **kwargs)
-
-    _wrapper.transform = True
+    _wrapper.preprocess = True
     return _wrapper
 
 

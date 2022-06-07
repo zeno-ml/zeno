@@ -1,4 +1,5 @@
 import asyncio
+import dataclasses
 import logging
 import os
 import sys
@@ -11,17 +12,18 @@ from typing import Callable, Dict, List
 
 import numpy as np
 import pandas as pd
-import umap  # type: ignore
+import umap
+
+from zeno.api import ZenoOptions  # type: ignore
 
 from .classes import (
-    DataLoader,
     ModelLoader,
+    Postprocessor,
     Preprocessor,
     ResultsRequest,
     Slice,
-    Slicer,
 )
-from .util import get_arrow_bytes, preprocess_data, run_inference, slice_data
+from .util import get_arrow_bytes, preprocess_data, run_inference
 
 
 class Zeno(object):
@@ -31,11 +33,14 @@ class Zeno(object):
         task: str,
         tests: Path,
         models: List[Path],
-        batch_size=16,
-        id_column="id",
-        label_column="label",
-        data_path="",
-        cache_path: Path = Path(),
+        batch_size,
+        id_column,
+        data_column,
+        label_column,
+        data_type,
+        output_type,
+        data_path,
+        cache_path: Path,
     ):
         logging.basicConfig(level=logging.INFO)
 
@@ -52,20 +57,31 @@ class Zeno(object):
 
         self.batch_size = batch_size
         self.id_column = id_column
+        self.data_column = data_column
         self.label_column = label_column
+        self.data_type = data_type
+        self.output_type = output_type
         self.data_path = data_path
+
+        self.zeno_options = ZenoOptions(
+            id_column=self.id_column,
+            data_column=self.data_column,
+            label_column=self.label_column,
+            data_path=self.data_path,
+            data_type=self.data_type,
+            output_type=self.output_type,
+            output_column="",
+            output_path="",
+        )
 
         self.status: str = "Initializing"
 
         self.model_loader: ModelLoader = None  # type: ignore
-        self.data_loader: DataLoader = None  # type: ignore
 
         # Key is name of preprocess function
         self.preprocessors: List[Preprocessor] = []
-        # Key is name of slicer function
-        self.slicers: Dict[str, Slicer] = {}
-        # Key is name of transform function
-        self.transforms: Dict[str, Callable] = {}
+        # Key is name of preprocess function
+        self.postprocessors: List[Postprocessor] = []
         # Key is name of metric function
         self.metrics: Dict[str, Callable] = {}
 
@@ -88,17 +104,21 @@ class Zeno(object):
 
         self.df[id_column].astype(str)
         self.df.set_index(self.id_column, inplace=True)
+        self.df[id_column] = self.df.index
 
         self.metadata: List[str] = []
 
-        self.done_slicing = threading.Event()
         self.done_inference = threading.Event()
         self.complete_columns = list(self.df.columns)
 
     def start_processing(self):
         """Parse testing files, preprocess, run inference, and slicing data."""
         self.__parse_testing_files()
-        self.metadata = [*[p.name for p in self.preprocessors], *list(self.df.columns)]
+        self.metadata = [
+            *[p.name for p in self.preprocessors],
+            *[p.name for p in self.postprocessors],
+            *list(self.df.columns),
+        ]
         self.__thread = threading.Thread(target=asyncio.run, args=(self.__process(),))
         self.__thread.start()
 
@@ -118,10 +138,6 @@ class Zeno(object):
             logging.error("No model loader found")
             sys.exit(1)
 
-        if not self.data_loader:
-            logging.error("No data loader found")
-            sys.exit(1)
-
     def __parse_testing_file(self, test_file: Path, base_path: Path):
         spec = util.spec_from_file_location("module.name", test_file)
         test_module = util.module_from_spec(spec)  # type: ignore
@@ -135,24 +151,10 @@ class Zeno(object):
                     else:
                         logging.error("Multiple model loaders found, can only have one")
                         sys.exit(1)
-                if hasattr(func, "load_data"):
-                    if self.data_loader is None:
-                        self.data_loader = DataLoader(func_name, test_file)
-                    else:
-                        logging.error("Multiple data loaders found, can only have one")
-                        sys.exit(1)
                 if hasattr(func, "preprocess"):
                     self.preprocessors.append(Preprocessor(func_name, test_file))
-                if hasattr(func, "slicer"):
-                    path_names = list(test_file.relative_to(base_path).parts)
-                    path_names[-1] = path_names[-1][0:-3]
-                    self.slicers[func_name] = Slicer(
-                        func_name,
-                        func,
-                        [*path_names, func_name],
-                    )
-                if hasattr(func, "transform"):
-                    self.transforms[func_name] = func
+                if hasattr(func, "postprocess"):
+                    self.postprocessors.append(Postprocessor(func_name, test_file))
                 if hasattr(func, "metric"):
                     self.metrics[func_name] = func
 
@@ -186,11 +188,10 @@ class Zeno(object):
                     [
                         [
                             s,
+                            self.zeno_options,
                             self.df[s.name],
-                            self.data_path,
                             self.cache_path,
                             self.df,
-                            self.data_loader,
                             self.batch_size,
                             i,
                         ]
@@ -200,12 +201,6 @@ class Zeno(object):
                 for out in preprocess_outputs:
                     self.df.loc[:, out[0]] = out[1]
                     self.complete_columns.append(out[0])
-
-        self.__slice_data()
-        self.done_slicing.set()
-        self.complete_columns.extend(
-            [r for r in self.df.columns if r.startswith("zenoslice_")]
-        )
 
         # Check if we need to run inference since Pool is expensive
         models_to_run = []
@@ -253,12 +248,11 @@ class Zeno(object):
                     run_inference,
                     [
                         [
+                            self.model_loader,
+                            self.zeno_options,
                             m,
-                            self.data_path,
                             self.cache_path,
                             self.df,
-                            self.data_loader,
-                            self.model_loader,
                             self.batch_size,
                             i,
                         ]
@@ -271,18 +265,7 @@ class Zeno(object):
                     self.complete_columns.append("zenomodel_" + out[0])
 
         self.done_inference.set()
-        self.status = "Done preprocessing"
-
-    def __slice_data(self):
-        """Run slicers to create all slices."""
-        self.slices = {}
-        for name, slicer in self.slicers.items():
-            self.status = "Slicing data for " + name
-            self.slices = {
-                **self.slices,
-                **slice_data(self.df, slicer, self.label_column),
-            }
-        self.status = "Done slicing"
+        self.status = "Done running inference"
 
     def get_results(self, requests: ResultsRequest):
         """Calculate result for each requested combination."""
@@ -305,24 +288,11 @@ class Zeno(object):
         if "zenomodel_" + model_name not in self.df.columns:
             return
 
+        local_ops = dataclasses.replace(
+            self.zeno_options, output_column="zenomodel_" + model_name
+        )
         metric_func = self.metrics[metric_name]
-
-        if len(signature(metric_func).parameters) == 3:
-            result = metric_func(
-                self.df.loc[idxs, "zenomodel_" + model_name].tolist(),
-                self.df.loc[idxs],
-                self.label_column,
-            )
-        else:
-            result = metric_func(
-                self.df.loc[idxs, "zenomodel_" + model_name].tolist(),
-                self.df.loc[idxs],
-            )
-
-        if len(result) == 0:
-            result_metric = 0.0
-        else:
-            result_metric = (sum(result) / len(result)) * 100.0
+        result_metric = metric_func(self.df.loc[idxs], local_ops)
 
         return {
             "slice": name,

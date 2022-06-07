@@ -1,13 +1,14 @@
+import dataclasses
 import os
 from importlib import util
 from inspect import signature
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
-from tqdm import trange  # type: ignore
+from tqdm import trange
 
-from .classes import DataLoader, ModelLoader, Preprocessor, Slice, Slicer
+from .api import ZenoOptions  # type: ignore
+from .classes import ModelLoader, Preprocessor
 
 # import pyarrow as pa  # type: ignore
 
@@ -32,15 +33,13 @@ def get_function(file_name, function_name):
 
 def preprocess_data(
     preprocessor: Preprocessor,
+    options: ZenoOptions,
     col: pd.Series,
-    data_path: str,
     cache_path: str,
     df: pd.DataFrame,
-    data_loader: DataLoader,
     batch_size: int,
     pos: int,
 ):
-    data_loader_fn = get_function(data_loader.file_name, data_loader.name)
     preprocessor_fn = get_function(preprocessor.file_name, preprocessor.name)
 
     save_path = Path(
@@ -52,8 +51,7 @@ def preprocess_data(
 
     if len(to_predict_indices) > 0:
         if len(to_predict_indices) < batch_size:
-            data = data_loader_fn(df.loc[to_predict_indices], data_path)
-            out = preprocessor_fn(data, df.loc[to_predict_indices])
+            out = preprocessor_fn(df.loc[to_predict_indices], options)
             col.loc[to_predict_indices] = out
             col.to_pickle(save_path)
         else:
@@ -64,29 +62,24 @@ def preprocess_data(
                 desc="preprocessing " + preprocessor.name,
                 position=pos,
             ):
-                data = data_loader_fn(
-                    df.loc[to_predict_indices[i : i + batch_size]],
-                    data_path,
+                out = preprocessor_fn(
+                    df.loc[to_predict_indices[i : i + batch_size]], options
                 )
-                out = preprocessor_fn(data, df.loc[to_predict_indices])
                 col.loc[to_predict_indices[i : i + batch_size]] = out
                 col.to_pickle(save_path)
     return (preprocessor.name, col)
 
 
 def run_inference(
+    model_loader: ModelLoader,
+    options: ZenoOptions,
     model_path: str,
-    data_path: str,
     cache_path: str,
     df: pd.DataFrame,
-    data_loader: DataLoader,
-    model_loader: ModelLoader,
     batch_size: int,
     pos: int,
 ):
-    data_loader_fn = get_function(data_loader.file_name, data_loader.name)
     model_loader_fn = get_function(model_loader.file_name, model_loader.name)
-
     model_name = os.path.basename(model_path).split(".")[0]
 
     inference_save_path = Path(
@@ -112,14 +105,16 @@ def run_inference(
     if len(to_predict_indices) > 0:
         fn = model_loader_fn(model_path)
         if len(to_predict_indices) < batch_size:
-            data = data_loader_fn(df.loc[to_predict_indices], data_path)
-
-            if len(signature(fn).parameters) == 3:
+            # TODO(instead check ZenoOptions)
+            if options.output_type == "path":
                 file_cache_path = os.path.join(cache_path, "zenomodel_" + model_name)
                 os.makedirs(file_cache_path, exist_ok=True)
-                out = fn(data, df.loc[to_predict_indices].index, file_cache_path)
+                out = fn(
+                    df.loc[to_predict_indices],
+                    dataclasses.replace(options, output_path=file_cache_path),
+                )
             else:
-                out = fn(data)
+                out = fn(df.loc[to_predict_indices], options)
 
             # Check if we also get embedding
             if type(out) == tuple and len(out) == 2:
@@ -139,23 +134,18 @@ def run_inference(
                 desc="Inference on " + model_name,
                 position=pos,
             ):
-                data = data_loader_fn(
-                    df.loc[to_predict_indices[i : i + batch_size]], data_path
-                )
-
-                if len(signature(fn).parameters) == 3:
+                if options.output_type == "path":
                     file_cache_path = os.path.join(
                         cache_path, "zenomodel_" + model_name
                     )
 
                     os.makedirs(file_cache_path, exist_ok=True)
                     out = fn(
-                        data,
-                        df.loc[to_predict_indices[i : i + batch_size]].index,
-                        file_cache_path,
+                        df.loc[to_predict_indices[i : i + batch_size]],
+                        dataclasses.replace(options, output_path=file_cache_path),
                     )
                 else:
-                    out = fn(data)
+                    out = fn(df.loc[to_predict_indices[i : i + batch_size]], options)
 
                 # Check if we also get embedding
                 if type(out) == tuple and len(out) == 2:
@@ -168,43 +158,3 @@ def run_inference(
                     inference_col[to_predict_indices[i : i + batch_size]] = out
                 inference_col.to_pickle(inference_save_path)
     return (model_name, inference_col, embedding_col)
-
-
-def slice_data(metadata: pd.DataFrame, slicer: Slicer, label_column: str):
-    if len(signature(slicer.func).parameters) == 2:
-        slicer_output = slicer.func(metadata, label_column)
-    else:
-        slicer_output = slicer.func(metadata)
-
-    if isinstance(slicer_output, pd.DataFrame):
-        slicer_output = slicer_output.index
-
-    slices = {}
-    # Can either be of the from [index list] or [(name, index list)..]
-    if isinstance(slicer_output, pd.Index) and len(slicer_output) == 0:
-        metadata.loc[:, "zenoslice_" + ".".join(slicer.name_list)] = pd.Series(
-            np.zeros(len(metadata), dtype=int), dtype=int
-        )
-        slices[".".join(slicer.name_list)] = Slice(
-            ".".join(slicer.name_list), slicer_output
-        )
-    elif (
-        isinstance(slicer_output[0], tuple) or isinstance(slicer_output[0], list)
-    ) and len(slicer_output) > 0:
-        for output_slice in slicer_output:
-            indices = output_slice[1]
-            name_list = [*slicer.name_list, output_slice[0]]
-            metadata.loc[:, "zenoslice_" + ".".join(name_list)] = pd.Series(
-                np.zeros(len(metadata), dtype=int), dtype=int
-            )
-            metadata.loc[indices, "zenoslice_" + ".".join(name_list)] = 1
-            slices[".".join(name_list)] = Slice(".".join(name_list), indices)
-    else:
-        metadata.loc[:, "zenoslice_" + ".".join(slicer.name_list)] = pd.Series(
-            np.zeros(len(metadata), dtype=int), dtype=int
-        )
-        metadata.loc[slicer_output, "zenoslice_" + ".".join(slicer.name_list)] = 1
-        slices[".".join(slicer.name_list)] = Slice(
-            ".".join(slicer.name_list), slicer_output
-        )
-    return slices

@@ -7,21 +7,15 @@
   export let name: string;
   export let size: number;
   export let metric: string;
-  export let modelA: string;
-  export let modelB: string;
+  export let model: string;
   export let selected;
   export let checked;
   export let fullName = name;
 
-  $: resultA = $results.get({
+  $: result = $results.get({
     slice: fullName,
     metric: metric,
-    model: modelA,
-  } as ResultKey);
-  $: resultB = $results.get({
-    slice: fullName,
-    metric: metric,
-    model: modelB,
+    model: model,
   } as ResultKey);
 </script>
 
@@ -47,17 +41,12 @@
     </div>
     <div class="group" style:width="100%">
       <span>{name}</span>
-      {#if resultA}
+      {#if result}
         <div>
           <span style:margin-right="10px">
-            A: {resultA.toFixed(2)}%
-            {#if resultB}
-              <span style:margin-left="10px">
-                B: {resultB.toFixed(2)}%
-              </span>
-            {/if}
+            {result.toFixed(2)}
           </span>
-          <span>{size.toLocaleString()}</span>
+          <span>({size.toLocaleString()})</span>
         </div>
       {/if}
     </div>

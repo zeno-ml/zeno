@@ -5,8 +5,7 @@
   import { settings } from "../stores";
 
   export let table;
-  export let modelACol;
-  export let modelBCol;
+  export let modelCol;
 </script>
 
 {#each table as row}
@@ -23,11 +22,8 @@
       </Wrapper>
       <br />
       <span class="label">{row[$settings.labelColumn]} </span>
-      {#if modelACol}
-        <span class="output">A: {row[modelACol]} </span>
-      {/if}
-      {#if modelBCol}
-        <span class="second_output">B: {row[modelBCol]} </span>
+      {#if modelCol}
+        <span class="output">A: {row[modelCol]} </span>
       {/if}
     </Paper>
   </div>

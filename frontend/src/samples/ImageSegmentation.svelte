@@ -4,12 +4,11 @@
 
   import SegmentedButton, { Segment, Label } from "@smui/segmented-button";
 
-  let choices = ["Label", "Model A", "Model B"];
+  let choices = ["Label", "Model"];
   let selected = ["Label"];
 
   export let table;
-  export let modelACol;
-  export let modelBCol;
+  export let modelCol;
 </script>
 
 <div style:margin-left="10px">
@@ -39,22 +38,13 @@
             alt="Image thumbnail for instance {row[$settings.labelColumn]}"
           />
         {/if}
-        {#if row[modelACol] && selected.includes("Model A")}
+        {#if row[modelCol] && selected.includes("Model")}
           <img
             class="overlay"
-            src="/cache/{modelACol}/{row[modelACol]}"
+            src="/cache/{modelCol}/{row[modelCol]}"
             style:width="150px"
             style:height="150px"
-            alt="Image thumbnail for instance {row[modelACol]}"
-          />
-        {/if}
-        {#if row[modelBCol] && selected.includes("Model B")}
-          <img
-            class="overlay"
-            src="/cache/{modelBCol}/{row[modelBCol]}"
-            style:width="150px"
-            style:height="150px"
-            alt="Image thumbnail for instance {row[modelBCol]}"
+            alt="Image thumbnail for instance {row[modelCol]}"
           />
         {/if}
       </div>

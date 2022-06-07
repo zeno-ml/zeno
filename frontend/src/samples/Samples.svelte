@@ -27,8 +27,7 @@
   } from "../stores";
   import { getFilteredTable, updateResults } from "src/util";
 
-  export let modelA: string = "";
-  export let modelB: string = "";
+  export let model: string = "";
   export let metric: string;
   export let table: ColumnTable;
   export let checked: Set<string>;
@@ -42,8 +41,7 @@
   let view = "list";
   let colorScale = scaleSequential(interpolatePurples).domain([0, 1]);
 
-  $: modelACol = "zenomodel_" + modelA;
-  $: modelBCol = "zenomodel_" + modelB;
+  $: modelCol = "zenomodel_" + model;
 
   $: start = currentPage * rowsPerPage;
   $: end = Math.min(start + rowsPerPage, table.size);
@@ -52,15 +50,10 @@
     currentPage = lastPage;
   }
 
-  $: resultA = $results.get({
+  $: result = $results.get({
     slice: "selection",
     metric: metric,
-    model: modelA,
-  } as ResultKey);
-  $: resultB = $results.get({
-    slice: "selection",
-    metric: metric,
-    model: modelB,
+    model: model,
   } as ResultKey);
 
   let gridResults: number[][] = [];
@@ -80,8 +73,7 @@
           s.name,
           $settings.metadata,
           $tableStore,
-          modelA,
-          modelB
+          model
         );
         return new Set(newTable.array($settings.idColumn) as string[]);
       }
@@ -124,7 +116,7 @@
         gridResults[r][c] = res.get({
           slice: "zenogrid_" + r + "_" + c,
           metric: metric,
-          model: modelA,
+          model: model,
         } as ResultKey);
         if (gridResults[r][c] > max) {
           max = gridResults[r][c];
@@ -142,9 +134,8 @@
   <div class="options container">
     <div style:margin-left="10px">
       <span style:margin-right="10px">
-        {resultA ? "A: " + resultA.toFixed(2) + "%" : ""}
+        {result ? result.toFixed(2) : ""}
       </span>
-      <span>{resultB ? "B: " + resultB.toFixed(2) + "%" : ""}</span>
     </div>
     <SegmentedButton
       segments={viewOptions}
@@ -164,32 +155,24 @@
       {#if $settings.task === "image-classification"}
         <ImageClassification
           table={table.slice(start, end).objects()}
-          {modelACol}
-          {modelBCol}
+          {modelCol}
         />
       {:else if $settings.task === "image-segmentation"}
         <ImageSegmentation
           table={table.slice(start, end).objects()}
-          {modelACol}
-          {modelBCol}
+          {modelCol}
         />
       {:else if $settings.task === "object-detection"}
-        <ObjectDetection
-          table={table.slice(start, end).objects()}
-          {modelACol}
-          {modelBCol}
-        />
+        <ObjectDetection table={table.slice(start, end).objects()} {modelCol} />
       {:else if $settings.task === "text-classification"}
         <TextClassification
           table={table.slice(start, end).objects()}
-          {modelACol}
-          {modelBCol}
+          {modelCol}
         />
       {:else if $settings.task === "audio-classification"}
         <AudioClassification
           table={table.slice(start, end).objects()}
-          {modelACol}
-          {modelBCol}
+          {modelCol}
         />
       {/if}
     {/if}

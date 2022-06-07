@@ -1,5 +1,7 @@
+import os
+
 import PIL
-from zeno import slicer, transform, preprocess
+from zeno import preprocess
 
 
 def get_brightness(im):
@@ -31,35 +33,16 @@ def get_border_brightness(im):
 
 
 @preprocess
-def brightness(images, _):
-    return [get_brightness(im) for im in images]
+def brightness(df, ops):
+    imgs = [
+        PIL.Image.open(os.path.join(ops.data_path, img)) for img in df[ops.data_column]
+    ]
+    return [get_brightness(im) for im in imgs]
 
 
 @preprocess
-def border_brightness(images, _):
-    return [get_border_brightness(im) for im in images]
-
-
-@slicer
-def low_exposure(metadata):
-    return metadata[metadata["brightness"] < 80].index
-
-
-@slicer
-def high_exposure(metadata):
-    return metadata[metadata["brightness"] > 200].index
-
-
-@slicer
-def white_border(metadata):
-    return metadata[metadata["border_brightness"] > 150].index
-
-
-@transform
-def blur(data):
-    return [img.filter(PIL.ImageFilter.BLUR) for img in data]
-
-
-@transform
-def rotate(data):
-    return [img.rotate(90, PIL.Image.NEAREST, expand=1) for img in data]
+def border_brightness(df, ops):
+    imgs = [
+        PIL.Image.open(os.path.join(ops.data_path, img)) for img in df[ops.data_column]
+    ]
+    return [get_border_brightness(im) for im in imgs]

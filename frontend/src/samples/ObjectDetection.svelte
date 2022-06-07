@@ -5,20 +5,17 @@
   import { settings } from "../stores";
 
   export let table;
-  export let modelACol;
-  export let modelBCol;
+  export let modelCol;
 
   let showLabel = true;
-  let showModelA = true;
-  let showModelB = true;
+  let showModel = true;
 
   let canvases: HTMLCanvasElement[] = [];
   let imgs: HTMLImageElement[] = [];
   $: {
     table;
     showLabel;
-    showModelA;
-    showModelB;
+    showModel;
     drawImages();
   }
   function drawImages() {
@@ -41,17 +38,10 @@
               ctx.strokeRect(box[0], box[1], box[2], box[3]);
             });
           }
-          if (t[modelACol] && showModelA) {
+          if (t[modelCol] && showModel) {
             ctx.strokeStyle = "orange";
             ctx.lineWidth = 3;
-            t[modelACol].forEach((box) => {
-              ctx.strokeRect(box[0], box[1], box[2], box[3]);
-            });
-          }
-          if (t[modelBCol] && showModelB) {
-            ctx.strokeStyle = "green";
-            ctx.lineWidth = 3;
-            t[modelACol].forEach((box) => {
+            t[modelCol].forEach((box) => {
               ctx.strokeRect(box[0], box[1], box[2], box[3]);
             });
           }
@@ -63,21 +53,6 @@
   }
 </script>
 
-<div>
-  <!-- <FormField>
-    <Checkbox bind:showLabel />
-    <span slot="label">label</span>
-  </FormField>
-  <FormField>
-    <Checkbox bind:showModelA />
-    <span slot="label">model A</span>
-  </FormField>
-  <FormField>
-    <Checkbox bind:showModelB />
-    <span slot="label">model B</span>
-  </FormField> -->
-</div>
-<br />
 {#each table as row, i}
   <div class="box">
     <Paper square>

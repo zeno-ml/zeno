@@ -1,13 +1,11 @@
-from .api import load_data, load_model, metric, preprocess, slicer, transform
+from .api import load_model, metric, preprocess, postprocess, ZenoOptions
 from .runner import run_zeno
 
 __all__ = [
-    "load_data",
     "load_model",
     "preprocess",
-    "slicer",
-    "transform",
+    "postprocess",
     "metric",
+    "ZenoOptions",
     "run_zeno",
-    "__create_parser",
 ]

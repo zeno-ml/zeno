@@ -1,21 +1,25 @@
-from zeno import preprocess
-import numpy as np
+import os
+
 import librosa
+import numpy as np
+from zeno import ZenoOptions, preprocess
 
 
 @preprocess
-def amplitude(audios, _):
+def amplitude(df, ops: ZenoOptions):
+    files = [os.path.join(ops.data_path, f) for f in df[ops.data_column]]
     amps = []
-    for audio in audios:
+    for audio in files:
         y, _ = librosa.load(audio)
         amps.append(np.abs(y).mean())
     return amps
 
 
 @preprocess
-def length(audios, _):
+def length(df, ops: ZenoOptions):
+    files = [os.path.join(ops.data_path, f) for f in df[ops.data_column]]
     amps = []
-    for audio in audios:
+    for audio in files:
         y, _ = librosa.load(audio)
         amps.append(len(y))
     return amps
