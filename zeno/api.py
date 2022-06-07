@@ -37,7 +37,7 @@ def postprocess(func):
     def _wrapper(*args, **kwargs):
         return func(*args, **kwargs)
 
-    _wrapper.preprocess = True
+    _wrapper.postprocess = True
     return _wrapper
 
 

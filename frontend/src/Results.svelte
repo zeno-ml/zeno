@@ -9,7 +9,7 @@
   import { getFilteredTable, updateResults } from "./util";
 
   import Samples from "./samples/Samples.svelte";
-  import LeafNode from "./LeafNode.svelte";
+  import Slice from "./Slice.svelte";
   import Filter from "./Filter.svelte";
   import MetadataNode from "./MetadataNode.svelte";
 
@@ -34,9 +34,6 @@
 
   $: {
     selected;
-    updateFilteredTable($table);
-  }
-  $: {
     metadataSelections;
     updateFilteredTable($table);
   }
@@ -47,19 +44,8 @@
     }
 
     let tempTable = t;
-
     if (selected) {
-      let slice = $slices.get(selected);
-      if (slice && slice.type === "programmatic") {
-        tempTable = t.filter(`(r) => r["${"zenoslice_" + slice.name}"] === 1`);
-      } else {
-        tempTable = getFilteredTable(
-          selected,
-          $settings.metadata,
-          $table,
-          model
-        );
-      }
+      tempTable = getFilteredTable(selected, $settings.metadata, $table, model);
     }
 
     metadataSelections.forEach((sel, i) => {
@@ -138,7 +124,7 @@
     {#if $metrics}
       <Select
         bind:value={selectedMetric}
-        label="Select Metric"
+        label="Metric"
         style="margin-right: 20px;"
       >
         {#each $metrics as m}
@@ -158,10 +144,10 @@
 
 <div id="container">
   <div class="side-container">
-    {#if [...$slices.values()].filter((d) => d.type === "generated").length > 0}
+    {#if [...$slices.values()].length > 0}
       <h4>Slices</h4>
-      {#each [...$slices.values()].filter((d) => d.type === "generated") as s}
-        <LeafNode
+      {#each [...$slices.values()] as s}
+        <Slice
           name={s.name}
           fullName={s.name}
           metric={selectedMetric}

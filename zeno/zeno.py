@@ -5,7 +5,7 @@ import os
 import sys
 import threading
 from importlib import util
-from inspect import getmembers, isfunction, signature
+from inspect import getmembers, isfunction
 from multiprocessing import Pool
 from pathlib import Path
 from typing import Callable, Dict, List
@@ -23,7 +23,7 @@ from .classes import (
     ResultsRequest,
     Slice,
 )
-from .util import get_arrow_bytes, preprocess_data, run_inference
+from .util import get_arrow_bytes, preprocess_data, run_inference, postprocess_data
 
 
 class Zeno(object):
@@ -114,11 +114,16 @@ class Zeno(object):
     def start_processing(self):
         """Parse testing files, preprocess, run inference, and slicing data."""
         self.__parse_testing_files()
-        self.metadata = [
-            *[p.name for p in self.preprocessors],
-            *[p.name for p in self.postprocessors],
+
+        meta = [
+            *["zenopre_" + p.name for p in self.preprocessors],
             *list(self.df.columns),
         ]
+        for post in self.postprocessors:
+            for model in self.model_names:
+                meta.append("zenopost_" + model + "_" + post.name)
+        self.metadata = meta
+
         self.__thread = threading.Thread(target=asyncio.run, args=(self.__process(),))
         self.__thread.start()
 
@@ -164,22 +169,20 @@ class Zeno(object):
         # Check if we need to preprocess since Pool is expensive
         preprocessors_to_run = []
         for preprocessor in self.preprocessors:
-            save_path = Path(
-                self.cache_path,
-                "zenopreprocess_" + preprocessor.name + ".pickle",
-            )
+            col_name = "zenopre_" + preprocessor.name
+            save_path = Path(self.cache_path, col_name + ".pickle")
 
             try:
-                self.df.loc[:, preprocessor.name] = pd.read_pickle(save_path)
+                self.df.loc[:, col_name] = pd.read_pickle(save_path)
             except FileNotFoundError:
-                self.df.loc[:, preprocessor.name] = pd.Series(
+                self.df.loc[:, col_name] = pd.Series(
                     [pd.NA] * self.df.shape[0], index=self.df.index
                 )
 
-            if self.df[preprocessor.name].isnull().any():
+            if self.df[col_name].isnull().any():
                 preprocessors_to_run.append(preprocessor)
             else:
-                self.complete_columns.append(preprocessor.name)
+                self.complete_columns.append(col_name)
 
         if len(preprocessors_to_run) > 0:
             with Pool() as pool:
@@ -189,7 +192,6 @@ class Zeno(object):
                         [
                             s,
                             self.zeno_options,
-                            self.df[s.name],
                             self.cache_path,
                             self.df,
                             self.batch_size,
@@ -206,40 +208,32 @@ class Zeno(object):
         models_to_run = []
         for model_path in self.model_paths:
             model_name = os.path.basename(model_path).split(".")[0]
+            col_name_model = "zenomodel_" + model_name
+            col_name_embedding = "zenoembedding_" + model_name
 
-            inference_save_path = Path(
-                self.cache_path,
-                "zenomodel_" + model_name + ".pickle",
-            )
-            embedding_save_path = Path(
-                self.cache_path,
-                "zenoembedding_" + model_name + ".pickle",
-            )
+            inference_save_path = Path(self.cache_path, col_name_model + ".pickle")
+            embedding_save_path = Path(self.cache_path, col_name_embedding + ".pickle")
 
             try:
-                self.df.loc[:, "zenomodel_" + model_name] = pd.read_pickle(
-                    inference_save_path
-                )
+                self.df.loc[:, col_name_model] = pd.read_pickle(inference_save_path)
             except FileNotFoundError:
-                self.df.loc[:, "zenomodel_" + model_name] = pd.Series(
+                self.df.loc[:, col_name_model] = pd.Series(
                     [pd.NA] * self.df.shape[0], index=self.df.index
                 )
             try:
-                self.df.loc[:, "zenoembedding_" + model_name] = pd.read_pickle(
-                    embedding_save_path
-                )
+                self.df.loc[:, col_name_embedding] = pd.read_pickle(embedding_save_path)
             except FileNotFoundError:
-                self.df.loc[:, "zenoembedding_" + model_name] = pd.Series(
+                self.df.loc[:, col_name_embedding] = pd.Series(
                     [pd.NA] * self.df.shape[0], index=self.df.index
                 )
 
             if (
-                self.df["zenomodel_" + model_name].isnull().any()
-                or self.df["zenoembedding_" + model_name].isnull().any()
+                self.df[col_name_model].isnull().any()
+                or self.df[col_name_embedding].isnull().any()
             ):
                 models_to_run.append(model_path)
             else:
-                self.complete_columns.append("zenomodel_" + model_name)
+                self.complete_columns.append(col_name_model)
 
         self.status = "Running inference"
         if len(models_to_run) > 0:
@@ -266,6 +260,50 @@ class Zeno(object):
 
         self.done_inference.set()
         self.status = "Done running inference"
+
+        # Check if we need to run postprocessing since Pool is expensive
+        post_to_run = []
+        for postprocessor in self.postprocessors:
+            for model in self.model_names:
+                col_name = "zenopost_" + model_name + "_" + postprocessor.name
+                save_path = Path(self.cache_path, col_name + ".pickle")
+
+                try:
+                    self.df.loc[:, col_name] = pd.read_pickle(save_path)
+                except FileNotFoundError:
+                    self.df.loc[:, col_name] = pd.Series(
+                        [pd.NA] * self.df.shape[0], index=self.df.index
+                    )
+
+                if self.df[col_name].isnull().any():
+                    post_to_run.append((postprocessor, model))
+                else:
+                    self.complete_columns.append(col_name)
+
+        self.status = "Running postprocessing"
+        if len(post_to_run) > 0:
+            with Pool() as pool:
+                post_outputs = pool.starmap(
+                    postprocess_data,
+                    [
+                        [
+                            e[0],
+                            e[1],
+                            self.zeno_options,
+                            self.cache_path,
+                            self.df,
+                            self.batch_size,
+                            i,
+                        ]
+                        for i, e in enumerate(post_to_run)
+                    ],
+                )
+                for out in post_outputs:
+                    self.df.loc[:, "zenopost_" + out[0]] = out[1]
+                    self.complete_columns.append("zenopost_" + out[0])
+
+        self.done_inference.set()
+        self.status = "Done running postprocessing"
 
     def get_results(self, requests: ResultsRequest):
         """Calculate result for each requested combination."""
