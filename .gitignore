@@ -1,7 +1,7 @@
 examples/models/cifar/cif
 data/
 .zeno_cache/
-examples/segmentation
+models/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

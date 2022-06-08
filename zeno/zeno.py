@@ -92,6 +92,7 @@ class Zeno(object):
         self.df[id_column] = self.df.index
         self.columns: List[str] = []
         self.complete_columns = list(self.df.columns)
+        self.done_processing = False
 
     def start_processing(self):
         """Parse testing files, preprocess, run inference, and postprocess."""
@@ -282,6 +283,7 @@ class Zeno(object):
                     self.complete_columns.append("zenopost_" + out[0])
 
         self.status = "Done running postprocessing"
+        self.done_processing = True
 
     def get_results(self, requests: ResultsRequest):
         """Calculate result for each requested combination."""
@@ -301,7 +303,7 @@ class Zeno(object):
     def calculate_metrics(
         self, idxs: List, name: str, metric_name: str, model_name: str
     ):
-        if "zenomodel_" + model_name not in self.df.columns:
+        if not self.done_processing:
             return
 
         local_ops = dataclasses.replace(

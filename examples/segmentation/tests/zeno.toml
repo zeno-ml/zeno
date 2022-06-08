@@ -1,0 +1,12 @@
+tests = "../"
+task = "image-segmentation"
+metadata = "../segmentation.csv"
+models = [
+    "/Users/acabrera/dev-research/22-zeno/zeno/examples/segmentation/models/weights.ckpt",
+]
+data_path = "/Users/acabrera/dev/data/sessile-main-Kvasir-SEG/"
+batch_size = 16
+data_column = "id"
+data_type = "path"
+output_type = "path"
+port = 8005
