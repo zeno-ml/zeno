@@ -1,6 +1,6 @@
 (api)=
 
-# Running Tests
+## Running Tests
 
 Zeno options are set using a `TOML` file:
 
@@ -57,12 +57,6 @@ The batch size used when running inference. **Optional**
 The column with unique identifiers in the metadata file. **Optional**
 
 By default it is `id`.
-
-### `id_column`
-
-The column with ground truth labels in the metadata file. **Optional**
-
-By default it is `label`.
 
 ### `cache_path`
 

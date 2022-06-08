@@ -12,8 +12,10 @@
   import Header from "./Header.svelte";
   import Results from "./Results.svelte";
   import Tests from "./Tests.svelte";
-  import { settings, slices, table, wsResponse } from "./stores";
-  import { initialFetch, updateResults, updateTab } from "./util";
+  import { table, wsResponse } from "./stores";
+  import { initialFetch, updateTab } from "./util";
+
+  table.subscribe((t) => console.log(t.objects()));
 
   let tab = $location.split("/")[1];
   if (!tab) {
@@ -60,26 +62,6 @@
             t = $table.assign(aq.fromJSON(x));
           }
           table.set(t);
-
-          let requests: ResultsRequest[] = [];
-          missingColumns.forEach((c) => {
-            if (c.startsWith("zenoslice_")) {
-              let idxs = t.filter(`d => d["${c}"] !== null`);
-              slices.update((s) => {
-                s.set(c.slice(10), {
-                  name: c.slice(10),
-                  type: "programmatic",
-                  size: idxs.size,
-                });
-                return s;
-              });
-              requests.push({
-                sli: c,
-                idxs: idxs.array($settings.idColumn) as string[],
-              });
-            }
-          });
-          updateResults(requests);
         });
     }
   });

@@ -1,6 +1,9 @@
-from zeno import load_model, load_data, metric
 import os
+
+import pandas as pd
 import torch
+from zeno import load_model, metric
+from zeno.api import ZenoOptions
 
 number_to_text = {
     0: "zero",
@@ -35,20 +38,16 @@ def load_model(model_path):
         prepare_model_input,
     ) = utils  # see function signature for details
 
-    def pred(instances):
-        input = prepare_model_input(read_batch(instances), device=device)
+    def pred(df, ops: ZenoOptions):
+        files = [os.path.join(ops.data_path, f) for f in df[ops.data_column]]
+        input = prepare_model_input(read_batch(files), device=device)
         output = model(input)
         return [decoder(x.cpu()) for x in output]
 
     return pred
 
 
-@load_data
-def load_data(df_metadata, data_path):
-    return [os.path.join(data_path, f) for f in df_metadata.index]
-
-
 @metric
-def accuracy(output, df, label_col):
-    df["text_label"] = df[label_col].apply(lambda x: number_to_text[x])
-    return df["text_label"] == output
+def accuracy(df, ops: ZenoOptions):
+    text_label = df[ops.label_column].apply(lambda x: number_to_text[x])
+    return 100 * (pd.Series(text_label) == df[ops.output_column]).sum() / len(df)

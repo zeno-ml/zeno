@@ -1,28 +1,20 @@
 <script lang="ts">
   import type ColumnTable from "arquero/dist/types/table/column-table";
-  import type { InternMap } from "internmap";
 
   import Button from "@smui/button";
   import Select, { Option } from "@smui/select";
   import * as aq from "arquero";
 
   import { metrics, models, ready, settings, slices, table } from "./stores";
-  import {
-    appendChild,
-    getFilteredTable,
-    SliceNode,
-    updateResults,
-  } from "./util";
+  import { getFilteredTable, updateResults } from "./util";
 
-  import ResultCell from "./ResultCell.svelte";
   import Samples from "./samples/Samples.svelte";
-  import LeafNode from "./LeafNode.svelte";
+  import Slice from "./Slice.svelte";
   import Filter from "./Filter.svelte";
   import MetadataNode from "./MetadataNode.svelte";
 
-  let modelA: string = "";
-  let modelB: string = "";
-  let selectedMetric: string = "";
+  let model: string = "";
+  let metric: string = "";
 
   let filteredTable = aq.table({});
   let filter: string = "";
@@ -30,39 +22,20 @@
 
   let selected: string = "";
   let checked: Set<string> = new Set();
-  let metadataSelections = [];
-
-  let sliceTree: SliceNode = new SliceNode("root", 0, {});
+  let metadataSelections = {};
 
   ready.subscribe((r) => {
     if (r) {
-      modelA = $models[0];
-      selectedMetric = $metrics[0];
-    }
-  });
-  slices.subscribe((sls) => {
-    if (sls.size > 0 && modelA && selectedMetric) {
-      setupTree(sls);
+      model = $models[0];
+      metric = $metrics[0];
     }
   });
   table.subscribe((t) => updateFilteredTable(t));
 
   $: {
     selected;
-    updateFilteredTable($table);
-  }
-  $: {
     metadataSelections;
     updateFilteredTable($table);
-  }
-
-  function setupTree(slices: InternMap<string, Slice>) {
-    const slis: Slice[] = [...slices.values()];
-    let programmaticSlices = slis.filter((s) => s.type === "programmatic");
-    programmaticSlices.forEach((r) => {
-      appendChild(sliceTree, r);
-    });
-    sliceTree = sliceTree;
   }
 
   function updateFilteredTable(t: ColumnTable) {
@@ -71,41 +44,19 @@
     }
 
     let tempTable = t;
-
     if (selected) {
-      let slice = $slices.get(selected);
-      if (slice && slice.type === "programmatic") {
-        tempTable = t.filter(`(r) => r["${"zenoslice_" + slice.name}"] === 1`);
-      } else {
-        tempTable = getFilteredTable(
-          selected,
-          $settings.metadata,
-          $table,
-          modelA,
-          modelB
-        );
-      }
+      tempTable = getFilteredTable(selected, $settings.metadata, $table, model);
     }
-
-    metadataSelections.forEach((sel, i) => {
-      if (sel) {
-        let name;
-        if (i >= $settings.metadata.length) {
-          name =
-            i === $settings.metadata.length
-              ? "zenomodel_" + modelA
-              : "zenomodel_" + modelB;
-        } else {
-          name = $settings.metadata[i];
-        }
-
-        if (sel[0] === "range") {
+    Object.keys(metadataSelections).forEach((name) => {
+      let entry = metadataSelections[name];
+      if (entry) {
+        if (entry[0] === "range") {
           tempTable = tempTable.filter(
-            `(r) => r["${name}"] > ${sel[1]} && r["${name}"] < ${sel[2]}`
+            `(r) => r["${name}"] > ${entry[1]} && r["${name}"] < ${entry[2]}`
           );
         } else {
           tempTable = tempTable.filter(
-            aq.escape((r) => aq.op.includes(sel.slice(1), r[name], 0))
+            aq.escape((r) => aq.op.includes(entry.slice(1), r[name], 0))
           );
         }
       }
@@ -127,8 +78,7 @@
         filter,
         $settings.metadata,
         $table,
-        modelA,
-        modelB
+        model
       );
       updateResults([
         {
@@ -165,24 +115,15 @@
   </div>
   <div>
     {#if $metrics}
-      <Select
-        bind:value={selectedMetric}
-        label="Select Metric"
-        style="margin-right: 20px;"
-      >
+      <Select bind:value={metric} label="Metric" style="margin-right: 20px;">
         {#each $metrics as m}
           <Option value={m}>{m}</Option>
         {/each}
       </Select>
     {/if}
     {#if $models}
-      <Select bind:value={modelA} label="Model A" style="margin-right: 20px;">
+      <Select bind:value={model} label="Model" style="margin-right: 20px;">
         {#each $models as m}
-          <Option value={m}>{m}</Option>
-        {/each}
-      </Select>
-      <Select bind:value={modelB} label="Model B" style="margin-right: 20px;">
-        {#each [...$models, ""] as m}
           <Option value={m}>{m}</Option>
         {/each}
       </Select>
@@ -192,66 +133,63 @@
 
 <div id="container">
   <div class="side-container">
-    {#if [...$slices.values()].filter((d) => d.type === "generated").length > 0}
-      <h4>Generated Slices</h4>
-      {#each [...$slices.values()].filter((d) => d.type === "generated") as s}
-        <LeafNode
+    {#if [...$slices.values()].length > 0}
+      <h4>Slices</h4>
+      {#each [...$slices.values()] as s}
+        <Slice
           name={s.name}
           fullName={s.name}
-          metric={selectedMetric}
+          {metric}
           size={s.size}
-          {modelA}
-          {modelB}
+          {model}
           bind:selected
           bind:checked
-        />
-      {/each}
-    {/if}
-
-    {#if sliceTree}
-      <h4>Slices</h4>
-      {#each Object.values(sliceTree.children) as node}
-        <ResultCell
-          sliceNode={node}
-          bind:selected
-          bind:checked
-          {modelA}
-          {modelB}
-          metric={selectedMetric}
         />
       {/each}
     {/if}
 
     <h4>Metadata</h4>
-    {#each $settings.metadata as name, i}
-      <MetadataNode {name} bind:finalSelection={metadataSelections[i]} />
+    {#each $settings.metadata.filter((m) => !m.startsWith("zeno")) as name, i}
+      <MetadataNode
+        {name}
+        col={name}
+        bind:finalSelection={metadataSelections[name]}
+      />
     {/each}
 
-    {#if modelA}
-      <h4>Outputs</h4>
+    <h4>Preprocessors</h4>
+    {#each $settings.metadata.filter((m) => m.startsWith("zenopre")) as name, i}
       <MetadataNode
-        name={"zenomodel_" + modelA}
-        bind:finalSelection={metadataSelections[$settings.metadata.length]}
+        name={name.slice(8)}
+        col={name}
+        bind:finalSelection={metadataSelections[name]}
       />
+    {/each}
+
+    <h4>Postprocessors</h4>
+    {#if model}
+      {#each $settings.metadata.filter( (m) => m.startsWith("zenopost_" + model + "_") ) as name, i}
+        <MetadataNode
+          name={name.slice(10 + model.length)}
+          col={name}
+          bind:finalSelection={metadataSelections[name]}
+        />
+      {/each}
     {/if}
 
-    {#if modelB}
+    {#if model}
+      <h4>Outputs</h4>
       <MetadataNode
-        name={"zenomodel_" + modelB}
-        bind:finalSelection={metadataSelections[$settings.metadata.length + 1]}
+        name={model}
+        col={"zenomodel_" + model}
+        bind:finalSelection={metadataSelections["zenomodel_" + model]}
       />
     {/if}
   </div>
 
   {#if filteredTable}
     <div id="results">
-      <Samples
-        bind:checked
-        {modelA}
-        {modelB}
-        table={filteredTable}
-        metric={selectedMetric}
-      />
+      <Samples bind:checked {model} table={filteredTable} {metric} />
     </div>
   {/if}
 </div>

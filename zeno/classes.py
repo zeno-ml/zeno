@@ -29,7 +29,7 @@ class Preprocessor:
         self.file_name = file_name
 
 
-class DataLoader:
+class Postprocessor:
     def __init__(self, name: str, file_name: Path):
         self.name = name
         self.file_name = file_name
@@ -41,13 +41,6 @@ class ModelLoader:
         self.file_name = file_name
 
 
-class Transform:
-    def __init__(self, name: str, func: Callable):
-        self.name = name
-        self.func = func
-        self.source = getsource(self.func)
-
-
 class Metric:
     def __init__(self, name: str, func: Callable):
         self.name = name
@@ -55,38 +48,21 @@ class Metric:
         self.source = getsource(self.func)
 
 
-class Slice:
-    def __init__(self, name: str, index: pd.Index):
-        self.name = name
-        self.index = index
-        self.size = len(index)
-
-
-class Slicer:
-    def __init__(self, name: str, func: Callable, name_list: List[str]):
-        self.name = name
-        self.func = func
-        self.name_list = name_list
-
-
 class Result:
     def __init__(
         self,
         sli: str,
-        transform: str,
         metric: str,
         slice_size: int,
     ):
-        """A result is a slice of data, a transform, and a metric.
+        """A result is a slice of data and a metric.
 
         Args:
             sli (str): The slice for this result.
-            transform (str): The transform for this result.
             metric (str): The metric for this result.
             slice_size (int): _description_
         """
         self.sli = sli
-        self.transform = transform
         self.metric = metric
 
         self.slice_size = slice_size
@@ -96,10 +72,7 @@ class Result:
         self.model_metrics: Dict[str, float] = {}
         self.model_metric_outputs: Dict[str, list] = {}
 
-        self.id: int = int(
-            hash("".join("".join(d) for d in sli) + self.transform + self.metric)
-            / 10000
-        )
+        self.id: int = int(hash("".join("".join(d) for d in sli) + self.metric) / 10000)
 
     def set_result(self, model_name: str, result: Union[pd.Series, list]):
         if model_name not in self.model_names:

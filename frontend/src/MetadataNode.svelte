@@ -7,6 +7,7 @@
   import { countSpec, histogramSpec } from "./vegaSpecs";
 
   export let name;
+  export let col;
   export let finalSelection;
 
   let selection = undefined;
@@ -14,9 +15,11 @@
   let view: View;
   let data = { table: [] };
 
+  $: console.log($table.objects(), data, col, selection);
+
   function updateData(table) {
-    if (spec && table.column(name)) {
-      let vals = table.column(name).data;
+    if (spec && table.column(col)) {
+      let vals = table.column(col).data;
       let d = vals.map((d) => ({ val: d }));
       data.table = d;
       data = data;
@@ -28,10 +31,10 @@
   }
 
   table.subscribe((t) => {
-    if (t.column(name)) {
-      let isOrdinal = isNaN(t.column(name).data[0]);
+    if (t.column(col)) {
+      let isOrdinal = isNaN(t.column(col).data[0]);
       let unique = t
-        .rollup({ unique: `d => op.distinct(d["${name}"])` })
+        .rollup({ unique: `d => op.distinct(d["${col}"])` })
         .object().unique;
 
       if (isOrdinal) {
@@ -42,6 +45,7 @@
     }
   });
   $: {
+    col;
     name;
     view;
     updateData($table);
@@ -70,15 +74,15 @@
         {selection ? selection[2].toFixed(2) : ""}
       </span>
     {/if}
-    {#if $table.column(name) && !spec}
+    {#if $table.column(col) && !spec}
       <span style:margin-right="5px">
         unique values: {$table
-          .rollup({ unique: `d => op.distinct(d["${name}"])` })
+          .rollup({ unique: `d => op.distinct(d["${col}"])` })
           .object().unique}
       </span>
     {/if}
   </div>
-  {#if $table.column(name) && spec && data.table.length > 0}
+  {#if $table.column(col) && spec && data.table.length > 0}
     <div
       id="histogram"
       on:mouseup={() => (finalSelection = selection)}

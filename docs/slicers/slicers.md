@@ -1,7 +1,0 @@
-(slicers)=
-
-# Slicers
-
-```{tableofcontents}
-
-```
