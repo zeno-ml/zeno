@@ -1,11 +1,10 @@
 import dataclasses
 import os
 from importlib import util
-from inspect import signature
 from pathlib import Path
 
 import pandas as pd
-from tqdm import trange
+from tqdm import trange  # type: ignore
 
 from .api import ZenoOptions  # type: ignore
 from .classes import ModelLoader, Postprocessor, Preprocessor

@@ -11,16 +11,8 @@ chapters:
       - file: model_loaders/model_loaders
         sections:
           - file: model_loaders/pytorch
-      - file: data_loaders/data_loaders
-        sections:
-          - file: data_loaders/image_loader
       - file: preprocessors/preprocessors
-      - file: slicers/slicers
-        sections:
-          - file: slicers/images
-      - file: transforms/transforms
-        sections:
-          - file: transforms/images
+      - file: postprocessors/postprocessors
       - file: metrics/metrics
         sections:
           - file: metrics/classification

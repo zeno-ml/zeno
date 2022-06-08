@@ -1,7 +1,0 @@
-(transforms)=
-
-# Transforms
-
-```{tableofcontents}
-
-```

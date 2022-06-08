@@ -35,12 +35,6 @@ class Postprocessor:
         self.file_name = file_name
 
 
-class DataLoader:
-    def __init__(self, name: str, file_name: Path):
-        self.name = name
-        self.file_name = file_name
-
-
 class ModelLoader:
     def __init__(self, name: str, file_name: Path):
         self.name = name
@@ -68,7 +62,7 @@ class Result:
         metric: str,
         slice_size: int,
     ):
-        """A result is a slice of data, a transform, and a metric.
+        """A result is a slice of data and a metric.
 
         Args:
             sli (str): The slice for this result.
@@ -85,10 +79,7 @@ class Result:
         self.model_metrics: Dict[str, float] = {}
         self.model_metric_outputs: Dict[str, list] = {}
 
-        self.id: int = int(
-            hash("".join("".join(d) for d in sli) + self.transform + self.metric)
-            / 10000
-        )
+        self.id: int = int(hash("".join("".join(d) for d in sli) + self.metric) / 10000)
 
     def set_result(self, model_name: str, result: Union[pd.Series, list]):
         if model_name not in self.model_names:

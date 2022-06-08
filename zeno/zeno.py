@@ -12,18 +12,11 @@ from typing import Callable, Dict, List
 
 import numpy as np
 import pandas as pd
-import umap
+import umap  # type: ignore
 
-from zeno.api import ZenoOptions  # type: ignore
-
-from .classes import (
-    ModelLoader,
-    Postprocessor,
-    Preprocessor,
-    ResultsRequest,
-    Slice,
-)
-from .util import get_arrow_bytes, preprocess_data, run_inference, postprocess_data
+from .api import ZenoOptions
+from .classes import ModelLoader, Postprocessor, Preprocessor, ResultsRequest, Slice
+from .util import get_arrow_bytes, postprocess_data, preprocess_data, run_inference
 
 
 class Zeno(object):
@@ -132,7 +125,6 @@ class Zeno(object):
         self.model_loader = None  # type: ignore
         self.slicers = {}
         self.metrics = {}
-        self.transforms = {}
 
         [
             self.__parse_testing_file(f, self.tests)
@@ -265,7 +257,7 @@ class Zeno(object):
         post_to_run = []
         for postprocessor in self.postprocessors:
             for model in self.model_names:
-                col_name = "zenopost_" + model_name + "_" + postprocessor.name
+                col_name = "zenopost_" + model + "_" + postprocessor.name
                 save_path = Path(self.cache_path, col_name + ".pickle")
 
                 try:

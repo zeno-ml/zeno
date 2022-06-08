@@ -1,4 +1,4 @@
-from .api import load_model, metric, preprocess, postprocess, ZenoOptions
+from .api import load_model, metric, postprocess, preprocess, ZenoOptions
 from .runner import run_zeno
 
 __all__ = [

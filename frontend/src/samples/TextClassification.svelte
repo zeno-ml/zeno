@@ -39,11 +39,6 @@
     font-size: 12px;
     color: rgba(255, 0, 0, 0.5);
   }
-  .second_output {
-    margin-left: 10px;
-    font-size: 12px;
-    color: rgba(255, 0, 255, 0.5);
-  }
   .box {
     padding: 10px;
   }
