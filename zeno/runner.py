@@ -167,7 +167,7 @@ def run_zeno(args):
                 "task": zeno.task,
                 "idColumn": zeno.id_column,
                 "labelColumn": zeno.label_column,
-                "metadata": zeno.metadata,
+                "metadata": zeno.columns,
                 "port": args["port"],
             }
         )
@@ -179,10 +179,6 @@ def run_zeno(args):
     @api_app.get("/models")
     def get_models():
         return json.dumps([str(n) for n in zeno.model_names])
-
-    @api_app.get("/slices")
-    def get_slices():
-        return json.dumps([str(n) for n in zeno.slices.keys()])
 
     @api_app.post("/table")
     def get_table(columns: TableRequest):

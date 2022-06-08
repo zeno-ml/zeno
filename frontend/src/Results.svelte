@@ -14,7 +14,7 @@
   import MetadataNode from "./MetadataNode.svelte";
 
   let model: string = "";
-  let selectedMetric: string = "";
+  let metric: string = "";
 
   let filteredTable = aq.table({});
   let filter: string = "";
@@ -22,12 +22,12 @@
 
   let selected: string = "";
   let checked: Set<string> = new Set();
-  let metadataSelections = [];
+  let metadataSelections = {};
 
   ready.subscribe((r) => {
     if (r) {
       model = $models[0];
-      selectedMetric = $metrics[0];
+      metric = $metrics[0];
     }
   });
   table.subscribe((t) => updateFilteredTable(t));
@@ -47,23 +47,16 @@
     if (selected) {
       tempTable = getFilteredTable(selected, $settings.metadata, $table, model);
     }
-
-    metadataSelections.forEach((sel, i) => {
-      if (sel) {
-        let name;
-        if (i >= $settings.metadata.length) {
-          name = "zenomodel_" + model;
-        } else {
-          name = $settings.metadata[i];
-        }
-
-        if (sel[0] === "range") {
+    Object.keys(metadataSelections).forEach((name) => {
+      let entry = metadataSelections[name];
+      if (entry) {
+        if (entry[0] === "range") {
           tempTable = tempTable.filter(
-            `(r) => r["${name}"] > ${sel[1]} && r["${name}"] < ${sel[2]}`
+            `(r) => r["${name}"] > ${entry[1]} && r["${name}"] < ${entry[2]}`
           );
         } else {
           tempTable = tempTable.filter(
-            aq.escape((r) => aq.op.includes(sel.slice(1), r[name], 0))
+            aq.escape((r) => aq.op.includes(entry.slice(1), r[name], 0))
           );
         }
       }
@@ -122,11 +115,7 @@
   </div>
   <div>
     {#if $metrics}
-      <Select
-        bind:value={selectedMetric}
-        label="Metric"
-        style="margin-right: 20px;"
-      >
+      <Select bind:value={metric} label="Metric" style="margin-right: 20px;">
         {#each $metrics as m}
           <Option value={m}>{m}</Option>
         {/each}
@@ -150,7 +139,7 @@
         <Slice
           name={s.name}
           fullName={s.name}
-          metric={selectedMetric}
+          {metric}
           size={s.size}
           {model}
           bind:selected
@@ -160,27 +149,47 @@
     {/if}
 
     <h4>Metadata</h4>
-    {#each $settings.metadata as name, i}
-      <MetadataNode {name} bind:finalSelection={metadataSelections[i]} />
+    {#each $settings.metadata.filter((m) => !m.startsWith("zeno")) as name, i}
+      <MetadataNode
+        {name}
+        col={name}
+        bind:finalSelection={metadataSelections[name]}
+      />
     {/each}
+
+    <h4>Preprocessors</h4>
+    {#each $settings.metadata.filter((m) => m.startsWith("zenopre")) as name, i}
+      <MetadataNode
+        name={name.slice(8)}
+        col={name}
+        bind:finalSelection={metadataSelections[name]}
+      />
+    {/each}
+
+    <h4>Postprocessors</h4>
+    {#if model}
+      {#each $settings.metadata.filter( (m) => m.startsWith("zenopost_" + model + "_") ) as name, i}
+        <MetadataNode
+          name={name.slice(10 + model.length)}
+          col={name}
+          bind:finalSelection={metadataSelections[name]}
+        />
+      {/each}
+    {/if}
 
     {#if model}
       <h4>Outputs</h4>
       <MetadataNode
-        name={"zenomodel_" + model}
-        bind:finalSelection={metadataSelections[$settings.metadata.length]}
+        name={model}
+        col={"zenomodel_" + model}
+        bind:finalSelection={metadataSelections["zenomodel_" + model]}
       />
     {/if}
   </div>
 
   {#if filteredTable}
     <div id="results">
-      <Samples
-        bind:checked
-        {model}
-        table={filteredTable}
-        metric={selectedMetric}
-      />
+      <Samples bind:checked {model} table={filteredTable} {metric} />
     </div>
   {/if}
 </div>

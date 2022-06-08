@@ -48,13 +48,6 @@ class Metric:
         self.source = getsource(self.func)
 
 
-class Slice:
-    def __init__(self, name: str, index: pd.Index):
-        self.name = name
-        self.index = index
-        self.size = len(index)
-
-
 class Result:
     def __init__(
         self,

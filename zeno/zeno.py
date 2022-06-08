@@ -15,7 +15,7 @@ import pandas as pd
 import umap  # type: ignore
 
 from .api import ZenoOptions
-from .classes import ModelLoader, Postprocessor, Preprocessor, ResultsRequest, Slice
+from .classes import ModelLoader, Postprocessor, Preprocessor, ResultsRequest
 from .util import get_arrow_bytes, postprocess_data, preprocess_data, run_inference
 
 
@@ -39,15 +39,6 @@ class Zeno(object):
 
         self.task = task
         self.tests = tests
-
-        if os.path.isdir(models[0]):
-            self.model_paths = [
-                os.path.join(models[0], m) for m in os.listdir(models[0])
-            ]
-        else:
-            self.model_paths = models  # type: ignore
-        self.model_names = [os.path.basename(p).split(".")[0] for p in self.model_paths]
-
         self.batch_size = batch_size
         self.id_column = id_column
         self.data_column = data_column
@@ -55,7 +46,6 @@ class Zeno(object):
         self.data_type = data_type
         self.output_type = output_type
         self.data_path = data_path
-
         self.zeno_options = ZenoOptions(
             id_column=self.id_column,
             data_column=self.data_column,
@@ -67,19 +57,21 @@ class Zeno(object):
             output_path="",
         )
 
+        if os.path.isdir(models[0]):
+            self.model_paths = [
+                os.path.join(models[0], m) for m in os.listdir(models[0])
+            ]
+        else:
+            self.model_paths = models  # type: ignore
+        self.model_names = [os.path.basename(p).split(".")[0] for p in self.model_paths]
+
         self.status: str = "Initializing"
 
         self.model_loader: ModelLoader = None  # type: ignore
-
-        # Key is name of preprocess function
         self.preprocessors: List[Preprocessor] = []
-        # Key is name of preprocess function
         self.postprocessors: List[Postprocessor] = []
         # Key is name of metric function
         self.metrics: Dict[str, Callable] = {}
-
-        # Key is name of slice
-        self.slices: Dict[str, Slice] = {}
 
         # Read metadata as Pandas for slicing
         if metadata_path.suffix == ".csv":
@@ -98,44 +90,40 @@ class Zeno(object):
         self.df[id_column].astype(str)
         self.df.set_index(self.id_column, inplace=True)
         self.df[id_column] = self.df.index
-
-        self.metadata: List[str] = []
-
-        self.done_inference = threading.Event()
+        self.columns: List[str] = []
         self.complete_columns = list(self.df.columns)
 
     def start_processing(self):
-        """Parse testing files, preprocess, run inference, and slicing data."""
+        """Parse testing files, preprocess, run inference, and postprocess."""
+
+        # Get Zeno test functions.
         self.__parse_testing_files()
 
-        meta = [
+        # Get names of all columns before processing.
+        cols = [
             *["zenopre_" + p.name for p in self.preprocessors],
             *list(self.df.columns),
         ]
         for post in self.postprocessors:
             for model in self.model_names:
-                meta.append("zenopost_" + model + "_" + post.name)
-        self.metadata = meta
+                cols.append("zenopost_" + model + "_" + post.name)
+        self.columns = cols
 
         self.__thread = threading.Thread(target=asyncio.run, args=(self.__process(),))
         self.__thread.start()
 
     def __parse_testing_files(self):
-        self.data_loader = None  # type: ignore
         self.model_loader = None  # type: ignore
         self.slicers = {}
         self.metrics = {}
 
-        [
-            self.__parse_testing_file(f, self.tests)
-            for f in list(self.tests.rglob("*.py"))
-        ]
+        [self.__parse_testing_file(f) for f in list(self.tests.rglob("*.py"))]
 
         if not self.model_loader:
             logging.error("No model loader found")
             sys.exit(1)
 
-    def __parse_testing_file(self, test_file: Path, base_path: Path):
+    def __parse_testing_file(self, test_file: Path):
         spec = util.spec_from_file_location("module.name", test_file)
         test_module = util.module_from_spec(spec)  # type: ignore
         spec.loader.exec_module(test_module)  # type: ignore
@@ -250,7 +238,6 @@ class Zeno(object):
                     self.df.loc[:, "zenoembedding_" + out[0]] = out[2]
                     self.complete_columns.append("zenomodel_" + out[0])
 
-        self.done_inference.set()
         self.status = "Done running inference"
 
         # Check if we need to run postprocessing since Pool is expensive
@@ -294,7 +281,6 @@ class Zeno(object):
                     self.df.loc[:, "zenopost_" + out[0]] = out[1]
                     self.complete_columns.append("zenopost_" + out[0])
 
-        self.done_inference.set()
         self.status = "Done running postprocessing"
 
     def get_results(self, requests: ResultsRequest):
@@ -319,7 +305,9 @@ class Zeno(object):
             return
 
         local_ops = dataclasses.replace(
-            self.zeno_options, output_column="zenomodel_" + model_name
+            self.zeno_options,
+            output_column="zenomodel_" + model_name,
+            output_path=os.path.join(self.cache_path, "zenomodel_" + model_name),
         )
         metric_func = self.metrics[metric_name]
         result_metric = metric_func(self.df.loc[idxs], local_ops)
