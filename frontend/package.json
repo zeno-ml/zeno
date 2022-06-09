@@ -46,7 +46,7 @@
     "@smui/segmented-button": "^6.0.0-beta.16",
     "@smui/select": "^6.0.0-beta.16",
     "apache-arrow": "7.0.0",
-    "arquero": "^4.8.8",
+    "arquero": "^5.0.0",
     "d3-force": "^3.0.0",
     "d3-scale": "^4.0.2",
     "d3-scale-chromatic": "^3.0.0",

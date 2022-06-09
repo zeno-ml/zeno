@@ -1,13 +1,12 @@
 <script lang="ts">
   import type ColumnTable from "arquero/dist/types/table/column-table";
 
-  import { Label } from "@smui/common";
+  import Chip, { Set as ChipSet, Text, TrailingIcon } from "@smui/chips";
   import { Pagination } from "@smui/data-table";
   import IconButton from "@smui/icon-button";
   import SegmentedButton, { Segment } from "@smui/segmented-button";
   import Select, { Option } from "@smui/select";
-  import Chip, { Set as ChipSet, Text } from "@smui/chips";
-  import Button from "@smui/button";
+  import Button, { Label } from "@smui/button";
 
   import { scaleSequential } from "d3-scale";
   import { interpolatePurples } from "d3-scale-chromatic";
@@ -19,6 +18,7 @@
   import TextClassification from "./TextClassification.svelte";
 
   import {
+    metadataSelections,
     ready,
     results,
     settings,
@@ -62,21 +62,13 @@
   function getIdxs(slice_name: string) {
     let s = $slices.get(slice_name);
     if (s) {
-      if (s.type === "programmatic") {
-        return new Set(
-          $tableStore
-            .filter(`d => d["${"zenoslice_" + s.name}"] !== null`)
-            .array($settings.idColumn) as string[]
-        );
-      } else {
-        const newTable = getFilteredTable(
-          s.name,
-          $settings.metadata,
-          $tableStore,
-          model
-        );
-        return new Set(newTable.array($settings.idColumn) as string[]);
-      }
+      const newTable = getFilteredTable(
+        s.name,
+        $settings.metadata,
+        $tableStore,
+        model
+      );
+      return new Set(newTable.array($settings.idColumn) as string[]);
     }
   }
 
@@ -132,10 +124,35 @@
 
 {#if table.size > 0}
   <div class="options container">
-    <div style:margin-left="10px">
+    <div class="inline" style:margin-left="10px">
       <span style:margin-right="10px">
         {result ? result.toFixed(2) : ""}
       </span>
+      {#each [...$metadataSelections.entries()] as [col, chip]}
+        <div class="meta-chip">
+          <span>
+            {#if chip.type === "range"}
+              {chip.values[0].toFixed(2)}
+              {"<"}
+              {chip.name}
+              {"<"}
+              {chip.values[1].toFixed(2)}
+            {:else}
+              {chip.name}
+              {"=="}
+              {chip.values.join(" | ")}
+            {/if}
+          </span>
+          <TrailingIcon
+            class="remove material-icons"
+            on:click={() =>
+              metadataSelections.update((m) => {
+                m.delete(col);
+                return m;
+              })}>cancel</TrailingIcon
+          >
+        </div>
+      {/each}
     </div>
     <SegmentedButton
       segments={viewOptions}
@@ -281,6 +298,14 @@
   }
   th {
     padding: 20px;
+  }
+  .meta-chip {
+    padding: 5px;
+    background: rgba(0, 0, 0, 0.07);
+    margin-left: 5px;
+    margin-right: 5px;
+    border-radius: 5px;
+    width: fit-content;
   }
   .container {
     display: flex;

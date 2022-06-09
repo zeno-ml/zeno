@@ -48,18 +48,13 @@
         },
         body: JSON.stringify({ columns: missingColumns }),
       })
-        .then((d) => d.json())
+        .then((d: Response) => d.arrayBuffer())
         .then((d) => {
-          const x = {};
-          Object.keys(d).forEach((k) => {
-            x[k] = Object.values(d[k]);
-          });
-
           let t: ColumnTable;
           if ($table.size === 0) {
-            t = aq.fromJSON(x);
+            t = aq.fromArrow(d);
           } else {
-            t = $table.assign(aq.fromJSON(x));
+            t = $table.assign(aq.fromArrow(d));
           }
           table.set(t);
         });

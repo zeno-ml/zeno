@@ -54,6 +54,7 @@ export function getFilteredTable(
 }
 
 export function updateResults(requests: ResultsRequest[]) {
+  console.log(requests);
   fetch("/api/results", {
     method: "POST",
     headers: {

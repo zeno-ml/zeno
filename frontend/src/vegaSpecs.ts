@@ -21,7 +21,7 @@ export const histogramSpec = {
       mark: "bar",
       encoding: {
         x: {
-          field: "val",
+          field: "data",
           bin: { maxbins: 20 },
           axis: {
             title: "",
@@ -42,7 +42,7 @@ export const histogramSpec = {
       mark: { type: "bar", fill: "#9b51e0", opacity: 0.5 },
       encoding: {
         x: {
-          field: "val",
+          field: "data",
           bin: { maxbins: 20 },
         },
         y: { aggregate: "count" },
@@ -71,7 +71,7 @@ export const countSpec = {
   mark: { type: "bar", fill: "#9b51e0", opacity: 0.5 },
   encoding: {
     x: {
-      field: "val",
+      field: "data",
       type: "ordinal",
       axis: {
         title: "",

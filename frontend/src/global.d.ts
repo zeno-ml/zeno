@@ -31,3 +31,9 @@ interface ResultsRequest {
   sli: string;
   idxs: string[];
 }
+
+interface MetadataSelection {
+  name: string;
+  type: string;
+  values: [];
+}

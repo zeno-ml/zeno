@@ -2,4 +2,6 @@ codecov:
   token: 18790a3d-ae22-412f-a987-74ef73d405a3
 coverage:
   status:
-    informational: true
+    project:
+      default:
+        informational: true

@@ -32,3 +32,6 @@ export const table: Writable<ColumnTable> = writable(aq.table({}));
 export const results: Writable<InternMap<ResultKey, number>> = writable(
   new InternMap([], (d) => d.slice + "." + d.metric + "." + d.model)
 );
+
+export const metadataSelections: Writable<Map<string, MetadataSelection>> =
+  writable(new Map());

@@ -4,23 +4,24 @@ from importlib import util
 from pathlib import Path
 
 import pandas as pd
+
+import pyarrow as pa  # type: ignore
 from tqdm import trange  # type: ignore
 
 from .api import ZenoOptions  # type: ignore
 from .classes import ModelLoader, Postprocessor, Preprocessor
 
-# import pyarrow as pa  # type: ignore
-
 
 def get_arrow_bytes(df, id_col):
-    # df_arrow = pa.Table.from_pandas(df)
-    # buf = pa.BufferOutputStream()
-    # with pa.ipc.new_file(buf, df_arrow.schema) as writer:
-    #     writer.write_table(df_arrow)
-    # return bytes(buf.getvalue())
     df[id_col] = df.index
-    js = df.to_json()
-    return js
+    df_arrow = pa.Table.from_pandas(df)
+    buf = pa.BufferOutputStream()
+    with pa.ipc.new_file(buf, df_arrow.schema) as writer:
+        writer.write_table(df_arrow)
+    bs = bytes(buf.getvalue())
+    return bs
+    # js = df.to_json()
+    # return js
 
 
 def get_function(file_name, function_name):

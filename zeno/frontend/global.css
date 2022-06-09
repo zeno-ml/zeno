@@ -118,3 +118,7 @@ span {
 .mdc-data-table__pagination {
   border-top-width: 0px;
 }
+
+.remove {
+  cursor: pointer;
+}

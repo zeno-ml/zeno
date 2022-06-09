@@ -5,7 +5,15 @@
   import Select, { Option } from "@smui/select";
   import * as aq from "arquero";
 
-  import { metrics, models, ready, settings, slices, table } from "./stores";
+  import {
+    metadataSelections,
+    metrics,
+    models,
+    ready,
+    settings,
+    slices,
+    table,
+  } from "./stores";
   import { getFilteredTable, updateResults } from "./util";
 
   import Samples from "./samples/Samples.svelte";
@@ -22,7 +30,6 @@
 
   let selected: string = "";
   let checked: Set<string> = new Set();
-  let metadataSelections = {};
 
   ready.subscribe((r) => {
     if (r) {
@@ -31,10 +38,10 @@
     }
   });
   table.subscribe((t) => updateFilteredTable(t));
+  metadataSelections.subscribe(() => updateFilteredTable($table));
 
   $: {
     selected;
-    metadataSelections;
     updateFilteredTable($table);
   }
 
@@ -47,18 +54,19 @@
     if (selected) {
       tempTable = getFilteredTable(selected, $settings.metadata, $table, model);
     }
-    Object.keys(metadataSelections).forEach((name) => {
-      let entry = metadataSelections[name];
-      if (entry) {
-        if (entry[0] === "range") {
-          tempTable = tempTable.filter(
-            `(r) => r["${name}"] > ${entry[1]} && r["${name}"] < ${entry[2]}`
-          );
-        } else {
-          tempTable = tempTable.filter(
-            aq.escape((r) => aq.op.includes(entry.slice(1), r[name], 0))
-          );
+    [...$metadataSelections.entries()].forEach((e) => {
+      let [name, entry] = e;
+      if (entry.type === "range") {
+        tempTable = tempTable.filter(
+          `(r) => r["${name}"] > ${entry.values[0]} && r["${name}"] < ${entry.values[1]}`
+        );
+      } else {
+        if (typeof tempTable.column(name).get(0) === "bigint") {
+          entry.values = entry.values.map((d) => BigInt(d));
         }
+        tempTable = tempTable.filter(
+          aq.escape((r) => aq.op.includes(entry.values, r[name], 0))
+        );
       }
     });
 
@@ -150,40 +158,24 @@
 
     <h4>Metadata</h4>
     {#each $settings.metadata.filter((m) => !m.startsWith("zeno")) as name, i}
-      <MetadataNode
-        {name}
-        col={name}
-        bind:finalSelection={metadataSelections[name]}
-      />
+      <MetadataNode {name} col={name} />
     {/each}
 
     <h4>Preprocessors</h4>
     {#each $settings.metadata.filter((m) => m.startsWith("zenopre")) as name, i}
-      <MetadataNode
-        name={name.slice(8)}
-        col={name}
-        bind:finalSelection={metadataSelections[name]}
-      />
+      <MetadataNode name={name.slice(8)} col={name} />
     {/each}
 
     <h4>Postprocessors</h4>
     {#if model}
       {#each $settings.metadata.filter( (m) => m.startsWith("zenopost_" + model + "_") ) as name, i}
-        <MetadataNode
-          name={name.slice(10 + model.length)}
-          col={name}
-          bind:finalSelection={metadataSelections[name]}
-        />
+        <MetadataNode name={name.slice(10 + model.length)} col={name} />
       {/each}
     {/if}
 
     {#if model}
       <h4>Outputs</h4>
-      <MetadataNode
-        name={model}
-        col={"zenomodel_" + model}
-        bind:finalSelection={metadataSelections["zenomodel_" + model]}
-      />
+      <MetadataNode name={model} col={"zenomodel_" + model} />
     {/if}
   </div>
 
