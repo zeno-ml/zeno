@@ -13,13 +13,6 @@ interface WSResponse {
   columns: string[];
 }
 
-interface Slice {
-  name: string;
-  // One of "programmatic", "generated"
-  type: string;
-  size: number;
-}
-
 interface ResultKey {
   // A JS query string, combination of metadata and slices.
   slice: string;
@@ -36,4 +29,17 @@ interface MetadataSelection {
   name: string;
   type: string;
   values: [];
+}
+
+interface FilterPredicate {
+  column: string;
+  operation: string;
+  value: string;
+  join: string;
+}
+
+interface Slice {
+  name: string;
+  predicates: FilterPredicate[];
+  size: number;
 }

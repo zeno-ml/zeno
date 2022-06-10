@@ -1,44 +1,28 @@
 <script lang="ts">
-  import Checkbox from "@smui/checkbox";
-  import FormField from "@smui/form-field";
+  import { TrailingIcon } from "@smui/chips";
+
   import Ripple from "@smui/ripple";
-  import { results } from "./stores";
+  import { results, model, metric, slices } from "./stores";
 
   export let name: string;
   export let size: number;
-  export let metric: string;
-  export let model: string;
-  export let selected;
-  export let checked;
   export let fullName = name;
+  export let selected = false;
+  export let setSelected;
 
   $: result = $results.get({
     slice: fullName,
-    metric: metric,
-    model: model,
+    metric: $metric,
+    model: $model,
   } as ResultKey);
 </script>
 
 <div
   use:Ripple={{ surface: true, color: "primary" }}
-  class="cell parent {selected === fullName ? 'selected' : ''}"
-  on:click={() =>
-    selected === fullName ? (selected = "") : (selected = fullName)}
+  class="cell parent {selected ? 'selected' : ''}"
+  on:click={setSelected}
 >
   <div class="group" style:width="100%">
-    <div style:margin-right="5px">
-      <FormField on:click={(e) => e.stopPropagation()}>
-        <Checkbox
-          checked={checked.has(fullName)}
-          on:click={() => {
-            checked.has(fullName)
-              ? checked.delete(fullName)
-              : checked.add(fullName);
-            checked = checked;
-          }}
-        />
-      </FormField>
-    </div>
     <div class="group" style:width="100%">
       <span>{name}</span>
       {#if result}
@@ -47,6 +31,16 @@
             {result.toFixed(2)}
           </span>
           <span>({size.toLocaleString()})</span>
+          <TrailingIcon
+            class="delete-outline material-icons"
+            on:click={() =>
+              slices.update((s) => {
+                s.delete(name);
+                return s;
+              })}
+          >
+            delete-outline
+          </TrailingIcon>
         </div>
       {/if}
     </div>

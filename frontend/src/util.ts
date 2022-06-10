@@ -1,4 +1,3 @@
-import type ColumnTable from "arquero/dist/types/table/column-table";
 import { metrics, models, ready, results, settings } from "./stores";
 
 export function initialFetch() {
@@ -26,35 +25,7 @@ export function updateTab(t: string) {
   return t;
 }
 
-export function getFilteredTable(
-  filter: string,
-  metadata: string[],
-  table: ColumnTable,
-  model: string
-) {
-  let tempFilter = filter;
-
-  metadata.forEach((m) => {
-    tempFilter = tempFilter.replaceAll("m." + m, 'd["' + m + '"]');
-  });
-
-  if (model) {
-    tempFilter = tempFilter.replaceAll("o1", "d.zenomodel_" + model);
-  }
-
-  table
-    .columnNames()
-    .filter((d) => d.startsWith("zenoslice_"))
-    .forEach((c) => {
-      c = c.substring(10);
-      tempFilter = tempFilter.replaceAll("s." + c, 'd["zenoslice_' + c + '"]');
-    });
-
-  return table.filter(tempFilter);
-}
-
 export function updateResults(requests: ResultsRequest[]) {
-  console.log(requests);
   fetch("/api/results", {
     method: "POST",
     headers: {
@@ -69,9 +40,7 @@ export function updateResults(requests: ResultsRequest[]) {
         res.forEach((r) => {
           resmap.set(
             {
-              slice: r.slice.startsWith("zenoslice_")
-                ? r.slice.slice(10)
-                : r.slice,
+              slice: r.slice,
               metric: r.metric,
               model: r.model,
             } as ResultKey,
@@ -82,4 +51,34 @@ export function updateResults(requests: ResultsRequest[]) {
       });
     })
     .catch((e) => console.log(e));
+}
+
+export function filterWithPredicates(
+  predicates: FilterPredicate[],
+  table,
+  currentColumns,
+  formattedCurrentColumns
+) {
+  const stringPreds = predicates.map((p: FilterPredicate) => {
+    if (p.join === "") {
+      return (
+        `d["${currentColumns[formattedCurrentColumns.indexOf(p.column)]}"]` +
+        " " +
+        p.operation +
+        " " +
+        p.value
+      );
+    }
+    return (
+      (p.join === "AND" ? "&&" : "||") +
+      " " +
+      `d["${currentColumns[formattedCurrentColumns.indexOf(p.column)]}"]` +
+      " " +
+      p.operation +
+      " " +
+      p.value
+    );
+  });
+
+  return table.filter(`d => ${stringPreds.join(" ")}`);
 }

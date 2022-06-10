@@ -1,5 +1,9 @@
 <script lang="ts">
-  import { mdiGraphql, mdiListStatus, mdiTestTube } from "@mdi/js";
+  import {
+    mdiCircleOutline,
+    mdiCheckboxMultipleMarkedCircleOutline,
+    mdiChartPie,
+  } from "@mdi/js";
   import { Svg } from "@smui/common/elements";
   import IconButton, { Icon } from "@smui/icon-button";
   import List, { Item, Separator } from "@smui/list";
@@ -8,14 +12,13 @@
   import { onMount } from "svelte";
   import Router, { location } from "svelte-spa-router";
 
-  import Embed from "./Embed.svelte";
-  import Header from "./Header.svelte";
-  import Results from "./Results.svelte";
-  import Tests from "./Tests.svelte";
   import { table, wsResponse } from "./stores";
   import { initialFetch, updateTab } from "./util";
 
-  table.subscribe((t) => console.log(t.objects()));
+  import Header from "./Header.svelte";
+  import Discovery from "./Discovery.svelte";
+  import Exploration from "./Exploration.svelte";
+  import Analysis from "./Analysis.svelte";
 
   let tab = $location.split("/")[1];
   if (!tab) {
@@ -23,17 +26,17 @@
   }
 
   const routes = {
-    "/": Results,
-    "/results/": Results,
-    "/embed/": Embed,
-    "/tests/": Tests,
-    "*": Results,
+    "/": Exploration,
+    "/discovery/": Discovery,
+    "/exploration/": Exploration,
+    "/analysis/": Analysis,
+    "*": Exploration,
   };
 
   location.subscribe((d) => {
     tab = d.split("/")[1];
     if (!tab) {
-      tab = "results";
+      tab = "exploration";
     }
   });
 
@@ -69,34 +72,37 @@
   <div id="side-menu">
     <List class="demo-list" iconList={true}>
       <Item
-        activated={tab === "results"}
-        on:SMUI:action={() => (tab = updateTab("results"))}
+        activated={tab === "discovery"}
+        on:SMUI:action={() => (tab = updateTab("discovery"))}
       >
         <IconButton>
           <Icon component={Svg} viewBox="0 0 24 24">
-            <path fill="currentColor" d={mdiListStatus} />
+            <path fill="currentColor" d={mdiCircleOutline} />
           </Icon>
         </IconButton>
       </Item>
       <Separator />
       <Item
-        activated={tab === "embed"}
-        on:SMUI:action={() => (tab = updateTab("embed"))}
+        activated={tab === "exploration"}
+        on:SMUI:action={() => (tab = updateTab("exploration"))}
       >
         <IconButton>
           <Icon component={Svg} viewBox="0 0 24 24">
-            <path fill="currentColor" d={mdiGraphql} />
+            <path fill="currentColor" d={mdiChartPie} />
           </Icon>
         </IconButton>
       </Item>
       <Separator />
       <Item
-        activated={tab === "tests"}
-        on:SMUI:action={() => (tab = updateTab("tests"))}
+        activated={tab === "analysis"}
+        on:SMUI:action={() => (tab = updateTab("analysis"))}
       >
         <IconButton>
           <Icon component={Svg} viewBox="0 0 24 24">
-            <path fill="currentColor" d={mdiTestTube} />
+            <path
+              fill="currentColor"
+              d={mdiCheckboxMultipleMarkedCircleOutline}
+            />
           </Icon>
         </IconButton>
       </Item>
@@ -132,7 +138,7 @@
   #side-menu {
     width: 50px;
     border-right: 1px solid #e0e0e0;
-    height: calc(100vh - 74px);
+    height: calc(100vh - 60px);
   }
 
   #main {
