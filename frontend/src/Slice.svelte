@@ -36,6 +36,7 @@
             on:click={() =>
               slices.update((s) => {
                 s.delete(name);
+                setSelected(name);
                 return s;
               })}
           >

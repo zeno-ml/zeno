@@ -1,10 +1,8 @@
 <script lang="ts">
-  import type ColumnTable from "arquero/dist/types/table/column-table";
-
+  import { Label } from "@smui/button";
   import { Pagination } from "@smui/data-table";
   import IconButton from "@smui/icon-button";
   import Select, { Option } from "@smui/select";
-  import { Label } from "@smui/button";
 
   import AudioClassification from "./samples/AudioClassification.svelte";
   import ImageClassification from "./samples/ImageClassification.svelte";
@@ -12,9 +10,7 @@
   import ObjectDetection from "./samples/ObjectDetection.svelte";
   import TextClassification from "./samples/TextClassification.svelte";
 
-  import { ready, settings, model } from "./stores";
-
-  export let table: ColumnTable;
+  import { filteredTable, model, ready, settings } from "./stores";
 
   let rowsPerPage = 15;
   let currentPage = 0;
@@ -22,8 +18,8 @@
   $: modelCol = "zenomodel_" + $model;
 
   $: start = currentPage * rowsPerPage;
-  $: end = Math.min(start + rowsPerPage, table.size);
-  $: lastPage = Math.max(Math.ceil(table.size / rowsPerPage) - 1, 0);
+  $: end = Math.min(start + rowsPerPage, $filteredTable.size);
+  $: lastPage = Math.max(Math.ceil($filteredTable.size / rowsPerPage) - 1, 0);
   $: if (currentPage > lastPage) {
     currentPage = lastPage;
   }
@@ -33,21 +29,27 @@
   {#if $ready}
     {#if $settings.task === "image-classification"}
       <ImageClassification
-        table={table.slice(start, end).objects()}
+        table={$filteredTable.slice(start, end).objects()}
         {modelCol}
       />
     {:else if $settings.task === "image-segmentation"}
-      <ImageSegmentation table={table.slice(start, end).objects()} {modelCol} />
+      <ImageSegmentation
+        table={$filteredTable.slice(start, end).objects()}
+        {modelCol}
+      />
     {:else if $settings.task === "object-detection"}
-      <ObjectDetection table={table.slice(start, end).objects()} {modelCol} />
+      <ObjectDetection
+        table={$filteredTable.slice(start, end).objects()}
+        {modelCol}
+      />
     {:else if $settings.task === "text-classification"}
       <TextClassification
-        table={table.slice(start, end).objects()}
+        table={$filteredTable.slice(start, end).objects()}
         {modelCol}
       />
     {:else if $settings.task === "audio-classification"}
       <AudioClassification
-        table={table.slice(start, end).objects()}
+        table={$filteredTable.slice(start, end).objects()}
         {modelCol}
       />
     {/if}
@@ -64,7 +66,7 @@
     </Select>
   </svelte:fragment>
   <svelte:fragment slot="total">
-    {start + 1}-{end} of {table.size}
+    {start + 1}-{end} of {$filteredTable.size}
   </svelte:fragment>
 
   <IconButton

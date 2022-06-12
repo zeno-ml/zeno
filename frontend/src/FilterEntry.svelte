@@ -7,13 +7,22 @@
 
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
-  import { formattedCurrentColumns } from "./stores";
+  import { formattedCurrentColumns, slices } from "./stores";
 
   export let predicate: FilterPredicate;
   export let deletePredicate;
   export let first;
 
   let operations = ["==", "!=", ">", "<", ">=", "<="];
+
+  $: if (
+    !predicate.column ||
+    $formattedCurrentColumns.includes(predicate.column)
+  ) {
+    predicate.type = "metadata";
+  } else {
+    predicate.type = "slice";
+  }
 </script>
 
 <div id="group">
@@ -30,30 +39,43 @@
       {/each}
     </Select>
   {/if}
-  <div class="selector">
-    <Autocomplete
-      options={$formattedCurrentColumns}
-      bind:value={predicate.column}
-      label="Metadata"
-    />
-  </div>
-  <div class="selector">
+  {#if predicate.type === "slice"}
     <Select
       bind:value={predicate.operation}
       label="Operation"
       style="margin-right: 20px;"
     >
-      {#each operations as o}
+      {#each ["IS IN", "IS NOT IN"] as o}
         <Option value={o}>{o}</Option>
       {/each}
     </Select>
-  </div>
-
+  {/if}
   <div class="selector">
-    <Textfield bind:value={predicate.value} label="Value">
-      <HelperText slot="helper">0</HelperText>
-    </Textfield>
+    <Autocomplete
+      options={[...$formattedCurrentColumns, ...$slices.keys()]}
+      bind:value={predicate.column}
+      label="Metadata or Slice"
+    />
   </div>
+  {#if predicate.type === "metadata"}
+    <div class="selector">
+      <Select
+        bind:value={predicate.operation}
+        label="Operation"
+        style="margin-right: 20px;"
+      >
+        {#each operations as o}
+          <Option value={o}>{o}</Option>
+        {/each}
+      </Select>
+    </div>
+
+    <div class="selector">
+      <Textfield bind:value={predicate.value} label="Value">
+        <HelperText slot="helper">0</HelperText>
+      </Textfield>
+    </div>
+  {/if}
   <div class="selector">
     <IconButton on:click={deletePredicate}>
       <Icon component={Svg} viewBox="0 0 24 24">

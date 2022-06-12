@@ -1,45 +1,42 @@
 <script lang="ts">
+  import Button from "@smui/button";
+  import * as aq from "arquero";
   import type ColumnTable from "arquero/dist/types/table/column-table";
 
-  import * as aq from "arquero";
-
-  import Button from "@smui/button";
+  import { clickOutside } from "./clickOutside";
+  import CreateSlice from "./CreateSlice.svelte";
+  import MetadataNode from "./MetadataNode.svelte";
+  import SampleOptions from "./SampleOptions.svelte";
+  import Samples from "./Samples.svelte";
+  import Slice from "./Slice.svelte";
 
   import {
+    currentColumns,
+    filteredTable,
+    formattedCurrentColumns,
     metadataSelections,
+    metric,
     metrics,
+    model,
     models,
     ready,
     settings,
     slices,
     table,
-    model,
-    metric,
-    currentColumns,
-    formattedCurrentColumns,
   } from "./stores";
   import { filterWithPredicates, updateResults } from "./util";
-  import { clickOutside } from "./clickOutside";
 
-  import Samples from "./Samples.svelte";
-  import SampleOptions from "./SampleOptions.svelte";
-  import CreateSlice from "./CreateSlice.svelte";
-  import Slice from "./Slice.svelte";
-  import MetadataNode from "./MetadataNode.svelte";
-
-  let filteredTable = aq.table({});
+  let newSlice = false;
+  let selected: string[] = [];
   let predicates: FilterPredicate[] = [
     {
       column: "",
+      type: "metadata",
       operation: "",
       value: "",
       join: "",
     },
   ];
-
-  let newSlice = false;
-
-  let selected: string[] = [];
 
   ready.subscribe((r) => {
     if (r) {
@@ -47,33 +44,34 @@
       metric.set($metrics[0]);
     }
   });
+
   table.subscribe((t) => updateFilteredTable(t));
   metadataSelections.subscribe(() => updateFilteredTable($table));
-
   $: {
     selected;
     updateFilteredTable($table);
   }
 
   function updateFilteredTable(t: ColumnTable) {
-    if (!$ready) {
+    if (!$ready || $table.size === 0) {
       return;
     }
 
     let tempTable = t;
 
-    // Filter with Slices
-    selected.forEach(
-      (s) =>
-        (tempTable = filterWithPredicates(
-          $slices.get(s).predicates,
-          tempTable,
-          $currentColumns,
-          $formattedCurrentColumns
-        ))
-    );
+    // Filter with slices.
+    selected.forEach((s) => {
+      let filt = filterWithPredicates(
+        $slices.get(s).predicates,
+        tempTable,
+        $currentColumns,
+        $formattedCurrentColumns,
+        $slices
+      );
+      tempTable = tempTable.filter(`(d) => ${filt}`);
+    });
 
-    // Filter with metadata selections
+    // Filter with metadata selections.
     [...$metadataSelections.entries()].forEach((e) => {
       let [name, entry] = e;
       if (entry.type === "range") {
@@ -90,11 +88,11 @@
       }
     });
 
-    filteredTable = tempTable;
+    filteredTable.set(tempTable);
     updateResults([
       {
         sli: "selection",
-        idxs: filteredTable.array($settings.idColumn) as string[],
+        idxs: tempTable.array($settings.idColumn) as string[],
       },
     ]);
   }
@@ -153,13 +151,13 @@
     {/if}
   </div>
 
-  {#if filteredTable}
-    <div>
+  {#if $filteredTable}
+    <div style:margin-left="10px">
       <div id="sample-options">
-        <SampleOptions table={filteredTable} bind:selected />
+        <SampleOptions bind:selected />
       </div>
       <div id="samples">
-        <Samples table={filteredTable} />
+        <Samples />
       </div>
     </div>
   {/if}

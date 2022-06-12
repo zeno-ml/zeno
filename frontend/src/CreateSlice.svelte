@@ -32,12 +32,15 @@
     }
     newSlice = false;
 
-    let tempTable = filterWithPredicates(
+    const filt = filterWithPredicates(
       predicates,
       $table,
       $currentColumns,
-      $formattedCurrentColumns
+      $formattedCurrentColumns,
+      $slices
     );
+
+    let tempTable = $table.filter(`(d) => ${filt}`);
     filteredTable.set(tempTable);
 
     updateResults([
@@ -59,6 +62,7 @@
     predicates = [
       {
         column: "",
+        type: "metadata",
         operation: "",
         value: "",
         join: "",
@@ -85,6 +89,7 @@
         on:click={() => {
           predicates.push({
             column: "",
+            type: "metadata",
             operation: "",
             value: "",
             join: "AND",

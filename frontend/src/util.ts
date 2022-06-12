@@ -57,28 +57,47 @@ export function filterWithPredicates(
   predicates: FilterPredicate[],
   table,
   currentColumns,
-  formattedCurrentColumns
+  formattedCurrentColumns,
+  slices
 ) {
   const stringPreds = predicates.map((p: FilterPredicate) => {
+    if (p.type === "slice") {
+      const filt = filterWithPredicates(
+        slices.get(p.column).predicates,
+        table,
+        currentColumns,
+        formattedCurrentColumns,
+        slices
+      );
+      if (p.operation === "IS IN") {
+        return filt;
+      } else {
+        return `!(${filt})`;
+      }
+    }
+
     if (p.join === "") {
       return (
-        `d["${currentColumns[formattedCurrentColumns.indexOf(p.column)]}"]` +
+        `(d["${currentColumns[formattedCurrentColumns.indexOf(p.column)]}"]` +
         " " +
         p.operation +
         " " +
-        p.value
+        p.value +
+        ")"
       );
     }
+
     return (
       (p.join === "AND" ? "&&" : "||") +
-      " " +
+      " (" +
       `d["${currentColumns[formattedCurrentColumns.indexOf(p.column)]}"]` +
       " " +
       p.operation +
       " " +
-      p.value
+      p.value +
+      ")"
     );
   });
 
-  return table.filter(`d => ${stringPreds.join(" ")}`);
+  return stringPreds.join(" ");
 }

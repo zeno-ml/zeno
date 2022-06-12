@@ -33,6 +33,8 @@ interface MetadataSelection {
 
 interface FilterPredicate {
   column: string;
+  // 'metadata' or 'slice'
+  type: string;
   operation: string;
   value: string;
   join: string;

@@ -1,6 +1,4 @@
 <script lang="ts">
-  import type ColumnTable from "arquero/dist/types/table/column-table";
-
   import { TrailingIcon } from "@smui/chips";
   import Select, { Option } from "@smui/select";
 
@@ -11,11 +9,11 @@
     models,
     metric,
     model,
+    filteredTable,
     currentColumns,
     formattedCurrentColumns,
   } from "./stores";
 
-  export let table: ColumnTable;
   export let selected: string[];
 
   let sort = "";
@@ -28,7 +26,7 @@
   } as ResultKey);
 </script>
 
-{#if table.size > 0}
+{#if $filteredTable.size > 0}
   <div id="options-container">
     <div class="options container">
       {#if $models}
