@@ -56,7 +56,7 @@
     "sirv-cli": "^2.0.0",
     "svelte-material-ui": "^6.0.0-beta.16",
     "svelte-spa-router": "^3.2.0",
-    "svelte-vega": "^1.1.0",
+    "svelte-vega": "^1.1.1",
     "svelte-websocket-store": "^1.1.28",
     "wavesurfer.js": "^6.2.0"
   }
