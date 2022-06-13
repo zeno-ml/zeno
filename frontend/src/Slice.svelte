@@ -33,12 +33,13 @@
           <span>({size.toLocaleString()})</span>
           <TrailingIcon
             class="delete-outline material-icons"
-            on:click={() =>
+            on:click={(e) => {
+              e.stopPropagation();
               slices.update((s) => {
                 s.delete(name);
-                setSelected(name);
                 return s;
-              })}
+              });
+            }}
           >
             delete-outline
           </TrailingIcon>

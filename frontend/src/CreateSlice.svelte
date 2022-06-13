@@ -1,11 +1,9 @@
 <script lang="ts">
+  import Button from "@smui/button";
   import Paper, { Content } from "@smui/paper";
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
-  import Button from "@smui/button";
-
   import FilterEntry from "./FilterEntry.svelte";
-
   import {
     currentColumns,
     filteredTable,
@@ -18,8 +16,58 @@
 
   export let newSlice;
   export let predicates: FilterPredicate[];
+  export let metadataSelections: Map<string, MetadataSelection>;
 
   let name = "";
+
+  // Pre-fill slice creation with current metadata selections.
+  if (metadataSelections.size !== 0) {
+    predicates = [];
+    [...metadataSelections.values()].forEach((entry) => {
+      // TODO: support slice selections
+      if (entry.type === "range") {
+        predicates.push({
+          column: entry.name,
+          type: "metadata",
+          operation: ">=",
+          value: entry.values[0],
+          join: "AND",
+        });
+        predicates.push({
+          column: entry.name,
+          type: "metadata",
+          operation: "<=",
+          value: entry.values[1],
+          join: "AND",
+        });
+      } else {
+        entry.values.forEach((v, j) => {
+          let indicator = undefined;
+          if (entry.values.length > 1 && j === 0) {
+            indicator = "start";
+          } else if (entry.values.length > 1 && j === entry.values.length - 1) {
+            indicator = "end";
+          }
+          predicates.push({
+            column: entry.name,
+            type: "metadata",
+            operation: "==",
+            value: v,
+            join: "OR",
+            groupIndicator: indicator,
+          });
+        });
+      }
+    });
+  } else {
+    predicates.push({
+      column: "",
+      type: "metadata",
+      operation: "",
+      value: "",
+      join: "",
+    });
+  }
 
   function deletePredicate(i) {
     predicates.splice(i, 1);
@@ -58,16 +106,6 @@
       });
       return s;
     });
-
-    predicates = [
-      {
-        column: "",
-        type: "metadata",
-        operation: "",
-        value: "",
-        join: "",
-      },
-    ];
   }
 </script>
 

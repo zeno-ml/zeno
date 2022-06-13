@@ -38,6 +38,8 @@ interface FilterPredicate {
   operation: string;
   value: string;
   join: string;
+  // 'start' or 'end'
+  groupIndicator?: string;
 }
 
 interface Slice {

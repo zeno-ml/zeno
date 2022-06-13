@@ -60,9 +60,16 @@ export function filterWithPredicates(
   formattedCurrentColumns,
   slices
 ) {
-  const stringPreds = predicates.map((p: FilterPredicate) => {
+  const stringPreds = predicates.map((p: FilterPredicate, i) => {
+    let join = "";
+    if (i !== 0) {
+      join = p.join;
+    }
+
+    let ret = "";
+
     if (p.type === "slice") {
-      const filt = filterWithPredicates(
+      ret = filterWithPredicates(
         slices.get(p.column).predicates,
         table,
         currentColumns,
@@ -70,33 +77,43 @@ export function filterWithPredicates(
         slices
       );
       if (p.operation === "IS IN") {
-        return filt;
+        return ret;
       } else {
-        return `!(${filt})`;
+        return `!(${ret})`;
       }
     }
 
-    if (p.join === "") {
-      return (
+    if (p.groupIndicator === "start" && join) {
+      ret += "&& (";
+    } else if (p.groupIndicator === "start") {
+      ret += "(";
+    }
+
+    if (join === "") {
+      ret +=
         `(d["${currentColumns[formattedCurrentColumns.indexOf(p.column)]}"]` +
         " " +
         p.operation +
         " " +
-        p.value +
-        ")"
-      );
+        (isNaN(parseFloat(p.value)) ? `"${p.value}"` : p.value) +
+        ")";
+    } else {
+      ret +=
+        (join === "AND" ? "&&" : "||") +
+        " (" +
+        `d["${currentColumns[formattedCurrentColumns.indexOf(p.column)]}"]` +
+        " " +
+        p.operation +
+        " " +
+        (isNaN(parseFloat(p.value)) ? `"${p.value}"` : p.value) +
+        ")";
     }
 
-    return (
-      (p.join === "AND" ? "&&" : "||") +
-      " (" +
-      `d["${currentColumns[formattedCurrentColumns.indexOf(p.column)]}"]` +
-      " " +
-      p.operation +
-      " " +
-      p.value +
-      ")"
-    );
+    if (p.groupIndicator === "end") {
+      ret += ")";
+    }
+
+    return ret;
   });
 
   return stringPreds.join(" ");

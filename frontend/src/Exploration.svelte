@@ -28,15 +28,7 @@
 
   let newSlice = false;
   let selected: string[] = [];
-  let predicates: FilterPredicate[] = [
-    {
-      column: "",
-      type: "metadata",
-      operation: "",
-      value: "",
-      join: "",
-    },
-  ];
+  let predicates: FilterPredicate[] = [];
 
   ready.subscribe((r) => {
     if (r) {
@@ -108,7 +100,11 @@
     </div>
     {#if newSlice}
       <div use:clickOutside on:click_outside={() => (newSlice = false)}>
-        <CreateSlice bind:newSlice bind:predicates />
+        <CreateSlice
+          metadataSelections={$metadataSelections}
+          bind:newSlice
+          bind:predicates
+        />
       </div>
     {/if}
     {#each [...$slices.values()] as s, i}
