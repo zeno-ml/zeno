@@ -1,4 +1,17 @@
-import { metrics, models, ready, results, settings } from "./stores";
+import * as aq from "arquero";
+import { get } from "svelte/store";
+
+import {
+  currentColumns,
+  formattedCurrentColumns,
+  metrics,
+  models,
+  ready,
+  results,
+  settings,
+  slices,
+  table,
+} from "./stores";
 
 export function initialFetch() {
   const fetchSettings = fetch("/api/settings")
@@ -16,6 +29,25 @@ export function initialFetch() {
   allRequests.then(() => ready.set(true));
 }
 
+export function getSlices(t) {
+  fetch("/api/slices")
+    .then((d) => d.json())
+    .then((d) => {
+      const slis = JSON.parse(d)[0];
+      slis.forEach(
+        (s) =>
+          (s.idxs = t
+            .filter("(d) => " + getFilterFromPredicates(s.predicates))
+            .array(get(settings).idColumn))
+      );
+      getMetrics(slis);
+
+      const sliMap = new Map();
+      slis.forEach((e) => sliMap.set(e.name, e));
+      slices.set(sliMap);
+    });
+}
+
 export function updateTab(t: string) {
   if (t === "home") {
     window.location.hash = "";
@@ -25,13 +57,14 @@ export function updateTab(t: string) {
   return t;
 }
 
-export function updateResults(requests: ResultsRequest[]) {
+export function getMetrics(slices: Slice[]) {
+  console.log(slices);
   fetch("/api/results", {
     method: "POST",
     headers: {
       "Content-type": "application/json",
     },
-    body: JSON.stringify({ requests: requests }),
+    body: JSON.stringify({ slices: slices }),
   })
     .then((d) => d.json())
     .then((res) => {
@@ -53,13 +86,7 @@ export function updateResults(requests: ResultsRequest[]) {
     .catch((e) => console.log(e));
 }
 
-export function filterWithPredicates(
-  predicates: FilterPredicate[],
-  table,
-  currentColumns,
-  formattedCurrentColumns,
-  slices
-) {
+export function getFilterFromPredicates(predicates: FilterPredicate[]) {
   const stringPreds = predicates.map((p: FilterPredicate, i) => {
     let join = "";
     if (i !== 0) {
@@ -68,14 +95,8 @@ export function filterWithPredicates(
 
     let ret = "";
 
-    if (p.type === "slice") {
-      ret = filterWithPredicates(
-        slices.get(p.column).predicates,
-        table,
-        currentColumns,
-        formattedCurrentColumns,
-        slices
-      );
+    if (p.predicateType === "slice") {
+      ret = getFilterFromPredicates(get(slices).get(p.name).predicates);
       if (p.operation === "IS IN") {
         return ret;
       } else {
@@ -91,7 +112,9 @@ export function filterWithPredicates(
 
     if (join === "") {
       ret +=
-        `(d["${currentColumns[formattedCurrentColumns.indexOf(p.column)]}"]` +
+        `(d["${
+          get(currentColumns)[get(formattedCurrentColumns).indexOf(p.name)]
+        }"]` +
         " " +
         p.operation +
         " " +
@@ -101,7 +124,9 @@ export function filterWithPredicates(
       ret +=
         (join === "AND" ? "&&" : "||") +
         " (" +
-        `d["${currentColumns[formattedCurrentColumns.indexOf(p.column)]}"]` +
+        `d["${
+          get(currentColumns)[get(formattedCurrentColumns).indexOf(p.name)]
+        }"]` +
         " " +
         p.operation +
         " " +
@@ -117,4 +142,35 @@ export function filterWithPredicates(
   });
 
   return stringPreds.join(" ");
+}
+
+export function updateTableColumns(w) {
+  let t = get(table);
+
+  const tableColumns = t.columnNames();
+  const missingColumns = w.columns.filter((c) => !tableColumns.includes(c));
+
+  if (missingColumns.length > 0) {
+    fetch("/api/table", {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({ columns: missingColumns }),
+    })
+      .then((d: Response) => d.arrayBuffer())
+      .then((d) => {
+        if (t.size === 0) {
+          t = aq.fromArrow(d);
+        } else {
+          t = t.assign(aq.fromArrow(d));
+        }
+        table.set(t);
+
+        // TODO: move somewhere more logical.
+        if (get(slices).size === 0 && w.doneProcessing) {
+          getSlices(t);
+        }
+      });
+  }
 }

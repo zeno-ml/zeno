@@ -3,16 +3,11 @@
   import Paper, { Content } from "@smui/paper";
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
+
+  import { filteredTable, settings, slices, table } from "../stores";
+  import { getFilterFromPredicates, getMetrics } from "../util";
+
   import FilterEntry from "./FilterEntry.svelte";
-  import {
-    currentColumns,
-    filteredTable,
-    formattedCurrentColumns,
-    settings,
-    slices,
-    table,
-  } from "./stores";
-  import { filterWithPredicates, updateResults } from "./util";
 
   export let newSlice;
   export let predicates: FilterPredicate[];
@@ -27,15 +22,15 @@
       // TODO: support slice selections
       if (entry.type === "range") {
         predicates.push({
-          column: entry.name,
-          type: "metadata",
+          name: entry.name,
+          predicateType: "metadata",
           operation: ">=",
           value: entry.values[0],
           join: "AND",
         });
         predicates.push({
-          column: entry.name,
-          type: "metadata",
+          name: entry.name,
+          predicateType: "metadata",
           operation: "<=",
           value: entry.values[1],
           join: "AND",
@@ -49,8 +44,8 @@
             indicator = "end";
           }
           predicates.push({
-            column: entry.name,
-            type: "metadata",
+            name: entry.name,
+            predicateType: "metadata",
             operation: "==",
             value: v,
             join: "OR",
@@ -61,8 +56,8 @@
     });
   } else {
     predicates.push({
-      column: "",
-      type: "metadata",
+      name: "",
+      predicateType: "metadata",
       operation: "",
       value: "",
       join: "",
@@ -80,20 +75,15 @@
     }
     newSlice = false;
 
-    const filt = filterWithPredicates(
-      predicates,
-      $table,
-      $currentColumns,
-      $formattedCurrentColumns,
-      $slices
-    );
+    const filt = getFilterFromPredicates(predicates);
 
     let tempTable = $table.filter(`(d) => ${filt}`);
     filteredTable.set(tempTable);
 
-    updateResults([
+    getMetrics([
       {
-        sli: name,
+        name: name,
+        predicates: predicates,
         idxs: tempTable.array($settings.idColumn) as string[],
       },
     ]);
@@ -101,7 +91,6 @@
     slices.update((s) => {
       s.set(name, {
         name: name,
-        size: tempTable.size,
         predicates: predicates,
       });
       return s;
@@ -126,8 +115,8 @@
         class="add"
         on:click={() => {
           predicates.push({
-            column: "",
-            type: "metadata",
+            name: "",
+            predicateType: "metadata",
             operation: "",
             value: "",
             join: "AND",

@@ -3,6 +3,7 @@ import json
 import os
 import sys
 from pathlib import Path
+from urllib.parse import unquote
 
 import tomli
 import uvicorn  # type: ignore
@@ -180,6 +181,15 @@ def run_zeno(args):
     def get_models():
         return json.dumps([str(n) for n in zeno.model_names])
 
+    @api_app.get("/slices")
+    def get_slices():
+        return json.dumps(zeno.get_slices())
+
+    @api_app.get("/delete-slice/{slice_id}")
+    def delete_slice(slice_id: str):
+        print(slice_id)
+        return json.dumps(zeno.delete_slice(unquote(slice_id)))
+
     @api_app.post("/table")
     def get_table(columns: TableRequest):
         return Response(zeno.get_table(columns.columns))
@@ -203,6 +213,7 @@ def run_zeno(args):
                 await websocket.send_json(
                     {
                         "status": zeno.status,
+                        "doneProcessing": zeno.done_processing,
                         "columns": list(zeno.complete_columns),
                     }
                 )

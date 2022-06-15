@@ -12,7 +12,7 @@
     filteredTable,
     currentColumns,
     formattedCurrentColumns,
-  } from "./stores";
+  } from "../stores";
 
   export let selected: string[];
 
@@ -20,7 +20,7 @@
   let group = "";
 
   $: result = $results.get({
-    slice: "selection",
+    slice: "",
     metric: $metric,
     model: $model,
   } as ResultKey);

@@ -4,13 +4,13 @@
   import IconButton from "@smui/icon-button";
   import Select, { Option } from "@smui/select";
 
-  import AudioClassification from "./samples/AudioClassification.svelte";
-  import ImageClassification from "./samples/ImageClassification.svelte";
-  import ImageSegmentation from "./samples/ImageSegmentation.svelte";
-  import ObjectDetection from "./samples/ObjectDetection.svelte";
-  import TextClassification from "./samples/TextClassification.svelte";
+  import { filteredTable, model, ready, settings } from "../stores";
 
-  import { filteredTable, model, ready, settings } from "./stores";
+  import AudioClassification from "./AudioClassification.svelte";
+  import ImageClassification from "./ImageClassification.svelte";
+  import ImageSegmentation from "./ImageSegmentation.svelte";
+  import ObjectDetection from "./ObjectDetection.svelte";
+  import TextClassification from "./TextClassification.svelte";
 
   let rowsPerPage = 15;
   let currentPage = 0;

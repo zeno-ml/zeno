@@ -3,17 +3,15 @@
   import * as aq from "arquero";
   import type ColumnTable from "arquero/dist/types/table/column-table";
 
-  import { clickOutside } from "./clickOutside";
+  import { clickOutside } from "../clickOutside";
   import CreateSlice from "./CreateSlice.svelte";
   import MetadataNode from "./MetadataNode.svelte";
-  import SampleOptions from "./SampleOptions.svelte";
-  import Samples from "./Samples.svelte";
+  import SampleOptions from "../samples/SampleOptions.svelte";
+  import Samples from "../samples/Samples.svelte";
   import Slice from "./Slice.svelte";
 
   import {
-    currentColumns,
     filteredTable,
-    formattedCurrentColumns,
     metadataSelections,
     metric,
     metrics,
@@ -23,8 +21,8 @@
     settings,
     slices,
     table,
-  } from "./stores";
-  import { filterWithPredicates, updateResults } from "./util";
+  } from "../stores";
+  import { getFilterFromPredicates, getMetrics } from "../util";
 
   let newSlice = false;
   let selected: string[] = [];
@@ -36,7 +34,6 @@
       metric.set($metrics[0]);
     }
   });
-
   table.subscribe((t) => updateFilteredTable(t));
   metadataSelections.subscribe(() => updateFilteredTable($table));
   $: {
@@ -53,13 +50,7 @@
 
     // Filter with slices.
     selected.forEach((s) => {
-      let filt = filterWithPredicates(
-        $slices.get(s).predicates,
-        tempTable,
-        $currentColumns,
-        $formattedCurrentColumns,
-        $slices
-      );
+      let filt = getFilterFromPredicates($slices.get(s).predicates);
       tempTable = tempTable.filter(`(d) => ${filt}`);
     });
 
@@ -71,6 +62,7 @@
           `(r) => r["${name}"] > ${entry.values[0]} && r["${name}"] < ${entry.values[1]}`
         );
       } else {
+        // TODO: figure out BigInt issues.
         if (typeof tempTable.column(name).get(0) === "bigint") {
           entry.values = entry.values.map((d) => BigInt(d));
         }
@@ -81,9 +73,10 @@
     });
 
     filteredTable.set(tempTable);
-    updateResults([
+    getMetrics([
       {
-        sli: "selection",
+        name: "",
+        predicates: [],
         idxs: tempTable.array($settings.idColumn) as string[],
       },
     ]);
@@ -111,7 +104,6 @@
       <Slice
         name={s.name}
         fullName={s.name}
-        size={s.size}
         selected={selected.includes(s.name)}
         setSelected={() => {
           if (selected.includes(s.name)) {

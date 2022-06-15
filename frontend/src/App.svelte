@@ -7,17 +7,15 @@
   import { Svg } from "@smui/common/elements";
   import IconButton, { Icon } from "@smui/icon-button";
   import List, { Item, Separator } from "@smui/list";
-  import * as aq from "arquero";
-  import type ColumnTable from "arquero/dist/types/table/column-table";
   import { onMount } from "svelte";
   import Router, { location } from "svelte-spa-router";
 
-  import { table, wsResponse } from "./stores";
-  import { initialFetch, updateTab } from "./util";
+  import { wsResponse } from "./stores";
+  import { initialFetch, updateTab, updateTableColumns } from "./util";
 
   import Header from "./Header.svelte";
   import Discovery from "./Discovery.svelte";
-  import Exploration from "./Exploration.svelte";
+  import Exploration from "./exploration/Exploration.svelte";
   import Analysis from "./Analysis.svelte";
 
   let tab = $location.split("/")[1];
@@ -40,30 +38,7 @@
     }
   });
 
-  wsResponse.subscribe((w) => {
-    let tableColumns = $table.columnNames();
-    let missingColumns = w.columns.filter((c) => !tableColumns.includes(c));
-    if (missingColumns.length > 0) {
-      fetch("/api/table", {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json",
-        },
-        body: JSON.stringify({ columns: missingColumns }),
-      })
-        .then((d: Response) => d.arrayBuffer())
-        .then((d) => {
-          let t: ColumnTable;
-          if ($table.size === 0) {
-            t = aq.fromArrow(d);
-          } else {
-            t = $table.assign(aq.fromArrow(d));
-          }
-          table.set(t);
-        });
-    }
-  });
-
+  wsResponse.subscribe((w) => updateTableColumns(w));
   onMount(() => initialFetch());
 </script>
 

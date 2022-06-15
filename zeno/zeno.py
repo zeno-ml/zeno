@@ -1,5 +1,6 @@
 import asyncio
 import dataclasses
+import json
 import logging
 import os
 import sys
@@ -15,7 +16,7 @@ import pandas as pd
 import umap  # type: ignore
 
 from .api import ZenoOptions
-from .classes import ModelLoader, Postprocessor, Preprocessor, ResultsRequest
+from .classes import ModelLoader, Postprocessor, Preprocessor, ResultsRequest, Slice
 from .util import get_arrow_bytes, postprocess_data, preprocess_data, run_inference
 
 
@@ -86,6 +87,15 @@ class Zeno(object):
         self.metadata_name = os.path.basename(metadata_path).split(".")[0]
         self.cache_path = os.path.join(cache_path, self.metadata_name)
         os.makedirs(self.cache_path, exist_ok=True)
+
+        self.slices: Dict[str, Slice] = {}
+        try:
+            with open(os.path.join(self.cache_path, "slices.json"), "r") as f:
+
+                slis = json.load(f)
+                self.slices = dict([(s["name"], Slice.parse_obj(s)) for s in slis])
+        except FileNotFoundError:
+            pass
 
         self.df[id_column].astype(str)
         self.df.set_index(self.id_column, inplace=True)
@@ -289,20 +299,16 @@ class Zeno(object):
         """Calculate result for each requested combination."""
 
         return_metrics = []
-        for request in requests.requests:
+        for sli in requests.slices:
             for metric_name in self.metrics.keys():
                 for model_name in self.model_names:
                     return_metrics.append(
-                        self.calculate_metrics(
-                            request.idxs, request.sli, metric_name, model_name
-                        )
+                        self.calculate_metrics(sli, metric_name, model_name)
                     )
 
         return return_metrics
 
-    def calculate_metrics(
-        self, idxs: List, name: str, metric_name: str, model_name: str
-    ):
+    def calculate_metrics(self, sli: Slice, metric_name: str, model_name: str):
         if not self.done_processing:
             return
 
@@ -312,10 +318,15 @@ class Zeno(object):
             output_path=os.path.join(self.cache_path, "zenomodel_" + model_name),
         )
         metric_func = self.metrics[metric_name]
-        result_metric = metric_func(self.df.loc[idxs], local_ops)
+        result_metric = metric_func(self.df.loc[sli.idxs], local_ops)
+
+        if len(sli.name) > 0 and sli.name not in self.slices:
+            self.slices[sli.name] = sli
+            with open(os.path.join(self.cache_path, "slices.json"), "w") as f:
+                json.dump(self.get_slices(), f)
 
         return {
-            "slice": name,
+            "slice": sli.name,
             "model": model_name,
             "metric": metric_name,
             "value": result_metric,
@@ -341,3 +352,17 @@ class Zeno(object):
             bytes: Arrow-encoded table of slice metadata
         """
         return get_arrow_bytes(self.df[columns], self.id_column)
+
+    def get_slices(self):
+        return (
+            json.loads(
+                "["
+                + ",".join([s.json(exclude={"idxs"}) for s in self.slices.values()])
+                + "]",
+            ),
+        )
+
+    def delete_slice(self, slice_id):
+        self.slices.pop(slice_id)
+        with open(os.path.join(self.cache_path, "slices.json"), "w") as f:
+            json.dump(self.get_slices(), f)

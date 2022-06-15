@@ -3,25 +3,22 @@
   import IconButton, { Icon } from "@smui/icon-button";
   import Autocomplete from "@smui-extra/autocomplete";
   import { Svg } from "@smui/common/elements";
-  import { mdiTrashCanOutline } from "@mdi/js";
-
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
-  import { formattedCurrentColumns, slices } from "./stores";
+  import { mdiTrashCanOutline } from "@mdi/js";
+
+  import { formattedCurrentColumns, slices } from "../stores";
 
   export let predicate: FilterPredicate;
-  export let deletePredicate;
+  export let deletePredicate: () => void;
   export let first;
 
   let operations = ["==", "!=", ">", "<", ">=", "<="];
 
-  $: if (
-    !predicate.column ||
-    $formattedCurrentColumns.includes(predicate.column)
-  ) {
-    predicate.type = "metadata";
+  $: if (!predicate.name || $formattedCurrentColumns.includes(predicate.name)) {
+    predicate.predicateType = "metadata";
   } else {
-    predicate.type = "slice";
+    predicate.predicateType = "slice";
   }
 </script>
 
@@ -39,7 +36,7 @@
       {/each}
     </Select>
   {/if}
-  {#if predicate.type === "slice"}
+  {#if predicate.predicateType === "slice"}
     <Select
       bind:value={predicate.operation}
       label="Operation"
@@ -53,11 +50,11 @@
   <div class="selector">
     <Autocomplete
       options={[...$formattedCurrentColumns, ...$slices.keys()]}
-      bind:value={predicate.column}
+      bind:value={predicate.name}
       label="Metadata or Slice"
     />
   </div>
-  {#if predicate.type === "metadata"}
+  {#if predicate.predicateType === "metadata"}
     <div class="selector">
       <Select
         bind:value={predicate.operation}

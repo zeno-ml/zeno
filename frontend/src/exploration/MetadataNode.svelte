@@ -4,7 +4,7 @@
 
   import { VegaLite } from "svelte-vega";
 
-  import { metadataSelections, table } from "./stores";
+  import { metadataSelections, table } from "../stores";
   import { countSpec, histogramSpec } from "./vegaSpecs";
 
   export let name;
@@ -32,7 +32,7 @@
       let isOrdinal = isNaN(Number(t.column(col).get(0)));
       let unique = t
         .rollup({ unique: `d => op.distinct(d["${col}"])` })
-        .object().unique;
+        .object()["unique"];
 
       if (isOrdinal) {
         spec = unique > 20 ? null : countSpec;
@@ -118,7 +118,7 @@
       <span style:margin-right="5px">
         unique values: {$table
           .rollup({ unique: `d => op.distinct(d["${col}"])` })
-          .object().unique}
+          .object()["unique"]}
       </span>
     {/if}
   </div>

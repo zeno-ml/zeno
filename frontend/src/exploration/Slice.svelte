@@ -1,11 +1,10 @@
 <script lang="ts">
   import { TrailingIcon } from "@smui/chips";
-
   import Ripple from "@smui/ripple";
-  import { results, model, metric, slices } from "./stores";
+
+  import { results, model, metric, slices } from "../stores";
 
   export let name: string;
-  export let size: number;
   export let fullName = name;
   export let selected = false;
   export let setSelected;
@@ -30,7 +29,7 @@
           <span style:margin-right="10px">
             {result.toFixed(2)}
           </span>
-          <span>({size.toLocaleString()})</span>
+          <!-- <span>({size.toLocaleString()})</span> -->
           <TrailingIcon
             class="delete-outline material-icons"
             on:click={(e) => {
@@ -39,6 +38,7 @@
                 s.delete(name);
                 return s;
               });
+              fetch("/api/delete-slice/" + encodeURIComponent(name));
             }}
           >
             delete-outline

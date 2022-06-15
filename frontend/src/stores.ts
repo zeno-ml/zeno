@@ -18,6 +18,7 @@ export const wsResponse: Writable<WSResponse> = websocketStore(
   `ws://localhost:${location.port}/api/status`,
   {
     status: "connecting",
+    doneProcessing: false,
     columns: [],
   } as WSResponse
 );

@@ -9,7 +9,7 @@ interface Settings {
 
 interface WSResponse {
   status: string;
-  slices: Slice[];
+  doneProcessing: boolean;
   columns: string[];
 }
 
@@ -20,21 +20,16 @@ interface ResultKey {
   model: string;
 }
 
-interface ResultsRequest {
-  sli: string;
-  idxs: string[];
-}
-
 interface MetadataSelection {
   name: string;
   type: string;
-  values: [];
+  values: Array;
 }
 
 interface FilterPredicate {
-  column: string;
+  name: string;
   // 'metadata' or 'slice'
-  type: string;
+  predicateType: string;
   operation: string;
   value: string;
   join: string;
@@ -45,5 +40,5 @@ interface FilterPredicate {
 interface Slice {
   name: string;
   predicates: FilterPredicate[];
-  size: number;
+  idxs?: string[];
 }
