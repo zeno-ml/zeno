@@ -4,14 +4,14 @@ Written in Svelte
 
 ### Development Environment
 
-Please have `npm` and `yarn` installed.
+Please have `npm` installed.
 
 ### Install
 
-`yarn`
+`npm i`
 
 ### Development
 
-`yarn dev`
+`npm run dev`
 
 Output files are saved to `/zeno/frontend/build` and packaged with the pip package.
