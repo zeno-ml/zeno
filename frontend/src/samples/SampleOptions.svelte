@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { TrailingIcon } from "@smui/chips";
+  import SelectionBar from "../filtering/SelectionBar.svelte";
+
   import Select, { Option } from "@smui/select";
 
   import {
-    results,
-    metadataSelections,
     metrics,
     models,
     metric,
@@ -14,16 +13,8 @@
     formattedCurrentColumns,
   } from "../stores";
 
-  export let selected: string[];
-
   let sort = "";
   let group = "";
-
-  $: result = $results.get({
-    slice: "",
-    metric: $metric,
-    model: $model,
-  } as ResultKey);
 </script>
 
 {#if $filteredTable.size > 0}
@@ -61,68 +52,10 @@
       </div>
     </div>
   </div>
-  <div class="chips">
-    <span id="metric">
-      {result ? result.toFixed(2) : ""}
-    </span>
-    {#each selected as s}
-      <div class="meta-chip">
-        {s}
-        <TrailingIcon
-          class="remove material-icons"
-          on:click={() => {
-            selected.splice(selected.indexOf(s), 1);
-            selected = selected;
-          }}
-        >
-          cancel
-        </TrailingIcon>
-      </div>
-    {/each}
-    {#each [...$metadataSelections.entries()] as [col, chip]}
-      <div class="meta-chip">
-        <span>
-          {#if chip.type === "range"}
-            {chip.values[0].toFixed(2)}
-            {"<"}
-            {chip.name}
-            {"<"}
-            {chip.values[1].toFixed(2)}
-          {:else}
-            {chip.name}
-            {"=="}
-            {chip.values.join(" | ")}
-          {/if}
-        </span>
-        <TrailingIcon
-          class="remove material-icons"
-          on:click={() =>
-            metadataSelections.update((m) => {
-              m.delete(col);
-              return m;
-            })}>cancel</TrailingIcon
-        >
-      </div>
-    {/each}
-    {#if $metadataSelections.size > 0}
-      <span class="clear" on:click={() => metadataSelections.set(new Map())}>
-        clear all
-      </span>
-    {/if}
-  </div>
+  <SelectionBar />
 {/if}
 
 <style>
-  .clear {
-    padding: 5px;
-    margin-left: 10px;
-    cursor: pointer;
-    color: #6200ee;
-  }
-  .clear:hover {
-    background: #ede1fd;
-    border-radius: 5px;
-  }
   #selects {
     display: flex;
     flex-direction: inline;
@@ -137,32 +70,11 @@
     padding-bottom: 10px;
     margin-right: 20px;
   }
-  .chips {
-    display: flex;
-    flex-direction: inline;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-  #metric {
-    font-weight: 600;
-    color: #6201ee;
-    margin-right: 15px;
-  }
   .options {
     align-items: center;
     justify-content: space-between;
   }
   .select-div {
     margin-left: 20px;
-  }
-  .meta-chip {
-    padding: 5px;
-    background: rgba(0, 0, 0, 0.07);
-    margin-left: 5px;
-    margin-right: 5px;
-    margin-top: 2px;
-    margin-bottom: 2px;
-    border-radius: 5px;
-    width: fit-content;
   }
 </style>

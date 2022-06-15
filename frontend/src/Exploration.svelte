@@ -12,8 +12,6 @@
   import SampleOptions from "./samples/SampleOptions.svelte";
   import Samples from "./samples/Samples.svelte";
 
-  let selected: string[] = [];
-
   ready.subscribe((r) => {
     if (r) {
       model.set($models[0]);
@@ -28,7 +26,7 @@
   {#if $filteredTable}
     <div style:margin-left="10px">
       <div id="sample-options">
-        <SampleOptions bind:selected />
+        <SampleOptions />
       </div>
       <div id="samples">
         <Samples />
