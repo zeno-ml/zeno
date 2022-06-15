@@ -4,8 +4,8 @@
 
   import { VegaLite } from "svelte-vega";
 
-  import { metadataSelections, table } from "../stores";
   import { countSpec, histogramSpec } from "./vegaSpecs";
+  import { metadataSelections, table } from "../stores";
 
   export let name;
   export let col;

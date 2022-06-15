@@ -47,6 +47,8 @@ class Zeno(object):
         self.data_type = data_type
         self.output_type = output_type
         self.data_path = data_path
+
+        # Options passed to Zeno functions.
         self.zeno_options = ZenoOptions(
             id_column=self.id_column,
             data_column=self.data_column,
@@ -115,9 +117,11 @@ class Zeno(object):
             *["zenopre_" + p.name for p in self.preprocessors],
             *list(self.df.columns),
         ]
+
         for post in self.postprocessors:
             for model in self.model_names:
                 cols.append("zenopost_" + model + "_" + post.name)
+
         self.columns = cols
 
         self.__thread = threading.Thread(target=asyncio.run, args=(self.__process(),))

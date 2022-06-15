@@ -36,6 +36,7 @@ export const results: Writable<InternMap<ResultKey, number>> = writable(
 
 export const metadataSelections: Writable<Map<string, MetadataSelection>> =
   writable(new Map());
+export const sliceSelections: Writable<string[]> = writable([]);
 
 export const model: Writable<string> = writable("");
 export const metric: Writable<string> = writable("");

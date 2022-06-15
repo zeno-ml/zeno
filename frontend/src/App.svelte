@@ -15,7 +15,7 @@
 
   import Header from "./Header.svelte";
   import Discovery from "./Discovery.svelte";
-  import Exploration from "./exploration/Exploration.svelte";
+  import Exploration from "./Exploration.svelte";
   import Analysis from "./Analysis.svelte";
 
   let tab = $location.split("/")[1];
