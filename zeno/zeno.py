@@ -358,6 +358,8 @@ class Zeno(object):
         return get_arrow_bytes(self.df[columns], self.id_column)
 
     def get_slices(self):
+        if len(self.slices) == 0:
+            return ""
         return (
             json.loads(
                 "["

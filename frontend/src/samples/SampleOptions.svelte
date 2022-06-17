@@ -1,17 +1,14 @@
 <script lang="ts">
-  import SelectionBar from "../filtering/SelectionBar.svelte";
-
   import Select, { Option } from "@smui/select";
 
   import {
-    metrics,
-    models,
-    metric,
-    model,
     filteredTable,
     currentColumns,
     formattedCurrentColumns,
   } from "../stores";
+
+  import Settings from "../Settings.svelte";
+  import SelectionBar from "../filtering/SelectionBar.svelte";
 
   let sort = "";
   let group = "";
@@ -20,20 +17,7 @@
 {#if $filteredTable.size > 0}
   <div id="options-container">
     <div class="options container">
-      {#if $models}
-        <Select bind:value={$model} label="Model" style="margin-right: 20px;">
-          {#each $models as m}
-            <Option value={m}>{m}</Option>
-          {/each}
-        </Select>
-      {/if}
-      {#if $metrics}
-        <Select bind:value={$metric} label="Metric" style="margin-right: 20px;">
-          {#each $metrics as m}
-            <Option value={m}>{m}</Option>
-          {/each}
-        </Select>
-      {/if}
+      <Settings />
     </div>
     <div id="selects">
       <div class="select-div">

@@ -10,7 +10,7 @@
   import { onMount } from "svelte";
   import Router, { location } from "svelte-spa-router";
 
-  import { wsResponse } from "./stores";
+  import { metric, metrics, model, models, ready, wsResponse } from "./stores";
   import { initialFetch, updateTab, updateTableColumns } from "./util";
 
   import Header from "./Header.svelte";
@@ -40,6 +40,13 @@
 
   wsResponse.subscribe((w) => updateTableColumns(w));
   onMount(() => initialFetch());
+
+  ready.subscribe((r) => {
+    if (r) {
+      model.set($models[0]);
+      metric.set($metrics[0]);
+    }
+  });
 </script>
 
 <Header />

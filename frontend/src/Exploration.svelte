@@ -1,23 +1,9 @@
 <script lang="ts">
-  import {
-    filteredTable,
-    metric,
-    metrics,
-    model,
-    models,
-    ready,
-  } from "./stores";
+  import { filteredTable } from "./stores";
 
   import MetadataBar from "./filtering/MetadataBar.svelte";
   import SampleOptions from "./samples/SampleOptions.svelte";
   import Samples from "./samples/Samples.svelte";
-
-  ready.subscribe((r) => {
-    if (r) {
-      model.set($models[0]);
-      metric.set($metrics[0]);
-    }
-  });
 </script>
 
 <div id="container">
