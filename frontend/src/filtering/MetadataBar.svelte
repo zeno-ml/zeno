@@ -109,22 +109,17 @@
     <MetadataNode {name} col={name} />
   {/each}
 
-  <h4>Preprocessors</h4>
+  <h4>Distilled Metadata</h4>
   {#each $settings.metadata.filter((m) => m.startsWith("zenopre")) as name}
     <MetadataNode name={name.slice(8)} col={name} />
   {/each}
-
-  <h4>Postprocessors</h4>
   {#if $model}
     {#each $settings.metadata.filter( (m) => m.startsWith("zenopost_" + $model + "_") ) as name}
       <MetadataNode name={name.slice(10 + $model.length)} col={name} />
     {/each}
   {/if}
 
-  {#if $model}
-    <h4>Outputs</h4>
-    <MetadataNode name={$model} col={"zenomodel_" + $model} />
-  {/if}
+  <div style:height="50px" />
 </div>
 
 <style>

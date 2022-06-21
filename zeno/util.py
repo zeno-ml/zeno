@@ -4,12 +4,11 @@ from importlib import util
 from pathlib import Path
 
 import pandas as pd
-
 import pyarrow as pa  # type: ignore
 from tqdm import trange  # type: ignore
 
-from .api import ZenoOptions  # type: ignore
-from .classes import ModelLoader, Postprocessor, Preprocessor
+from .api import ZenoOptions
+from .classes import DistillFunction, PredictFunction
 
 
 def get_arrow_bytes(df, id_col):
@@ -24,6 +23,13 @@ def get_arrow_bytes(df, id_col):
     # return js
 
 
+def load_series(df, col_name, save_path):
+    try:
+        df.loc[:, col_name] = pd.read_pickle(save_path)
+    except FileNotFoundError:
+        df.loc[:, col_name] = pd.Series([pd.NA] * df.shape[0], index=df.index)
+
+
 def get_function(file_name, function_name):
     spec = util.spec_from_file_location("module.name", file_name)
     test_module = util.module_from_spec(spec)  # type: ignore
@@ -31,8 +37,8 @@ def get_function(file_name, function_name):
     return getattr(test_module, function_name)  # type: ignore
 
 
-def preprocess_data(
-    preprocessor: Preprocessor,
+def predistill_data(
+    preprocessor: DistillFunction,
     options: ZenoOptions,
     cache_path: str,
     df: pd.DataFrame,
@@ -67,8 +73,8 @@ def preprocess_data(
     return (col_name, col)
 
 
-def postprocess_data(
-    postprocessor: Postprocessor,
+def postdistill_data(
+    postprocessor: DistillFunction,
     model: str,
     options: ZenoOptions,
     cache_path: str,
@@ -110,7 +116,7 @@ def postprocess_data(
 
 
 def run_inference(
-    model_loader: ModelLoader,
+    model_loader: PredictFunction,
     options: ZenoOptions,
     model_path: str,
     cache_path: str,

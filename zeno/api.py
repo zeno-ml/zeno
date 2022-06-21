@@ -31,37 +31,28 @@ class ZenoOptions:
     output_path: str
 
 
-def load_model(func):
+def predict_function(func):
     @functools.wraps(func)
     def _wrapper(*args, **kwargs):
         return func(*args, **kwargs)
 
-    _wrapper.load_model = True
+    _wrapper.predict_function = True
     return _wrapper
 
 
-def preprocess(func):
+def distill_function(func):
     @functools.wraps(func)
     def _wrapper(*args, **kwargs):
         return func(*args, **kwargs)
 
-    _wrapper.preprocess = True
+    _wrapper.distill_function = True
     return _wrapper
 
 
-def postprocess(func):
+def metric_function(func):
     @functools.wraps(func)
     def _wrapper(*args, **kwargs):
         return func(*args, **kwargs)
 
-    _wrapper.postprocess = True
-    return _wrapper
-
-
-def metric(func):
-    @functools.wraps(func)
-    def _wrapper(*args, **kwargs):
-        return func(*args, **kwargs)
-
-    _wrapper.metric = True
+    _wrapper.metric_function = True
     return _wrapper

@@ -1,6 +1,6 @@
 import os
 import cv2
-from zeno import ZenoOptions, preprocess
+from zeno import ZenoOptions, distill_function
 import numpy as np
 
 
@@ -14,7 +14,7 @@ def get_imgs(df, ops: ZenoOptions):
     return ret
 
 
-@preprocess
+@distill_function
 def area(df, ops: ZenoOptions):
     ret = []
     for _, row in df.iterrows():
@@ -26,7 +26,7 @@ def area(df, ops: ZenoOptions):
     return ret
 
 
-@preprocess
+@distill_function
 def black_box_count(df, ops):
     """
     Detect if there is a black box at the bottom left

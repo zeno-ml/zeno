@@ -1,10 +1,11 @@
-import torchvision.transforms as transforms
-import PIL
+import os
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import os
-from zeno import load_model
+import torchvision.transforms as transforms
+from PIL import Image
+from zeno import predict_function
 
 transform_image = transforms.Compose(
     [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
@@ -45,15 +46,14 @@ classes = (
 )
 
 
-@load_model
+@predict_function
 def load_model(model_path):
     net = Net()
     net.load_state_dict(torch.load(model_path))
 
     def pred(df, ops):
         imgs = [
-            PIL.Image.open(os.path.join(ops.data_path, img))
-            for img in df[ops.data_column]
+            Image.open(os.path.join(ops.data_path, img)) for img in df[ops.data_column]
         ]
         imgs = torch.stack([transform_image(img) for img in imgs])
         with torch.no_grad():

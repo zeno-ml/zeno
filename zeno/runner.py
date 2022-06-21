@@ -171,7 +171,7 @@ def run_zeno(args):
 
     @api_app.get("/metrics")
     def get_metrics():
-        return json.dumps([s.__name__ for s in zeno.metrics.values()])
+        return json.dumps([s.__name__ for s in zeno.metric_functions.values()])
 
     @api_app.get("/models")
     def get_models():

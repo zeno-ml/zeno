@@ -1,11 +1,8 @@
-from .api import load_model, metric, postprocess, preprocess, ZenoOptions
-from .runner import run_zeno
+from .api import distill_function, metric_function, predict_function, ZenoOptions
 
 __all__ = [
-    "load_model",
-    "preprocess",
-    "postprocess",
-    "metric",
+    "predict_function",
+    "distill_function",
+    "metric_function",
     "ZenoOptions",
-    "run_zeno",
 ]

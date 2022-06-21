@@ -1,12 +1,12 @@
 import asyncio
 import dataclasses
-import json
 import logging
 import os
+import pickle
 import sys
 import threading
 from importlib import util
-from inspect import getmembers, isfunction
+from inspect import getmembers, getsource, isfunction
 from multiprocessing import Pool
 from pathlib import Path
 from typing import Callable, Dict, List
@@ -16,8 +16,14 @@ import pandas as pd
 import umap  # type: ignore
 
 from .api import ZenoOptions
-from .classes import ModelLoader, Postprocessor, Preprocessor, ResultsRequest, Slice
-from .util import get_arrow_bytes, postprocess_data, preprocess_data, run_inference
+from .classes import DistillFunction, PredictFunction, ResultsRequest, Slice
+from .util import (
+    get_arrow_bytes,
+    load_series,
+    postdistill_data,
+    predistill_data,
+    run_inference,
+)
 
 
 class Zeno(object):
@@ -70,11 +76,10 @@ class Zeno(object):
 
         self.status: str = "Initializing"
 
-        self.model_loader: ModelLoader = None  # type: ignore
-        self.preprocessors: List[Preprocessor] = []
-        self.postprocessors: List[Postprocessor] = []
+        self.predict_function: PredictFunction = PredictFunction("", Path(""))
+        self.distill_functions: List[DistillFunction] = []
         # Key is name of metric function
-        self.metrics: Dict[str, Callable] = {}
+        self.metric_functions: Dict[str, Callable] = {}
 
         # Read metadata as Pandas for slicing
         if metadata_path.suffix == ".csv":
@@ -92,50 +97,47 @@ class Zeno(object):
 
         self.slices: Dict[str, Slice] = {}
         try:
-            with open(os.path.join(self.cache_path, "slices.json"), "r") as f:
-
-                slis = json.load(f)
-                self.slices = dict([(s["name"], Slice.parse_obj(s)) for s in slis])
+            with open(os.path.join(self.cache_path, "slices.pickle"), "rb") as f:
+                self.slices = pickle.load(f)
         except FileNotFoundError:
             pass
 
         self.df[id_column].astype(str)
         self.df.set_index(self.id_column, inplace=True)
         self.df[id_column] = self.df.index
+
         self.columns: List[str] = []
         self.complete_columns = list(self.df.columns)
+
         self.done_processing = False
 
     def start_processing(self):
-        """Parse testing files, preprocess, run inference, and postprocess."""
+        """Parse testing files, distill, and run inference."""
 
         # Get Zeno test functions.
         self.__parse_testing_files()
 
         # Get names of all columns before processing.
-        cols = [
-            *["zenopre_" + p.name for p in self.preprocessors],
-            *list(self.df.columns),
-        ]
+        distill_fn_cols = []
+        for fn in self.distill_functions:
+            fn_type = fn.fn_type
+            if fn_type == "pre":
+                distill_fn_cols.append("zenopre_" + fn.name)
+            else:
+                for m in self.model_names:
+                    distill_fn_cols.append("zenopost_" + m + "_" + fn.name)
 
-        for post in self.postprocessors:
-            for model in self.model_names:
-                cols.append("zenopost_" + model + "_" + post.name)
-
-        self.columns = cols
+        self.columns = [*distill_fn_cols, *list(self.df.columns)]
 
         self.__thread = threading.Thread(target=asyncio.run, args=(self.__process(),))
         self.__thread.start()
 
     def __parse_testing_files(self):
-        self.model_loader = None  # type: ignore
-        self.slicers = {}
-        self.metrics = {}
+        for f in list(self.tests.rglob("*.py")):
+            self.__parse_testing_file(f)
 
-        [self.__parse_testing_file(f) for f in list(self.tests.rglob("*.py"))]
-
-        if not self.model_loader:
-            logging.error("No model loader found")
+        if self.predict_function.name == "":
+            logging.error("No prediction_function found.")
             sys.exit(1)
 
     def __parse_testing_file(self, test_file: Path):
@@ -145,44 +147,44 @@ class Zeno(object):
 
         for func_name, func in getmembers(test_module):
             if isfunction(func):
-                if hasattr(func, "load_model"):
-                    if self.model_loader is None:
-                        self.model_loader = ModelLoader(func_name, test_file)
+                if hasattr(func, "predict_function"):
+                    if self.predict_function.name == "":
+                        self.predict_function = PredictFunction(func_name, test_file)
                     else:
-                        logging.error("Multiple model loaders found, can only have one")
+                        logging.error(
+                            "Multiple prediction_functions found, can only have one"
+                        )
                         sys.exit(1)
-                if hasattr(func, "preprocess"):
-                    self.preprocessors.append(Preprocessor(func_name, test_file))
-                if hasattr(func, "postprocess"):
-                    self.postprocessors.append(Postprocessor(func_name, test_file))
-                if hasattr(func, "metric"):
-                    self.metrics[func_name] = func
+                if hasattr(func, "distill_function"):
+                    # TODO: find pre vs. post distill functions
+                    src = getsource(func)
+                    fn_type = "post" if "output_column" in src else "pre"
+                    self.distill_functions.append(
+                        DistillFunction(func_name, test_file, fn_type)
+                    )
+                if hasattr(func, "metric_function"):
+                    self.metric_functions[func_name] = func
 
     async def __process(self):
         self.status = "Running preprocessing"
 
         # Check if we need to preprocess since Pool is expensive
-        preprocessors_to_run = []
-        for preprocessor in self.preprocessors:
-            col_name = "zenopre_" + preprocessor.name
+        predistill_to_run = []
+        for distill_fn in [f for f in self.distill_functions if f.fn_type == "pre"]:
+            col_name = "zenopre_" + distill_fn.name
             save_path = Path(self.cache_path, col_name + ".pickle")
 
-            try:
-                self.df.loc[:, col_name] = pd.read_pickle(save_path)
-            except FileNotFoundError:
-                self.df.loc[:, col_name] = pd.Series(
-                    [pd.NA] * self.df.shape[0], index=self.df.index
-                )
+            load_series(self.df, col_name, save_path)
 
             if self.df[col_name].isnull().any():
-                preprocessors_to_run.append(preprocessor)
+                predistill_to_run.append(distill_fn)
             else:
                 self.complete_columns.append(col_name)
 
-        if len(preprocessors_to_run) > 0:
+        if len(predistill_to_run) > 0:
             with Pool() as pool:
-                preprocess_outputs = pool.starmap(
-                    preprocess_data,
+                predistill_outputs = pool.starmap(
+                    predistill_data,
                     [
                         [
                             s,
@@ -192,10 +194,10 @@ class Zeno(object):
                             self.batch_size,
                             i,
                         ]
-                        for i, s in enumerate(self.preprocessors)
+                        for i, s in enumerate(predistill_to_run)
                     ],
                 )
-                for out in preprocess_outputs:
+                for out in predistill_outputs:
                     self.df.loc[:, out[0]] = out[1]
                     self.complete_columns.append(out[0])
 
@@ -209,18 +211,8 @@ class Zeno(object):
             inference_save_path = Path(self.cache_path, col_name_model + ".pickle")
             embedding_save_path = Path(self.cache_path, col_name_embedding + ".pickle")
 
-            try:
-                self.df.loc[:, col_name_model] = pd.read_pickle(inference_save_path)
-            except FileNotFoundError:
-                self.df.loc[:, col_name_model] = pd.Series(
-                    [pd.NA] * self.df.shape[0], index=self.df.index
-                )
-            try:
-                self.df.loc[:, col_name_embedding] = pd.read_pickle(embedding_save_path)
-            except FileNotFoundError:
-                self.df.loc[:, col_name_embedding] = pd.Series(
-                    [pd.NA] * self.df.shape[0], index=self.df.index
-                )
+            load_series(self.df, col_name_model, inference_save_path)
+            load_series(self.df, col_name_embedding, embedding_save_path)
 
             if (
                 self.df[col_name_model].isnull().any()
@@ -237,7 +229,7 @@ class Zeno(object):
                     run_inference,
                     [
                         [
-                            self.model_loader,
+                            self.predict_function,
                             self.zeno_options,
                             m,
                             self.cache_path,
@@ -245,7 +237,7 @@ class Zeno(object):
                             self.batch_size,
                             i,
                         ]
-                        for i, m in enumerate(self.model_paths)
+                        for i, m in enumerate(models_to_run)
                     ],
                 )
                 for out in inference_outputs:
@@ -256,29 +248,24 @@ class Zeno(object):
         self.status = "Done running inference"
 
         # Check if we need to run postprocessing since Pool is expensive
-        post_to_run = []
-        for postprocessor in self.postprocessors:
+        postdistill_to_run = []
+        for distill_fn in [fn for fn in self.distill_functions if fn.fn_type == "post"]:
             for model in self.model_names:
-                col_name = "zenopost_" + model + "_" + postprocessor.name
+                col_name = "zenopost_" + model + "_" + distill_fn.name
                 save_path = Path(self.cache_path, col_name + ".pickle")
 
-                try:
-                    self.df.loc[:, col_name] = pd.read_pickle(save_path)
-                except FileNotFoundError:
-                    self.df.loc[:, col_name] = pd.Series(
-                        [pd.NA] * self.df.shape[0], index=self.df.index
-                    )
+                load_series(self.df, col_name, save_path)
 
                 if self.df[col_name].isnull().any():
-                    post_to_run.append((postprocessor, model))
+                    postdistill_to_run.append((distill_fn, model))
                 else:
                     self.complete_columns.append(col_name)
 
         self.status = "Running postprocessing"
-        if len(post_to_run) > 0:
+        if len(postdistill_to_run) > 0:
             with Pool() as pool:
                 post_outputs = pool.starmap(
-                    postprocess_data,
+                    postdistill_data,
                     [
                         [
                             e[0],
@@ -289,7 +276,7 @@ class Zeno(object):
                             self.batch_size,
                             i,
                         ]
-                        for i, e in enumerate(post_to_run)
+                        for i, e in enumerate(postdistill_to_run)
                     ],
                 )
                 for out in post_outputs:
@@ -304,7 +291,7 @@ class Zeno(object):
 
         return_metrics = []
         for sli in requests.slices:
-            for metric_name in self.metrics.keys():
+            for metric_name in self.metric_functions.keys():
                 for model_name in self.model_names:
                     return_metrics.append(
                         self.calculate_metrics(sli, metric_name, model_name)
@@ -321,13 +308,13 @@ class Zeno(object):
             output_column="zenomodel_" + model_name,
             output_path=os.path.join(self.cache_path, "zenomodel_" + model_name),
         )
-        metric_func = self.metrics[metric_name]
+        metric_func = self.metric_functions[metric_name]
         result_metric = metric_func(self.df.loc[sli.idxs], local_ops)
 
         if len(sli.name) > 0 and sli.name not in self.slices:
             self.slices[sli.name] = sli
-            with open(os.path.join(self.cache_path, "slices.json"), "w") as f:
-                json.dump(self.get_slices(), f)
+            with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
+                pickle.dump(self.slices, f)
 
         return {
             "slice": sli.name,
@@ -358,15 +345,9 @@ class Zeno(object):
         return get_arrow_bytes(self.df[columns], self.id_column)
 
     def get_slices(self):
-        if len(self.slices) == 0:
-            return ""
-        return (
-            json.loads(
-                ",".join([s.json(exclude={"idxs"}) for s in self.slices.values()])
-            ),
-        )
+        return [s.dict() for s in self.slices.values()]
 
     def delete_slice(self, slice_id):
         self.slices.pop(slice_id)
-        with open(os.path.join(self.cache_path, "slices.json"), "w") as f:
-            json.dump(self.get_slices(), f)
+        with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
+            pickle.dump(self.slices, f)

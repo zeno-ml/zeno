@@ -33,7 +33,7 @@ export function getSlices(t) {
   fetch("/api/slices")
     .then((d) => d.json())
     .then((d) => {
-      const slis = JSON.parse(d)[0];
+      const slis = JSON.parse(d);
       slis.forEach(
         (s) =>
           (s.idxs = t

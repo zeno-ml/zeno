@@ -54,7 +54,7 @@
         });
       }
     });
-  } else {
+  } else if (predicates.length === 0) {
     predicates.push({
       name: "",
       predicateType: "metadata",

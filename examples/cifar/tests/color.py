@@ -2,8 +2,8 @@ import colorsys
 import os
 
 import numpy as np
-import PIL
-from zeno import preprocess
+from PIL import Image
+from zeno import distill_function
 
 
 def red_pixels(im):
@@ -32,17 +32,13 @@ def blue_border_pixels(im):
     return count_blue
 
 
-@preprocess
+@distill_function
 def red_count(df, ops):
-    imgs = [
-        PIL.Image.open(os.path.join(ops.data_path, img)) for img in df[ops.data_column]
-    ]
+    imgs = [Image.open(os.path.join(ops.data_path, img)) for img in df[ops.data_column]]
     return [red_pixels(im) for im in imgs]
 
 
-@preprocess
+@distill_function
 def blue_border_count(df, ops):
-    imgs = [
-        PIL.Image.open(os.path.join(ops.data_path, img)) for img in df[ops.data_column]
-    ]
+    imgs = [Image.open(os.path.join(ops.data_path, img)) for img in df[ops.data_column]]
     return [blue_border_pixels(im) for im in imgs]

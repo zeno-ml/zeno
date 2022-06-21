@@ -2,8 +2,7 @@ import os
 
 import pandas as pd
 import torch
-from zeno import load_model, metric
-from zeno.api import ZenoOptions
+from zeno import ZenoOptions, metric_function, predict_function
 
 number_to_text = {
     0: "zero",
@@ -20,7 +19,7 @@ number_to_text = {
 }
 
 
-@load_model
+@predict_function
 def load_model(model_path):
     device = torch.device(
         "cpu"
@@ -47,7 +46,7 @@ def load_model(model_path):
     return pred
 
 
-@metric
+@metric_function
 def accuracy(df, ops: ZenoOptions):
     text_label = df[ops.label_column].apply(lambda x: number_to_text[x])
     return 100 * (pd.Series(text_label) == df[ops.output_column]).sum() / len(df)
