@@ -10,17 +10,20 @@
 
 	filteredTable.subscribe((d) => d);
 
-	async function projectEmbeddings2D(model: string) {
+	async function projectEmbeddings2D(
+		model: string,
+		instance_ids: any[] | TypedArray = []
+	) {
 		const response = await fetch("api/projection", {
 			method: "POST",
 			headers: {
 				Accept: "application/json",
 				"Content-Type": "application/json",
 			},
-			body: JSON.stringify({ model }),
+			body: JSON.stringify({ model, instance_ids }),
 		});
 		const output = await response.json();
-		return output;
+		return JSON.parse(output);
 	}
 	$: if (filteredTable !== undefined) {
 		console.log($filteredTable);
@@ -31,24 +34,24 @@
 		dt._names.includes(colName);
 	const embedKeys = { x: "zenoembed_x", y: "zenoembed_y" };
 
-	$: {
-		if (
-			hasColumn($filteredTable, embedKeys.x) &&
-			hasColumn($filteredTable, embedKeys.y)
-		) {
-			projection = [
-				$filteredTable.columnArray(embedKeys.x),
-				$filteredTable.columnArray(embedKeys.y),
-			];
+	// $: {
+	// 	if (
+	// 		hasColumn($filteredTable, embedKeys.x) &&
+	// 		hasColumn($filteredTable, embedKeys.y)
+	// 	) {
+	// 		projection = [
+	// 			$filteredTable.columnArray(embedKeys.x),
+	// 			$filteredTable.columnArray(embedKeys.y),
+	// 		];
 
-			const [x, y] = projection;
-			formattedProjection = [];
-			for (let i = 0; i < x.length; i++) {
-				const coordinate = [x[i], y[i]];
-				formattedProjection.push(coordinate);
-			}
-		}
-	}
+	// 		const [x, y] = projection;
+	// 		formattedProjection = [];
+	// 		for (let i = 0; i < x.length; i++) {
+	// 			const coordinate = [x[i], y[i]];
+	// 			formattedProjection.push(coordinate);
+	// 		}
+	// 	}
+	// }
 </script>
 
 <div id="main">
@@ -63,7 +66,6 @@
 				width={600}
 				height={600}
 				points={formattedProjection}
-				colorIdxs={formattedProjection.map((_) => 0)}
 				colors={["#CCCCCC"]}
 				createScatterConfig={{
 					pointSize: 3,
@@ -79,10 +81,14 @@
 		<div>
 			<button
 				on:click={async () => {
-					const _projection = await projectEmbeddings2D($model);
-					console.log(_projection);
-					console.log(projection);
-					console.log(formattedProjection);
+					const filteredIds = $filteredTable.columnArray("id");
+					const _projection = await projectEmbeddings2D(
+						$model,
+						filteredIds
+					);
+					formattedProjection = _projection.data.map(
+						({ proj, id }) => proj
+					);
 				}}
 				>Compute projection
 			</button>
