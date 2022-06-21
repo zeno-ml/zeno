@@ -2,10 +2,9 @@
 
 # Writing Tests
 
-The Zeno API has 4 decorator functions: one for loading models and three for defining tests.
+Zeno has 3 primary decorator functions: `predict_function`, `distill_function` and `metric_function`.
 
-You can pass any number of files with decorated functions to Zeno, but you **must have one and only one `load_model` function**.
-You may have as many of the testing functions as you may like.
+You can pass any number of files with decorated functions to Zeno, but you **must have one and only one `predict_function`**.
 
 ```{tableofcontents}
 
@@ -20,79 +19,58 @@ Every Zeno test module is passed a ZenoOptions object with the following paramet
    :members:
 ```
 
-## Load Model
+## Predict
 
-Functions with the `load_model` decorator should return a function that takes a list of data in the format returned by `load_data` and returns a list of outputs used by `metric` functions.
+`predict_function` functions should return a function that returns a list of model outputs for a given model name.
+
+The function returned by `predict_function` should take two parameters: a Pandas DataFrame and a ZenoOptions object.
 
 ```python
-@load_model
-def load_model(model_path: Path) -> Callable[Any[], Any[]]
+@predict_function
+def predict_function(model_path: Path) -> Callable[[df: DataFrame, ops: ZenoOptions], Any[]]
 ```
 
 Example:
 
 ```python
-@load_model
-def load_model(model_path):
-    """We return a new function to be able to process the output of the model correctly"""
+@predict_function
+def predict_function(model_path):
     model = load_model(model_path)
-    def pred(instances):
+    def pred(df: DataFrame, ops: ZenoOptions):
         outputs = model(instances)
-        processed = process(outputs)
-        return processed
-    return model
+        return model(df[ops.data_column])
+    return pred
 ```
 
-See [Model Loaders](model_loaders) for real-world examples.
+See [Predict Functions](predict_functions) for real-world examples.
 
-## Preprocess
+## Distill
 
-Functions with the `preprocess` decorator return a new column derived from the original data and metadata.
-It can be used to extract metadata from an instance
+`distill` functions return a derived metadata column from input data and/or model outputs.
 
 ```python
-@preprocess
-def preprocessor(df: pd.DataFrame, ops: ZenoOptions) -> Union[pd.Series, List]:
+@distill_function
+def distill(df: pd.DataFrame, ops: ZenoOptions) -> Union[pd.Series, List]:
 ```
 
 Example:
 
 ```python
-@preprocess
+@distill
 def get_objects(df, ops):
     return [ObjectDetector(inst) for inst in data[ops.data_column]]
 ```
 
-See [Preprocessors](preprocessors) for real-world examples.
-
-## Postprocess
-
-Functions with the `postprocess` decorator return a new column derived from the original data, metadata, and _a given model's output_.
-
-```python
-@postprocess
-def postprocessor(df: pd.DataFrame, ops: ZenoOptions) -> Union[pd.Series, List]:
-```
-
-Example:
-
-```python
-@postprocess
-def get_objects(df, ops):
-    return [ObjectDetector(inst) for inst in data[ops.data_column]]
-```
-
-See [Postprocessors](postprocessors) for real-world examples.
+See [Distill Functions](distill_functions) for real-world examples.
 
 ## Metric
 
-Functions with the `metric` decorator return a float between 0 and 1.
-Metrics can be classic functions such as accuracy, or specific measures such as switch percentage or word prevalence.
-Optionally, metric functions can take the original output and metadata for instances that had a transformation applied to calculate metrics such as switch percentage.
+Functions with the `metric` decorator return a continuous number given a subset of data.
+Metrics can be classic functions such as accuracy, or specific measures such as word prevalence.
 
 ```python
-@metric
-def metric_func(df: pd.DataFrame, ops: ZenoOptions) -> Union[int, float]:
+@metric_function
+def metric_func(df: pd.DataFrame, ops: ZenoOptions) -> float:
 ```
 
 Example:
@@ -103,4 +81,4 @@ def accuracy(df, ops):
     return 100 * (df[ops.label_column] == df[ops.output_column]).sum() / len(df)
 ```
 
-See [Metrics](metrics) for real-world examples.
+See [Metric Functions](metric_functions) for real-world examples.

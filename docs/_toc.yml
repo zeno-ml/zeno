@@ -8,14 +8,9 @@ chapters:
   - file: api
   - file: example_test_functions
     sections:
-      - file: model_loaders/model_loaders
-        sections:
-          - file: model_loaders/pytorch
-      - file: preprocessors/preprocessors
-      - file: postprocessors/postprocessors
-      - file: metrics/metrics
-        sections:
-          - file: metrics/classification
+      - file: predict_functions/predict_functions
+      - file: distill_functions/distill_functions
+      - file: metric_functions/metric_functions
   - file: example_analyses/example_analyses
     sections:
       - file: example_analyses/cifar

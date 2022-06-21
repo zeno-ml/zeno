@@ -1,40 +1,31 @@
-# ML Testing with Zeno
+# Zeno: A Unified Testing Platform for ML
 
-Zeno is an API and interface for evaluating machine learning models.
-You first define how you expect a model to behave for subsets of data, and optionally after transformations.
-The UI then allows you to explore and compare the results across models.
+Zeno is a platform for behavioral evaluation of machine learning models using Python functions and an interactive UI.
+The Python API runs model inference and derives new metadata for analysis of unstructured data.
+The interactive UI lets users explore model performance, create behavioral tests, and compare model performance.
 
-````{panels}
-:card: border-2
-Write simple `slicing` and `metric` functions:
-^^^
+::::{grid}
+:gutter: 2
+
+:::{grid-item-card} Python processing functions:
+
 ```python
-@slicer(["accuracy"])
-def medium_sample(data, metad):
-    return metad.sample(100).index
+@distill_function
+def brightness(df, ops):
+    return lum(df[ops.data_column]))
 
-@metric
-def accuracy(out, metad):
-    return metad[
-           metad["lab"] == out].shape[0]
-           / (metad.shape[0]) * 100
+@metric_function
+def accuracy(df, ops):
+    return df[ops.label_column]
+           == df[ops.output_column]
 ```
----
 
-Analyze & compare models with a powerful UI:
-^^^
+:::
 
+:::{grid-item-card} Interactive UI:
 ![teaser](./teaser.png)
-
-````
-
-The tests are connected as follows. Slices are optionally passed to transforms, which are then passed to have metrics calculated.
-
-```{image} flow.png
-:alt: flow
-:width: 500px
-:align: center
-```
+:::
+::::
 
 ## Quickstart
 
@@ -42,8 +33,8 @@ The tests are connected as follows. Slices are optionally passed to transforms, 
 pip install zenoml
 ```
 
-Create a folder with at least one Python file including a `load_model` and `load_data` function.
-Add any number of Zeno modules, including the `preprocess`, `slicer`, and `metric` functions.
+Create a folder with at least one Python file with a `predict_function`.
+Add any number of Zeno modules using the `distill` and `metric` functions.
 See [Writing Tests](writing_tests) for details on each of these modules.
 
 Next, create a configuration `TOML` file with the required options such as metadata and model file paths. See [API](api) for the configuration options.

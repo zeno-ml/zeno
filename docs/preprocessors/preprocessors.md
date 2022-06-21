@@ -1,7 +1,0 @@
-(preprocessors)=
-
-# Preprocessors
-
-```{tableofcontents}
-
-```
