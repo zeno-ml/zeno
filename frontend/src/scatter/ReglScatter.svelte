@@ -7,6 +7,7 @@
 
 	export let width: number;
 	export let height: number;
+	export let canvasStyle: string = "";
 	export let createScatterConfig: Partial<Properties> = {};
 	export let points: number[][] = [
 		[0, -1],
@@ -103,7 +104,7 @@
 	}
 </script>
 
-<canvas bind:this={canvasEl} {width} {height} />
+<canvas bind:this={canvasEl} {width} {height} style={canvasStyle} />
 
 <style>
 </style>
