@@ -41,8 +41,8 @@ book:
 .PHONY: build
 build:
 	@echo "==> 👷‍♀️ Build"
-	@poetry build -vvv
 	@cd frontend && npm run build
+	@poetry build -vvv
 
 .PHONY: install
 install:

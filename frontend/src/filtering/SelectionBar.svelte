@@ -44,6 +44,9 @@
           {chip.name}
           {"<"}
           {chip.values[1].toFixed(2)}
+        {:else if chip.type === "binary"}
+          {chip.values[0]}
+          {chip.name}
         {:else}
           {chip.name}
           {"=="}

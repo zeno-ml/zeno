@@ -47,6 +47,12 @@
         tempTable = tempTable.filter(
           `(r) => r["${name}"] > ${entry.values[0]} && r["${name}"] < ${entry.values[1]}`
         );
+      } else if (entry.type === "binary") {
+        if (entry.values[0] === "is") {
+          tempTable = tempTable.filter(`(r) => r["${name}"] == 1`);
+        } else {
+          tempTable = tempTable.filter(`(r) => r["${name}"] == 0`);
+        }
       } else {
         // TODO: figure out BigInt issues.
         if (typeof tempTable.column(name).get(0) === "bigint") {

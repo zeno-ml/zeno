@@ -1,12 +1,12 @@
 [tool.poetry]
 name = "zenoml"
-version = "0.0.1"
+version = "0.0.3"
 description = "Behavioral Testing for Machine Learning"
 license = "MIT"
 authors = ["Ángel Alexander Cabrera <alex.cabrera@gmail.com>"]
 readme = "README.md"  # Markdown files are supported
-repository = "https://github.com/cabreraalex/zeno"
-homepage = "https://github.com/cabreraalex/zeno"
+repository = "https://github.com/cmudig/zeno"
+homepage = "https://dig.cmu.edu/zeno/"
 keywords = ["ml", "testing"]
 packages = [
     { include = "zeno" },
@@ -24,9 +24,7 @@ uvicorn = "^0.17.5"
 fastapi = ">=0.75,<0.79"
 websockets = "^10.2"
 umap-learn = "^0.5.3"
-numba = "^0.55"
 tqdm = "^4.64.0"
-omegaconf = "^2.2.2"
 tomli = "^2.0.1"
 
 [tool.poetry.dev-dependencies]
