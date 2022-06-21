@@ -196,7 +196,8 @@ def run_zeno(args):
 
     @api_app.post("/projection")
     def run_projection(model: ProjectionRequest):
-        return zeno.run_projection(model.model)
+        projection = zeno.run_projection(model.model, model.instance_ids)
+        return json.dumps({"data": projection, "model": model.model})
 
     @api_app.websocket("/status")
     async def results_websocket(websocket: WebSocket):

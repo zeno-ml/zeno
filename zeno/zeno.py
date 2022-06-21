@@ -323,18 +323,31 @@ class Zeno(object):
             "value": result_metric,
         }
 
-    def __run_umap(self, model):
-        embeds = np.stack(self.df["zenoembedding_" + model].to_numpy())
-        reducer = umap.UMAP()
-        embedding = reducer.fit_transform(embeds)
-        self.df.loc[:, "zenoembed_x"] = embedding[:, 0]  # type: ignore
-        self.df.loc[:, "zenoembed_y"] = embedding[:, 1]  # type: ignore
-        self.complete_columns.append("zenoembed_x")
-        self.complete_columns.append("zenoembed_y")
-        self.status = "Done projecting"
+    def __get_df_rows(self, dataframe, column="id", list_to_get=None):
+        if list_to_get is None:
+            return None
+        return dataframe[dataframe[column].isin(list_to_get)]
 
-    def run_projection(self, model):
-        self.__run_umap(model)
+    def __run_umap(self, embeds):
+        reducer = umap.UMAP()
+        projection = reducer.fit_transform(embeds)
+        # self.df.loc[:, "zenoembed_x"] = projection[:, 0]  # type: ignore
+        # self.df.loc[:, "zenoembed_y"] = projection[:, 1]  # type: ignore
+        # self.complete_columns.append("zenoembed_x")
+        # self.complete_columns.append("zenoembed_y")
+        self.status = "Done projecting"
+        return projection.tolist()
+
+    def run_projection(self, model, instance_ids):
+        filtered_rows = self.__get_df_rows(
+            self.df, column="id", list_to_get=instance_ids
+        )
+        embeds = np.stack(filtered_rows[f"zenoembedding_{model}"].to_numpy())
+        projection = self.__run_umap(embeds)
+        payload = [
+            {"proj": proj, "id": id} for proj, id in zip(projection, instance_ids)
+        ]
+        return payload
 
     def get_table(self, columns):
         """Get the metadata DataFrame for a given slice.
