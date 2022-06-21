@@ -144,11 +144,7 @@ def run_zeno(args):
 
     app.mount(
         "/cache",
-        StaticFiles(
-            directory=os.path.join(
-                args["cache_path"], os.path.basename(args["metadata"]).split(".")[0]
-            )
-        ),
+        StaticFiles(directory=args["cache_path"]),
         name="cache",
     )
     app.mount("/api", api_app)

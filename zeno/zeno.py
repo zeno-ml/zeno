@@ -87,7 +87,7 @@ class Zeno(object):
             )
             sys.exit(1)
         self.metadata_name = os.path.basename(metadata_path).split(".")[0]
-        self.cache_path = os.path.join(cache_path, self.metadata_name)
+        self.cache_path = cache_path
         os.makedirs(self.cache_path, exist_ok=True)
 
         self.slices: Dict[str, Slice] = {}
@@ -362,9 +362,7 @@ class Zeno(object):
             return ""
         return (
             json.loads(
-                "["
-                + ",".join([s.json(exclude={"idxs"}) for s in self.slices.values()])
-                + "]",
+                ",".join([s.json(exclude={"idxs"}) for s in self.slices.values()])
             ),
         )
 
