@@ -20,7 +20,9 @@
     ready,
   } from "../stores";
 
+  let name = "";
   let newSlice = false;
+  let mode = "create";
   let predicates: FilterPredicate[] = [];
 
   table.subscribe((t) => updateFilteredTable(t));
@@ -73,21 +75,43 @@
       },
     ]);
   }
+
+  function editSlice(sli: Slice) {
+    predicates = sli.predicates;
+    name = sli.name;
+    mode = "edit";
+    newSlice = true;
+  }
 </script>
 
 <div class="side-container">
   <h4>Slices</h4>
   <div style:margin-bottom="10px">
-    <Button variant="outlined" on:click={() => (newSlice = true)}>
+    <Button
+      variant="outlined"
+      on:click={() => {
+        predicates = [];
+        name = "";
+        newSlice = true;
+      }}
+    >
       New Slice
     </Button>
   </div>
   {#if newSlice}
-    <div use:clickOutside on:click_outside={() => (newSlice = false)}>
+    <div
+      use:clickOutside
+      on:click_outside={() => {
+        mode = "create";
+        newSlice = false;
+      }}
+    >
       <CreateSlice
         metadataSelections={$metadataSelections}
         bind:newSlice
         bind:predicates
+        bind:mode
+        bind:name
       />
     </div>
   {/if}
@@ -96,6 +120,7 @@
     <SliceNode
       name={s.name}
       fullName={s.name}
+      {editSlice}
       selected={$sliceSelections.includes(s.name)}
       setSelected={() => {
         if ($sliceSelections.includes(s.name)) {
