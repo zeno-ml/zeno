@@ -49,19 +49,24 @@
 		return { xExtent, yExtent };
 	}
 
-	onMount(() => {
+	function stylePoints(scatterRef, colors) {
+		scatterRef.set({
+			pointColor: colors as string[],
+		});
+	}
+	function createScatter(canvasEl, c = colors, config = createScatterConfig) {
 		if (canvasEl) {
+			if (scatterRef !== undefined) {
+				scatterRef.destroy();
+			}
 			const scatter = createScatterPlot({
 				canvas: canvasEl,
 				width,
 				height,
-				...createScatterConfig,
+				...config,
 			});
 			scatterRef = scatter;
 			scatter.set({ colorBy: "valueA", opacityBy: "valueB" });
-			scatter.set({
-				pointColor: colors as string[],
-			});
 			scatter.subscribe("deselect", deselectPoints, null);
 			scatter.subscribe(
 				"select",
@@ -69,6 +74,9 @@
 				null
 			);
 		}
+	}
+	onMount(() => {
+		createScatter(canvasEl, colors, createScatterConfig);
 	});
 	$: {
 		if (scatterRef !== undefined && points.length > 0) {
@@ -88,6 +96,7 @@
 				colorIdxs.length > 0 ? colorIdxs[i] : 0,
 				0.65,
 			]);
+			stylePoints(scatterRef, colors);
 			scatterRef.draw(transformedPoints);
 		}
 	}

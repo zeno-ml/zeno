@@ -3,10 +3,11 @@
 	import type { TypedArray } from "arquero/dist/types/table/table";
 	import MetadataBar from "./filtering/MetadataBar.svelte";
 	import SelectionBar from "./filtering/SelectionBar.svelte";
-	import { filteredTable, model } from "./stores";
+	import { filteredTable, model, settings } from "./stores";
 	import ReglScatter from "./scatter/ReglScatter.svelte";
 	import Samples from "./samples/Samples.svelte";
 	import SamplesOptions from "./samples/SampleOptions.svelte";
+	import * as d3 from "d3";
 
 	filteredTable.subscribe((d) => d);
 
@@ -34,28 +35,52 @@
 		dt._names.includes(colName);
 	const embedKeys = { x: "zenoembed_x", y: "zenoembed_y" };
 
-	// $: {
-	// 	if (
-	// 		hasColumn($filteredTable, embedKeys.x) &&
-	// 		hasColumn($filteredTable, embedKeys.y)
-	// 	) {
-	// 		projection = [
-	// 			$filteredTable.columnArray(embedKeys.x),
-	// 			$filteredTable.columnArray(embedKeys.y),
-	// 		];
-
-	// 		const [x, y] = projection;
-	// 		formattedProjection = [];
-	// 		for (let i = 0; i < x.length; i++) {
-	// 			const coordinate = [x[i], y[i]];
-	// 			formattedProjection.push(coordinate);
-	// 		}
-	// 	}
-	// }
+	let sliceSelectedForColoring = "zenopost_cifar_net_1_incorrect";
+	const cifar10Labels = [
+		"airplane",
+		"automobile",
+		"bird",
+		"cat",
+		"deer",
+		"dog",
+		"frog",
+		"horse",
+		"ship",
+		"truck",
+	];
+	let colorCombos = {
+		label: {
+			colorer: (label) => cifar10Labels.indexOf(label),
+			colors: d3.schemeCategory10,
+		},
+		zenopost_cifar_net_1_incorrect: {
+			colorer: (item: any) => Number(item),
+			colors: [d3.color("steelblue").hex(), d3.color("salmon").hex()],
+		},
+	};
+	let colorIdx: any[] = [];
+	let selectedColorer = "label";
+	$: {
+		const metadataExist = $settings.metadata.length > 0;
+		if (metadataExist) {
+			colorIdx = $filteredTable
+				.columnArray(selectedColorer)
+				.map((row) => colorCombos[selectedColorer].colorer(row));
+		}
+	}
 </script>
 
 <div id="main">
 	<MetadataBar />
+	<button
+		on:click={() => {
+			if (selectedColorer === "label") {
+				selectedColorer = "zenopost_cifar_net_1_incorrect";
+			} else {
+				selectedColorer = "label";
+			}
+		}}>Switch coloring</button
+	>
 	<div>
 		<div>
 			<p>{$filteredTable.size}</p>
@@ -66,7 +91,8 @@
 				width={600}
 				height={600}
 				points={formattedProjection}
-				colors={["#CCCCCC"]}
+				colorIdxs={colorIdx}
+				colors={colorCombos[selectedColorer].colors}
 				createScatterConfig={{
 					pointSize: 3,
 					opacity: 0.65,
@@ -92,6 +118,13 @@
 				}}
 				>Compute projection
 			</button>
+		</div>
+		<div>
+			{#each $settings.metadata ?? [] as md, i}
+				<div>
+					{md}
+				</div>
+			{/each}
 		</div>
 	</div>
 	<div>
