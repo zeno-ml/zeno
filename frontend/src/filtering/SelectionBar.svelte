@@ -63,7 +63,7 @@
       >
     </div>
   {/each}
-  {#if $metadataSelections.size > 0}
+  {#if $metadataSelections.size + $sliceSelections.length > 0}
     <span class="clear" on:click={() => metadataSelections.set(new Map())}>
       clear all
     </span>

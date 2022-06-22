@@ -85,18 +85,20 @@
 </script>
 
 <div class="side-container">
-  <h4>Slices</h4>
-  <div style:margin-bottom="10px">
-    <Button
-      variant="outlined"
-      on:click={() => {
-        predicates = [];
-        name = "";
-        newSlice = true;
-      }}
-    >
-      New Slice
-    </Button>
+  <div class="inline">
+    <h4>Slices</h4>
+    <div style:margin-right="10px">
+      <Button
+        variant="outlined"
+        on:click={() => {
+          predicates = [];
+          name = "";
+          newSlice = true;
+        }}
+      >
+        New Slice
+      </Button>
+    </div>
   </div>
   {#if newSlice}
     <div
@@ -162,5 +164,10 @@
     height: calc(100vh - 60px);
     overflow-y: auto;
     min-width: 450px;
+  }
+  .inline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 </style>
