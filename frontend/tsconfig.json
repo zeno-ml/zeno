@@ -1,19 +1,22 @@
 {
   "extends": "@tsconfig/svelte/tsconfig.json",
-  "include": ["src/**/*"],
-  "exclude": ["node_modules/*", "__sapper__/*", "public/*"],
   "compilerOptions": {
-    "moduleResolution": "node",
-    "target": "es2021",
-    "importsNotUsedAsValues": "error",
-    "preserveValueImports": true,
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "module": "ES2022",
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    /**
+     * Typecheck JS in `.svelte` and `.js` files by default.
+     * Disable checkJs if you'd like to use dynamic types in JS.
+     * Note that setting allowJs false does not prevent the use
+     * of JS in `.svelte` files.
+     */
+    "allowJs": true,
+    "checkJs": true,
     "isolatedModules": true,
-    "sourceMap": true,
-    "strict": false,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "types": ["svelte"],
-    "baseUrl": "."
-  }
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.js", "src/**/*.svelte"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }
