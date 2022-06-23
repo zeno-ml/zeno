@@ -4,9 +4,8 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "npm run smui-theme && vite build --emptyOutDir && vite",
     "build": "npm run smui-theme && vite build --emptyOutDir",
-    "watch": "vite build --watch --emptyOutDir",
     "smui-theme": "smui-theme compile public/smui.css -i src/theme",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json"
