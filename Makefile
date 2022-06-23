@@ -3,12 +3,12 @@ all: check lint typecheck cover book
 .PHONY: test
 test:
 	@echo "==> 🧪 Tests"
-	@poetry run pytest -svv zeno/tests/
+	@poetry run pytest -svv zeno/tests/*
 
 .PHONY: cover
 cover:
 	@echo "==> 🧪 Tests with Coverage =="
-	@poetry run pytest --cov=zeno --cov-report=term-missing ./zeno
+	@poetry run pytest --cov=zeno --cov-report=term-missing ./zeno/tests/*
 
 .PHONY: lint
 lint:
@@ -41,8 +41,8 @@ book:
 .PHONY: build
 build:
 	@echo "==> 👷‍♀️ Build"
-	@poetry build -vvv
 	@cd frontend && npm run build
+	@poetry build -vvv
 
 .PHONY: install
 install:

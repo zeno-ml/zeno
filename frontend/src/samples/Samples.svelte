@@ -107,7 +107,7 @@
     width: 100%;
   }
   .sample-container {
-    height: calc(100vh - 245px);
+    height: calc(100vh - 250px);
     overflow-y: auto;
     align-content: baseline;
     border-bottom: 1px solid rgb(224, 224, 224);

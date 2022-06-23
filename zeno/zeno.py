@@ -311,7 +311,7 @@ class Zeno(object):
         metric_func = self.metric_functions[metric_name]
         result_metric = metric_func(self.df.loc[sli.idxs], local_ops)
 
-        if len(sli.name) > 0 and sli.name not in self.slices:
+        if len(sli.name) > 0:
             self.slices[sli.name] = sli
             with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
                 pickle.dump(self.slices, f)

@@ -41,7 +41,7 @@ jobs:
           npm i
 
       - name: Run tests
-        run: poetry run pytest --cov=./ --cov-report=xml zeno
+        run: poetry run pytest --cov=./ --cov-report=xml ./zeno/tests/*
       - name: Check types
         run: make typecheck
       - name: Check Poetry

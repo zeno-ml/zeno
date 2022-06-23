@@ -27,7 +27,19 @@ def area(df, ops: ZenoOptions):
 
 
 @distill_function
-def black_box_count(df, ops):
+def output_area(df, ops: ZenoOptions):
+    ret = []
+    for _, row in df.iterrows():
+        label_path = os.path.join(ops.output_path, row[ops.output_column])
+        label_img = cv2.imread(label_path, cv2.IMREAD_GRAYSCALE)
+        label_img = cv2.resize(label_img, (224, 224))
+
+        ret.append(np.where(label_img > 0, 1, 0).sum())
+    return ret
+
+
+@distill_function
+def black_box(df, ops):
     """
     Detect if there is a black box at the bottom left
     """
@@ -43,8 +55,8 @@ def black_box_count(df, ops):
                 if img[y][x][0] == 0:
                     count += 1
         if count == 720:
-            box_count.append("A")
+            box_count.append(1)
         else:
-            box_count.append("B")
+            box_count.append(0)
 
     return box_count

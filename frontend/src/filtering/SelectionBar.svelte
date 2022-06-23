@@ -44,6 +44,9 @@
           {chip.name}
           {"<"}
           {chip.values[1].toFixed(2)}
+        {:else if chip.type === "binary"}
+          {chip.values[0]}
+          {chip.name}
         {:else}
           {chip.name}
           {"=="}
@@ -60,8 +63,14 @@
       >
     </div>
   {/each}
-  {#if $metadataSelections.size > 0}
-    <span class="clear" on:click={() => metadataSelections.set(new Map())}>
+  {#if $metadataSelections.size + $sliceSelections.length > 0}
+    <span
+      class="clear"
+      on:click={() => {
+        metadataSelections.set(new Map());
+        sliceSelections.set([]);
+      }}
+    >
       clear all
     </span>
   {/if}
@@ -74,6 +83,7 @@
     flex-wrap: wrap;
     height: fit-content;
     align-items: center;
+    min-height: 40px;
   }
   #metric {
     font-weight: 600;

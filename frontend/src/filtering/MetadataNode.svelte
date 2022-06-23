@@ -1,6 +1,9 @@
 <script lang="ts">
-  import type { View, VegaLiteSpec } from "svelte-vega";
+  import type { View } from "svelte-vega";
   import type ColumnTable from "arquero/dist/types/table/column-table";
+
+  import Button from "@smui/button";
+  import { Label } from "@smui/common";
 
   import { VegaLite } from "svelte-vega";
 
@@ -10,14 +13,24 @@
   export let name;
   export let col;
 
+  enum ChartType {
+    Count,
+    Histogram,
+    Binary,
+    Other,
+  }
+  let chartType: ChartType;
+
   let selection = undefined;
   let finalSelection = undefined;
-  let spec: VegaLiteSpec = undefined;
   let view: View;
   let data = { table: [] };
 
   function updateData(table: ColumnTable) {
-    if (spec && table.column(col)) {
+    if (
+      (chartType === ChartType.Count || chartType === ChartType.Histogram) &&
+      table.column(col)
+    ) {
       let arr = table.array(col);
       // Deal with BigInts.
       if (!isNaN(Number(arr[0]))) {
@@ -34,10 +47,18 @@
         .rollup({ unique: `d => op.distinct(d["${col}"])` })
         .object()["unique"];
 
-      if (isOrdinal) {
-        spec = unique > 20 ? null : countSpec;
+      if (!isOrdinal && unique === 2) {
+        let vals = t
+          .orderby(col)
+          .rollup({ a: `d => op.array_agg_distinct(d["${col}"])` })
+          .object()["a"];
+        if (Number(vals[0]) === 0 && Number(vals[1]) === 1) {
+          chartType = ChartType.Binary;
+        }
+      } else if (isOrdinal) {
+        chartType = unique > 20 ? ChartType.Other : ChartType.Count;
       } else {
-        spec = unique < 20 ? countSpec : histogramSpec;
+        chartType = unique < 20 ? ChartType.Count : ChartType.Histogram;
       }
     }
   });
@@ -70,13 +91,13 @@
     }
   });
 
-  $: if (view && spec) {
-    if (spec === histogramSpec) {
+  $: if (view) {
+    if (chartType === ChartType.Histogram) {
       view.addSignalListener(
         "brush",
         (...s) => (selection = s[1].data ? ["range", ...s[1].data] : undefined)
       );
-    } else {
+    } else if (chartType === ChartType.Count) {
       view.addSignalListener(
         "select",
         (...s) => (selection = s[1].data ? ["points", ...s[1].data] : undefined)
@@ -108,13 +129,47 @@
 <div class="cell">
   <div id="info">
     <span>{name}</span>
+    {#if chartType === ChartType.Binary}
+      <div style:display="flex">
+        <div class="binary-button">
+          <Button
+            variant="outlined"
+            on:click={() => {
+              selection =
+                selection && selection[1] === "is"
+                  ? undefined
+                  : ["binary", "is"];
+              setSelection();
+            }}
+          >
+            <Label>Is</Label>
+          </Button>
+          {$table.filter(`d => d["${col}"] == 1`).count().object()["count"]}
+        </div>
+        <div class="binary-button">
+          <Button
+            variant="outlined"
+            on:click={() => {
+              selection =
+                selection && selection[1] === "is not"
+                  ? undefined
+                  : ["binary", "is not"];
+              setSelection();
+            }}
+          >
+            <Label>Is Not</Label>
+          </Button>
+          {$table.filter(`d => d["${col}"] == 0`).count().object()["count"]}
+        </div>
+      </div>
+    {/if}
     {#if selection && selection[0] === "range"}
       <span>
         {selection ? selection[1].toFixed(2) + " - " : ""}
         {selection ? selection[2].toFixed(2) : ""}
       </span>
     {/if}
-    {#if $table.column(col) && !spec}
+    {#if $table.column(col) && chartType === ChartType.Other}
       <span style:margin-right="5px">
         unique values: {$table
           .rollup({ unique: `d => op.distinct(d["${col}"])` })
@@ -122,7 +177,7 @@
       </span>
     {/if}
   </div>
-  {#if data.table.length > 0}
+  {#if data.table.length > 0 && (chartType === ChartType.Histogram || chartType === ChartType.Count)}
     <div
       id="histogram"
       on:mouseup={setSelection}
@@ -131,7 +186,7 @@
       on:blur={setSelection}
     >
       <VegaLite
-        {spec}
+        spec={chartType === ChartType.Histogram ? histogramSpec : countSpec}
         {data}
         bind:view
         options={{ tooltip: true, actions: false, theme: "vox" }}
@@ -152,10 +207,16 @@
   #info {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     width: 100%;
     font-size: 14px;
     margin-left: 5px;
     margin-bottom: 5px;
     color: #666;
+  }
+  .binary-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 </style>
