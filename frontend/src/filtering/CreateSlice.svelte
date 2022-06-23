@@ -10,12 +10,15 @@
   import { getFilterFromPredicates, getMetrics } from "../util";
 
   import FilterEntry from "./FilterEntry.svelte";
+  import { onMount } from "svelte";
 
   export let name;
   export let newSlice;
   export let mode = "create";
   export let predicates: FilterPredicate[];
   export let metadataSelections: Map<string, MetadataSelection>;
+
+  let nameField;
 
   // Pre-fill slice creation with current metadata selections.
   if (metadataSelections.size !== 0) {
@@ -107,13 +110,15 @@
       return s;
     });
   }
+
+  onMount(() => nameField.getElement().focus());
 </script>
 
 <div id="paper-container">
   <Paper elevation={7}>
     <Content>
       {#if mode === "create"}
-        <Textfield bind:value={name} label="Name">
+        <Textfield bind:value={name} label="Name" bind:this={nameField}>
           <HelperText slot="helper">Slice 1</HelperText>
         </Textfield>
       {:else}

@@ -64,7 +64,13 @@
     </div>
   {/each}
   {#if $metadataSelections.size + $sliceSelections.length > 0}
-    <span class="clear" on:click={() => metadataSelections.set(new Map())}>
+    <span
+      class="clear"
+      on:click={() => {
+        metadataSelections.set(new Map());
+        sliceSelections.set([]);
+      }}
+    >
       clear all
     </span>
   {/if}
@@ -77,6 +83,7 @@
     flex-wrap: wrap;
     height: fit-content;
     align-items: center;
+    min-height: 40px;
   }
   #metric {
     font-weight: 600;
