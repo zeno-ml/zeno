@@ -3,6 +3,7 @@
   import DataTable, { Head, Body, Row, Cell } from "@smui/data-table";
 
   import Settings from "./Settings.svelte";
+  import SliceDetails from "./SliceDetails.svelte";
 </script>
 
 <Settings />
@@ -19,7 +20,7 @@
     <Body>
       {#each [...$slices.values()] as sli}
         <Row>
-          <Cell>{sli.name}</Cell>
+          <Cell>{sli.name} <SliceDetails {sli} /></Cell>
           {#each $models as m}
             {@const r = $results.get({
               slice: sli.name,
