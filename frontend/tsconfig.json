@@ -8,7 +8,6 @@
     "importsNotUsedAsValues": "error",
     "preserveValueImports": true,
     "isolatedModules": true,
-    "sourceMap": true,
     "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,

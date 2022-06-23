@@ -2,7 +2,6 @@ import svelte from "rollup-plugin-svelte";
 import commonjs from "@rollup/plugin-commonjs";
 import json from "@rollup/plugin-json";
 import resolve from "@rollup/plugin-node-resolve";
-import livereload from "rollup-plugin-livereload";
 import { terser } from "rollup-plugin-terser";
 import sveltePreprocess from "svelte-preprocess";
 import typescript from "@rollup/plugin-typescript";
@@ -10,38 +9,28 @@ import css from "rollup-plugin-css-only";
 
 const production = !process.env.ROLLUP_WATCH;
 
-function serve() {
-  let server;
-
-  function toExit() {
-    if (server) server.kill(0);
-  }
-
-  return {
-    writeBundle() {
-      if (server) return;
-      server = require("child_process").spawn(
-        "npm",
-        ["run", "start", "--", "--dev"],
-        {
-          stdio: ["ignore", "inherit", "inherit"],
-          shell: true,
-        }
-      );
-
-      process.on("SIGTERM", toExit);
-      process.on("exit", toExit);
-    },
-  };
-}
-
 export default {
   input: "src/main.ts",
   output: {
-    sourcemap: true,
-    format: "iife",
+    sourcemap: !production,
+    format: "es",
     name: "app",
-    file: "../zeno/frontend/build/bundle.js",
+    dir: "../zeno/frontend/build/",
+    manualChunks: (id) => {
+      if (id.includes("node_modules")) {
+        if (id.includes("@smui")) {
+          return "vendor_smui";
+        } else if (id.includes("arquero") || id.includes("apache-arrow")) {
+          return "vendor_arquero";
+        } else if (id.includes("@mdi/js")) {
+          return "vendor_mdi";
+        } else if (id.includes("svelte-vega")) {
+          return "vendor_vega";
+        }
+
+        return "vendor"; // all other package goes here
+      }
+    },
   },
   plugins: [
     svelte({
@@ -70,14 +59,6 @@ export default {
       sourceMap: !production,
       inlineSources: !production,
     }),
-
-    // In dev mode, call `npm run start` once
-    // the bundle has been generated
-    // !production && serve(),
-
-    // Watch the `public` directory and refresh the
-    // browser on changes when not in production
-    !production && livereload("public"),
 
     // If we're building for production (npm run build
     // instead of npm run dev), minify

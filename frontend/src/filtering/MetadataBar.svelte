@@ -87,7 +87,7 @@
 <div class="side-container">
   <div class="inline">
     <h4>Slices</h4>
-    <div style:margin-right="10px">
+    <div style:margin-right="28px">
       <Button
         variant="outlined"
         on:click={() => {
