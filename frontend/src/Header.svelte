@@ -22,7 +22,7 @@
   <div class="inline">
     <img
       style="width:100px; margin-right: 50px;"
-      src="zeno.png"
+      src="build/zeno.png"
       alt="Square spiral logo next to 'Zeno'"
     />
     <div class="status inline">

@@ -6,6 +6,7 @@
   import Ripple from "@smui/ripple";
 
   import { results, model, metric, slices } from "../stores";
+  import SliceDetails from "../SliceDetails.svelte";
 
   export let name: string;
   export let fullName = name;
@@ -89,20 +90,7 @@
   </div>
   {#if expanded}
     <div in:slide out:slide class="details">
-      {#each sli.predicates as pred, i}
-        <div class="meta-chip">
-          <span>
-            {pred.groupIndicator === "start" ? "(" : ""}
-            {i === 0 ? "" : pred.join}
-            {pred.name}
-            {pred.operation}
-            {!isNaN(Number(pred.value))
-              ? Number(pred.value).toFixed(2)
-              : pred.value}
-            {pred.groupIndicator === "end" ? ")" : ""}
-          </span>
-        </div>
-      {/each}
+      <SliceDetails {sli} />
     </div>
   {/if}
 </div>
@@ -128,15 +116,5 @@
   }
   .selected {
     background: #ebdffc;
-  }
-  .meta-chip {
-    padding: 5px;
-    background: rgba(0, 0, 0, 0.07);
-    margin-left: 5px;
-    margin-right: 5px;
-    margin-top: 2px;
-    margin-bottom: 2px;
-    border-radius: 5px;
-    width: fit-content;
   }
 </style>
