@@ -6,8 +6,10 @@
   import SliceDetails from "./SliceDetails.svelte";
 </script>
 
-<Settings />
-<div>
+<div class="settings">
+  <Settings />
+</div>
+<div class="table">
   <DataTable table$aria-label="People list" style="max-width: 100%;">
     <Head>
       <Row>
@@ -34,3 +36,12 @@
     </Body>
   </DataTable>
 </div>
+
+<style>
+  .table {
+    margin-top: 20px;
+  }
+  .settings {
+    margin-top: 10px;
+  }
+</style>
