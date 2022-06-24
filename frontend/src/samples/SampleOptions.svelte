@@ -8,7 +8,7 @@
   } from "../stores";
 
   import Settings from "../Settings.svelte";
-  import SelectionBar from "../filtering/SelectionBar.svelte";
+  import SelectionBar from "../metadata/SelectionBar.svelte";
 
   let sort = "";
   let group = "";

@@ -124,7 +124,6 @@
   }
 
   #main {
-    padding-left: 10px;
     width: calc(100vw - 50px);
   }
 </style>

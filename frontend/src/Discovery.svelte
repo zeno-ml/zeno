@@ -1,13 +1,11 @@
 <script lang="ts">
-  import MetadataBar from "./filtering/MetadataBar.svelte";
-  import SelectionBar from "./filtering/SelectionBar.svelte";
+  import MetadataPanel from "./metadata/MetadataPanel.svelte";
+  import SelectionBar from "./metadata/SelectionBar.svelte";
   import { filteredTable } from "./stores";
-
-  filteredTable.subscribe((d) => console.log(d));
 </script>
 
 <div id="main">
-  <MetadataBar />
+  <MetadataPanel />
   <p>{$filteredTable.size}</p>
   <SelectionBar />
 </div>

@@ -112,8 +112,15 @@
   }
 
   onMount(() => nameField.getElement().focus());
+
+  function submit(e) {
+    if (e.key === "Enter") {
+      createSlice();
+    }
+  }
 </script>
 
+<svelte:window on:keydown={submit} />
 <div id="paper-container">
   <Paper elevation={7}>
     <Content>

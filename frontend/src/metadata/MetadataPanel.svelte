@@ -3,9 +3,9 @@
   import * as aq from "arquero";
   import type ColumnTable from "arquero/dist/types/table/column-table";
 
-  import CreateSlice from "./CreateSlice.svelte";
-  import MetadataNode from "./MetadataNode.svelte";
-  import SliceNode from "./SliceNode.svelte";
+  import CreateSlice from "../filtering/CreateSlice.svelte";
+  import MetadataNode from "./MetadataCell.svelte";
+  import SliceNode from "./SliceCell.svelte";
 
   import { getFilterFromPredicates, getMetrics } from "../util";
   import { clickOutside } from "../clickOutside";
@@ -87,7 +87,7 @@
 <div class="side-container">
   <div class="inline">
     <h4>Slices</h4>
-    <div style:margin-right="28px">
+    <div style:margin-right="13px">
       <Button
         variant="outlined"
         on:click={() => {
@@ -164,6 +164,7 @@
     height: calc(100vh - 60px);
     overflow-y: auto;
     min-width: 450px;
+    padding: 10px;
   }
   .inline {
     display: flex;
