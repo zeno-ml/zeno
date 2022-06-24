@@ -4,7 +4,7 @@
 
   import Settings from "./Settings.svelte";
   import AnalysisTableRow from "./AnalysisTableRow.svelte";
-  import ReportsPanel from "./ReportsPanel.svelte";
+  import ReportsPanel from "./report/ReportsPanel.svelte";
 </script>
 
 <div class="inline">

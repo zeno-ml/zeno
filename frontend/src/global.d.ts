@@ -42,3 +42,8 @@ interface Slice {
   predicates: FilterPredicate[];
   idxs?: string[];
 }
+
+interface Report {
+  name: string;
+  slices: Slice[];
+}

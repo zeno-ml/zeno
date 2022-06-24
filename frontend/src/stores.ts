@@ -33,11 +33,13 @@ export const table: Writable<ColumnTable> = writable(aq.table({}));
 export const results: Writable<InternMap<ResultKey, number>> = writable(
   new InternMap([], (d) => d.slice + "." + d.metric + "." + d.model)
 );
+export const reports: Writable<Report[]> = writable([]);
 
 export const metadataSelections: Writable<Map<string, MetadataSelection>> =
   writable(new Map());
 export const sliceSelections: Writable<string[]> = writable([]);
 
+export const report: Writable<number> = writable(undefined);
 export const model: Writable<string> = writable("");
 export const metric: Writable<string> = writable("");
 export const filteredTable: Writable<ColumnTable> = writable(aq.fromJSON({}));
