@@ -10,7 +10,15 @@
   import { onMount } from "svelte";
   import Router, { location } from "svelte-spa-router";
 
-  import { metric, metrics, model, models, ready, wsResponse } from "./stores";
+  import {
+    tab,
+    metric,
+    metrics,
+    model,
+    models,
+    ready,
+    wsResponse,
+  } from "./stores";
   import { initialFetch, updateTab, updateTableColumns } from "./util";
 
   import Header from "./Header.svelte";
@@ -18,9 +26,10 @@
   import Exploration from "./Exploration.svelte";
   import Analysis from "./Analysis.svelte";
 
-  let tab = $location.split("/")[1];
-  if (!tab) {
-    tab = "results";
+  tab.set($location.split("/")[1]);
+
+  if (!$tab) {
+    tab.set("results");
   }
 
   const routes = {
@@ -32,9 +41,9 @@
   };
 
   location.subscribe((d) => {
-    tab = d.split("/")[1];
+    tab.set(d.split("/")[1]);
     if (!tab) {
-      tab = "exploration";
+      tab.set("exploration");
     }
   });
 
@@ -54,8 +63,8 @@
   <div id="side-menu">
     <List class="demo-list" iconList={true}>
       <Item
-        activated={tab === "discovery"}
-        on:SMUI:action={() => (tab = updateTab("discovery"))}
+        activated={$tab === "discovery"}
+        on:SMUI:action={() => updateTab("discovery")}
       >
         <IconButton>
           <Icon component={Svg} viewBox="0 0 24 24">
@@ -65,8 +74,8 @@
       </Item>
       <Separator />
       <Item
-        activated={tab === "exploration"}
-        on:SMUI:action={() => (tab = updateTab("exploration"))}
+        activated={$tab === "exploration"}
+        on:SMUI:action={() => updateTab("exploration")}
       >
         <IconButton>
           <Icon component={Svg} viewBox="0 0 24 24">
@@ -76,8 +85,8 @@
       </Item>
       <Separator />
       <Item
-        activated={tab === "analysis"}
-        on:SMUI:action={() => (tab = updateTab("analysis"))}
+        activated={$tab === "analysis"}
+        on:SMUI:action={() => updateTab("analysis")}
       >
         <IconButton>
           <Icon component={Svg} viewBox="0 0 24 24">

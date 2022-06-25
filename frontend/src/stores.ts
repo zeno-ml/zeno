@@ -28,6 +28,8 @@ export const status: Readable<string> = derived(
   "connecting"
 );
 
+export const tab: Writable<string> = writable("results");
+
 export const slices: Writable<Map<string, Slice>> = writable(new Map());
 export const table: Writable<ColumnTable> = writable(aq.table({}));
 export const results: Writable<InternMap<ResultKey, number>> = writable(

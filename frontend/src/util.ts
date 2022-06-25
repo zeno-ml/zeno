@@ -1,5 +1,6 @@
 import * as aq from "arquero";
 import { get } from "svelte/store";
+import { tab } from "./stores";
 
 import {
   currentColumns,
@@ -54,7 +55,7 @@ export function updateTab(t: string) {
   } else {
     window.location.hash = "#/" + t + "/";
   }
-  return t;
+  tab.set(t);
 }
 
 export function getMetrics(slices: Slice[]) {
