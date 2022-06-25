@@ -1,9 +1,9 @@
 <script lang="ts">
-  export let sli;
+  export let sli: Slice;
 </script>
 
 <div class="chip">
-  {#each sli.predicates as pred, i}
+  {#each sli.filterPredicates as pred, i}
     <div class="meta-chip">
       {pred.groupIndicator === "start" ? "(" : ""}
       {i === 0 ? "" : pred.join}

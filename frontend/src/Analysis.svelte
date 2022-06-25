@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { models, slices } from "./stores";
+  import { metric, metrics, models, slices } from "./stores";
   import DataTable, { Head, Body, Row, Cell } from "@smui/data-table";
 
-  import Settings from "./Settings.svelte";
   import AnalysisTableRow from "./AnalysisTableRow.svelte";
   import ReportsPanel from "./report/ReportsPanel.svelte";
+  import Select, { Option } from "@smui/select";
 </script>
 
 <div class="inline">
@@ -13,7 +13,13 @@
   </div>
   <div>
     <div class="settings">
-      <Settings />
+      {#if $metrics}
+        <Select bind:value={$metric} label="Metric" style="margin-right: 20px;">
+          {#each $metrics as m}
+            <Option value={m}>{m}</Option>
+          {/each}
+        </Select>
+      {/if}
     </div>
     <div class="table">
       <DataTable table$aria-label="People list" style="max-width: 100%;">

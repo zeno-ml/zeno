@@ -8,7 +8,7 @@ export const settings: Writable<Settings> = writable({
   task: "",
   idColumn: "",
   labelColumn: "",
-  metadata: [],
+  metadataColumns: [],
 });
 export const metrics = writable([]);
 export const models = writable([]);
@@ -19,7 +19,7 @@ export const wsResponse: Writable<WSResponse> = websocketStore(
   {
     status: "connecting",
     doneProcessing: false,
-    columns: [],
+    completeColumns: [],
   } as WSResponse
 );
 export const status: Readable<string> = derived(
@@ -46,7 +46,7 @@ export const filteredTable: Writable<ColumnTable> = writable(aq.fromJSON({}));
 export const currentColumns: Readable<string[]> = derived(
   [settings, model],
   ([$settings, $model]) =>
-    $settings.metadata.filter((c) => {
+    $settings.metadataColumns.filter((c) => {
       if (
         c.startsWith("zenopost_") &&
         !c.startsWith("zenopost_" + $model + "_")

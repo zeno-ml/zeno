@@ -4,13 +4,13 @@ interface Settings {
   task: string;
   idColumn: string;
   labelColumn: string;
-  metadata: string[];
+  metadataColumns: string[];
 }
 
 interface WSResponse {
   status: string;
   doneProcessing: boolean;
-  columns: string[];
+  completeColumns: string[];
 }
 
 interface ResultKey {
@@ -38,12 +38,25 @@ interface FilterPredicate {
 }
 
 interface Slice {
-  name: string;
-  predicates: FilterPredicate[];
+  sliceName: string;
+  filterPredicates: FilterPredicate[];
   idxs?: string[];
+}
+
+interface ReportPredicate {
+  sliceName: string;
+  operation: string;
+  value: number;
 }
 
 interface Report {
   name: string;
-  slices: Slice[];
+  reportPredicates: ReportPredicate[];
+}
+
+declare namespace svelte.JSX {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface DOMAttributes<T> {
+    onclick_outside?: CompositionEventHandler<T>;
+  }
 }

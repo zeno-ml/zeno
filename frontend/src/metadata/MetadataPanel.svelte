@@ -38,7 +38,7 @@
 
     // Filter with slices.
     $sliceSelections.forEach((s) => {
-      let filt = getFilterFromPredicates($slices.get(s).predicates);
+      let filt = getFilterFromPredicates($slices.get(s).filterPredicates);
       tempTable = tempTable.filter(`(d) => ${filt}`);
     });
 
@@ -68,17 +68,17 @@
 
     filteredTable.set(tempTable);
     getMetrics([
-      {
-        name: "",
-        predicates: [],
+      <Slice>{
+        sliceName: "",
+        filterPredicates: [],
         idxs: tempTable.array($settings.idColumn) as string[],
       },
     ]);
   }
 
   function editSlice(sli: Slice) {
-    predicates = sli.predicates;
-    name = sli.name;
+    predicates = sli.filterPredicates;
+    name = sli.sliceName;
     mode = "edit";
     newSlice = true;
   }
@@ -120,34 +120,34 @@
 
   {#each [...$slices.values()] as s, i}
     <SliceNode
-      name={s.name}
-      fullName={s.name}
+      name={s.sliceName}
+      fullName={s.sliceName}
       {editSlice}
-      selected={$sliceSelections.includes(s.name)}
+      selected={$sliceSelections.includes(s.sliceName)}
       setSelected={() => {
-        if ($sliceSelections.includes(s.name)) {
+        if ($sliceSelections.includes(s.sliceName)) {
           sliceSelections.update((sel) => {
-            sel.splice(sel.indexOf(s.name), 1);
+            sel.splice(sel.indexOf(s.sliceName), 1);
             return [...sel];
           });
         } else {
-          sliceSelections.update((sel) => [...sel, s.name]);
+          sliceSelections.update((sel) => [...sel, s.sliceName]);
         }
       }}
     />
   {/each}
 
   <h4>Metadata</h4>
-  {#each $settings.metadata.filter((m) => !m.startsWith("zeno")) as name}
+  {#each $settings.metadataColumns.filter((m) => !m.startsWith("zeno")) as name}
     <MetadataNode {name} col={name} />
   {/each}
 
   <h4>Distilled Metadata</h4>
-  {#each $settings.metadata.filter((m) => m.startsWith("zenopre")) as name}
+  {#each $settings.metadataColumns.filter( (m) => m.startsWith("zenopre") ) as name}
     <MetadataNode name={name.slice(8)} col={name} />
   {/each}
   {#if $model}
-    {#each $settings.metadata.filter( (m) => m.startsWith("zenopost_" + $model + "_") ) as name}
+    {#each $settings.metadataColumns.filter( (m) => m.startsWith("zenopost_" + $model + "_") ) as name}
       <MetadataNode name={name.slice(10 + $model.length)} col={name} />
     {/each}
   {/if}

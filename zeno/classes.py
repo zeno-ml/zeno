@@ -38,8 +38,8 @@ class FilterPredicate(CamelModel):
 
 
 class Slice(CamelModel):
-    name: str
-    predicates: List[FilterPredicate]
+    sliceName: str
+    filterPredicates: List[FilterPredicate]
     idxs: Optional[List[str]]
 
 

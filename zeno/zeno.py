@@ -311,13 +311,13 @@ class Zeno(object):
         metric_func = self.metric_functions[metric_name]
         result_metric = metric_func(self.df.loc[sli.idxs], local_ops)
 
-        if len(sli.name) > 0:
-            self.slices[sli.name] = sli
+        if len(sli.sliceName) > 0:
+            self.slices[sli.sliceName] = sli
             with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
                 pickle.dump(self.slices, f)
 
         return {
-            "slice": sli.name,
+            "slice": sli.sliceName,
             "model": model_name,
             "metric": metric_name,
             "value": result_metric,

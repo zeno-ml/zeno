@@ -33,17 +33,17 @@ export function getSlices(t) {
   fetch("/api/slices")
     .then((d) => d.json())
     .then((d) => {
-      const slis = JSON.parse(d);
+      const slis = JSON.parse(d) as Slice[];
       slis.forEach(
-        (s) =>
+        (s: Slice) =>
           (s.idxs = t
-            .filter("(d) => " + getFilterFromPredicates(s.predicates))
+            .filter("(d) => " + getFilterFromPredicates(s.filterPredicates))
             .array(get(settings).idColumn))
       );
       getMetrics(slis);
 
       const sliMap = new Map();
-      slis.forEach((e) => sliMap.set(e.name, e));
+      slis.forEach((e) => sliMap.set(e.sliceName, e));
       slices.set(sliMap);
     });
 }
@@ -72,11 +72,11 @@ export function getMetrics(slices: Slice[]) {
       results.update((resmap) => {
         res.forEach((r) => {
           resmap.set(
-            {
+            <ResultKey>{
               slice: r.slice,
               metric: r.metric,
               model: r.model,
-            } as ResultKey,
+            },
             r.value
           );
         });
@@ -96,7 +96,7 @@ export function getFilterFromPredicates(predicates: FilterPredicate[]) {
     let ret = "";
 
     if (p.predicateType === "slice") {
-      ret = getFilterFromPredicates(get(slices).get(p.name).predicates);
+      ret = getFilterFromPredicates(get(slices).get(p.name).filterPredicates);
       if (p.operation === "IS IN") {
         return ret;
       } else {
@@ -144,11 +144,13 @@ export function getFilterFromPredicates(predicates: FilterPredicate[]) {
   return stringPreds.join(" ");
 }
 
-export function updateTableColumns(w) {
+export function updateTableColumns(w: WSResponse) {
   let t = get(table);
 
   const tableColumns = t.columnNames();
-  const missingColumns = w.columns.filter((c) => !tableColumns.includes(c));
+  const missingColumns = w.completeColumns.filter(
+    (c) => !tableColumns.includes(c)
+  );
 
   if (missingColumns.length > 0) {
     fetch("/api/table", {

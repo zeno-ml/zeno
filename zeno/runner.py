@@ -164,8 +164,7 @@ def run_zeno(args):
                 "task": zeno.task,
                 "idColumn": zeno.id_column,
                 "labelColumn": zeno.label_column,
-                "metadata": zeno.columns,
-                "port": args["port"],
+                "metadataColumns": zeno.columns,
             }
         )
 
@@ -210,7 +209,7 @@ def run_zeno(args):
                     {
                         "status": zeno.status,
                         "doneProcessing": zeno.done_processing,
-                        "columns": list(zeno.complete_columns),
+                        "completeColumns": list(zeno.complete_columns),
                     }
                 )
 

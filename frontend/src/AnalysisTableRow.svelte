@@ -1,7 +1,12 @@
 <script lang="ts">
-  import { metric, models, results } from "./stores";
+  import { metric, models, report, reports, results } from "./stores";
   import { Row, Cell } from "@smui/data-table";
-  import { mdiChevronDown, mdiChevronUp } from "@mdi/js";
+  import {
+    mdiChevronDown,
+    mdiChevronUp,
+    mdiMinusCircleOutline,
+    mdiPlusCircleOutline,
+  } from "@mdi/js";
   import { Svg } from "@smui/common/elements";
   import { Icon } from "@smui/common";
 
@@ -10,11 +15,52 @@
   export let sli: Slice;
 
   let expanded = false;
+
+  function hasSlice() {
+    let rep = $reports[$report];
+    if (!rep) {
+      return false;
+    }
+    let idx = rep.reportPredicates.findIndex(
+      (pred) => pred.sliceName === sli.sliceName
+    );
+    return idx === -1 ? false : true;
+  }
 </script>
 
 <Row>
   <Cell class={expanded ? "detail-row" : ""}>
     <div class="inline">
+      <div
+        style:width="24px"
+        style:height="24px"
+        style:cursor="pointer"
+        style:margin-right="10px"
+      >
+        <Icon
+          component={Svg}
+          viewBox="0 0 24 24"
+          class="material-icons"
+          on:click={(e) => {
+            e.stopPropagation();
+            reports.update((reps) => {
+              let rep = reps[$report];
+              rep.reportPredicates.push({
+                sliceName: sli.sliceName,
+                operation: undefined,
+                value: undefined,
+              });
+              reps[$report] = rep;
+              return reps;
+            });
+          }}
+        >
+          <path
+            fill="#9b51e0"
+            d={hasSlice() ? mdiMinusCircleOutline : mdiPlusCircleOutline}
+          />
+        </Icon>
+      </div>
       <div
         style:width="24px"
         style:height="24px"
@@ -37,13 +83,13 @@
         </Icon>
       </div>
       <div>
-        {sli.name}
+        {sli.sliceName}
       </div>
     </div>
   </Cell>
   {#each $models as m}
     {@const r = $results.get({
-      slice: sli.name,
+      slice: sli.sliceName,
       metric: $metric,
       model: m,
     })}
