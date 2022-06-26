@@ -1,5 +1,6 @@
 import * as aq from "arquero";
 import { get } from "svelte/store";
+import {color as _color} from "d3";
 
 import {
   currentColumns,
@@ -173,4 +174,16 @@ export function updateTableColumns(w) {
         }
       });
   }
+}
+
+export function interpolateColorToArray(
+  interpolateColorer: (normalized: number) => string,
+  length: number
+) {
+  const increment = 1.0 / length;
+  let colorArray = new Array(length);
+  for (let i = 0, t = 0; i < colorArray.length; i++, t += increment) {
+    colorArray[i] = _color(interpolateColorer(t)).hex();
+  }
+  return colorArray;
 }
