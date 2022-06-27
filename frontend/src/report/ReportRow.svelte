@@ -7,6 +7,7 @@
   import { clickOutside } from "../clickOutside";
   import Select, { Option } from "@smui/select";
   import HelperText from "@smui/textfield/helper-text";
+  import { updateReports } from "../util";
 
   export let i;
 
@@ -35,6 +36,7 @@
     reports.update((reps) => {
       reps[i].name = name;
       reps[i].reportPredicates = preds;
+      updateReports(reps);
       return reps;
     });
   }}
@@ -66,6 +68,7 @@
           e.stopPropagation();
           reports.update((reps) => {
             reps.splice(i, 1);
+            updateReports(reps);
             return reps;
           });
         }}

@@ -16,7 +16,14 @@ import pandas as pd
 import umap  # type: ignore
 
 from .api import ZenoOptions
-from .classes import DistillFunction, PredictFunction, ResultsRequest, Slice
+from .classes import (
+    DistillFunction,
+    PredictFunction,
+    Report,
+    ReportsRequest,
+    ResultsRequest,
+    Slice,
+)
 from .util import (
     get_arrow_bytes,
     load_series,
@@ -99,6 +106,12 @@ class Zeno(object):
         try:
             with open(os.path.join(self.cache_path, "slices.pickle"), "rb") as f:
                 self.slices = pickle.load(f)
+        except FileNotFoundError:
+            pass
+        self.reports: List[Report] = []
+        try:
+            with open(os.path.join(self.cache_path, "reports.pickle"), "rb") as f:
+                self.reports = pickle.load(f)
         except FileNotFoundError:
             pass
 
@@ -311,17 +324,26 @@ class Zeno(object):
         metric_func = self.metric_functions[metric_name]
         result_metric = metric_func(self.df.loc[sli.idxs], local_ops)
 
-        if len(sli.sliceName) > 0:
-            self.slices[sli.sliceName] = sli
+        if len(sli.slice_name) > 0:
+            self.slices[sli.slice_name] = sli
             with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
                 pickle.dump(self.slices, f)
 
         return {
-            "slice": sli.sliceName,
+            "slice": sli.slice_name,
             "model": model_name,
             "metric": metric_name,
             "value": result_metric,
         }
+
+    def get_reports(self):
+        return [r.dict(by_alias=True) for r in self.reports]
+
+    def update_reports(self, reports: ReportsRequest):
+        """Update reports with results."""
+        self.reports = reports.reports
+        with open(os.path.join(self.cache_path, "reports.pickle"), "wb") as f:
+            pickle.dump(self.reports, f)
 
     def __run_umap(self, model):
         embeds = np.stack(self.df["zenoembedding_" + model].to_numpy())
@@ -345,7 +367,7 @@ class Zeno(object):
         return get_arrow_bytes(self.df[columns], self.id_column)
 
     def get_slices(self):
-        return [s.dict() for s in self.slices.values()]
+        return [s.dict(by_alias=True) for s in self.slices.values()]
 
     def delete_slice(self, slice_id):
         self.slices.pop(slice_id)

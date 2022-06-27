@@ -6,6 +6,7 @@
 
   import { reports, report } from "../stores";
   import ReportRow from "./ReportRow.svelte";
+  import { updateReports } from "../util";
 
   report.set(-1);
 </script>
@@ -39,6 +40,7 @@
           name: "new report",
           reportPredicates: [],
         });
+        updateReports(reps);
         return reps;
       });
     }}>New Report</Button

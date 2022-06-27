@@ -47,7 +47,7 @@ interface ReportPredicate {
   sliceName: string;
   metric: string;
   operation: string;
-  value: number;
+  value: string;
 }
 
 interface Report {

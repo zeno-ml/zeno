@@ -11,7 +11,7 @@ from fastapi import FastAPI, WebSocket
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 
-from .classes import ProjectionRequest, ResultsRequest, TableRequest
+from .classes import ProjectionRequest, ReportsRequest, ResultsRequest, TableRequest
 from .zeno import Zeno
 
 TASK_TYPES = [
@@ -182,7 +182,6 @@ def run_zeno(args):
 
     @api_app.get("/delete-slice/{slice_id}")
     def delete_slice(slice_id: str):
-        print(slice_id)
         return json.dumps(zeno.delete_slice(unquote(slice_id)))
 
     @api_app.post("/table")
@@ -192,6 +191,14 @@ def run_zeno(args):
     @api_app.post("/results")
     def get_results(reqs: ResultsRequest):
         return json.dumps(zeno.get_results(reqs))
+
+    @api_app.get("/reports")
+    def get_reports():
+        return json.dumps(zeno.get_reports())
+
+    @api_app.post("/update-reports")
+    def update_reports(reqs: ReportsRequest):
+        return json.dumps(zeno.update_reports(reqs))
 
     @api_app.post("/projection")
     def run_projection(model: ProjectionRequest):

@@ -20,7 +20,7 @@
     results,
     sliceSelections,
   } from "./stores";
-  import { updateTab } from "./util";
+  import { updateReports, updateTab } from "./util";
 
   export let sli: Slice;
 
@@ -96,14 +96,15 @@
                 if (idx === -1) {
                   rep.reportPredicates.push({
                     sliceName: sli.sliceName,
-                    metric: undefined,
-                    operation: undefined,
-                    value: 0,
+                    metric: "",
+                    operation: "",
+                    value: "0",
                   });
                 } else {
                   rep.reportPredicates.splice(idx, 1);
                 }
                 reps[$report] = rep;
+                updateReports(reps);
                 return reps;
               });
             }}
