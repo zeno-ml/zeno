@@ -20,10 +20,12 @@
 </script>
 
 <div id="legendary" style:width="{width}px" style:height="{height}px">
+	{#if points.length > 0}
+		<div id="bottom-scatter">
+			<AutoscaledRegl {width} {height} {colorRange} {points} />
+		</div>
+	{/if}
 	<div id="top-legend">
-		<AutoscaledRegl {width} {height} {colorRange} {points} />
-	</div>
-	<div id="bottom-scatter">
 		<Legend gap={5} data={legend} squareWidth={25} />
 	</div>
 </div>
@@ -31,11 +33,11 @@
 <style lang="scss">
 	#legendary {
 		position: relative;
-		border: 1px solid lightgray;
+		// border: 1px solid lightgray;
 		#top-legend {
 			position: absolute;
-			left: 0;
-			top: 0;
+			left: 11px;
+			top: 11px;
 		}
 	}
 </style>

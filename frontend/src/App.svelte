@@ -14,7 +14,7 @@
   import { initialFetch, updateTab, updateTableColumns } from "./util";
 
   import Header from "./Header.svelte";
-  import Discovery from "./Discovery.svelte";
+  import Discovery from "./discovery/Discovery.svelte";
   import Exploration from "./Exploration.svelte";
   import Analysis from "./Analysis.svelte";
 
