@@ -27,8 +27,16 @@
   let expanded = false;
   let hasSlice = false;
 
-  reports.subscribe((reps) => reportHasSlice($report, reps));
-  report.subscribe((rep) => reportHasSlice(rep, $reports));
+  let predicateResults: boolean[] = new Array($models.length).fill(true);
+
+  reports.subscribe((reps) => {
+    reportHasSlice($report, reps);
+    updatePredicateResults(reps[$report]);
+  });
+  report.subscribe((rep) => {
+    reportHasSlice(rep, $reports);
+    updatePredicateResults($reports[rep]);
+  });
 
   function reportHasSlice(report, reports) {
     if (report === -1) {
@@ -39,6 +47,28 @@
       (pred) => pred.sliceName === sli.sliceName
     );
     hasSlice = idx === -1 ? false : true;
+  }
+
+  function updatePredicateResults(rep: Report) {
+    if (!rep) {
+      predicateResults = new Array($models.length).fill(true);
+      return;
+    }
+    let relevantPredicates = rep.reportPredicates.filter(
+      (r) => r.metric === $metric && r.sliceName === sli.sliceName
+    );
+    $models.forEach((m, i) => {
+      let result = $results.get({
+        slice: sli.sliceName,
+        metric: $metric,
+        model: m,
+      });
+      relevantPredicates.forEach((p) => {
+        if (!eval(`${result} ${p.operation} ${p.value}`)) {
+          predicateResults[i] = false;
+        }
+      });
+    });
   }
 </script>
 
@@ -66,8 +96,9 @@
                 if (idx === -1) {
                   rep.reportPredicates.push({
                     sliceName: sli.sliceName,
+                    metric: undefined,
                     operation: undefined,
-                    value: undefined,
+                    value: 0,
                   });
                 } else {
                   rep.reportPredicates.splice(idx, 1);
@@ -117,13 +148,17 @@
       </div>
     </div>
   </Cell>
-  {#each $models as m}
+  {#each $models as m, i}
     {@const r = $results.get({
       slice: sli.sliceName,
       metric: $metric,
       model: m,
     })}
-    <Cell class={expanded ? "detail-row" : ""}>{r ? r.toFixed(2) : ""}</Cell>
+    <Cell class={expanded ? "detail-row" : ""}>
+      <p style:color={predicateResults[i] ? "black" : "red"}>
+        {r ? r.toFixed(2) : ""}
+      </p>
+    </Cell>
   {/each}
 </Row>
 {#if expanded}

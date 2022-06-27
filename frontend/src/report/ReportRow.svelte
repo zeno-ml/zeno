@@ -3,8 +3,10 @@
   import Ripple from "@smui/ripple";
   import Textfield from "@smui/textfield";
 
-  import { reports, report } from "../stores";
+  import { reports, report, metrics } from "../stores";
   import { clickOutside } from "../clickOutside";
+  import Select, { Option } from "@smui/select";
+  import HelperText from "@smui/textfield/helper-text";
 
   export let i;
 
@@ -26,25 +28,21 @@
   let editMode = false;
 </script>
 
-<div>
+<div
+  use:clickOutside
+  on:click_outside={() => {
+    editMode = false;
+    reports.update((reps) => {
+      reps[i].name = name;
+      reps[i].reportPredicates = preds;
+      return reps;
+    });
+  }}
+>
   <div
     use:Ripple={{ surface: true, color: "primary" }}
     class="report {$report === i ? 'selected' : ''}"
-    on:click={() => {
-      if ($report === i) {
-        report.set(-1);
-      } else {
-        report.set(i);
-      }
-    }}
-    use:clickOutside
-    on:click_outside={() => {
-      editMode = false;
-      reports.update((reps) => {
-        reps[i].name = name;
-        return reps;
-      });
-    }}
+    on:click={() => report.set(i)}
   >
     {#if !editMode}
       <p>{rep.name}</p>
@@ -58,7 +56,6 @@
         on:click={(e) => {
           e.stopPropagation();
           editMode = !editMode;
-          // editMode ? nameField.getElement().focus() : "";
         }}
       >
         edit
@@ -80,13 +77,48 @@
   {#if selected}
     <div class="report-predicates">
       {#each preds as pred}
-        <p>{pred.sliceName}</p>
+        <div class="report-predicate">
+          <p>{pred.sliceName}</p>
+          {#if editMode}
+            <Select
+              bind:value={pred.metric}
+              label="Operation"
+              style="margin-right: 20px; margin-left: 20px; width: 120px"
+            >
+              {#each $metrics as m}
+                <Option value={m}>{m}</Option>
+              {/each}
+            </Select>
+            <Select
+              bind:value={pred.operation}
+              label="Operation"
+              style="margin-right: 20px; width: 120px"
+            >
+              {#each [">", "<", "==", "!="] as o}
+                <Option value={o}>{o}</Option>
+              {/each}
+            </Select>
+            <Textfield
+              style="width: 50px"
+              bind:value={pred.value}
+              label="Value"
+            >
+              <HelperText slot="helper">0</HelperText>
+            </Textfield>
+          {:else if pred.metric && pred.operation}
+            <p class="details">{pred.metric} {pred.operation} {pred.value}</p>
+          {/if}
+        </div>
       {/each}
     </div>
   {/if}
 </div>
 
 <style>
+  .details {
+    margin-left: 15px;
+    color: grey;
+  }
   .report {
     display: flex;
     align-items: center;
@@ -98,6 +130,9 @@
   }
   .report-predicates {
     margin-left: 20px;
+  }
+  .report-predicate {
+    display: flex;
   }
   .selected {
     background: #ebdffc;
