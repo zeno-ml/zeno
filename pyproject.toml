@@ -20,7 +20,7 @@ exclude = ["zeno/tests/*"]
 python = ">=3.9,<3.11" 
 pandas = "^1.4.0"
 pyarrow = "^7.0.0"
-uvicorn = "^0.17.5"
+uvicorn = ">=0.17.5,<0.19.0"
 fastapi = ">=0.75,<0.79"
 websockets = "^10.2"
 umap-learn = "^0.5.3"
