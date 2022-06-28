@@ -43,10 +43,25 @@
 		$settings.metadata.length > 0 || $filteredTable._names.length > 0;
 
 	$: pointsExist = projection2D.length > 0;
+
+	let oldIds = [],
+		newIds = [];
+	$: {
+		oldIds = saveIds();
+		updateColors({ colorBy });
+	}
+	$: {
+		if (metadataExists && $filteredTable) {
+			newIds = saveIds();
+		}
+	}
+	$: {
+		opacityValues = oldIds.map((id, i) =>
+			newIds.includes(id) ? 0.75 : 0.15
+		);
+	}
 	$: {
 		if (metadataExists && pointsExist) {
-			updateColors({ colorBy });
-			updateOpacity({ projection2D });
 			updateLegendaryScatter({
 				colorRange,
 				colorValues,
