@@ -1,8 +1,12 @@
-export interface IPoints {
+export interface LegendaryScatterPoint {
 	x: number;
 	y: number;
 	color: number;
-	opacity?: number;
+	opacity: number;
+}
+export interface LegendaryLegendEntry {
+	color: string;
+	value: string;
 }
 
 export function extentXY<T>(
