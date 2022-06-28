@@ -23,7 +23,18 @@
 	$: yMinMax = convertExtentToArray(extent.yExtent);
 </script>
 
-<ScaledRegl {width} {height} {points} {colorRange} {xMinMax} {yMinMax} />
+<ScaledRegl
+	{width}
+	{height}
+	{points}
+	{colorRange}
+	{xMinMax}
+	{yMinMax}
+	on:create
+	on:draw
+	on:select
+	on:deselect
+/>
 
 <style>
 	/*  put stuff here */

@@ -22,7 +22,16 @@
 <div id="legendary" style:width="{width}px" style:height="{height}px">
 	{#if points.length > 0}
 		<div id="bottom-scatter">
-			<AutoscaledRegl {width} {height} {colorRange} {points} />
+			<AutoscaledRegl
+				{width}
+				{height}
+				{colorRange}
+				{points}
+				on:create
+				on:draw
+				on:select
+				on:deselect
+			/>
 		</div>
 	{/if}
 	<div id="top-legend">
