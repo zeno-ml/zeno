@@ -37,14 +37,30 @@
 	let dataType: dataType = "categorical";
 	let colorRange: string[] = d3.schemeCategory10 as string[];
 	let lassoSelectTable = null;
-	function scatterSelectEmpty(table: Table) {
-		return table === null;
-	}
+
+	// stuff that gets updated (reactive)
 	$: metadataExists =
 		$settings.metadata.length > 0 || $filteredTable._names.length > 0;
 
-	let pointsPlottedIds = [];
-	let newIds: any[] = [];
+	$: pointsExist = projection2D.length > 0;
+	$: {
+		if (metadataExists && pointsExist) {
+			updateColors({ colorBy });
+			updateOpacity({ projection2D });
+			updateLegendaryScatter({
+				colorRange,
+				colorValues,
+				dataRange,
+				projection2D,
+				opacityValues,
+			});
+		}
+	}
+
+	// functions
+	function scatterSelectEmpty(table: Table) {
+		return table === null;
+	}
 	function saveIds() {
 		return $filteredTable.columnArray("id").map((d) => d) as string[];
 	}
@@ -86,45 +102,58 @@
 		}
 		return { colorRange, colorValues };
 	}
-	$: {
-		if (metadataExists) {
-			// save ids for currently highlighted points
-			pointsPlottedIds = saveIds();
+	function updateColors({ colorBy = "label", table = $filteredTable } = {}) {
+		// compute coloring stuff
+		const { metadata, range, type } = inferOutputsType(colorBy, table);
+		const { colorRange: cRange, colorValues: cValues } =
+			selectColorsForRange(type, metadata, range);
 
-			// compute coloring stuff
-			const { metadata, range, type } = inferOutputsType(colorBy);
-			const { colorRange: cRange, colorValues: cValues } =
-				selectColorsForRange(type, metadata, range);
-
-			// save globally
-			selectedMetadataOutputs = metadata;
-			dataRange = range;
-			dataType = type;
-			colorRange = cRange;
-			colorValues = cValues;
-		}
+		// save globally
+		selectedMetadataOutputs = metadata;
+		dataRange = range;
+		dataType = type;
+		colorRange = cRange;
+		colorValues = cValues;
 	}
 
-	$: {
-		if (metadataExists) {
-			newIds = $filteredTable.columnArray("id").map((d) => d) as string[];
-		}
+	function packageLegendaryScatterPoints({
+		colorRange,
+		dataRange,
+		projection2D,
+		colorValues,
+		opacityValues,
+	}) {
+		const legend = reformatAPI.legendaryScatter.legend(
+			colorRange,
+			dataRange
+		);
+		const scatter = reformatAPI.legendaryScatter.points(
+			projection2D,
+			colorValues,
+			opacityValues
+		);
+		return { scatter, legend };
 	}
-	$: {
-		if (metadataExists) {
-			opacityValues = selectedMetadataOutputs.map((_, i) =>
-				newIds.includes(pointsPlottedIds[i]) ? 0.75 : 0.15
-			);
-			legendaryScatterLegend = reformatAPI.legendaryScatter.legend(
-				colorRange,
-				dataRange
-			);
-			legendaryScatterPoints = reformatAPI.legendaryScatter.points(
-				projection2D,
-				colorValues,
-				opacityValues
-			);
-		}
+	function updateLegendaryScatter({
+		colorRange,
+		colorValues,
+		dataRange,
+		opacityValues,
+		projection2D,
+	}) {
+		const { legend, scatter } = packageLegendaryScatterPoints({
+			colorRange,
+			colorValues,
+			dataRange,
+			opacityValues,
+			projection2D,
+		});
+		// update global variables for rendering
+		legendaryScatterLegend = legend;
+		legendaryScatterPoints = scatter;
+	}
+	function updateOpacity({ projection2D }) {
+		opacityValues = projection2D.map((_, i) => 1.0);
 	}
 </script>
 

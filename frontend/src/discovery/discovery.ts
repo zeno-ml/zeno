@@ -1,6 +1,10 @@
 import { color as _color } from "d3";
 import type { TypedArray } from "arquero/dist/types/table/table";
 import type ColumnTable from "arquero/dist/types/table/column-table";
+import type {
+	LegendaryLegendEntry,
+	LegendaryScatterPoint,
+} from "./scatter/scatter";
 import type { Table } from "apache-arrow";
 import * as d3 from "d3";
 import * as aq from "arquero";
@@ -68,14 +72,14 @@ function formatScatter(
 			opacity,
 		};
 	});
-	return formatted;
+	return formatted as LegendaryScatterPoint[];
 }
 function formatLegend(colors: string[], labels: string[]) {
 	const formatted = labels.map((label, i) => ({
 		color: colors[i],
 		value: label,
 	}));
-	return formatted;
+	return formatted as LegendaryLegendEntry[];
 }
 export const reformatAPI = {
 	legendaryScatter: { points: formatScatter, legend: formatLegend },
