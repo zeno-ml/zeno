@@ -12,14 +12,16 @@
   import ObjectDetection from "./ObjectDetection.svelte";
   import TextClassification from "./TextClassification.svelte";
 
+  export let table = $filteredTable;
+  
   let rowsPerPage = 15;
   let currentPage = 0;
 
   $: modelCol = "zenomodel_" + $model;
 
   $: start = currentPage * rowsPerPage;
-  $: end = Math.min(start + rowsPerPage, $filteredTable.size);
-  $: lastPage = Math.max(Math.ceil($filteredTable.size / rowsPerPage) - 1, 0);
+  $: end = Math.min(start + rowsPerPage, table.size);
+  $: lastPage = Math.max(Math.ceil(table.size / rowsPerPage) - 1, 0);
   $: if (currentPage > lastPage) {
     currentPage = lastPage;
   }
@@ -29,27 +31,27 @@
   {#if $ready}
     {#if $settings.task === "image-classification"}
       <ImageClassification
-        table={$filteredTable.slice(start, end).objects()}
+        table={table.slice(start, end).objects()}
         {modelCol}
       />
     {:else if $settings.task === "image-segmentation"}
       <ImageSegmentation
-        table={$filteredTable.slice(start, end).objects()}
+        table={table.slice(start, end).objects()}
         {modelCol}
       />
     {:else if $settings.task === "object-detection"}
       <ObjectDetection
-        table={$filteredTable.slice(start, end).objects()}
+        table={table.slice(start, end).objects()}
         {modelCol}
       />
     {:else if $settings.task === "text-classification"}
       <TextClassification
-        table={$filteredTable.slice(start, end).objects()}
+        table={table.slice(start, end).objects()}
         {modelCol}
       />
     {:else if $settings.task === "audio-classification"}
       <AudioClassification
-        table={$filteredTable.slice(start, end).objects()}
+        table={table.slice(start, end).objects()}
         {modelCol}
       />
     {/if}
@@ -66,7 +68,7 @@
     </Select>
   </svelte:fragment>
   <svelte:fragment slot="total">
-    {start + 1}-{end} of {$filteredTable.size}
+    {start + 1}-{end} of {table.size}
   </svelte:fragment>
 
   <IconButton
