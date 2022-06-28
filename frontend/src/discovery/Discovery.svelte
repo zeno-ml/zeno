@@ -121,8 +121,9 @@
 	$: {
 		if (metadataExists) {
 			newIds = $filteredTable.columnArray("id").map((d) => d) as string[];
+			const wentBack = oldIds.length > newIds.length; // cursed bug -> fix this idiot
 			opacityValues = selectedMetadata.map((_, i) =>
-				newIds.includes(oldIds[i]) ? 0.75 : 0.1
+				wentBack || newIds.includes(oldIds[i]) ? 0.75 : 0.1
 			);
 		}
 	}
@@ -165,6 +166,12 @@
 					height={scatterHeight}
 					legend={legendaryScatterLegend}
 					points={legendaryScatterPoints}
+					on:deselect={({ detail }) => {
+						console.log(detail);
+					}}
+					on:select={({ detail }) => {
+						console.log(detail);
+					}}
 				/>
 			</div>
 			<div>
