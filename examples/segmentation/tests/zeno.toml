@@ -4,7 +4,8 @@ metadata = "../segmentation.csv"
 models = [
     "/Users/acabrera/dev-research/22-zeno/zeno/examples/segmentation/models/weights.ckpt",
 ]
-data_path = "/Users/acabrera/dev/data/sessile-main-Kvasir-SEG/"
+data_path = "/Users/acabrera/dev/data/sessile-main-Kvasir-SEG/images"
+label_path = "/Users/acabrera/dev/data/sessile-main-Kvasir-SEG/masks"
 batch_size = 16
 data_column = "id"
 data_type = "path"

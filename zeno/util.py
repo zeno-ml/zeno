@@ -3,6 +3,8 @@ import os
 from importlib import util
 from pathlib import Path
 
+import numpy as np
+
 import pandas as pd
 import pyarrow as pa  # type: ignore
 from tqdm import trange  # type: ignore
@@ -13,6 +15,9 @@ from .classes import DistillFunction, PredictFunction
 
 def get_arrow_bytes(df, id_col):
     df[id_col] = df.index
+    df = df.infer_objects()
+    d = dict.fromkeys(df.select_dtypes(np.int64).columns, np.int32)
+    df = df.astype(d)
     df_arrow = pa.Table.from_pandas(df)
     buf = pa.BufferOutputStream()
     with pa.ipc.new_file(buf, df_arrow.schema) as writer:
@@ -150,16 +155,13 @@ def run_inference(
     if len(to_predict_indices) > 0:
         fn = model_loader_fn(model_path)
         if len(to_predict_indices) < batch_size:
-            # TODO(instead check ZenoOptions)
-            if options.output_type == "path":
-                file_cache_path = os.path.join(cache_path, "zenomodel_" + model_name)
-                os.makedirs(file_cache_path, exist_ok=True)
-                out = fn(
-                    df.loc[to_predict_indices],
-                    dataclasses.replace(options, output_path=file_cache_path),
-                )
-            else:
-                out = fn(df.loc[to_predict_indices], options)
+            # TODO: check functions to see if they use output_path.
+            file_cache_path = os.path.join(cache_path, "zenomodel_" + model_name)
+            os.makedirs(file_cache_path, exist_ok=True)
+            out = fn(
+                df.loc[to_predict_indices],
+                dataclasses.replace(options, output_path=file_cache_path),
+            )
 
             # Check if we also get embedding
             if type(out) == tuple and len(out) == 2:
@@ -179,18 +181,13 @@ def run_inference(
                 desc="Inference on " + model_name,
                 position=pos,
             ):
-                if options.output_type == "path":
-                    file_cache_path = os.path.join(
-                        cache_path, "zenomodel_" + model_name
-                    )
+                file_cache_path = os.path.join(cache_path, "zenomodel_" + model_name)
 
-                    os.makedirs(file_cache_path, exist_ok=True)
-                    out = fn(
-                        df.loc[to_predict_indices[i : i + batch_size]],
-                        dataclasses.replace(options, output_path=file_cache_path),
-                    )
-                else:
-                    out = fn(df.loc[to_predict_indices[i : i + batch_size]], options)
+                os.makedirs(file_cache_path, exist_ok=True)
+                out = fn(
+                    df.loc[to_predict_indices[i : i + batch_size]],
+                    dataclasses.replace(options, output_path=file_cache_path),
+                )
 
                 # Check if we also get embedding
                 if type(out) == tuple and len(out) == 2:

@@ -44,6 +44,28 @@ Can either be paths or names, passed directly to the `load_model` function.
 
 The directory with data instances. **Optional**
 
+### `label_path`
+
+The directory with label files. **Optional**
+
+### `id_column`
+
+The column with unique identifiers in the metadata file. **Optional**
+
+By default it is `id`.
+
+### `data_column`
+
+The column with either file names for data instances or raw data (e.g. text). **Optional**
+
+By default it is `id`.
+
+### `label_column`
+
+The column with either file names for data instances or raw data (e.g. text). **Optional**
+
+By default it is `label`.
+
 ### `port`
 
 The port to run Zeno on. **Optional**
@@ -51,12 +73,6 @@ The port to run Zeno on. **Optional**
 ### `batch_size`
 
 The batch size used when running inference. **Optional**
-
-### `id_column`
-
-The column with unique identifiers in the metadata file. **Optional**
-
-By default it is `id`.
 
 ### `cache_path`
 

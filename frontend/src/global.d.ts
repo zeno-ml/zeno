@@ -4,6 +4,7 @@ interface Settings {
   task: string;
   idColumn: string;
   labelColumn: string;
+  dataColumn: string;
   metadataColumns: string[];
 }
 

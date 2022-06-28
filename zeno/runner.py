@@ -66,9 +66,11 @@ def main():
         print("ERROR: Must have 'models' entry which have at least one model.")
         sys.exit(1)
     else:
-        args["models"] = [
-            Path(os.path.realpath(os.path.join(toml_path, m))) for m in args["models"]
-        ]
+        if Path(os.path.realpath(os.path.join(toml_path, args["models"][0]))).exists():
+            args["models"] = [
+                Path(os.path.realpath(os.path.join(toml_path, m)))
+                for m in args["models"]
+            ]
 
     if "data_path" not in args:
         args["data_path"] = ""
@@ -77,11 +79,12 @@ def main():
             os.path.realpath(os.path.join(toml_path, args["data_path"]))
         )
 
-    if "port" not in args:
-        args["port"] = 8000
-
-    if "batch_size" not in args:
-        args["batch_size"] = 1
+    if "label_path" not in args:
+        args["label_path"] = ""
+    else:
+        args["label_path"] = Path(
+            os.path.realpath(os.path.join(toml_path, args["label_path"]))
+        )
 
     if "id_column" not in args:
         args["id_column"] = "id"
@@ -92,19 +95,11 @@ def main():
     if "label_column" not in args:
         args["label_column"] = "label"
 
-    if "data_type" in args:
-        if args["data_type"] != "path" and args["data_type"] != "raw":
-            print("ERROR: data_type must be one of 'path' or 'raw'")
-            sys.exit(1)
-    else:
-        args["data_type"] = "path"
+    if "port" not in args:
+        args["port"] = 8000
 
-    if "output_type" in args:
-        if args["output_type"] != "path" and args["output_type"] != "raw":
-            print("ERROR: output_type must be one of 'path' or 'raw'")
-            sys.exit(1)
-    else:
-        args["output_type"] = "raw"
+    if "batch_size" not in args:
+        args["batch_size"] = 1
 
     if "cache_path" not in args:
         args["cache_path"] = Path(
@@ -128,9 +123,8 @@ def run_zeno(args):
         id_column=args["id_column"],
         data_column=args["data_column"],
         label_column=args["label_column"],
-        data_type=args["data_type"],
-        output_type=args["output_type"],
         data_path=args["data_path"],
+        label_path=args["label_path"],
         cache_path=args["cache_path"],
     )
 
@@ -140,7 +134,9 @@ def run_zeno(args):
     api_app = FastAPI(title="Backend API")
 
     if args["data_path"] != "":
-        app.mount("/static", StaticFiles(directory=args["data_path"]), name="static")
+        app.mount("/data", StaticFiles(directory=args["data_path"]), name="static")
+    if args["label_path"] != "":
+        app.mount("/labels", StaticFiles(directory=args["label_path"]), name="static")
 
     app.mount(
         "/cache",
@@ -164,6 +160,7 @@ def run_zeno(args):
                 "task": zeno.task,
                 "idColumn": zeno.id_column,
                 "labelColumn": zeno.label_column,
+                "dataColumn": zeno.data_column,
                 "metadataColumns": zeno.columns,
             }
         )

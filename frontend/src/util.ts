@@ -61,6 +61,7 @@ export function updateTab(t: string) {
 }
 
 export function getMetrics(slices: Slice[]) {
+  console.log(slices);
   fetch("/api/results", {
     method: "POST",
     headers: {

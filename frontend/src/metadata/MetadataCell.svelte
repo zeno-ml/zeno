@@ -31,11 +31,8 @@
       (chartType === ChartType.Count || chartType === ChartType.Histogram) &&
       table.column(col)
     ) {
+      console.log(table.objects());
       let arr = table.array(col);
-      // Deal with BigInts.
-      if (!isNaN(Number(arr[0]))) {
-        arr = arr.map((d) => Number(d));
-      }
       data = { table: arr };
     }
   }

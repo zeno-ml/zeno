@@ -18,7 +18,7 @@ def get_imgs(df, ops: ZenoOptions):
 def area(df, ops: ZenoOptions):
     ret = []
     for _, row in df.iterrows():
-        label_path = os.path.join(ops.data_path, row[ops.label_column])
+        label_path = os.path.join(ops.label_path, row[ops.label_column])
         label_img = cv2.imread(label_path, cv2.IMREAD_GRAYSCALE)
         label_img = cv2.resize(label_img, (224, 224))
 

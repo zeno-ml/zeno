@@ -56,10 +56,6 @@
           tempTable = tempTable.filter(`(r) => r["${name}"] == 0`);
         }
       } else {
-        // TODO: figure out BigInt issues.
-        if (typeof tempTable.column(name).get(0) === "bigint") {
-          entry.values = entry.values.map((d) => BigInt(d));
-        }
         tempTable = tempTable.filter(
           aq.escape((r) => aq.op.includes(entry.values, r[name], 0))
         );

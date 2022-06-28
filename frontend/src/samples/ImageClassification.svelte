@@ -10,7 +10,7 @@
   <div class="box">
     <Wrapper>
       <img
-        src="/static/{row[$settings.idColumn]}"
+        src="/data/{row[$settings.idColumn]}"
         style:max-width="200px"
         alt="Image thumbnail for instance {row[$settings.idColumn]}"
       />

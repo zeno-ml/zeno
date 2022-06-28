@@ -44,9 +44,8 @@ class Zeno(object):
         id_column,
         data_column,
         label_column,
-        data_type,
-        output_type,
         data_path,
+        label_path,
         cache_path: Path,
     ):
         logging.basicConfig(level=logging.INFO)
@@ -57,9 +56,8 @@ class Zeno(object):
         self.id_column = id_column
         self.data_column = data_column
         self.label_column = label_column
-        self.data_type = data_type
-        self.output_type = output_type
         self.data_path = data_path
+        self.label_path = label_path
 
         # Options passed to Zeno functions.
         self.zeno_options = ZenoOptions(
@@ -67,8 +65,7 @@ class Zeno(object):
             data_column=self.data_column,
             label_column=self.label_column,
             data_path=self.data_path,
-            data_type=self.data_type,
-            output_type=self.output_type,
+            label_path=self.label_path,
             output_column="",
             output_path="",
         )
@@ -98,6 +95,11 @@ class Zeno(object):
                 "Extension of " + metadata_path.suffix + " not one of .csv or .parquet"
             )
             sys.exit(1)
+        # TODO: figure out if this breaks for big integers. Need to do this for
+        # frontend bigint issues.
+        d = dict.fromkeys(self.df.select_dtypes(np.int64).columns, np.int32)
+        self.df = self.df.astype(d)
+
         self.metadata_name = os.path.basename(metadata_path).split(".")[0]
         self.cache_path = cache_path
         os.makedirs(self.cache_path, exist_ok=True)

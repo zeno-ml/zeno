@@ -23,7 +23,7 @@
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "module": "zeno",
-      "args": ["./examples/reviews/zeno.toml"]
+      "args": ["./examples/reviews/tests/zeno.toml"]
     },
     {
       "name": "zenofsdd",

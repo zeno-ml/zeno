@@ -47,7 +47,7 @@
           }
         }
       };
-      img.src = `/static/${t[$settings.idColumn]}`;
+      img.src = `/data/${t[$settings.idColumn]}`;
       return img;
     });
   }
