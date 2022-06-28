@@ -166,5 +166,13 @@ export function getDataRange<T>(arrayOfValues: T[], categoryThreshold = 10) {
 		outputRange = continuous;
 	}
 
-	return { range: outputRange, type: dataType };
+	const stringifiedRange = outputRange.map((r) => ({
+		value: r,
+		str: `${r}`,
+	}));
+	const orderedRange = stringifiedRange
+		.sort((a, b) => a.str.toString().localeCompare(b.str.toString()))
+		.map(({ value }) => value); // dirty hack to keep the stuff in the same order
+
+	return { range: orderedRange, type: dataType };
 }

@@ -15,7 +15,7 @@
 		interpolateColorToArray,
 		indexTable,
 		binContinuous,
-		getDataRange,
+		getDataRange as uniqueOutputs,
 	} from "./discovery";
 	import { filteredTable, model, settings } from "../stores";
 
@@ -24,6 +24,7 @@
 		LegendaryScatterPoint,
 		LegendaryLegendEntry,
 	} from "./scatter/scatter";
+	import type ColumnTable from "arquero/dist/types/table/column-table";
 
 	// props
 	export let scatterWidth = 900;
@@ -47,35 +48,63 @@
 	function saveIds() {
 		return $filteredTable.columnArray("id").map((d) => d) as string[];
 	}
-	function getMetadata(colorBy: string) {
-		return $filteredTable.columnArray(colorBy) as string[];
+	function getMetadata(table: ColumnTable, colorBy: string) {
+		return table.columnArray(colorBy) as string[];
 	}
 
-	let selectedMetadata: any[],
+	let selectedMetadataOutputs: any[],
 		dataRange: any[],
 		legendaryScatterLegend: LegendaryLegendEntry[],
 		legendaryScatterPoints: LegendaryScatterPoint[];
-	$: if (metadataExists) {
-		pointsPlottedIds = saveIds();
-		selectedMetadata = getMetadata(colorBy);
-		const { range, type } = getDataRange(selectedMetadata);
-		const stringifiedRange = range.map((r) => ({ value: r, str: `${r}` }));
-		dataRange = stringifiedRange
-			.sort((a, b) => a.str.toString().localeCompare(b.str.toString()))
-			.map(({ value }) => value);
-		dataType = type;
-		if (dataType === "categorical") {
-			colorValues = selectedMetadata.map((md) => dataRange.indexOf(md));
+
+	function inferOutputsType(
+		colorBy: string,
+		table: ColumnTable = $filteredTable
+	) {
+		// get the range and type of data
+		const metadata = getMetadata(table, colorBy); // get columns for selected metadata
+		const { range, type } = uniqueOutputs(metadata); // return the unique categorical or continuous range
+		return { metadata, range, type };
+	}
+	function selectColorsForRange(
+		type: dataType,
+		metadata: any[],
+		range: any[]
+	) {
+		// based on datatype inferred color differently
+		let colorRange, colorValues;
+		if (type === "categorical") {
+			colorValues = metadata.map((md) => range.indexOf(md));
 			colorRange = d3.schemeCategory10 as string[];
-		} else if (dataType === "continuous") {
-			const binAssignments = binContinuous(selectedMetadata);
-			colorValues = binAssignments.map((ass) => dataRange[ass]);
+		} else if (type === "continuous") {
+			const binAssignments = binContinuous(metadata);
+			colorValues = binAssignments.map((ass) => range[ass]);
 			colorRange = interpolateColorToArray(
 				d3.interpolateBuPu,
-				dataRange.length
+				range.length
 			);
 		}
+		return { colorRange, colorValues };
 	}
+	$: {
+		if (metadataExists) {
+			// save ids for currently highlighted points
+			pointsPlottedIds = saveIds();
+
+			// compute coloring stuff
+			const { metadata, range, type } = inferOutputsType(colorBy);
+			const { colorRange: cRange, colorValues: cValues } =
+				selectColorsForRange(type, metadata, range);
+
+			// save globally
+			selectedMetadataOutputs = metadata;
+			dataRange = range;
+			dataType = type;
+			colorRange = cRange;
+			colorValues = cValues;
+		}
+	}
+
 	$: {
 		if (metadataExists) {
 			newIds = $filteredTable.columnArray("id").map((d) => d) as string[];
@@ -83,7 +112,7 @@
 	}
 	$: {
 		if (metadataExists) {
-			opacityValues = selectedMetadata.map((_, i) =>
+			opacityValues = selectedMetadataOutputs.map((_, i) =>
 				newIds.includes(pointsPlottedIds[i]) ? 0.75 : 0.15
 			);
 			legendaryScatterLegend = reformatAPI.legendaryScatter.legend(
