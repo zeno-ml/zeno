@@ -4,7 +4,6 @@ import type {
 	LegendaryLegendEntry,
 	LegendaryScatterPoint,
 } from "./scatter/scatter";
-import * as aq from "arquero";
 import { color } from "d3-color";
 import { extent } from "d3-array";
 
@@ -13,7 +12,7 @@ export function interpolateColorToArray(
 	length: number
 ) {
 	const increment = 1.0 / length;
-	let colorArray = new Array(length);
+	const colorArray = new Array(length);
 	for (let i = 0, t = 0; i < colorArray.length; i++, t += increment) {
 		colorArray[i] = color(interpolateColorer(t)).hex();
 	}
@@ -22,7 +21,7 @@ export function interpolateColorToArray(
 
 export async function projectEmbeddings2D(
 	model: string,
-	instance_ids: any[] | TypedArray = []
+	instance_ids: TypedArray | any[]
 ) {
 	const response = await fetch("api/projection", {
 		method: "POST",
@@ -91,29 +90,7 @@ export function indexTable(table: ColumnTable, idx: number[]): ColumnTable {
 	return selectedTable;
 }
 
-export function indexTableOld(table: ColumnTable, idx: number[]): ColumnTable {
-	const idArray = idx.map((index) => table.get("id", index));
-	let rows = [];
-	for (const row of table) {
-		if (idArray.includes(row["id"])) {
-			rows.push(row);
-		}
-	}
-	let jsonRepresentation = {};
-	for (const row of rows) {
-		Object.entries(row).forEach(([k, v]) => {
-			if (k in jsonRepresentation) {
-				jsonRepresentation[k].push(v);
-			} else {
-				jsonRepresentation[k] = [v];
-			}
-		});
-	}
-	const selectedTable = aq.table(jsonRepresentation);
-	return selectedTable;
-}
-
-export function getBins(values: number[], bins: number = 10) {
+export function getBins(values: number[], bins = 10) {
 	const [minValue, maxValue] = extent(values, (d) => Number(d));
 	const range = maxValue - minValue;
 	const binInterval = range / bins;
@@ -122,10 +99,12 @@ export function getBins(values: number[], bins: number = 10) {
 		.map((_, i) => minValue + i * binInterval);
 	return binsArray;
 }
-export function binContinuous(values: number[], bins: number = 10) {
-	if (bins <= 0) return;
+export function binContinuous(values: number[], bins = 10) {
+	if (bins <= 0) {
+		return;
+	}
 	const binsArray = getBins(values, bins);
-	let assignments = [];
+	const assignments = [];
 	valueIterator: for (let i = 0; i < values.length; i++) {
 		const value = values[i];
 		binIterator: for (
@@ -159,8 +138,8 @@ export function getDataRange<T>(arrayOfValues: T[], categoryThreshold = 10) {
 
 	let outputRange = [];
 	if (dataType === "categorical") {
-		let categories = [];
-		for (const [category, _] of rangeMap) {
+		const categories = [];
+		for (const category of rangeMap.keys()) {
 			categories.push(category);
 		}
 		outputRange = categories;

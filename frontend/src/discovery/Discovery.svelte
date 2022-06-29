@@ -33,6 +33,7 @@
 	let colorValues: number[] = [];
 	let opacityValues: number[] = [];
 	let colorBy: string = "label";
+	// eslint-disable-next-line
 	let dataType: dataType = "categorical";
 	let colorRange: string[] = colorsCategorical;
 	let lassoSelectTable = null;
@@ -61,9 +62,7 @@
 		}
 	}
 	$: {
-		opacityValues = oldIds.map((id, i) =>
-			newIds.includes(id) ? 0.75 : 0.15
-		);
+		opacityValues = oldIds.map((id) => (newIds.includes(id) ? 0.75 : 0.15));
 	}
 	$: {
 		if (metadataExists && pointsExist) {
@@ -85,11 +84,11 @@
 		return $filteredTable.columnArray("id").map((d) => d) as string[];
 	}
 	function getMetadata(table: ColumnTable, colorBy: string) {
-		return table.columnArray(colorBy) as string[];
+		return table.columnArray(colorBy) as any[];
 	}
 
-	let selectedMetadataOutputs: any[],
-		dataRange: any[],
+	let selectedMetadataOutputs,
+		dataRange,
 		legendaryScatterLegend: LegendaryLegendEntry[],
 		legendaryScatterPoints: LegendaryScatterPoint[];
 
@@ -104,8 +103,8 @@
 	}
 	function selectColorsForRange(
 		type: dataType,
-		metadata: any[],
-		range: any[]
+		metadata: number[],
+		range: number[]
 	) {
 		// based on datatype inferred color differently
 		let colorRange, colorValues;
@@ -131,6 +130,7 @@
 		// save globally
 		selectedMetadataOutputs = metadata;
 		dataRange = range;
+		// eslint-disable-next-line no-import-assign
 		dataType = type;
 		colorRange = cRange;
 		colorValues = cValues;
@@ -171,9 +171,6 @@
 		// update global variables for rendering
 		legendaryScatterLegend = legend;
 		legendaryScatterPoints = scatter;
-	}
-	function updateOpacity({ projection2D }) {
-		opacityValues = projection2D.map((_, i) => 1.0);
 	}
 </script>
 

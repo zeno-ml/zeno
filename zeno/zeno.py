@@ -351,18 +351,23 @@ class Zeno(object):
         reducer = umap.UMAP()
         projection = reducer.fit_transform(embeds)
         self.status = "Done projecting"
-        return projection.tolist()
+        if isinstance(projection, (np.ndarray)):
+            return projection.tolist()
+        elif isinstance(projection, (list)):
+            return projection
+        else:
+            return []
 
     def __get_df_rows(self, dataframe, column="id", list_to_get=None):
         if list_to_get is None:
-            return None
+            return []
         return dataframe[dataframe[column].isin(list_to_get)]
 
     def run_projection(self, model, instance_ids):
         filtered_rows = self.__get_df_rows(
             self.df, column="id", list_to_get=instance_ids
         )
-        embeds = np.stack(filtered_rows[f"zenoembedding_{model}"].to_numpy())
+        embeds = np.stack(filtered_rows["zenoembedding_" + model].to_numpy())
         projection = self.__run_umap(embeds)
         payload = [
             {"proj": proj, "id": id} for proj, id in zip(projection, instance_ids)
