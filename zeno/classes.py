@@ -65,6 +65,7 @@ class ResultsRequest(BaseModel):
 
 class ProjectionRequest(BaseModel):
     model: str
+    instance_ids: List[str]
 
 
 class TableRequest(BaseModel):

@@ -347,18 +347,32 @@ class Zeno(object):
         with open(os.path.join(self.cache_path, "reports.pickle"), "wb") as f:
             pickle.dump(self.reports, f)
 
-    def __run_umap(self, model):
-        embeds = np.stack(self.df["zenoembedding_" + model].to_numpy())
+    def __run_umap(self, embeds):
         reducer = umap.UMAP()
-        embedding = reducer.fit_transform(embeds)
-        self.df.loc[:, "zenoembed_x"] = embedding[:, 0]  # type: ignore
-        self.df.loc[:, "zenoembed_y"] = embedding[:, 1]  # type: ignore
-        self.complete_columns.append("zenoembed_x")
-        self.complete_columns.append("zenoembed_y")
+        projection = reducer.fit_transform(embeds)
         self.status = "Done projecting"
+        if isinstance(projection, (np.ndarray)):
+            return projection.tolist()
+        elif isinstance(projection, (list)):
+            return projection
+        else:
+            return []
 
-    def run_projection(self, model):
-        self.__run_umap(model)
+    def __get_df_rows(self, dataframe, column="id", list_to_get=None):
+        if list_to_get is None:
+            return []
+        return dataframe[dataframe[column].isin(list_to_get)]
+
+    def run_projection(self, model, instance_ids):
+        filtered_rows = self.__get_df_rows(
+            self.df, column="id", list_to_get=instance_ids
+        )
+        embeds = np.stack(filtered_rows["zenoembedding_" + model].to_numpy())
+        projection = self.__run_umap(embeds)
+        payload = [
+            {"proj": proj, "id": id} for proj, id in zip(projection, instance_ids)
+        ]
+        return payload
 
     def get_table(self, columns):
         """Get the metadata DataFrame for a given slice.

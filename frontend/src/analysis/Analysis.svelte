@@ -1,73 +1,72 @@
 <script lang="ts">
-  import html2pdf from "html2pdf.js";
+	import html2pdf from "html2pdf.js";
 
-  import Button from "@smui/button";
+	import Button from "@smui/button";
 
-  import Select, { Option } from "@smui/select";
-  import { metric, metrics } from "../stores";
+	import Select, { Option } from "@smui/select";
+	import { metric, metrics } from "../stores";
 
-  import AnalysisTable from "./AnalysisTable.svelte";
-  import ReportsPanel from "./report/ReportsPanel.svelte";
+	import AnalysisTable from "./AnalysisTable.svelte";
+	import ReportsPanel from "./report/ReportsPanel.svelte";
 
-  let table: HTMLDivElement;
+	let table: HTMLDivElement;
 </script>
 
 <div class="inline">
-  <div>
-    <ReportsPanel />
-  </div>
-  <div>
-    <div class="settings">
-      {#if $metrics}
-        <Select bind:value={$metric} label="Metric" style="margin-right: 20px;">
-          {#each $metrics as m}
-            <Option value={m}>{m}</Option>
-          {/each}
-        </Select>
-      {/if}
-    </div>
-    <div class="table" bind:this={table}>
-      <AnalysisTable />
-    </div>
+	<div>
+		<ReportsPanel />
+	</div>
+	<div>
+		<div class="settings">
+			{#if $metrics}
+				<Select bind:value={$metric} label="Metric" style="margin-right: 20px;">
+					{#each $metrics as m}
+						<Option value={m}>{m}</Option>
+					{/each}
+				</Select>
+			{/if}
+		</div>
+		<div class="table" bind:this={table}>
+			<AnalysisTable />
+		</div>
 
-    <div class="export">
-      <Button
-        variant="outlined"
-        on:click={() => {
-          let img = new Image(220, 100);
-          img.src = "build/zeno.png";
-          img.onload = () => {
-            let divElem = document.createElement("div");
-            divElem.innerHTML = "<br />" + table.innerHTML;
-            divElem.prepend(img);
-            html2pdf(divElem, {
-              margin: [0, 20, 20, 20],
-              filename: "report.pdf",
-              image: { type: "jpeg", quality: 0.98 },
-              html2canvas: { scale: 2 },
-              jsPDF: { orientation: "l" },
-            });
-          };
-        }}>Export</Button
-      >
-    </div>
-  </div>
+		<div class="export">
+			<Button
+				variant="outlined"
+				on:click={() => {
+					let img = new Image(220, 100);
+					img.src = "build/zeno.png";
+					img.onload = () => {
+						let divElem = document.createElement("div");
+						divElem.innerHTML = "<br />" + table.innerHTML;
+						divElem.prepend(img);
+						html2pdf(divElem, {
+							margin: [0, 20, 20, 20],
+							filename: "report.pdf",
+							image: { type: "jpeg", quality: 0.98 },
+							html2canvas: { scale: 2 },
+							jsPDF: { orientation: "l" },
+						});
+					};
+				}}>Export</Button>
+		</div>
+	</div>
 </div>
 
 <style>
-  .export {
-    margin-top: 15px;
-    display: flex;
-    flex-direction: row-reverse;
-  }
-  .inline {
-    display: flex;
-    flex-direction: row;
-  }
-  .table {
-    margin-top: 20px;
-  }
-  .settings {
-    margin-top: 10px;
-  }
+	.export {
+		margin-top: 15px;
+		display: flex;
+		flex-direction: row-reverse;
+	}
+	.inline {
+		display: flex;
+		flex-direction: row;
+	}
+	.table {
+		margin-top: 20px;
+	}
+	.settings {
+		margin-top: 10px;
+	}
 </style>
