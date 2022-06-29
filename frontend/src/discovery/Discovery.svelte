@@ -1,6 +1,6 @@
 <script lang="ts">
-	import MetadataBar from "../filtering/MetadataBar.svelte";
-	import SelectionBar from "../filtering/SelectionBar.svelte";
+	import MetadataBar from "../metadata/MetadataPanel.svelte";
+	import SelectionBar from "../metadata/SelectionBar.svelte";
 	import LegendaryScatter from "./scatter/LegendaryScatter.svelte";
 	import Select, { Option } from "@smui/select";
 	import Samples from "../samples/Samples.svelte";
@@ -39,7 +39,8 @@
 
 	// stuff that gets updated (reactive)
 	$: metadataExists =
-		$settings.metadata.length > 0 || $filteredTable._names.length > 0;
+		$settings.metadataColumns.length > 0 ||
+		$filteredTable._names.length > 0;
 
 	$: pointsExist = projection2D.length > 0;
 
@@ -183,7 +184,7 @@
 		<div id="color-by">
 			{#if metadataExists}
 				<Select bind:value={colorBy} label={"Color Points By"}>
-					{#each $settings.metadata as metadataName, i}
+					{#each $settings.metadataColumns as metadataName, i}
 						<Option value={metadataName}>{metadataName}</Option>
 					{/each}
 				</Select>
