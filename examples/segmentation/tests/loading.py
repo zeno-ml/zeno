@@ -3,7 +3,6 @@ import os
 import cv2
 import numpy as np
 import segmentation_models as sm
-import sklearn
 from sklearn.metrics import jaccard_score
 from zeno import ZenoOptions, distill_function, metric_function, predict_function
 
@@ -56,7 +55,7 @@ def load_model(model_path):
 def iou(df, ops: ZenoOptions):
     outs = []
     for _, row in df.iterrows():
-        label_path = os.path.join(ops.data_path, row[ops.label_column])
+        label_path = os.path.join(ops.label_path, row[ops.label_column])
         label_img = cv2.imread(label_path, cv2.IMREAD_GRAYSCALE)
         label_img = cv2.resize(label_img, (224, 224))
         output_path = os.path.join(ops.output_path, row[ops.output_column])

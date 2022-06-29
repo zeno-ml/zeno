@@ -38,9 +38,25 @@ class FilterPredicate(CamelModel):
 
 
 class Slice(CamelModel):
-    name: str
-    predicates: List[FilterPredicate]
+    slice_name: str
+    filter_predicates: List[FilterPredicate]
     idxs: Optional[List[str]]
+
+
+class ReportPredicate(CamelModel):
+    slice_name: str
+    metric: str
+    operation: str
+    value: str
+
+
+class Report(CamelModel):
+    name: str
+    report_predicates: List[ReportPredicate]
+
+
+class ReportsRequest(CamelModel):
+    reports: List[Report]
 
 
 class ResultsRequest(BaseModel):

@@ -1,13 +1,13 @@
 <script lang="ts">
   import { filteredTable } from "./stores";
 
-  import MetadataBar from "./filtering/MetadataBar.svelte";
+  import MetadataPanel from "./metadata/MetadataPanel.svelte";
   import SampleOptions from "./samples/SampleOptions.svelte";
   import Samples from "./samples/Samples.svelte";
 </script>
 
 <div id="container">
-  <MetadataBar />
+  <MetadataPanel />
 
   {#if $filteredTable}
     <div style:margin-left="10px">

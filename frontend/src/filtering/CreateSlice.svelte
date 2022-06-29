@@ -95,35 +95,38 @@
     filteredTable.set(tempTable);
 
     getMetrics([
-      {
-        name: name,
-        predicates: predicates,
+      <Slice>{
+        sliceName: name,
+        filterPredicates: predicates,
         idxs: tempTable.array($settings.idColumn) as string[],
       },
     ]);
 
     slices.update((s) => {
-      s.set(name, {
-        name: name,
-        predicates: predicates,
+      s.set(name, <Slice>{
+        sliceName: name,
+        filterPredicates: predicates,
       });
       return s;
     });
   }
 
   onMount(() => nameField.getElement().focus());
+
+  function submit(e) {
+    if (e.key === "Enter") {
+      createSlice();
+    }
+  }
 </script>
 
+<svelte:window on:keydown={submit} />
 <div id="paper-container">
   <Paper elevation={7}>
     <Content>
-      {#if mode === "create"}
-        <Textfield bind:value={name} label="Name" bind:this={nameField}>
-          <HelperText slot="helper">Slice 1</HelperText>
-        </Textfield>
-      {:else}
-        <h4>{name}</h4>
-      {/if}
+      <Textfield bind:value={name} label="Name" bind:this={nameField}>
+        <HelperText slot="helper">Slice 1</HelperText>
+      </Textfield>
       <ul use:autoAnimate>
         {#each predicates as p, i}
           <li>

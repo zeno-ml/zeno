@@ -22,7 +22,7 @@
         mediaControls: true,
         height: 50,
       });
-      w.load(`/static/${table[i][$settings.idColumn]}`);
+      w.load(`/data/${table[i][$settings.idColumn]}`);
       return w;
     }
   });

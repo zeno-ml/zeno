@@ -1,12 +1,11 @@
 <script lang="ts">
   import { mdiChevronDown, mdiChevronUp } from "@mdi/js";
-  import { Svg } from "@smui/common/elements";
   import { Icon } from "@smui/common";
-  import { slide } from "svelte/transition";
+  import { Svg } from "@smui/common/elements";
   import Ripple from "@smui/ripple";
-
-  import { results, model, metric, slices } from "../stores";
+  import { slide } from "svelte/transition";
   import SliceDetails from "../SliceDetails.svelte";
+  import { metric, model, results, slices } from "../stores";
 
   export let name: string;
   export let fullName = name;

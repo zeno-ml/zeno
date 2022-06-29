@@ -24,7 +24,7 @@
     <Wrapper>
       <div id="overlays">
         <img
-          src="/static/{row[$settings.idColumn]}"
+          src="/data/{row[$settings.idColumn]}"
           style:width="150px"
           style:height="150px"
           alt="Image thumbnail for instance {row[$settings.idColumn]}"
@@ -32,7 +32,7 @@
         {#if selected.includes("Label")}
           <img
             class="overlay"
-            src="/static/{row[$settings.labelColumn]}"
+            src="/labels/{row[$settings.labelColumn]}"
             style:width="150px"
             style:height="150px"
             alt="Image thumbnail for instance {row[$settings.labelColumn]}"

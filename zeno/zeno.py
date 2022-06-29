@@ -16,7 +16,14 @@ import pandas as pd
 import umap  # type: ignore
 
 from .api import ZenoOptions
-from .classes import DistillFunction, PredictFunction, ResultsRequest, Slice
+from .classes import (
+    DistillFunction,
+    PredictFunction,
+    Report,
+    ReportsRequest,
+    ResultsRequest,
+    Slice,
+)
 from .util import (
     get_arrow_bytes,
     load_series,
@@ -37,9 +44,8 @@ class Zeno(object):
         id_column,
         data_column,
         label_column,
-        data_type,
-        output_type,
         data_path,
+        label_path,
         cache_path: Path,
     ):
         logging.basicConfig(level=logging.INFO)
@@ -50,9 +56,8 @@ class Zeno(object):
         self.id_column = id_column
         self.data_column = data_column
         self.label_column = label_column
-        self.data_type = data_type
-        self.output_type = output_type
         self.data_path = data_path
+        self.label_path = label_path
 
         # Options passed to Zeno functions.
         self.zeno_options = ZenoOptions(
@@ -60,8 +65,7 @@ class Zeno(object):
             data_column=self.data_column,
             label_column=self.label_column,
             data_path=self.data_path,
-            data_type=self.data_type,
-            output_type=self.output_type,
+            label_path=self.label_path,
             output_column="",
             output_path="",
         )
@@ -91,6 +95,11 @@ class Zeno(object):
                 "Extension of " + metadata_path.suffix + " not one of .csv or .parquet"
             )
             sys.exit(1)
+        # TODO: figure out if this breaks for big integers. Need to do this for
+        # frontend bigint issues.
+        d = dict.fromkeys(self.df.select_dtypes(np.int64).columns, np.int32)
+        self.df = self.df.astype(d)
+
         self.metadata_name = os.path.basename(metadata_path).split(".")[0]
         self.cache_path = cache_path
         os.makedirs(self.cache_path, exist_ok=True)
@@ -99,6 +108,12 @@ class Zeno(object):
         try:
             with open(os.path.join(self.cache_path, "slices.pickle"), "rb") as f:
                 self.slices = pickle.load(f)
+        except FileNotFoundError:
+            pass
+        self.reports: List[Report] = []
+        try:
+            with open(os.path.join(self.cache_path, "reports.pickle"), "rb") as f:
+                self.reports = pickle.load(f)
         except FileNotFoundError:
             pass
 
@@ -311,32 +326,37 @@ class Zeno(object):
         metric_func = self.metric_functions[metric_name]
         result_metric = metric_func(self.df.loc[sli.idxs], local_ops)
 
-        if len(sli.name) > 0:
-            self.slices[sli.name] = sli
+        if len(sli.slice_name) > 0:
+            self.slices[sli.slice_name] = sli
             with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
                 pickle.dump(self.slices, f)
 
         return {
-            "slice": sli.name,
+            "slice": sli.slice_name,
             "model": model_name,
             "metric": metric_name,
             "value": result_metric,
         }
 
-    def __get_df_rows(self, dataframe, column="id", list_to_get=None):
-        if list_to_get is None:
-            return None
-        return dataframe[dataframe[column].isin(list_to_get)]
+    def get_reports(self):
+        return [r.dict(by_alias=True) for r in self.reports]
+
+    def update_reports(self, reports: ReportsRequest):
+        """Update reports with results."""
+        self.reports = reports.reports
+        with open(os.path.join(self.cache_path, "reports.pickle"), "wb") as f:
+            pickle.dump(self.reports, f)
 
     def __run_umap(self, embeds):
         reducer = umap.UMAP()
         projection = reducer.fit_transform(embeds)
-        # self.df.loc[:, "zenoembed_x"] = projection[:, 0]  # type: ignore
-        # self.df.loc[:, "zenoembed_y"] = projection[:, 1]  # type: ignore
-        # self.complete_columns.append("zenoembed_x")
-        # self.complete_columns.append("zenoembed_y")
         self.status = "Done projecting"
         return projection.tolist()
+
+    def __get_df_rows(self, dataframe, column="id", list_to_get=None):
+        if list_to_get is None:
+            return None
+        return dataframe[dataframe[column].isin(list_to_get)]
 
     def run_projection(self, model, instance_ids):
         filtered_rows = self.__get_df_rows(
@@ -358,7 +378,7 @@ class Zeno(object):
         return get_arrow_bytes(self.df[columns], self.id_column)
 
     def get_slices(self):
-        return [s.dict() for s in self.slices.values()]
+        return [s.dict(by_alias=True) for s in self.slices.values()]
 
     def delete_slice(self, slice_id):
         self.slices.pop(slice_id)

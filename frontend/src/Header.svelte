@@ -38,7 +38,7 @@
 
   <div>
     <Wrapper>
-      <IconButton href="https://cabreraalex.github.io/zeno/intro.html">
+      <IconButton href="https://dig.cmu.edu/zeno/intro.html">
         <Icon component={Svg} viewBox="0 0 24 24">
           <path fill="currentColor" d={mdiApi} />
         </Icon>
@@ -46,7 +46,7 @@
       <Tooltip>read the documentation</Tooltip>
     </Wrapper>
     <Wrapper>
-      <IconButton href="https://github.com/cabreraalex/zeno">
+      <IconButton href="https://github.com/cmudig/zeno">
         <Icon component={Svg} viewBox="0 0 24 24">
           <path fill="currentColor" d={mdiGithub} />
         </Icon>

@@ -1,6 +1,6 @@
 import * as aq from "arquero";
 import { get } from "svelte/store";
-import {color as _color} from "d3";
+import { tab } from "./stores";
 
 import {
   currentColumns,
@@ -12,6 +12,7 @@ import {
   settings,
   slices,
   table,
+  reports,
 } from "./stores";
 
 export function initialFetch() {
@@ -30,23 +31,24 @@ export function initialFetch() {
   allRequests.then(() => ready.set(true));
 }
 
-export function getSlices(t) {
-  fetch("/api/slices")
-    .then((d) => d.json())
-    .then((d) => {
-      const slis = JSON.parse(d);
-      slis.forEach(
-        (s) =>
-          (s.idxs = t
-            .filter("(d) => " + getFilterFromPredicates(s.predicates))
-            .array(get(settings).idColumn))
-      );
-      getMetrics(slis);
+export async function getSlicesAndReports(t) {
+  const slicesRes = await fetch("/api/slices").then((d) => d.json());
+  const slis = JSON.parse(slicesRes) as Slice[];
+  slis.forEach(
+    (s: Slice) =>
+      (s.idxs = t
+        .filter("(d) => " + getFilterFromPredicates(s.filterPredicates))
+        .array(get(settings).idColumn))
+  );
+  getMetrics(slis);
+  const sliMap = new Map();
+  slis.forEach((e) => sliMap.set(e.sliceName, e));
+  slices.set(sliMap);
 
-      const sliMap = new Map();
-      slis.forEach((e) => sliMap.set(e.name, e));
-      slices.set(sliMap);
-    });
+  // todo: get reports
+  const reportsRes = await fetch("/api/reports").then((d) => d.json());
+  const localReports = JSON.parse(reportsRes) as Report[];
+  reports.set(localReports);
 }
 
 export function updateTab(t: string) {
@@ -55,7 +57,7 @@ export function updateTab(t: string) {
   } else {
     window.location.hash = "#/" + t + "/";
   }
-  return t;
+  tab.set(t);
 }
 
 export function getMetrics(slices: Slice[]) {
@@ -73,11 +75,11 @@ export function getMetrics(slices: Slice[]) {
       results.update((resmap) => {
         res.forEach((r) => {
           resmap.set(
-            {
+            <ResultKey>{
               slice: r.slice,
               metric: r.metric,
               model: r.model,
-            } as ResultKey,
+            },
             r.value
           );
         });
@@ -97,7 +99,7 @@ export function getFilterFromPredicates(predicates: FilterPredicate[]) {
     let ret = "";
 
     if (p.predicateType === "slice") {
-      ret = getFilterFromPredicates(get(slices).get(p.name).predicates);
+      ret = getFilterFromPredicates(get(slices).get(p.name).filterPredicates);
       if (p.operation === "IS IN") {
         return ret;
       } else {
@@ -145,11 +147,13 @@ export function getFilterFromPredicates(predicates: FilterPredicate[]) {
   return stringPreds.join(" ");
 }
 
-export function updateTableColumns(w) {
+export function updateTableColumns(w: WSResponse) {
   let t = get(table);
 
   const tableColumns = t.columnNames();
-  const missingColumns = w.columns.filter((c) => !tableColumns.includes(c));
+  const missingColumns = w.completeColumns.filter(
+    (c) => !tableColumns.includes(c)
+  );
 
   if (missingColumns.length > 0) {
     fetch("/api/table", {
@@ -170,8 +174,19 @@ export function updateTableColumns(w) {
 
         // TODO: move somewhere more logical.
         if (get(slices).size === 0 && w.doneProcessing) {
-          getSlices(t);
+          getSlicesAndReports(t);
         }
       });
   }
+}
+
+export function updateReports(reps) {
+  console.log(reps);
+  fetch("/api/update-reports", {
+    method: "POST",
+    headers: {
+      "Content-type": "application/json",
+    },
+    body: JSON.stringify({ reports: reps }),
+  }).then((d: Response) => d.json());
 }
