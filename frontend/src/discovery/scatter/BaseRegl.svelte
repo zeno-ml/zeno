@@ -85,11 +85,7 @@
 			opacity: opacities,
 		});
 	}
-	function colorPoints(
-		scatter,
-		colors = availableColors,
-		dataType = "valueA"
-	) {
+	function colorPoints(scatter, colors = availableColors, dataType = "valueA") {
 		scatter.set({
 			colorBy: dataType,
 			pointColor: colors,
@@ -97,11 +93,7 @@
 	}
 	function addSelectionDispatch(scatter) {
 		scatter.subscribe("deselect", deselectPoints, null);
-		scatter.subscribe(
-			"select",
-			(d) => exportSelectedPoints(d.points),
-			null
-		);
+		scatter.subscribe("select", (d) => exportSelectedPoints(d.points), null);
 	}
 	function exportSelectedPoints(idx: number[]) {
 		const pointsExport = idx.map((i) => ({ index: i, point: points[i] }));

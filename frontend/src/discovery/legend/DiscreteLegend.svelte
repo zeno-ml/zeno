@@ -26,14 +26,11 @@
 		{squareWidth}
 		{gap}
 		colors={data.map((item) => item.color)}
-		bind:exportSquares={squareLocations}
-	/>
+		bind:exportSquares={squareLocations} />
 	{#if "yOffset" in squareLocations && "squareHeight" in squareLocations && "squareWidth" in squareLocations}
 		{#each data as d, i}
 			{@const textY =
-				squareLocations["yOffset"][i] +
-				squareLocations["squareHeight"] / 2 +
-				7}
+				squareLocations["yOffset"][i] + squareLocations["squareHeight"] / 2 + 7}
 			{@const textX = squareLocations["squareWidth"] + 4}
 			<text
 				style={textStyle}
@@ -42,8 +39,7 @@
 				fill={d.color}
 				stroke={"black"}
 				stroke-width={0.3}
-				{...textProps}
-			>
+				{...textProps}>
 				{d.value}
 			</text>
 		{/each}

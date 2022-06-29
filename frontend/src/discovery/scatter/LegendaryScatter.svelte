@@ -30,8 +30,7 @@
 				on:create
 				on:draw
 				on:select
-				on:deselect
-			/>
+				on:deselect />
 		</div>
 	{/if}
 	<div id="top-legend">

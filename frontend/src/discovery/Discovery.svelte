@@ -40,8 +40,7 @@
 
 	// stuff that gets updated (reactive)
 	$: metadataExists =
-		$settings.metadataColumns.length > 0 ||
-		$filteredTable._names.length > 0;
+		$settings.metadataColumns.length > 0 || $filteredTable._names.length > 0;
 
 	$: pointsExist = projection2D.length > 0;
 
@@ -114,18 +113,18 @@
 		} else if (type === "continuous") {
 			const binAssignments = binContinuous(metadata);
 			colorValues = binAssignments.map((ass) => range[ass]);
-			colorRange = interpolateColorToArray(
-				colorsContinuous,
-				range.length
-			);
+			colorRange = interpolateColorToArray(colorsContinuous, range.length);
 		}
 		return { colorRange, colorValues };
 	}
 	function updateColors({ colorBy = "label", table = $filteredTable } = {}) {
 		// compute coloring stuff
 		const { metadata, range, type } = inferOutputsType(colorBy, table);
-		const { colorRange: cRange, colorValues: cValues } =
-			selectColorsForRange(type, metadata, range);
+		const { colorRange: cRange, colorValues: cValues } = selectColorsForRange(
+			type,
+			metadata,
+			range
+		);
 
 		// save globally
 		selectedMetadataOutputs = metadata;
@@ -143,10 +142,7 @@
 		colorValues,
 		opacityValues,
 	}) {
-		const legend = reformatAPI.legendaryScatter.legend(
-			colorRange,
-			dataRange
-		);
+		const legend = reformatAPI.legendaryScatter.legend(colorRange, dataRange);
 		const scatter = reformatAPI.legendaryScatter.points(
 			projection2D,
 			colorValues,
@@ -193,8 +189,7 @@
 			<div
 				class="paper"
 				style:width="{scatterWidth}px"
-				style:height="{scatterHeight}px"
-			>
+				style:height="{scatterHeight}px">
 				<LegendaryScatter
 					width={scatterWidth}
 					height={scatterHeight}
@@ -205,12 +200,8 @@
 					}}
 					on:select={({ detail }) => {
 						const indexInstances = detail.map(({ index }) => index);
-						lassoSelectTable = indexTable(
-							$filteredTable,
-							indexInstances
-						);
-					}}
-				/>
+						lassoSelectTable = indexTable($filteredTable, indexInstances);
+					}} />
 			</div>
 			<div>
 				<p>{$filteredTable.size} instances</p>
@@ -222,10 +213,7 @@
 				on:click={async () => {
 					if ($filteredTable) {
 						const filteredIds = $filteredTable.columnArray("id");
-						const _projection = await projectEmbeddings2D(
-							$model,
-							filteredIds
-						);
+						const _projection = await projectEmbeddings2D($model, filteredIds);
 						projection2D = _projection.data.map(({ proj }) => proj);
 					}
 				}}
@@ -240,8 +228,7 @@
 		<Samples
 			table={scatterSelectEmpty(lassoSelectTable)
 				? $filteredTable
-				: lassoSelectTable}
-		/>
+				: lassoSelectTable} />
 	</div>
 </div>
 

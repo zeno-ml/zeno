@@ -29,8 +29,7 @@
 			y={yPosition}
 			width={squareWidth}
 			height={squareHeight}
-			fill={c}
-		/>
+			fill={c} />
 	{/each}
 </svg>
 

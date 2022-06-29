@@ -38,5 +38,4 @@
 	on:create
 	on:draw
 	on:select
-	on:deselect
-/>
+	on:deselect />

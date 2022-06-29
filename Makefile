@@ -10,6 +10,11 @@ cover:
 	@echo "==> 🧪 Tests with Coverage =="
 	@poetry run pytest --cov=zeno --cov-report=term-missing ./zeno/tests/*
 
+.PHONY: format
+format:
+	@echo "==> 🧩 Formatting"
+	@cd frontend && npx prettier --write ./src/**/*
+
 .PHONY: lint
 lint:
 	@echo "==> 👕 Linting"

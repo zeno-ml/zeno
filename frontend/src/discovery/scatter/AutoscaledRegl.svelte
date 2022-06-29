@@ -35,8 +35,7 @@
 	on:create
 	on:draw
 	on:select
-	on:deselect
-/>
+	on:deselect />
 
 <style>
 	/*  put stuff here */
