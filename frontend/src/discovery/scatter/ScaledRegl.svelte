@@ -12,7 +12,7 @@
 	export let colorRange: string[] = schemeCategory10 as string[];
 	export let points: LegendaryScatterPoint[] = new Array(100_000)
 		.fill(0)
-		.map((_, i) => ({
+		.map(() => ({
 			x: Math.random() * 3,
 			y: Math.random() * 5,
 			color: Math.random(),
@@ -24,7 +24,7 @@
 	$: yWindowMinMax = [-1 + yPadding, 1 - yPadding];
 	$: xScale = scaleLinear().domain(xMinMax).range(xWindowMinMax);
 	$: yScale = scaleLinear().domain(yMinMax).range(yWindowMinMax);
-	$: formattedPoints = points.map((p, i) => {
+	$: formattedPoints = points.map((p) => {
 		return [xScale(p.x), yScale(p.y), p.color, p.opacity];
 	});
 </script>

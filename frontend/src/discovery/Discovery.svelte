@@ -84,7 +84,7 @@
 		return $filteredTable.columnArray("id").map((d) => d) as string[];
 	}
 	function getMetadata(table: ColumnTable, colorBy: string) {
-		return table.columnArray(colorBy) as any[];
+		return table.columnArray(colorBy) as Array<unknown>;
 	}
 
 	let selectedMetadataOutputs,
@@ -103,8 +103,8 @@
 	}
 	function selectColorsForRange(
 		type: dataType,
-		metadata: number[],
-		range: number[]
+		metadata: unknown[],
+		range: unknown[]
 	) {
 		// based on datatype inferred color differently
 		let colorRange, colorValues;
@@ -130,7 +130,7 @@
 		// save globally
 		selectedMetadataOutputs = metadata;
 		dataRange = range;
-		// eslint-disable-next-line no-import-assign
+		// eslint-disable-next-line
 		dataType = type;
 		colorRange = cRange;
 		colorValues = cValues;
@@ -226,9 +226,7 @@
 							$model,
 							filteredIds
 						);
-						projection2D = _projection.data.map(
-							({ proj, id }) => proj
-						);
+						projection2D = _projection.data.map(({ proj }) => proj);
 					}
 				}}
 				>Compute projection

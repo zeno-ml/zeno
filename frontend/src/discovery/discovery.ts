@@ -21,7 +21,7 @@ export function interpolateColorToArray(
 
 export async function projectEmbeddings2D(
 	model: string,
-	instance_ids: TypedArray | any[]
+	instance_ids: unknown[] | TypedArray
 ) {
 	const response = await fetch("api/projection", {
 		method: "POST",
@@ -90,7 +90,7 @@ export function indexTable(table: ColumnTable, idx: number[]): ColumnTable {
 	return selectedTable;
 }
 
-export function getBins(values: number[], bins = 10) {
+export function getBins(values: unknown[], bins = 10) {
 	const [minValue, maxValue] = extent(values, (d) => Number(d));
 	const range = maxValue - minValue;
 	const binInterval = range / bins;
@@ -99,7 +99,7 @@ export function getBins(values: number[], bins = 10) {
 		.map((_, i) => minValue + i * binInterval);
 	return binsArray;
 }
-export function binContinuous(values: number[], bins = 10) {
+export function binContinuous(values: unknown[], bins = 10) {
 	if (bins <= 0) {
 		return;
 	}
@@ -122,7 +122,7 @@ export function binContinuous(values: number[], bins = 10) {
 	return assignments;
 }
 
-export type dataType = "categorical" | "continuous";
+export type dataType = "categorical" | "continuous" | undefined;
 export function getDataRange<T>(arrayOfValues: T[], categoryThreshold = 10) {
 	const rangeMap = new Map();
 	let dataType: dataType = "categorical";

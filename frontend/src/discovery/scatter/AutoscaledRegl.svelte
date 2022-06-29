@@ -9,7 +9,7 @@
 	export let colorRange = schemeCategory10 as string[];
 	export let points: LegendaryScatterPoint[] = new Array(100_00)
 		.fill(0)
-		.map((_, i) => ({
+		.map(() => ({
 			x: Math.random() * 3,
 			y: Math.random() * 5,
 			color: Math.random(),
