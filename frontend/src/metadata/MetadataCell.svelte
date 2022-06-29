@@ -31,7 +31,6 @@
 			(chartType === ChartType.Count || chartType === ChartType.Histogram) &&
 			table.column(col)
 		) {
-			console.log(table.objects());
 			let arr = table.array(col);
 			data = { table: arr };
 		}

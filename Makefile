@@ -1,4 +1,4 @@
-all: check lint typecheck cover book 
+all: check format lint typecheck cover book 
 
 .PHONY: test
 test:
