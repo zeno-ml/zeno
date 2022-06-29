@@ -4,7 +4,7 @@
   import IconButton from "@smui/icon-button";
   import Select, { Option } from "@smui/select";
 
-  import { filteredTable, model, ready, settings } from "../stores";
+  import { model, ready, settings } from "../stores";
 
   import AudioClassification from "./AudioClassification.svelte";
   import ImageClassification from "./ImageClassification.svelte";
@@ -12,8 +12,8 @@
   import ObjectDetection from "./ObjectDetection.svelte";
   import TextClassification from "./TextClassification.svelte";
 
-  export let table = $filteredTable;
-  
+  export let table;
+
   let rowsPerPage = 15;
   let currentPage = 0;
 
@@ -35,15 +35,9 @@
         {modelCol}
       />
     {:else if $settings.task === "image-segmentation"}
-      <ImageSegmentation
-        table={table.slice(start, end).objects()}
-        {modelCol}
-      />
+      <ImageSegmentation table={table.slice(start, end).objects()} {modelCol} />
     {:else if $settings.task === "object-detection"}
-      <ObjectDetection
-        table={table.slice(start, end).objects()}
-        {modelCol}
-      />
+      <ObjectDetection table={table.slice(start, end).objects()} {modelCol} />
     {:else if $settings.task === "text-classification"}
       <TextClassification
         table={table.slice(start, end).objects()}
