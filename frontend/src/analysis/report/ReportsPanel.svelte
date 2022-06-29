@@ -4,9 +4,9 @@
   import Ripple from "@smui/ripple";
   import { mdiTableMultiple } from "@mdi/js";
 
-  import { reports, report } from "../stores";
+  import { reports, report } from "../../stores";
   import ReportRow from "./ReportRow.svelte";
-  import { updateReports } from "../util";
+  import { updateReports } from "../../util";
 
   report.set(-1);
 </script>

@@ -49,6 +49,7 @@
     "d3-force": "^3.0.0",
     "d3-scale": "^4.0.2",
     "d3-scale-chromatic": "^3.0.0",
+    "html2pdf.js": "^0.9.3",
     "internmap": "^2.0.3",
     "regl-scatterplot": "^1.3.0",
     "sirv-cli": "^2.0.0",

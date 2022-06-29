@@ -9,7 +9,7 @@
   import { Svg } from "@smui/common/elements";
   import { Cell, Row } from "@smui/data-table";
 
-  import SliceDetails from "./SliceDetails.svelte";
+  import SliceDetails from "../SliceDetails.svelte";
 
   import {
     metadataSelections,
@@ -19,8 +19,8 @@
     reports,
     results,
     sliceSelections,
-  } from "./stores";
-  import { updateReports, updateTab } from "./util";
+  } from "../stores";
+  import { updateReports, updateTab } from "../util";
 
   export let sli: Slice;
 

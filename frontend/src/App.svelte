@@ -24,7 +24,7 @@
   import Header from "./Header.svelte";
   import Discovery from "./Discovery.svelte";
   import Exploration from "./Exploration.svelte";
-  import Analysis from "./Analysis.svelte";
+  import Analysis from "./analysis/Analysis.svelte";
 
   tab.set($location.split("/")[1]);
 

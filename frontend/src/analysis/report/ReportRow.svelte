@@ -3,11 +3,11 @@
   import Ripple from "@smui/ripple";
   import Textfield from "@smui/textfield";
 
-  import { reports, report, metrics } from "../stores";
-  import { clickOutside } from "../clickOutside";
   import Select, { Option } from "@smui/select";
   import HelperText from "@smui/textfield/helper-text";
-  import { updateReports } from "../util";
+  import { clickOutside } from "../../clickOutside";
+  import { metrics, report, reports } from "../../stores";
+  import { updateReports } from "../../util";
 
   export let i;
 
