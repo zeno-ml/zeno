@@ -1,7 +1,7 @@
 <script lang="ts">
 	import VerticalSquares from "./VerticalSquares.svelte";
 	import { interpolateColorToArray } from "../discovery";
-	import { interpolateCool as defaultInterpolate } from "d3";
+	import { interpolateCool as defaultInterpolate } from "d3-scale-chromatic";
 
 	export let width = 75;
 	export let height = 250;

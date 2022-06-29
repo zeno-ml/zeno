@@ -1,18 +1,20 @@
 <script lang="ts">
 	import ScaledRegl from "./ScaledRegl.svelte";
-	import type { IPoints } from "./scatter";
+	import type { LegendaryScatterPoint } from "./scatter";
 	import { extentXY } from "./scatter";
-	import * as d3 from "d3";
+	import { schemeCategory10 } from "d3-scale-chromatic";
 
 	export let width = 500;
 	export let height = 500;
-	export let colorRange = d3.schemeCategory10 as string[];
-	export let points: IPoints[] = new Array(100_00).fill(0).map((_, i) => ({
-		x: Math.random() * 3,
-		y: Math.random() * 5,
-		color: Math.random(),
-		opacity: Math.random(),
-	}));
+	export let colorRange = schemeCategory10 as string[];
+	export let points: LegendaryScatterPoint[] = new Array(100_00)
+		.fill(0)
+		.map((_, i) => ({
+			x: Math.random() * 3,
+			y: Math.random() * 5,
+			color: Math.random(),
+			opacity: Math.random(),
+		}));
 	$: extent = extentXY(
 		points,
 		(d) => d.x,

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import Legend from "../legend/Legend.svelte";
 	import AutoscaledRegl from "./AutoscaledRegl.svelte";
-	import * as d3 from "d3";
+	import { schemeCategory10 } from "d3-scale-chromatic";
 
-	const defaultColors = d3.schemeCategory10 as string[];
+	const defaultColors = schemeCategory10 as string[];
 	export let width = 800;
 	export let height = 800;
 	export let points = new Array(10_000).fill(0).map((_, i) => ({

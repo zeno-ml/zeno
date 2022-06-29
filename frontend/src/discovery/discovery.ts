@@ -1,13 +1,12 @@
-import { color as _color } from "d3";
 import type { TypedArray } from "arquero/dist/types/table/table";
 import type ColumnTable from "arquero/dist/types/table/column-table";
 import type {
 	LegendaryLegendEntry,
 	LegendaryScatterPoint,
 } from "./scatter/scatter";
-import type { Table } from "apache-arrow";
-import * as d3 from "d3";
 import * as aq from "arquero";
+import { color } from "d3-color";
+import { extent } from "d3-array";
 
 export function interpolateColorToArray(
 	interpolateColorer: (normalized: number) => string,
@@ -16,7 +15,7 @@ export function interpolateColorToArray(
 	const increment = 1.0 / length;
 	let colorArray = new Array(length);
 	for (let i = 0, t = 0; i < colorArray.length; i++, t += increment) {
-		colorArray[i] = _color(interpolateColorer(t)).hex();
+		colorArray[i] = color(interpolateColorer(t)).hex();
 	}
 	return colorArray;
 }
@@ -115,7 +114,7 @@ export function indexTableOld(table: ColumnTable, idx: number[]): ColumnTable {
 }
 
 export function getBins(values: number[], bins: number = 10) {
-	const [minValue, maxValue] = d3.extent(values, (d) => Number(d));
+	const [minValue, maxValue] = extent(values, (d) => Number(d));
 	const range = maxValue - minValue;
 	const binInterval = range / bins;
 	const binsArray = new Array(bins)

@@ -5,10 +5,7 @@
 	import Select, { Option } from "@smui/select";
 	import Samples from "../samples/Samples.svelte";
 	import SampleOptions from "../samples/SampleOptions.svelte";
-
-	import * as d3 from "d3";
-	import type Table from "arquero/dist/types/table/table";
-
+	import * as d3chromatic from "d3-scale-chromatic";
 	import {
 		projectEmbeddings2D,
 		reformatAPI,
@@ -29,13 +26,15 @@
 	// props
 	export let scatterWidth = 900;
 	export let scatterHeight = 700;
+	export let colorsCategorical = d3chromatic.schemeCategory10 as string[];
+	export let colorsContinuous = d3chromatic.interpolateBuPu;
 
 	let projection2D: number[][] = [];
 	let colorValues: number[] = [];
 	let opacityValues: number[] = [];
 	let colorBy: string = "label";
 	let dataType: dataType = "categorical";
-	let colorRange: string[] = d3.schemeCategory10 as string[];
+	let colorRange: string[] = colorsCategorical;
 	let lassoSelectTable = null;
 
 	// stuff that gets updated (reactive)
@@ -44,6 +43,11 @@
 
 	$: pointsExist = projection2D.length > 0;
 
+	// absolutely cursed reactive stuff here
+	// whenever stuff is mentioned as the parameter it will update/recompute for that variable
+	// so I hid stuff (global variables) within the function so they don't call the reactive on update
+	// this cursed black magic can be removed once I get a better copying and caching system down
+	// for the pipeline
 	let oldIds = [],
 		newIds = [];
 	$: {
@@ -73,7 +77,7 @@
 	}
 
 	// functions
-	function scatterSelectEmpty(table: Table) {
+	function scatterSelectEmpty(table: ColumnTable) {
 		return table === null;
 	}
 	function saveIds() {
@@ -106,12 +110,12 @@
 		let colorRange, colorValues;
 		if (type === "categorical") {
 			colorValues = metadata.map((md) => range.indexOf(md));
-			colorRange = d3.schemeCategory10 as string[];
+			colorRange = colorsCategorical;
 		} else if (type === "continuous") {
 			const binAssignments = binContinuous(metadata);
 			colorValues = binAssignments.map((ass) => range[ass]);
 			colorRange = interpolateColorToArray(
-				d3.interpolateBuPu,
+				colorsContinuous,
 				range.length
 			);
 		}

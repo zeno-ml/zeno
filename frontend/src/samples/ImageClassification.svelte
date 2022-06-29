@@ -4,10 +4,11 @@
 
   export let table;
   export let modelCol;
+  export let color = "white";
 </script>
 
 {#each table as row}
-  <div class="box">
+  <div class="box" style:background-color={color}>
     <Wrapper>
       <img
         src="/static/{row[$settings.idColumn]}"

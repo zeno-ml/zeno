@@ -2,7 +2,8 @@
 	import { onDestroy, onMount, createEventDispatcher } from "svelte";
 	import createScatterPlot from "regl-scatterplot";
 	import type { Properties } from "regl-scatterplot/dist/types";
-	import * as d3 from "d3";
+	import { color } from "d3-color";
+	import { interpolateBuPu } from "d3-scale-chromatic";
 	const dispatch = createEventDispatcher();
 
 	const generatePoints = (num) => {
@@ -36,7 +37,7 @@
 		const increment = 1.0 / length;
 		let colorArray = new Array(length);
 		for (let i = 0, t = 0; i < colorArray.length; i++, t += increment) {
-			colorArray[i] = d3.color(interpolateColorer(t)).hex();
+			colorArray[i] = color(interpolateColorer(t)).hex();
 		}
 		return colorArray;
 	}
@@ -46,7 +47,7 @@
 	export let height: number;
 	export let points = generatePoints(10000);
 	export let availableColors = interpolateColorToArray(
-		d3.interpolateBuPu,
+		interpolateBuPu,
 		100
 	) as string[];
 	export let availableOpacities = opacityRange(100);
