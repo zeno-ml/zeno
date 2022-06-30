@@ -10,11 +10,19 @@
 		sliceSelections,
 	} from "../stores";
 
-	$: result = $results.get({
-		slice: "",
-		metric: $metric,
-		model: $model,
-	} as ResultKey);
+	let result = undefined;
+
+	function updateResult(results, model, metric) {
+		result = results.get({
+			slice: "",
+			metric: metric,
+			model: model,
+		} as ResultKey);
+	}
+
+	results.subscribe((r) => updateResult(r, $model, $metric));
+	model.subscribe((m) => updateResult($results, m, $metric));
+	metric.subscribe((m) => updateResult($results, $model, m));
 </script>
 
 <div class="chips">

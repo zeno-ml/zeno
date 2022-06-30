@@ -119,14 +119,32 @@
 			{editSlice}
 			selected={$sliceSelections.includes(s.sliceName)}
 			setSelected={(e) => {
-				if ($sliceSelections.includes(s.sliceName)) {
-					sliceSelections.update((sel) => {
-						sel.splice(sel.indexOf(s.sliceName), 1);
-						return [...sel];
-					});
-				} else {
-					if (e.shiftKey) {
+				if (
+					$sliceSelections.length === 1 &&
+					$sliceSelections.includes(s.sliceName)
+				) {
+					sliceSelections.set([]);
+					return;
+				}
+				if (e.shiftKey) {
+					if ($sliceSelections.includes(s.sliceName)) {
+						sliceSelections.update((sel) => {
+							sel.splice(sel.indexOf(s.sliceName), 1);
+							return [...sel];
+						});
+					} else {
 						sliceSelections.update((slis) => [...slis, s.sliceName]);
+					}
+				} else {
+					if ($sliceSelections.includes(s.sliceName)) {
+						if ($sliceSelections.length > 0) {
+							sliceSelections.set([s.sliceName]);
+						} else {
+							sliceSelections.update((sel) => {
+								sel.splice(sel.indexOf(s.sliceName), 1);
+								return [...sel];
+							});
+						}
 					} else {
 						sliceSelections.set([s.sliceName]);
 					}

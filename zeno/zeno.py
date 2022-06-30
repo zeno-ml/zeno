@@ -323,8 +323,11 @@ class Zeno(object):
             output_column="zenomodel_" + model_name,
             output_path=os.path.join(self.cache_path, "zenomodel_" + model_name),
         )
-        metric_func = self.metric_functions[metric_name]
-        result_metric = metric_func(self.df.loc[sli.idxs], local_ops)
+        if (len(sli.idxs) > 0):
+            metric_func = self.metric_functions[metric_name]
+            result_metric = metric_func(self.df.loc[sli.idxs], local_ops)
+        else:
+            result_metric = None
 
         if len(sli.slice_name) > 0:
             self.slices[sli.slice_name] = sli

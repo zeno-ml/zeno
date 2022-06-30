@@ -1,4 +1,4 @@
-# Zeno: A Behavioral Evaluation Platform for ML
+# Zeno: Behavioral Evaluation Platform for ML
 
 Zeno is a platform for behavioral evaluation of machine learning models using Python functions and an interactive UI.
 The Python API runs model inference and derives new metadata for analysis of unstructured data.
