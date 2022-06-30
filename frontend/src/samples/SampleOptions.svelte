@@ -21,23 +21,21 @@
 	});
 </script>
 
-{#if $filteredTable.size > 0}
-	<div id="options-container">
-		<div class="options container">
-			<Settings />
-		</div>
-		<div id="selects">
-			<div class="select-div">
-				<Select bind:value={$sort} label="Sort By">
-					{#each $currentColumns as m, i}
-						<Option value={m}>{$formattedCurrentColumns[i]}</Option>
-					{/each}
-				</Select>
-			</div>
+<div id="options-container">
+	<div class="options container">
+		<Settings />
+	</div>
+	<div id="selects">
+		<div class="select-div">
+			<Select bind:value={$sort} label="Sort By">
+				{#each $currentColumns as m, i}
+					<Option value={m}>{$formattedCurrentColumns[i]}</Option>
+				{/each}
+			</Select>
 		</div>
 	</div>
-	<SelectionBar />
-{/if}
+</div>
+<SelectionBar />
 
 <style>
 	#selects {

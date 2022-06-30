@@ -9,16 +9,14 @@
 <div id="container">
 	<MetadataPanel />
 
-	{#if $filteredTable}
-		<div style:margin-left="10px">
-			<div id="sample-options">
-				<SampleOptions />
-			</div>
-			<div id="samples">
-				<Samples table={$filteredTable} />
-			</div>
+	<div style:margin-left="10px">
+		<div id="sample-options">
+			<SampleOptions />
 		</div>
-	{/if}
+		<div id="samples">
+			<Samples table={$filteredTable} />
+		</div>
+	</div>
 </div>
 
 <style>

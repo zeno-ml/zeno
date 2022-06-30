@@ -80,7 +80,13 @@
 		return table === null;
 	}
 	function saveIds() {
-		return $filteredTable.columnArray("id").map((d) => d) as string[];
+		if ($filteredTable) {
+			return $filteredTable
+				.columnArray($settings.idColumn)
+				.map((d) => d) as string[];
+		} else {
+			return [];
+		}
 	}
 	function getMetadata(table: ColumnTable, colorBy: string) {
 		return table.columnArray(colorBy) as Array<unknown>;
