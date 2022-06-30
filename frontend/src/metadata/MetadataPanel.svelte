@@ -108,12 +108,7 @@
 				mode = "create";
 				newSlice = false;
 			}}>
-			<CreateSlice
-				metadataSelections={$metadataSelections}
-				bind:newSlice
-				bind:predicates
-				bind:mode
-				bind:name />
+			<CreateSlice bind:newSlice bind:predicates bind:mode bind:name />
 		</div>
 	{/if}
 
@@ -123,14 +118,18 @@
 			fullName={s.sliceName}
 			{editSlice}
 			selected={$sliceSelections.includes(s.sliceName)}
-			setSelected={() => {
+			setSelected={(e) => {
 				if ($sliceSelections.includes(s.sliceName)) {
 					sliceSelections.update((sel) => {
 						sel.splice(sel.indexOf(s.sliceName), 1);
 						return [...sel];
 					});
 				} else {
-					sliceSelections.update((sel) => [...sel, s.sliceName]);
+					if (e.shiftKey) {
+						sliceSelections.update((slis) => [...slis, s.sliceName]);
+					} else {
+						sliceSelections.set([s.sliceName]);
+					}
 				}
 			}} />
 	{/each}

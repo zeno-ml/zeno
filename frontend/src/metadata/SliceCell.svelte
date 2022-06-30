@@ -26,7 +26,7 @@
 <div
 	use:Ripple={{ surface: true, color: "primary" }}
 	class="cell parent {selected ? 'selected' : ''}"
-	on:click={setSelected}>
+	on:click={(e) => setSelected(e)}>
 	<div class="group" style:width="100%">
 		<div class="group" style:width="100%">
 			<div class="group" style:width="max-content">

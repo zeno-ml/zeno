@@ -6,7 +6,13 @@
 
 	import autoAnimate from "@formkit/auto-animate";
 
-	import { settings, slices, table } from "../stores";
+	import {
+		settings,
+		slices,
+		sliceSelections,
+		metadataSelections,
+		table,
+	} from "../stores";
 	import { getFilterFromPredicates, getMetrics } from "../util";
 
 	import FilterEntry from "./FilterEntry.svelte";
@@ -16,14 +22,13 @@
 	export let newSlice;
 	export let mode = "create";
 	export let predicates: FilterPredicate[];
-	export let metadataSelections: Map<string, MetadataSelection>;
 
 	let nameField;
 
 	// Pre-fill slice creation with current metadata selections.
-	if (metadataSelections.size !== 0) {
+	if ($metadataSelections.size !== 0) {
 		predicates = [];
-		[...metadataSelections.values()].forEach((entry) => {
+		[...$metadataSelections.values()].forEach((entry) => {
 			// TODO: support slice selections
 			if (entry.type === "range") {
 				predicates.push({
@@ -50,22 +55,35 @@
 					join: "AND",
 				});
 			} else {
-				entry.values.forEach((v, j) => {
-					let indicator = undefined;
-					if (entry.values.length > 1 && j === 0) {
-						indicator = "start";
-					} else if (entry.values.length > 1 && j === entry.values.length - 1) {
-						indicator = "end";
-					}
+				if (entry.values.length === 1) {
 					predicates.push({
 						name: entry.name,
 						predicateType: "metadata",
 						operation: "==",
-						value: v,
-						join: "OR",
-						groupIndicator: indicator,
+						value: entry.values[0],
+						join: "AND",
 					});
-				});
+				} else {
+					entry.values.forEach((v, j) => {
+						let indicator = undefined;
+						if (entry.values.length > 1 && j === 0) {
+							indicator = "start";
+						} else if (
+							entry.values.length > 1 &&
+							j === entry.values.length - 1
+						) {
+							indicator = "end";
+						}
+						predicates.push({
+							name: entry.name,
+							predicateType: "metadata",
+							operation: "==",
+							value: v,
+							join: "OR",
+							groupIndicator: indicator,
+						});
+					});
+				}
 			}
 		});
 	} else if (predicates.length === 0) {
@@ -107,6 +125,8 @@
 			});
 			return s;
 		});
+		metadataSelections.set(new Map());
+		sliceSelections.set([]);
 	}
 
 	onMount(() => nameField.getElement().focus());

@@ -1,4 +1,4 @@
-# Zeno: A Unified Testing Platform for ML
+# Zeno: A Behavioral Evaluation Platform for ML
 
 Zeno is a platform for behavioral evaluation of machine learning models using Python functions and an interactive UI.
 The Python API runs model inference and derives new metadata for analysis of unstructured data.
@@ -7,7 +7,7 @@ The interactive UI lets users explore model performance, create behavioral tests
 ::::{grid}
 :gutter: 2
 
-:::{grid-item-card} Python processing functions:
+:::{grid-item-card} Python API:
 
 ```python
 @distill_function
@@ -35,7 +35,7 @@ def accuracy(df, ops):
 pip install zenoml
 ```
 
-Create a folder with at least one Python file with a `predict_function`.
+Create a folder with at least one Python file and a `predict_function`.
 Add any number of Zeno modules using the `distill` and `metric` functions.
 See [Writing Tests](writing_tests) for details on each of these modules.
 
