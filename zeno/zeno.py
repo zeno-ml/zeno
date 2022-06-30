@@ -361,14 +361,14 @@ class Zeno(object):
         else:
             return []
 
-    def __get_df_rows(self, dataframe, column="id", list_to_get=None):
+    def __get_df_rows(self, dataframe, column, list_to_get=None):
         if list_to_get is None:
             return []
         return dataframe[dataframe[column].isin(list_to_get)]
 
     def run_projection(self, model, instance_ids):
         filtered_rows = self.__get_df_rows(
-            self.df, column="id", list_to_get=instance_ids
+            self.df, self.id_column, list_to_get=instance_ids
         )
         embeds = np.stack(filtered_rows["zenoembedding_" + model].to_numpy())
         projection = self.__run_umap(embeds)
