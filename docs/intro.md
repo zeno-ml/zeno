@@ -27,6 +27,8 @@ def accuracy(df, ops):
 :::
 ::::
 
+![workflow](./workflow.png)
+
 ## Quickstart
 
 ```bash

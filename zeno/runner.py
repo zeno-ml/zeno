@@ -87,10 +87,16 @@ def main():
         )
 
     if "id_column" not in args:
-        args["id_column"] = "id"
+        if "data_column" in args:
+            args["id_column"] = args["data_column"]
+        else:
+            print(
+                "ERROR: Must have 'id_column' referencing a column with unique IDs",
+                "if no data_column is specified.",
+            )
 
     if "data_column" not in args:
-        args["data_column"] = "id"
+        args["data_column"] = ""
 
     if "label_column" not in args:
         args["label_column"] = "label"

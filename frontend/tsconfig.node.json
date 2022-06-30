@@ -1,8 +1,8 @@
 {
-  "compilerOptions": {
-    "composite": true,
-    "module": "ES2022",
-    "moduleResolution": "node"
-  },
-  "include": ["viteconfig.ts"]
+	"compilerOptions": {
+		"composite": true,
+		"module": "ES2022",
+		"moduleResolution": "node"
+	},
+	"include": ["vite.config.ts"]
 }
