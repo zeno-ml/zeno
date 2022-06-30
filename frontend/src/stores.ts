@@ -7,6 +7,7 @@ import * as aq from "arquero";
 export const settings: Writable<Settings> = writable({
 	task: "",
 	idColumn: "",
+	dataColumn: "",
 	labelColumn: "",
 	metadataColumns: [],
 });

@@ -218,7 +218,7 @@
 			<button
 				on:click={async () => {
 					if ($filteredTable) {
-						const filteredIds = $filteredTable.columnArray("id");
+						const filteredIds = $filteredTable.columnArray($settings.idColumn);
 						const _projection = await projectEmbeddings2D($model, filteredIds);
 						projection2D = _projection.data.map(({ proj }) => proj);
 					}
