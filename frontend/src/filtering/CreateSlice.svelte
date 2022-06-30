@@ -6,7 +6,7 @@
 
 	import autoAnimate from "@formkit/auto-animate";
 
-	import { filteredTable, settings, slices, table } from "../stores";
+	import { settings, slices, table } from "../stores";
 	import { getFilterFromPredicates, getMetrics } from "../util";
 
 	import FilterEntry from "./FilterEntry.svelte";
@@ -90,9 +90,7 @@
 		newSlice = false;
 
 		const filt = getFilterFromPredicates(predicates);
-
 		let tempTable = $table.filter(`(d) => ${filt}`);
-		filteredTable.set(tempTable);
 
 		getMetrics([
 			<Slice>{

@@ -71,3 +71,5 @@ export const formattedCurrentColumns: Readable<string[]> = derived(
 			return c;
 		})
 );
+
+export const sort: Writable<string> = writable("");

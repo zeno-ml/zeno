@@ -2,10 +2,11 @@
 	import { TrailingIcon } from "@smui/chips";
 
 	import {
-		results,
+		filteredTable,
+		metadataSelections,
 		metric,
 		model,
-		metadataSelections,
+		results,
 		sliceSelections,
 	} from "../stores";
 
@@ -18,7 +19,10 @@
 
 <div class="chips">
 	<span id="metric">
-		{result ? result.toFixed(2) : ""}
+		{$metric}: {result ? result.toFixed(2) : ""}
+	</span>
+	<span id="size">
+		{$filteredTable.size} instances
 	</span>
 	{#each $sliceSelections as s}
 		<div class="meta-chip">
@@ -83,7 +87,8 @@
 		min-height: 40px;
 	}
 	#metric {
-		font-weight: 600;
+		font-weight: 400;
+		margin-left: 10px;
 		color: #6201ee;
 		margin-right: 15px;
 	}
@@ -106,5 +111,10 @@
 	.clear:hover {
 		background: #ede1fd;
 		border-radius: 5px;
+	}
+	#size {
+		font-style: italic;
+		color: rgba(0, 0, 0, 0.4);
+		margin-right: 10px;
 	}
 </style>

@@ -18,12 +18,14 @@
 	let currentPage = 0;
 
 	$: modelCol = "zenomodel_" + $model;
-	let start = currentPage * rowsPerPage;
+	$: start = currentPage * rowsPerPage;
 	let end = 0;
 	let lastPage = 0;
 
 	$: if (table) {
 		end = Math.min(start + rowsPerPage, table.size);
+	}
+	$: if (table) {
 		lastPage = Math.max(Math.ceil(table.size / rowsPerPage) - 1, 0);
 	}
 

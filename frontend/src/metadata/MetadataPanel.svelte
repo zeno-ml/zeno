@@ -18,6 +18,7 @@
 		table,
 		filteredTable,
 		ready,
+		sort,
 	} from "../stores";
 
 	let name = "";
@@ -62,7 +63,12 @@
 			}
 		});
 
+		if ($sort) {
+			tempTable = tempTable.orderby($sort);
+		}
+
 		filteredTable.set(tempTable);
+
 		getMetrics([
 			<Slice>{
 				sliceName: "",
@@ -153,7 +159,7 @@
 		color: rgba(0, 0, 0, 0.7);
 	}
 	.side-container {
-		height: calc(100vh - 60px);
+		height: calc(100vh - 80px);
 		overflow-y: auto;
 		min-width: 450px;
 		padding: 10px;
