@@ -2845,14 +2845,14 @@ typing-extensions = "*"
 
 [[package]]
 name = "torchaudio"
-version = "0.11.0"
+version = "0.12.0"
 description = "An audio package for PyTorch"
 category = "dev"
 optional = false
 python-versions = "*"
 
 [package.dependencies]
-torch = "1.11.0"
+torch = "*"
 
 [[package]]
 name = "torchvision"
@@ -3157,7 +3157,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "6d1f5f3ac36427c6cfd4c3a03a64a98afc57b6e05a85f8add0fb37edc5fe3077"
+content-hash = "ebfcabf8033121e060ae140d3b875d7ef17193783c531b2fc4abe09f432a2c59"
 
 [metadata.files]
 absl-py = [
@@ -5084,25 +5084,25 @@ torch = [
     {file = "torch-1.11.0-cp39-none-macosx_11_0_arm64.whl", hash = "sha256:0e48af66ad755f0f9c5f2664028a414f57c49d6adc37e77e06fe0004da4edb61"},
 ]
 torchaudio = [
-    {file = "torchaudio-0.11.0-cp310-cp310-macosx_10_15_x86_64.whl", hash = "sha256:8363e3db0a8af5820fd7d3bf8396a0af23dc8221c9a9d4b60e2e389805492944"},
-    {file = "torchaudio-0.11.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:d3a3b2cceb95f04ed936da33bc53bd666dab0715a79db33ae4719852241dc2d2"},
-    {file = "torchaudio-0.11.0-cp310-cp310-manylinux1_x86_64.whl", hash = "sha256:4e70645a1b77a89d9f40406f1a5b9af724f726a5c13bc2be55381e72b0fa63b6"},
-    {file = "torchaudio-0.11.0-cp310-cp310-manylinux2014_aarch64.whl", hash = "sha256:4d45833276a34ba0cdc9743b93141e6dbf17950091bb07940a30a6bf6cb80f05"},
-    {file = "torchaudio-0.11.0-cp310-cp310-win_amd64.whl", hash = "sha256:eff169d339d671b44bd777188be62861f4a3fca0779ecaa37518218e1e90978e"},
-    {file = "torchaudio-0.11.0-cp37-cp37m-macosx_10_15_x86_64.whl", hash = "sha256:b9a4d3e1ab611161c065ed2106804833ff4b85f64d84021ec590468363169f9d"},
-    {file = "torchaudio-0.11.0-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:a2f27bd7b53c5a3d91b120b8291a46fb09ba3e5aa4e54dd5c8fe47fbb8f7d848"},
-    {file = "torchaudio-0.11.0-cp37-cp37m-manylinux2014_aarch64.whl", hash = "sha256:3a3964f8a50cdeba8a02d20f07305853650a2dc3fb604a2334dce6b68cf8ea38"},
-    {file = "torchaudio-0.11.0-cp37-cp37m-win_amd64.whl", hash = "sha256:21837810b14fec5fbd21055f8153f608f4957d8a563055402913a3da6bf602de"},
-    {file = "torchaudio-0.11.0-cp38-cp38-macosx_10_15_x86_64.whl", hash = "sha256:f4e9dda9e8d3ce0bbd5e791926219f5054b8b85365c79be2ee90333acf9adbfc"},
-    {file = "torchaudio-0.11.0-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:317fd8ec39fddb3af1dad906593b9ecdc3edf68e7f5780c42f8de956585ae480"},
-    {file = "torchaudio-0.11.0-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:7bcd958c31071accc8147f4781acd64743e37fcdc72c06b6eaa37dc88fb1ee28"},
-    {file = "torchaudio-0.11.0-cp38-cp38-manylinux2014_aarch64.whl", hash = "sha256:77add44d291a8a97f3a607cef053f009a27296f5d99f33082c57c4e6c326fafc"},
-    {file = "torchaudio-0.11.0-cp38-cp38-win_amd64.whl", hash = "sha256:771bb585311306c416de6ca20f60eb6940bff8f5e3b43fd8204f22d37e794ac2"},
-    {file = "torchaudio-0.11.0-cp39-cp39-macosx_10_15_x86_64.whl", hash = "sha256:70d8bc07f277608d23a9aa08db3fbaf035660254bc12d9b361640c4556777559"},
-    {file = "torchaudio-0.11.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:e5e5513fcdd57870061965befbf0765787b25f499c3e00b58f4d844e44183177"},
-    {file = "torchaudio-0.11.0-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:7eb1376d2ed2693ada562841500ff84a8be40b63c859d10fb70e423af5f6c2fb"},
-    {file = "torchaudio-0.11.0-cp39-cp39-manylinux2014_aarch64.whl", hash = "sha256:9d1196a0f21041f60e915c2aa1b3fa9734d23f3b56f78794b2684cbd498a9dcb"},
-    {file = "torchaudio-0.11.0-cp39-cp39-win_amd64.whl", hash = "sha256:cd938f5e4a9456112574f28c493422525095c0fa27bd41215ff9d27999e52a2c"},
+    {file = "torchaudio-0.12.0-cp310-cp310-macosx_10_15_x86_64.whl", hash = "sha256:26d854c6d8eb1d051da832b92db49a1403704106f1955045dd27c47741503079"},
+    {file = "torchaudio-0.12.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:b41b7a5c08ae1a13b13013ea7d34d64c0cbe061627ea0452a51a9c6c9cbcc2ac"},
+    {file = "torchaudio-0.12.0-cp310-cp310-manylinux1_x86_64.whl", hash = "sha256:531f876a19cdf78ee1e56681d842d9ec1413028b691913fff36fd95e23e44ebd"},
+    {file = "torchaudio-0.12.0-cp310-cp310-manylinux2014_aarch64.whl", hash = "sha256:dda0effc59606374c1c6177dd93a0b99a885940314ae20d2834097cf48be9e09"},
+    {file = "torchaudio-0.12.0-cp310-cp310-win_amd64.whl", hash = "sha256:904dc449ff0f5674175f26f8f9aa6a5a9432409773d124c05a40171aa4d388d5"},
+    {file = "torchaudio-0.12.0-cp37-cp37m-macosx_10_15_x86_64.whl", hash = "sha256:11f2a1b7bb6107416a0e75c686a142fa4bde81126346fa177bc9b0062a5ae6fb"},
+    {file = "torchaudio-0.12.0-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:3417745b64ddc3fce2270bd646637351f65a9e2ffe9eade4a3fabbf63baf7c22"},
+    {file = "torchaudio-0.12.0-cp37-cp37m-manylinux2014_aarch64.whl", hash = "sha256:1972d0cd1b5412ba2c9ccbcb251b19af1487c7f90518494d264fda0755bea4b6"},
+    {file = "torchaudio-0.12.0-cp37-cp37m-win_amd64.whl", hash = "sha256:5b0726e01206a37f9044f7eaee0506d548817a9ac32ef3837a7a8d6e222cffc6"},
+    {file = "torchaudio-0.12.0-cp38-cp38-macosx_10_15_x86_64.whl", hash = "sha256:bc6e3ec1e2b8abc086fe883af0fefc422950c3a98044a9934ca70ca10cdca210"},
+    {file = "torchaudio-0.12.0-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:d176ace6903bf5d1f57fea4a36aa37e6c848aa197c3d06d238dcae8831c92cbe"},
+    {file = "torchaudio-0.12.0-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:e5e1bb8d36dc548257b4f523471779087d40a4c8d7b08c6198fc2d74561905b7"},
+    {file = "torchaudio-0.12.0-cp38-cp38-manylinux2014_aarch64.whl", hash = "sha256:1c5cf143305ebb36c8715cac2418147a37275cdf3b44331ea44ef6722ee2b7e5"},
+    {file = "torchaudio-0.12.0-cp38-cp38-win_amd64.whl", hash = "sha256:7d29a632d945c8f87ed34f8e083bcd0f9820079d826deb9d072078be55df61f7"},
+    {file = "torchaudio-0.12.0-cp39-cp39-macosx_10_15_x86_64.whl", hash = "sha256:00e5badf3122dea48de7641455c57f779b3d22ee6196cf8e9d89830c02d8f1c4"},
+    {file = "torchaudio-0.12.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:d4483b0647521e397e4131951cdf8ec20e1041bc6b95af84075017bf0fed4747"},
+    {file = "torchaudio-0.12.0-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:193248b517e8b9aae725bc08215efaf332e7778ea1cffe9b128971d50990b296"},
+    {file = "torchaudio-0.12.0-cp39-cp39-manylinux2014_aarch64.whl", hash = "sha256:c0a404248dc9b2012ccc64759aaa9a72194f369b6bcc95ab81974ad56602b315"},
+    {file = "torchaudio-0.12.0-cp39-cp39-win_amd64.whl", hash = "sha256:f1e4c7fecf328ba35c42901c3898fb81d38b73ac57920f21acf6763cb82a636f"},
 ]
 torchvision = [
     {file = "torchvision-0.12.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:693656e6790b6ab21e4a6e87e81c2982bad9e455b5eb24e14bb672382ec6130f"},
