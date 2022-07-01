@@ -3,8 +3,10 @@
 	import { Pagination } from "@smui/data-table";
 	import IconButton from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
+	import { ZenoColumnType } from "../globals";
+	import { columnHash } from "../util";
 
-	import { model, ready, settings } from "../stores";
+	import { model, settings, status } from "../stores";
 
 	import AudioClassification from "./AudioClassification.svelte";
 	import ImageClassification from "./ImageClassification.svelte";
@@ -17,7 +19,15 @@
 	let rowsPerPage = 15;
 	let currentPage = 0;
 
-	$: modelCol = "zenomodel_" + $model;
+	let modelCol = "";
+
+	status.subscribe((s) => {
+		let obj = s.completeColumns.find((c) => {
+			return c.columnType === ZenoColumnType.OUTPUT && c.model === $model;
+		});
+		modelCol = obj ? columnHash(obj) : "";
+	});
+
 	$: start = currentPage * rowsPerPage;
 	let end = 0;
 	let lastPage = 0;
@@ -36,26 +46,22 @@
 
 {#if table}
 	<div class="container sample-container">
-		{#if $ready}
-			{#if $settings.task === "image-classification"}
-				<ImageClassification
-					table={table.slice(start, end).objects()}
-					{modelCol} />
-			{:else if $settings.task === "image-segmentation"}
-				<ImageSegmentation
-					table={table.slice(start, end).objects()}
-					{modelCol} />
-			{:else if $settings.task === "object-detection"}
-				<ObjectDetection table={table.slice(start, end).objects()} {modelCol} />
-			{:else if $settings.task === "text-classification"}
-				<TextClassification
-					table={table.slice(start, end).objects()}
-					{modelCol} />
-			{:else if $settings.task === "audio-classification"}
-				<AudioClassification
-					table={table.slice(start, end).objects()}
-					{modelCol} />
-			{/if}
+		{#if $settings.task === "image-classification"}
+			<ImageClassification
+				table={table.slice(start, end).objects()}
+				{modelCol} />
+		{:else if $settings.task === "image-segmentation"}
+			<ImageSegmentation table={table.slice(start, end).objects()} {modelCol} />
+		{:else if $settings.task === "object-detection"}
+			<ObjectDetection table={table.slice(start, end).objects()} {modelCol} />
+		{:else if $settings.task === "text-classification"}
+			<TextClassification
+				table={table.slice(start, end).objects()}
+				{modelCol} />
+		{:else if $settings.task === "audio-classification"}
+			<AudioClassification
+				table={table.slice(start, end).objects()}
+				{modelCol} />
 		{/if}
 	</div>
 	<Pagination slot="paginate" class="pagination">

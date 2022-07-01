@@ -1,0 +1,7 @@
+export enum ZenoColumnType {
+	METADATA,
+	PREDISTILL,
+	OUTPUT,
+	EMBEDDING,
+	POSTDISTILL,
+}

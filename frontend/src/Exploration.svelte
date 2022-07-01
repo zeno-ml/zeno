@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { filteredTable } from "./stores";
+	import { filteredTable, ready } from "./stores";
 
 	import MetadataPanel from "./metadata/MetadataPanel.svelte";
 	import SampleOptions from "./samples/SampleOptions.svelte";
@@ -13,9 +13,11 @@
 		<div id="sample-options">
 			<SampleOptions />
 		</div>
-		<div id="samples">
-			<Samples table={$filteredTable} />
-		</div>
+		{#if $ready}
+			<div id="samples">
+				<Samples table={$filteredTable} />
+			</div>
+		{/if}
 	</div>
 </div>
 

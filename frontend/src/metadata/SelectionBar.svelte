@@ -46,20 +46,20 @@
 			</TrailingIcon>
 		</div>
 	{/each}
-	{#each [...$metadataSelections.entries()] as [col, chip]}
+	{#each [...$metadataSelections.entries()] as [hash, chip]}
 		<div class="meta-chip">
 			<span>
 				{#if chip.type === "range"}
 					{chip.values[0].toFixed(2)}
 					{"<"}
-					{chip.name}
+					{chip.column.name}
 					{"<"}
 					{chip.values[1].toFixed(2)}
 				{:else if chip.type === "binary"}
 					{chip.values[0]}
-					{chip.name}
+					{chip.column.name}
 				{:else}
-					{chip.name}
+					{chip.column.name}
 					{"=="}
 					{chip.values.join(" | ")}
 				{/if}
@@ -68,7 +68,7 @@
 				class="remove material-icons"
 				on:click={() =>
 					metadataSelections.update((m) => {
-						m.delete(col);
+						m.delete(hash);
 						return m;
 					})}>cancel</TrailingIcon>
 		</div>

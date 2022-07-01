@@ -23,6 +23,7 @@
 		table,
 	} from "../stores";
 	import { getFilterFromPredicates, getMetrics } from "../util";
+	import { ZenoColumnType } from "../globals";
 
 	let name = "";
 	let newSlice = false;
@@ -48,20 +49,20 @@
 
 		// Filter with metadata selections.
 		[...$metadataSelections.entries()].forEach((e) => {
-			let [name, entry] = e;
+			let [hash, entry] = e;
 			if (entry.type === "range") {
 				tempTable = tempTable.filter(
-					`(r) => r["${name}"] > ${entry.values[0]} && r["${name}"] < ${entry.values[1]}`
+					`(r) => r["${hash}"] > ${entry.values[0]} && r["${hash}"] < ${entry.values[1]}`
 				);
 			} else if (entry.type === "binary") {
 				if (entry.values[0] === "is") {
-					tempTable = tempTable.filter(`(r) => r["${name}"] == 1`);
+					tempTable = tempTable.filter(`(r) => r["${hash}"] == 1`);
 				} else {
-					tempTable = tempTable.filter(`(r) => r["${name}"] == 0`);
+					tempTable = tempTable.filter(`(r) => r["${hash}"] == 0`);
 				}
 			} else {
 				tempTable = tempTable.filter(
-					aq.escape((r) => aq.op.includes(entry.values, r[name], 0))
+					aq.escape((r) => aq.op.includes(entry.values, r[hash], 0))
 				);
 			}
 		});
@@ -76,6 +77,7 @@
 			<Slice>{
 				sliceName: "",
 				filterPredicates: [],
+				transform: "",
 				idxs: tempTable.array($settings.idColumn) as string[],
 			},
 		]);
@@ -176,17 +178,17 @@
 	{/each}
 
 	<h4>Metadata</h4>
-	{#each $settings.metadataColumns.filter((m) => !m.startsWith("zeno")) as name}
-		<MetadataNode {name} col={name} />
+	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.METADATA) as col}
+		<MetadataNode {col} />
 	{/each}
 
 	<h4>Distilled Metadata</h4>
-	{#each $settings.metadataColumns.filter( (m) => m.startsWith("zenopre") ) as name}
-		<MetadataNode name={name.slice(8)} col={name} />
+	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL) as col}
+		<MetadataNode {col} />
 	{/each}
 	{#if $model}
-		{#each $settings.metadataColumns.filter( (m) => m.startsWith("zenopost_" + $model + "_") ) as name}
-			<MetadataNode name={name.slice(10 + $model.length)} col={name} />
+		{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.POSTDISTILL && m.model === $model) as col}
+			<MetadataNode {col} />
 		{/each}
 	{/if}
 

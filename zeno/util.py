@@ -2,6 +2,7 @@ import dataclasses
 import os
 from importlib import util
 from pathlib import Path
+from typing import Tuple
 
 import numpy as np
 
@@ -10,7 +11,7 @@ import pyarrow as pa  # type: ignore
 from tqdm import trange  # type: ignore
 
 from .api import ZenoOptions
-from .classes import DistillFunction, PredictFunction
+from .classes import ZenoColumn, ZenoColumnType, ZenoFunction
 
 
 def get_arrow_bytes(df, id_col):
@@ -24,8 +25,6 @@ def get_arrow_bytes(df, id_col):
         writer.write_table(df_arrow)
     bs = bytes(buf.getvalue())
     return bs
-    # js = df.to_json()
-    # return js
 
 
 def load_series(df, col_name, save_path):
@@ -35,31 +34,32 @@ def load_series(df, col_name, save_path):
         df.loc[:, col_name] = pd.Series([pd.NA] * df.shape[0], index=df.index)
 
 
-def get_function(file_name, function_name):
-    spec = util.spec_from_file_location("module.name", file_name)
+def get_function(fn: ZenoFunction):
+    spec = util.spec_from_file_location("module.name", fn.file_name)
     test_module = util.module_from_spec(spec)  # type: ignore
     spec.loader.exec_module(test_module)  # type: ignore
-    return getattr(test_module, function_name)  # type: ignore
+    return getattr(test_module, fn.name)  # type: ignore
 
 
 def predistill_data(
-    preprocessor: DistillFunction,
+    preprocessor: ZenoFunction,
+    column: ZenoColumn,
     options: ZenoOptions,
     cache_path: str,
     df: pd.DataFrame,
     batch_size: int,
     pos: int,
-):
-    preprocessor_fn = get_function(preprocessor.file_name, preprocessor.name)
-    col_name = "zenopre_" + preprocessor.name
-    col = df[col_name]
+) -> Tuple[ZenoColumn, pd.Series]:
+    fn = get_function(preprocessor)
+    col_hash = columnHash(column)
+    col = df[col_hash]
 
-    save_path = Path(cache_path, col_name + ".pickle")
+    save_path = Path(cache_path, col_hash + ".pickle")
     to_predict_indices = col.loc[pd.isna(col)].index
 
     if len(to_predict_indices) > 0:
         if len(to_predict_indices) < batch_size:
-            out = preprocessor_fn(df.loc[to_predict_indices], options)
+            out = fn(df.loc[to_predict_indices], options)
             col.loc[to_predict_indices] = out
             col.to_pickle(save_path)
         else:
@@ -70,16 +70,98 @@ def predistill_data(
                 desc="preprocessing " + preprocessor.name,
                 position=pos,
             ):
-                out = preprocessor_fn(
-                    df.loc[to_predict_indices[i : i + batch_size]], options
-                )
+                out = fn(df.loc[to_predict_indices[i : i + batch_size]], options)
                 col.loc[to_predict_indices[i : i + batch_size]] = out
                 col.to_pickle(save_path)
-    return (col_name, col)
+    return (column, col)
+
+
+def run_inference(
+    model_loader: ZenoFunction,
+    options: ZenoOptions,
+    model_path: str,
+    cache_path: str,
+    df: pd.DataFrame,
+    batch_size: int,
+    pos: int,
+) -> Tuple[ZenoColumn, ZenoColumn, pd.Series, pd.Series]:
+    model_loader_fn = get_function(model_loader)
+    model_name = os.path.basename(model_path).split(".")[0]
+
+    model_col_obj = ZenoColumn(
+        column_type=ZenoColumnType.OUTPUT,
+        name=model_name,
+        model=model_name,
+        transform="",
+    )
+    embedding_col_obj = ZenoColumn(
+        column_type=ZenoColumnType.EMBEDDING,
+        name=model_name,
+        model=model_name,
+        transform="",
+    )
+    model_hash = columnHash(model_col_obj)
+    embedding_hash = columnHash(embedding_col_obj)
+    model_col = df[model_hash]
+    embedding_col = df[embedding_hash]
+
+    model_save_path = Path(cache_path, model_hash + ".pickle")
+    embedding_save_path = Path(cache_path, embedding_hash + ".pickle")
+
+    to_predict_indices = model_col.loc[pd.isna(model_col)].index
+
+    if len(to_predict_indices) > 0:
+        fn = model_loader_fn(model_path)
+        if len(to_predict_indices) < batch_size:
+            # TODO: check functions to see if they use output_path.
+            file_cache_path = os.path.join(cache_path, model_hash)
+            os.makedirs(file_cache_path, exist_ok=True)
+            out = fn(
+                df.loc[to_predict_indices],
+                dataclasses.replace(options, output_path=file_cache_path),
+            )
+
+            # Check if we also get embedding
+            if type(out) == tuple and len(out) == 2:
+                for i, idx in enumerate(to_predict_indices):
+                    model_col.at[idx] = out[0][i]
+                    embedding_col.at[idx] = out[1][i]
+                embedding_col.to_pickle(embedding_save_path)
+                out = out[0]
+            else:
+                model_col[to_predict_indices] = out
+            model_col.to_pickle(model_save_path)
+        else:
+            for i in trange(
+                0,
+                len(to_predict_indices),
+                batch_size,
+                desc="Inference on " + model_name,
+                position=pos,
+            ):
+                file_cache_path = os.path.join(cache_path, model_hash)
+
+                os.makedirs(file_cache_path, exist_ok=True)
+                out = fn(
+                    df.loc[to_predict_indices[i : i + batch_size]],
+                    dataclasses.replace(options, output_path=file_cache_path),
+                )
+
+                # Check if we also get embedding
+                if type(out) == tuple and len(out) == 2:
+                    for i, idx in enumerate(to_predict_indices[i : i + batch_size]):
+                        model_col.at[idx] = out[0][i]
+                        embedding_col.at[idx] = out[1][i]
+                    embedding_col.to_pickle(embedding_save_path)
+                    out = out[0]
+                else:
+                    model_col[to_predict_indices[i : i + batch_size]] = out
+                model_col.to_pickle(model_save_path)
+    return (model_col_obj, embedding_col_obj, model_col, embedding_col)
 
 
 def postdistill_data(
-    postprocessor: DistillFunction,
+    postprocessor: ZenoFunction,
     model: str,
     options: ZenoOptions,
     cache_path: str,
@@ -87,17 +169,32 @@ def postdistill_data(
     batch_size: int,
     pos: int,
 ):
-    postprocessor_fn = get_function(postprocessor.file_name, postprocessor.name)
-    col_name = "zenopost_" + model + "_" + postprocessor.name
-    col = df[col_name]
-    save_path = Path(cache_path, col_name + ".pickle")
+    postprocessor_fn = get_function(postprocessor)
+    col_obj = ZenoColumn(
+        column_type=ZenoColumnType.POSTDISTILL,
+        name=postprocessor.name,
+        model=model,
+        transform="",
+    )
+    col_hash = columnHash(col_obj)
+    col = df[col_hash]
+
+    output_obj = ZenoColumn(
+        column_type=ZenoColumnType.OUTPUT,
+        name=model,
+        model=model,
+        transform="",
+    )
+    output_hash = columnHash(output_obj)
+
+    save_path = Path(cache_path, col_hash + ".pickle")
 
     to_predict_indices = col.loc[pd.isna(col)].index
 
     local_options = dataclasses.replace(
         options,
-        output_column="zenomodel_" + model,
-        output_path=os.path.join(cache_path, "zenomodel_" + model),
+        output_column=output_hash,
+        output_path=os.path.join(cache_path, output_hash),
     )
     if len(to_predict_indices) > 0:
         if len(to_predict_indices) < batch_size:
@@ -117,86 +214,14 @@ def postdistill_data(
                 )
                 col.loc[to_predict_indices[i : i + batch_size]] = out
                 col.to_pickle(save_path)
-    return (model + "_" + postprocessor.name, col)
+    return (col_obj, col)
 
 
-def run_inference(
-    model_loader: PredictFunction,
-    options: ZenoOptions,
-    model_path: str,
-    cache_path: str,
-    df: pd.DataFrame,
-    batch_size: int,
-    pos: int,
-):
-    model_loader_fn = get_function(model_loader.file_name, model_loader.name)
-    model_name = os.path.basename(model_path).split(".")[0]
-
-    inference_save_path = Path(
-        cache_path,
-        "zenomodel_" + model_name + ".pickle",
+def columnHash(col: ZenoColumn) -> str:
+    if col.column_type == ZenoColumnType.METADATA:
+        return col.name
+    string = (
+        str(int(col.column_type)) + str(col.name) + str(col.model) + str(col.transform)
     )
-    embedding_save_path = Path(
-        cache_path,
-        "zenoembedding_" + model_name + ".pickle",
-    )
-
-    try:
-        inference_col = pd.read_pickle(inference_save_path)
-    except FileNotFoundError:
-        inference_col = pd.Series([pd.NA] * df.shape[0], index=df.index)
-    try:
-        embedding_col = pd.read_pickle(embedding_save_path)
-    except FileNotFoundError:
-        embedding_col = pd.Series([pd.NA] * df.shape[0], index=df.index)
-
-    to_predict_indices = inference_col.loc[pd.isna(inference_col)].index
-
-    if len(to_predict_indices) > 0:
-        fn = model_loader_fn(model_path)
-        if len(to_predict_indices) < batch_size:
-            # TODO: check functions to see if they use output_path.
-            file_cache_path = os.path.join(cache_path, "zenomodel_" + model_name)
-            os.makedirs(file_cache_path, exist_ok=True)
-            out = fn(
-                df.loc[to_predict_indices],
-                dataclasses.replace(options, output_path=file_cache_path),
-            )
-
-            # Check if we also get embedding
-            if type(out) == tuple and len(out) == 2:
-                for i, idx in enumerate(to_predict_indices):
-                    inference_col.at[idx] = out[0][i]
-                    embedding_col.at[idx] = out[1][i]
-                embedding_col.to_pickle(embedding_save_path)
-                out = out[0]
-            else:
-                inference_col[to_predict_indices] = out
-            inference_col.to_pickle(inference_save_path)
-        else:
-            for i in trange(
-                0,
-                len(to_predict_indices),
-                batch_size,
-                desc="Inference on " + model_name,
-                position=pos,
-            ):
-                file_cache_path = os.path.join(cache_path, "zenomodel_" + model_name)
-
-                os.makedirs(file_cache_path, exist_ok=True)
-                out = fn(
-                    df.loc[to_predict_indices[i : i + batch_size]],
-                    dataclasses.replace(options, output_path=file_cache_path),
-                )
-
-                # Check if we also get embedding
-                if type(out) == tuple and len(out) == 2:
-                    for i, idx in enumerate(to_predict_indices[i : i + batch_size]):
-                        inference_col.at[idx] = out[0][i]
-                        embedding_col.at[idx] = out[1][i]
-                    embedding_col.to_pickle(embedding_save_path)
-                    out = out[0]
-                else:
-                    inference_col[to_predict_indices[i : i + batch_size]] = out
-                inference_col.to_pickle(inference_save_path)
-    return (model_name, inference_col, embedding_col)
+    return string
+    # return hashlib.sha1(bytes(string, encoding="utf-8")).hexdigest()

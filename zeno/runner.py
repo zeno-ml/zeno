@@ -11,7 +11,14 @@ from fastapi import FastAPI, WebSocket
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 
-from .classes import ProjectionRequest, ReportsRequest, ResultsRequest, TableRequest
+from .classes import (
+    ProjectionRequest,
+    ReportsRequest,
+    ResultsRequest,
+    StatusResponse,
+    TableRequest,
+    ZenoSettings,
+)
 from .zeno import Zeno
 
 TASK_TYPES = [
@@ -159,21 +166,23 @@ def run_zeno(args):
         name="base",
     )
 
-    @api_app.get("/settings")
+    @api_app.get("/settings", response_model=ZenoSettings)
     def get_settings():
-        return json.dumps(
-            {
-                "task": zeno.task,
-                "idColumn": zeno.id_column,
-                "labelColumn": zeno.label_column,
-                "dataColumn": zeno.data_column,
-                "metadataColumns": zeno.columns,
-            }
+        return ZenoSettings(
+            task=zeno.task,
+            id_column=zeno.id_column,
+            label_column=zeno.label_column,
+            data_column=zeno.data_column,
+            metadata_columns=zeno.columns,
         )
 
     @api_app.get("/metrics")
     def get_metrics():
-        return json.dumps([s.__name__ for s in zeno.metric_functions.values()])
+        return json.dumps(list(zeno.metric_functions.keys()))
+
+    @api_app.get("/transforms")
+    def get_transforms():
+        return json.dumps(list(zeno.transform_functions.keys()))
 
     @api_app.get("/models")
     def get_models():
@@ -217,11 +226,11 @@ def run_zeno(args):
             if zeno.status != previous_status:
                 previous_status = zeno.status
                 await websocket.send_json(
-                    {
-                        "status": zeno.status,
-                        "doneProcessing": zeno.done_processing,
-                        "completeColumns": list(zeno.complete_columns),
-                    }
+                    StatusResponse(
+                        status=zeno.status,
+                        done_processing=zeno.done_processing,
+                        complete_columns=zeno.complete_columns,
+                    ).json(by_alias=True)
                 )
 
     uvicorn.run(app, host="localhost", port=args["port"])  # type: ignore

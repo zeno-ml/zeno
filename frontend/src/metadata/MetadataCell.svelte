@@ -9,9 +9,10 @@
 
 	import { countSpec, histogramSpec } from "./vegaSpecs";
 	import { metadataSelections, table } from "../stores";
+	import { columnHash } from "../util";
 
-	export let name;
-	export let col;
+	export let col: ZenoColumn;
+	$: hash = columnHash(col);
 
 	enum ChartType {
 		Count,
@@ -29,24 +30,24 @@
 	function updateData(table: ColumnTable) {
 		if (
 			(chartType === ChartType.Count || chartType === ChartType.Histogram) &&
-			table.column(col)
+			table.column(hash)
 		) {
-			let arr = table.array(col);
+			let arr = table.array(hash);
 			data = { table: arr };
 		}
 	}
 
 	table.subscribe((t) => {
-		if (t.column(col)) {
-			let isOrdinal = isNaN(Number(t.column(col).get(0)));
+		if (t.column(hash)) {
+			let isOrdinal = isNaN(Number(t.column(hash).get(0)));
 			let unique = t
-				.rollup({ unique: `d => op.distinct(d["${col}"])` })
+				.rollup({ unique: `d => op.distinct(d["${hash}"])` })
 				.object()["unique"];
 
 			if (!isOrdinal && unique === 2) {
 				let vals = t
-					.orderby(col)
-					.rollup({ a: `d => op.array_agg_distinct(d["${col}"])` })
+					.orderby(hash)
+					.rollup({ a: `d => op.array_agg_distinct(d["${hash}"])` })
 					.object()["a"];
 				if (Number(vals[0]) === 0 && Number(vals[1]) === 1) {
 					chartType = ChartType.Binary;
@@ -61,12 +62,11 @@
 
 	$: {
 		col;
-		name;
 		updateData($table);
 	}
 
 	metadataSelections.subscribe((m) => {
-		if (!m.has(col) && view) {
+		if (!m.has(hash) && view) {
 			if (view.getState().signals["brush_data"]) {
 				view.signal("brush", {});
 				view.signal("brush_data", {});
@@ -109,11 +109,11 @@
 		finalSelection = selection;
 		metadataSelections.update((m) => {
 			if (!finalSelection) {
-				m.delete(col);
+				m.delete(hash);
 				return m;
 			}
-			m.set(col, {
-				name: name,
+			m.set(hash, {
+				column: col,
 				type: finalSelection[0],
 				values: finalSelection.slice(1),
 			});
@@ -124,7 +124,7 @@
 
 <div class="cell">
 	<div id="info">
-		<span>{name}</span>
+		<span>{col.name}</span>
 		{#if chartType === ChartType.Binary}
 			<div style:display="flex">
 				<div class="binary-button">
@@ -139,7 +139,7 @@
 						}}>
 						<Label>Is</Label>
 					</Button>
-					{$table.filter(`d => d["${col}"] == 1`).count().object()["count"]}
+					{$table.filter(`d => d["${hash}"] == 1`).count().object()["count"]}
 				</div>
 				<div class="binary-button">
 					<Button
@@ -153,7 +153,7 @@
 						}}>
 						<Label>Is Not</Label>
 					</Button>
-					{$table.filter(`d => d["${col}"] == 0`).count().object()["count"]}
+					{$table.filter(`d => d["${hash}"] == 0`).count().object()["count"]}
 				</div>
 			</div>
 		{/if}
@@ -163,10 +163,10 @@
 				{selection ? selection[2].toFixed(2) : ""}
 			</span>
 		{/if}
-		{#if $table.column(col) && chartType === ChartType.Other}
+		{#if $table.column(hash) && chartType === ChartType.Other}
 			<span style:margin-right="5px">
 				unique values: {$table
-					.rollup({ unique: `d => op.distinct(d["${col}"])` })
+					.rollup({ unique: `d => op.distinct(d["${hash}"])` })
 					.object()["unique"]}
 			</span>
 		{/if}

@@ -1,10 +1,9 @@
+import { ZenoColumnType } from "./globals";
 import * as aq from "arquero";
 import { get } from "svelte/store";
-import { recentResultHash, tab } from "./stores";
+import { recentResultHash, tab, transforms } from "./stores";
 
 import {
-	currentColumns,
-	formattedCurrentColumns,
 	metrics,
 	models,
 	ready,
@@ -18,15 +17,25 @@ import {
 export function initialFetch() {
 	const fetchSettings = fetch("/api/settings")
 		.then((r) => r.json())
-		.then((s) => settings.set(JSON.parse(s)));
+		.then((s) => {
+			settings.set(s);
+		});
 	const fetchModels = fetch("/api/models")
 		.then((d) => d.json())
 		.then((d) => models.set(JSON.parse(d)));
 	const fetchMetrics = fetch("/api/metrics")
 		.then((d) => d.json())
 		.then((d) => metrics.set(JSON.parse(d)));
+	const fetchTransforms = fetch("/api/transforms")
+		.then((d) => d.json())
+		.then((d) => transforms.set(JSON.parse(d)));
 
-	const allRequests = Promise.all([fetchSettings, fetchModels, fetchMetrics]);
+	const allRequests = Promise.all([
+		fetchSettings,
+		fetchModels,
+		fetchMetrics,
+		fetchTransforms,
+	]);
 
 	allRequests.then(() => ready.set(true));
 }
@@ -45,7 +54,6 @@ export async function getSlicesAndReports(t) {
 	slis.forEach((e) => sliMap.set(e.sliceName, e));
 	slices.set(sliMap);
 
-	// todo: get reports
 	const reportsRes = await fetch("/api/reports").then((d) => d.json());
 	const localReports = JSON.parse(reportsRes) as Report[];
 	reports.set(localReports);
@@ -103,26 +111,17 @@ export function getFilterFromPredicates(predicates: FilterPredicate[]) {
 
 		let ret = "";
 
-		if (p.predicateType === "slice") {
-			ret = getFilterFromPredicates(get(slices).get(p.name).filterPredicates);
-			if (p.operation === "IS IN") {
-				return ret;
-			} else {
-				return `!(${ret})`;
-			}
-		}
-
 		if (p.groupIndicator === "start" && join) {
 			ret += "&& (";
 		} else if (p.groupIndicator === "start") {
 			ret += "(";
 		}
 
+		const hash = columnHash(p.column);
+
 		if (join === "") {
 			ret +=
-				`(d["${
-					get(currentColumns)[get(formattedCurrentColumns).indexOf(p.name)]
-				}"]` +
+				`(d["${hash}"]` +
 				" " +
 				p.operation +
 				" " +
@@ -132,9 +131,7 @@ export function getFilterFromPredicates(predicates: FilterPredicate[]) {
 			ret +=
 				(join === "AND" ? "&&" : "||") +
 				" (" +
-				`d["${
-					get(currentColumns)[get(formattedCurrentColumns).indexOf(p.name)]
-				}"]` +
+				`d["${hash}"]` +
 				" " +
 				p.operation +
 				" " +
@@ -157,7 +154,7 @@ export function updateTableColumns(w: WSResponse) {
 
 	const tableColumns = t.columnNames();
 	const missingColumns = w.completeColumns.filter(
-		(c) => !tableColumns.includes(c)
+		(c) => !tableColumns.includes(columnHash(c))
 	);
 
 	if (missingColumns.length > 0) {
@@ -193,4 +190,11 @@ export function updateReports(reps) {
 		},
 		body: JSON.stringify({ reports: reps }),
 	}).then((d: Response) => d.json());
+}
+
+export function columnHash(col: ZenoColumn) {
+	if (col.columnType === ZenoColumnType.METADATA) {
+		return col.name;
+	}
+	return col.columnType + col.name + col.model + col.transform;
 }

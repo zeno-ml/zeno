@@ -97,6 +97,7 @@
 										sliceName: sli.sliceName,
 										metric: "",
 										operation: "",
+										transform: "",
 										value: "0",
 									});
 								} else {

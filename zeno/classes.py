@@ -1,3 +1,4 @@
+from enum import IntEnum
 from pathlib import Path
 from typing import List, Optional
 
@@ -9,29 +10,30 @@ def to_camel(string):
     return components[0] + "".join(x.title() for x in components[1:])
 
 
-class DistillFunction:
-    def __init__(self, name: str, file_name: Path, fn_type: str):
-        self.name = name
-        self.file_name = file_name
-        # Either "pre" or "post" if needs to run with output or not.
-        self.fn_type = fn_type
-
-
-class PredictFunction:
-    def __init__(self, name: str, file_name: Path):
-        self.name = name
-        self.file_name = file_name
-
-
 class CamelModel(BaseModel):
     class Config:
         alias_generator = to_camel
         allow_population_by_field_name = True
 
 
+class ZenoColumnType(IntEnum):
+    METADATA = 0
+    PREDISTILL = 1
+    OUTPUT = 2
+    EMBEDDING = 3
+    POSTDISTILL = 4
+
+
+class ZenoFunctionType(IntEnum):
+    PREDICTION = 0
+    PREDISTILL = 1
+    POSTDISTILL = 2
+    TRANSFORM = 3
+    METRIC = 4
+
+
 class FilterPredicate(CamelModel):
-    name: str
-    predicate_type: str
+    column: str
     operation: str
     value: str
     join: str
@@ -41,12 +43,14 @@ class FilterPredicate(CamelModel):
 class Slice(CamelModel):
     slice_name: str
     filter_predicates: List[FilterPredicate]
+    transform: str
     idxs: Optional[List[str]]
 
 
 class ReportPredicate(CamelModel):
     slice_name: str
     metric: str
+    transform: str
     operation: str
     value: str
 
@@ -69,5 +73,32 @@ class ProjectionRequest(BaseModel):
     instance_ids: List[str]
 
 
+class ZenoFunction(CamelModel):
+    name: str
+    file_name: Path
+    fn_type: ZenoFunctionType
+
+
+class ZenoColumn(CamelModel):
+    column_type: ZenoColumnType
+    name: str
+    model: str
+    transform: str
+
+
+class ZenoSettings(CamelModel):
+    task: str
+    id_column: str
+    label_column: str
+    data_column: str
+    metadata_columns: List[ZenoColumn]
+
+
+class StatusResponse(CamelModel):
+    status: str
+    done_processing: bool
+    complete_columns: List[ZenoColumn]
+
+
 class TableRequest(BaseModel):
-    columns: List[str]
+    columns: List[ZenoColumn]

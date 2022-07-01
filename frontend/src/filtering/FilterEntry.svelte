@@ -7,19 +7,13 @@
 	import HelperText from "@smui/textfield/helper-text";
 	import { mdiTrashCanOutline } from "@mdi/js";
 
-	import { formattedCurrentColumns, slices } from "../stores";
+	import { currentColumns } from "../stores";
 
 	export let predicate: FilterPredicate;
 	export let deletePredicate: () => void;
 	export let first;
 
 	let operations = ["==", "!=", ">", "<", ">=", "<="];
-
-	$: if (!predicate.name || $formattedCurrentColumns.includes(predicate.name)) {
-		predicate.predicateType = "metadata";
-	} else {
-		predicate.predicateType = "slice";
-	}
 </script>
 
 <div id="group">
@@ -35,40 +29,29 @@
 			{/each}
 		</Select>
 	{/if}
-	{#if predicate.predicateType === "slice"}
+	<div class="selector">
+		<Autocomplete
+			options={$currentColumns}
+			getOptionLabel={(option) => (option ? option.name : "")}
+			bind:value={predicate.column}
+			label="Metadata or Slice" />
+	</div>
+	<div class="selector">
 		<Select
 			bind:value={predicate.operation}
 			label="Operation"
 			style="margin-right: 20px;">
-			{#each ["IS IN", "IS NOT IN"] as o}
+			{#each operations as o}
 				<Option value={o}>{o}</Option>
 			{/each}
 		</Select>
-	{/if}
-	<div class="selector">
-		<Autocomplete
-			options={[...$formattedCurrentColumns, ...$slices.keys()]}
-			bind:value={predicate.name}
-			label="Metadata or Slice" />
 	</div>
-	{#if predicate.predicateType === "metadata"}
-		<div class="selector">
-			<Select
-				bind:value={predicate.operation}
-				label="Operation"
-				style="margin-right: 20px;">
-				{#each operations as o}
-					<Option value={o}>{o}</Option>
-				{/each}
-			</Select>
-		</div>
 
-		<div class="selector">
-			<Textfield bind:value={predicate.value} label="Value">
-				<HelperText slot="helper">0</HelperText>
-			</Textfield>
-		</div>
-	{/if}
+	<div class="selector">
+		<Textfield bind:value={predicate.value} label="Value">
+			<HelperText slot="helper">0</HelperText>
+		</Textfield>
+	</div>
 	<div class="selector">
 		<IconButton on:click={deletePredicate}>
 			<Icon component={Svg} viewBox="0 0 24 24">

@@ -1,12 +1,7 @@
 <script lang="ts">
 	import Select, { Option } from "@smui/select";
 
-	import {
-		filteredTable,
-		currentColumns,
-		formattedCurrentColumns,
-		sort,
-	} from "../stores";
+	import { filteredTable, currentColumns, sort } from "../stores";
 
 	import Settings from "../Settings.svelte";
 	import SelectionBar from "../metadata/SelectionBar.svelte";
@@ -28,8 +23,8 @@
 	<div id="selects">
 		<div class="select-div">
 			<Select bind:value={$sort} label="Sort By">
-				{#each $currentColumns as m, i}
-					<Option value={m}>{$formattedCurrentColumns[i]}</Option>
+				{#each $currentColumns as m}
+					<Option value={m}>{m.name}</Option>
 				{/each}
 			</Select>
 		</div>

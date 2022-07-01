@@ -5,32 +5,31 @@ interface Settings {
 	idColumn: string;
 	labelColumn: string;
 	dataColumn: string;
-	metadataColumns: string[];
+	metadataColumns: ZenoColumn[];
 }
 
 interface WSResponse {
 	status: string;
 	doneProcessing: boolean;
-	completeColumns: string[];
+	completeColumns: ZenoColumn[];
 }
 
 interface ResultKey {
 	// A JS query string, combination of metadata and slices.
 	slice: string;
 	metric: string;
+	transform: string;
 	model: string;
 }
 
 interface MetadataSelection {
-	name: string;
+	column: ZenoColumn;
 	type: string;
 	values: Array;
 }
 
 interface FilterPredicate {
-	name: string;
-	// 'metadata' or 'slice'
-	predicateType: string;
+	column: ZenoColumn;
 	operation: string;
 	value: string;
 	join: string;
@@ -41,12 +40,14 @@ interface FilterPredicate {
 interface Slice {
 	sliceName: string;
 	filterPredicates: FilterPredicate[];
+	transform: string;
 	idxs?: string[];
 }
 
 interface ReportPredicate {
 	sliceName: string;
 	metric: string;
+	transform: string;
 	operation: string;
 	value: string;
 }
@@ -54,6 +55,13 @@ interface ReportPredicate {
 interface Report {
 	name: string;
 	reportPredicates: ReportPredicate[];
+}
+
+interface ZenoColumn {
+	columnType: ZenoColumnType;
+	name: string;
+	model: string;
+	transform: string;
 }
 
 declare namespace svelte.JSX {

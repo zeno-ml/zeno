@@ -32,15 +32,13 @@
 			// TODO: support slice selections
 			if (entry.type === "range") {
 				predicates.push({
-					name: entry.name,
-					predicateType: "metadata",
+					column: entry.column,
 					operation: ">=",
 					value: entry.values[0],
 					join: "AND",
 				});
 				predicates.push({
-					name: entry.name,
-					predicateType: "metadata",
+					column: entry.column,
 					operation: "<=",
 					value: entry.values[1],
 					join: "AND",
@@ -48,8 +46,7 @@
 			} else if (entry.type === "binary") {
 				let val = entry.values[0] === "is" ? "1" : "0";
 				predicates.push({
-					name: entry.name,
-					predicateType: "metadata",
+					column: entry.column,
 					operation: "==",
 					value: val,
 					join: "AND",
@@ -57,8 +54,7 @@
 			} else {
 				if (entry.values.length === 1) {
 					predicates.push({
-						name: entry.name,
-						predicateType: "metadata",
+						column: entry.column,
 						operation: "==",
 						value: entry.values[0],
 						join: "AND",
@@ -75,8 +71,7 @@
 							indicator = "end";
 						}
 						predicates.push({
-							name: entry.name,
-							predicateType: "metadata",
+							column: entry.column,
 							operation: "==",
 							value: v,
 							join: "OR",
@@ -88,8 +83,7 @@
 		});
 	} else if (predicates.length === 0) {
 		predicates.push({
-			name: "",
-			predicateType: "metadata",
+			column: undefined,
 			operation: "",
 			value: "",
 			join: "",
@@ -114,6 +108,7 @@
 			<Slice>{
 				sliceName: name,
 				filterPredicates: predicates,
+				transform: "",
 				idxs: tempTable.array($settings.idColumn) as string[],
 			},
 		]);
