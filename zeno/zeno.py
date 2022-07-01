@@ -84,6 +84,7 @@ class Zeno(object):
         self.distill_functions: List[DistillFunction] = []
         # Key is name of metric function
         self.metric_functions: Dict[str, Callable] = {}
+        self.transform_functions: Dict[str, Callable] = {}
 
         # Read metadata as Pandas for slicing
         if metadata_path.suffix == ".csv":
@@ -177,6 +178,8 @@ class Zeno(object):
                     self.distill_functions.append(
                         DistillFunction(func_name, test_file, fn_type)
                     )
+                if hasattr(func, "transform_function"):
+                    self.transform_functions[func_name] = func
                 if hasattr(func, "metric_function"):
                     self.metric_functions[func_name] = func
 

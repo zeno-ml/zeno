@@ -74,3 +74,5 @@ export const formattedCurrentColumns: Readable<string[]> = derived(
 );
 
 export const sort: Writable<string> = writable("");
+
+export const recentResultHash: Writable<string> = writable("0");

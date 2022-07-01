@@ -45,6 +45,15 @@ def distill_function(func):
     return _wrapper
 
 
+def transform_function(func):
+    @functools.wraps(func)
+    def _wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    _wrapper.transform_function = True
+    return _wrapper
+
+
 def metric_function(func):
     @functools.wraps(func)
     def _wrapper(*args, **kwargs):

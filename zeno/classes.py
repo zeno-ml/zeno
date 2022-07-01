@@ -13,6 +13,7 @@ class DistillFunction:
     def __init__(self, name: str, file_name: Path, fn_type: str):
         self.name = name
         self.file_name = file_name
+        # Either "pre" or "post" if needs to run with output or not.
         self.fn_type = fn_type
 
 

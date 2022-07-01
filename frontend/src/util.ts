@@ -1,6 +1,6 @@
 import * as aq from "arquero";
 import { get } from "svelte/store";
-import { tab } from "./stores";
+import { recentResultHash, tab } from "./stores";
 
 import {
 	currentColumns,
@@ -61,6 +61,9 @@ export function updateTab(t: string) {
 }
 
 export function getMetrics(slices: Slice[]) {
+	// Resolve race condition where some results return after more recent requests.
+	const thisHash = Math.random().toFixed(10);
+	recentResultHash.set(thisHash);
 	fetch("/api/results", {
 		method: "POST",
 		headers: {
@@ -70,6 +73,9 @@ export function getMetrics(slices: Slice[]) {
 	})
 		.then((d) => d.json())
 		.then((res) => {
+			if (thisHash !== get(recentResultHash)) {
+				return;
+			}
 			res = JSON.parse(res);
 			results.update((resmap) => {
 				res.forEach((r) => {
@@ -180,7 +186,6 @@ export function updateTableColumns(w: WSResponse) {
 }
 
 export function updateReports(reps) {
-	console.log(reps);
 	fetch("/api/update-reports", {
 		method: "POST",
 		headers: {

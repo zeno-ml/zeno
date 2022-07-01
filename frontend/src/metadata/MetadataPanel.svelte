@@ -1,25 +1,28 @@
 <script lang="ts">
-	import Button from "@smui/button";
+	import Button, { Icon } from "@smui/button";
+	import { Svg } from "@smui/common/elements";
 	import * as aq from "arquero";
 	import type ColumnTable from "arquero/dist/types/table/column-table";
 
+	import { mdiTableMultiple } from "@mdi/js";
+	import Ripple from "@smui/ripple";
 	import CreateSlice from "../filtering/CreateSlice.svelte";
 	import MetadataNode from "./MetadataCell.svelte";
 	import SliceNode from "./SliceCell.svelte";
 
-	import { getFilterFromPredicates, getMetrics } from "../util";
 	import { clickOutside } from "../clickOutside";
 	import {
+		filteredTable,
 		metadataSelections,
-		sliceSelections,
 		model,
+		ready,
 		settings,
 		slices,
-		table,
-		filteredTable,
-		ready,
+		sliceSelections,
 		sort,
+		table,
 	} from "../stores";
+	import { getFilterFromPredicates, getMetrics } from "../util";
 
 	let name = "";
 	let newSlice = false;
@@ -87,6 +90,26 @@
 </script>
 
 <div class="side-container">
+	<div
+		use:Ripple={{ surface: true, color: "primary" }}
+		class={"overview " +
+			($sliceSelections.length + $metadataSelections.size === 0
+				? "selected"
+				: "")}
+		on:click={() => {
+			sliceSelections.set([]);
+			metadataSelections.set(new Map());
+		}}>
+		<div class="inline">
+			<div class="icon">
+				<Icon component={Svg} viewBox="0 0 24 24">
+					<path fill="currentColor" d={mdiTableMultiple} />
+				</Icon>
+			</div>
+			<p>all instances</p>
+		</div>
+		<p>{$table.size}</p>
+	</div>
 	<div class="inline">
 		<h4>Slices</h4>
 		<div style:margin-right="13px">
@@ -185,5 +208,23 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+	}
+	.icon {
+		width: 24px;
+		height: 24px;
+		margin-right: 10px;
+	}
+	.overview {
+		display: flex;
+		align-items: center;
+		border-bottom: 0.5px solid rgb(224, 224, 224);
+		border-top: 0.5px solid rgb(224, 224, 224);
+		padding-left: 10px;
+		justify-content: space-between;
+		padding-right: 10px;
+		margin-right: 10px;
+	}
+	.selected {
+		background: #ebdffc;
 	}
 </style>
