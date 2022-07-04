@@ -31,7 +31,7 @@
     "@smui/tooltip": "^6.0.0-beta.16",
     "@sveltejs/vite-plugin-svelte": "^1.0.0-next.30",
     "@tsconfig/svelte": "^2.0.1",
-    "@typescript-eslint/eslint-plugin": "^5.30.0",
+    "@typescript-eslint/eslint-plugin": "^5.30.5",
     "eslint": "^8.18.0",
     "eslint-plugin-svelte3": "^4.0.0",
     "prettier": "^2.7.1",
