@@ -45,7 +45,7 @@
     "vite": "^2.9.13"
   },
   "dependencies": {
-    "@mdi/js": "^6.7.96",
+    "@mdi/js": "^6.9.96",
     "apache-arrow": "7.0.0",
     "arquero": "^5.0.0",
     "d3-array": "^3.1.6",
