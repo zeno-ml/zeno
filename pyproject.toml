@@ -28,7 +28,7 @@ tqdm = "^4.64.0"
 tomli = "^2.0.1"
 
 [tool.poetry.dev-dependencies]
-pandas-stubs = "^1.2.0"
+pandas-stubs = "^1.4.3"
 pytest = "^7.1.1"
 pytest-cov = "^3.0"
 torch = "^1.12.0"
