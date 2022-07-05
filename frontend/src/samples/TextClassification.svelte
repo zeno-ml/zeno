@@ -1,15 +1,17 @@
 <script lang="ts">
 	import Tooltip, { Wrapper } from "@smui/tooltip";
-	import { settings } from "../stores";
 
 	export let table;
-	export let modelCol;
+	export let modelColumn;
+	export let labelColumn;
+	export let dataColumn;
+	export let idColumn;
 </script>
 
 {#each table as row}
 	<div class="box">
 		<Wrapper>
-			<span>{row[$settings.dataColumn]}</span>
+			<span>{row[dataColumn]}</span>
 			<Tooltip>
 				{#each Object.keys(row).filter((r) => !r.startsWith("zeno")) as key}
 					{key} : {row[key]}
@@ -19,12 +21,12 @@
 		</Wrapper>
 		<br />
 		<span class="label">label: </span><span class="value">
-			{row[$settings.labelColumn]}
+			{row[labelColumn]}
 		</span>
-		{#if modelCol && row[modelCol]}
+		{#if modelColumn && row[modelColumn]}
 			<br />
 			<span class="label">pred: </span>
-			<span class="value">{row[modelCol]} </span>
+			<span class="value">{row[modelColumn]} </span>
 		{/if}
 	</div>
 {/each}

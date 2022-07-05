@@ -2,9 +2,9 @@
 
 interface Settings {
 	task: string;
-	idColumn: string;
-	labelColumn: string;
-	dataColumn: string;
+	idColumn: ZenoColumn;
+	labelColumn: ZenoColumn;
+	dataColumn: ZenoColumn;
 	metadataColumns: ZenoColumn[];
 }
 

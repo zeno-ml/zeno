@@ -13,7 +13,7 @@
 		metadataSelections,
 		table,
 	} from "../stores";
-	import { getFilterFromPredicates, getMetrics } from "../util";
+	import { getFilterFromPredicates, getMetrics, columnHash } from "../util";
 
 	import FilterEntry from "./FilterEntry.svelte";
 	import { onMount } from "svelte";
@@ -34,13 +34,13 @@
 				predicates.push({
 					column: entry.column,
 					operation: ">=",
-					value: entry.values[0],
+					value: "" + entry.values[0],
 					join: "AND",
 				});
 				predicates.push({
 					column: entry.column,
 					operation: "<=",
-					value: entry.values[1],
+					value: "" + entry.values[1],
 					join: "AND",
 				});
 			} else if (entry.type === "binary") {
@@ -56,12 +56,12 @@
 					predicates.push({
 						column: entry.column,
 						operation: "==",
-						value: entry.values[0],
+						value: "" + entry.values[0],
 						join: "AND",
 					});
 				} else {
 					entry.values.forEach((v, j) => {
-						let indicator = undefined;
+						let indicator = "";
 						if (entry.values.length > 1 && j === 0) {
 							indicator = "start";
 						} else if (
@@ -73,7 +73,7 @@
 						predicates.push({
 							column: entry.column,
 							operation: "==",
-							value: v,
+							value: "" + v,
 							join: "OR",
 							groupIndicator: indicator,
 						});
@@ -109,7 +109,7 @@
 				sliceName: name,
 				filterPredicates: predicates,
 				transform: "",
-				idxs: tempTable.array($settings.idColumn) as string[],
+				idxs: tempTable.array(columnHash($settings.idColumn)) as string[],
 			},
 		]);
 
@@ -117,6 +117,7 @@
 			s.set(name, <Slice>{
 				sliceName: name,
 				filterPredicates: predicates,
+				transform: "",
 			});
 			return s;
 		});
@@ -154,8 +155,7 @@
 				class="add"
 				on:click={() => {
 					predicates.push({
-						name: "",
-						predicateType: "metadata",
+						column: undefined,
 						operation: "",
 						value: "",
 						join: "AND",

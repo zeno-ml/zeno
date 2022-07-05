@@ -1,14 +1,16 @@
 <script lang="ts">
 	import WaveSurfer from "wavesurfer.js";
 
-	import Tooltip, { Wrapper } from "@smui/tooltip";
-	import { settings } from "../stores";
+	import { mdiPause, mdiPlay } from "@mdi/js";
 	import { Svg } from "@smui/common/elements";
 	import IconButton, { Icon } from "@smui/icon-button";
-	import { mdiPlay, mdiPause } from "@mdi/js";
+	import Tooltip, { Wrapper } from "@smui/tooltip";
 
 	export let table;
-	export let modelCol;
+	export let modelColumn;
+	export let labelColumn;
+	export let dataColumn;
+	export let idColumn;
 
 	let divs = [];
 
@@ -22,7 +24,7 @@
 				mediaControls: true,
 				height: 50,
 			});
-			w.load(`/data/${table[i][$settings.idColumn]}`);
+			w.load(`/data/${table[i][idColumn]}`);
 			return w;
 		}
 	});
@@ -46,7 +48,7 @@
 					style:width="150px"
 					style:height="50px"
 					bind:this={divs[i]}
-					id={"wave_" + row[$settings.idColumn]} />
+					id={"wave_" + row[idColumn]} />
 			</div>
 			<Tooltip>
 				{#each Object.keys(row).filter((r) => !r.startsWith("zeno")) as key}
@@ -57,12 +59,12 @@
 		</Wrapper>
 		<br />
 		<span class="label">label: </span><span class="value">
-			{row[$settings.labelColumn]}
+			{row[idColumn]}
 		</span>
-		{#if modelCol && row[modelCol]}
+		{#if modelColumn && row[modelColumn]}
 			<br />
 			<span class="label">pred: </span>
-			<span class="value">{row[modelCol]} </span>
+			<span class="value">{row[modelColumn]} </span>
 		{/if}
 	</div>
 {/each}

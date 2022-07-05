@@ -32,21 +32,6 @@ class ZenoFunctionType(IntEnum):
     METRIC = 4
 
 
-class FilterPredicate(CamelModel):
-    column: str
-    operation: str
-    value: str
-    join: str
-    group_indicator: Optional[str]
-
-
-class Slice(CamelModel):
-    slice_name: str
-    filter_predicates: List[FilterPredicate]
-    transform: str
-    idxs: Optional[List[str]]
-
-
 class ReportPredicate(CamelModel):
     slice_name: str
     metric: str
@@ -60,6 +45,61 @@ class Report(CamelModel):
     report_predicates: List[ReportPredicate]
 
 
+class ZenoFunction(CamelModel):
+    name: str
+    file_name: Path
+    fn_type: ZenoFunctionType
+
+
+class ZenoColumn(CamelModel):
+    column_type: ZenoColumnType
+    name: str
+    model: Optional[str] = ""
+    transform: Optional[str] = ""
+
+    def __str__(self):
+        m = ""
+        t = ""
+        if self.model is not None:
+            m = self.model
+        if self.transform is not None:
+            t = self.transform
+        return str(int(self.column_type)) + self.name + m + t
+
+
+class FilterPredicate(CamelModel):
+    column: ZenoColumn
+    operation: str
+    value: str
+    join: str
+    group_indicator: Optional[str]
+
+
+class ZenoSettings(CamelModel):
+    task: str
+    id_column: ZenoColumn
+    label_column: ZenoColumn
+    data_column: ZenoColumn
+    metadata_columns: List[ZenoColumn]
+
+
+class Slice(CamelModel):
+    slice_name: str
+    filter_predicates: List[FilterPredicate]
+    transform: str
+    idxs: Optional[List[str]]
+
+
+class StatusResponse(CamelModel):
+    status: str
+    done_processing: bool
+    complete_columns: List[ZenoColumn]
+
+
+class TableRequest(BaseModel):
+    columns: List[ZenoColumn]
+
+
 class ReportsRequest(CamelModel):
     reports: List[Report]
 
@@ -71,34 +111,3 @@ class ResultsRequest(BaseModel):
 class ProjectionRequest(BaseModel):
     model: str
     instance_ids: List[str]
-
-
-class ZenoFunction(CamelModel):
-    name: str
-    file_name: Path
-    fn_type: ZenoFunctionType
-
-
-class ZenoColumn(CamelModel):
-    column_type: ZenoColumnType
-    name: str
-    model: str
-    transform: str
-
-
-class ZenoSettings(CamelModel):
-    task: str
-    id_column: str
-    label_column: str
-    data_column: str
-    metadata_columns: List[ZenoColumn]
-
-
-class StatusResponse(CamelModel):
-    status: str
-    done_processing: bool
-    complete_columns: List[ZenoColumn]
-
-
-class TableRequest(BaseModel):
-    columns: List[ZenoColumn]

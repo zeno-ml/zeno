@@ -21,8 +21,10 @@
 		sliceSelections,
 		sort,
 		table,
+		metric,
+		results,
 	} from "../stores";
-	import { getFilterFromPredicates, getMetrics } from "../util";
+	import { getFilterFromPredicates, getMetrics, columnHash } from "../util";
 	import { ZenoColumnType } from "../globals";
 
 	let name = "";
@@ -78,7 +80,7 @@
 				sliceName: "",
 				filterPredicates: [],
 				transform: "",
-				idxs: tempTable.array($settings.idColumn) as string[],
+				idxs: tempTable.array(columnHash($settings.idColumn)) as string[],
 			},
 		]);
 	}
@@ -137,10 +139,15 @@
 		</div>
 	{/if}
 
-	{#each [...$slices.values()] as s, i}
+	{#each [...$slices.values()] as s}
+		{@const result = $results.get({
+			slice: s.sliceName,
+			metric: $metric,
+			model: $model,
+		})}
 		<SliceNode
-			name={s.sliceName}
-			fullName={s.sliceName}
+			slice={s}
+			{result}
 			{editSlice}
 			selected={$sliceSelections.includes(s.sliceName)}
 			setSelected={(e) => {

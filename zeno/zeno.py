@@ -27,7 +27,6 @@ from .classes import (
     ZenoFunctionType,
 )
 from .util import (
-    columnHash,
     get_arrow_bytes,
     get_function,
     load_series,
@@ -57,17 +56,21 @@ class Zeno(object):
         self.task = task
         self.tests = tests
         self.batch_size = batch_size
-        self.id_column = id_column
-        self.data_column = data_column
-        self.label_column = label_column
+        self.id_column = ZenoColumn(column_type=ZenoColumnType.METADATA, name=id_column)
+        self.data_column = ZenoColumn(
+            column_type=ZenoColumnType.METADATA, name=data_column
+        )
+        self.label_column = ZenoColumn(
+            column_type=ZenoColumnType.METADATA, name=label_column
+        )
         self.data_path = data_path
         self.label_path = label_path
 
         # Options passed to Zeno functions.
         self.zeno_options = ZenoOptions(
-            id_column=self.id_column,
-            data_column=self.data_column,
-            label_column=self.label_column,
+            id_column=str(self.id_column),
+            data_column=str(self.data_column),
+            label_column=str(self.label_column),
             data_path=self.data_path,
             label_path=self.label_path,
             output_column="",
@@ -123,9 +126,10 @@ class Zeno(object):
         except FileNotFoundError:
             pass
 
-        self.df[id_column].astype(str)
-        self.df.set_index(self.id_column, inplace=True)
-        self.df[id_column] = self.df.index
+        self.df = self.df.rename(columns=lambda x: "0" + str(x))
+        self.df[str(self.id_column)].astype(str)
+        self.df.set_index(str(self.id_column), inplace=True)
+        self.df[str(self.id_column)] = self.df.index
 
         self.columns: List[ZenoColumn] = []
         self.complete_columns: List[ZenoColumn] = []
@@ -142,24 +146,14 @@ class Zeno(object):
         # Get all Zeno core columns before processing.
         zeno_cols: List[ZenoColumn] = []
         for metadata_col in self.df.columns:
-            col = ZenoColumn(
-                column_type=ZenoColumnType.METADATA,
-                name=metadata_col,
-                model="",
-                transform="",
-            )
+            col = ZenoColumn(column_type=ZenoColumnType.METADATA, name=metadata_col[1:])
             zeno_cols.append(col)
             self.complete_columns.append(col)
 
         for fn in self.distill_functions.values():
             if fn.fn_type == ZenoFunctionType.PREDISTILL:
                 zeno_cols.append(
-                    ZenoColumn(
-                        column_type=ZenoColumnType.PREDISTILL,
-                        name=fn.name,
-                        model="",
-                        transform="",
-                    )
+                    ZenoColumn(column_type=ZenoColumnType.PREDISTILL, name=fn.name)
                 )
             else:
                 for m in self.model_names:
@@ -168,7 +162,6 @@ class Zeno(object):
                             column_type=ZenoColumnType.POSTDISTILL,
                             name=fn.name,
                             model=m,
-                            transform="",
                         )
                     )
 
@@ -227,11 +220,11 @@ class Zeno(object):
         for predistill_column in [
             c for c in self.columns if c.column_type == ZenoColumnType.PREDISTILL
         ]:
-            save_path = Path(self.cache_path, columnHash(predistill_column) + ".pickle")
+            save_path = Path(self.cache_path, str(predistill_column) + ".pickle")
 
-            load_series(self.df, columnHash(predistill_column), save_path)
+            load_series(self.df, str(predistill_column), save_path)
 
-            if self.df[columnHash(predistill_column)].isnull().any():
+            if self.df[str(predistill_column)].isnull().any():
                 predistill_to_run.append(predistill_column)
             else:
                 self.complete_columns.append(predistill_column)
@@ -254,7 +247,7 @@ class Zeno(object):
                     ],
                 )
                 for out in predistill_outputs:
-                    self.df.loc[:, columnHash(out[0])] = out[1]
+                    self.df.loc[:, str(out[0])] = out[1]
                     self.complete_columns.append(out[0])
 
     def __inference_and_postdistill(self):
@@ -263,19 +256,13 @@ class Zeno(object):
         for model_path in self.model_paths:
             model_name = os.path.basename(model_path).split(".")[0]
             model_column = ZenoColumn(
-                column_type=ZenoColumnType.OUTPUT,
-                name=model_name,
-                model=model_name,
-                transform="",
+                column_type=ZenoColumnType.OUTPUT, name=model_name, model=model_name
             )
             embedding_column = ZenoColumn(
-                column_type=ZenoColumnType.EMBEDDING,
-                name=model_name,
-                model=model_name,
-                transform="",
+                column_type=ZenoColumnType.EMBEDDING, name=model_name, model=model_name
             )
-            model_hash = columnHash(model_column)
-            embedding_hash = columnHash(embedding_column)
+            model_hash = str(model_column)
+            embedding_hash = str(embedding_column)
 
             model_save_path = Path(self.cache_path, model_hash + ".pickle")
             embedding_save_path = Path(self.cache_path, embedding_hash + ".pickle")
@@ -310,8 +297,8 @@ class Zeno(object):
                     ],
                 )
                 for out in inference_outputs:
-                    self.df.loc[:, columnHash(out[0])] = out[2]
-                    self.df.loc[:, columnHash(out[1])] = out[3]
+                    self.df.loc[:, str(out[0])] = out[2]
+                    self.df.loc[:, str(out[1])] = out[3]
                     self.complete_columns.append(out[0])
 
         self.status = "Done running inference"
@@ -324,7 +311,7 @@ class Zeno(object):
             col_name = postdistill_column.copy(
                 update={"model": postdistill_column.model}
             )
-            col_hash = columnHash(col_name)
+            col_hash = str(col_name)
             save_path = Path(self.cache_path, col_hash + ".pickle")
 
             load_series(self.df, col_hash, save_path)
@@ -353,7 +340,7 @@ class Zeno(object):
                     ],
                 )
                 for out in post_outputs:
-                    self.df.loc[:, columnHash(out[0])] = out[1]
+                    self.df.loc[:, str(out[0])] = out[1]
                     self.complete_columns.append(out[0])
 
         self.status = "Done running postprocessing"
@@ -386,12 +373,9 @@ class Zeno(object):
             return
 
         output_col = ZenoColumn(
-            column_type=ZenoColumnType.OUTPUT,
-            name=model_name,
-            model=model_name,
-            transform="",
+            column_type=ZenoColumnType.OUTPUT, name=model_name, model=model_name
         )
-        output_hash = columnHash(output_col)
+        output_hash = str(output_col)
 
         local_ops = dataclasses.replace(
             self.zeno_options,
@@ -444,7 +428,7 @@ class Zeno(object):
 
     def run_projection(self, model, instance_ids):
         filtered_rows = self.__get_df_rows(
-            self.df, self.id_column, list_to_get=instance_ids
+            self.df, str(self.id_column), list_to_get=instance_ids
         )
         embeds = np.stack(filtered_rows["zenoembedding_" + model].to_numpy())
         projection = self.__run_umap(embeds)
@@ -459,9 +443,7 @@ class Zeno(object):
         Returns:
             bytes: Arrow-encoded table of slice metadata
         """
-        return get_arrow_bytes(
-            self.df[[columnHash(c) for c in columns]], self.id_column
-        )
+        return get_arrow_bytes(self.df[[str(c) for c in columns]], str(self.id_column))
 
     def get_slices(self):
         return [s.dict(by_alias=True) for s in self.slices.values()]

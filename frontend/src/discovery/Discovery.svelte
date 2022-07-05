@@ -15,6 +15,7 @@
 		getDataRange as uniqueOutputs,
 	} from "./discovery";
 	import { filteredTable, model, settings } from "../stores";
+	import { columnHash } from "../util";
 
 	import type { dataType } from "./discovery";
 	import type {
@@ -82,7 +83,7 @@
 	function saveIds() {
 		if ($filteredTable) {
 			return $filteredTable
-				.columnArray($settings.idColumn)
+				.columnArray(columnHash($settings.idColumn))
 				.map((d) => d) as string[];
 		} else {
 			return [];
@@ -218,7 +219,9 @@
 			<button
 				on:click={async () => {
 					if ($filteredTable) {
-						const filteredIds = $filteredTable.columnArray($settings.idColumn);
+						const filteredIds = $filteredTable.columnArray(
+							columnHash($settings.idColumn)
+						);
 						const _projection = await projectEmbeddings2D($model, filteredIds);
 						projection2D = _projection.data.map(({ proj }) => proj);
 					}

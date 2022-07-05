@@ -51,7 +51,7 @@ def predistill_data(
     pos: int,
 ) -> Tuple[ZenoColumn, pd.Series]:
     fn = get_function(preprocessor)
-    col_hash = columnHash(column)
+    col_hash = str(column)
     col = df[col_hash]
 
     save_path = Path(cache_path, col_hash + ".pickle")
@@ -100,8 +100,8 @@ def run_inference(
         model=model_name,
         transform="",
     )
-    model_hash = columnHash(model_col_obj)
-    embedding_hash = columnHash(embedding_col_obj)
+    model_hash = str(model_col_obj)
+    embedding_hash = str(embedding_col_obj)
     model_col = df[model_hash]
     embedding_col = df[embedding_hash]
 
@@ -176,7 +176,7 @@ def postdistill_data(
         model=model,
         transform="",
     )
-    col_hash = columnHash(col_obj)
+    col_hash = str(col_obj)
     col = df[col_hash]
 
     output_obj = ZenoColumn(
@@ -185,7 +185,7 @@ def postdistill_data(
         model=model,
         transform="",
     )
-    output_hash = columnHash(output_obj)
+    output_hash = str(output_obj)
 
     save_path = Path(cache_path, col_hash + ".pickle")
 
@@ -215,13 +215,3 @@ def postdistill_data(
                 col.loc[to_predict_indices[i : i + batch_size]] = out
                 col.to_pickle(save_path)
     return (col_obj, col)
-
-
-def columnHash(col: ZenoColumn) -> str:
-    if col.column_type == ZenoColumnType.METADATA:
-        return col.name
-    string = (
-        str(int(col.column_type)) + str(col.name) + str(col.model) + str(col.transform)
-    )
-    return string
-    # return hashlib.sha1(bytes(string, encoding="utf-8")).hexdigest()

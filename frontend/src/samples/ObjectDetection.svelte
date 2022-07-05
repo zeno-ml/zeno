@@ -1,11 +1,12 @@
 <script lang="ts">
 	import Paper from "@smui/paper";
-
 	import Tooltip, { Wrapper } from "@smui/tooltip";
-	import { settings } from "../stores";
 
 	export let table;
-	export let modelCol;
+	export let modelColumn;
+	export let labelColumn;
+	export let dataColumn;
+	export let idColumn;
 
 	let showLabel = true;
 	let showModel = true;
@@ -31,23 +32,23 @@
 					ctx.imageSmoothingEnabled = true;
 					ctx.drawImage(img, 0, 0);
 					if (showLabel) {
-						let boxes = table[i][$settings.labelColumn];
+						let boxes = table[i][labelColumn];
 						ctx.strokeStyle = "purple";
 						ctx.lineWidth = 3;
 						boxes.forEach((box) => {
 							ctx.strokeRect(box[0], box[1], box[2], box[3]);
 						});
 					}
-					if (t[modelCol] && showModel) {
+					if (t[modelColumn] && showModel) {
 						ctx.strokeStyle = "orange";
 						ctx.lineWidth = 3;
-						t[modelCol].forEach((box) => {
+						t[modelColumn].forEach((box) => {
 							ctx.strokeRect(box[0], box[1], box[2], box[3]);
 						});
 					}
 				}
 			};
-			img.src = `/data/${t[$settings.idColumn]}`;
+			img.src = `/data/${t[idColumn]}`;
 			return img;
 		});
 	}

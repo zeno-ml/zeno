@@ -1,9 +1,11 @@
 <script lang="ts">
 	import Tooltip, { Wrapper } from "@smui/tooltip";
-	import { settings } from "../stores";
 
 	export let table;
-	export let modelCol;
+	export let modelColumn;
+	export let labelColumn;
+	export let dataColumn;
+	export let idColumn;
 	export let color = "white";
 </script>
 
@@ -11,9 +13,9 @@
 	<div class="box" style:background-color={color}>
 		<Wrapper>
 			<img
-				src="/data/{row[$settings.idColumn]}"
+				src="/data/{row[idColumn]}"
 				style:max-width="200px"
-				alt="Image thumbnail for instance {row[$settings.idColumn]}" />
+				alt="Image thumbnail for instance {row[idColumn]}" />
 			<Tooltip>
 				{#each Object.keys(row).filter((r) => !r.startsWith("zeno")) as key}
 					{key} : {row[key]}
@@ -23,12 +25,12 @@
 		</Wrapper>
 		<br />
 		<span class="label">label: </span><span class="value">
-			{row[$settings.labelColumn]}
+			{row[labelColumn]}
 		</span>
-		{#if modelCol && row[modelCol]}
+		{#if modelColumn && row[modelColumn]}
 			<br />
 			<span class="label">pred: </span>
-			<span class="value">{row[modelCol]} </span>
+			<span class="value">{row[modelColumn]} </span>
 		{/if}
 	</div>
 {/each}

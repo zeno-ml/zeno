@@ -1,4 +1,3 @@
-import { ZenoColumnType } from "./globals";
 import * as aq from "arquero";
 import { get } from "svelte/store";
 import { recentResultHash, tab, transforms } from "./stores";
@@ -47,7 +46,7 @@ export async function getSlicesAndReports(t) {
 		(s: Slice) =>
 			(s.idxs = t
 				.filter("(d) => " + getFilterFromPredicates(s.filterPredicates))
-				.array(get(settings).idColumn))
+				.array(columnHash(get(settings).idColumn)))
 	);
 	getMetrics(slis);
 	const sliMap = new Map();
@@ -72,6 +71,7 @@ export function getMetrics(slices: Slice[]) {
 	// Resolve race condition where some results return after more recent requests.
 	const thisHash = Math.random().toFixed(10);
 	recentResultHash.set(thisHash);
+	console.log(thisHash, slices);
 	fetch("/api/results", {
 		method: "POST",
 		headers: {
@@ -85,6 +85,7 @@ export function getMetrics(slices: Slice[]) {
 				return;
 			}
 			res = JSON.parse(res);
+			console.log(thisHash, res);
 			results.update((resmap) => {
 				res.forEach((r) => {
 					resmap.set(
@@ -156,7 +157,6 @@ export function updateTableColumns(w: WSResponse) {
 	const missingColumns = w.completeColumns.filter(
 		(c) => !tableColumns.includes(columnHash(c))
 	);
-
 	if (missingColumns.length > 0) {
 		fetch("/api/table", {
 			method: "POST",
@@ -193,8 +193,5 @@ export function updateReports(reps) {
 }
 
 export function columnHash(col: ZenoColumn) {
-	if (col.columnType === ZenoColumnType.METADATA) {
-		return col.name;
-	}
 	return col.columnType + col.name + col.model + col.transform;
 }

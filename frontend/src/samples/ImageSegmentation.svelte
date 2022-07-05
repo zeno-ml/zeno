@@ -1,14 +1,15 @@
 <script lang="ts">
+	import SegmentedButton, { Label, Segment } from "@smui/segmented-button";
 	import Tooltip, { Wrapper } from "@smui/tooltip";
-	import { settings } from "../stores";
-
-	import SegmentedButton, { Segment, Label } from "@smui/segmented-button";
 
 	let choices = ["Label", "Model"];
 	let selected = ["Label"];
 
 	export let table;
-	export let modelCol;
+	export let modelColumn;
+	export let labelColumn;
+	export let dataColumn;
+	export let idColumn;
 </script>
 
 <div style:margin-left="10px">
@@ -24,25 +25,25 @@
 		<Wrapper>
 			<div id="overlays">
 				<img
-					src="/data/{row[$settings.idColumn]}"
+					src="/data/{row[idColumn]}"
 					style:width="150px"
 					style:height="150px"
-					alt="Image thumbnail for instance {row[$settings.idColumn]}" />
+					alt="Image thumbnail for instance {row[idColumn]}" />
 				{#if selected.includes("Label")}
 					<img
 						class="overlay"
-						src="/labels/{row[$settings.labelColumn]}"
+						src="/labels/{row[labelColumn]}"
 						style:width="150px"
 						style:height="150px"
-						alt="Image thumbnail for instance {row[$settings.labelColumn]}" />
+						alt="Image thumbnail for instance {row[labelColumn]}" />
 				{/if}
-				{#if row[modelCol] && selected.includes("Model")}
+				{#if row[modelColumn] && selected.includes("Model")}
 					<img
 						class="overlay"
-						src="/cache/{modelCol}/{row[modelCol]}"
+						src="/cache/{modelColumn}/{row[modelColumn]}"
 						style:width="150px"
 						style:height="150px"
-						alt="Image thumbnail for instance {row[modelCol]}" />
+						alt="Image thumbnail for instance {row[modelColumn]}" />
 				{/if}
 			</div>
 			<Tooltip>

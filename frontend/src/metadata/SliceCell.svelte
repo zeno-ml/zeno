@@ -5,22 +5,15 @@
 	import Ripple from "@smui/ripple";
 	import { slide } from "svelte/transition";
 	import SliceDetails from "../SliceDetails.svelte";
-	import { metric, model, results, slices } from "../stores";
+	import { slices } from "../stores";
 
-	export let name: string;
-	export let fullName = name;
+	export let slice: Slice;
+	export let result: number;
 	export let selected = false;
 	export let setSelected;
 	export let editSlice;
 
 	let expanded = false;
-
-	$: sli = $slices.get(fullName);
-	$: result = $results.get({
-		slice: fullName,
-		metric: $metric,
-		model: $model,
-	} as ResultKey);
 </script>
 
 <div
@@ -48,7 +41,7 @@
 							d={expanded ? mdiChevronUp : mdiChevronDown} />
 					</Icon>
 				</div>
-				<div>{name}</div>
+				<div>{slice.sliceName}</div>
 			</div>
 			<div class="group">
 				{#if result}
@@ -61,7 +54,7 @@
 						class="material-icons"
 						on:click={(e) => {
 							e.stopPropagation();
-							editSlice(sli);
+							editSlice(slice);
 						}}>
 						edit
 					</Icon>
@@ -70,10 +63,10 @@
 						on:click={(e) => {
 							e.stopPropagation();
 							slices.update((s) => {
-								s.delete(name);
+								s.delete(slice.sliceName);
 								return s;
 							});
-							fetch("/api/delete-slice/" + encodeURIComponent(name));
+							fetch("/api/delete-slice/" + encodeURIComponent(slice.sliceName));
 						}}>
 						delete
 					</Icon>
@@ -83,7 +76,7 @@
 	</div>
 	{#if expanded}
 		<div in:slide out:slide class="details">
-			<SliceDetails {sli} />
+			<SliceDetails sli={slice} />
 		</div>
 	{/if}
 </div>

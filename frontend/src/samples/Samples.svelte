@@ -19,13 +19,13 @@
 	let rowsPerPage = 15;
 	let currentPage = 0;
 
-	let modelCol = "";
+	let modelColumn = "";
 
 	status.subscribe((s) => {
 		let obj = s.completeColumns.find((c) => {
 			return c.columnType === ZenoColumnType.OUTPUT && c.model === $model;
 		});
-		modelCol = obj ? columnHash(obj) : "";
+		modelColumn = obj ? columnHash(obj) : "";
 	});
 
 	$: start = currentPage * rowsPerPage;
@@ -48,20 +48,39 @@
 	<div class="container sample-container">
 		{#if $settings.task === "image-classification"}
 			<ImageClassification
+				idColumn={columnHash($settings.idColumn)}
+				labelColumn={columnHash($settings.labelColumn)}
+				dataColumn={columnHash($settings.dataColumn)}
 				table={table.slice(start, end).objects()}
-				{modelCol} />
+				{modelColumn} />
 		{:else if $settings.task === "image-segmentation"}
-			<ImageSegmentation table={table.slice(start, end).objects()} {modelCol} />
+			<ImageSegmentation
+				idColumn={columnHash($settings.idColumn)}
+				labelColumn={columnHash($settings.labelColumn)}
+				dataColumn={columnHash($settings.dataColumn)}
+				table="{table.slice(start, end).objects()}modelColumn{modelColumn}"
+				{modelColumn} />
 		{:else if $settings.task === "object-detection"}
-			<ObjectDetection table={table.slice(start, end).objects()} {modelCol} />
+			<ObjectDetection
+				idColumn={columnHash($settings.idColumn)}
+				labelColumn={columnHash($settings.labelColumn)}
+				dataColumn={columnHash($settings.dataColumn)}
+				table="{table.slice(start, end).objects()}modelColumn{modelColumn}"
+				{modelColumn} />
 		{:else if $settings.task === "text-classification"}
 			<TextClassification
+				idColumn={columnHash($settings.idColumn)}
+				labelColumn={columnHash($settings.labelColumn)}
+				dataColumn={columnHash($settings.dataColumn)}
 				table={table.slice(start, end).objects()}
-				{modelCol} />
+				{modelColumn} />
 		{:else if $settings.task === "audio-classification"}
 			<AudioClassification
+				idColumn={columnHash($settings.idColumn)}
+				labelColumn={columnHash($settings.labelColumn)}
+				dataColumn={columnHash($settings.dataColumn)}
 				table={table.slice(start, end).objects()}
-				{modelCol} />
+				{modelColumn} />
 		{/if}
 	</div>
 	<Pagination slot="paginate" class="pagination">
