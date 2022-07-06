@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { TrailingIcon } from "@smui/chips";
+	import { columnHash, getMetricsForSlices } from "../util";
 
 	import {
 		table,
@@ -7,32 +8,42 @@
 		metadataSelections,
 		metric,
 		model,
-		results,
 		sliceSelections,
+		transform,
+		settings,
 	} from "../stores";
 
-	let result = undefined;
+	async function updateResult(model, metric, transform, filteredTable) {
+		if (filteredTable.size === 0) {
+			return;
+		}
 
-	function updateResult(results, model, metric) {
 		let name = "";
-		if ($table.size === $filteredTable.size) {
+		if ($table.size === filteredTable.size) {
 			name = "overall";
 		}
-		result = results.get({
-			slice: name,
-			metric: metric,
-			model: model,
-		} as ResultKey);
+
+		let idxs = filteredTable.array(columnHash($settings.idColumn));
+		let sli = <Slice>{ sliceName: name, idxs: idxs };
+
+		return getMetricsForSlices([
+			<MetricKey>{
+				sli: sli,
+				metric: metric,
+				model: model,
+				transform: transform,
+			},
+		]);
 	}
 
-	results.subscribe((r) => updateResult(r, $model, $metric));
-	model.subscribe((m) => updateResult($results, m, $metric));
-	metric.subscribe((m) => updateResult($results, $model, m));
+	$: result = updateResult($model, $metric, $transform, $filteredTable);
 </script>
 
 <div class="chips">
 	<span id="metric">
-		{$metric}: {result ? result.toFixed(2) : ""}
+		{$metric}: {#await result then res}
+			{res ? res[0].toFixed(2) : ""}
+		{/await}
 	</span>
 	<span id="size">
 		{$filteredTable.size} instances

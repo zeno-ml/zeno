@@ -12,9 +12,9 @@ from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 
 from .classes import (
+    MetricsRequest,
     ProjectionRequest,
     ReportsRequest,
-    ResultsRequest,
     StatusResponse,
     TableRequest,
     ZenoSettings,
@@ -201,7 +201,7 @@ def run_zeno(args):
         return Response(zeno.get_table(columns.columns))
 
     @api_app.post("/results")
-    def get_results(reqs: ResultsRequest):
+    def get_results(reqs: MetricsRequest):
         return json.dumps(zeno.get_results(reqs))
 
     @api_app.get("/reports")

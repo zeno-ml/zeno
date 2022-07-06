@@ -21,10 +21,8 @@
 		sliceSelections,
 		sort,
 		table,
-		metric,
-		results,
 	} from "../stores";
-	import { getFilterFromPredicates, getMetrics, columnHash } from "../util";
+	import { columnHash, getFilterFromPredicates } from "../util";
 	import { ZenoColumnType } from "../globals";
 
 	let name = "";
@@ -69,30 +67,10 @@
 		});
 
 		if ($sort) {
-			tempTable = tempTable.orderby($sort);
+			tempTable = tempTable.orderby(columnHash($sort));
 		}
 
 		filteredTable.set(tempTable);
-
-		if (tempTable.size === $table.size) {
-			getMetrics([
-				<Slice>{
-					sliceName: "overall",
-					filterPredicates: [],
-					transform: "",
-					idxs: tempTable.array(columnHash($settings.idColumn)) as string[],
-				},
-			]);
-		} else {
-			getMetrics([
-				<Slice>{
-					sliceName: "",
-					filterPredicates: [],
-					transform: "",
-					idxs: tempTable.array(columnHash($settings.idColumn)) as string[],
-				},
-			]);
-		}
 	}
 
 	function editSlice(sli: Slice) {
@@ -150,14 +128,8 @@
 	{/if}
 
 	{#each [...$slices.values()] as s}
-		{@const result = $results.get({
-			slice: s.sliceName,
-			metric: $metric,
-			model: $model,
-		})}
 		<SliceNode
 			slice={s}
-			{result}
 			{editSlice}
 			selected={$sliceSelections.includes(s.sliceName)}
 			setSelected={(e) => {

@@ -18,9 +18,10 @@
 		report,
 		reports,
 		results,
+		transform,
 		sliceSelections,
 	} from "../stores";
-	import { updateReports, updateTab } from "../util";
+	import { getMetricsForSlices, updateReports, updateTab } from "../util";
 
 	export let sli: Slice;
 
@@ -70,6 +71,15 @@
 			});
 		});
 	}
+
+	$: modelResults = getMetricsForSlices(
+		$models.map((m) => ({
+			sli: sli,
+			metric: $metric,
+			model: m,
+			transform: $transform,
+		}))
+	);
 </script>
 
 <Row>
@@ -144,16 +154,13 @@
 		</div>
 	</Cell>
 	{#each $models as m, i}
-		{@const r = $results.get({
-			slice: sli.sliceName,
-			metric: $metric,
-			model: m,
-		})}
-		<Cell class={expanded ? "detail-row" : ""}>
-			<p style:color={predicateResults[i] ? "black" : "red"}>
-				{r ? r.toFixed(2) : ""}
-			</p>
-		</Cell>
+		{#await modelResults then res}
+			<Cell class={expanded ? "detail-row" : ""}>
+				<p style:color={predicateResults[i] ? "black" : "red"}>
+					{res[i] ? res[i].toFixed(2) : ""}
+				</p>
+			</Cell>
+		{/await}
 	{/each}
 </Row>
 {#if expanded}

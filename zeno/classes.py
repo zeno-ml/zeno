@@ -22,6 +22,7 @@ class ZenoColumnType(IntEnum):
     OUTPUT = 2
     EMBEDDING = 3
     POSTDISTILL = 4
+    TRANSFORM = 5
 
 
 class ZenoFunctionType(IntEnum):
@@ -85,8 +86,7 @@ class ZenoSettings(CamelModel):
 
 class Slice(CamelModel):
     slice_name: str
-    filter_predicates: List[FilterPredicate]
-    transform: str
+    filter_predicates: Optional[List[FilterPredicate]]
     idxs: Optional[List[str]]
 
 
@@ -104,8 +104,15 @@ class ReportsRequest(CamelModel):
     reports: List[Report]
 
 
-class ResultsRequest(BaseModel):
-    slices: List[Slice]
+class MetricKey(CamelModel):
+    sli: Slice
+    metric: str
+    model: str
+    transform: str
+
+
+class MetricsRequest(BaseModel):
+    requests: List[MetricKey]
 
 
 class ProjectionRequest(BaseModel):

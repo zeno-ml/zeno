@@ -26,7 +26,7 @@
 {/if}
 {#if $transforms}
 	<Select bind:value={$transform} label="Transform" style="margin-right: 20px;">
-		{#each [...$transforms, ""] as t}
+		{#each ["", ...$transforms] as t}
 			<Option value={t}>{t}</Option>
 		{/each}
 	</Select>

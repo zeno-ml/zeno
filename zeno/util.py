@@ -1,6 +1,7 @@
 import dataclasses
 import os
 from importlib import util
+from inspect import getsource
 from pathlib import Path
 from typing import Tuple
 
@@ -76,9 +77,60 @@ def predistill_data(
     return (column, col)
 
 
+def transform_data(
+    transform: ZenoFunction,
+    options: ZenoOptions,
+    cache_path: str,
+    df: pd.DataFrame,
+    batch_size: int,
+    pos: int,
+) -> Tuple[ZenoColumn, pd.Series]:
+    transform_fn = get_function(transform)
+    transform_col = ZenoColumn(
+        column_type=ZenoColumnType.TRANSFORM,
+        name=transform.name,
+    )
+    col_hash = str(transform_col)
+    col = df[col_hash]
+
+    save_path = Path(cache_path, col_hash + ".pickle")
+    src = getsource(transform_fn)
+    transform_cache_path = ""
+    if "output_path" in src:
+        transform_cache_path = os.path.join(cache_path, col_hash)
+        os.makedirs(transform_cache_path, exist_ok=True)
+
+    to_transform_indices = col.loc[pd.isna(col)].index
+
+    if len(to_transform_indices) > 0:
+        if len(to_transform_indices) < batch_size:
+            out = transform_fn(
+                df.loc[to_transform_indices],
+                dataclasses.replace(options, output_path=transform_cache_path),
+            )
+            col.loc[to_transform_indices] = out
+            col.to_pickle(save_path)
+        else:
+            for i in trange(
+                0,
+                len(to_transform_indices),
+                batch_size,
+                desc="transforming " + transform.name,
+                position=pos,
+            ):
+                out = transform_fn(
+                    df.loc[to_transform_indices[i : i + batch_size]],
+                    dataclasses.replace(options, output_path=transform_cache_path),
+                )
+                col.loc[to_transform_indices[i : i + batch_size]] = out
+                col.to_pickle(save_path)
+    return (transform_col, col)
+
+
 def run_inference(
     model_loader: ZenoFunction,
     options: ZenoOptions,
+    transform: str,
     model_path: str,
     cache_path: str,
     df: pd.DataFrame,
@@ -91,14 +143,12 @@ def run_inference(
     model_col_obj = ZenoColumn(
         column_type=ZenoColumnType.OUTPUT,
         name=model_name,
-        model=model_name,
-        transform="",
+        transform=transform,
     )
     embedding_col_obj = ZenoColumn(
         column_type=ZenoColumnType.EMBEDDING,
         name=model_name,
-        model=model_name,
-        transform="",
+        transform=transform,
     )
     model_hash = str(model_col_obj)
     embedding_hash = str(embedding_col_obj)
@@ -110,16 +160,29 @@ def run_inference(
 
     to_predict_indices = model_col.loc[pd.isna(model_col)].index
 
+    # If transform, pass transform data
+    if len(transform) != 0:
+        transform_data_col = ZenoColumn(
+            column_type=ZenoColumnType.TRANSFORM,
+            name=transform,
+        )
+        transform_col_name = str(transform_data_col)
+        transform_path = os.path.join(cache_path, transform_col_name)
+        options = dataclasses.replace(
+            options, data_path=transform_path, data_column=transform_col_name
+        )
+
     if len(to_predict_indices) > 0:
         fn = model_loader_fn(model_path)
         if len(to_predict_indices) < batch_size:
-            # TODO: check functions to see if they use output_path.
-            file_cache_path = os.path.join(cache_path, model_hash)
-            os.makedirs(file_cache_path, exist_ok=True)
-            out = fn(
-                df.loc[to_predict_indices],
-                dataclasses.replace(options, output_path=file_cache_path),
-            )
+            # Make output folder if function uses output_path
+            src = getsource(fn)
+            if "output_path" in src:
+                file_cache_path = os.path.join(cache_path, model_hash)
+                os.makedirs(file_cache_path, exist_ok=True)
+                options = dataclasses.replace(options, output_path=file_cache_path)
+
+            out = fn(df.loc[to_predict_indices], options)
 
             # Check if we also get embedding
             if type(out) == tuple and len(out) == 2:
@@ -130,22 +193,26 @@ def run_inference(
                 out = out[0]
             else:
                 model_col[to_predict_indices] = out
+
             model_col.to_pickle(model_save_path)
+
         else:
             for i in trange(
                 0,
                 len(to_predict_indices),
                 batch_size,
-                desc="Inference on " + model_name,
+                desc="Inference on " + model_name + " with " + transform,
                 position=pos,
             ):
-                file_cache_path = os.path.join(cache_path, model_hash)
 
-                os.makedirs(file_cache_path, exist_ok=True)
-                out = fn(
-                    df.loc[to_predict_indices[i : i + batch_size]],
-                    dataclasses.replace(options, output_path=file_cache_path),
-                )
+                # Make output folder if function uses output_path
+                src = getsource(fn)
+                if "output_path" in src:
+                    file_cache_path = os.path.join(cache_path, model_hash)
+                    os.makedirs(file_cache_path, exist_ok=True)
+                    options = dataclasses.replace(options, output_path=file_cache_path)
+
+                out = fn(df.loc[to_predict_indices[i : i + batch_size]], options)
 
                 # Check if we also get embedding
                 if type(out) == tuple and len(out) == 2:
@@ -156,7 +223,9 @@ def run_inference(
                     out = out[0]
                 else:
                     model_col[to_predict_indices[i : i + batch_size]] = out
+
                 model_col.to_pickle(model_save_path)
+
     return (model_col_obj, embedding_col_obj, model_col, embedding_col)
 
 

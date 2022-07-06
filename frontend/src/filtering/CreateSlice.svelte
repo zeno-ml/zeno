@@ -7,13 +7,13 @@
 	import autoAnimate from "@formkit/auto-animate";
 
 	import {
-		settings,
 		slices,
 		sliceSelections,
 		metadataSelections,
 		table,
+		settings,
 	} from "../stores";
-	import { getFilterFromPredicates, getMetrics, columnHash } from "../util";
+	import { columnHash, getFilterFromPredicates } from "../util";
 
 	import FilterEntry from "./FilterEntry.svelte";
 	import { onMount } from "svelte";
@@ -104,20 +104,12 @@
 		const filt = getFilterFromPredicates(predicates);
 		let tempTable = $table.filter(`(d) => ${filt}`);
 
-		getMetrics([
-			<Slice>{
-				sliceName: name,
-				filterPredicates: predicates,
-				transform: "",
-				idxs: tempTable.array(columnHash($settings.idColumn)) as string[],
-			},
-		]);
-
 		slices.update((s) => {
 			s.set(name, <Slice>{
 				sliceName: name,
 				filterPredicates: predicates,
 				transform: "",
+				idxs: tempTable.array(columnHash($settings.idColumn)) as string[],
 			});
 			return s;
 		});

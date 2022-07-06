@@ -31,11 +31,11 @@ export const status: Readable<WSResponse> = derived(
 	} as WSResponse
 );
 
-export const settings: Writable<Settings> = writable({
+export const settings: Writable<Settings> = writable(<Settings>{
 	task: "",
-	idColumn: "",
-	dataColumn: "",
-	labelColumn: "",
+	idColumn: {},
+	dataColumn: {},
+	labelColumn: {},
 	metadataColumns: [],
 });
 export const metrics: Writable<string[]> = writable([]);
@@ -51,8 +51,12 @@ export const sort: Writable<ZenoColumn> = writable();
 
 export const slices: Writable<Map<string, Slice>> = writable(new Map());
 export const reports: Writable<Report[]> = writable([]);
-export const results: Writable<InternMap<ResultKey, number>> = writable(
-	new InternMap([], (d) => d.slice + "." + d.metric + "." + d.model)
+export const results: Writable<InternMap<MetricKey, number>> = writable(
+	new InternMap(
+		[],
+		(d: MetricKey) =>
+			d.sli.sliceName + "." + d.metric + "." + d.model + "." + d.transform
+	)
 );
 
 export const table: Writable<ColumnTable> = writable(aq.table({}));

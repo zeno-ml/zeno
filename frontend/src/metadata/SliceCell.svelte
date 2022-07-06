@@ -5,15 +5,24 @@
 	import Ripple from "@smui/ripple";
 	import { slide } from "svelte/transition";
 	import SliceDetails from "../SliceDetails.svelte";
-	import { slices } from "../stores";
+	import { metric, model, slices, transform } from "../stores";
+	import { getMetricsForSlices } from "../util";
 
 	export let slice: Slice;
-	export let result: number;
 	export let selected = false;
 	export let setSelected;
 	export let editSlice;
 
 	let expanded = false;
+
+	$: result = getMetricsForSlices([
+		<MetricKey>{
+			sli: slice,
+			metric: $metric,
+			model: $model,
+			transform: $transform,
+		},
+	]);
 </script>
 
 <div
@@ -46,7 +55,12 @@
 			<div class="group">
 				{#if result}
 					<span style:margin-right="10px">
-						{result.toFixed(2)}
+						{#await result then res}
+							{res[0].toFixed(2)}
+						{/await}
+					</span>
+					<span id="size">
+						({slice.idxs.length})
 					</span>
 				{/if}
 				<div style:cursor="pointer">
@@ -82,6 +96,11 @@
 </div>
 
 <style>
+	#size {
+		font-style: italic;
+		color: rgba(0, 0, 0, 0.4);
+		margin-right: 10px;
+	}
 	.details {
 		padding-top: 10px;
 		margin-left: 10px;

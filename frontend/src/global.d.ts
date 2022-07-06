@@ -14,12 +14,11 @@ interface WSResponse {
 	completeColumns: ZenoColumn[];
 }
 
-interface ResultKey {
-	// A JS query string, combination of metadata and slices.
-	slice: string;
+interface MetricKey {
+	sli: Slice;
 	metric: string;
-	transform: string;
 	model: string;
+	transform: string;
 }
 
 interface MetadataSelection {
@@ -40,8 +39,7 @@ interface FilterPredicate {
 
 interface Slice {
 	sliceName: string;
-	filterPredicates: FilterPredicate[];
-	transform: string;
+	filterPredicates?: FilterPredicate[];
 	idxs?: string[];
 }
 
@@ -61,8 +59,9 @@ interface Report {
 interface ZenoColumn {
 	columnType: ZenoColumnType;
 	name: string;
-	model: string;
-	transform: string;
+	// model and transform are only set for OUTPUT columnTypes.
+	model?: string;
+	transform?: string;
 }
 
 declare namespace svelte.JSX {

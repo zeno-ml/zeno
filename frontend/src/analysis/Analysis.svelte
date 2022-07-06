@@ -4,7 +4,7 @@
 	import Button from "@smui/button";
 
 	import Select, { Option } from "@smui/select";
-	import { metric, metrics } from "../stores";
+	import { metric, metrics, transforms, transform } from "../stores";
 
 	import AnalysisTable from "./AnalysisTable.svelte";
 	import ReportsPanel from "./report/ReportsPanel.svelte";
@@ -22,6 +22,16 @@
 				<Select bind:value={$metric} label="Metric" style="margin-right: 20px;">
 					{#each $metrics as m}
 						<Option value={m}>{m}</Option>
+					{/each}
+				</Select>
+			{/if}
+			{#if $transforms}
+				<Select
+					bind:value={$transform}
+					label="Transform"
+					style="margin-right: 20px;">
+					{#each ["", ...$transforms] as t}
+						<Option value={t}>{t}</Option>
 					{/each}
 				</Select>
 			{/if}

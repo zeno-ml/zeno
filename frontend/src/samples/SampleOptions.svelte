@@ -5,11 +5,12 @@
 
 	import Settings from "../Settings.svelte";
 	import SelectionBar from "../metadata/SelectionBar.svelte";
+	import { columnHash } from "../util";
 
 	sort.subscribe((s) => {
 		filteredTable.update((table) => {
 			if (table && s) {
-				return table.orderby(s);
+				return table.orderby(columnHash(s));
 			}
 			return table;
 		});

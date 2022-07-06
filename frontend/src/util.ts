@@ -1,6 +1,6 @@
 import * as aq from "arquero";
 import { get } from "svelte/store";
-import { metric, model, tab, transform, transforms } from "./stores";
+import { tab, transforms } from "./stores";
 
 import {
 	metrics,
@@ -49,7 +49,6 @@ export async function getSlicesAndReports(t) {
 				.array(columnHash(get(settings).idColumn));
 		}
 	});
-	getMetrics(slis);
 	const sliMap = new Map();
 	slis.forEach((e) => sliMap.set(e.sliceName, e));
 	slices.set(sliMap);
@@ -68,46 +67,39 @@ export function updateTab(t: string) {
 	tab.set(t);
 }
 
-export function getMetrics(slices: Slice[]) {
-	// TODO: Make fetching overall and current selection clearner, formal API
-	const requiredSlices = slices.filter((s) => {
-		if (s.sliceName === "") {
-			return true;
+export async function getMetricsForSlices(metricKeys: MetricKey[]) {
+	console.log(metricKeys);
+	const returnValues = metricKeys.map((k) => {
+		if (k.sli.sliceName === "") {
+			return undefined;
 		}
-		const res = get(results).get({
-			slice: s.sliceName,
-			metric: get(metric),
-			transform: get(transform),
-			model: get(model),
-		});
-		return res ? false : true;
+		return get(results).get(k);
 	});
-	fetch("/api/results", {
-		method: "POST",
-		headers: {
-			"Content-type": "application/json",
-		},
-		body: JSON.stringify({ slices: requiredSlices }),
-	})
-		.then((d) => d.json())
-		.then((res) => {
-			res = JSON.parse(res);
-			results.update((resmap) => {
-				res.forEach((r) => {
-					resmap.set(
-						<ResultKey>{
-							slice: r.slice,
-							metric: r.metric,
-							transform: r.transform,
-							model: r.model,
-						},
-						r.value
-					);
-				});
-				return resmap;
-			});
-		})
-		.catch((e) => console.log(e));
+	const requiredIndices = returnValues.reduce((arr, curr, i) => {
+		if (curr === undefined) {
+			arr.push(i);
+		}
+		return arr;
+	}, []);
+
+	if (requiredIndices.length > 0) {
+		let res = await fetch("/api/results", {
+			method: "POST",
+			headers: {
+				"Content-type": "application/json",
+			},
+			body: JSON.stringify({
+				requests: requiredIndices.map((i) => metricKeys[i]),
+			}),
+		}).then((d) => d.json());
+		res = JSON.parse(res);
+		results.update((resmap) => {
+			res.forEach((r, i) => resmap.set(metricKeys[i], r));
+			return resmap;
+		});
+		requiredIndices.forEach((r, i) => (returnValues[r] = res[i]));
+	}
+	return returnValues;
 }
 
 export function getFilterFromPredicates(predicates: FilterPredicate[]) {
