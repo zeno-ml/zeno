@@ -69,5 +69,3 @@ export const currentColumns: Readable<ZenoColumn[]> = derived(
 			(c) => c.model === "" || c.model === $model
 		)
 );
-
-export const recentResultHash: Writable<string> = writable("0");

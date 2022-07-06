@@ -30,6 +30,7 @@ interface MetadataSelection {
 
 interface FilterPredicate {
 	column: ZenoColumn;
+	// >, <, ==, !=, >=, <=
 	operation: string;
 	value: string;
 	join: string;

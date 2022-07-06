@@ -1,6 +1,6 @@
 import * as aq from "arquero";
 import { get } from "svelte/store";
-import { recentResultHash, tab, transforms } from "./stores";
+import { metric, model, tab, transform, transforms } from "./stores";
 
 import {
 	metrics,
@@ -42,12 +42,13 @@ export function initialFetch() {
 export async function getSlicesAndReports(t) {
 	const slicesRes = await fetch("/api/slices").then((d) => d.json());
 	const slis = JSON.parse(slicesRes) as Slice[];
-	slis.forEach(
-		(s: Slice) =>
-			(s.idxs = t
+	slis.forEach((s: Slice) => {
+		if (s.filterPredicates.length !== 0) {
+			s.idxs = t
 				.filter("(d) => " + getFilterFromPredicates(s.filterPredicates))
-				.array(columnHash(get(settings).idColumn)))
-	);
+				.array(columnHash(get(settings).idColumn));
+		}
+	});
 	getMetrics(slis);
 	const sliMap = new Map();
 	slis.forEach((e) => sliMap.set(e.sliceName, e));
@@ -68,30 +69,36 @@ export function updateTab(t: string) {
 }
 
 export function getMetrics(slices: Slice[]) {
-	// Resolve race condition where some results return after more recent requests.
-	const thisHash = Math.random().toFixed(10);
-	recentResultHash.set(thisHash);
-	console.log(thisHash, slices);
+	// TODO: Make fetching overall and current selection clearner, formal API
+	const requiredSlices = slices.filter((s) => {
+		if (s.sliceName === "") {
+			return true;
+		}
+		const res = get(results).get({
+			slice: s.sliceName,
+			metric: get(metric),
+			transform: get(transform),
+			model: get(model),
+		});
+		return res ? false : true;
+	});
 	fetch("/api/results", {
 		method: "POST",
 		headers: {
 			"Content-type": "application/json",
 		},
-		body: JSON.stringify({ slices: slices }),
+		body: JSON.stringify({ slices: requiredSlices }),
 	})
 		.then((d) => d.json())
 		.then((res) => {
-			if (thisHash !== get(recentResultHash)) {
-				return;
-			}
 			res = JSON.parse(res);
-			console.log(thisHash, res);
 			results.update((resmap) => {
 				res.forEach((r) => {
 					resmap.set(
 						<ResultKey>{
 							slice: r.slice,
 							metric: r.metric,
+							transform: r.transform,
 							model: r.model,
 						},
 						r.value

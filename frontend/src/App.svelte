@@ -18,12 +18,6 @@
 	import Exploration from "./Exploration.svelte";
 	import Analysis from "./analysis/Analysis.svelte";
 
-	tab.set($location.split("/")[1]);
-
-	if (!$tab) {
-		tab.set("results");
-	}
-
 	const routes = {
 		"/": Exploration,
 		"/discovery/": Discovery,
@@ -32,20 +26,20 @@
 		"*": Exploration,
 	};
 
-	location.subscribe((d) => {
-		tab.set(d.split("/")[1]);
-		if (!tab) {
-			tab.set("exploration");
-		}
-	});
+	tab.set($location.split("/")[1]);
 
-	status.subscribe((w) => updateTableColumns(w));
 	onMount(() => initialFetch());
-
+	status.subscribe((w) => updateTableColumns(w));
 	ready.subscribe((r) => {
 		if (r) {
 			model.set($models[0]);
 			metric.set($metrics[0]);
+		}
+	});
+	location.subscribe((d) => {
+		tab.set(d.split("/")[1]);
+		if (!$tab) {
+			tab.set("exploration");
 		}
 	});
 </script>

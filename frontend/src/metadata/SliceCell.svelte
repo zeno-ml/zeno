@@ -92,7 +92,7 @@
 		border: 1px solid #e0e0e0;
 		padding: 10px;
 		min-width: 400px;
-		width: fit-content;
+		width: 400px;
 	}
 	.group {
 		display: flex;

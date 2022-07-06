@@ -19,6 +19,8 @@
 	.chip {
 		display: flex;
 		flex-direction: row;
+		flex-wrap: wrap;
+		width: fit-content;
 	}
 	.meta-chip {
 		width: fit-content;

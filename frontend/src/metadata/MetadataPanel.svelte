@@ -40,7 +40,6 @@
 		if (!$ready || $table.size === 0) {
 			return;
 		}
-
 		let tempTable = t;
 
 		// Filter with slices.
@@ -75,14 +74,25 @@
 
 		filteredTable.set(tempTable);
 
-		getMetrics([
-			<Slice>{
-				sliceName: "",
-				filterPredicates: [],
-				transform: "",
-				idxs: tempTable.array(columnHash($settings.idColumn)) as string[],
-			},
-		]);
+		if (tempTable.size === $table.size) {
+			getMetrics([
+				<Slice>{
+					sliceName: "overall",
+					filterPredicates: [],
+					transform: "",
+					idxs: tempTable.array(columnHash($settings.idColumn)) as string[],
+				},
+			]);
+		} else {
+			getMetrics([
+				<Slice>{
+					sliceName: "",
+					filterPredicates: [],
+					transform: "",
+					idxs: tempTable.array(columnHash($settings.idColumn)) as string[],
+				},
+			]);
+		}
 	}
 
 	function editSlice(sli: Slice) {

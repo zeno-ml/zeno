@@ -388,7 +388,7 @@ class Zeno(object):
         else:
             result_metric = None
 
-        if len(sli.slice_name) > 0:
+        if len(sli.slice_name) > 0 and sli.idxs and len(sli.idxs) != len(self.df):
             self.slices[sli.slice_name] = sli
             with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
                 pickle.dump(self.slices, f)

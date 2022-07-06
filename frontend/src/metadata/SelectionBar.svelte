@@ -2,6 +2,7 @@
 	import { TrailingIcon } from "@smui/chips";
 
 	import {
+		table,
 		filteredTable,
 		metadataSelections,
 		metric,
@@ -13,8 +14,12 @@
 	let result = undefined;
 
 	function updateResult(results, model, metric) {
+		let name = "";
+		if ($table.size === $filteredTable.size) {
+			name = "overall";
+		}
 		result = results.get({
-			slice: "",
+			slice: name,
 			metric: metric,
 			model: model,
 		} as ResultKey);
