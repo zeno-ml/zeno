@@ -10,6 +10,14 @@
       "args": ["./examples/cifar/tests/zeno.toml"]
     },
     {
+      "name": "zenocifarnomodel",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": ["./examples/cifar/zeno_no_model.toml"]
+    },
+    {
       "name": "zenococo",
       "type": "python",
       "request": "launch",

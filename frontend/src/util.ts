@@ -69,6 +69,9 @@ export function updateTab(t: string) {
 }
 
 export async function getMetricsForSlices(metricKeys: MetricKey[]) {
+	if (metricKeys[0].metric === undefined) {
+		return new Array(metricKeys.length).fill("");
+	}
 	const returnValues = metricKeys.map((k) => {
 		if (k.sli.sliceName === "") {
 			return undefined;

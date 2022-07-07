@@ -195,7 +195,9 @@
 		<MetadataNode {col} />
 	{/each}
 
-	<h4>Distilled Metadata</h4>
+	{#if $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL).length > 0}
+		<h4>Distilled Metadata</h4>
+	{/if}
 	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL) as col}
 		<MetadataNode {col} />
 	{/each}

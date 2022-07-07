@@ -41,7 +41,8 @@
 
 <div class="chips">
 	<span id="metric">
-		{$metric}: {#await result then res}
+		{$metric ? $metric + ":" : ""}
+		{#await result then res}
 			{res && res[0] ? res[0].toFixed(2) : ""}
 		{/await}
 	</span>

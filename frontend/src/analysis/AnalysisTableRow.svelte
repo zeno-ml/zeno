@@ -59,10 +59,11 @@
 			(r) => r.metric === $metric && r.sliceName === sli.sliceName
 		);
 		$models.forEach((m, i) => {
-			let result = $results.get({
-				slice: sli.sliceName,
+			let result = $results.get(<MetricKey>{
+				sli: sli,
 				metric: $metric,
 				model: m,
+				transform: $transform,
 			});
 			relevantPredicates.forEach((p) => {
 				if (!eval(`${result} ${p.operation} ${p.value}`)) {

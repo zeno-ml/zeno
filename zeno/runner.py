@@ -49,12 +49,6 @@ def main():
 
     toml_path = os.path.dirname(os.path.abspath(sys.argv[1]))
 
-    if "tests" not in args or not os.path.exists(args["tests"]):
-        print("ERROR: Must have 'tests' entry which is a valid directory.")
-        sys.exit(1)
-    else:
-        args["tests"] = Path(os.path.realpath(os.path.join(toml_path, args["tests"])))
-
     if "task" not in args or args["task"] not in TASK_TYPES:
         print("ERROR: Must have 'task' entry which is one of the following:")
         for t in TASK_TYPES:
@@ -69,9 +63,15 @@ def main():
             os.path.realpath(os.path.join(toml_path, args["metadata"]))
         )
 
+    if "tests" not in args or not os.path.exists(args["tests"]):
+        print("WARNING: No 'tests' directory found.")
+        args["tests"] = None
+    else:
+        args["tests"] = Path(os.path.realpath(os.path.join(toml_path, args["tests"])))
+
     if "models" not in args or len(args["models"]) < 1:
-        print("ERROR: Must have 'models' entry which have at least one model.")
-        sys.exit(1)
+        print("WARNING: No 'models' found.")
+        args["models"] = []
     else:
         if Path(os.path.realpath(os.path.join(toml_path, args["models"][0]))).exists():
             args["models"] = [

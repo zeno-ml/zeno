@@ -79,7 +79,7 @@ class Zeno(object):
             output_path="",
         )
 
-        if os.path.isdir(models[0]):
+        if models and os.path.isdir(models[0]):
             self.model_paths = [
                 os.path.join(models[0], m) for m in os.listdir(models[0])
             ]
@@ -141,16 +141,22 @@ class Zeno(object):
     def start_processing(self):
         """Parse testing files, distill, and run inference."""
 
-        # Get Zeno test functions.
-        for f in list(self.tests.rglob("*.py")):
-            self.__parse_testing_file(f)
-
         # Get all Zeno core columns before processing.
         zeno_cols: List[ZenoColumn] = []
         for metadata_col in self.df.columns:
             col = ZenoColumn(column_type=ZenoColumnType.METADATA, name=metadata_col[1:])
             zeno_cols.append(col)
             self.complete_columns.append(col)
+
+        # Get Zeno test functions.
+        if not self.tests:
+            self.columns = zeno_cols
+            self.done_processing = True
+            self.status = "Done processing"
+            return
+
+        for f in list(self.tests.rglob("*.py")):
+            self.__parse_testing_file(f)
 
         for fn in self.distill_functions.values():
             if fn.fn_type == ZenoFunctionType.PREDISTILL:

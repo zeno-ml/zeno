@@ -8,6 +8,8 @@
 	export let transformColumn;
 	export let idColumn;
 	export let color = "white";
+
+	console;
 </script>
 
 {#each table as row}
