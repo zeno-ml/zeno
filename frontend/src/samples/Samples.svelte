@@ -23,7 +23,7 @@
 
 	status.subscribe((s) => {
 		let obj = s.completeColumns.find((c) => {
-			return c.columnType === ZenoColumnType.OUTPUT && c.model === $model;
+			return c.columnType === ZenoColumnType.OUTPUT && c.name === $model;
 		});
 		modelColumn = obj ? columnHash(obj) : "";
 	});
@@ -58,14 +58,14 @@
 				idColumn={columnHash($settings.idColumn)}
 				labelColumn={columnHash($settings.labelColumn)}
 				dataColumn={columnHash($settings.dataColumn)}
-				table="{table.slice(start, end).objects()}modelColumn{modelColumn}"
+				table={table.slice(start, end).objects()}
 				{modelColumn} />
 		{:else if $settings.task === "object-detection"}
 			<ObjectDetection
 				idColumn={columnHash($settings.idColumn)}
 				labelColumn={columnHash($settings.labelColumn)}
 				dataColumn={columnHash($settings.dataColumn)}
-				table="{table.slice(start, end).objects()}modelColumn{modelColumn}"
+				table={table.slice(start, end).objects()}
 				{modelColumn} />
 		{:else if $settings.task === "text-classification"}
 			<TextClassification

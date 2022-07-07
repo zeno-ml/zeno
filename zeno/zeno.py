@@ -368,7 +368,7 @@ class Zeno(object):
             c for c in self.columns if c.column_type == ZenoColumnType.POSTDISTILL
         ]:
             col_name = postdistill_column.copy(
-                update={"model": postdistill_column.model}
+                update={"model": postdistill_column.model, "transform": transform.name}
             )
             col_hash = str(col_name)
             save_path = Path(self.cache_path, col_hash + ".pickle")
@@ -389,6 +389,7 @@ class Zeno(object):
                         [
                             self.distill_functions[e.name],
                             e.model,
+                            transform.name,
                             self.zeno_options,
                             self.cache_path,
                             self.df,

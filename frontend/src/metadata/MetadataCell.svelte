@@ -10,6 +10,7 @@
 	import { countSpec, histogramSpec } from "./vegaSpecs";
 	import { metadataSelections, table } from "../stores";
 	import { columnHash } from "../util";
+	import { onMount } from "svelte";
 
 	export let col: ZenoColumn;
 	$: hash = columnHash(col);
@@ -37,7 +38,7 @@
 		}
 	}
 
-	table.subscribe((t) => {
+	function drawChart(t: ColumnTable) {
 		if (t.column(hash)) {
 			let isOrdinal = isNaN(Number(t.column(hash).get(0)));
 			let unique = t
@@ -58,6 +59,12 @@
 				chartType = unique < 20 ? ChartType.Count : ChartType.Histogram;
 			}
 		}
+	}
+
+	table.subscribe((t) => drawChart(t));
+	onMount(() => {
+		drawChart($table);
+		updateData($table);
 	});
 
 	$: {

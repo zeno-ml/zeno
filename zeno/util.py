@@ -232,6 +232,7 @@ def run_inference(
 def postdistill_data(
     postprocessor: ZenoFunction,
     model: str,
+    transform: str,
     options: ZenoOptions,
     cache_path: str,
     df: pd.DataFrame,
@@ -243,7 +244,7 @@ def postdistill_data(
         column_type=ZenoColumnType.POSTDISTILL,
         name=postprocessor.name,
         model=model,
-        transform="",
+        transform=transform,
     )
     col_hash = str(col_obj)
     col = df[col_hash]
@@ -251,8 +252,7 @@ def postdistill_data(
     output_obj = ZenoColumn(
         column_type=ZenoColumnType.OUTPUT,
         name=model,
-        model=model,
-        transform="",
+        transform=transform,
     )
     output_hash = str(output_obj)
 
@@ -275,7 +275,12 @@ def postdistill_data(
                 0,
                 len(to_predict_indices),
                 batch_size,
-                desc="postprocessing " + postprocessor.name,
+                desc="postprocessing "
+                + postprocessor.name
+                + " on "
+                + model
+                + " with "
+                + transform,
                 position=pos,
             ):
                 out = postprocessor_fn(

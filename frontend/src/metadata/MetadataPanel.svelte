@@ -21,8 +21,15 @@
 		sliceSelections,
 		sort,
 		table,
+		metric,
+		transform,
 	} from "../stores";
-	import { columnHash, getFilterFromPredicates } from "../util";
+	import {
+		columnHash,
+		getFilterFromPredicates,
+		getMetricsForSlices,
+		updateSliceIdxs,
+	} from "../util";
 	import { ZenoColumnType } from "../globals";
 
 	let name = "";
@@ -79,6 +86,20 @@
 		mode = "edit";
 		newSlice = true;
 	}
+
+	model.subscribe(() => updateSliceIdxs());
+
+	$: res = getMetricsForSlices([
+		<MetricKey>{
+			sli: <Slice>{
+				sliceName: "overall",
+				idxs: $table.array(columnHash($settings.idColumn)),
+			},
+			metric: $metric,
+			model: $model,
+			transform: $transform,
+		},
+	]);
 </script>
 
 <div class="side-container">
@@ -100,7 +121,10 @@
 			</div>
 			<p>all instances</p>
 		</div>
-		<p>{$table.size}</p>
+		<div>
+			<span>{#await res then r}{r && r[0] ? r[0].toFixed(2) : ""}{/await}</span>
+			<span class="size">({$table.size})</span>
+		</div>
 	</div>
 	<div class="inline">
 		<h4>Slices</h4>
@@ -217,5 +241,10 @@
 	}
 	.selected {
 		background: #ebdffc;
+	}
+	.size {
+		font-style: italic;
+		color: rgba(0, 0, 0, 0.4);
+		margin-right: 10px;
 	}
 </style>

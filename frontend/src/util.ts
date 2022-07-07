@@ -1,6 +1,7 @@
+import { ZenoColumnType } from "./globals";
 import * as aq from "arquero";
 import { get } from "svelte/store";
-import { tab, transforms } from "./stores";
+import { model, tab, transforms } from "./stores";
 
 import {
 	metrics,
@@ -68,7 +69,6 @@ export function updateTab(t: string) {
 }
 
 export async function getMetricsForSlices(metricKeys: MetricKey[]) {
-	console.log(metricKeys);
 	const returnValues = metricKeys.map((k) => {
 		if (k.sli.sliceName === "") {
 			return undefined;
@@ -102,8 +102,23 @@ export async function getMetricsForSlices(metricKeys: MetricKey[]) {
 	return returnValues;
 }
 
+export function updateSliceIdxs() {
+	slices.update((slis) => {
+		slis.forEach((sli) => {
+			sli.idxs = get(table)
+				.filter("(d) => " + getFilterFromPredicates(sli.filterPredicates))
+				.array(columnHash(get(settings).idColumn));
+			slis.set(sli.sliceName, sli);
+		});
+		return slis;
+	});
+}
+
 export function getFilterFromPredicates(predicates: FilterPredicate[]) {
 	const stringPreds = predicates.map((p: FilterPredicate, i) => {
+		if (p.column.columnType === ZenoColumnType.POSTDISTILL) {
+			p.column.model = get(model);
+		}
 		let join = "";
 		if (i !== 0) {
 			join = p.join;
