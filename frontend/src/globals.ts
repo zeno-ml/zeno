@@ -4,4 +4,5 @@ export enum ZenoColumnType {
 	OUTPUT,
 	EMBEDDING,
 	POSTDISTILL,
+	TRANSFORM,
 }

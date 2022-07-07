@@ -5,6 +5,7 @@
 	export let modelColumn;
 	export let labelColumn;
 	export let dataColumn;
+	export let transformColumn;
 	export let idColumn;
 	export let color = "white";
 </script>
@@ -23,6 +24,20 @@
 				{/each}
 			</Tooltip>
 		</Wrapper>
+		{#if transformColumn}
+			<Wrapper>
+				<img
+					src={`/cache/${transformColumn}/${row[transformColumn]}`}
+					style:max-width="200px"
+					alt="Image thumbnail for instance {row[transformColumn]}" />
+				<Tooltip>
+					{#each Object.keys(row).filter((r) => !r.startsWith("zeno")) as key}
+						{key} : {row[key]}
+						<br />
+					{/each}
+				</Tooltip>
+			</Wrapper>
+		{/if}
 		<br />
 		<span class="label">label: </span><span class="value">
 			{row[labelColumn]}

@@ -207,5 +207,10 @@ export function updateReports(reps) {
 }
 
 export function columnHash(col: ZenoColumn) {
-	return col.columnType + col.name + col.model + col.transform;
+	return (
+		col.columnType +
+		col.name +
+		(col.model ? col.model : "") +
+		(col.transform ? col.transform : "")
+	);
 }

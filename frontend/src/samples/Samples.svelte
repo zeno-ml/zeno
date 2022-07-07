@@ -6,7 +6,7 @@
 	import { ZenoColumnType } from "../globals";
 	import { columnHash } from "../util";
 
-	import { model, settings, status } from "../stores";
+	import { model, settings, status, transform } from "../stores";
 
 	import AudioClassification from "./AudioClassification.svelte";
 	import ImageClassification from "./ImageClassification.svelte";
@@ -42,6 +42,19 @@
 	$: if (currentPage > lastPage) {
 		currentPage = lastPage;
 	}
+
+	let transformColumn = "";
+	transform.subscribe((t) => {
+		if (t) {
+			let col = <ZenoColumn>{
+				columnType: ZenoColumnType.TRANSFORM,
+				name: t,
+			};
+			transformColumn = columnHash(col);
+		} else {
+			transformColumn = "";
+		}
+	});
 </script>
 
 {#if table}
@@ -52,6 +65,7 @@
 				labelColumn={columnHash($settings.labelColumn)}
 				dataColumn={columnHash($settings.dataColumn)}
 				table={table.slice(start, end).objects()}
+				{transformColumn}
 				{modelColumn} />
 		{:else if $settings.task === "image-segmentation"}
 			<ImageSegmentation
