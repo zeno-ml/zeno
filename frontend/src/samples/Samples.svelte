@@ -13,6 +13,7 @@
 	import ImageSegmentation from "./ImageSegmentation.svelte";
 	import ObjectDetection from "./ObjectDetection.svelte";
 	import TextClassification from "./TextClassification.svelte";
+	import { mdiZWave } from "@mdi/js";
 
 	export let table;
 
@@ -55,11 +56,25 @@
 			transformColumn = "";
 		}
 	});
+
+	let sampleDiv;
+	settings.subscribe((s) => {
+		let v = window.location.origin + "/view/main.js";
+		try {
+			import(v).then((m) => {
+				console.log(m);
+				sampleDiv.appendChild(m.default());
+			});
+		} catch (e) {
+			console.log(e);
+		}
+	});
 </script>
 
 {#if table}
 	<div class="container sample-container">
-		{#if $settings.task === "image-classification"}
+		<div bind:this={sampleDiv} />
+		<!-- {#if $settings.task === "image-classification"}
 			<ImageClassification
 				idColumn={columnHash($settings.idColumn)}
 				labelColumn={columnHash($settings.labelColumn)}
@@ -96,7 +111,7 @@
 				table={table.slice(start, end).objects()}
 				{transformColumn}
 				{modelColumn} />
-		{/if}
+		{/if} -->
 	</div>
 	<Pagination slot="paginate" class="pagination">
 		<svelte:fragment slot="rowsPerPage">

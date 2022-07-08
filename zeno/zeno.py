@@ -42,7 +42,6 @@ class Zeno(object):
     def __init__(
         self,
         metadata_path: Path,
-        task: str,
         tests: Path,
         models: List[Path],
         batch_size,
@@ -55,7 +54,6 @@ class Zeno(object):
     ):
         logging.basicConfig(level=logging.INFO)
 
-        self.task = task
         self.tests = tests
         self.batch_size = batch_size
         self.id_column = ZenoColumn(column_type=ZenoColumnType.METADATA, name=id_column)

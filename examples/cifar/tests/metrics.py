@@ -24,3 +24,8 @@ def f1(df, ops: ZenoOptions):
 @distill_function
 def incorrect(df, ops: ZenoOptions):
     return (df[ops.label_column] != df[ops.output_column]).astype(int).tolist()
+
+
+@distill_function
+def output_label(df, ops: ZenoOptions):
+    return df[ops.output_column]

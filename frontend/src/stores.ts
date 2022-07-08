@@ -32,7 +32,7 @@ export const status: Readable<WSResponse> = derived(
 );
 
 export const settings: Writable<Settings> = writable(<Settings>{
-	task: "",
+	view: "",
 	idColumn: {},
 	dataColumn: {},
 	labelColumn: {},

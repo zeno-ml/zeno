@@ -1,5 +1,5 @@
 tests = "./"
-task = "image-classification"
+view = "zenoml_image_classification"
 metadata = "../cifar_pred.csv"
 models = [
     "../cifar_net_1.pth",

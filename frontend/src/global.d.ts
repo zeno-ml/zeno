@@ -1,7 +1,7 @@
 /// <reference types="svelte" />
 
 interface Settings {
-	task: string;
+	view: string;
 	idColumn: ZenoColumn;
 	labelColumn: ZenoColumn;
 	dataColumn: ZenoColumn;
