@@ -94,6 +94,7 @@
 				labelColumn={columnHash($settings.labelColumn)}
 				dataColumn={columnHash($settings.dataColumn)}
 				table={table.slice(start, end).objects()}
+				{transformColumn}
 				{modelColumn} />
 		{/if}
 	</div>

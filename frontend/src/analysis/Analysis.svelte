@@ -2,9 +2,9 @@
 	import html2pdf from "html2pdf.js";
 
 	import Button from "@smui/button";
-
 	import Select, { Option } from "@smui/select";
-	import { metric, metrics, transforms, transform } from "../stores";
+
+	import { metric, metrics, transform, transforms } from "../stores";
 
 	import AnalysisTable from "./AnalysisTable.svelte";
 	import ReportsPanel from "./report/ReportsPanel.svelte";

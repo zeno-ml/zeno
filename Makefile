@@ -52,7 +52,6 @@ build:
 .PHONY: install
 install:
 	@echo "==> 📦 Installing"
-	@poetry config virtualenvs.in-project true
 	@poetry install
 	@cd frontend && npm i && npm run build
 

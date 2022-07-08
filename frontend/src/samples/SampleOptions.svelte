@@ -1,11 +1,20 @@
 <script lang="ts">
 	import Select, { Option } from "@smui/select";
 
-	import { filteredTable, currentColumns, sort } from "../stores";
-
-	import Settings from "../Settings.svelte";
-	import SelectionBar from "../metadata/SelectionBar.svelte";
+	import {
+		currentColumns,
+		filteredTable,
+		sort,
+		metric,
+		metrics,
+		model,
+		models,
+		transform,
+		transforms,
+	} from "../stores";
 	import { columnHash } from "../util";
+
+	import SelectionBar from "../metadata/SelectionBar.svelte";
 
 	sort.subscribe((s) => {
 		filteredTable.update((table) => {
@@ -19,7 +28,30 @@
 
 <div id="options-container">
 	<div class="options container">
-		<Settings />
+		{#if $models}
+			<Select bind:value={$model} label="Model" style="margin-right: 20px;">
+				{#each $models as m}
+					<Option value={m}>{m}</Option>
+				{/each}
+			</Select>
+		{/if}
+		{#if $metrics}
+			<Select bind:value={$metric} label="Metric" style="margin-right: 20px;">
+				{#each $metrics as m}
+					<Option value={m}>{m}</Option>
+				{/each}
+			</Select>
+		{/if}
+		{#if $transforms}
+			<Select
+				bind:value={$transform}
+				label="Transform"
+				style="margin-right: 20px;">
+				{#each ["", ...$transforms] as t}
+					<Option value={t}>{t}</Option>
+				{/each}
+			</Select>
+		{/if}
 	</div>
 	<div id="selects">
 		<div class="select-div">

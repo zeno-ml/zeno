@@ -20,6 +20,7 @@ pip install zenoml
 After cloning the repository:
 
 - Install [`Poetry`](https://python-poetry.org/docs/master/#installing-with-the-official-installer), [`nodejs`](https://nodejs.org/en/download/) and use [`VSCode`](https://code.visualstudio.com/) as your editor.
+- `poetry config virtualenvs.in-project true`
 - `make install`
 
 You should now be able to run `poetry run zeno`
@@ -27,7 +28,7 @@ You should now be able to run `poetry run zeno`
 To run the CIFAR-10 example:
 
 - `mkdir data; cd data; git clone https://github.com/YoongiKim/CIFAR-10-images`
-- `poetry run zeno examples/cifar/tests/zeno.toml`
+- `poetry run zeno ./examples/cifar/tests/zeno.toml`
 - For debugging, you can use the "Run and Debug" sidebar in VSCode (a play button with a bug icon), and run the `zenocifar` configuration.
 
 To see live changes to the frontend:

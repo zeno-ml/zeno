@@ -10,6 +10,7 @@
 	export let modelColumn;
 	export let labelColumn;
 	export let dataColumn;
+	export let transformColumn;
 	export let idColumn;
 
 	let divs = [];
@@ -24,7 +25,11 @@
 				mediaControls: true,
 				height: 50,
 			});
-			w.load(`/data/${table[i][idColumn]}`);
+			if (!transformColumn) {
+				w.load(`/data/${table[i][idColumn]}`);
+			} else {
+				w.load(`/cache/${transformColumn}/${table[i][transformColumn]}`);
+			}
 			return w;
 		}
 	});

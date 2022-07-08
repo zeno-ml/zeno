@@ -1,8 +1,8 @@
 <script lang="ts">
 	import {
-		mdiCircleOutline,
-		mdiCheckboxMultipleMarkedCircleOutline,
 		mdiChartPie,
+		mdiCheckboxMultipleMarkedCircleOutline,
+		mdiCircleOutline,
 	} from "@mdi/js";
 	import { Svg } from "@smui/common/elements";
 	import IconButton, { Icon } from "@smui/icon-button";
@@ -10,13 +10,13 @@
 	import { onMount } from "svelte";
 	import Router, { location } from "svelte-spa-router";
 
-	import { tab, metric, metrics, model, models, ready, status } from "./stores";
+	import { metric, metrics, model, models, ready, status, tab } from "./stores";
 	import { initialFetch, updateTab, updateTableColumns } from "./util";
 
-	import Header from "./Header.svelte";
+	import Analysis from "./analysis/Analysis.svelte";
 	import Discovery from "./discovery/Discovery.svelte";
 	import Exploration from "./Exploration.svelte";
-	import Analysis from "./analysis/Analysis.svelte";
+	import Header from "./Header.svelte";
 
 	const routes = {
 		"/": Exploration,
@@ -27,6 +27,12 @@
 	};
 
 	tab.set($location.split("/")[1]);
+	location.subscribe((d) => {
+		tab.set(d.split("/")[1]);
+		if (!$tab) {
+			tab.set("exploration");
+		}
+	});
 
 	onMount(() => initialFetch());
 	status.subscribe((w) => updateTableColumns(w));
@@ -34,12 +40,6 @@
 		if (r) {
 			model.set($models[0]);
 			metric.set($metrics[0]);
-		}
-	});
-	location.subscribe((d) => {
-		tab.set(d.split("/")[1]);
-		if (!$tab) {
-			tab.set("exploration");
 		}
 	});
 </script>

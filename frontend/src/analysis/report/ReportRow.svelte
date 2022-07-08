@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { Icon } from "@smui/button";
 	import Ripple from "@smui/ripple";
-	import Textfield from "@smui/textfield";
-
 	import Select, { Option } from "@smui/select";
+	import Textfield from "@smui/textfield";
 	import HelperText from "@smui/textfield/helper-text";
+
 	import { clickOutside } from "../../clickOutside";
 	import { metrics, report, reports } from "../../stores";
 	import { updateReports } from "../../util";

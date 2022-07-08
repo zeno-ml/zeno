@@ -1,6 +1,7 @@
 <script>
+	import DataTable, { Body, Cell, Head, Row } from "@smui/data-table";
+
 	import { models, slices } from "../stores";
-	import DataTable, { Head, Body, Row, Cell } from "@smui/data-table";
 
 	import AnalysisTableRow from "./AnalysisTableRow.svelte";
 </script>

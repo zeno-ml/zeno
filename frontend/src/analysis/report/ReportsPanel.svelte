@@ -1,12 +1,13 @@
 <script lang="ts">
+	import { mdiTableMultiple } from "@mdi/js";
 	import Button, { Icon } from "@smui/button";
 	import { Svg } from "@smui/common/elements";
 	import Ripple from "@smui/ripple";
-	import { mdiTableMultiple } from "@mdi/js";
 
-	import { reports, report } from "../../stores";
-	import ReportRow from "./ReportRow.svelte";
+	import { report, reports } from "../../stores";
 	import { updateReports } from "../../util";
+
+	import ReportRow from "./ReportRow.svelte";
 
 	report.set(-1);
 </script>

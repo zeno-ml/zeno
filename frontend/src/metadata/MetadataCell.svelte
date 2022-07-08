@@ -1,16 +1,16 @@
 <script lang="ts">
-	import type { View } from "svelte-vega";
 	import type ColumnTable from "arquero/dist/types/table/column-table";
+	import type { View } from "svelte-vega";
 
 	import Button from "@smui/button";
 	import { Label } from "@smui/common";
 
 	import { VegaLite } from "svelte-vega";
+	import { onMount } from "svelte";
 
-	import { countSpec, histogramSpec } from "./vegaSpecs";
 	import { metadataSelections, table } from "../stores";
 	import { columnHash } from "../util";
-	import { onMount } from "svelte";
+	import { countSpec, histogramSpec } from "./vegaSpecs";
 
 	export let col: ZenoColumn;
 	$: hash = columnHash(col);

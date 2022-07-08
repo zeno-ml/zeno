@@ -90,6 +90,13 @@ class Slice(CamelModel):
     idxs: Optional[List[str]]
 
 
+class MetricKey(CamelModel):
+    sli: Slice
+    metric: str
+    model: str
+    transform: str
+
+
 class StatusResponse(CamelModel):
     status: str
     done_processing: bool
@@ -102,13 +109,6 @@ class TableRequest(BaseModel):
 
 class ReportsRequest(CamelModel):
     reports: List[Report]
-
-
-class MetricKey(CamelModel):
-    sli: Slice
-    metric: str
-    model: str
-    transform: str
 
 
 class MetricsRequest(BaseModel):
