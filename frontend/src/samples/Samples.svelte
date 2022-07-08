@@ -58,13 +58,25 @@
 	});
 
 	let sampleDiv;
+	let divFunction;
+
+	$: if (sampleDiv && divFunction) {
+		sampleDiv.innerHTML = "";
+		sampleDiv.appendChild(
+			divFunction(
+				table.slice(start, end).objects(),
+				modelColumn,
+				columnHash($settings.labelColumn),
+				columnHash($settings.dataColumn),
+				transformColumn,
+				columnHash($settings.idColumn)
+			)
+		);
+	}
 	settings.subscribe((s) => {
-		let v = window.location.origin + "/view/main.js";
+		let v = window.location.origin + "/view/index.mjs";
 		try {
-			import(v).then((m) => {
-				console.log(m);
-				sampleDiv.appendChild(m.default());
-			});
+			import(v).then((m) => (divFunction = m.default));
 		} catch (e) {
 			console.log(e);
 		}
@@ -155,13 +167,8 @@
 {/if}
 
 <style>
-	.container {
-		display: flex;
-		flex-direction: inline;
-		flex-wrap: wrap;
-		width: 100%;
-	}
 	.sample-container {
+		width: 100%;
 		height: calc(100vh - 250px);
 		overflow-y: auto;
 		align-content: baseline;

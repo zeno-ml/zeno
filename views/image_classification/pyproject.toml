@@ -9,10 +9,10 @@ repository = "https://github.com/cmudig/zeno"
 homepage = "https://dig.cmu.edu/zeno/"
 keywords = ["ml", "testing"]
 packages = [
-    { include = "zenoml_image_classification" },
+    { include = "image_classification" },
 ]
 include = [
-    "zenoml_image_classification/frontend/**/*"
+    "image_classification/frontend/**/*"
 ]
 
 [tool.poetry.dependencies]
