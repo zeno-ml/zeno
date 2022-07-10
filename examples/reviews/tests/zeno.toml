@@ -1,5 +1,5 @@
 tests = "./"
-task = "text-classification"
+view = "zenoml_text_classification"
 metadata = "../amazon_pred.csv"
 models = [
     "distilbert-base-uncased-finetuned-sst-2-english",
