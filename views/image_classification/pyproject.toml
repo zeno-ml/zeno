@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "zenoml_image_classification"
 version = "0.0.1"
-description = "Image classification view for Zeno"
+description = "Image Classification for Zeno"
 license = "MIT"
 authors = ["Ángel Alexander Cabrera <alex.cabrera@gmail.com>"]
 readme = "README.md"  # Markdown files are supported
@@ -9,10 +9,10 @@ repository = "https://github.com/cmudig/zeno"
 homepage = "https://dig.cmu.edu/zeno/"
 keywords = ["ml", "testing"]
 packages = [
-    { include = "image_classification" },
+    { include = "zenoml_image_classification" },
 ]
 include = [
-    "image_classification/frontend/**/*"
+    "zenoml_image_classification/frontend/**/*"
 ]
 
 [tool.poetry.dependencies]

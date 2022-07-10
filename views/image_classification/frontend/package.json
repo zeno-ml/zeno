@@ -1,7 +1,7 @@
 {
-  "name": "image_classification",
+  "name": "zenoml_image_classification",
   "svelte": "src/index.js",
-  "module": "../image_classification/frontend/index.mjs",
+  "module": "../zenoml_image_classification/frontend/index.mjs",
   "scripts": {
     "build": "rollup -c",
     "prepublishOnly": "npm run build"

@@ -53,7 +53,7 @@ segmentation-models = "^1.0.1"
 keras = "^2.9.0"
 tensorflow = "^2.9.0"
 librosa = "^0.9.2"
-zenoml-image-classification = {path = "views/image-classification", develop = true}
+zenoml_image_classification = {path = "views/image_classification", develop = true}
 
 [tool.poetry.scripts]
 zeno = "zeno.runner:main"

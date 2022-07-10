@@ -1,7 +1,7 @@
 {
-  "name": "zenoml_{{cookiecutter.view_name}}",
+  "name": "{{cookiecutter.package_name}}",
   "svelte": "src/index.js",
-  "module": "../{{cookiecutter.view_name}}/frontend/index.mjs",
+  "module": "../{{cookiecutter.package_name}}/frontend/index.mjs",
   "scripts": {
     "build": "rollup -c",
     "prepublishOnly": "npm run build"

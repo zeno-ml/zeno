@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "zenoml_{{cookiecutter.view_name}}"
+name = "{{cookiecutter.package_name}}"
 version = "0.0.1"
 description = "{{cookiecutter.view_name}} for Zeno"
 license = "MIT"
@@ -9,10 +9,10 @@ repository = "https://github.com/cmudig/zeno"
 homepage = "https://dig.cmu.edu/zeno/"
 keywords = ["ml", "testing"]
 packages = [
-    { include = "{{cookiecutter.view_name}}" },
+    { include = "{{cookiecutter.package_name}}" },
 ]
 include = [
-    "{{cookiecutter.view_name}}/frontend/**/*"
+    "{{cookiecutter.package_name}}/frontend/**/*"
 ]
 
 [tool.poetry.dependencies]

@@ -60,7 +60,7 @@ def main():
     try:
         mod = importlib.import_module(args["view"])
     except ModuleNotFoundError:
-        print("ERROR: " + args["view"] + "is not a valid python package")
+        print("ERROR: " + args["view"] + " is not a valid python package")
         sys.exit(1)
 
     if not mod.path:
