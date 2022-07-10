@@ -1,5 +1,5 @@
 tests = "../"
-task = "image-segmentation"
+view = "zenoml_image_segmentation"
 metadata = "../segmentation.csv"
 models = [
     "/Users/acabrera/dev-research/22-zeno/zeno/examples/segmentation/models/weights.ckpt",

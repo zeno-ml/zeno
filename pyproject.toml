@@ -54,6 +54,7 @@ keras = "^2.9.0"
 tensorflow = "^2.9.0"
 librosa = "^0.9.2"
 zenoml_image_classification = {path = "views/image_classification", develop = true}
+zenoml_image_segmentation = {path = "views/image_segmentation", develop = true}
 zenoml_audio_transcription = {path = "views/audio_transcription", develop = true}
 
 [tool.poetry.scripts]
