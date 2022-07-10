@@ -1,7 +1,7 @@
 {
-  "name": "zenoml_image_classification",
+  "name": "zenoml_audio_transcription",
   "svelte": "src/index.js",
-  "module": "../zenoml_image_classification/frontend/index.mjs",
+  "module": "../zenoml_audio_transcription/frontend/index.mjs",
   "scripts": {
     "build": "rollup -c",
     "prepublishOnly": "npm run build"
@@ -19,5 +19,11 @@
   "files": [
     "src",
     "dist"
-  ]
+  ],
+  "dependencies": {
+    "@mdi/js": "^6.9.96",
+    "@smui/common": "^6.0.0-beta.16",
+    "@smui/icon-button": "^6.0.0-beta.16",
+    "wavesurfer.js": "^6.2.0"
+  }
 }

@@ -3143,6 +3143,19 @@ optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 
 [[package]]
+name = "zenoml-audio-transcription"
+version = "0.0.1"
+description = "Audio Transcription for Zeno"
+category = "dev"
+optional = false
+python-versions = ">=3.9,<3.11" 
+develop = true
+
+[package.source]
+type = "directory"
+url = "views/audio_transcription"
+
+[[package]]
 name = "zenoml-image-classification"
 version = "0.0.1"
 description = "Image Classification for Zeno"
@@ -3170,7 +3183,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11" 
-content-hash = "a2f4de9b121747783fe87c161bf178dbbf5ca36745a4b54186a50c93a97b0f7e"
+content-hash = "145373464e1537ab10ac1a60c60ad4ba91e31f2d58b721949c0656aa4ffa8644"
 
 [metadata.files]
 absl-py = [
@@ -4778,6 +4791,7 @@ wrapt = [
     {file = "wrapt-1.14.1-cp39-cp39-win_amd64.whl", hash = "sha256:dee60e1de1898bde3b238f18340eec6148986da0455d8ba7848d50470a7a32fb"},
     {file = "wrapt-1.14.1.tar.gz", hash = "sha256:380a85cf89e0e69b7cfbe2ea9f765f004ff419f34194018a6827ac0e3edfed4d"},
 ]
+zenoml-audio-transcription = []
 zenoml-image-classification = []
 zipp = [
     {file = "zipp-3.8.0-py3-none-any.whl", hash = "sha256:c4f6e5bbf48e74f7a38e7cc5b0480ff42b0ae5178957d564d18932525d5cf099"},

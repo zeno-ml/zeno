@@ -1,5 +1,5 @@
 tests = "./"
-task = "audio-classification"
+view = "zenoml_audio_transcription"
 metadata = "../fsdd.csv"
 models = [
     "a",
