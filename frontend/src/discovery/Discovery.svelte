@@ -33,7 +33,7 @@
 	let projection2D: number[][] = [];
 	let colorValues: number[] = [];
 	let opacityValues: number[] = [];
-	let colorBy: string = "label";
+	let colorBy: string = "0label";
 	// eslint-disable-next-line
 	let dataType: dataType = "categorical";
 	let colorRange: string[] = colorsCategorical;
@@ -181,7 +181,7 @@
 	<MetadataBar />
 	<div>
 		<!-- Color Dropdown -->
-		<div id="color-by">
+		<!-- <div id="color-by">
 			{#if metadataExists}
 				<Select bind:value={colorBy} label={"Color Points By"}>
 					{#each $settings.metadataColumns as metadataName, i}
@@ -189,7 +189,7 @@
 					{/each}
 				</Select>
 			{/if}
-		</div>
+		</div> -->
 
 		<!-- Scatter View -->
 		<div id="scatter-view" style:margin-top="10px">

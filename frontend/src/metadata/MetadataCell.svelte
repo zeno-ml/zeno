@@ -11,6 +11,7 @@
 	import { metadataSelections, table } from "../stores";
 	import { columnHash } from "../util";
 	import { countSpec, histogramSpec } from "./vegaSpecs";
+	import * as aq from "arquero";
 
 	export let col: ZenoColumn;
 	$: hash = columnHash(col);
@@ -28,13 +29,43 @@
 	let view: View;
 	let data = { table: [] };
 
+	function binGroups(columnNames: string[], t = $table) {
+		const counts = [];
+		const binName = (col) => `bin_${col}`;
+		const countCol = "count";
+		for (const name of columnNames) {
+			const binColName = binName(name);
+			const grouped = t.groupby({ [binColName]: aq.bin(name) });
+
+			const binnedData = grouped
+				.count({ as: countCol })
+				.impute(
+					{ count: () => 0 },
+					{
+						expand: {
+							[binColName]: `(d) => op.sequence(...op.bins(d.${binColName}))`,
+						},
+					}
+				)
+				.orderby(binColName);
+			counts.push({
+				[name]: {
+					bins: binnedData.columnArray(binColName),
+					counts: binnedData.columnArray(countCol),
+				},
+			});
+		}
+		return counts;
+	}
+
 	function updateData(table: ColumnTable) {
 		if (
 			(chartType === ChartType.Count || chartType === ChartType.Histogram) &&
 			table.column(hash)
 		) {
 			let arr = table.array(hash);
-			data = { table: arr };
+			let colorArr = table.array(`color_${hash}`);
+			data = { table: arr.map((d, i) => ({ data: d, color: colorArr[i] })) };
 		}
 	}
 
@@ -44,6 +75,7 @@
 			let unique = t
 				.rollup({ unique: `d => op.distinct(d["${hash}"])` })
 				.object()["unique"];
+			const key = `color_${hash}`;
 
 			if (!isOrdinal && unique === 2) {
 				let vals = t
@@ -54,11 +86,84 @@
 					chartType = ChartType.Binary;
 				}
 			} else if (isOrdinal) {
-				chartType = unique > 20 ? ChartType.Other : ChartType.Count;
+				if (unique <= 20) {
+					chartType = ChartType.Count;
+					const labels = colorLabelCategorical(hash);
+					if (!$table.column(key)) {
+						const newTable = aq.table({ [key]: labels });
+						table.set($table.assign(newTable));
+					}
+				} else {
+					chartType = ChartType.Other;
+				}
 			} else {
-				chartType = unique < 20 ? ChartType.Count : ChartType.Histogram;
+				if (unique < 20) {
+					chartType = ChartType.Count;
+				} else {
+					chartType = ChartType.Histogram;
+					const labels = colorLabelContinuous(hash);
+					if (!$table.column(key)) {
+						const newTable = aq.table({ [key]: labels });
+						table.set($table.assign(newTable));
+					}
+				}
 			}
 		}
+	}
+
+	function colorLabelContinuous(columnName: string, t = $table) {
+		let niceBins = bin(columnName, t);
+		let labels = [];
+		for (const row of t) {
+			let i = 0;
+			for (const bin of niceBins) {
+				if (row[columnName] >= bin.binStart && row[columnName] < bin.binEnd) {
+					labels.push(i);
+					continue;
+				}
+				i++;
+			}
+		}
+		return labels;
+	}
+
+	function colorLabelCategorical(columnName: string, t = $table) {
+		let vals = t
+			.orderby(hash)
+			.rollup({ a: `d => op.array_agg_distinct(d["${hash}"])` })
+			.object()["a"];
+		let mapper = new Map();
+
+		for (let i = 0; i < vals.length; i++) {
+			mapper.set(vals[i], i);
+		}
+
+		let colorLabels = [];
+		for (const row of t) {
+			colorLabels.push(mapper.get(row[hash]));
+		}
+		return colorLabels;
+	}
+
+	function bin(hash: string, t = $table) {
+		const groups = binGroups([hash], t)[0][hash];
+		const inc = groups.bins[1];
+		let formatted = [];
+		let i = 0,
+			k = 1;
+		while (k < groups.bins.length) {
+			const binStart = groups.bins[i];
+			const binEnd = groups.bins[k];
+			const count = groups.counts[i];
+			formatted.push({ binStart, binEnd, count });
+			i++;
+			k++;
+		}
+		const binStart = groups.bins[i];
+		const binEnd = binStart + inc;
+		const count = groups.counts[i];
+		formatted.push({ binStart, binEnd, count });
+		return formatted;
 	}
 
 	table.subscribe((t) => drawChart(t));
@@ -187,7 +292,7 @@
 			on:blur={setSelection}>
 			<VegaLite
 				spec={chartType === ChartType.Histogram ? histogramSpec : countSpec}
-				{data}
+				data={chartType === ChartType.Histogram ? data : data}
 				bind:view
 				options={{ tooltip: true, actions: false, theme: "vox" }} />
 		</div>

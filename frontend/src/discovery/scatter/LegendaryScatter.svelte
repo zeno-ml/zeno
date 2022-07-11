@@ -19,7 +19,11 @@
 	$: colorRange = legend.map((item) => item.color);
 </script>
 
-<div id="legendary" style:width="{width}px" style:height="{height}px">
+<div
+	id="legendary"
+	style:width="{width}px"
+	style:height="{height}px"
+	style:margin={"20px"}>
 	{#if points.length > 0}
 		<div id="bottom-scatter">
 			<AutoscaledRegl
@@ -34,7 +38,7 @@
 		</div>
 	{/if}
 	<div id="top-legend">
-		<Legend gap={5} data={legend} squareWidth={25} />
+		<!-- <Legend gap={5} data={legend} squareWidth={25} /> -->
 	</div>
 </div>
 

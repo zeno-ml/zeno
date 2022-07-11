@@ -479,7 +479,13 @@ class Zeno(object):
         filtered_rows = self.__get_df_rows(
             self.df, str(self.id_column), list_to_get=instance_ids
         )
-        embeds = np.stack(filtered_rows["zenoembedding_" + model].to_numpy())
+        embedding_col = ZenoColumn(
+            column_type=ZenoColumnType.EMBEDDING,
+            name=model,
+            transform="",
+        )
+        embedding_hash = str(embedding_col)
+        embeds = np.stack(filtered_rows[embedding_hash].to_numpy())
         projection = self.__run_umap(embeds)
         payload = [
             {"proj": proj, "id": id} for proj, id in zip(projection, instance_ids)
