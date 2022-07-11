@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "{{cookiecutter.project_name}}"
+name = "zenoml-audio-transcription"
 version = "0.0.1"
-description = "{{cookiecutter.view_name}} for Zeno"
+description = "Audio Transcription for Zeno"
 license = "MIT"
 authors = ["Ángel Alexander Cabrera <alex.cabrera@gmail.com>"]
 readme = "README.md"  # Markdown files are supported
@@ -9,10 +9,10 @@ repository = "https://github.com/cmudig/zeno"
 homepage = "https://dig.cmu.edu/zeno/"
 keywords = ["ml", "testing"]
 packages = [
-    { include = "{{cookiecutter.package_name}}" },
+    { include = "zenoml_audio_transcription" },
 ]
 include = [
-    "{{cookiecutter.package_name}}/frontend/**/*"
+    "zenoml_audio_transcription/frontend/**/*"
 ]
 
 [tool.poetry.dependencies]

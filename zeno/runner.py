@@ -1,4 +1,5 @@
 import asyncio
+import importlib
 import json
 import os
 import sys
@@ -10,7 +11,6 @@ import uvicorn  # type: ignore
 from fastapi import FastAPI, WebSocket
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
-import importlib
 
 from .classes import (
     MetricsRequest,

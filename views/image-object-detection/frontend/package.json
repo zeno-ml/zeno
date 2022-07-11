@@ -1,7 +1,7 @@
 {
-  "name": "{{cookiecutter.project_name}}",
+  "name": "zenoml-image-object-detection",
   "svelte": "src/index.js",
-  "module": "../{{cookiecutter.package_name}}/frontend/index.mjs",
+  "module": "../zenoml_image_object_detection/frontend/index.mjs",
   "scripts": {
     "build": "rollup -c",
     "prepublishOnly": "npm run build"

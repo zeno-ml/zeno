@@ -3,6 +3,8 @@ data/
 .zeno_cache/
 models/
 node_modules/
+frontend/index.mjs
+*.pt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

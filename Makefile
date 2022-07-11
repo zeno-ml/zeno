@@ -1,5 +1,13 @@
 all: check format lint typecheck cover book 
 
+.PHONY: install
+install:
+	@echo "==> 📦 Installing"
+	@chmod +x ./build-views.sh
+	@./build-views.sh
+	@poetry install
+	@cd frontend && npm i && npm run build
+
 .PHONY: test
 test:
 	@echo "==> 🧪 Tests"
@@ -48,13 +56,6 @@ build:
 	@echo "==> 👷‍♀️ Build"
 	@cd frontend && npm run build
 	@poetry build -vvv
-
-.PHONY: install
-install:
-	@echo "==> 📦 Installing"
-	@poetry install
-	@cd frontend && npm i && npm run build
-
 
 .PHONY: check
 check:

@@ -101,8 +101,6 @@
 			transform: $transform,
 		},
 	]);
-
-	$: console.log($settings.metadataColumns, $table.columnNames());
 </script>
 
 <div class="side-container">

@@ -62,7 +62,7 @@ def predistill_data(
         if len(to_predict_indices) < batch_size:
             out = fn(df.loc[to_predict_indices], options)
             col.loc[to_predict_indices] = out
-            col.to_pickle(save_path)
+            col.to_pickle(str(save_path))
         else:
             for i in trange(
                 0,
@@ -73,7 +73,7 @@ def predistill_data(
             ):
                 out = fn(df.loc[to_predict_indices[i : i + batch_size]], options)
                 col.loc[to_predict_indices[i : i + batch_size]] = out
-                col.to_pickle(save_path)
+                col.to_pickle(str(save_path))
     return (column, col)
 
 
@@ -109,7 +109,7 @@ def transform_data(
                 dataclasses.replace(options, output_path=transform_cache_path),
             )
             col.loc[to_transform_indices] = out
-            col.to_pickle(save_path)
+            col.to_pickle(str(save_path))
         else:
             for i in trange(
                 0,
@@ -123,7 +123,7 @@ def transform_data(
                     dataclasses.replace(options, output_path=transform_cache_path),
                 )
                 col.loc[to_transform_indices[i : i + batch_size]] = out
-                col.to_pickle(save_path)
+                col.to_pickle(str(save_path))
     return (transform_col, col)
 
 
@@ -189,12 +189,12 @@ def run_inference(
                 for i, idx in enumerate(to_predict_indices):
                     model_col.at[idx] = out[0][i]
                     embedding_col.at[idx] = out[1][i]
-                embedding_col.to_pickle(embedding_save_path)
+                embedding_col.to_pickle(str(embedding_save_path))
                 out = out[0]
             else:
                 model_col[to_predict_indices] = out
 
-            model_col.to_pickle(model_save_path)
+            model_col.to_pickle(str(model_save_path))
 
         else:
             for i in trange(
@@ -219,12 +219,12 @@ def run_inference(
                     for i, idx in enumerate(to_predict_indices[i : i + batch_size]):
                         model_col.at[idx] = out[0][i]
                         embedding_col.at[idx] = out[1][i]
-                    embedding_col.to_pickle(embedding_save_path)
+                    embedding_col.to_pickle(str(embedding_save_path))
                     out = out[0]
                 else:
                     model_col[to_predict_indices[i : i + batch_size]] = out
 
-                model_col.to_pickle(model_save_path)
+                model_col.to_pickle(str(model_save_path))
 
     return (model_col_obj, embedding_col_obj, model_col, embedding_col)
 
@@ -269,7 +269,7 @@ def postdistill_data(
         if len(to_predict_indices) < batch_size:
             out = postprocessor_fn(df.loc[to_predict_indices], local_options)
             col.loc[to_predict_indices] = out
-            col.to_pickle(save_path)
+            col.to_pickle(str(save_path))
         else:
             for i in trange(
                 0,
@@ -287,5 +287,5 @@ def postdistill_data(
                     df.loc[to_predict_indices[i : i + batch_size]], local_options
                 )
                 col.loc[to_predict_indices[i : i + batch_size]] = out
-                col.to_pickle(save_path)
+                col.to_pickle(str(save_path))
     return (col_obj, col)

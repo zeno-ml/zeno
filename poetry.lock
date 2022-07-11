@@ -1564,7 +1564,7 @@ test = ["hypothesis (>=5.5.3)", "pytest (>=6.0)", "pytest-xdist (>=1.31)"]
 
 [[package]]
 name = "pandas-stubs"
-version = "1.4.3.220704"
+version = "1.4.3.220710"
 description = "Type annotations for pandas"
 category = "dev"
 optional = false
@@ -2184,7 +2184,7 @@ win32 = ["pywin32"]
 
 [[package]]
 name = "setuptools-scm"
-version = "7.0.4"
+version = "7.0.5"
 description = "the blessed package to manage your versions by scm tags"
 category = "dev"
 optional = false
@@ -3153,7 +3153,7 @@ develop = true
 
 [package.source]
 type = "directory"
-url = "views/audio_transcription"
+url = "views/audio-transcription"
 
 [[package]]
 name = "zenoml-image-classification"
@@ -3166,7 +3166,46 @@ develop = true
 
 [package.source]
 type = "directory"
-url = "views/image_classification"
+url = "views/image-classification"
+
+[[package]]
+name = "zenoml-image-object-detection"
+version = "0.0.1"
+description = "Image Object Detection for Zeno"
+category = "dev"
+optional = false
+python-versions = ">=3.9,<3.11" 
+develop = true
+
+[package.source]
+type = "directory"
+url = "views/image-object-detection"
+
+[[package]]
+name = "zenoml-image-segmentation"
+version = "0.0.1"
+description = "Image Segmentation for Zeno"
+category = "dev"
+optional = false
+python-versions = ">=3.9,<3.11" 
+develop = true
+
+[package.source]
+type = "directory"
+url = "views/image-segmentation"
+
+[[package]]
+name = "zenoml-text-classification"
+version = "0.0.1"
+description = "Text Classification for Zeno"
+category = "dev"
+optional = false
+python-versions = ">=3.9,<3.11" 
+develop = true
+
+[package.source]
+type = "directory"
+url = "views/text-classification"
 
 [[package]]
 name = "zipp"
@@ -3183,7 +3222,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11" 
-content-hash = "145373464e1537ab10ac1a60c60ad4ba91e31f2d58b721949c0656aa4ffa8644"
+content-hash = "d1951b6e641747a9c8d402fdebdd64b4d626176b6acf06a0cd3ed10dd098fc1a"
 
 [metadata.files]
 absl-py = [
@@ -3901,10 +3940,7 @@ packaging = [
     {file = "packaging-21.3.tar.gz", hash = "sha256:dd47c42927d89ab911e606518907cc2d3a1f38bbd026385970643f9c5b8ecfeb"},
 ]
 pandas = []
-pandas-stubs = [
-    {file = "pandas-stubs-1.4.3.220704.tar.gz", hash = "sha256:175ed68aeb0dcd0a1c430452fba3091fdea1093e7e157ede71a8979f9a29edd3"},
-    {file = "pandas_stubs-1.4.3.220704-py3-none-any.whl", hash = "sha256:bf6e48e6219627d93136b126b480fb2ae344808846c352f7f501447e44c7d674"},
-]
+pandas-stubs = []
 pandocfilters = [
     {file = "pandocfilters-1.5.0-py2.py3-none-any.whl", hash = "sha256:33aae3f25fd1a026079f5d27bdd52496f0e0803b3469282162bafdcbdf6ef14f"},
     {file = "pandocfilters-1.5.0.tar.gz", hash = "sha256:0b679503337d233b4339a817bfc8c50064e2eff681314376a47cb582305a7a38"},
@@ -4372,10 +4408,7 @@ send2trash = [
     {file = "Send2Trash-1.8.0-py3-none-any.whl", hash = "sha256:f20eaadfdb517eaca5ce077640cb261c7d2698385a6a0f072a4a5447fd49fa08"},
     {file = "Send2Trash-1.8.0.tar.gz", hash = "sha256:d2c24762fd3759860a0aff155e45871447ea58d2be6bdd39b5c8f966a0c99c2d"},
 ]
-setuptools-scm = [
-    {file = "setuptools_scm-7.0.4-py3-none-any.whl", hash = "sha256:53a6f51451a84d891ca485cec700a802413bbc5e76ee65da134e54c733a6e44d"},
-    {file = "setuptools_scm-7.0.4.tar.gz", hash = "sha256:c27bc1f48593cfc9527251f1f0fc41ce282ea57bbc7fd5a1ea3acb99325fab4c"},
-]
+setuptools-scm = []
 six = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
     {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
@@ -4793,6 +4826,9 @@ wrapt = [
 ]
 zenoml-audio-transcription = []
 zenoml-image-classification = []
+zenoml-image-object-detection = []
+zenoml-image-segmentation = []
+zenoml-text-classification = []
 zipp = [
     {file = "zipp-3.8.0-py3-none-any.whl", hash = "sha256:c4f6e5bbf48e74f7a38e7cc5b0480ff42b0ae5178957d564d18932525d5cf099"},
     {file = "zipp-3.8.0.tar.gz", hash = "sha256:56bf8aadb83c24db6c4b577e13de374ccfb67da2078beba1d037c17980bf43ad"},

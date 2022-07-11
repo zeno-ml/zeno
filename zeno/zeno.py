@@ -106,8 +106,10 @@ class Zeno(object):
             sys.exit(1)
         # TODO: figure out if this breaks for big integers. Need to do this for
         # frontend bigint issues.
-        d = dict.fromkeys(self.df.select_dtypes(np.int64).columns, np.int32)
-        self.df = self.df.astype(d)
+        d = dict.fromkeys(
+            self.df.select_dtypes(np.int64).columns, np.int32  # type: ignore
+        )
+        self.df = self.df.astype(d)  # type: ignore
 
         self.metadata_name = os.path.basename(metadata_path).split(".")[0]
         self.cache_path = cache_path
@@ -404,7 +406,7 @@ class Zeno(object):
                     ],
                 )
                 for out in post_outputs:
-                    self.df.loc[:, str(out[0])] = out[1]
+                    self.df.loc[:, str(out[0])] = out[1]  # type: ignore
                     self.complete_columns.append(out[0])
 
         self.status = "Done running postprocessing"
@@ -477,7 +479,9 @@ class Zeno(object):
         filtered_rows = self.__get_df_rows(
             self.df, str(self.id_column), list_to_get=instance_ids
         )
-        embeds = np.stack(filtered_rows["zenoembedding_" + model].to_numpy())
+        embeds = np.stack(
+            filtered_rows["zenoembedding_" + model].to_numpy()  # type: ignore
+        )
         projection = self.__run_umap(embeds)
         payload = [
             {"proj": proj, "id": id} for proj, id in zip(projection, instance_ids)

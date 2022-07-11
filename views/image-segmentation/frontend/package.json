@@ -1,7 +1,7 @@
 {
-  "name": "{{cookiecutter.project_name}}",
+  "name": "zenoml-image-segmentation",
   "svelte": "src/index.js",
-  "module": "../{{cookiecutter.package_name}}/frontend/index.mjs",
+  "module": "../zenoml_image_segmentation/frontend/index.mjs",
   "scripts": {
     "build": "rollup -c",
     "prepublishOnly": "npm run build"
@@ -19,5 +19,8 @@
   "files": [
     "src",
     "dist"
-  ]
+  ],
+  "dependencies": {
+    "@smui/segmented-button": "^6.0.0-beta.16"
+  }
 }
