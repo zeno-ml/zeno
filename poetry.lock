@@ -1564,11 +1564,11 @@ test = ["hypothesis (>=5.5.3)", "pytest (>=6.0)", "pytest-xdist (>=1.31)"]
 
 [[package]]
 name = "pandas-stubs"
-version = "1.2.0.62"
-description = "Type annotations for Pandas"
+version = "1.4.3.220710"
+description = "Type annotations for pandas"
 category = "dev"
 optional = false
-python-versions = "*"
+python-versions = ">=3.8,<3.11"
 
 [[package]]
 name = "pandocfilters"
@@ -3157,7 +3157,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "4ecfc223f297cdaf18f3613a8039df040070344c764f40f8e6f1fcc9cefa1a30"
+content-hash = "3bd1c4288546f650d6624b6d39c8547942e32633c55857aa0bc7eee32c1d25a2"
 
 [metadata.files]
 absl-py = []
