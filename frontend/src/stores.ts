@@ -73,3 +73,8 @@ export const currentColumns: Readable<ZenoColumn[]> = derived(
 			(c) => c.model === "" || c.model === $model
 		)
 );
+
+export const colorStore = writable({
+	colorRange: [],
+	columnHash: "",
+});

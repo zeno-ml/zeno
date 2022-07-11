@@ -4,11 +4,12 @@
 
 	import Button from "@smui/button";
 	import { Label } from "@smui/common";
+	import IconButton, { Icon } from "@smui/icon-button";
 
 	import { VegaLite } from "svelte-vega";
 	import { onMount } from "svelte";
 
-	import { metadataSelections, table } from "../stores";
+	import { metadataSelections, table, filteredTable } from "../stores";
 	import { columnHash } from "../util";
 	import { countSpec, histogramSpec } from "./vegaSpecs";
 	import * as aq from "arquero";
@@ -28,14 +29,17 @@
 	let finalSelection = undefined;
 	let view: View;
 	let data = { table: [] };
+	let histoTable = { values: [] };
 
-	function binGroups(columnNames: string[], t = $table) {
+	function binGroups(columnNames: string[], t = $table, precomputed = "") {
+		console.log(t._group);
 		const counts = [];
 		const binName = (col) => `bin_${col}`;
 		const countCol = "count";
 		for (const name of columnNames) {
 			const binColName = binName(name);
 			const grouped = t.groupby({ [binColName]: aq.bin(name) });
+			console.log(grouped);
 
 			const binnedData = grouped
 				.count({ as: countCol })
@@ -64,8 +68,7 @@
 			table.column(hash)
 		) {
 			let arr = table.array(hash);
-			let colorArr = table.array(`color_${hash}`);
-			data = { table: arr.map((d, i) => ({ data: d, color: colorArr[i] })) };
+			data = { table: arr };
 		}
 	}
 
@@ -88,11 +91,11 @@
 			} else if (isOrdinal) {
 				if (unique <= 20) {
 					chartType = ChartType.Count;
-					const labels = colorLabelCategorical(hash);
-					if (!$table.column(key)) {
-						const newTable = aq.table({ [key]: labels });
-						table.set($table.assign(newTable));
-					}
+					// const labels = colorLabelCategorical(hash);
+					// if (!$table.column(key)) {
+					// 	// const newTable = aq.table({ [key]: labels });
+					// 	// table.set($table.assign(newTable));
+					// }
 				} else {
 					chartType = ChartType.Other;
 				}
@@ -101,11 +104,16 @@
 					chartType = ChartType.Count;
 				} else {
 					chartType = ChartType.Histogram;
-					const labels = colorLabelContinuous(hash);
-					if (!$table.column(key)) {
-						const newTable = aq.table({ [key]: labels });
-						table.set($table.assign(newTable));
-					}
+					const labels = bin(hash, $table);
+					histoTable.values = labels.map((d) => ({
+						...d,
+						filteredCount: d.count,
+					}));
+					// const labels = colorLabelContinuous(hash);
+					// if (!$table.column(key)) {
+					// 	// const newTable = aq.table({ [key]: labels });
+					// 	// table.set($table.assign(newTable));
+					// }
 				}
 			}
 		}
@@ -201,10 +209,11 @@
 
 	$: if (view) {
 		if (chartType === ChartType.Histogram) {
-			view.addSignalListener(
-				"brush",
-				(...s) => (selection = s[1].data ? ["range", ...s[1].data] : undefined)
-			);
+			view.addSignalListener("brush", (...s) => {
+				return (selection = s[1].binStart
+					? ["range", ...s[1].binStart]
+					: undefined);
+			});
 		} else if (chartType === ChartType.Count) {
 			view.addSignalListener(
 				"select",
@@ -237,6 +246,7 @@
 <div class="cell">
 	<div id="info">
 		<span>{col.name}</span>
+		<IconButton class="material-icons" on:click>color-picker</IconButton>
 		{#if chartType === ChartType.Binary}
 			<div style:display="flex">
 				<div class="binary-button">
@@ -292,7 +302,7 @@
 			on:blur={setSelection}>
 			<VegaLite
 				spec={chartType === ChartType.Histogram ? histogramSpec : countSpec}
-				data={chartType === ChartType.Histogram ? data : data}
+				data={chartType === ChartType.Histogram ? histoTable : data}
 				bind:view
 				options={{ tooltip: true, actions: false, theme: "vox" }} />
 		</div>
