@@ -15,7 +15,13 @@
 		binContinuous,
 		getDataRange as uniqueOutputs,
 	} from "./discovery";
-	import { filteredTable, model, settings } from "../stores";
+	import {
+		filteredTable,
+		model,
+		settings,
+		colorByHash,
+		colorSpec,
+	} from "../stores";
 	import { columnHash } from "../util";
 
 	import type { dataType } from "./discovery";
@@ -34,12 +40,13 @@
 	let projection2D: number[][] = [];
 	let colorValues: number[] = [];
 	let opacityValues: number[] = [];
-	let colorBy: string = "0label";
+
 	// eslint-disable-next-line
 	let dataType: dataType = "categorical";
 	let colorRange: string[] = colorsCategorical;
 	let lassoSelectTable = null;
 
+	$: console.log("SPEC", $colorByHash, $colorSpec);
 	// stuff that gets updated (reactive)
 	$: metadataExists =
 		$settings.metadataColumns.length > 0 || $filteredTable._names.length > 0;
@@ -55,7 +62,7 @@
 		newIds = [];
 	$: {
 		oldIds = saveIds();
-		updateColors({ colorBy });
+		updateColors({ colorBy: $colorByHash });
 	}
 	$: {
 		if (metadataExists && $filteredTable) {
@@ -184,7 +191,7 @@
 		<!-- Color Dropdown -->
 		<div id="color-by">
 			{#if metadataExists}
-				<Select bind:value={colorBy} label={"Color Points By"}>
+				<Select bind:value={$colorByHash} label={"Color Points By"}>
 					{#each $settings.metadataColumns as metadataName, i}
 						{@const isModelsMetadata =
 							(metadataName.model === "" || metadataName.model === $model) &&

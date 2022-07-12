@@ -8,7 +8,13 @@
 	import { VegaLite } from "svelte-vega";
 	import { onMount } from "svelte";
 
-	import { metadataSelections, table, settings } from "../stores";
+	import {
+		metadataSelections,
+		table,
+		settings,
+		colorSpec,
+		availableColors,
+	} from "../stores";
 	import { columnHash } from "../util";
 	import { countSpec, histogramSpec } from "./vegaSpecs";
 	import * as aq from "arquero";
@@ -94,11 +100,13 @@
 				if (Number(vals[0]) === 0 && Number(vals[1]) === 1) {
 					colorAssignments = colorLabelCategorical(hash);
 					chartType = ChartType.Binary;
+					$availableColors.set(hash, colorAssignments);
 				}
 			} else if (isOrdinal) {
 				if (unique <= 20) {
 					chartType = ChartType.Count;
 					colorAssignments = colorLabelCategorical(hash);
+					$availableColors.set(hash, colorAssignments);
 				} else {
 					chartType = ChartType.Other;
 				}
@@ -106,6 +114,7 @@
 				if (unique < 20) {
 					chartType = ChartType.Count;
 				} else {
+					colorAssignments = colorLabelContin(hash);
 					chartType = ChartType.Histogram;
 					const labels = bin(hash, $table);
 					histoTable.values = labels.map((d) => ({
@@ -136,6 +145,22 @@
 			}
 		}
 		return labels;
+	}
+
+	function colorLabelContin(columnName: string, t = $table) {
+		let colorArray = ["#1f77b4"];
+		let colorLabels = [];
+		for (const row of t) {
+			colorLabels.push({
+				id: row[columnHash($settings.idColumn)],
+				colorIndex: 0,
+			});
+		}
+		return {
+			colors: colorArray,
+			labels: colorLabels,
+			hash,
+		} as IColorAssignments;
 	}
 
 	function colorLabelCategorical(columnName: string, t = $table) {
