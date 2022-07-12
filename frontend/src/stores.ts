@@ -74,12 +74,12 @@ export const currentColumns: Readable<ZenoColumn[]> = derived(
 		)
 );
 
-export const colorByHash = writable("0label");
+export const colorByHash = writable("");
 export const availableColors = writable(new Map());
 export const colorSpec = derived(
 	[colorByHash, availableColors],
 	([$colorByHash, $availableColors]) => {
 		const color = $availableColors.get($colorByHash);
-		return color ? color : { hash: "", labels: [], colors: [] };
+		return color;
 	}
 );

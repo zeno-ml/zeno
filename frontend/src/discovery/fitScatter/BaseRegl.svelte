@@ -98,6 +98,7 @@
 	}
 	function exportSelectedPoints(idx: number[]) {
 		const pointsExport = idx.map((i) => ({ index: i, point: points[i] }));
+		console.log(pointsExport);
 		dispatch("select", pointsExport);
 	}
 	function deselectPoints() {

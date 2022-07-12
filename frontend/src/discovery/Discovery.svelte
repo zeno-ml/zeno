@@ -21,6 +21,7 @@
 		settings,
 		colorByHash,
 		colorSpec,
+		table,
 	} from "../stores";
 	import { columnHash } from "../util";
 
@@ -38,6 +39,7 @@
 	export let colorsContinuous = d3chromatic.interpolateBuPu;
 
 	let projection2D: number[][] = [];
+	let idProjection2D: object[] = [];
 	let colorValues: number[] = [];
 	let opacityValues: number[] = [];
 
@@ -53,11 +55,6 @@
 
 	$: pointsExist = projection2D.length > 0;
 
-	// absolutely cursed reactive stuff here
-	// whenever stuff is mentioned as the parameter it will update/recompute for that variable
-	// so I hid stuff (global variables) within the function so they don't call the reactive on update
-	// this cursed black magic can be removed once I get a better copying and caching system down
-	// for the pipeline
 	let oldIds = [],
 		newIds = [];
 	$: {
@@ -73,14 +70,38 @@
 		opacityValues = oldIds.map((id) => (newIds.includes(id) ? 0.75 : 0.15));
 	}
 	$: {
-		if (metadataExists && pointsExist) {
-			updateLegendaryScatter({
-				colorRange,
-				colorValues,
-				dataRange,
-				projection2D,
-				opacityValues,
+		if (metadataExists && pointsExist && $colorSpec) {
+			// const ids = $filteredTable.columnArray(columnHash($settings.idColumn));
+			// const colorLabels = $colorSpec.labels;
+			// const filteredLabels = colorLabels
+			// 	.filter((label) => {
+			// 		const included = ids.includes(label.id);
+			// 		return included;
+			// 	})
+			// 	.map((item) => item.colorIndex);
+			// console.log($colorSpec.colors);
+			// console.log(projection2D);
+			// console.log(idProjection2D);
+
+			legendaryScatterPoints = idProjection2D.map((item) => {
+				const proj = item["proj"],
+					id = item["id"];
+				return {
+					x: proj[0],
+					y: proj[1],
+					opacity: 0.75,
+					color: $colorSpec.labels.find((label) => label.id === id).colorIndex,
+					id,
+				};
 			});
+
+			// updateLegendaryScatter({
+			// 	colorRange: $colorSpec.colors,
+			// 	colorValues: filteredLabels,
+			// 	dataRange,
+			// 	projection2D,
+			// 	opacityValues,
+			// });
 		}
 	}
 
@@ -182,6 +203,7 @@
 		// update global variables for rendering
 		legendaryScatterLegend = legend;
 		legendaryScatterPoints = scatter;
+		console.log(legendaryScatterPoints);
 	}
 </script>
 
@@ -214,15 +236,20 @@
 				<FitLegendaryScatter
 					width={scatterWidth}
 					height={scatterHeight}
-					legend={legendaryScatterLegend}
 					points={legendaryScatterPoints}
 					on:deselect={() => {
 						lassoSelectTable = null;
 					}}
 					on:select={({ detail }) => {
 						const indexInstances = detail.map(({ index }) => index);
-						lassoSelectTable = indexTable($filteredTable, indexInstances);
-						console.log(indexInstances);
+						lassoSelectTable = indexTable(
+							$filteredTable,
+							indexInstances.map((i) => i + 1)
+						);
+						console.log(
+							indexInstances,
+							lassoSelectTable.columnArray(columnHash($settings.idColumn))
+						);
 					}}
 					regionMode={false} />
 			</div>
@@ -240,6 +267,7 @@
 						);
 						const _projection = await projectEmbeddings2D($model, filteredIds);
 						projection2D = _projection.data.map(({ proj }) => proj);
+						idProjection2D = _projection.data;
 					}
 				}}
 				>Compute projection

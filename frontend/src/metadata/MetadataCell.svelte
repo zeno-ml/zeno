@@ -117,15 +117,11 @@
 					colorAssignments = colorLabelContin(hash);
 					chartType = ChartType.Histogram;
 					const labels = bin(hash, $table);
+					$availableColors.set(hash, colorAssignments);
 					histoTable.values = labels.map((d) => ({
 						...d,
 						filteredCount: d.count,
 					}));
-					// const labels = colorLabelContinuous(hash);
-					// if (!$table.column(key)) {
-					// 	// const newTable = aq.table({ [key]: labels });
-					// 	// table.set($table.assign(newTable));
-					// }
 				}
 			}
 		}
