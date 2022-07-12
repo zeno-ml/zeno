@@ -71,13 +71,13 @@
 	}
 	$: {
 		if (metadataExists && pointsExist && $colorSpec) {
-			legendaryScatterPoints = idProjection2D.map((item, i) => {
+			legendaryScatterPoints = idProjection2D.map((item) => {
 				const proj = item["proj"],
 					id = item["id"];
 				return {
 					x: proj[0],
 					y: proj[1],
-					opacity: opacityValues[i],
+					opacity: 0.75,
 					color: $colorSpec.labels.find((label) => label.id === id).colorIndex,
 					id,
 				};
