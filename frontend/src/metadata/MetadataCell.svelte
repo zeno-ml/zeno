@@ -4,15 +4,15 @@
 
 	import Button from "@smui/button";
 	import { Label } from "@smui/common";
-	import IconButton, { Icon } from "@smui/icon-button";
 
 	import { VegaLite } from "svelte-vega";
 	import { onMount } from "svelte";
 
-	import { metadataSelections, table, filteredTable } from "../stores";
+	import { metadataSelections, table, settings } from "../stores";
 	import { columnHash } from "../util";
 	import { countSpec, histogramSpec } from "./vegaSpecs";
 	import * as aq from "arquero";
+	import * as d3c from "d3-scale-chromatic";
 
 	export let col: ZenoColumn;
 	$: hash = columnHash(col);
@@ -30,6 +30,13 @@
 	let view: View;
 	let data = { table: [] };
 	let histoTable = { values: [] };
+	interface IColorAssignments {
+		colors: string[];
+		labels: { id: string; colorIndex: number }[];
+		hash: string;
+	}
+	let colorAssignments: IColorAssignments = { colors: [], labels: [], hash };
+	$: console.log(colorAssignments);
 
 	function binGroups(columnNames: string[], t = $table, precomputed = "") {
 		console.log(t._group);
@@ -78,7 +85,6 @@
 			let unique = t
 				.rollup({ unique: `d => op.distinct(d["${hash}"])` })
 				.object()["unique"];
-			const key = `color_${hash}`;
 
 			if (!isOrdinal && unique === 2) {
 				let vals = t
@@ -86,16 +92,13 @@
 					.rollup({ a: `d => op.array_agg_distinct(d["${hash}"])` })
 					.object()["a"];
 				if (Number(vals[0]) === 0 && Number(vals[1]) === 1) {
+					colorAssignments = colorLabelCategorical(hash);
 					chartType = ChartType.Binary;
 				}
 			} else if (isOrdinal) {
 				if (unique <= 20) {
 					chartType = ChartType.Count;
-					// const labels = colorLabelCategorical(hash);
-					// if (!$table.column(key)) {
-					// 	// const newTable = aq.table({ [key]: labels });
-					// 	// table.set($table.assign(newTable));
-					// }
+					colorAssignments = colorLabelCategorical(hash);
 				} else {
 					chartType = ChartType.Other;
 				}
@@ -136,21 +139,27 @@
 	}
 
 	function colorLabelCategorical(columnName: string, t = $table) {
+		const colorArray = d3c.schemeCategory10;
 		let vals = t
 			.orderby(hash)
 			.rollup({ a: `d => op.array_agg_distinct(d["${hash}"])` })
 			.object()["a"];
 		let mapper = new Map();
-
 		for (let i = 0; i < vals.length; i++) {
 			mapper.set(vals[i], i);
 		}
-
 		let colorLabels = [];
 		for (const row of t) {
-			colorLabels.push(mapper.get(row[hash]));
+			colorLabels.push({
+				id: row[columnHash($settings.idColumn)],
+				colorIndex: mapper.get(row[hash]),
+			});
 		}
-		return colorLabels;
+		return {
+			colors: colorArray,
+			labels: colorLabels,
+			hash,
+		} as IColorAssignments;
 	}
 
 	function bin(hash: string, t = $table) {

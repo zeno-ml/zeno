@@ -74,7 +74,8 @@ export const currentColumns: Readable<ZenoColumn[]> = derived(
 		)
 );
 
-export const colorStore = writable({
-	colorRange: [],
-	columnHash: "",
+export const availableColors = writable({
+	colors: [],
+	labels: [],
+	hash: "",
 });
