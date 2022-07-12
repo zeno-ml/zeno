@@ -12,8 +12,8 @@
 		metadataSelections,
 		table,
 		settings,
-		colorSpec,
 		availableColors,
+		colorByHash,
 	} from "../stores";
 	import { columnHash } from "../util";
 	import { countSpec, histogramSpec } from "./vegaSpecs";
@@ -275,7 +275,11 @@
 
 <div class="cell">
 	<div id="info">
-		<span>{col.name}</span>
+		<span
+			style:color={$colorByHash === hash ? "#9B52DF" : ""}
+			on:click={() => {
+				colorByHash.set(hash);
+			}}>{col.name}</span>
 		{#if chartType === ChartType.Binary}
 			<div style:display="flex">
 				<div class="binary-button">

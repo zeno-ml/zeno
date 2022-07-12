@@ -7,6 +7,7 @@
 	import Samples from "../samples/Samples.svelte";
 	import SampleOptions from "../samples/SampleOptions.svelte";
 	import * as d3chromatic from "d3-scale-chromatic";
+	import Button from "@smui/button";
 	import {
 		projectEmbeddings2D,
 		reformatAPI,
@@ -235,7 +236,8 @@
 			</div>
 		</div>
 		<div>
-			<button
+			<Button
+				variant="outlined"
 				on:click={async () => {
 					if ($filteredTable) {
 						const filteredIds = $filteredTable.columnArray(
@@ -247,7 +249,7 @@
 					}
 				}}
 				>Compute projection
-			</button>
+			</Button>
 		</div>
 	</div>
 
