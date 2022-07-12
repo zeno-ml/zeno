@@ -246,7 +246,6 @@
 <div class="cell">
 	<div id="info">
 		<span>{col.name}</span>
-		<IconButton class="material-icons" on:click>color-picker</IconButton>
 		{#if chartType === ChartType.Binary}
 			<div style:display="flex">
 				<div class="binary-button">

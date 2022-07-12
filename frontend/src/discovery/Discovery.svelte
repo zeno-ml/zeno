@@ -2,6 +2,7 @@
 	import MetadataBar from "../metadata/MetadataPanel.svelte";
 	import SelectionBar from "../metadata/SelectionBar.svelte";
 	import LegendaryScatter from "./scatter/LegendaryScatter.svelte";
+	import FitLegendaryScatter from "./fitScatter/LegendaryScatter.svelte";
 	import Select, { Option } from "@smui/select";
 	import Samples from "../samples/Samples.svelte";
 	import SampleOptions from "../samples/SampleOptions.svelte";
@@ -203,7 +204,7 @@
 				class="paper"
 				style:width="{scatterWidth}px"
 				style:height="{scatterHeight}px">
-				<LegendaryScatter
+				<FitLegendaryScatter
 					width={scatterWidth}
 					height={scatterHeight}
 					legend={legendaryScatterLegend}
@@ -215,7 +216,8 @@
 						const indexInstances = detail.map(({ index }) => index);
 						lassoSelectTable = indexTable($filteredTable, indexInstances);
 						console.log(indexInstances);
-					}} />
+					}}
+					regionMode={false} />
 			</div>
 			<div>
 				<p>{$filteredTable.size} instances</p>
