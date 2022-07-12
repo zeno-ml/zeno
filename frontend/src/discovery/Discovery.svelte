@@ -71,37 +71,17 @@
 	}
 	$: {
 		if (metadataExists && pointsExist && $colorSpec) {
-			// const ids = $filteredTable.columnArray(columnHash($settings.idColumn));
-			// const colorLabels = $colorSpec.labels;
-			// const filteredLabels = colorLabels
-			// 	.filter((label) => {
-			// 		const included = ids.includes(label.id);
-			// 		return included;
-			// 	})
-			// 	.map((item) => item.colorIndex);
-			// console.log($colorSpec.colors);
-			// console.log(projection2D);
-			// console.log(idProjection2D);
-
-			legendaryScatterPoints = idProjection2D.map((item) => {
+			legendaryScatterPoints = idProjection2D.map((item, i) => {
 				const proj = item["proj"],
 					id = item["id"];
 				return {
 					x: proj[0],
 					y: proj[1],
-					opacity: 0.75,
+					opacity: opacityValues[i],
 					color: $colorSpec.labels.find((label) => label.id === id).colorIndex,
 					id,
 				};
 			});
-
-			// updateLegendaryScatter({
-			// 	colorRange: $colorSpec.colors,
-			// 	colorValues: filteredLabels,
-			// 	dataRange,
-			// 	projection2D,
-			// 	opacityValues,
-			// });
 		}
 	}
 
@@ -245,10 +225,6 @@
 						lassoSelectTable = indexTable(
 							$filteredTable,
 							indexInstances.map((i) => i + 1)
-						);
-						console.log(
-							indexInstances,
-							lassoSelectTable.columnArray(columnHash($settings.idColumn))
 						);
 					}}
 					regionMode={false} />
