@@ -181,15 +181,21 @@
 	<MetadataBar />
 	<div>
 		<!-- Color Dropdown -->
-		<!-- <div id="color-by">
+		<div id="color-by">
 			{#if metadataExists}
 				<Select bind:value={colorBy} label={"Color Points By"}>
 					{#each $settings.metadataColumns as metadataName, i}
-						<Option value={metadataName}>{metadataName}</Option>
+						{@const isModelsMetadata =
+							(metadataName.model === "" || metadataName.model === $model) &&
+							metadataName.name !== $settings.idColumn.name}
+						{#if isModelsMetadata}
+							<Option value={columnHash(metadataName)}
+								>{metadataName.name}</Option>
+						{/if}
 					{/each}
 				</Select>
 			{/if}
-		</div> -->
+		</div>
 
 		<!-- Scatter View -->
 		<div id="scatter-view" style:margin-top="10px">
@@ -208,6 +214,7 @@
 					on:select={({ detail }) => {
 						const indexInstances = detail.map(({ index }) => index);
 						lassoSelectTable = indexTable($filteredTable, indexInstances);
+						console.log(indexInstances);
 					}} />
 			</div>
 			<div>
