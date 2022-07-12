@@ -5,8 +5,8 @@ install:
 	@echo "==> 📦 Installing"
 	@chmod +x ./build-views.sh
 	@./build-views.sh
-	@poetry install
 	@cd frontend && npm i && npm run build
+	@poetry install
 
 .PHONY: test
 test:
