@@ -34,6 +34,7 @@
 		}
 	});
 
+	let el;
 	onMount(() => initialFetch());
 	status.subscribe((w) => updateTableColumns(w));
 	ready.subscribe((r) => {
@@ -46,6 +47,7 @@
 
 <Header />
 <main>
+	<div bind:this={el} />
 	<div id="side-menu">
 		<List class="demo-list" iconList={true}>
 			<Item

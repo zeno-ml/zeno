@@ -77,7 +77,7 @@ class FilterPredicate(CamelModel):
 
 
 class ZenoSettings(CamelModel):
-    task: str
+    view: str
     id_column: ZenoColumn
     label_column: ZenoColumn
     data_column: ZenoColumn

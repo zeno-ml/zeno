@@ -1,18 +1,10 @@
-from zeno import load_model, load_data, metric
+from zeno import predict_function, metric_function, ZenoOptions
 from PIL import Image
 import os
 import torch
 
 
-# @load_model
-# def load_model(model_path):
-#     def pred(instances):
-#         return [1] * len(instances)
-
-#     return pred
-
-
-@load_model
+@predict_function
 def torchhub(model_path):
     # Model
     if model_path == "yolov3":
@@ -22,8 +14,11 @@ def torchhub(model_path):
     elif model_path == "yolov5":
         model = torch.hub.load("ultralytics/yolov5", "yolov5s", force_reload=True)
 
-    def pred(instances):
-        results = model(instances).pred
+    def pred(df, ops: ZenoOptions):
+        imgs = [
+            Image.open(os.path.join(ops.data_path, img)) for img in df[ops.data_column]
+        ]
+        results = model(imgs).pred
         # Results
         res = []
         for r in results:
@@ -36,11 +31,6 @@ def torchhub(model_path):
     return pred
 
 
-@load_data
-def load_data(df_metadata, data_path):
-    return [Image.open(os.path.join(data_path, img)) for img in df_metadata.index]
-
-
-@metric
-def accuracy(output, metadata, label_col):
-    return [1] * len(output)
+@metric_function
+def accuracy(df, ops):
+    return [1] * len(df)

@@ -1,4 +1,5 @@
 import asyncio
+import importlib
 import json
 import os
 import sys
@@ -49,11 +50,24 @@ def main():
 
     toml_path = os.path.dirname(os.path.abspath(sys.argv[1]))
 
-    if "task" not in args or args["task"] not in TASK_TYPES:
-        print("ERROR: Must have 'task' entry which is one of the following:")
-        for t in TASK_TYPES:
-            print(t)
+    if "view" not in args:
+        print(
+            "ERROR: Must have 'view' entry which is a valid and installed"
+            + "Python Zeno view package:"
+        )
         sys.exit(1)
+
+    try:
+        mod = importlib.import_module(args["view"])
+    except ModuleNotFoundError:
+        print("ERROR: " + args["view"] + " is not a valid python package")
+        sys.exit(1)
+
+    if not mod.path:
+        print("ERROR: View does not export a valid path variable.")
+        sys.exit(1)
+
+    args["view"] = mod.path
 
     if "metadata" not in args:
         print("ERROR: Must have 'metadata' entry which must be a CSV or Parquet file.")
@@ -129,7 +143,6 @@ def main():
 def run_zeno(args):
     zeno = Zeno(
         metadata_path=args["metadata"],
-        task=args["task"],
         tests=args["tests"],
         models=args["models"],
         batch_size=args["batch_size"],
@@ -156,6 +169,11 @@ def run_zeno(args):
         StaticFiles(directory=args["cache_path"]),
         name="cache",
     )
+    app.mount(
+        "/view",
+        StaticFiles(directory=args["view"]),
+        name="view",
+    )
     app.mount("/api", api_app)
     app.mount(
         "/",
@@ -169,7 +187,7 @@ def run_zeno(args):
     @api_app.get("/settings", response_model=ZenoSettings)
     def get_settings():
         return ZenoSettings(
-            task=zeno.task,
+            view=args["view"],
             id_column=zeno.id_column,
             label_column=zeno.label_column,
             data_column=zeno.data_column,

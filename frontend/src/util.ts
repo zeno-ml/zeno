@@ -174,6 +174,7 @@ export function updateTableColumns(w: WSResponse) {
 	const missingColumns = w.completeColumns.filter(
 		(c) => !tableColumns.includes(columnHash(c))
 	);
+	console.log(tableColumns, missingColumns);
 	if (missingColumns.length > 0) {
 		fetch("/api/table", {
 			method: "POST",

@@ -31,7 +31,7 @@ tomli = "^2.0.1"
 pandas-stubs = "^1.2.0"
 pytest = "^7.1.1"
 pytest-cov = "^3.0"
-torch = "^1.12.0"
+torch = "^1.11.0"
 torchaudio = "^0.12.0"
 torchvision = "^0.13.0"
 Sphinx = "^4.4.0"
@@ -53,6 +53,11 @@ segmentation-models = "^1.0.1"
 keras = "^2.9.0"
 tensorflow = "^2.9.0"
 librosa = "^0.9.2"
+zenoml-audio-transcription = {path = "views/audio-transcription", develop = true}
+zenoml-image-classification = {path = "views/image-classification", develop = true}
+zenoml-image-object-detection = {path = "views/image-object-detection", develop = true}
+zenoml-image-segmentation = {path = "views/image-segmentation", develop = true}
+zenoml-text-classification = {path = "views/text-classification", develop = true}
 
 [tool.poetry.scripts]
 zeno = "zeno.runner:main"

@@ -16,6 +16,12 @@
 		"checkJs": true,
 		"forceConsistentCasingInFileNames": true
 	},
-	"include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.js", "src/**/*.svelte"],
+	"include": [
+		"src/**/*.d.ts",
+		"src/**/*.ts",
+		"src/**/*.js",
+		"src/**/*.svelte",
+		"../views/zenoml-image-classification/zenoml-image-classification/frontend/test.js"
+	],
 	"references": [{ "path": "./tsconfig.node.json" }]
 }

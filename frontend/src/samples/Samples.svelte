@@ -3,16 +3,10 @@
 	import { Pagination } from "@smui/data-table";
 	import IconButton from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
+
 	import { ZenoColumnType } from "../globals";
 	import { columnHash } from "../util";
-
 	import { model, settings, status, transform } from "../stores";
-
-	import AudioClassification from "./AudioClassification.svelte";
-	import ImageClassification from "./ImageClassification.svelte";
-	import ImageSegmentation from "./ImageSegmentation.svelte";
-	import ObjectDetection from "./ObjectDetection.svelte";
-	import TextClassification from "./TextClassification.svelte";
 
 	export let table;
 
@@ -55,48 +49,37 @@
 			transformColumn = "";
 		}
 	});
+
+	let sampleDiv;
+	let divFunction;
+
+	$: if (sampleDiv && divFunction) {
+		sampleDiv.innerHTML = "";
+		sampleDiv.appendChild(
+			divFunction(
+				table.slice(start, end).objects(),
+				modelColumn,
+				columnHash($settings.labelColumn),
+				columnHash($settings.dataColumn),
+				transformColumn,
+				columnHash($settings.idColumn)
+			)
+		);
+	}
+
+	settings.subscribe(() => {
+		let v = window.location.origin + "/view/index.mjs";
+		try {
+			import(v).then((m) => (divFunction = m.default));
+		} catch (e) {
+			console.log(e);
+		}
+	});
 </script>
 
 {#if table}
 	<div class="container sample-container">
-		{#if $settings.task === "image-classification"}
-			<ImageClassification
-				idColumn={columnHash($settings.idColumn)}
-				labelColumn={columnHash($settings.labelColumn)}
-				dataColumn={columnHash($settings.dataColumn)}
-				table={table.slice(start, end).objects()}
-				{transformColumn}
-				{modelColumn} />
-		{:else if $settings.task === "image-segmentation"}
-			<ImageSegmentation
-				idColumn={columnHash($settings.idColumn)}
-				labelColumn={columnHash($settings.labelColumn)}
-				dataColumn={columnHash($settings.dataColumn)}
-				table={table.slice(start, end).objects()}
-				{modelColumn} />
-		{:else if $settings.task === "object-detection"}
-			<ObjectDetection
-				idColumn={columnHash($settings.idColumn)}
-				labelColumn={columnHash($settings.labelColumn)}
-				dataColumn={columnHash($settings.dataColumn)}
-				table={table.slice(start, end).objects()}
-				{modelColumn} />
-		{:else if $settings.task === "text-classification"}
-			<TextClassification
-				idColumn={columnHash($settings.idColumn)}
-				labelColumn={columnHash($settings.labelColumn)}
-				dataColumn={columnHash($settings.dataColumn)}
-				table={table.slice(start, end).objects()}
-				{modelColumn} />
-		{:else if $settings.task === "audio-classification"}
-			<AudioClassification
-				idColumn={columnHash($settings.idColumn)}
-				labelColumn={columnHash($settings.labelColumn)}
-				dataColumn={columnHash($settings.dataColumn)}
-				table={table.slice(start, end).objects()}
-				{transformColumn}
-				{modelColumn} />
-		{/if}
+		<div bind:this={sampleDiv} />
 	</div>
 	<Pagination slot="paginate" class="pagination">
 		<svelte:fragment slot="rowsPerPage">
@@ -140,13 +123,8 @@
 {/if}
 
 <style>
-	.container {
-		display: flex;
-		flex-direction: inline;
-		flex-wrap: wrap;
-		width: 100%;
-	}
 	.sample-container {
+		width: 100%;
 		height: calc(100vh - 250px);
 		overflow-y: auto;
 		align-content: baseline;

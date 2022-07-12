@@ -19,6 +19,7 @@
 		settings,
 		slices,
 		sliceSelections,
+		status,
 		sort,
 		table,
 		metric,
@@ -202,7 +203,7 @@
 		<MetadataNode {col} />
 	{/each}
 	{#if $model}
-		{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.POSTDISTILL && m.model === $model) as col}
+		{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.POSTDISTILL && m.model === $model && m.transform === $transform) as col}
 			<MetadataNode {col} />
 		{/each}
 	{/if}
