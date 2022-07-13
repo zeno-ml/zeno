@@ -36,6 +36,7 @@ from .util import (
     run_inference,
     transform_data,
 )
+from .pipeline.pipeline2 import Pipeline
 
 
 class Zeno(object):
@@ -54,6 +55,8 @@ class Zeno(object):
         cache_path: Path,
     ):
         logging.basicConfig(level=logging.INFO)
+
+        self.pipeline = Pipeline()
 
         self.task = task
         self.tests = tests
@@ -137,6 +140,58 @@ class Zeno(object):
         self.complete_columns: List[ZenoColumn] = []
 
         self.done_processing = False
+
+    def reset_pipeline(self):
+        self.pipeline.reset_weak_labeler_memory()
+        self.pipeline.reset_weak_labeler()
+
+    def init_pipeline(self, model: str):
+        self.pipeline.set_model(model)
+        self.pipeline.set_id_column(str(self.id_column))
+        self.pipeline.set_table(self.df)
+
+    def run_pipeline_between(self):
+        return self.pipeline.run()
+
+    def run_pipeline_labeler(self):
+        return self.pipeline.run_labeler()
+
+    def add_id_filter_pipeline(self, ids: list[str]):
+        self.pipeline.add_filter(ids)
+        output, js_export = self.run_pipeline_between()
+        return js_export
+
+    def add_umap_pipeline(self):
+        self.pipeline.add_umap()
+        output, js_export = self.run_pipeline_between()
+        return js_export
+
+    def add_region_labeler_pipeline(self, polygon, name):
+        self.pipeline.set_name(name)
+        self.pipeline.add_region_labeler(polygon)
+        output, js_export = self.run_pipeline_labeler()
+        col_name = self.table_weak_labels(output)
+        return {"export": js_export, "col_name": col_name}
+
+    def table_weak_labels(self, io_memory):
+        # small_table = io_memory["input_table"]
+        labels = io_memory["labels"]
+        col_kwargs = {
+            "column_type": ZenoColumnType.PREDISTILL,
+            "name": self.pipeline.name,
+            "model": self.pipeline.model,
+            "transform": "",
+        }
+        new_column_labels = ZenoColumn(
+            **col_kwargs,
+        )
+        self.df.loc[:, str(new_column_labels)] = labels
+        if new_column_labels not in self.complete_columns:
+            self.complete_columns.append(new_column_labels)
+        if new_column_labels not in self.columns:
+            self.columns.append(new_column_labels)
+
+        return col_kwargs
 
     def start_processing(self):
         """Parse testing files, distill, and run inference."""

@@ -20,13 +20,12 @@ class RegionBasedLabelerNode:
         return inside
 
     def points_inside_polygon(self, points: list[list], polygon: list[list]):
-        return [self.point_inside_polygon(point, polygon) for point in points]
+        return [int(self.point_inside_polygon(point, polygon)) for point in points]
 
     def fit(self, input):
         return self
 
     def transform(self, input):
-        # this is going to totally fuck me in the ass
         self.labels = self.points_inside_polygon(input["projection2D"], self.model)
         self.input = input
 
@@ -48,3 +47,4 @@ class RegionBasedLabelerNode:
 
     def init(self, polygon: list):
         self.model = polygon
+        return self

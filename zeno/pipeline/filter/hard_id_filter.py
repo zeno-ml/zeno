@@ -25,7 +25,7 @@ class HardFilterNode:
         return self.input
 
     def export_outputs_js(self):
-        return {"status": "added hard id filter"}
+        return {"ids": self.instance_ids}
 
     def save(self, path: str):
         pass
@@ -35,6 +35,7 @@ class HardFilterNode:
 
     def init(self, instance_ids: list):
         self.instance_ids = instance_ids
+        return self
 
     def __repr__(self):
         return "HardFilterNode"

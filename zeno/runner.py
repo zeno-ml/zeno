@@ -13,6 +13,9 @@ from fastapi.staticfiles import StaticFiles
 
 from .classes import (
     MetricsRequest,
+    PipelineIdFilter,
+    PipelineInit,
+    PipelineRegionLabeler,
     ProjectionRequest,
     ReportsRequest,
     StatusResponse,
@@ -216,6 +219,31 @@ def run_zeno(args):
     def run_projection(model: ProjectionRequest):
         projection = zeno.run_projection(model.model, model.instance_ids)
         return json.dumps({"data": projection, "model": model.model})
+
+    @api_app.post("/pipe/reset")
+    def reset_pipeline():
+        zeno.reset_pipeline()
+        return json.dumps({"status": "reset"})
+
+    @api_app.post("/pipe/init")
+    def init_pipeline(req: PipelineInit):
+        zeno.init_pipeline(req.model)
+        return json.dumps({"status": "init"})
+
+    @api_app.post("/pipe/id-filter")
+    def filter_pipeline(req: PipelineIdFilter):
+        js_export = zeno.add_id_filter_pipeline(req.ids)
+        return json.dumps({"status": "filtered", "data": js_export})
+
+    @api_app.post("/pipe/umap")
+    def umap_pipeline():
+        js_export = zeno.add_umap_pipeline()
+        return json.dumps({"status": "projected", "data": js_export})
+
+    @api_app.post("/pipe/region-labeler")
+    def region_labeler_pipeline(req: PipelineRegionLabeler):
+        js_export = zeno.add_region_labeler_pipeline(req.polygon, req.name)
+        return json.dumps({"status": "labeled", "data": js_export})
 
     @api_app.websocket("/status")
     async def results_websocket(websocket: WebSocket):

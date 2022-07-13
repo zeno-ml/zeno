@@ -118,3 +118,16 @@ class MetricsRequest(BaseModel):
 class ProjectionRequest(BaseModel):
     model: str
     instance_ids: List[str]
+
+
+class PipelineInit(BaseModel):
+    model: str
+
+
+class PipelineIdFilter(BaseModel):
+    ids: list[str]
+
+
+class PipelineRegionLabeler(BaseModel):
+    polygon: list[list[float]]
+    name: str = "default"

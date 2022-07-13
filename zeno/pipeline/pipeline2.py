@@ -1,0 +1,77 @@
+from .filter.hard_id_filter import HardFilterNode
+from .projection.parametric_umap import ParametricUMAPNode
+from .lableler.region_based_labler import RegionBasedLabelerNode
+
+
+class Pipeline:
+    def __init__(self):
+        self.weak_labeler_memory = {}
+        self.weak_labeler = []
+        self.final_labeler = None
+
+        self.table = None
+        self.model = None
+        self.id_column = None
+        self.name = "default"
+
+    def reset_weak_labeler_memory(self):
+        self.weak_labeler_memory = {}
+        if self.table is not None:
+            self.set_table(self.table)
+        if self.id_column is not None:
+            self.set_id_column(self.id_column)
+        if self.model is not None:
+            self.set_model(self.model)
+
+    def reset_weak_labeler(self):
+        self.weak_labeler = []
+
+    def set_name(self, name):
+        self.name = name
+        self.weak_labeler_memory["name"] = name
+
+    def set_model(self, model):
+        self.model = model
+        self.weak_labeler_memory["model"] = model
+
+    def set_id_column(self, id_column):
+        self.id_column = id_column
+        self.weak_labeler_memory["id_column"] = id_column
+
+    def set_table(self, table):
+        self.table = table
+        self.weak_labeler_memory["global_table"] = table
+        self.weak_labeler_memory["input_table"] = table.copy(deep=False)
+
+    def add_filter(self, ids):
+        new_node = HardFilterNode().init(ids).fit(self.weak_labeler_memory)
+        self.weak_labeler.append(new_node)
+
+    def add_umap(self):
+        new_node = (
+            ParametricUMAPNode()
+            .init(n_components=2, n_epochs=20)
+            .fit(self.weak_labeler_memory)
+        )
+        self.weak_labeler.append(new_node)
+
+    def add_region_labeler(self, polygon):
+        new_node = RegionBasedLabelerNode().init(polygon).fit(self.weak_labeler_memory)
+        self.final_labeler = new_node
+
+    def run(self):
+        self.reset_weak_labeler_memory()
+        output = self.weak_labeler_memory
+        js_export = {}
+        for step_node in self.weak_labeler:
+            output_obj = step_node.transform(output)
+            output = output_obj.pipe_outputs()
+            js_export = output_obj.export_outputs_js()
+
+        return output, js_export
+
+    def run_labeler(self):
+        if self.final_labeler is not None:
+            output, js_export = self.run()
+            output_obj = self.final_labeler.transform(output)
+            return output_obj.pipe_outputs(), output_obj.export_outputs_js()

@@ -15,8 +15,6 @@ class ParametricUMAPNode:
         embedding_col = ZenoColumn(
             column_type=ZenoColumnType.EMBEDDING,
             name=model_name,
-            model=model_name,
-            transform="",
         )
         embedding_col_name = str(embedding_col)
         embeddings_pd_col = table[embedding_col_name]  # type: ignore
@@ -43,7 +41,7 @@ class ParametricUMAPNode:
     def __package_projection_export(self, projection, instance_ids):
         payload = []
         for projection, instance_id in zip(projection, instance_ids):
-            packaged_projection = {"projection": projection, "instance_id": instance_id}
+            packaged_projection = {"proj": projection, "id": instance_id}
             payload.append(packaged_projection)
         return payload
 
@@ -61,6 +59,7 @@ class ParametricUMAPNode:
 
     def init(self, *args, **kwargs):
         self.model = ParametricUMAP(*args, **kwargs)
+        return self
 
     def __repr__(self):
         return "ParametricUMAPNode"
