@@ -19,20 +19,27 @@ export function interpolateColorToArray(
 	return colorArray;
 }
 
-export async function projectEmbeddings2D(
-	model: string,
-	instance_ids: unknown[] | TypedArray
-) {
-	const response = await fetch("api/projection", {
+export async function post({ url, payload }: { url: string; payload: object }) {
+	const response = await fetch(url, {
 		method: "POST",
 		headers: {
 			Accept: "application/json",
 			"Content-Type": "application/json",
 		},
-		body: JSON.stringify({ model, instance_ids }),
+		body: JSON.stringify(payload),
 	});
 	const output = await response.json();
 	return JSON.parse(output);
+}
+export async function projectEmbeddings2D(
+	model: string,
+	instance_ids: unknown[] | TypedArray
+) {
+	const output = await post({
+		url: "api/projection",
+		payload: { model, instance_ids },
+	});
+	return output;
 }
 
 export const hasColumn = (dt: ColumnTable, colName: string) =>

@@ -8,6 +8,7 @@
 	import SampleOptions from "../samples/SampleOptions.svelte";
 	import * as d3chromatic from "d3-scale-chromatic";
 	import Button from "@smui/button";
+	import TextField from "@smui/textfield";
 	import {
 		projectEmbeddings2D,
 		reformatAPI,
@@ -15,6 +16,7 @@
 		indexTable,
 		binContinuous,
 		getDataRange as uniqueOutputs,
+		post,
 	} from "./discovery";
 	import {
 		filteredTable,
@@ -25,6 +27,7 @@
 		table,
 		metadataSelections,
 		sliceSelections,
+		transform,
 	} from "../stores";
 	import { columnHash } from "../util";
 
@@ -57,7 +60,7 @@
 	$: metadataExists =
 		$settings.metadataColumns.length > 0 || $filteredTable._names.length > 0;
 
-	$: pointsExist = projection2D.length > 0;
+	$: pointsExist = idProjection2D.length > 0;
 
 	let oldIds = [],
 		newIds = [];
@@ -217,6 +220,35 @@
 		const newTable = aq.table(accumulate);
 		return newTable;
 	}
+
+	async function resetPipeline() {
+		const output = await post({ url: "api/pipe/reset", payload: {} });
+		if (output.status !== "reset") {
+			throw Error("not reset correctly");
+		}
+	}
+	async function initPipeline(modelName: string) {
+		const output = await post({
+			url: "api/pipe/init",
+			payload: { model: modelName },
+		});
+		if (output.status !== "init") {
+			throw Error("not init correctly");
+		}
+	}
+	$: {
+		if ($model && $table) {
+			resetPipeline().then(() => {
+				console.log("reset");
+			});
+			initPipeline($model).then(() => {
+				console.log("init");
+			});
+		}
+	}
+	let regionLabeler = false;
+	let regionPolygon = [];
+	let regionLabelerName = "name";
 </script>
 
 <div id="main">
@@ -262,7 +294,8 @@
 							idedInstanced
 						);
 					}}
-					regionMode={false} />
+					bind:regionPolygon
+					regionMode={regionLabeler} />
 			</div>
 			<div>
 				<p>{$filteredTable.size} instances</p>
@@ -320,7 +353,7 @@
 								name: "lasso select projection",
 								state: {
 									projection: idProjection2D,
-									table: $filteredTable,
+									table: lassoSelectTable,
 									filterInfo: {
 										metadata: $metadataSelections,
 										slice: $sliceSelections,
@@ -332,6 +365,67 @@
 				}}
 				>Selection Projection
 			</Button>
+			<Button
+				on:click={async () => {
+					const output = await post({
+						url: "api/pipe/umap",
+						payload: {},
+					});
+					if (output.status !== "projected") {
+						throw Error("Failed to project");
+					}
+					idProjection2D = output["data"];
+				}}>
+				UMAP</Button>
+			<Button
+				on:click={async () => {
+					const lassoedIds = lassoSelectTable.columnArray(
+						columnHash($settings.idColumn)
+					);
+					const output = await post({
+						url: "api/pipe/id-filter",
+						payload: {
+							ids: lassoedIds,
+						},
+					});
+					if (output.status !== "filtered") {
+						throw Error("Failed to filter");
+					}
+					console.log(output);
+				}}>
+				Filter by ID</Button>
+			<Button on:click={() => (regionLabeler = !regionLabeler)}
+				>Draw Polygon: {regionPolygon.length}</Button>
+			<Button
+				on:click={async () => {
+					const output = await post({
+						url: "api/pipe/region-labeler",
+						payload: {
+							polygon: regionPolygon,
+							name: regionLabelerName,
+						},
+					});
+					if (output.status !== "labeled") {
+						throw Error("Failed to label");
+					}
+					console.log(output);
+					const col = output["data"]["col_name"];
+					const model = col.model;
+					const name = col.name;
+					const columnType = col.column_type;
+					const transform = col.transform;
+					const newAddition = {
+						model,
+						name,
+						columnType,
+						transform,
+					};
+					$settings.metadataColumns.push(newAddition);
+					settings.set({ ...$settings });
+				}}>
+				Apply Region Labeler</Button>
+
+			<TextField bind:value={regionLabelerName} label={"Labeler Name"} />
 		</div>
 		<div>
 			<h3>History</h3>

@@ -78,6 +78,7 @@
 		}
 
 		filteredTable.set(tempTable);
+		return tempTable;
 	}
 
 	function editSlice(sli: Slice) {

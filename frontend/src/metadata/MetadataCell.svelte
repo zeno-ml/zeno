@@ -36,6 +36,7 @@
 	let view: View;
 	let data = { table: [] };
 	let histoTable = { values: [] };
+
 	interface IColorAssignments {
 		colors: string[];
 		labels: { id: string; colorIndex: number }[];
