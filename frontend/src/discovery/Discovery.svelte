@@ -23,6 +23,8 @@
 		colorByHash,
 		colorSpec,
 		table,
+		metadataSelections,
+		sliceSelections,
 	} from "../stores";
 	import { columnHash } from "../util";
 
@@ -188,12 +190,13 @@
 		// update global variables for rendering
 		legendaryScatterLegend = legend;
 		legendaryScatterPoints = scatter;
-		console.log(legendaryScatterPoints);
 	}
+	let applications = [];
 </script>
 
 <div id="main">
 	<MetadataBar />
+
 	<div>
 		<!-- Color Dropdown -->
 		<div id="color-by">
@@ -242,6 +245,13 @@
 		<div>
 			<Button
 				variant="outlined"
+				on:click={() => {
+					console.log("hit");
+				}}
+				>Change Base, Add new filter
+			</Button>
+			<Button
+				variant="outlined"
 				on:click={async () => {
 					if ($filteredTable) {
 						const filteredIds = $filteredTable.columnArray(
@@ -250,10 +260,37 @@
 						const _projection = await projectEmbeddings2D($model, filteredIds);
 						projection2D = _projection.data.map(({ proj }) => proj);
 						idProjection2D = _projection.data;
+						applications = [
+							...applications,
+							{
+								name: "first projection",
+								state: {
+									projection: idProjection2D,
+									table: $filteredTable,
+									filterInfo: {
+										metadata: $metadataSelections,
+										slice: $sliceSelections,
+									},
+								},
+							},
+						];
 					}
 				}}
-				>Compute projection
+				>Initial Projection w/ Sidebar Filter
 			</Button>
+		</div>
+		<div>
+			<h3>History</h3>
+			{#each applications as app, i}
+				<div
+					on:click={() => {
+						idProjection2D = app.state.projection;
+						metadataSelections.set(app.state.filterInfo.metadata);
+						sliceSelections.set(app.state.filterInfo.slice);
+					}}>
+					NAME: {app.name}, PROJ LENGTH: {app.state.projection.length}
+				</div>
+			{/each}
 		</div>
 	</div>
 
