@@ -34,6 +34,7 @@
 		LegendaryLegendEntry,
 	} from "./scatter/scatter";
 	import type ColumnTable from "arquero/dist/types/table/column-table";
+	import * as aq from "arquero";
 
 	// props
 	export let scatterWidth = 900;
@@ -192,6 +193,30 @@
 		legendaryScatterPoints = scatter;
 	}
 	let applications = [];
+
+	function filterIdsTable(
+		table: ColumnTable,
+		idColumn: string = columnHash($settings.idColumn),
+		ids: string[]
+	) {
+		let rows = [];
+		for (const row of $filteredTable) {
+			if (ids.includes(row[idColumn])) {
+				rows.push(row);
+			}
+		}
+		let accumulate = {};
+		rows.forEach((row) => {
+			Object.keys(row).forEach((key) => {
+				if (!(key in accumulate)) {
+					accumulate[key] = [];
+				}
+				accumulate[key].push(row[key]);
+			});
+		});
+		const newTable = aq.table(accumulate);
+		return newTable;
+	}
 </script>
 
 <div id="main">
@@ -230,9 +255,11 @@
 					}}
 					on:select={({ detail }) => {
 						const indexInstances = detail.map(({ index }) => index);
-						lassoSelectTable = indexTable(
+						const idedInstanced = detail.map(({ id }) => id);
+						lassoSelectTable = filterIdsTable(
 							$filteredTable,
-							indexInstances.map((i) => i + 1)
+							columnHash($settings.idColumn),
+							idedInstanced
 						);
 					}}
 					regionMode={false} />
@@ -277,6 +304,33 @@
 					}
 				}}
 				>Initial Projection w/ Sidebar Filter
+			</Button>
+			<Button
+				variant="outlined"
+				on:click={async () => {
+					if ($filteredTable) {
+						const filteredIds = lassoSelectTable.columnArray(
+							columnHash($settings.idColumn)
+						);
+						const _projection = await projectEmbeddings2D($model, filteredIds);
+						idProjection2D = _projection.data;
+						applications = [
+							...applications,
+							{
+								name: "lasso select projection",
+								state: {
+									projection: idProjection2D,
+									table: $filteredTable,
+									filterInfo: {
+										metadata: $metadataSelections,
+										slice: $sliceSelections,
+									},
+								},
+							},
+						];
+					}
+				}}
+				>Selection Projection
 			</Button>
 		</div>
 		<div>

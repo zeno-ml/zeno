@@ -27,7 +27,7 @@
 	$: xScale = scaleLinear().domain(xMinMax).range(xWindowMinMax);
 	$: yScale = scaleLinear().domain(yMinMax).range(yWindowMinMax);
 	$: formattedPoints = points.map((p) => {
-		return [xScale(p.x), yScale(p.y), p.color, p.opacity];
+		return [xScale(p.x), yScale(p.y), p.color, p.opacity, p.id];
 	});
 	export let xScaleTracker = scaleLinear().domain([-1, 1]);
 	export let yScaleTracker = scaleLinear().domain([-1, 1]);

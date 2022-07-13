@@ -97,7 +97,11 @@
 		scatter.subscribe("select", (d) => exportSelectedPoints(d.points), null);
 	}
 	function exportSelectedPoints(idx: number[]) {
-		const pointsExport = idx.map((i) => ({ index: i, point: points[i] }));
+		const pointsExport = idx.map((i) => ({
+			index: i,
+			point: points[i],
+			id: points[i][4],
+		}));
 		console.log(pointsExport);
 		dispatch("select", pointsExport);
 	}
