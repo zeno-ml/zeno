@@ -100,7 +100,11 @@
 		}
 	}
 	function getMetadata(table: ColumnTable, colorBy: string) {
-		return table.columnArray(colorBy) as Array<unknown>;
+		if (table.column(colorBy)) {
+			return table.columnArray(colorBy) as Array<unknown>;
+		} else {
+			return [];
+		}
 	}
 
 	let selectedMetadataOutputs,

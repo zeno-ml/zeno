@@ -80,27 +80,29 @@
 				}
 			}}
 			on:mousemove={(e) => {
-				mousePos[0] = e.offsetX;
-				mousePos[1] = e.offsetY;
-				const pointPos = conversion.screenSpaceToPointSpace(mousePos);
-				dispatch("mousemove", {
-					mousePos,
-					pointPos,
-				});
-				if (regionMode) {
-					if (keyDown && mouseDown) {
-						currInterval++;
-						if (currInterval >= intervalSample) {
-							polygon = [
-								...polygon,
-								[
-									conversion.xViewScale.invert(mousePos[0]),
-									conversion.yViewScale.invert(mousePos[1]),
-								],
-							];
-							regionPolygon = [...regionPolygon, [...pointPos]];
-							console.log(polygon);
-							currInterval = 0;
+				if (conversion) {
+					mousePos[0] = e.offsetX;
+					mousePos[1] = e.offsetY;
+					const pointPos = conversion.screenSpaceToPointSpace(mousePos);
+					dispatch("mousemove", {
+						mousePos,
+						pointPos,
+					});
+					if (regionMode) {
+						if (keyDown && mouseDown) {
+							currInterval++;
+							if (currInterval >= intervalSample) {
+								polygon = [
+									...polygon,
+									[
+										conversion.xViewScale.invert(mousePos[0]),
+										conversion.yViewScale.invert(mousePos[1]),
+									],
+								];
+								regionPolygon = [...regionPolygon, [...pointPos]];
+								console.log(polygon);
+								currInterval = 0;
+							}
 						}
 					}
 				}
