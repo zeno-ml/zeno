@@ -1,13 +1,11 @@
 <script lang="ts">
 	import MetadataBar from "../metadata/MetadataPanel.svelte";
-	import SelectionBar from "../metadata/SelectionBar.svelte";
 	import Scatter from "./scatterplot/LegendaryScatter.svelte";
 	import Select, { Option } from "@smui/select";
 	import Samples from "../samples/Samples.svelte";
 	import SampleOptions from "../samples/SampleOptions.svelte";
 	import Button from "@smui/button";
 	import TextField from "@smui/textfield";
-	import { projectEmbeddings2D } from "./discovery";
 	import * as pipeline from "./pipeline";
 	import {
 		filteredTable,
@@ -16,8 +14,6 @@
 		colorByHash,
 		colorSpec,
 		table,
-		metadataSelections,
-		sliceSelections,
 	} from "../stores";
 	import { columnHash } from "../util";
 
@@ -93,6 +89,16 @@
 		const newTable = aq.table(accumulate);
 		return newTable;
 	}
+
+	function addZenoColumn({
+		model = "",
+		name = "",
+		columnType,
+		transform = "",
+	}: ZenoColumn) {
+		$settings.metadataColumns.push({ model, name, columnType, transform });
+		settings.set({ ...$settings });
+	}
 </script>
 
 <div id="main">
@@ -140,10 +146,6 @@
 					bind:regionPolygon
 					regionMode={regionLabeler} />
 			</div>
-			<div>
-				<p>{$filteredTable.size} instances</p>
-				<SelectionBar />
-			</div>
 		</div>
 		<div>
 			<Button
@@ -176,19 +178,13 @@
 						polygon: regionPolygon,
 						name: regionLabelerName,
 					});
-					const col = output["col_name"];
-					const model = col.model;
-					const name = col.name;
-					const columnType = col.column_type;
-					const transform = col.transform;
-					const newAddition = {
-						model,
-						name,
-						columnType,
-						transform,
-					};
-					$settings.metadataColumns.push(newAddition);
-					settings.set({ ...$settings });
+					const column = output["col_name"];
+					addZenoColumn({
+						model: column.model,
+						name: column.name,
+						columnType: column.column_type,
+						transform: column.transform,
+					});
 				}}>
 				Apply Region Labeler</Button>
 

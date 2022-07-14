@@ -1,7 +1,5 @@
-import type { TypedArray } from "arquero/dist/types/table/table";
 import type ColumnTable from "arquero/dist/types/table/column-table";
 import { color } from "d3-color";
-import { post } from "../util";
 
 export function interpolateColorToArray(
 	interpolateColorer: (normalized: number) => string,
@@ -13,17 +11,6 @@ export function interpolateColorToArray(
 		colorArray[i] = color(interpolateColorer(t)).hex();
 	}
 	return colorArray;
-}
-
-export async function projectEmbeddings2D(
-	model: string,
-	instance_ids: unknown[] | TypedArray
-) {
-	const output = await post({
-		url: "api/projection",
-		payload: { model, instance_ids },
-	});
-	return output;
 }
 
 export function indexTable(table: ColumnTable, idx: number[]): ColumnTable {

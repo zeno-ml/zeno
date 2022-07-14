@@ -1,3 +1,4 @@
+import type { TypedArray } from "arquero/dist/types/table/table";
 import { postEndpointGenerator, enforce } from "../util";
 
 export const apiEndpoint = "api/pipe";
@@ -51,7 +52,7 @@ export async function regionLabeler({
 	return dataAccessor(output);
 }
 
-export async function idFilter({ ids }: { ids: unknown[] }) {
+export async function idFilter({ ids }: { ids: any[] | TypedArray }) {
 	const output = await postPipe({
 		url: "id-filter",
 		payload: {
