@@ -27,7 +27,7 @@
 </script>
 
 <div id="options-container">
-	<div class="options container">
+	<div class="container">
 		{#if $models}
 			<Select bind:value={$model} label="Model" style="margin-right: 20px;">
 				{#each $models as m}
@@ -54,22 +54,16 @@
 		{/if}
 	</div>
 	<div id="selects">
-		<div class="select-div">
-			<Select bind:value={$sort} label="Sort By">
-				{#each $currentColumns as m}
-					<Option value={m}>{m.name}</Option>
-				{/each}
-			</Select>
-		</div>
+		<Select bind:value={$sort} label="Sort By">
+			{#each $currentColumns as m}
+				<Option value={m}>{m.name}</Option>
+			{/each}
+		</Select>
 	</div>
 </div>
 <SelectionBar />
 
 <style>
-	#selects {
-		display: flex;
-		flex-direction: inline;
-	}
 	#options-container {
 		display: flex;
 		flex-direction: row;
@@ -79,12 +73,5 @@
 		margin-bottom: 10px;
 		padding-bottom: 10px;
 		margin-right: 20px;
-	}
-	.options {
-		align-items: center;
-		justify-content: space-between;
-	}
-	.select-div {
-		margin-left: 20px;
 	}
 </style>

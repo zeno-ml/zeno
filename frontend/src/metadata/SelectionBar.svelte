@@ -47,7 +47,7 @@
 		{/await}
 	</span>
 	<span id="size">
-		{$filteredTable.size} instances
+		({$filteredTable.size} instances)
 	</span>
 	{#each $sliceSelections as s}
 		<div class="meta-chip">
@@ -114,7 +114,7 @@
 	#metric {
 		font-weight: 400;
 		margin-left: 10px;
-		color: #6201ee;
+		color: #6a1b9a;
 		margin-right: 15px;
 	}
 	.meta-chip {

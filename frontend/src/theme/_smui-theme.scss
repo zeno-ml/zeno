@@ -4,12 +4,19 @@
 
 // Svelte Colors!
 @use "@material/theme/index" as theme with (
-	$primary: #9b51e0,
+	$primary: #6a1b9a,
 	$secondary: #676778,
 	$surface: #fff,
 	$background: #fff,
 	$error: color-palette.$red-900
 );
+
+@use "@material/circular-progress/index" as circular-progress;
+
+.status-circle {
+	@include circular-progress.color(#fff);
+	@include circular-progress.track-color(#fff);
+}
 
 html,
 body {

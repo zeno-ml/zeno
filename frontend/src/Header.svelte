@@ -27,6 +27,7 @@
 		<div class="status inline">
 			{#if runningAnalysis}
 				<CircularProgress
+					class="status-circle"
 					style="height: 32px; width: 32px; margin-right:20px"
 					indeterminate />
 				<span>{@html $status.status}</span>
@@ -38,7 +39,7 @@
 		<Wrapper>
 			<IconButton href="https://dig.cmu.edu/zeno/intro.html">
 				<Icon component={Svg} viewBox="0 0 24 24">
-					<path fill="currentColor" d={mdiApi} />
+					<path fill="white" d={mdiApi} />
 				</Icon>
 			</IconButton>
 			<Tooltip>read the documentation</Tooltip>
@@ -46,7 +47,7 @@
 		<Wrapper>
 			<IconButton href="https://github.com/cmudig/zeno">
 				<Icon component={Svg} viewBox="0 0 24 24">
-					<path fill="currentColor" d={mdiGithub} />
+					<path fill="white" d={mdiGithub} />
 				</Icon>
 			</IconButton>
 			<Tooltip>see the code on GitHub</Tooltip>
@@ -57,13 +58,14 @@
 <style>
 	header {
 		display: flex;
+		color: white;
 		flex-direction: row;
 		justify-content: space-between;
 		padding-top: 5px;
 		padding-bottom: 5px;
 		padding-right: 20px;
 		padding-left: 20px;
-		background: var(--mdc-theme-background);
+		background: #6a1b9a;
 		border-bottom: 1px solid #e0e0e0;
 	}
 

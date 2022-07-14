@@ -115,12 +115,12 @@
 			metadataSelections.set(new Map());
 		}}>
 		<div class="inline">
-			<div class="icon">
+			<!-- <div class="icon">
 				<Icon component={Svg} viewBox="0 0 24 24">
 					<path fill="currentColor" d={mdiTableMultiple} />
 				</Icon>
-			</div>
-			<p>all instances</p>
+			</div> -->
+			<p>All instances</p>
 		</div>
 		<div>
 			<span>{#await res then r}{r && r[0] ? r[0].toFixed(2) : ""}{/await}</span>
@@ -235,15 +235,14 @@
 	.overview {
 		display: flex;
 		align-items: center;
-		border-bottom: 0.5px solid rgb(224, 224, 224);
-		border-top: 0.5px solid rgb(224, 224, 224);
+		border: 0.5px solid #e0e0e0;
 		padding-left: 10px;
 		justify-content: space-between;
 		padding-right: 10px;
 		margin-right: 10px;
 	}
 	.selected {
-		background: #ebdffc;
+		background: #f9f5ff;
 	}
 	.size {
 		font-style: italic;
