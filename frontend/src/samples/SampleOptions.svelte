@@ -27,22 +27,22 @@
 </script>
 
 <div id="options-container">
-	<div class="options container">
-		{#if $models}
+	<div class="container">
+		{#if $models && $models.length > 0}
 			<Select bind:value={$model} label="Model" style="margin-right: 20px;">
 				{#each $models as m}
 					<Option value={m}>{m}</Option>
 				{/each}
 			</Select>
 		{/if}
-		{#if $metrics}
+		{#if $metrics && $metrics.length > 0}
 			<Select bind:value={$metric} label="Metric" style="margin-right: 20px;">
 				{#each $metrics as m}
 					<Option value={m}>{m}</Option>
 				{/each}
 			</Select>
 		{/if}
-		{#if $transforms}
+		{#if $transforms && $transforms.length > 0}
 			<Select
 				bind:value={$transform}
 				label="Transform"
@@ -54,37 +54,26 @@
 		{/if}
 	</div>
 	<div id="selects">
-		<div class="select-div">
-			<Select bind:value={$sort} label="Sort By">
-				{#each $currentColumns as m}
-					<Option value={m}>{m.name}</Option>
-				{/each}
-			</Select>
-		</div>
+		<Select
+			bind:value={$sort}
+			label="Sort By"
+			key={(d) => (d && d.name ? d.name : "")}>
+			{#each $currentColumns as m}
+				<Option value={m}>{m.name}</Option>
+			{/each}
+		</Select>
 	</div>
 </div>
 <SelectionBar />
 
 <style>
-	#selects {
-		display: flex;
-		flex-direction: inline;
-	}
 	#options-container {
 		display: flex;
 		flex-direction: row;
 		justify-content: space-between;
 		align-items: center;
-		border-bottom: 1px solid rgb(224, 224, 224);
-		margin-bottom: 10px;
 		padding-bottom: 10px;
+		margin-bottom: 10px;
 		margin-right: 20px;
-	}
-	.options {
-		align-items: center;
-		justify-content: space-between;
-	}
-	.select-div {
-		margin-left: 20px;
 	}
 </style>

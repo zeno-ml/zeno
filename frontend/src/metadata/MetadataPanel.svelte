@@ -1,10 +1,8 @@
 <script lang="ts">
-	import Button, { Icon } from "@smui/button";
-	import { Svg } from "@smui/common/elements";
+	import Button from "@smui/button";
 	import * as aq from "arquero";
 	import type ColumnTable from "arquero/dist/types/table/column-table";
 
-	import { mdiTableMultiple } from "@mdi/js";
 	import Ripple from "@smui/ripple";
 	import CreateSlice from "../filtering/CreateSlice.svelte";
 	import MetadataNode from "./MetadataCell.svelte";
@@ -115,12 +113,12 @@
 			metadataSelections.set(new Map());
 		}}>
 		<div class="inline">
-			<div class="icon">
+			<!-- <div class="icon">
 				<Icon component={Svg} viewBox="0 0 24 24">
 					<path fill="currentColor" d={mdiTableMultiple} />
 				</Icon>
-			</div>
-			<p>all instances</p>
+			</div> -->
+			<p>All instances</p>
 		</div>
 		<div>
 			<span>{#await res then r}{r && r[0] ? r[0].toFixed(2) : ""}{/await}</span>
@@ -217,7 +215,8 @@
 		color: rgba(0, 0, 0, 0.7);
 	}
 	.side-container {
-		height: calc(100vh - 80px);
+		margin-left: 10px;
+		height: calc(100vh - 82px);
 		overflow-y: auto;
 		min-width: 450px;
 		padding: 10px;
@@ -235,15 +234,14 @@
 	.overview {
 		display: flex;
 		align-items: center;
-		border-bottom: 0.5px solid rgb(224, 224, 224);
-		border-top: 0.5px solid rgb(224, 224, 224);
+		border: 0.5px solid #e0e0e0;
 		padding-left: 10px;
 		justify-content: space-between;
 		padding-right: 10px;
 		margin-right: 10px;
 	}
 	.selected {
-		background: #ebdffc;
+		background: #f9f5ff;
 	}
 	.size {
 		font-style: italic;
