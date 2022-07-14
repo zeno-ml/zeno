@@ -35,7 +35,6 @@
 	let regionPolygon = [];
 	let regionLabelerName = "name";
 	let legendaryScatterPoints: LegendaryScatterPoint[];
-	let applications = [];
 
 	$: metadataExists =
 		$settings.metadataColumns.length > 0 || $filteredTable._names.length > 0;
@@ -148,67 +147,6 @@
 		</div>
 		<div>
 			<Button
-				variant="outlined"
-				on:click={() => {
-					console.log("hit");
-				}}
-				>Change Base, Add new filter
-			</Button>
-			<Button
-				variant="outlined"
-				on:click={async () => {
-					if ($filteredTable) {
-						const filteredIds = $filteredTable.columnArray(
-							columnHash($settings.idColumn)
-						);
-						const _projection = await projectEmbeddings2D($model, filteredIds);
-						projection2D = _projection.data;
-						applications = [
-							...applications,
-							{
-								name: "first projection",
-								state: {
-									projection: projection2D,
-									table: $filteredTable,
-									filterInfo: {
-										metadata: $metadataSelections,
-										slice: $sliceSelections,
-									},
-								},
-							},
-						];
-					}
-				}}
-				>Initial Projection w/ Sidebar Filter
-			</Button>
-			<Button
-				variant="outlined"
-				on:click={async () => {
-					if ($filteredTable) {
-						const filteredIds = lassoSelectTable.columnArray(
-							columnHash($settings.idColumn)
-						);
-						const _projection = await projectEmbeddings2D($model, filteredIds);
-						projection2D = _projection.data;
-						applications = [
-							...applications,
-							{
-								name: "lasso select projection",
-								state: {
-									projection: projection2D,
-									table: lassoSelectTable,
-									filterInfo: {
-										metadata: $metadataSelections,
-										slice: $sliceSelections,
-									},
-								},
-							},
-						];
-					}
-				}}
-				>Selection Projection
-			</Button>
-			<Button
 				on:click={async () => {
 					const output = await pipeline.parametricUMAP();
 					projection2D = output;
@@ -262,19 +200,6 @@
 					const reset = await pipeline.reset();
 					const init = await pipeline.init({ model: $model });
 				}}>Reset Pipeline with model: {$model}</Button>
-		</div>
-		<div>
-			<h3>History</h3>
-			{#each applications as app, i}
-				<div
-					on:click={() => {
-						projection2D = app.state.projection;
-						metadataSelections.set(app.state.filterInfo.metadata);
-						sliceSelections.set(app.state.filterInfo.slice);
-					}}>
-					NAME: {app.name}, PROJ LENGTH: {app.state.projection.length}
-				</div>
-			{/each}
 		</div>
 	</div>
 
