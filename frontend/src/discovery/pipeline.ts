@@ -1,19 +1,7 @@
-import { post } from "./discovery";
+import { postEndpointGenerator, enforce } from "../util";
 
-function enforce({ rule, name }: { rule: boolean; name: string }) {
-	if (rule !== true) {
-		throw new Error(`Violated: ${name}`);
-	}
-}
-
-function postGenerator(endpoint: string) {
-	function postFunc({ url, payload = {} }: { url: string; payload?: object }) {
-		return post({ url: `${endpoint}/${url}`, payload });
-	}
-	return postFunc;
-}
 export const apiEndpoint = "api/pipe";
-export const postPipe = postGenerator(apiEndpoint);
+export const postPipe = postEndpointGenerator(apiEndpoint);
 
 function dataAccessor(obj: object) {
 	if ("data" in obj) {

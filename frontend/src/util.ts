@@ -217,3 +217,64 @@ export function columnHash(col: ZenoColumn) {
 		(col.transform ? col.transform : "")
 	);
 }
+
+export async function post({
+	url,
+	payload = {},
+}: {
+	url: string;
+	payload?: object;
+}) {
+	const response = await fetch(url, {
+		method: "POST",
+		headers: {
+			Accept: "application/json",
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(payload),
+	});
+	const output = await response.json();
+	return JSON.parse(output);
+}
+export function postEndpointGenerator(endpoint: string) {
+	function postFunc({ url, payload = {} }: { url: string; payload?: object }) {
+		return post({ url: `${endpoint}/${url}`, payload });
+	}
+	return postFunc;
+}
+
+export function enforce({ rule, name }: { rule: boolean; name: string }) {
+	if (rule !== true) {
+		throw new Error(`Violated: ${name}`);
+	}
+}
+
+export function extentXY<T>(
+	data: T[],
+	xGetter = (d: T) => d[0],
+	yGetter = (d: T) => d[1]
+) {
+	const firstPoint = data[0];
+	const xExtent = { min: xGetter(firstPoint), max: xGetter(firstPoint) };
+	const yExtent = { min: yGetter(firstPoint), max: yGetter(firstPoint) };
+	for (let i = 1; i < data.length; i++) {
+		const value = data[i];
+		const xValue = xGetter(value),
+			yValue = yGetter(value);
+		// mins
+		if (xValue < xExtent.min) {
+			xExtent.min = xValue;
+		}
+		if (yValue < yExtent.min) {
+			yExtent.min = yValue;
+		}
+		// maxs
+		if (xValue > xExtent.max) {
+			xExtent.max = xValue;
+		}
+		if (yValue > yExtent.max) {
+			yExtent.max = yValue;
+		}
+	}
+	return { xExtent, yExtent };
+}

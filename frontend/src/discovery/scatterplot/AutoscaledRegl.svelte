@@ -1,7 +1,7 @@
 <script lang="ts">
 	import ScaledTrackerRegl from "./ScaledTrackerRegl.svelte";
 	import type { LegendaryScatterPoint } from "./scatter";
-	import { extentXY } from "./scatter";
+	import { extentXY } from "../../util";
 	import { schemeCategory10 } from "d3-scale-chromatic";
 
 	export let width = 500;
