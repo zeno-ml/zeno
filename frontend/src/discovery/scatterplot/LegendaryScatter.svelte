@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Legend from "../legend/Legend.svelte";
 	import AutoscaledRegl from "./AutoscaledRegl.svelte";
 	import { schemeCategory10 } from "d3-scale-chromatic";
 	import { color, HSLColor, RGBColor } from "d3-color";
@@ -7,6 +6,7 @@
 	const dispatch = createEventDispatcher();
 
 	const defaultColors = schemeCategory10 as string[];
+
 	export let width = 800;
 	export let height = 800;
 	export let points = new Array(10_000).fill(0).map((_, i) => ({
@@ -19,15 +19,20 @@
 		color: c,
 		value: `${i}`,
 	}));
-	$: colorRange = legend.map((item) => item.color);
+	export let regionMode = true;
+	export let regionPolygon = [];
+	export let regionStroke = color("lightgreen");
+	export let regionFill = opacify(regionStroke, 0.25);
+
 	let mousePos = [0, 0];
 	let conversion;
-
 	let mouseDown = false;
 	let keyDown = false;
-	export let regionMode = true;
 	let polygon = [];
-	export let regionPolygon = [];
+	let intervalSample = 1;
+	let currInterval = 0;
+
+	$: colorRange = legend.map((item) => item.color);
 	$: svgPolygon = polygon.map(([x, y]) => [
 		conversion.xViewScale(x),
 		conversion.yViewScale(y),
@@ -36,20 +41,39 @@
 		(acc, item) => acc + " " + item.toString(),
 		""
 	);
-	let intervalSample = 1;
-	let currInterval = 0;
 
 	function opacify(colorObj: RGBColor | HSLColor, opacity: number) {
 		const colorCopy = colorObj.copy();
 		colorCopy.opacity = opacity;
 		return colorCopy;
 	}
-	let regionStroke = color("lightgreen");
-	let regionFill = opacify(regionStroke, 0.25);
+	function addPolygon({ mousePos, conversionObj }) {
+		const pointPos = conversionObj.screenSpaceToPointSpace(mousePos);
+		dispatch("mousemove", {
+			mousePos,
+			pointPos,
+		});
+		if (regionMode) {
+			if (keyDown && mouseDown) {
+				currInterval++;
+				if (currInterval >= intervalSample) {
+					polygon = [
+						...polygon,
+						[
+							conversionObj.xViewScale.invert(mousePos[0]),
+							conversionObj.yViewScale.invert(mousePos[1]),
+						],
+					];
+					regionPolygon = [...regionPolygon, [...pointPos]];
+					currInterval = 0;
+				}
+			}
+		}
+	}
 </script>
 
 <svelte:window
-	on:keyup={(e) => {
+	on:keyup={() => {
 		if (regionMode) {
 			keyDown = false;
 		}
@@ -61,7 +85,7 @@
 			currInterval = 0;
 		}
 	}} />
-<div id="legendary" style:width="{width}px" style:height="{height}px">
+<div id="scatter" style:width="{width}px" style:height="{height}px">
 	{#if points.length > 0}
 		<div
 			id="bottom-scatter"
@@ -83,28 +107,10 @@
 				if (conversion) {
 					mousePos[0] = e.offsetX;
 					mousePos[1] = e.offsetY;
-					const pointPos = conversion.screenSpaceToPointSpace(mousePos);
-					dispatch("mousemove", {
+					addPolygon({
 						mousePos,
-						pointPos,
+						conversionObj: conversion,
 					});
-					if (regionMode) {
-						if (keyDown && mouseDown) {
-							currInterval++;
-							if (currInterval >= intervalSample) {
-								polygon = [
-									...polygon,
-									[
-										conversion.xViewScale.invert(mousePos[0]),
-										conversion.yViewScale.invert(mousePos[1]),
-									],
-								];
-								regionPolygon = [...regionPolygon, [...pointPos]];
-								console.log(polygon);
-								currInterval = 0;
-							}
-						}
-					}
 				}
 			}}>
 			<AutoscaledRegl
@@ -121,7 +127,7 @@
 				on:deselect />
 			{#if regionMode}
 				<svg
-					style="border: 3px dashed lightgreen; position:absolute; left:0; top: 0;"
+					style="border: 3px dashed {regionStroke.toString()}; position:absolute; left:0; top: 0;"
 					{width}
 					{height}>
 					<polygon
@@ -133,22 +139,10 @@
 			{/if}
 		</div>
 	{/if}
-	<!-- <div id="top-legend">
-		<Legend gap={5} data={legend} squareWidth={25} />
-	</div> -->
-	<!-- <div style="position: absolute; left: {mousePos[0]}px; top: {mousePos[1]}px;">
-		mouse here
-	</div> -->
 </div>
 
-<style lang="scss">
-	#legendary {
+<style>
+	#scatter {
 		position: relative;
-		// border: 1px solid lightgray;
-		#top-legend {
-			position: absolute;
-			left: 11px;
-			top: 11px;
-		}
 	}
 </style>

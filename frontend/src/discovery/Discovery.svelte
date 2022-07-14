@@ -1,19 +1,13 @@
 <script lang="ts">
 	import MetadataBar from "../metadata/MetadataPanel.svelte";
 	import SelectionBar from "../metadata/SelectionBar.svelte";
-	import FitLegendaryScatter from "./scatterplot/LegendaryScatter.svelte";
+	import Scatter from "./scatterplot/LegendaryScatter.svelte";
 	import Select, { Option } from "@smui/select";
 	import Samples from "../samples/Samples.svelte";
 	import SampleOptions from "../samples/SampleOptions.svelte";
-	import * as d3chromatic from "d3-scale-chromatic";
 	import Button from "@smui/button";
 	import TextField from "@smui/textfield";
-	import {
-		projectEmbeddings2D,
-		interpolateColorToArray,
-		binContinuous,
-		getDataRange as uniqueOutputs,
-	} from "./discovery";
+	import { projectEmbeddings2D } from "./discovery";
 	import * as pipeline from "./pipeline";
 	import {
 		filteredTable,
@@ -27,7 +21,6 @@
 	} from "../stores";
 	import { columnHash } from "../util";
 
-	import type { dataType } from "./discovery";
 	import type { LegendaryScatterPoint } from "./scatterplot/scatter";
 	import type ColumnTable from "arquero/dist/types/table/column-table";
 	import * as aq from "arquero";
@@ -35,43 +28,22 @@
 	// props
 	export let scatterWidth = 900;
 	export let scatterHeight = 700;
-	export let colorsCategorical = d3chromatic.schemeCategory10 as string[];
-	export let colorsContinuous = d3chromatic.interpolateBuPu;
 
-	let projection2D: number[][] = [];
-	let idProjection2D: object[] = [];
-	let colorValues: number[] = [];
-	let opacityValues: number[] = [];
-
-	// eslint-disable-next-line
-	let dataType: dataType = "categorical";
-	let colorRange: string[] = colorsCategorical;
+	let projection2D: object[] = [];
 	let lassoSelectTable = null;
+	let regionLabeler = false;
+	let regionPolygon = [];
+	let regionLabelerName = "name";
+	let legendaryScatterPoints: LegendaryScatterPoint[];
+	let applications = [];
 
-	$: console.log("SPEC", $colorByHash, $colorSpec);
-	// stuff that gets updated (reactive)
 	$: metadataExists =
 		$settings.metadataColumns.length > 0 || $filteredTable._names.length > 0;
+	$: pointsExist = projection2D.length > 0;
 
-	$: pointsExist = idProjection2D.length > 0;
-
-	let oldIds = [],
-		newIds = [];
-	$: {
-		oldIds = saveIds();
-		updateColors({ colorBy: $colorByHash });
-	}
-	$: {
-		if (metadataExists && $filteredTable) {
-			newIds = saveIds();
-		}
-	}
-	$: {
-		opacityValues = oldIds.map((id) => (newIds.includes(id) ? 0.75 : 0.15));
-	}
 	$: {
 		if (metadataExists && pointsExist && $colorSpec) {
-			legendaryScatterPoints = idProjection2D.map((item) => {
+			legendaryScatterPoints = projection2D.map((item) => {
 				const proj = item["proj"],
 					id = item["id"];
 				return {
@@ -85,76 +57,20 @@
 		}
 	}
 
-	// functions
+	$: {
+		if ($model && $table) {
+			pipeline.reset().then(() => {
+				console.log("reset");
+			});
+			pipeline.init({ model: $model }).then(() => {
+				console.log("init");
+			});
+		}
+	}
+
 	function scatterSelectEmpty(table: ColumnTable) {
 		return table === null;
 	}
-	function saveIds() {
-		if ($filteredTable) {
-			return $filteredTable
-				.columnArray(columnHash($settings.idColumn))
-				.map((d) => d) as string[];
-		} else {
-			return [];
-		}
-	}
-	function getMetadata(table: ColumnTable, colorBy: string) {
-		if (table.column(colorBy)) {
-			return table.columnArray(colorBy) as Array<unknown>;
-		} else {
-			return [];
-		}
-	}
-
-	let selectedMetadataOutputs,
-		dataRange,
-		legendaryScatterPoints: LegendaryScatterPoint[];
-
-	function inferOutputsType(
-		colorBy: string,
-		table: ColumnTable = $filteredTable
-	) {
-		// get the range and type of data
-		const metadata = getMetadata(table, colorBy); // get columns for selected metadata
-		const { range, type } = uniqueOutputs(metadata); // return the unique categorical or continuous range
-		return { metadata, range, type };
-	}
-	function selectColorsForRange(
-		type: dataType,
-		metadata: unknown[],
-		range: unknown[]
-	) {
-		// based on datatype inferred color differently
-		let colorRange, colorValues;
-		if (type === "categorical") {
-			colorValues = metadata.map((md) => range.indexOf(md));
-			colorRange = colorsCategorical;
-		} else if (type === "continuous") {
-			const binAssignments = binContinuous(metadata);
-			colorValues = binAssignments.map((ass) => range[ass]);
-			colorRange = interpolateColorToArray(colorsContinuous, range.length);
-		}
-		return { colorRange, colorValues };
-	}
-	function updateColors({ colorBy = "label", table = $filteredTable } = {}) {
-		// compute coloring stuff
-		const { metadata, range, type } = inferOutputsType(colorBy, table);
-		const { colorRange: cRange, colorValues: cValues } = selectColorsForRange(
-			type,
-			metadata,
-			range
-		);
-
-		// save globally
-		selectedMetadataOutputs = metadata;
-		dataRange = range;
-		// eslint-disable-next-line
-		dataType = type;
-		colorRange = cRange;
-		colorValues = cValues;
-	}
-
-	let applications = [];
 	function filterIdsTable(
 		table: ColumnTable,
 		idColumn: string = columnHash($settings.idColumn),
@@ -178,20 +94,6 @@
 		const newTable = aq.table(accumulate);
 		return newTable;
 	}
-
-	$: {
-		if ($model && $table) {
-			pipeline.reset().then(() => {
-				console.log("reset");
-			});
-			pipeline.init({ model: $model }).then(() => {
-				console.log("init");
-			});
-		}
-	}
-	let regionLabeler = false;
-	let regionPolygon = [];
-	let regionLabelerName = "name";
 </script>
 
 <div id="main">
@@ -221,7 +123,7 @@
 				class="paper"
 				style:width="{scatterWidth}px"
 				style:height="{scatterHeight}px">
-				<FitLegendaryScatter
+				<Scatter
 					width={scatterWidth}
 					height={scatterHeight}
 					points={legendaryScatterPoints}
@@ -229,7 +131,6 @@
 						lassoSelectTable = null;
 					}}
 					on:select={({ detail }) => {
-						const indexInstances = detail.map(({ index }) => index);
 						const idedInstanced = detail.map(({ id }) => id);
 						lassoSelectTable = filterIdsTable(
 							$filteredTable,
@@ -261,14 +162,13 @@
 							columnHash($settings.idColumn)
 						);
 						const _projection = await projectEmbeddings2D($model, filteredIds);
-						projection2D = _projection.data.map(({ proj }) => proj);
-						idProjection2D = _projection.data;
+						projection2D = _projection.data;
 						applications = [
 							...applications,
 							{
 								name: "first projection",
 								state: {
-									projection: idProjection2D,
+									projection: projection2D,
 									table: $filteredTable,
 									filterInfo: {
 										metadata: $metadataSelections,
@@ -289,13 +189,13 @@
 							columnHash($settings.idColumn)
 						);
 						const _projection = await projectEmbeddings2D($model, filteredIds);
-						idProjection2D = _projection.data;
+						projection2D = _projection.data;
 						applications = [
 							...applications,
 							{
 								name: "lasso select projection",
 								state: {
-									projection: idProjection2D,
+									projection: projection2D,
 									table: lassoSelectTable,
 									filterInfo: {
 										metadata: $metadataSelections,
@@ -311,7 +211,7 @@
 			<Button
 				on:click={async () => {
 					const output = await pipeline.parametricUMAP();
-					idProjection2D = output;
+					projection2D = output;
 				}}>
 				UMAP</Button>
 			<Button
@@ -368,7 +268,7 @@
 			{#each applications as app, i}
 				<div
 					on:click={() => {
-						idProjection2D = app.state.projection;
+						projection2D = app.state.projection;
 						metadataSelections.set(app.state.filterInfo.metadata);
 						sliceSelections.set(app.state.filterInfo.slice);
 					}}>
