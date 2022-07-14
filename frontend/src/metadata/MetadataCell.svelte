@@ -14,7 +14,7 @@
 		settings,
 		availableColors,
 		colorByHash,
-		model,
+		filteredTable,
 	} from "../stores";
 	import { columnHash } from "../util";
 	import { countSpec, histogramSpec } from "./vegaSpecs";
@@ -32,20 +32,50 @@
 	}
 	let chartType: ChartType;
 
-	let selection = undefined;
-	let finalSelection = undefined;
-	let view: View;
-	let data = { table: [] };
-	let histoTable = { values: [] };
-
 	interface IColorAssignments {
 		colors: string[];
 		labels: { id: string; colorIndex: number }[];
 		hash: string;
 	}
-	let colorAssignments: IColorAssignments = { colors: [], labels: [], hash };
-	$: console.log(colorAssignments);
+	interface IBin {
+		binStart: number;
+		binEnd: number;
+		count?: number;
+		filteredCount?: number;
+	}
+	let selection = undefined;
+	let finalSelection = undefined;
+	let view: View;
+	let data = { table: [] };
+	let histoData = { table: [] };
+	let bins: IBin[] = [];
 
+	let colorAssignments: IColorAssignments = { colors: [], labels: [], hash };
+
+	console.warn = () => {
+		return;
+	};
+
+	function countGivenBins({
+		bins,
+		table,
+	}: {
+		bins: IBin[];
+		table: ColumnTable;
+	}) {
+		let newCounts = bins.map(() => 0);
+		tableIter: for (const row of table) {
+			const value = row[hash];
+			for (let i = 0; i < bins.length; i++) {
+				const bin = bins[i];
+				if (value >= bin.binStart && value < bin.binEnd) {
+					newCounts[i]++;
+					continue tableIter;
+				}
+			}
+		}
+		return newCounts;
+	}
 	function binGroups(columnNames: string[], t = $table, precomputed = "") {
 		console.log(t._group);
 		const counts = [];
@@ -118,9 +148,9 @@
 				} else {
 					colorAssignments = colorLabelContin(hash);
 					chartType = ChartType.Histogram;
-					const labels = bin(hash, $table);
+					bins = bin(hash, $table);
 					$availableColors.set(hash, colorAssignments);
-					histoTable.values = labels.map((d) => ({
+					histoData.table = bins.map((d) => ({
 						...d,
 						filteredCount: d.count,
 					}));
@@ -207,6 +237,18 @@
 	}
 
 	table.subscribe((t) => drawChart(t));
+	filteredTable.subscribe((t) => {
+		const filteredCounts = countGivenBins({
+			bins: bins,
+			table: t,
+		});
+		histoData.table = bins.map((d, i) => ({
+			...d,
+			filteredCount: filteredCounts[i],
+		}));
+		histoData = { ...histoData };
+		console.log(histoData.table);
+	});
 	onMount(() => {
 		drawChart($table);
 		updateData($table);
@@ -338,7 +380,7 @@
 			on:blur={setSelection}>
 			<VegaLite
 				spec={chartType === ChartType.Histogram ? histogramSpec : countSpec}
-				data={chartType === ChartType.Histogram ? histoTable : data}
+				data={chartType === ChartType.Histogram ? histoData : data}
 				bind:view
 				options={{ tooltip: true, actions: false, theme: "vox" }} />
 		</div>

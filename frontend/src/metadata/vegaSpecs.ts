@@ -3,7 +3,7 @@ import type { VegaLiteSpec } from "svelte-vega";
 export const histogramSpec = {
 	$schema: "https://vega.github.io/schema/vega-lite/v5.json",
 	data: {
-		name: "values",
+		name: "table",
 	},
 	view: {
 		stroke: "transparent",
