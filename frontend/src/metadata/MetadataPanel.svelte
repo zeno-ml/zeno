@@ -1,10 +1,8 @@
 <script lang="ts">
-	import Button, { Icon } from "@smui/button";
-	import { Svg } from "@smui/common/elements";
+	import Button from "@smui/button";
 	import * as aq from "arquero";
 	import type ColumnTable from "arquero/dist/types/table/column-table";
 
-	import { mdiTableMultiple } from "@mdi/js";
 	import Ripple from "@smui/ripple";
 	import CreateSlice from "../filtering/CreateSlice.svelte";
 	import MetadataNode from "./MetadataCell.svelte";
@@ -217,7 +215,8 @@
 		color: rgba(0, 0, 0, 0.7);
 	}
 	.side-container {
-		height: calc(100vh - 80px);
+		margin-left: 10px;
+		height: calc(100vh - 82px);
 		overflow-y: auto;
 		min-width: 450px;
 		padding: 10px;

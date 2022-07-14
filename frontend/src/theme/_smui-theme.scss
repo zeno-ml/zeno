@@ -11,13 +11,6 @@
 	$error: color-palette.$red-900
 );
 
-@use "@material/circular-progress/index" as circular-progress;
-
-.status-circle {
-	@include circular-progress.color(#fff);
-	@include circular-progress.track-color(#fff);
-}
-
 html,
 body {
 	background-color: theme.$surface;

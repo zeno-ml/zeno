@@ -10,7 +10,7 @@
 
 	export let table;
 
-	let rowsPerPage = 15;
+	let rowsPerPage = 60;
 	let currentPage = 0;
 
 	let modelColumn = "";
@@ -125,7 +125,7 @@
 <style>
 	.sample-container {
 		width: 100%;
-		height: calc(100vh - 250px);
+		height: calc(100vh - 260px);
 		overflow-y: auto;
 		align-content: baseline;
 		border-bottom: 1px solid rgb(224, 224, 224);

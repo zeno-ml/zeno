@@ -110,10 +110,11 @@
 		height: fit-content;
 		align-items: center;
 		min-height: 40px;
+		border-top: 1px solid #e0e0e0;
+		border-bottom: 1px solid #e0e0e0;
 	}
 	#metric {
 		font-weight: 400;
-		margin-left: 10px;
 		color: #6a1b9a;
 		margin-right: 15px;
 	}

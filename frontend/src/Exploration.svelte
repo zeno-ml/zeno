@@ -10,7 +10,7 @@
 	<div id="container">
 		<MetadataPanel />
 
-		<div style:margin-left="10px">
+		<div style:width="100%" style:padding-left="10px">
 			<div id="sample-options">
 				<SampleOptions />
 			</div>
@@ -36,5 +36,6 @@
 	#container {
 		display: flex;
 		flex-direction: row;
+		min-width: 100%;
 	}
 </style>
