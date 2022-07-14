@@ -35,7 +35,10 @@ class RegionBasedLabelerNode:
         return {**self.input, "labels": self.labels}
 
     def export_outputs_js(self):
-        return {"labeler": self.labels}
+        return {
+            "labels": self.labels,
+            "ids": self.input["input_table"][self.input["id_column"]].tolist(),
+        }
 
     def save(self, path: str):
         with open(path, "w") as out_file:
@@ -48,3 +51,6 @@ class RegionBasedLabelerNode:
     def init(self, polygon: list):
         self.model = polygon
         return self
+
+    def __repr__(self):
+        return "RegionBasedLabelerNode"

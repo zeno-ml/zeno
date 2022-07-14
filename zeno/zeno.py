@@ -144,6 +144,7 @@ class Zeno(object):
     def reset_pipeline(self):
         self.pipeline.reset_weak_labeler_memory()
         self.pipeline.reset_weak_labeler()
+        self.pipeline.reset_final_labeler()
 
     def init_pipeline(self, model: str):
         self.pipeline.set_model(model)
@@ -170,12 +171,10 @@ class Zeno(object):
         self.pipeline.set_name(name)
         self.pipeline.add_region_labeler(polygon)
         output, js_export = self.run_pipeline_labeler()
-        col_name = self.table_weak_labels(output)
+        col_name = self.table_weak_labels(js_export)
         return {"export": js_export, "col_name": col_name}
 
-    def table_weak_labels(self, io_memory):
-        # small_table = io_memory["input_table"]
-        labels = io_memory["labels"]
+    def table_weak_labels(self, js_export):
         col_kwargs = {
             "column_type": ZenoColumnType.PREDISTILL,
             "name": self.pipeline.name,
@@ -185,7 +184,13 @@ class Zeno(object):
         new_column_labels = ZenoColumn(
             **col_kwargs,
         )
-        self.df.loc[:, str(new_column_labels)] = labels
+        new_column_labels_hash = str(new_column_labels)
+
+        ids = js_export["ids"]
+        labels = js_export["labels"]
+        self.df.loc[:, new_column_labels_hash] = 0
+        self.df.loc[ids, new_column_labels_hash] = labels
+
         if new_column_labels not in self.complete_columns:
             self.complete_columns.append(new_column_labels)
         if new_column_labels not in self.columns:

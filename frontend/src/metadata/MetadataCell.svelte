@@ -14,6 +14,7 @@
 		settings,
 		availableColors,
 		colorByHash,
+		model,
 	} from "../stores";
 	import { columnHash } from "../util";
 	import { countSpec, histogramSpec } from "./vegaSpecs";
@@ -213,6 +214,7 @@
 
 	$: {
 		col;
+		drawChart($table);
 		updateData($table);
 	}
 

@@ -14,6 +14,9 @@ class Pipeline:
         self.id_column = None
         self.name = "default"
 
+    def reset_final_labeler(self):
+        self.final_labeler = None
+
     def reset_weak_labeler_memory(self):
         self.weak_labeler_memory = {}
         if self.table is not None:
@@ -74,4 +77,12 @@ class Pipeline:
         if self.final_labeler is not None:
             output, js_export = self.run()
             output_obj = self.final_labeler.transform(output)
+            self.weak_labeler_memory = output_obj.pipe_outputs()
             return output_obj.pipe_outputs(), output_obj.export_outputs_js()
+
+    def stringify_pipeline(self):
+        result = ""
+        for step_node in self.weak_labeler:
+            result += str(step_node) + " -> "
+        result += str(self.final_labeler)
+        return result

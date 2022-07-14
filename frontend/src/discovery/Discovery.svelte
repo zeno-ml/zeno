@@ -379,6 +379,23 @@
 				UMAP</Button>
 			<Button
 				on:click={async () => {
+					const ids = $filteredTable.columnArray(
+						columnHash($settings.idColumn)
+					);
+					const output = await post({
+						url: "api/pipe/id-filter",
+						payload: {
+							ids,
+						},
+					});
+					if (output.status !== "filtered") {
+						throw Error("Failed to filter");
+					}
+					console.log(output);
+				}}>
+				Filter by metadata panel</Button>
+			<Button
+				on:click={async () => {
 					const lassoedIds = lassoSelectTable.columnArray(
 						columnHash($settings.idColumn)
 					);
@@ -393,7 +410,7 @@
 					}
 					console.log(output);
 				}}>
-				Filter by ID</Button>
+				Filter by lasso selection</Button>
 			<Button on:click={() => (regionLabeler = !regionLabeler)}
 				>Draw Polygon: {regionPolygon.length}</Button>
 			<Button
@@ -426,6 +443,13 @@
 				Apply Region Labeler</Button>
 
 			<TextField bind:value={regionLabelerName} label={"Labeler Name"} />
+		</div>
+		<div>
+			<Button
+				on:click={async () => {
+					const reset = await resetPipeline();
+					const init = await initPipeline($model);
+				}}>Reset Pipeline with model: {$model}</Button>
 		</div>
 		<div>
 			<h3>History</h3>
