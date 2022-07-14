@@ -41,14 +41,12 @@ class RegionBasedLabelerNode:
         }
 
     def save(self, path: str):
-        with open(path, "w") as out_file:
-            out_file.write(self.model)
+        pass
 
     def load(self, path: str):
-        with open(path, "r") as in_file:
-            self.model = in_file.readline()
+        pass
 
-    def init(self, polygon: list):
+    def init(self, polygon: list[list[float]]):
         self.model = polygon
         return self
 

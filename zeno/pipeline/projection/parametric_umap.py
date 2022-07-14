@@ -1,9 +1,9 @@
+import numpy as np
 from umap.parametric_umap import (  # type: ignore
     load_ParametricUMAP,  # type: ignore
     ParametricUMAP,  # type: ignore
 )  # type: ignore
 
-import numpy as np
 from ...classes import ZenoColumn, ZenoColumnType
 
 

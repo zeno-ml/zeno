@@ -27,6 +27,7 @@ from .classes import (
     ZenoFunction,
     ZenoFunctionType,
 )
+from .pipeline.pipeline import Pipeline
 from .util import (
     get_arrow_bytes,
     get_function,
@@ -36,7 +37,6 @@ from .util import (
     run_inference,
     transform_data,
 )
-from .pipeline.pipeline2 import Pipeline
 
 
 class Zeno(object):
