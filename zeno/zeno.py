@@ -162,8 +162,8 @@ class Zeno(object):
         output, js_export = self.run_pipeline_between()
         return js_export
 
-    def add_umap_pipeline(self):
-        self.pipeline.add_umap()
+    def add_umap_pipeline(self, user_specified_args: dict):
+        self.pipeline.add_umap(**user_specified_args)
         output, js_export = self.run_pipeline_between()
         return js_export
 

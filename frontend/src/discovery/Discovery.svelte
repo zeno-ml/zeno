@@ -1,8 +1,7 @@
 <script lang="ts">
 	import MetadataBar from "../metadata/MetadataPanel.svelte";
 	import SelectionBar from "../metadata/SelectionBar.svelte";
-	import LegendaryScatter from "./scatter/LegendaryScatter.svelte";
-	import FitLegendaryScatter from "./fitScatter/LegendaryScatter.svelte";
+	import FitLegendaryScatter from "./scatterplot/LegendaryScatter.svelte";
 	import Select, { Option } from "@smui/select";
 	import Samples from "../samples/Samples.svelte";
 	import SampleOptions from "../samples/SampleOptions.svelte";
@@ -11,13 +10,11 @@
 	import TextField from "@smui/textfield";
 	import {
 		projectEmbeddings2D,
-		reformatAPI,
 		interpolateColorToArray,
-		indexTable,
 		binContinuous,
 		getDataRange as uniqueOutputs,
-		post,
 	} from "./discovery";
+	import * as pipeline from "./pipeline";
 	import {
 		filteredTable,
 		model,
@@ -27,15 +24,11 @@
 		table,
 		metadataSelections,
 		sliceSelections,
-		transform,
 	} from "../stores";
 	import { columnHash } from "../util";
 
 	import type { dataType } from "./discovery";
-	import type {
-		LegendaryScatterPoint,
-		LegendaryLegendEntry,
-	} from "./scatter/scatter";
+	import type { LegendaryScatterPoint } from "./scatterplot/scatter";
 	import type ColumnTable from "arquero/dist/types/table/column-table";
 	import * as aq from "arquero";
 
@@ -115,7 +108,6 @@
 
 	let selectedMetadataOutputs,
 		dataRange,
-		legendaryScatterLegend: LegendaryLegendEntry[],
 		legendaryScatterPoints: LegendaryScatterPoint[];
 
 	function inferOutputsType(
@@ -162,41 +154,7 @@
 		colorValues = cValues;
 	}
 
-	function packageLegendaryScatterPoints({
-		colorRange,
-		dataRange,
-		projection2D,
-		colorValues,
-		opacityValues,
-	}) {
-		const legend = reformatAPI.legendaryScatter.legend(colorRange, dataRange);
-		const scatter = reformatAPI.legendaryScatter.points(
-			projection2D,
-			colorValues,
-			opacityValues
-		);
-		return { scatter, legend };
-	}
-	function updateLegendaryScatter({
-		colorRange,
-		colorValues,
-		dataRange,
-		opacityValues,
-		projection2D,
-	}) {
-		const { legend, scatter } = packageLegendaryScatterPoints({
-			colorRange,
-			colorValues,
-			dataRange,
-			opacityValues,
-			projection2D,
-		});
-		// update global variables for rendering
-		legendaryScatterLegend = legend;
-		legendaryScatterPoints = scatter;
-	}
 	let applications = [];
-
 	function filterIdsTable(
 		table: ColumnTable,
 		idColumn: string = columnHash($settings.idColumn),
@@ -221,27 +179,12 @@
 		return newTable;
 	}
 
-	async function resetPipeline() {
-		const output = await post({ url: "api/pipe/reset", payload: {} });
-		if (output.status !== "reset") {
-			throw Error("not reset correctly");
-		}
-	}
-	async function initPipeline(modelName: string) {
-		const output = await post({
-			url: "api/pipe/init",
-			payload: { model: modelName },
-		});
-		if (output.status !== "init") {
-			throw Error("not init correctly");
-		}
-	}
 	$: {
 		if ($model && $table) {
-			resetPipeline().then(() => {
+			pipeline.reset().then(() => {
 				console.log("reset");
 			});
-			initPipeline($model).then(() => {
+			pipeline.init({ model: $model }).then(() => {
 				console.log("init");
 			});
 		}
@@ -367,31 +310,16 @@
 			</Button>
 			<Button
 				on:click={async () => {
-					const output = await post({
-						url: "api/pipe/umap",
-						payload: {},
-					});
-					if (output.status !== "projected") {
-						throw Error("Failed to project");
-					}
-					idProjection2D = output["data"];
+					const output = await pipeline.parametricUMAP();
+					idProjection2D = output;
 				}}>
 				UMAP</Button>
 			<Button
 				on:click={async () => {
-					const ids = $filteredTable.columnArray(
+					const tableIds = $filteredTable.columnArray(
 						columnHash($settings.idColumn)
 					);
-					const output = await post({
-						url: "api/pipe/id-filter",
-						payload: {
-							ids,
-						},
-					});
-					if (output.status !== "filtered") {
-						throw Error("Failed to filter");
-					}
-					console.log(output);
+					const output = await pipeline.idFilter({ ids: tableIds });
 				}}>
 				Filter by metadata panel</Button>
 			<Button
@@ -399,34 +327,18 @@
 					const lassoedIds = lassoSelectTable.columnArray(
 						columnHash($settings.idColumn)
 					);
-					const output = await post({
-						url: "api/pipe/id-filter",
-						payload: {
-							ids: lassoedIds,
-						},
-					});
-					if (output.status !== "filtered") {
-						throw Error("Failed to filter");
-					}
-					console.log(output);
+					const output = await pipeline.idFilter({ ids: lassoedIds });
 				}}>
 				Filter by lasso selection</Button>
 			<Button on:click={() => (regionLabeler = !regionLabeler)}
 				>Draw Polygon: {regionPolygon.length}</Button>
 			<Button
 				on:click={async () => {
-					const output = await post({
-						url: "api/pipe/region-labeler",
-						payload: {
-							polygon: regionPolygon,
-							name: regionLabelerName,
-						},
+					const output = await pipeline.regionLabeler({
+						polygon: regionPolygon,
+						name: regionLabelerName,
 					});
-					if (output.status !== "labeled") {
-						throw Error("Failed to label");
-					}
-					console.log(output);
-					const col = output["data"]["col_name"];
+					const col = output["col_name"];
 					const model = col.model;
 					const name = col.name;
 					const columnType = col.column_type;
@@ -447,8 +359,8 @@
 		<div>
 			<Button
 				on:click={async () => {
-					const reset = await resetPipeline();
-					const init = await initPipeline($model);
+					const reset = await pipeline.reset();
+					const init = await pipeline.init({ model: $model });
 				}}>Reset Pipeline with model: {$model}</Button>
 		</div>
 		<div>

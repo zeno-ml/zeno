@@ -131,3 +131,7 @@ class PipelineIdFilter(BaseModel):
 class PipelineRegionLabeler(BaseModel):
     polygon: list[list[float]]
     name: str = "default"
+
+
+class PipelineProjection(BaseModel):
+    args: dict

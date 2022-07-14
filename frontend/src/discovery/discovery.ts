@@ -3,7 +3,7 @@ import type ColumnTable from "arquero/dist/types/table/column-table";
 import type {
 	LegendaryLegendEntry,
 	LegendaryScatterPoint,
-} from "./scatter/scatter";
+} from "./scatterplot/scatter";
 import { color } from "d3-color";
 import { extent } from "d3-array";
 
@@ -19,7 +19,13 @@ export function interpolateColorToArray(
 	return colorArray;
 }
 
-export async function post({ url, payload }: { url: string; payload: object }) {
+export async function post({
+	url,
+	payload = {},
+}: {
+	url: string;
+	payload?: object;
+}) {
 	const response = await fetch(url, {
 		method: "POST",
 		headers: {

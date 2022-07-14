@@ -50,11 +50,10 @@ class Pipeline:
         new_node = HardFilterNode().init(ids).fit(self.weak_labeler_memory)
         self.weak_labeler.append(new_node)
 
-    def add_umap(self):
+    def add_umap(self, **kwargs):
+        kwargs_umap = {"n_components": 2, "n_epochs": 20, **kwargs}
         new_node = (
-            ParametricUMAPNode()
-            .init(n_components=2, n_epochs=20)
-            .fit(self.weak_labeler_memory)
+            ParametricUMAPNode().init(**kwargs_umap).fit(self.weak_labeler_memory)
         )
         self.weak_labeler.append(new_node)
 
