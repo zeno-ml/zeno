@@ -17,7 +17,11 @@
 		filteredTable,
 	} from "../stores";
 	import { columnHash } from "../util";
-	import { countSpec, histogramSpec } from "./vegaSpecs";
+	import {
+		countSpec,
+		histogramSpec,
+		histogramSpecNotColored,
+	} from "./vegaSpecs";
 	import * as aq from "arquero";
 	import * as d3c from "d3-scale-chromatic";
 
@@ -379,7 +383,11 @@
 			on:click={setSelection}
 			on:blur={setSelection}>
 			<VegaLite
-				spec={chartType === ChartType.Histogram ? histogramSpec : countSpec}
+				spec={chartType === ChartType.Histogram
+					? $colorByHash === hash
+						? histogramSpec
+						: histogramSpecNotColored
+					: countSpec}
 				data={chartType === ChartType.Histogram ? histoData : data}
 				bind:view
 				options={{ tooltip: true, actions: false, theme: "vox" }} />

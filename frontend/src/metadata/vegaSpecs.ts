@@ -1,5 +1,61 @@
 import type { VegaLiteSpec } from "svelte-vega";
 
+export const histogramSpecNotColored = {
+	$schema: "https://vega.github.io/schema/vega-lite/v5.json",
+	data: {
+		name: "table",
+	},
+	view: {
+		stroke: "transparent",
+	},
+	width: 350,
+	height: 40,
+	layer: [
+		{
+			params: [
+				{
+					name: "brush",
+					select: { type: "interval", encodings: ["x"] },
+				},
+			],
+			mark: "bar",
+			encoding: {
+				x: {
+					field: "binStart",
+					bin: { binned: true },
+				},
+				x2: { field: "binEnd" },
+				y: {
+					field: "count",
+					type: "quantitative",
+				},
+				color: { value: "#ddd" },
+			},
+		},
+		{
+			transform: [{ filter: { param: "brush" } }],
+			mark: { type: "bar", fill: "#B1B1B1", opacity: 0.9 },
+			encoding: {
+				size: {
+					legend: null,
+				},
+				x: {
+					field: "binStart",
+					bin: { binned: true },
+					title: "",
+					axis: { title: "", labelColor: "rgba(0, 0, 0, 0.6)" },
+				},
+				x2: { field: "binEnd" },
+				y: {
+					field: "filteredCount",
+					type: "quantitative",
+					title: "count",
+					axis: { title: "", tickCount: 2, labelColor: "rgba(0, 0, 0, 0.6)" },
+				},
+			},
+		},
+	],
+} as VegaLiteSpec;
 export const histogramSpec = {
 	$schema: "https://vega.github.io/schema/vega-lite/v5.json",
 	data: {
@@ -62,6 +118,7 @@ export const histogramSpec = {
 		},
 	],
 } as VegaLiteSpec;
+
 export const histogramSpec2 = {
 	$schema: "https://vega.github.io/schema/vega-lite/v5.json",
 	data: {
