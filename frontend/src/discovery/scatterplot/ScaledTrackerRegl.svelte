@@ -22,6 +22,9 @@
 		}));
 	export let yPadding = 0;
 	export let xPadding = 0;
+	export let xScaleTracker = scaleLinear().domain([-1, 1]);
+	export let yScaleTracker = scaleLinear().domain([-1, 1]);
+
 	$: xWindowMinMax = [-1 + xPadding, 1 - xPadding];
 	$: yWindowMinMax = [-1 + yPadding, 1 - yPadding];
 	$: xScale = scaleLinear().domain(xMinMax).range(xWindowMinMax);
@@ -29,8 +32,6 @@
 	$: formattedPoints = points.map((p) => {
 		return [xScale(p.x), yScale(p.y), p.color, p.opacity, p.id];
 	});
-	export let xScaleTracker = scaleLinear().domain([-1, 1]);
-	export let yScaleTracker = scaleLinear().domain([-1, 1]);
 
 	function screenSpaceToPointSpace(screenSpacePoint: [number, number]) {
 		const [x, y] = screenSpacePoint;

@@ -108,14 +108,7 @@
 	function deselectPoints() {
 		dispatch("deselect", { deseleted: true });
 	}
-	let mounted = false;
-	onMount(() => {
-		// createScatter(canvasEl, createScatterConfig);
-		mounted = true;
-	});
-	onDestroy(() => {
-		scatterRef.destroy();
-	});
+
 	$: {
 		if (canvasEl && mounted) {
 			createScatter(canvasEl, createScatterConfig);
@@ -131,6 +124,14 @@
 			dispatch("draw", scatterRef);
 		}
 	}
+
+	let mounted = false;
+	onMount(() => {
+		mounted = true;
+	});
+	onDestroy(() => {
+		scatterRef.destroy();
+	});
 </script>
 
 <canvas bind:this={canvasEl} {width} {height} style={canvasStyle} />

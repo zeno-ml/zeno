@@ -20,11 +20,14 @@
 		(d) => d.x,
 		(d) => d.y
 	);
+	$: newExtent = adjustExtentToFit(extent);
+	$: xMinMax = convertExtentToArray(newExtent.xExtent);
+	$: yMinMax = convertExtentToArray(newExtent.yExtent);
+
 	const convertExtentToArray = (extent) => [extent.min, extent.max];
 	function extentRange(extent: { min: number; max: number }) {
 		return extent.max - extent.min;
 	}
-
 	function fitSmallerExtent(
 		largerRange: number,
 		smallerExtent: { min: number; max: number }
@@ -50,10 +53,6 @@
 		}
 		return newExtent;
 	}
-
-	$: newExtent = adjustExtentToFit(extent);
-	$: xMinMax = convertExtentToArray(newExtent.xExtent);
-	$: yMinMax = convertExtentToArray(newExtent.yExtent);
 </script>
 
 <ScaledTrackerRegl
@@ -68,7 +67,3 @@
 	on:draw
 	on:select
 	on:deselect />
-
-<style>
-	/*  put stuff here */
-</style>
