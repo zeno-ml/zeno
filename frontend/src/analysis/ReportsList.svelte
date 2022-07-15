@@ -1,13 +1,11 @@
 <script lang="ts">
-	import { mdiTableMultiple } from "@mdi/js";
-	import Button, { Icon } from "@smui/button";
-	import { Svg } from "@smui/common/elements";
+	import Button from "@smui/button";
 	import Ripple from "@smui/ripple";
 
-	import { report, reports } from "../../stores";
-	import { updateReports } from "../../util";
+	import { report, reports } from "../stores";
+	import { updateReports } from "../util";
 
-	import ReportRow from "./ReportRow.svelte";
+	import ReportListRow from "./ReportListRow.svelte";
 
 	report.set(-1);
 </script>
@@ -19,17 +17,12 @@
 		on:click={() => {
 			report.set(-1);
 		}}>
-		<div class="icon">
-			<Icon component={Svg} viewBox="0 0 24 24">
-				<path fill="currentColor" d={mdiTableMultiple} />
-			</Icon>
-		</div>
-		<p>all slices</p>
+		<p>Overview</p>
 	</div>
 	<h4>Reports</h4>
 	<div id="reports">
 		{#each $reports as rep, i}
-			<ReportRow {i} />
+			<ReportListRow {i} />
 		{/each}
 	</div>
 	<Button
@@ -49,9 +42,12 @@
 <style>
 	#reports-container {
 		padding: 10px;
-		height: calc(100vh - 60px);
+		margin-left: 10px;
+		margin-right: 10px;
+		height: calc(100vh - 90px);
 		overflow-y: auto;
 		min-width: 450px;
+		border-right: 1px solid #e8e8e8;
 	}
 	#reports {
 		margin-bottom: 10px;
@@ -74,7 +70,7 @@
 		padding-right: 10px;
 	}
 	.selected {
-		background: #ebdffc;
+		background: #f9f5ff;
 	}
 	.icon {
 		width: 24px;

@@ -1,9 +1,9 @@
 <script>
 	import DataTable, { Body, Cell, Head, Row } from "@smui/data-table";
 
-	import { models, slices } from "../stores";
+	import { models, slices } from "../../stores";
 
-	import AnalysisTableRow from "./AnalysisTableRow.svelte";
+	import SliceTableRow from "./SliceTableRow.svelte";
 </script>
 
 <DataTable table$aria-label="People list" style="max-width: 100%;">
@@ -17,7 +17,7 @@
 	</Head>
 	<Body>
 		{#each [...$slices.values()] as sli}
-			<AnalysisTableRow {sli} />
+			<SliceTableRow {sli} />
 		{/each}
 	</Body>
 </DataTable>

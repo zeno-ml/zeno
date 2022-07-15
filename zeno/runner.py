@@ -58,6 +58,7 @@ def main():
         sys.exit(1)
 
     try:
+        args["view"] = args["view"].replace("-", "_")
         mod = importlib.import_module(args["view"])
     except ModuleNotFoundError:
         print("ERROR: " + args["view"] + " is not a valid python package")

@@ -1,4 +1,4 @@
-task = "image-classification"
+view = "zenoml-image-classification"
 metadata = "./cifar_pred.csv"
 data_path = "../../data/CIFAR-10-images/test/"
 data_column = "id"
