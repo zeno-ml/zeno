@@ -5,6 +5,7 @@ from .projection.parametric_umap import ParametricUMAPNode
 
 class Pipeline:
     def __init__(self):
+        self.uid = None
         self.weak_labeler_memory = {}
         self.weak_labeler = []
         self.final_labeler = None
@@ -28,6 +29,9 @@ class Pipeline:
 
     def reset_weak_labeler(self):
         self.weak_labeler = []
+
+    def set_uid(self, uid):
+        self.uid = uid
 
     def set_name(self, name):
         self.name = name
@@ -79,9 +83,32 @@ class Pipeline:
             self.weak_labeler_memory = output_obj.pipe_outputs()
             return output_obj.pipe_outputs(), output_obj.export_outputs_js()
 
-    def stringify_pipeline(self):
-        result = ""
+    def __repr__(self):
+        result = f"UID: {self.uid}: "
         for step_node in self.weak_labeler:
             result += str(step_node) + " -> "
         result += str(self.final_labeler)
         return result
+
+    def json(self):
+        weak_labeler_json = []
+        final_labeler_json = None
+
+        for step_node in self.weak_labeler:
+            weak_labeler_json.append(step_node.json())
+        final_labeler_json = (
+            None if self.final_labeler is None else self.final_labeler.json()
+        )
+
+        return {
+            "uid": self.uid,
+            "model": self.model,
+            "pipeline": weak_labeler_json,
+            "labeler": final_labeler_json,
+        }
+
+    def populated(self):
+        return len(self.weak_labeler) > 0
+
+    def same(self, model: str, uid):
+        return model == self.model and uid == self.uid

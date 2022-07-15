@@ -56,10 +56,6 @@
 
 	let colorAssignments: IColorAssignments = { colors: [], labels: [], hash };
 
-	console.warn = () => {
-		return;
-	};
-
 	function countGivenBins({
 		bins,
 		table,
@@ -81,14 +77,12 @@
 		return newCounts;
 	}
 	function binGroups(columnNames: string[], t = $table, precomputed = "") {
-		console.log(t._group);
 		const counts = [];
 		const binName = (col) => `bin_${col}`;
 		const countCol = "count";
 		for (const name of columnNames) {
 			const binColName = binName(name);
 			const grouped = t.groupby({ [binColName]: aq.bin(name) });
-			console.log(grouped);
 
 			const binnedData = grouped
 				.count({ as: countCol })
@@ -251,7 +245,6 @@
 			filteredCount: filteredCounts[i],
 		}));
 		histoData = { ...histoData };
-		console.log(histoData.table);
 	});
 	onMount(() => {
 		drawChart($table);

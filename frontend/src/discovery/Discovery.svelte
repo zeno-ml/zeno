@@ -22,8 +22,12 @@
 	import * as aq from "arquero";
 
 	// props
-	export let scatterWidth = 900;
-	export let scatterHeight = 700;
+	export let scatterWidth = 700;
+	export let scatterHeight = 500;
+
+	console.warn = () => {
+		return;
+	};
 
 	let projection2D: object[] = [];
 	let lassoSelectTable = null;
@@ -31,6 +35,10 @@
 	let regionPolygon = [];
 	let regionLabelerName = "name";
 	let legendaryScatterPoints: LegendaryScatterPoint[];
+	let pipelineJSON: { pipeline: any[]; labeler: null | any } = {
+		pipeline: [],
+		labeler: null,
+	};
 
 	$: metadataExists =
 		$settings.metadataColumns.length > 0 || $filteredTable._names.length > 0;
@@ -52,12 +60,13 @@
 		}
 	}
 
+	const PIPELINE_ID = "nice";
 	$: {
 		if ($model && $table) {
 			pipeline.reset().then(() => {
 				console.log("reset");
 			});
-			pipeline.init({ model: $model }).then(() => {
+			pipeline.init({ model: $model, uid: PIPELINE_ID }).then(() => {
 				console.log("init");
 			});
 		}
@@ -194,8 +203,15 @@
 			<Button
 				on:click={async () => {
 					const reset = await pipeline.reset();
-					const init = await pipeline.init({ model: $model });
+					const init = await pipeline.init({ model: $model, uid: PIPELINE_ID });
 				}}>Reset Pipeline with model: {$model}</Button>
+		</div>
+		<div>
+			<Button
+				on:click={async () => {
+					pipelineJSON = await pipeline.pipelineJSON();
+					console.log(pipelineJSON);
+				}}>Get json pipeline repr</Button>
 		</div>
 	</div>
 

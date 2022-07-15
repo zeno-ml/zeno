@@ -52,3 +52,6 @@ class RegionBasedLabelerNode:
 
     def __repr__(self):
         return "RegionBasedLabelerNode"
+
+    def json(self):
+        return {"type": self.__repr__()}

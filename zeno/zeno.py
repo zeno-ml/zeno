@@ -146,7 +146,8 @@ class Zeno(object):
         self.pipeline.reset_weak_labeler()
         self.pipeline.reset_final_labeler()
 
-    def init_pipeline(self, model: str):
+    def init_pipeline(self, model: str, uid: str = "0"):
+        self.pipeline.set_uid(uid)
         self.pipeline.set_model(model)
         self.pipeline.set_id_column(str(self.id_column))
         self.pipeline.set_table(self.df)
@@ -166,6 +167,16 @@ class Zeno(object):
         self.pipeline.add_umap(**user_specified_args)
         output, js_export = self.run_pipeline_between()
         return js_export
+
+    def get_json_pipeline(self):
+        return self.pipeline.json()
+
+    def load_pipeline(self, model: str, uid: str = "0"):
+        if self.pipeline.populated() and self.pipeline.same(model, uid):
+            return self.pipeline.run()
+        else:
+            # within the init I can do cache stuff
+            self.init_pipeline(model, uid)
 
     def add_region_labeler_pipeline(self, polygon, name):
         self.pipeline.set_name(name)

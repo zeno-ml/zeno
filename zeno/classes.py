@@ -122,6 +122,7 @@ class ProjectionRequest(BaseModel):
 
 class PipelineInit(BaseModel):
     model: str
+    uid: str = "id:0"
 
 
 class PipelineIdFilter(BaseModel):

@@ -39,3 +39,6 @@ class HardFilterNode:
 
     def __repr__(self):
         return "HardFilterNode"
+
+    def json(self):
+        return {"type": self.__repr__()}

@@ -228,7 +228,7 @@ def run_zeno(args):
 
     @api_app.post("/pipe/init")
     def init_pipeline(req: PipelineInit):
-        zeno.init_pipeline(req.model)
+        zeno.init_pipeline(req.model, req.uid)
         return json.dumps({"status": True})
 
     @api_app.post("/pipe/id-filter")
@@ -245,6 +245,15 @@ def run_zeno(args):
     def region_labeler_pipeline(req: PipelineRegionLabeler):
         js_export = zeno.add_region_labeler_pipeline(req.polygon, req.name)
         return json.dumps({"status": True, "data": js_export})
+
+    @api_app.get("/pipe/graph")
+    def get_pipeline_json():
+        js_export = zeno.get_json_pipeline()
+        return json.dumps({"status": True, "data": js_export})
+
+    @api_app.get("/bins")
+    def get_bins():
+        pass
 
     @api_app.websocket("/status")
     async def results_websocket(websocket: WebSocket):

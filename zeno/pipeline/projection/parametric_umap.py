@@ -63,3 +63,6 @@ class ParametricUMAPNode:
 
     def __repr__(self):
         return "ParametricUMAPNode"
+
+    def json(self):
+        return {"type": self.__repr__()}
