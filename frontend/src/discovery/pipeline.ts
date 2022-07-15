@@ -1,8 +1,10 @@
 import type { TypedArray } from "arquero/dist/types/table/table";
-import { postEndpointGenerator, enforce } from "../util";
+import { enforce } from "../util";
+import request from "../request";
 
 export const apiEndpoint = "api/pipe";
-export const postPipe = postEndpointGenerator(apiEndpoint);
+export const postPipe = request.generator.post(apiEndpoint);
+export const getPipe = request.generator.get(apiEndpoint);
 
 function dataAccessor(obj: object) {
 	if ("data" in obj) {
@@ -19,10 +21,10 @@ export async function reset() {
 	});
 	return dataAccessor(output);
 }
-export async function init({ model }: { model: string }) {
+export async function init({ model, uid }: { model: string; uid?: string }) {
 	const output = await postPipe({
 		url: "init",
-		payload: { model },
+		payload: { model, uid },
 	});
 	enforce({
 		rule: output.status === true,
@@ -75,6 +77,15 @@ export async function parametricUMAP({
 			args: umapArgs,
 		},
 	});
+	enforce({
+		rule: output.status === true,
+		name: "umap status is true",
+	});
+	return dataAccessor(output);
+}
+
+export async function pipelineJSON() {
+	const output = await getPipe({ url: "graph" });
 	enforce({
 		rule: output.status === true,
 		name: "umap status is true",

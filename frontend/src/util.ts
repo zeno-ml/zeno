@@ -218,31 +218,6 @@ export function columnHash(col: ZenoColumn) {
 	);
 }
 
-export async function post({
-	url,
-	payload = {},
-}: {
-	url: string;
-	payload?: object;
-}) {
-	const response = await fetch(url, {
-		method: "POST",
-		headers: {
-			Accept: "application/json",
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify(payload),
-	});
-	const output = await response.json();
-	return JSON.parse(output);
-}
-export function postEndpointGenerator(endpoint: string) {
-	function postFunc({ url, payload = {} }: { url: string; payload?: object }) {
-		return post({ url: `${endpoint}/${url}`, payload });
-	}
-	return postFunc;
-}
-
 export function enforce({ rule, name }: { rule: boolean; name: string }) {
 	if (rule !== true) {
 		throw new Error(`Violated: ${name}`);
