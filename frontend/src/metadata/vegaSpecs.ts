@@ -90,7 +90,7 @@ export const countSpec = {
 				},
 				{ name: "select", select: { type: "point", encodings: ["x"] } },
 			],
-			mark: { type: "bar", fill: "#ededed" },
+			mark: { type: "bar", fill: "#9b51e0", opacity: 0.3 },
 			encoding: {
 				x: {
 					field: "value",
@@ -111,18 +111,15 @@ export const countSpec = {
 					condition: { param: "select", value: 1 },
 					value: 1,
 				},
-				stroke: {
-					value: "black",
-				},
-				strokeWidth: {
+				fill: {
 					condition: [
 						{
 							param: "select",
-							empty: false,
-							value: 1,
+							empty: true,
+							value: "#9b51e0",
 						},
 					],
-					value: 0,
+					value: "#ddd",
 				},
 			},
 		},
