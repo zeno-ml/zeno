@@ -226,6 +226,11 @@ def run_zeno(args):
         zeno.reset_pipeline()
         return json.dumps({"status": True})
 
+    @api_app.post("/pipe/load")
+    def load_pipeline(req: PipelineInit):
+        js_export = zeno.load_pipeline(req.model, req.uid)
+        return json.dumps({"status": True, "data": js_export})
+
     @api_app.post("/pipe/init")
     def init_pipeline(req: PipelineInit):
         zeno.init_pipeline(req.model, req.uid)

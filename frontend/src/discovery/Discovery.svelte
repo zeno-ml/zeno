@@ -63,11 +63,20 @@
 	const PIPELINE_ID = "nice";
 	$: {
 		if ($model && $table) {
-			pipeline.reset().then(() => {
-				console.log("reset");
+			// pipeline.reset().then(() => {
+			// 	console.log("reset");
+			// });
+			// pipeline.init({ model: $model, uid: PIPELINE_ID }).then(() => {
+			// 	console.log("init");
+			// });
+			pipeline.load({ model: $model, uid: PIPELINE_ID }).then((d) => {
+				if (d !== null) {
+					projection2D = d;
+				}
 			});
-			pipeline.init({ model: $model, uid: PIPELINE_ID }).then(() => {
-				console.log("init");
+
+			pipeline.pipelineJSON().then((d) => {
+				pipelineJSON = d;
 			});
 		}
 	}
@@ -118,17 +127,50 @@
 			id="scatter-view"
 			style:margin-top="10px"
 			style:height="{scatterHeight}px">
-			<div id="pipeline-view" class="paper">
+			<div id="pipeline-view" class="paper" style:height="{scatterHeight}px">
 				<h4>Pipeline</h4>
 				<div>
-					<Button
-						on:click={async () => {
-							const output = await pipeline.parametricUMAP();
-							projection2D = output;
-							pipelineJSON = await pipeline.pipelineJSON();
-						}}>
-						UMAP</Button>
-					<Button
+					<div id="weak-labeler-pipeline">
+						{#each pipelineJSON.pipeline as pipe}
+							<div class="meta-chip pipe">{pipe.type}</div>
+						{:else}
+							<div>Empty pipeline</div>
+						{/each}
+						{#if pipelineJSON.labeler !== null}
+							<div>{pipelineJSON.labeler.type}</div>
+						{/if}
+					</div>
+					<div>
+						<Button
+							title="Click to Filter Current Selection"
+							variant="outlined"
+							on:click={async () => {
+								return;
+							}}>
+							Filter</Button>
+						<Button
+							variant="outlined"
+							title="Click to Project with UMAP"
+							on:click={async () => {
+								const output = await pipeline.parametricUMAP();
+								projection2D = output;
+								pipelineJSON = await pipeline.pipelineJSON();
+							}}>
+							Project</Button>
+					</div>
+					<div>
+						<Button
+							title="Reset entire pipeline"
+							on:click={async () => {
+								await pipeline.reset();
+								await pipeline.init({ model: $model, uid: PIPELINE_ID });
+								projection2D = [];
+								legendaryScatterPoints = [];
+								pipelineJSON = await pipeline.pipelineJSON();
+							}}>
+							Reset</Button>
+					</div>
+					<!-- <Button
 						on:click={async () => {
 							const tableIds = $filteredTable.columnArray(
 								columnHash($settings.idColumn)
@@ -165,9 +207,9 @@
 						}}>
 						Apply Region Labeler</Button>
 
-					<TextField bind:value={regionLabelerName} label={"Labeler Name"} />
+					<TextField bind:value={regionLabelerName} label={"Labeler Name"} /> -->
 				</div>
-				<div>
+				<!-- <div>
 					<Button
 						on:click={async () => {
 							const reset = await pipeline.reset();
@@ -195,7 +237,7 @@
 					{#if pipelineJSON.labeler !== null}
 						<div>{pipelineJSON.labeler.type}</div>
 					{/if}
-				</div>
+				</div> -->
 			</div>
 
 			<div
@@ -259,7 +301,9 @@
 	}
 	#pipeline-view {
 		width: 400px;
-		height: 100%;
+		padding-left: 10px;
+		padding-right: 10px;
+		overflow-y: scroll;
 	}
 	#samples-view {
 	}
@@ -277,5 +321,22 @@
 	h4 {
 		font-weight: 500;
 		color: rgba(0, 0, 0, 0.7);
+	}
+
+	.meta-chip {
+		padding: 5px;
+		background: rgba(0, 0, 0, 0.07);
+		margin-left: 5px;
+		margin-right: 5px;
+		margin-top: 2px;
+		margin-bottom: 2px;
+		border-radius: 5px;
+		width: fit-content;
+	}
+	#weak-labeler-pipeline {
+		margin-bottom: 10px;
+		display: flex;
+		flex-direction: column;
+		gap: 5px;
 	}
 </style>

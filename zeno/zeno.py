@@ -173,7 +173,8 @@ class Zeno(object):
 
     def load_pipeline(self, model: str, uid: str = "0"):
         if self.pipeline.populated() and self.pipeline.same(model, uid):
-            return self.pipeline.run()
+            output, js_export = self.run_pipeline_between()
+            return js_export
         else:
             # within the init I can do cache stuff
             self.init_pipeline(model, uid)

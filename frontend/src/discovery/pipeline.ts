@@ -92,3 +92,15 @@ export async function pipelineJSON() {
 	});
 	return dataAccessor(output);
 }
+
+export async function load({ model, uid }: { model: string; uid: string }) {
+	const output = await postPipe({
+		url: "load",
+		payload: { model, uid },
+	});
+	enforce({
+		rule: output.status === true,
+		name: "load status is true",
+	});
+	return dataAccessor(output);
+}
