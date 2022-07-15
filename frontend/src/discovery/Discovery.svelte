@@ -145,7 +145,11 @@
 							title="Click to Filter Current Selection"
 							variant="outlined"
 							on:click={async () => {
-								return;
+								const ids = $filteredTable
+									.intersect(lassoSelectTable)
+									.columnArray(columnHash($settings.idColumn));
+								await pipeline.idFilter({ ids });
+								pipelineJSON = await pipeline.pipelineJSON();
 							}}>
 							Filter</Button>
 						<Button

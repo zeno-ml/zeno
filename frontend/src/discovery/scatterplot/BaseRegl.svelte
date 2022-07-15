@@ -102,7 +102,6 @@
 			point: points[i],
 			id: points[i][4],
 		}));
-		console.log(pointsExport);
 		dispatch("select", pointsExport);
 	}
 	function deselectPoints() {
