@@ -34,7 +34,7 @@
 	let regionLabeler = false;
 	let regionPolygon = [];
 	let regionLabelerName = "name";
-	let legendaryScatterPoints: LegendaryScatterPoint[];
+	let legendaryScatterPoints: LegendaryScatterPoint[] = [];
 	let pipelineJSON: { pipeline: any[]; labeler: null | any } = {
 		pipeline: [],
 		labeler: null,
