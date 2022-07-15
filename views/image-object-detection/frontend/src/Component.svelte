@@ -18,7 +18,6 @@
   let canvases = [];
   let imgs = [];
 
-  console.log("mounted");
   drawImages();
 
   $: {
@@ -28,8 +27,6 @@
     drawImages();
   }
   function drawImages() {
-    console.log("draw");
-    console.log(table);
     imgs = table.map((t, i) => {
       let img = new Image();
       img.style.maxHeight = "200px";

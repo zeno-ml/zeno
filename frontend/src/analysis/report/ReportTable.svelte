@@ -10,19 +10,19 @@
 
 <h4>{report.name}</h4>
 
-<DataTable table$aria-label="People list" style="max-width: 100%;">
+<DataTable style="max-width: 100%; overflow: visible;">
 	<Head>
 		<Row>
 			<Cell>{""}</Cell>
-			<Cell>Test</Cell>
 			<Cell>Transform</Cell>
 			<Cell>Metric</Cell>
-			{#each $models as m}
+			<Cell>Test</Cell>
+			{#each $models.slice().reverse() as m}
 				<Cell>{m}</Cell>
 			{/each}
 		</Row>
 	</Head>
-	<Body>
+	<Body style="overflow: visible">
 		{#each report.reportPredicates as predicate, i}
 			<ReportTableRow {predicate} predicateIndex={i} />
 		{/each}

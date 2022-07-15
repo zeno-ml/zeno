@@ -107,10 +107,6 @@ export const countSpec = {
 					field: "count",
 					axis: { title: "", tickCount: 2, labelColor: "rgba(0, 0, 0, 0.6)" },
 				},
-				fillOpacity: {
-					condition: { param: "select", value: 1 },
-					value: 1,
-				},
 				fill: {
 					condition: [
 						{
@@ -141,25 +137,6 @@ export const countSpec = {
 					field: "filteredCount",
 					axis: { title: "", tickCount: 2, labelColor: "rgba(0, 0, 0, 0.6)" },
 				},
-				// fillOpacity: {
-				// 	condition: { param: "select", value: 1 },
-				// 	value: 0.3,
-				// },
-				// strokeWidth: {
-				// 	condition: [
-				// 		{
-				// 			param: "select",
-				// 			empty: false,
-				// 			value: 2,
-				// 		},
-				// 		{
-				// 			param: "highlight",
-				// 			empty: false,
-				// 			value: 1,
-				// 		},
-				// 	],
-				// 	value: 0,
-				// },
 			},
 		},
 	],

@@ -90,11 +90,11 @@
 		</div>
 	</div>
 
-	<div>
+	<div class="icons">
 		<Wrapper>
 			<IconButton href="https://dig.cmu.edu/zeno/intro.html">
 				<Icon component={Svg} viewBox="0 0 24 24">
-					<path fill="#6A1B9A" d={mdiApi} />
+					<path fill="black" d={mdiApi} />
 				</Icon>
 			</IconButton>
 			<Tooltip>read the documentation</Tooltip>
@@ -102,7 +102,7 @@
 		<Wrapper>
 			<IconButton href="https://github.com/cmudig/zeno">
 				<Icon component={Svg} viewBox="0 0 24 24">
-					<path fill="#6A1B9A" d={mdiGithub} />
+					<path fill="black" d={mdiGithub} />
 				</Icon>
 			</IconButton>
 			<Tooltip>see the code on GitHub</Tooltip>
@@ -154,7 +154,6 @@
 
 	.item:hover {
 		background-color: #f5f5f5;
-		color: #6a1b9a;
 	}
 
 	.selected {

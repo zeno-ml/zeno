@@ -49,6 +49,8 @@ interface ReportPredicate {
 	transform: string;
 	operation: string;
 	value: string;
+	// -1, 0, 1
+	results: number[];
 }
 
 interface Report {

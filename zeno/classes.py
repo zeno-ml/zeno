@@ -39,6 +39,7 @@ class ReportPredicate(CamelModel):
     transform: str
     operation: str
     value: str
+    results: List[int]
 
 
 class Report(CamelModel):

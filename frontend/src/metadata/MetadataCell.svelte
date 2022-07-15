@@ -110,10 +110,11 @@
 					(selection = s[1].value ? ["range", ...s[1].value] : undefined)
 			);
 		} else if (chartType === ChartType.Count) {
-			view.addSignalListener("select", (...s) => {
-				console.log(s);
-				selection = s[1].value ? ["points", ...s[1].value] : undefined;
-			});
+			view.addSignalListener(
+				"select",
+				(...s) =>
+					(selection = s[1].value ? ["points", ...s[1].value] : undefined)
+			);
 		}
 	}
 

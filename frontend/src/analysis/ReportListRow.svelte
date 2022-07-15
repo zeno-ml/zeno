@@ -6,37 +6,46 @@
 	import { mdiPencilOutline } from "@mdi/js";
 
 	import { clickOutside } from "../clickOutside";
-	import { report, reports } from "../stores";
+	import { report as selectedReport, reports } from "../stores";
 	import { updateReports } from "../util";
 
-	export let i;
+	export let report;
+	export let reportIndex;
 
-	let rep: Report = $reports[i];
-	let name = rep.name;
 	let editMode = false;
 </script>
 
 <div
 	use:clickOutside
 	on:click_outside={() => {
-		editMode = false;
-		reports.update((reps) => {
-			reps[i].name = name;
-			updateReports(reps);
-			return reps;
-		});
+		if (editMode) {
+			editMode = false;
+			reports.update((reps) => {
+				reps[reportIndex].name = report.name;
+				updateReports(reps);
+				return reps;
+			});
+		}
 	}}>
 	<div
 		use:Ripple={{ surface: true, color: "primary" }}
-		class="report {$report === i ? 'selected' : ''}"
-		on:click={() => report.set(i)}>
+		class="report {$selectedReport === reportIndex ? 'selected' : ''}"
+		on:click={() => selectedReport.set(reportIndex)}>
 		{#if !editMode}
-			<p>{rep.name}</p>
+			<p>{report.name}</p>
 		{:else}
-			<Textfield bind:value={name} />
+			<Textfield bind:value={report.name} />
 		{/if}
 
 		<div class="options">
+			<p style:margin-right="10px">{report.reportPredicates.length} tests</p>
+			<p style:margin-right="10px">
+				{report.reportPredicates.filter(
+					(r) => r.results[r.results.length - 1] === 1
+				).length}/{report.reportPredicates.filter(
+					(r) => r.results[r.results.length - 1] > -1
+				).length} passing
+			</p>
 			<div style:width="24px" style:height="24" style:cursor="pointer">
 				<Icon
 					component={Svg}
@@ -54,7 +63,7 @@
 					on:click={(e) => {
 						e.stopPropagation();
 						reports.update((reps) => {
-							reps.splice(i, 1);
+							reps.splice(reportIndex, 1);
 							updateReports(reps);
 							return reps;
 						});
@@ -82,5 +91,6 @@
 	.options {
 		display: flex;
 		flex-direction: inline;
+		align-items: center;
 	}
 </style>

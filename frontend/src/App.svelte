@@ -22,7 +22,7 @@
 	status.subscribe((w) => updateTableColumns(w));
 	ready.subscribe((r) => {
 		if (r) {
-			model.set($models[0]);
+			model.set($models[$models.length - 1]);
 			metric.set($metrics[0]);
 		}
 	});

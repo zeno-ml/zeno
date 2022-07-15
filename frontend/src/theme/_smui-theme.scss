@@ -11,6 +11,10 @@
 	$error: color-palette.$red-900
 );
 
+.mdc-data-table__table-container {
+	overflow: visible;
+}
+
 html,
 body {
 	background-color: theme.$surface;
@@ -22,4 +26,8 @@ a {
 }
 a:visited {
 	color: color.scale(#40b3ff, $lightness: -35%);
+}
+
+.overflow-show {
+	overflow: visible;
 }

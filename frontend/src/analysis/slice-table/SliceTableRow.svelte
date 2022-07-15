@@ -44,6 +44,7 @@
 									operation: "",
 									transform: $transform,
 									value: "",
+									results: [],
 								});
 								reps[$report] = rep;
 								updateReports(reps);
@@ -57,13 +58,13 @@
 			<SliceCell {sli} />
 		</div>
 	</Cell>
-	{#each $models as m, i}
-		{#await modelResults then res}
+	{#await modelResults then res}
+		{#each res.slice().reverse() as r}
 			<Cell>
-				{res[i] ? res[i].toFixed(2) : ""}
+				{r ? r.toFixed(2) : ""}
 			</Cell>
-		{/await}
-	{/each}
+		{/each}
+	{/await}
 </Row>
 
 <style>

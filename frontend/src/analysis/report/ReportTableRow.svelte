@@ -19,27 +19,39 @@
 
 	$: sli = $slices.get(predicate.sliceName);
 
-	$: modelResults = getMetricsForSlices(
+	let modelResults = [];
+	$: getMetricsForSlices(
 		$models.map((m) => ({
 			sli: sli,
 			metric: predicate.metric,
 			model: m,
 			transform: predicate.transform,
 		}))
-	);
+	).then((arr) => (modelResults = arr));
 
-	function getTestResult(res: number) {
-		if (!predicate.operation || !predicate.value) {
-			return true;
-		} else if (!eval(`${res} ${predicate.operation} ${predicate.value}`)) {
-			return false;
-		} else {
-			return true;
-		}
+	function savePredicates() {
+		// Exiting edit mode, save predicates and update results.
+		let outcomes = modelResults.map((res) => {
+			if (predicate.operation && predicate.value) {
+				if (eval(`${res} ${predicate.operation} ${predicate.value}`)) {
+					return 1;
+				} else {
+					return 0;
+				}
+			}
+			return -1;
+		});
+		let rep = $reports[$report];
+		rep.reportPredicates[predicateIndex].results = outcomes;
+		reports.update((reps) => {
+			reps[$report] = rep;
+			updateReports(reps);
+			return reps;
+		});
 	}
 </script>
 
-<Row>
+<Row style="overflow: visible">
 	<Cell>
 		<div class="inline">
 			<div style:width="24px" style:height="24" style:cursor="pointer">
@@ -48,6 +60,9 @@
 					viewBox="0 0 24 24"
 					on:click={(e) => {
 						e.stopPropagation();
+						if (editMode) {
+							savePredicates();
+						}
 						editMode = !editMode;
 					}}>
 					<path fill="black" d={mdiPencilOutline} />
@@ -77,32 +92,36 @@
 			<SliceCell {sli} />
 		</div>
 	</Cell>
-	{#if editMode}
-		<Select
-			bind:value={predicate.operation}
-			label="Operation"
-			style="margin-right: 20px; margin-left: 20px; width: 120px">
-			{#each [">", "<", "==", "!="] as o}
-				<Option value={o}>{o}</Option>
-			{/each}
-		</Select>
-		<Textfield style="width: 50px" bind:value={predicate.value} label="Value">
-			<HelperText slot="helper">0</HelperText>
-		</Textfield>
-	{:else}
-		<Cell>{predicate.operation} {predicate.value}</Cell>
-	{/if}
 	<Cell>{predicate.transform}</Cell>
 	<Cell>{predicate.metric}</Cell>
-	{#await modelResults then results}
-		{#each results as r}
-			<Cell>
-				<p style:color={getTestResult(r) ? "black" : "red"}>
-					{r ? r.toFixed(2) : ""}
-				</p>
-			</Cell>
-		{/each}
-	{/await}
+	<Cell style="overflow: visible">
+		{#if editMode}
+			<Select
+				bind:value={predicate.operation}
+				label="Operation"
+				style="margin-right: 20px; margin-left: 20px; width: 120px">
+				{#each [">", "<", "==", "!="] as o}
+					<Option value={o}>{o}</Option>
+				{/each}
+			</Select>
+			<Textfield style="width: 50px" bind:value={predicate.value} label="Value">
+				<HelperText slot="helper">0</HelperText>
+			</Textfield>
+		{:else}
+			{predicate.operation} {predicate.value}
+		{/if}
+	</Cell>
+	{#each modelResults.slice().reverse() as r, i}
+		<Cell>
+			<p
+				style:color={predicate.results.length > i &&
+				predicate.results[predicate.results.length - i - 1] === 0
+					? "red"
+					: "black"}>
+				{r ? r.toFixed(2) : ""}
+			</p>
+		</Cell>
+	{/each}
 </Row>
 
 <style>

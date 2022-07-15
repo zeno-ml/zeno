@@ -118,6 +118,9 @@ export function updateSliceIdxs() {
 }
 
 export function getFilterFromPredicates(predicates: FilterPredicate[]) {
+	if (predicates.length === 0) {
+		return "true";
+	}
 	const stringPreds = predicates.map((p: FilterPredicate, i) => {
 		if (p.column.columnType === ZenoColumnType.POSTDISTILL) {
 			p.column.model = get(model);
@@ -174,7 +177,6 @@ export function updateTableColumns(w: WSResponse) {
 	const missingColumns = w.completeColumns.filter(
 		(c) => !tableColumns.includes(columnHash(c))
 	);
-	console.log(tableColumns, missingColumns);
 	if (missingColumns.length > 0) {
 		fetch("/api/table", {
 			method: "POST",

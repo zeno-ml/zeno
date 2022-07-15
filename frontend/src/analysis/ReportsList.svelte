@@ -22,7 +22,7 @@
 	<h4>Reports</h4>
 	<div id="reports">
 		{#each $reports as rep, i}
-			<ReportListRow {i} />
+			<ReportListRow report={rep} reportIndex={i} />
 		{/each}
 	</div>
 	<Button

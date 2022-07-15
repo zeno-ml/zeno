@@ -24,7 +24,7 @@
 	<div>
 		<ReportsList />
 	</div>
-	<div>
+	<div style:overflow="visible">
 		{#if $reports[$report]}
 			<ReportTable report={$reports[$report]} />
 			<div class="export">

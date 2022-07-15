@@ -6,11 +6,11 @@
 	import SliceTableRow from "./SliceTableRow.svelte";
 </script>
 
-<DataTable table$aria-label="People list" style="max-width: 100%;">
+<DataTable style="max-width: 100%;">
 	<Head>
 		<Row>
 			<Cell>{""}</Cell>
-			{#each $models as m}
+			{#each $models.slice().reverse() as m}
 				<Cell>{m}</Cell>
 			{/each}
 		</Row>
