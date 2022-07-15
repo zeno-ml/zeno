@@ -114,24 +114,6 @@
 	<MetadataBar />
 
 	<div>
-		<!-- Color Dropdown -->
-		<div id="color-by">
-			{#if metadataExists}
-				<Select bind:value={$colorByHash} label={"Color Points By"}>
-					{#each $settings.metadataColumns as metadataName, i}
-						{@const isModelsMetadata =
-							(metadataName.model === "" || metadataName.model === $model) &&
-							metadataName.name !== $settings.idColumn.name}
-						{#if isModelsMetadata}
-							<Option value={columnHash(metadataName)}
-								>{metadataName.name}</Option>
-						{/if}
-					{/each}
-				</Select>
-			{/if}
-		</div>
-
-		<!-- Scatter View -->
 		<div id="scatter-view" style:margin-top="10px">
 			<div
 				class="paper"

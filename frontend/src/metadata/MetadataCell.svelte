@@ -130,13 +130,13 @@
 				if (Number(vals[0]) === 0 && Number(vals[1]) === 1) {
 					colorAssignments = colorLabelCategorical(hash);
 					chartType = ChartType.Binary;
-					$availableColors.set(hash, colorAssignments);
+					$availableColors = { ...$availableColors, [hash]: colorAssignments };
 				}
 			} else if (isOrdinal) {
 				if (unique <= 20) {
 					chartType = ChartType.Count;
 					colorAssignments = colorLabelCategorical(hash);
-					$availableColors.set(hash, colorAssignments);
+					$availableColors = { ...$availableColors, [hash]: colorAssignments };
 				} else {
 					chartType = ChartType.Other;
 				}
@@ -147,7 +147,7 @@
 					colorAssignments = colorLabelContin(hash);
 					chartType = ChartType.Histogram;
 					bins = bin(hash, $table);
-					$availableColors.set(hash, colorAssignments);
+					$availableColors = { ...$availableColors, [hash]: colorAssignments };
 					histoData.table = bins.map((d) => ({
 						...d,
 						filteredCount: d.count,
