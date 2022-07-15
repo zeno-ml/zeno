@@ -22,8 +22,8 @@
 	import * as aq from "arquero";
 
 	// props
-	export let scatterWidth = 700;
-	export let scatterHeight = 500;
+	export let scatterWidth = 800;
+	export let scatterHeight = 550;
 
 	console.warn = () => {
 		return;
@@ -114,7 +114,90 @@
 	<MetadataBar />
 
 	<div>
-		<div id="scatter-view" style:margin-top="10px">
+		<div
+			id="scatter-view"
+			style:margin-top="10px"
+			style:height="{scatterHeight}px">
+			<div id="pipeline-view" class="paper">
+				<h4>Pipeline</h4>
+				<div>
+					<Button
+						on:click={async () => {
+							const output = await pipeline.parametricUMAP();
+							projection2D = output;
+							pipelineJSON = await pipeline.pipelineJSON();
+						}}>
+						UMAP</Button>
+					<Button
+						on:click={async () => {
+							const tableIds = $filteredTable.columnArray(
+								columnHash($settings.idColumn)
+							);
+							const output = await pipeline.idFilter({ ids: tableIds });
+							pipelineJSON = await pipeline.pipelineJSON();
+						}}>
+						Filter by metadata panel</Button>
+					<Button
+						on:click={async () => {
+							const lassoedIds = lassoSelectTable.columnArray(
+								columnHash($settings.idColumn)
+							);
+							const output = await pipeline.idFilter({ ids: lassoedIds });
+							pipelineJSON = await pipeline.pipelineJSON();
+						}}>
+						Filter by lasso selection</Button>
+					<Button on:click={() => (regionLabeler = !regionLabeler)}
+						>Draw Polygon: {regionPolygon.length}</Button>
+					<Button
+						on:click={async () => {
+							const output = await pipeline.regionLabeler({
+								polygon: regionPolygon,
+								name: regionLabelerName,
+							});
+							const column = output["col_name"];
+							addZenoColumn({
+								model: column.model,
+								name: column.name,
+								columnType: column.column_type,
+								transform: column.transform,
+							});
+							pipelineJSON = await pipeline.pipelineJSON();
+						}}>
+						Apply Region Labeler</Button>
+
+					<TextField bind:value={regionLabelerName} label={"Labeler Name"} />
+				</div>
+				<div>
+					<Button
+						on:click={async () => {
+							const reset = await pipeline.reset();
+							const init = await pipeline.init({
+								model: $model,
+								uid: PIPELINE_ID,
+							});
+							pipelineJSON = await pipeline.pipelineJSON();
+						}}>Reset Pipeline with model: {$model}</Button>
+				</div>
+				<div>
+					<Button
+						on:click={async () => {
+							pipelineJSON = await pipeline.pipelineJSON();
+							console.log(pipelineJSON);
+						}}>Get json pipeline repr</Button>
+				</div>
+				<div>
+					<h3>Pipeline</h3>
+					{#each pipelineJSON.pipeline as pipe}
+						<div>{pipe.type}</div>
+					{:else}
+						<div>Empty pipeline</div>
+					{/each}
+					{#if pipelineJSON.labeler !== null}
+						<div>{pipelineJSON.labeler.type}</div>
+					{/if}
+				</div>
+			</div>
+
 			<div
 				class="paper"
 				style:width="{scatterWidth}px"
@@ -138,88 +221,20 @@
 					regionMode={regionLabeler} />
 			</div>
 		</div>
-		<div>
-			<Button
-				on:click={async () => {
-					const output = await pipeline.parametricUMAP();
-					projection2D = output;
-					pipelineJSON = await pipeline.pipelineJSON();
-				}}>
-				UMAP</Button>
-			<Button
-				on:click={async () => {
-					const tableIds = $filteredTable.columnArray(
-						columnHash($settings.idColumn)
-					);
-					const output = await pipeline.idFilter({ ids: tableIds });
-					pipelineJSON = await pipeline.pipelineJSON();
-				}}>
-				Filter by metadata panel</Button>
-			<Button
-				on:click={async () => {
-					const lassoedIds = lassoSelectTable.columnArray(
-						columnHash($settings.idColumn)
-					);
-					const output = await pipeline.idFilter({ ids: lassoedIds });
-					pipelineJSON = await pipeline.pipelineJSON();
-				}}>
-				Filter by lasso selection</Button>
-			<Button on:click={() => (regionLabeler = !regionLabeler)}
-				>Draw Polygon: {regionPolygon.length}</Button>
-			<Button
-				on:click={async () => {
-					const output = await pipeline.regionLabeler({
-						polygon: regionPolygon,
-						name: regionLabelerName,
-					});
-					const column = output["col_name"];
-					addZenoColumn({
-						model: column.model,
-						name: column.name,
-						columnType: column.column_type,
-						transform: column.transform,
-					});
-					pipelineJSON = await pipeline.pipelineJSON();
-				}}>
-				Apply Region Labeler</Button>
-
-			<TextField bind:value={regionLabelerName} label={"Labeler Name"} />
+		<div
+			class="horizontal-divider"
+			style:margin-top="10px"
+			style:margin-bottom="5px" />
+		<!-- Instances view -->
+		<div id="instance-view">
+			<div id="samples-view">
+				<SampleOptions />
+				<Samples
+					table={scatterSelectEmpty(lassoSelectTable)
+						? $filteredTable
+						: lassoSelectTable} />
+			</div>
 		</div>
-		<div>
-			<Button
-				on:click={async () => {
-					const reset = await pipeline.reset();
-					const init = await pipeline.init({ model: $model, uid: PIPELINE_ID });
-					pipelineJSON = await pipeline.pipelineJSON();
-				}}>Reset Pipeline with model: {$model}</Button>
-		</div>
-		<div>
-			<Button
-				on:click={async () => {
-					pipelineJSON = await pipeline.pipelineJSON();
-					console.log(pipelineJSON);
-				}}>Get json pipeline repr</Button>
-		</div>
-		<div>
-			<h3>Pipeline</h3>
-			{#each pipelineJSON.pipeline as pipe}
-				<div>{pipe.type}</div>
-			{:else}
-				<div>Empty pipeline</div>
-			{/each}
-			{#if pipelineJSON.labeler !== null}
-				<div>{pipelineJSON.labeler.type}</div>
-			{/if}
-		</div>
-	</div>
-
-	<!-- Instances view -->
-	<div id="instance-view">
-		<SampleOptions />
-		<Samples
-			table={scatterSelectEmpty(lassoSelectTable)
-				? $filteredTable
-				: lassoSelectTable} />
 	</div>
 </div>
 
@@ -228,7 +243,39 @@
 		display: flex;
 		flex-direction: row;
 	}
-	.paper {
+	.shadow-paper {
 		box-shadow: 0px 0px 3px 3px hsla(0, 0%, 0%, 0.1);
+	}
+	.paper {
+		border: 1px #e0e0e0 solid;
+	}
+	#scatter-view {
+		display: flex;
+		justify-content: center;
+		gap: 10px;
+	}
+	#instance-view {
+		display: flex;
+	}
+	#pipeline-view {
+		width: 400px;
+		height: 100%;
+	}
+	#samples-view {
+	}
+	.vertical-divider {
+		width: 1px;
+		background-color: #e0e0e0;
+		height: 100%;
+	}
+	.horizontal-divider {
+		width: 100%;
+		background-color: #e0e0e0;
+		height: 1px;
+	}
+
+	h4 {
+		font-weight: 500;
+		color: rgba(0, 0, 0, 0.7);
 	}
 </style>
