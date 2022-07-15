@@ -94,7 +94,7 @@
 	</Cell>
 	<Cell>{predicate.transform}</Cell>
 	<Cell>{predicate.metric}</Cell>
-	<Cell style="overflow: visible">
+	<Cell style="overflow: visible" class="end-cell">
 		{#if editMode}
 			<Select
 				bind:value={predicate.operation}
