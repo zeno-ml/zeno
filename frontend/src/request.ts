@@ -37,6 +37,24 @@ export function getEndpointGenerator(endpoint: string) {
 	return getFunc;
 }
 
+interface IRequest {
+	url: string;
+	payload?: object;
+}
+export function requestGenerator(
+	request: ({ url, payload }: IRequest) => Promise<any>,
+	paramModifier: ({ url, payload }: IRequest) => IRequest,
+	afterRequest: () => any
+) {
+	async function req({ url, payload }: IRequest) {
+		const modifiedRequest = paramModifier({ url, payload });
+		const output = await request(modifiedRequest);
+		const afterOutput = await afterRequest();
+		return { ...output, ...afterOutput };
+	}
+	return req;
+}
+
 const request = {
 	get: getRequest,
 	post: postRequest,

@@ -161,6 +161,7 @@
 				on:click={async () => {
 					const output = await pipeline.parametricUMAP();
 					projection2D = output;
+					pipelineJSON = await pipeline.pipelineJSON();
 				}}>
 				UMAP</Button>
 			<Button
@@ -169,6 +170,7 @@
 						columnHash($settings.idColumn)
 					);
 					const output = await pipeline.idFilter({ ids: tableIds });
+					pipelineJSON = await pipeline.pipelineJSON();
 				}}>
 				Filter by metadata panel</Button>
 			<Button
@@ -177,6 +179,7 @@
 						columnHash($settings.idColumn)
 					);
 					const output = await pipeline.idFilter({ ids: lassoedIds });
+					pipelineJSON = await pipeline.pipelineJSON();
 				}}>
 				Filter by lasso selection</Button>
 			<Button on:click={() => (regionLabeler = !regionLabeler)}
@@ -194,6 +197,7 @@
 						columnType: column.column_type,
 						transform: column.transform,
 					});
+					pipelineJSON = await pipeline.pipelineJSON();
 				}}>
 				Apply Region Labeler</Button>
 
@@ -204,6 +208,7 @@
 				on:click={async () => {
 					const reset = await pipeline.reset();
 					const init = await pipeline.init({ model: $model, uid: PIPELINE_ID });
+					pipelineJSON = await pipeline.pipelineJSON();
 				}}>Reset Pipeline with model: {$model}</Button>
 		</div>
 		<div>
@@ -212,6 +217,17 @@
 					pipelineJSON = await pipeline.pipelineJSON();
 					console.log(pipelineJSON);
 				}}>Get json pipeline repr</Button>
+		</div>
+		<div>
+			<h3>Pipeline</h3>
+			{#each pipelineJSON.pipeline as pipe}
+				<div>{pipe.type}</div>
+			{:else}
+				<div>Empty pipeline</div>
+			{/each}
+			{#if pipelineJSON.labeler !== null}
+				<div>{pipelineJSON.labeler.type}</div>
+			{/if}
 		</div>
 	</div>
 
