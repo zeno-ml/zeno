@@ -101,6 +101,7 @@ class Pipeline:
         )
 
         return {
+            "name": self.name,
             "uid": self.uid,
             "model": self.model,
             "pipeline": weak_labeler_json,

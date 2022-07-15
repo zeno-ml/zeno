@@ -60,23 +60,24 @@
 		}
 	}
 
+	const noReact = {
+		setProjection: (projection) => (projection2D = projection),
+		setPipeline: (pipeline) => (pipelineJSON = pipeline),
+		setName: (name) => (regionLabelerName = name),
+	};
+
 	const PIPELINE_ID = "nice";
 	$: {
 		if ($model && $table) {
-			// pipeline.reset().then(() => {
-			// 	console.log("reset");
-			// });
-			// pipeline.init({ model: $model, uid: PIPELINE_ID }).then(() => {
-			// 	console.log("init");
-			// });
 			pipeline.load({ model: $model, uid: PIPELINE_ID }).then((d) => {
 				if (d !== null) {
-					projection2D = d;
+					noReact.setProjection(d);
 				}
 			});
 
 			pipeline.pipelineJSON().then((d) => {
-				pipelineJSON = d;
+				noReact.setPipeline(d);
+				noReact.setName(d.name);
 			});
 		}
 	}
@@ -128,6 +129,10 @@
 			style:margin-top="10px"
 			style:height="{scatterHeight}px">
 			<div id="pipeline-view" class="paper" style:height="{scatterHeight}px">
+				<h4>Pipeline Labeler</h4>
+				<div>
+					<TextField bind:value={regionLabelerName} label={"Name"} />
+				</div>
 				<h4>Pipeline</h4>
 				<div>
 					<div id="weak-labeler-pipeline">
@@ -136,18 +141,20 @@
 						{:else}
 							<div>Empty pipeline</div>
 						{/each}
-						{#if pipelineJSON.labeler !== null}
-							<div>{pipelineJSON.labeler.type}</div>
-						{/if}
 					</div>
 					<div>
 						<Button
 							title="Click to Filter Current Selection"
 							variant="outlined"
 							on:click={async () => {
-								const ids = $filteredTable
-									.intersect(lassoSelectTable)
-									.columnArray(columnHash($settings.idColumn));
+								let tableIds = $filteredTable;
+								if (lassoSelectTable !== null) {
+									tableIds.intersect(lassoSelectTable);
+								}
+								const ids = tableIds.columnArray(
+									columnHash($settings.idColumn)
+								);
+								console.log(ids);
 								await pipeline.idFilter({ ids });
 								pipelineJSON = await pipeline.pipelineJSON();
 							}}>
@@ -165,83 +172,41 @@
 					<div>
 						<Button
 							title="Reset entire pipeline"
+							color={regionLabeler ? "secondary" : "primary"}
 							on:click={async () => {
 								await pipeline.reset();
 								await pipeline.init({ model: $model, uid: PIPELINE_ID });
 								projection2D = [];
 								legendaryScatterPoints = [];
+								regionLabelerName = "default";
 								pipelineJSON = await pipeline.pipelineJSON();
 							}}>
 							Reset</Button>
+						<Button
+							on:click={async () => {
+								if (regionLabeler && regionPolygon.length > 0) {
+									const output = await pipeline.regionLabeler({
+										polygon: regionPolygon,
+										name: regionLabelerName,
+									});
+									const column = output["col_name"];
+									addZenoColumn({
+										model: column.model,
+										name: column.name,
+										columnType: column.column_type,
+										transform: column.transform,
+									});
+									regionLabeler = false;
+								} else {
+									regionLabeler = true;
+								}
+								pipelineJSON = await pipeline.pipelineJSON();
+							}}>
+							{regionLabeler
+								? "Click Here to Confirm"
+								: "Create Labeler"}</Button>
 					</div>
-					<!-- <Button
-						on:click={async () => {
-							const tableIds = $filteredTable.columnArray(
-								columnHash($settings.idColumn)
-							);
-							const output = await pipeline.idFilter({ ids: tableIds });
-							pipelineJSON = await pipeline.pipelineJSON();
-						}}>
-						Filter by metadata panel</Button>
-					<Button
-						on:click={async () => {
-							const lassoedIds = lassoSelectTable.columnArray(
-								columnHash($settings.idColumn)
-							);
-							const output = await pipeline.idFilter({ ids: lassoedIds });
-							pipelineJSON = await pipeline.pipelineJSON();
-						}}>
-						Filter by lasso selection</Button>
-					<Button on:click={() => (regionLabeler = !regionLabeler)}
-						>Draw Polygon: {regionPolygon.length}</Button>
-					<Button
-						on:click={async () => {
-							const output = await pipeline.regionLabeler({
-								polygon: regionPolygon,
-								name: regionLabelerName,
-							});
-							const column = output["col_name"];
-							addZenoColumn({
-								model: column.model,
-								name: column.name,
-								columnType: column.column_type,
-								transform: column.transform,
-							});
-							pipelineJSON = await pipeline.pipelineJSON();
-						}}>
-						Apply Region Labeler</Button>
-
-					<TextField bind:value={regionLabelerName} label={"Labeler Name"} /> -->
 				</div>
-				<!-- <div>
-					<Button
-						on:click={async () => {
-							const reset = await pipeline.reset();
-							const init = await pipeline.init({
-								model: $model,
-								uid: PIPELINE_ID,
-							});
-							pipelineJSON = await pipeline.pipelineJSON();
-						}}>Reset Pipeline with model: {$model}</Button>
-				</div>
-				<div>
-					<Button
-						on:click={async () => {
-							pipelineJSON = await pipeline.pipelineJSON();
-							console.log(pipelineJSON);
-						}}>Get json pipeline repr</Button>
-				</div>
-				<div>
-					<h3>Pipeline</h3>
-					{#each pipelineJSON.pipeline as pipe}
-						<div>{pipe.type}</div>
-					{:else}
-						<div>Empty pipeline</div>
-					{/each}
-					{#if pipelineJSON.labeler !== null}
-						<div>{pipelineJSON.labeler.type}</div>
-					{/if}
-				</div> -->
 			</div>
 
 			<div
@@ -305,8 +270,7 @@
 	}
 	#pipeline-view {
 		width: 400px;
-		padding-left: 10px;
-		padding-right: 10px;
+		padding-left: 20px;
 		overflow-y: scroll;
 	}
 	#samples-view {
@@ -325,6 +289,8 @@
 	h4 {
 		font-weight: 500;
 		color: rgba(0, 0, 0, 0.7);
+		margin-bottom: 8px;
+		margin-top: 25px;
 	}
 
 	.meta-chip {
