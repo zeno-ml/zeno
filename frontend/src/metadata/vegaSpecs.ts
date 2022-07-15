@@ -18,10 +18,10 @@ export const histogramSpec = {
 					select: { type: "interval", encodings: ["x"] },
 				},
 			],
-			mark: "bar",
+			mark: { type: "bar", fill: "#ededed" },
 			encoding: {
 				x: {
-					field: "data",
+					field: "value",
 					bin: { maxbins: 20 },
 					axis: {
 						title: "",
@@ -31,18 +31,38 @@ export const histogramSpec = {
 					},
 				},
 				y: {
-					aggregate: "count",
+					aggregate: "sum",
+					field: "count",
 					axis: { title: "", tickCount: 2, labelColor: "rgba(0, 0, 0, 0.6)" },
 				},
-				color: { value: "#ddd" },
+			},
+		},
+		{
+			mark: { type: "bar", fill: "#9b51e0", opacity: 0.6 },
+			encoding: {
+				x: {
+					field: "value",
+					bin: { maxbins: 20 },
+					axis: {
+						title: "",
+						grid: false,
+						tickCount: 2,
+						labelColor: "rgba(0, 0, 0, 0.6)",
+					},
+				},
+				y: {
+					aggregate: "sum",
+					field: "filteredCount",
+					axis: { title: "", tickCount: 2, labelColor: "rgba(0, 0, 0, 0.6)" },
+				},
 			},
 		},
 		{
 			transform: [{ filter: { param: "brush" } }],
-			mark: { type: "bar", fill: "#9b51e0", opacity: 0.5 },
+			mark: { type: "bar", fill: "#9b51e0", opacity: 0.3 },
 			encoding: {
 				x: {
-					field: "data",
+					field: "value",
 					bin: { maxbins: 20 },
 				},
 				y: { aggregate: "count" },
@@ -61,47 +81,89 @@ export const countSpec = {
 	},
 	width: 350,
 	height: 40,
-	params: [
+	layer: [
 		{
-			name: "highlight",
-			select: { type: "point", on: "mouseover" },
-		},
-		{ name: "select", select: { type: "point", encodings: ["x"] } },
-	],
-	mark: { type: "bar", fill: "#9b51e0", opacity: 0.5 },
-	encoding: {
-		x: {
-			field: "data",
-			type: "ordinal",
-			axis: {
-				title: "",
-				grid: false,
-				tickCount: 2,
-				labelColor: "rgba(0, 0, 0, 0.6)",
-			},
-		},
-		y: {
-			aggregate: "count",
-			axis: { title: "", tickCount: 2, labelColor: "rgba(0, 0, 0, 0.6)" },
-		},
-		fillOpacity: {
-			condition: { param: "select", value: 1 },
-			value: 0.3,
-		},
-		strokeWidth: {
-			condition: [
+			params: [
 				{
-					param: "select",
-					empty: false,
-					value: 2,
+					name: "highlight",
+					select: { type: "point", on: "mouseover" },
 				},
-				{
-					param: "highlight",
-					empty: false,
+				{ name: "select", select: { type: "point", encodings: ["x"] } },
+			],
+			mark: { type: "bar", fill: "#ededed" },
+			encoding: {
+				x: {
+					field: "value",
+					type: "ordinal",
+					axis: {
+						title: "",
+						grid: false,
+						tickCount: 2,
+						labelColor: "rgba(0, 0, 0, 0.6)",
+					},
+				},
+				y: {
+					aggregate: "sum",
+					field: "count",
+					axis: { title: "", tickCount: 2, labelColor: "rgba(0, 0, 0, 0.6)" },
+				},
+				fillOpacity: {
+					condition: { param: "select", value: 1 },
 					value: 1,
 				},
-			],
-			value: 0,
+				stroke: {
+					value: "black",
+				},
+				strokeWidth: {
+					condition: [
+						{
+							param: "select",
+							empty: false,
+							value: 1,
+						},
+					],
+					value: 0,
+				},
+			},
 		},
-	},
+		{
+			mark: { type: "bar", fill: "#9b51e0", opacity: 0.6 },
+			encoding: {
+				x: {
+					field: "value",
+					type: "ordinal",
+					axis: {
+						title: "",
+						grid: false,
+						tickCount: 2,
+						labelColor: "rgba(0, 0, 0, 0.6)",
+					},
+				},
+				y: {
+					aggregate: "sum",
+					field: "filteredCount",
+					axis: { title: "", tickCount: 2, labelColor: "rgba(0, 0, 0, 0.6)" },
+				},
+				// fillOpacity: {
+				// 	condition: { param: "select", value: 1 },
+				// 	value: 0.3,
+				// },
+				// strokeWidth: {
+				// 	condition: [
+				// 		{
+				// 			param: "select",
+				// 			empty: false,
+				// 			value: 2,
+				// 		},
+				// 		{
+				// 			param: "highlight",
+				// 			empty: false,
+				// 			value: 1,
+				// 		},
+				// 	],
+				// 	value: 0,
+				// },
+			},
+		},
+	],
 } as VegaLiteSpec;

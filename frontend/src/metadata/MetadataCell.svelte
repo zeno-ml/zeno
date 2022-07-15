@@ -8,7 +8,7 @@
 	import { VegaLite } from "svelte-vega";
 	import { onMount } from "svelte";
 
-	import { metadataSelections, table } from "../stores";
+	import { metadataSelections, table, filteredTable } from "../stores";
 	import { columnHash } from "../util";
 	import { countSpec, histogramSpec } from "./vegaSpecs";
 
@@ -28,12 +28,18 @@
 	let view: View;
 	let data = { table: [] };
 
-	function updateData(table: ColumnTable) {
+	function updateData(table: ColumnTable, filteredTable: ColumnTable) {
 		if (
 			(chartType === ChartType.Count || chartType === ChartType.Histogram) &&
 			table.column(hash)
 		) {
+			let filtIndices = new Set(filteredTable.indices());
 			let arr = table.array(hash);
+			arr = arr.map((x, i) => ({
+				value: x,
+				count: 1,
+				filteredCount: filtIndices.has(i) ? 1 : 0,
+			}));
 			data = { table: arr };
 		}
 	}
@@ -64,19 +70,21 @@
 	table.subscribe((t) => drawChart(t));
 	onMount(() => {
 		drawChart($table);
-		updateData($table);
+		updateData($table, $filteredTable);
 	});
 
 	$: {
 		col;
-		updateData($table);
+		updateData($table, $filteredTable);
 	}
 
 	metadataSelections.subscribe((m) => {
 		if (!m.has(hash) && view) {
-			if (view.getState().signals["brush_data"]) {
+			if (view.getState().signals["brush_x"]) {
 				view.signal("brush", {});
-				view.signal("brush_data", {});
+				if (view.getState().signals["brush_data"]) {
+					view.signal("brush_data", {});
+				}
 				view.signal("brush_x", []);
 				view.runAsync();
 			}
@@ -98,13 +106,14 @@
 		if (chartType === ChartType.Histogram) {
 			view.addSignalListener(
 				"brush",
-				(...s) => (selection = s[1].data ? ["range", ...s[1].data] : undefined)
+				(...s) =>
+					(selection = s[1].value ? ["range", ...s[1].value] : undefined)
 			);
 		} else if (chartType === ChartType.Count) {
-			view.addSignalListener(
-				"select",
-				(...s) => (selection = s[1].data ? ["points", ...s[1].data] : undefined)
-			);
+			view.addSignalListener("select", (...s) => {
+				console.log(s);
+				selection = s[1].value ? ["points", ...s[1].value] : undefined;
+			});
 		}
 	}
 
