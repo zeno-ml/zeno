@@ -148,10 +148,6 @@
 					chartType = ChartType.Histogram;
 					bins = bin(hash, $table);
 					$availableColors = { ...$availableColors, [hash]: colorAssignments };
-					histoData.table = bins.map((d) => ({
-						...d,
-						filteredCount: d.count,
-					}));
 				}
 			}
 		}
@@ -254,6 +250,15 @@
 	$: {
 		col;
 		drawChart($table);
+		const filteredCounts = countGivenBins({
+			bins: bins,
+			table: $filteredTable,
+		});
+		histoData.table = bins.map((d, i) => ({
+			...d,
+			filteredCount: filteredCounts[i],
+		}));
+		histoData = { ...histoData };
 		updateData($table);
 	}
 
