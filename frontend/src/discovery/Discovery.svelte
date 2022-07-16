@@ -25,10 +25,6 @@
 	export let scatterWidth = 800;
 	export let scatterHeight = 550;
 
-	console.warn = () => {
-		return;
-	};
-
 	let projection2D: object[] = [];
 	let lassoSelectTable = null;
 	let regionLabeler = false;
