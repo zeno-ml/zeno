@@ -188,7 +188,7 @@ class Zeno(object):
 
     def table_weak_labels(self, js_export):
         col_kwargs = {
-            "column_type": ZenoColumnType.PREDISTILL,
+            "column_type": ZenoColumnType.WEAK_LABEL,
             "name": self.pipeline.name,
             "model": self.pipeline.model,
             "transform": "",

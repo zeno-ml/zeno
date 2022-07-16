@@ -23,6 +23,7 @@ class ZenoColumnType(IntEnum):
     EMBEDDING = 3
     POSTDISTILL = 4
     TRANSFORM = 5
+    WEAK_LABEL = 6
 
 
 class ZenoFunctionType(IntEnum):

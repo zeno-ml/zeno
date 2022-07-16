@@ -127,6 +127,14 @@
 			<span class="size">({$table.size})</span>
 		</div>
 	</div>
+
+	<h4>Weak Labels</h4>
+	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.WEAK_LABEL) as col}
+		<MetadataNode {col} />
+	{:else}
+		No weak labels yet.
+	{/each}
+
 	<div class="inline">
 		<h4>Slices</h4>
 		<div style:margin-right="13px">

@@ -5,4 +5,5 @@ export enum ZenoColumnType {
 	EMBEDDING,
 	POSTDISTILL,
 	TRANSFORM,
+	WEAK_LABEL,
 }
