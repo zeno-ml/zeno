@@ -64,6 +64,7 @@
 		setPipeline: (pipeline) => (pipelineJSON = pipeline),
 		setName: (name) => (regionLabelerName = name),
 		setRepr: (repr) => (pipelineRepr = repr),
+		setSelectedNode: (node) => (selectedNode = node),
 	};
 
 	const PIPELINE_ID = "nice";
@@ -73,9 +74,9 @@
 				if (d !== null) {
 					if (d.pipeline.length > 0) {
 						noReact.setRepr(d.pipeline);
-						noReact.setProjection(
-							d.pipeline[d.pipeline.length - 1].state.projection
-						);
+						const lastNode = d.pipeline[d.pipeline.length - 1];
+						noReact.setProjection(lastNode.state.projection);
+						noReact.setSelectedNode(lastNode);
 					}
 				}
 			});
@@ -125,6 +126,7 @@
 	}
 	$: console.log(pipelineJSON);
 	let tempProjection;
+	let selectedNode;
 </script>
 
 <div id="main">
@@ -143,16 +145,18 @@
 				<h4>Pipeline</h4>
 				<div>
 					<div id="weak-labeler-pipeline">
-						{#each pipelineRepr as node}
+						{#each pipelineRepr as node, i}
 							<Node
 								{node}
-								on:mouseenter={() => {
-									tempProjection = [...projection2D];
+								on:backClick={() => {
+									console.log("go back");
+								}}
+								on:eyeClick={() => {
+									selectedNode = node;
 									projection2D = node.state.projection;
 								}}
-								on:mouseleave={() => {
-									projection2D = [...tempProjection];
-								}} />
+								selectedId={selectedNode.id}
+								lastNode={i === pipelineRepr.length - 1} />
 						{:else}
 							<div>Empty pipeline</div>
 						{/each}
@@ -169,7 +173,6 @@
 								const ids = tableIds.columnArray(
 									columnHash($settings.idColumn)
 								);
-								console.log(ids);
 								const node = await pipeline.idFilter({ ids });
 								projection2D = node.state.projection;
 								pipelineJSON = await pipeline.pipelineJSON();
