@@ -127,6 +127,10 @@
 	$: console.log(pipelineJSON);
 	let tempProjection;
 	let selectedNode;
+	let scatterObj;
+	function resetSelection() {
+		scatterObj.select([]);
+	}
 </script>
 
 <div id="main">
@@ -148,8 +152,19 @@
 						{#each pipelineRepr as node, i}
 							<Node
 								{node}
-								on:backClick={() => {
-									console.log("go back");
+								on:backClick={async () => {
+									await pipeline.reset({ upToId: node.id });
+									let newSubset = [];
+									for (let i = 0; i < pipelineRepr.length; i++) {
+										newSubset.push(pipelineRepr[i]);
+										if (pipelineRepr[i].id === node.id) {
+											break;
+										}
+									}
+									pipelineRepr = newSubset;
+									selectedNode = node;
+									projection2D = node.state.projection;
+									pipelineJSON = await pipeline.pipelineJSON();
 								}}
 								on:eyeClick={() => {
 									selectedNode = node;
@@ -176,7 +191,10 @@
 								const node = await pipeline.idFilter({ ids });
 								projection2D = node.state.projection;
 								pipelineJSON = await pipeline.pipelineJSON();
+								console.log(scatterObj);
+								resetSelection();
 								pipelineRepr = [...pipelineRepr, node];
+								selectedNode = node;
 							}}>
 							Filter</Button>
 						<Button
@@ -187,6 +205,7 @@
 								projection2D = node.state.projection;
 								pipelineJSON = await pipeline.pipelineJSON();
 								pipelineRepr = [...pipelineRepr, node];
+								selectedNode = node;
 							}}>
 							Project</Button>
 					</div>
@@ -210,6 +229,7 @@
 									const output = await pipeline.regionLabeler({
 										polygon: regionPolygon,
 										name: regionLabelerName,
+										upToId: selectedNode.id,
 									});
 									const column = output["col_name"];
 									addZenoColumn({
@@ -219,7 +239,9 @@
 										transform: column.transform,
 									});
 									regionLabeler = false;
+									regionPolygon = [];
 								} else {
+									regionPolygon = [];
 									regionLabeler = true;
 								}
 								pipelineJSON = await pipeline.pipelineJSON();
@@ -239,6 +261,10 @@
 					width={scatterWidth}
 					height={scatterHeight}
 					points={legendaryScatterPoints}
+					on:create={({ detail }) => {
+						console.log(detail);
+						scatterObj = detail;
+					}}
 					on:deselect={() => {
 						lassoSelectTable = null;
 					}}

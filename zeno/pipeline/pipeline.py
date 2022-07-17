@@ -18,10 +18,10 @@ class Pipeline:
         self.id_column = None
         self.name = "default"
 
-    def reset_final_labeler(self):
+    def reset_labeler(self):
         self.labeler = None
 
-    def reset_weak_labeler_memory(self):
+    def reset_memory(self):
         self.global_memory.reset()
         if self.table is not None:
             self.set_table(self.table)
@@ -30,8 +30,17 @@ class Pipeline:
         if self.model is not None:
             self.set_model(self.model)
 
-    def reset_weak_labeler(self):
-        self.pipeline = []
+    def reset_pipeline(self, up_to_id=""):
+        reset_pipeline = []
+
+        up_to_id_exist = len(up_to_id) > 0
+        if up_to_id_exist is True:
+            for step_node in self.pipeline:
+                reset_pipeline.append(step_node)
+                if up_to_id == str(step_node.id):
+                    break
+
+        self.pipeline = reset_pipeline
 
     def set_uid(self, uid):
         self.uid = uid
@@ -76,21 +85,24 @@ class Pipeline:
 
         self.labeler = new_node
 
-    def run(self):
-        self.reset_weak_labeler_memory()
+    def run(self, up_to_id=""):
+        self.reset_memory()
         js_export = {}
+        up_to_id_exist = len(up_to_id) > 0
 
         for step_node in self.pipeline:
             step_node.transform()
             self.global_memory = step_node.pipe_outputs()
+            if up_to_id_exist is True and up_to_id == str(step_node.id):
+                break
 
         js_export = step_node.json()
 
         return self.global_memory, js_export
 
-    def run_labeler(self):
+    def run_labeler(self, up_to_id=""):
         if self.labeler is not None:
-            self.global_memory, js_export = self.run()
+            self.global_memory, js_export = self.run(up_to_id)
             self.labeler.transform()
             self.global_memory = self.labeler.pipe_outputs()
             return self.global_memory, self.labeler.json()
@@ -106,7 +118,7 @@ class Pipeline:
         nodes_repr = []
         final_labeler_json = None
         if state is True:
-            self.reset_weak_labeler_memory()
+            self.reset_memory()
             for step_node in self.pipeline:
                 step_node.transform()
                 self.global_memory = step_node.pipe_outputs()

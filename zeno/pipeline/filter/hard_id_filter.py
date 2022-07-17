@@ -41,3 +41,6 @@ class HardFilterNode(PipelineNode):
             if self.memory.nice_projection is not None
             else [],
         }
+
+    def __repr__(self):
+        return "Filter"

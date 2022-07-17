@@ -13,8 +13,11 @@ function dataAccessor(obj: object) {
 		return undefined;
 	}
 }
-export async function reset() {
-	const output = await postPipe({ url: "reset" });
+export async function reset({ upToId = "" }: { upToId?: string } = {}) {
+	const output = await postPipe({
+		url: "reset",
+		payload: { up_to_id: upToId },
+	});
 	enforce({
 		rule: output.status === true,
 		name: "reset status is true",
@@ -36,15 +39,18 @@ export async function init({ model, uid }: { model: string; uid?: string }) {
 export async function regionLabeler({
 	polygon,
 	name,
+	upToId = "",
 }: {
 	polygon: number[][];
 	name: string;
+	upToId?: string;
 }) {
 	const output = await postPipe({
 		url: "region-labeler",
 		payload: {
 			polygon,
 			name,
+			up_to_id: upToId,
 		},
 	});
 	enforce({

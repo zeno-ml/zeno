@@ -60,3 +60,6 @@ class ParametricUMAPNode(PipelineNode):
 
     def load(self, path: str):
         self.model = load_ParametricUMAP(path)
+
+    def __repr__(self):
+        return "Projection"

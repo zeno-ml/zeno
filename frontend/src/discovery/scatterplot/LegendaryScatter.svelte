@@ -21,7 +21,7 @@
 	}));
 	export let regionMode = true;
 	export let regionPolygon = [];
-	export let regionStroke = color("lightgreen");
+	export let regionStroke = color("#6102EE");
 	export let regionFill = opacify(regionStroke, 0.25);
 
 	let mousePos = [0, 0];
@@ -81,8 +81,10 @@
 	on:keydown={(e) => {
 		if (regionMode) {
 			keyDown = e.key === "Shift";
-			polygon = [];
-			currInterval = 0;
+			if (keyDown) {
+				polygon = [];
+				currInterval = 0;
+			}
 		}
 	}} />
 <div id="scatter" style:width="{width}px" style:height="{height}px">

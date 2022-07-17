@@ -141,10 +141,10 @@ class Zeno(object):
 
         self.done_processing = False
 
-    def reset_pipeline(self):
-        self.pipeline.reset_weak_labeler_memory()
-        self.pipeline.reset_weak_labeler()
-        self.pipeline.reset_final_labeler()
+    def reset_pipeline(self, up_to_id=""):
+        self.pipeline.reset_memory()
+        self.pipeline.reset_pipeline(up_to_id)
+        self.pipeline.reset_labeler()
 
     def init_pipeline(self, model: str, uid: str = "0"):
         self.pipeline.set_uid(uid)
@@ -152,20 +152,14 @@ class Zeno(object):
         self.pipeline.set_id_column(self.id_column)
         self.pipeline.set_table(self.df)
 
-    def run_pipeline_between(self):
-        return self.pipeline.run()
-
-    def run_pipeline_labeler(self):
-        return self.pipeline.run_labeler()
-
     def add_id_filter_pipeline(self, ids: list[str]):
         self.pipeline.add_filter(ids)
-        output, js_export = self.run_pipeline_between()
+        output, js_export = self.pipeline.run()
         return js_export
 
     def add_umap_pipeline(self, user_specified_args: dict):
         self.pipeline.add_umap(**user_specified_args)
-        output, js_export = self.run_pipeline_between()
+        output, js_export = self.pipeline.run()
         return js_export
 
     def get_json_pipeline(self):
@@ -178,10 +172,10 @@ class Zeno(object):
             # within the init I can do cache stuff
             self.init_pipeline(model, uid)
 
-    def add_region_labeler_pipeline(self, polygon, name):
+    def add_region_labeler_pipeline(self, polygon, name, up_to_id=""):
         self.pipeline.set_name(name)
         self.pipeline.add_region_labeler(polygon)
-        output, js_export = self.run_pipeline_labeler()
+        output, js_export = self.pipeline.run_labeler(up_to_id)
         col_name = self.table_weak_labels(js_export["state"])
         return {"export": js_export["state"], "col_name": col_name}
 
@@ -204,7 +198,7 @@ class Zeno(object):
 
         self.complete_columns.append(new_column_labels)
         self.columns.append(new_column_labels)
-        self.status = "Done running weak labeler"
+        self.status = f"Done running weak labeler {new_column_labels_hash}"
 
         return col_kwargs
 

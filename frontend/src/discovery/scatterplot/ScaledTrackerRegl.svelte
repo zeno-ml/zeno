@@ -64,6 +64,7 @@
 			},
 			null
 		);
+		dispatch("create", e.detail);
 	}}
 	on:draw
 	on:select

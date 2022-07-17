@@ -18,7 +18,10 @@
 
 <div class="node-container">
 	<div>
-		<IconButton class="material-icons" on:click={() => dispatch("eyeClick")}>
+		<IconButton
+			class="material-icons"
+			on:click={() => dispatch("eyeClick")}
+			disabled={selectedNode}>
 			{selectedNode ? icon.eye.on : icon.eye.off}
 		</IconButton>
 	</div>

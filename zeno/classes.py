@@ -126,6 +126,10 @@ class PipelineInit(BaseModel):
     uid: str = "id:0"
 
 
+class PipelineReset(BaseModel):
+    up_to_id: str = ""
+
+
 class PipelineIdFilter(BaseModel):
     ids: list[str]
 
@@ -133,6 +137,7 @@ class PipelineIdFilter(BaseModel):
 class PipelineRegionLabeler(BaseModel):
     polygon: list[list[float]]
     name: str = "default"
+    up_to_id: str = ""
 
 
 class PipelineProjection(BaseModel):

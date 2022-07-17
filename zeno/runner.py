@@ -17,6 +17,7 @@ from .classes import (
     PipelineInit,
     PipelineProjection,
     PipelineRegionLabeler,
+    PipelineReset,
     ProjectionRequest,
     ReportsRequest,
     StatusResponse,
@@ -222,8 +223,8 @@ def run_zeno(args):
         return json.dumps({"data": projection, "model": model.model})
 
     @api_app.post("/pipe/reset")
-    def reset_pipeline():
-        zeno.reset_pipeline()
+    def reset_pipeline(req: PipelineReset):
+        zeno.reset_pipeline(req.up_to_id)
         return json.dumps({"status": True})
 
     @api_app.post("/pipe/load")
@@ -248,7 +249,9 @@ def run_zeno(args):
 
     @api_app.post("/pipe/region-labeler")
     def region_labeler_pipeline(req: PipelineRegionLabeler):
-        js_export = zeno.add_region_labeler_pipeline(req.polygon, req.name)
+        js_export = zeno.add_region_labeler_pipeline(
+            req.polygon, req.name, req.up_to_id
+        )
         return json.dumps({"status": True, "data": js_export})
 
     @api_app.get("/pipe/graph")
