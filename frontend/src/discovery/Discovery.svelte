@@ -20,6 +20,7 @@
 	import type { LegendaryScatterPoint } from "./scatterplot/scatter";
 	import type ColumnTable from "arquero/dist/types/table/column-table";
 	import * as aq from "arquero";
+	import Node from "./node/Node.svelte";
 
 	// props
 	export let scatterWidth = 800;
@@ -36,7 +37,7 @@
 		pipeline: [],
 		labeler: null,
 	};
-	let pipelineRepr: any[] = [];
+	let pipelineRepr: Pipeline.Node[] = [];
 
 	$: metadataExists =
 		$settings.metadataColumns.length > 0 || $filteredTable._names.length > 0;
@@ -142,18 +143,16 @@
 				<h4>Pipeline</h4>
 				<div>
 					<div id="weak-labeler-pipeline">
-						{#each pipelineRepr as pipe}
-							<div
-								class="meta-chip pipe"
+						{#each pipelineRepr as node}
+							<Node
+								{node}
 								on:mouseenter={() => {
 									tempProjection = [...projection2D];
-									projection2D = pipe.state.projection;
+									projection2D = node.state.projection;
 								}}
 								on:mouseleave={() => {
 									projection2D = [...tempProjection];
-								}}>
-								{pipe.type}
-							</div>
+								}} />
 						{:else}
 							<div>Empty pipeline</div>
 						{/each}
@@ -313,16 +312,6 @@
 		margin-top: 25px;
 	}
 
-	.meta-chip {
-		padding: 5px;
-		background: rgba(0, 0, 0, 0.07);
-		margin-left: 5px;
-		margin-right: 5px;
-		margin-top: 2px;
-		margin-bottom: 2px;
-		border-radius: 5px;
-		width: fit-content;
-	}
 	#weak-labeler-pipeline {
 		margin-bottom: 10px;
 		display: flex;
