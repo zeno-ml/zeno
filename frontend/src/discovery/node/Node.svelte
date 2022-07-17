@@ -11,13 +11,22 @@
 			on: "visibility",
 			off: "visibility_off",
 		},
-		back: "undo",
+		back: "replay",
 	};
 	$: selectedNode = selectedId === node.id;
 </script>
 
 <div class="node-container">
-	<div>
+	<div class="reset">
+		{#if !lastNode}
+			<IconButton
+				class="material-icons"
+				on:click={() => {
+					dispatch("backClick");
+				}}>{icon.back}</IconButton>
+		{/if}
+	</div>
+	<div class="view">
 		<IconButton
 			class="material-icons"
 			on:click={() => dispatch("eyeClick")}
@@ -25,16 +34,10 @@
 			{selectedNode ? icon.eye.on : icon.eye.off}
 		</IconButton>
 	</div>
-	<div on:click class="chip" on:mouseenter on:mouseleave>{node.type}</div>
-	{#if !lastNode}
-		<div>
-			<IconButton
-				class="material-icons"
-				on:click={() => {
-					dispatch("backClick");
-				}}>{icon.back}</IconButton>
-		</div>
-	{/if}
+	<div on:click class="chip node" on:mouseenter on:mouseleave>{node.type}</div>
+	<div class="count">
+		({node.state.projection.length} points)
+	</div>
 </div>
 
 <style>
@@ -45,16 +48,37 @@
 		width: 100%;
 		height: 100%;
 		position: relative;
-		cursor: pointer;
+		gap: 3px;
+		--h: 271;
+		--s: 69%;
+		--l: 60%;
+		--a: 1;
 	}
 	.chip {
 		padding: 5px;
-		background: rgba(0, 0, 0, 0.07);
+		color: hsla(var(--h), var(--s), var(--l), var(--a));
+		background-color: hsla(var(--h), var(--s), var(--l), 0.1);
 		margin-left: 5px;
 		margin-right: 5px;
 		margin-top: 2px;
 		margin-bottom: 2px;
 		border-radius: 5px;
+		text-align: center;
+		text-transform: uppercase;
 		width: fit-content;
+	}
+	.reset {
+		width: 50px;
+	}
+	.view {
+		width: 50px;
+	}
+	.node {
+		width: 10ch;
+	}
+	.count {
+		width: 12ch;
+		text-align: left;
+		color: hsla(var(--h), var(--s), var(--l), 0.4);
 	}
 </style>
