@@ -24,6 +24,7 @@
 	} from "./vegaSpecs";
 	import * as aq from "arquero";
 	import * as d3c from "d3-scale-chromatic";
+	import { interpolateColorToArray } from "../discovery/discovery";
 
 	export let col: ZenoColumn;
 	$: hash = columnHash(col);
@@ -128,14 +129,17 @@
 					.rollup({ a: `d => op.array_agg_distinct(d["${hash}"])` })
 					.object()["a"];
 				if (Number(vals[0]) === 0 && Number(vals[1]) === 1) {
-					colorAssignments = colorLabelCategorical(hash);
+					colorAssignments = colorLabelCategorical({
+						hash,
+						colorRange: ["#040265", "#FD9A03"],
+					});
 					chartType = ChartType.Binary;
 					$availableColors = { ...$availableColors, [hash]: colorAssignments };
 				}
 			} else if (isOrdinal) {
 				if (unique <= 20) {
 					chartType = ChartType.Count;
-					colorAssignments = colorLabelCategorical(hash);
+					colorAssignments = colorLabelCategorical({ hash });
 					$availableColors = { ...$availableColors, [hash]: colorAssignments };
 				} else {
 					chartType = ChartType.Other;
@@ -146,37 +150,33 @@
 				} else {
 					colorAssignments = colorLabelContin(hash);
 					chartType = ChartType.Histogram;
+					console.time("binning");
 					bins = bin(hash, $table);
+					console.timeEnd("binning");
 					$availableColors = { ...$availableColors, [hash]: colorAssignments };
 				}
 			}
 		}
 	}
 
-	function colorLabelContinuous(columnName: string, t = $table) {
-		let niceBins = bin(columnName, t);
-		let labels = [];
+	function colorLabelContin(columnName: string, t = $table) {
+		let colorArray = interpolateColorToArray(
+			d3c.interpolatePurples,
+			bins.length
+		);
+		let colorLabels = [];
 		for (const row of t) {
 			let i = 0;
-			for (const bin of niceBins) {
+			for (const bin of bins) {
 				if (row[columnName] >= bin.binStart && row[columnName] < bin.binEnd) {
-					labels.push(i);
-					continue;
+					colorLabels.push({
+						id: row[columnHash($settings.idColumn)],
+						colorIndex: i,
+					});
+					break;
 				}
 				i++;
 			}
-		}
-		return labels;
-	}
-
-	function colorLabelContin(columnName: string, t = $table) {
-		let colorArray = ["#1f77b4"];
-		let colorLabels = [];
-		for (const row of t) {
-			colorLabels.push({
-				id: row[columnHash($settings.idColumn)],
-				colorIndex: 0,
-			});
 		}
 		return {
 			colors: colorArray,
@@ -185,8 +185,15 @@
 		} as IColorAssignments;
 	}
 
-	function colorLabelCategorical(columnName: string, t = $table) {
-		const colorArray = d3c.schemeCategory10;
+	function colorLabelCategorical({
+		hash,
+		t = $table,
+		colorRange = d3c.schemeCategory10 as string[],
+	}: {
+		hash: string;
+		t?: ColumnTable;
+		colorRange?: string[];
+	}) {
 		let vals = t
 			.orderby(hash)
 			.rollup({ a: `d => op.array_agg_distinct(d["${hash}"])` })
@@ -203,7 +210,7 @@
 			});
 		}
 		return {
-			colors: colorArray,
+			colors: colorRange,
 			labels: colorLabels,
 			hash,
 		} as IColorAssignments;
@@ -239,6 +246,7 @@
 		histoData.table = bins.map((d, i) => ({
 			...d,
 			filteredCount: filteredCounts[i],
+			color: colorAssignments.colors[i],
 		}));
 		histoData = { ...histoData };
 	});
@@ -298,6 +306,7 @@
 			);
 		}
 	}
+	$: selectedHash = $colorByHash === hash;
 
 	function setSelection() {
 		if (selection === finalSelection) {
@@ -323,7 +332,7 @@
 <div class="cell">
 	<div id="info">
 		<span
-			style:color={$colorByHash === hash ? "#9B52DF" : ""}
+			style:color={selectedHash ? "#9B52DF" : ""}
 			on:click={() => {
 				colorByHash.set(hash);
 			}}>{col.name}</span>
@@ -339,7 +348,9 @@
 									: ["binary", "is"];
 							setSelection();
 						}}>
-						<Label>Is</Label>
+						<Label
+							style="color: {selectedHash ? colorAssignments.colors[1] : ''};"
+							>Is</Label>
 					</Button>
 					{$table.filter(`d => d["${hash}"] == 1`).count().object()["count"]}
 				</div>
@@ -353,7 +364,9 @@
 									: ["binary", "is not"];
 							setSelection();
 						}}>
-						<Label>Is Not</Label>
+						<Label
+							style="color: {selectedHash ? colorAssignments.colors[0] : ''};"
+							>Is Not</Label>
 					</Button>
 					{$table.filter(`d => d["${hash}"] == 0`).count().object()["count"]}
 				</div>
