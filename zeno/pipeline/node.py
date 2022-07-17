@@ -5,7 +5,7 @@ from typing import Union
 class PipelineNode:
     def __init__(self):
         self.id = NodeId()
-        self.details = {}
+        self.state = {}
         self.memory: Union[PipelineMemory, None] = None
 
     def fit(self):
@@ -38,8 +38,12 @@ class PipelineNode:
     def __repr__(self):
         return f"{self.__class__.__name__}"
 
-    def json(self):
-        return {"type": self.__repr__(), "id": str(self.id), "details": self.details}
+    def json(self, state=True):
+        return {
+            "type": self.__repr__(),
+            "id": str(self.id),
+            "state": self.export_outputs_js() if state is True else None,
+        }
 
 
 class NodeId:

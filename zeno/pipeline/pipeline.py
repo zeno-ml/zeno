@@ -1,3 +1,4 @@
+from copy import deepcopy
 from .node import PipelineNode
 from .memory import PipelineMemory
 from .filter.hard_id_filter import HardFilterNode
@@ -77,21 +78,22 @@ class Pipeline:
 
     def run(self):
         self.reset_weak_labeler_memory()
-        output = self.global_memory
         js_export = {}
-        for step_node in self.pipeline:
-            output_obj = step_node.transform()
-            output = output_obj.pipe_outputs()
-            js_export = output_obj.export_outputs_js()
 
-        return output, js_export
+        for step_node in self.pipeline:
+            step_node.transform()
+            self.global_memory = step_node.pipe_outputs()
+
+        js_export = step_node.json()
+
+        return self.global_memory, js_export
 
     def run_labeler(self):
         if self.labeler is not None:
-            output, js_export = self.run()
-            output_obj = self.labeler.transform()
-            self.global_memory = output_obj.pipe_outputs()
-            return output_obj.pipe_outputs(), output_obj.export_outputs_js()
+            self.global_memory, js_export = self.run()
+            self.labeler.transform()
+            self.global_memory = self.labeler.pipe_outputs()
+            return self.global_memory, self.labeler.json()
 
     def __repr__(self):
         result = f"UID: {self.uid}: "
@@ -100,20 +102,32 @@ class Pipeline:
         result += str(self.labeler)
         return result
 
-    def json(self):
-        weak_labeler_json = []
+    def pipeline_repr(self, state=False):
+        nodes_repr = []
         final_labeler_json = None
+        if state is True:
+            self.reset_weak_labeler_memory()
+            for step_node in self.pipeline:
+                step_node.transform()
+                self.global_memory = step_node.pipe_outputs()
+                js_export = step_node.json()
+                nodes_repr.append(deepcopy(js_export))
+        else:
+            for step_node in self.pipeline:
+                nodes_repr.append(step_node.json(state))
 
-        for step_node in self.pipeline:
-            weak_labeler_json.append(step_node.json())
-        final_labeler_json = None if self.labeler is None else self.labeler.json()
+        final_labeler_json = None if self.labeler is None else self.labeler.json(state)
+        return nodes_repr, final_labeler_json
+
+    def json(self, state=False):
+        pipeline, labeler = self.pipeline_repr(state)
 
         return {
             "name": self.name,
             "uid": self.uid,
             "model": self.model,
-            "pipeline": weak_labeler_json,
-            "labeler": final_labeler_json,
+            "pipeline": pipeline,
+            "labeler": labeler,
         }
 
     def populated(self):

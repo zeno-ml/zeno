@@ -36,6 +36,7 @@
 		pipeline: [],
 		labeler: null,
 	};
+	let pipelineRepr: any[] = [];
 
 	$: metadataExists =
 		$settings.metadataColumns.length > 0 || $filteredTable._names.length > 0;
@@ -61,6 +62,7 @@
 		setProjection: (projection) => (projection2D = projection),
 		setPipeline: (pipeline) => (pipelineJSON = pipeline),
 		setName: (name) => (regionLabelerName = name),
+		setRepr: (repr) => (pipelineRepr = repr),
 	};
 
 	const PIPELINE_ID = "nice";
@@ -68,7 +70,12 @@
 		if ($model && $table) {
 			pipeline.load({ model: $model, uid: PIPELINE_ID }).then((d) => {
 				if (d !== null) {
-					noReact.setProjection(d.projection);
+					if (d.pipeline.length > 0) {
+						noReact.setRepr(d.pipeline);
+						noReact.setProjection(
+							d.pipeline[d.pipeline.length - 1].state.projection
+						);
+					}
 				}
 			});
 
@@ -116,6 +123,7 @@
 		settings.set({ ...$settings });
 	}
 	$: console.log(pipelineJSON);
+	let tempProjection;
 </script>
 
 <div id="main">
@@ -134,8 +142,18 @@
 				<h4>Pipeline</h4>
 				<div>
 					<div id="weak-labeler-pipeline">
-						{#each pipelineJSON.pipeline as pipe}
-							<div class="meta-chip pipe">{pipe.type}</div>
+						{#each pipelineRepr as pipe}
+							<div
+								class="meta-chip pipe"
+								on:mouseenter={() => {
+									tempProjection = [...projection2D];
+									projection2D = pipe.state.projection;
+								}}
+								on:mouseleave={() => {
+									projection2D = [...tempProjection];
+								}}>
+								{pipe.type}
+							</div>
 						{:else}
 							<div>Empty pipeline</div>
 						{/each}
@@ -153,22 +171,20 @@
 									columnHash($settings.idColumn)
 								);
 								console.log(ids);
-								const output = await pipeline.idFilter({ ids });
-								if ("projection" in output) {
-									projection2D = output.projection;
-								}
+								const node = await pipeline.idFilter({ ids });
+								projection2D = node.state.projection;
 								pipelineJSON = await pipeline.pipelineJSON();
+								pipelineRepr = [...pipelineRepr, node];
 							}}>
 							Filter</Button>
 						<Button
 							variant="outlined"
 							title="Click to Project with UMAP"
 							on:click={async () => {
-								const output = await pipeline.parametricUMAP();
-								if ("projection" in output) {
-									projection2D = output.projection;
-								}
+								const node = await pipeline.parametricUMAP();
+								projection2D = node.state.projection;
 								pipelineJSON = await pipeline.pipelineJSON();
+								pipelineRepr = [...pipelineRepr, node];
 							}}>
 							Project</Button>
 					</div>
@@ -183,6 +199,7 @@
 								legendaryScatterPoints = [];
 								regionLabelerName = "default";
 								pipelineJSON = await pipeline.pipelineJSON();
+								pipelineRepr = [];
 							}}>
 							Reset</Button>
 						<Button

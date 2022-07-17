@@ -173,8 +173,7 @@ class Zeno(object):
 
     def load_pipeline(self, model: str, uid: str = "0"):
         if self.pipeline.populated() and self.pipeline.same(model, uid):
-            output, js_export = self.run_pipeline_between()
-            return js_export
+            return self.pipeline.json(state=True)
         else:
             # within the init I can do cache stuff
             self.init_pipeline(model, uid)
@@ -183,8 +182,8 @@ class Zeno(object):
         self.pipeline.set_name(name)
         self.pipeline.add_region_labeler(polygon)
         output, js_export = self.run_pipeline_labeler()
-        col_name = self.table_weak_labels(js_export)
-        return {"export": js_export, "col_name": col_name}
+        col_name = self.table_weak_labels(js_export["state"])
+        return {"export": js_export["state"], "col_name": col_name}
 
     def table_weak_labels(self, js_export):
         col_kwargs = {
