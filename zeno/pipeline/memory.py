@@ -1,6 +1,6 @@
 from typing import Union
 from pandas import DataFrame
-from ..classes import ZenoColumnType
+from ..classes import ZenoColumn
 
 
 class PipelineMemory:
@@ -11,7 +11,7 @@ class PipelineMemory:
         input_table: Union[DataFrame, None] = None,
         global_table: Union[DataFrame, None] = None,
         name: Union[str, None] = None,
-        id_column: Union[ZenoColumnType, None] = None,
+        id_column: Union[ZenoColumn, None] = None,
         model: Union[str, None] = None,
         labels: Union[list, None] = None,
     ):
@@ -23,3 +23,13 @@ class PipelineMemory:
         self.id_column = id_column
         self.model = model
         self.labels = labels
+
+    def reset(self):
+        self.projection = None
+        self.nice_projection = None
+        self.input_table = None
+        self.global_table = None
+        self.name = None
+        self.id_column = None
+        self.model = None
+        self.labels = None

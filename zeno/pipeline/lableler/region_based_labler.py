@@ -2,9 +2,9 @@ from ..node import PipelineNode
 
 
 class RegionBasedLabelerNode(PipelineNode):
-    def __init__(self):
+    def __init__(self, polygon: list[list[float]]):
         super().__init__()
-        self.status = ""
+        self.model = polygon
 
     def point_inside_polygon(self, point: list, polygon: list[list]):
         x, y = point
@@ -26,31 +26,19 @@ class RegionBasedLabelerNode(PipelineNode):
     def points_inside_polygon(self, points: list[list], polygon: list[list]):
         return [int(self.point_inside_polygon(point, polygon)) for point in points]
 
-    def fit(self, input):
+    def fit(self):
         return self
 
-    def transform(self, input):
-        self.labels = self.points_inside_polygon(input.projection, self.model)
-        self.input = input
-
+    def transform(self):
+        self.labels = self.points_inside_polygon(self.memory.projection, self.model)
         return self
 
     def pipe_outputs(self):
-        self.input.labels = self.labels
-        return self.input
+        self.memory.labels = self.labels
+        return self.memory
 
     def export_outputs_js(self):
         return {
             "labels": self.labels,
-            "ids": self.input.input_table[str(self.input.id_column)].tolist(),
+            "ids": self.memory.input_table[str(self.memory.id_column)].tolist(),
         }
-
-    def save(self, path: str):
-        pass
-
-    def load(self, path: str):
-        pass
-
-    def init(self, polygon: list[list[float]]):
-        self.model = polygon
-        return self

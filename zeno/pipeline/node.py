@@ -1,15 +1,17 @@
 from .memory import PipelineMemory
+from typing import Union
 
 
 class PipelineNode:
     def __init__(self):
         self.id = NodeId()
         self.details = {}
+        self.memory: Union[PipelineMemory, None] = None
 
-    def fit(self, input: PipelineMemory):
+    def fit(self):
         pass
 
-    def transform(self, input: PipelineMemory):
+    def transform(self):
         pass
 
     def pipe_outputs(self):
@@ -26,6 +28,12 @@ class PipelineNode:
 
     def init(self):
         pass
+
+    def get_memory(self):
+        return self.memory
+
+    def set_memory(self, memory: PipelineMemory):
+        self.memory = memory
 
     def __repr__(self):
         return f"{self.__class__.__name__}"

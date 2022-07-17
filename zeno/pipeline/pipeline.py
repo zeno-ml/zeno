@@ -1,3 +1,4 @@
+from .node import PipelineNode
 from .memory import PipelineMemory
 from .filter.hard_id_filter import HardFilterNode
 from .lableler.region_based_labler import RegionBasedLabelerNode
@@ -7,8 +8,8 @@ from .projection.parametric_umap import ParametricUMAPNode
 class Pipeline:
     def __init__(self):
         self.uid = None
-        self.shared_memory = PipelineMemory()
-        self.pipeline = []
+        self.global_memory = PipelineMemory()
+        self.pipeline: list[PipelineNode] = []
         self.labeler = None
 
         self.table = None
@@ -20,7 +21,7 @@ class Pipeline:
         self.labeler = None
 
     def reset_weak_labeler_memory(self):
-        self.shared_memory = PipelineMemory()
+        self.global_memory.reset()
         if self.table is not None:
             self.set_table(self.table)
         if self.id_column is not None:
@@ -36,40 +37,50 @@ class Pipeline:
 
     def set_name(self, name):
         self.name = name
-        self.shared_memory.name = name
+        self.global_memory.name = name
 
     def set_model(self, model):
         self.model = model
-        self.shared_memory.model = model
+        self.global_memory.model = model
 
     def set_id_column(self, id_column):
         self.id_column = id_column
-        self.shared_memory.id_column = id_column
+        self.global_memory.id_column = id_column
 
     def set_table(self, table):
         self.table = table
-        self.shared_memory.global_table = table
-        self.shared_memory.input_table = table.copy(deep=False)
+        self.global_memory.global_table = table
+        self.global_memory.input_table = table.copy(deep=False)
 
     def add_filter(self, ids):
-        new_node = HardFilterNode().init(ids).fit(self.shared_memory)
+        new_node = HardFilterNode(ids)
+        new_node.set_memory(self.global_memory)
+        new_node.fit()
+
         self.pipeline.append(new_node)
 
     def add_umap(self, **kwargs):
         kwargs_umap = {"n_components": 2, "n_epochs": 20, **kwargs}
-        new_node = ParametricUMAPNode().init(**kwargs_umap).fit(self.shared_memory)
+
+        new_node = ParametricUMAPNode(**kwargs_umap)
+        new_node.set_memory(self.global_memory)
+        new_node.fit()
+
         self.pipeline.append(new_node)
 
     def add_region_labeler(self, polygon):
-        new_node = RegionBasedLabelerNode().init(polygon).fit(self.shared_memory)
+        new_node = RegionBasedLabelerNode(polygon)
+        new_node.set_memory(self.global_memory)
+        new_node.fit()
+
         self.labeler = new_node
 
     def run(self):
         self.reset_weak_labeler_memory()
-        output = self.shared_memory
+        output = self.global_memory
         js_export = {}
         for step_node in self.pipeline:
-            output_obj = step_node.transform(output)
+            output_obj = step_node.transform()
             output = output_obj.pipe_outputs()
             js_export = output_obj.export_outputs_js()
 
@@ -78,8 +89,8 @@ class Pipeline:
     def run_labeler(self):
         if self.labeler is not None:
             output, js_export = self.run()
-            output_obj = self.labeler.transform(output)
-            self.shared_memory = output_obj.pipe_outputs()
+            output_obj = self.labeler.transform()
+            self.global_memory = output_obj.pipe_outputs()
             return output_obj.pipe_outputs(), output_obj.export_outputs_js()
 
     def __repr__(self):

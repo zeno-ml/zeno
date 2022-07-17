@@ -9,9 +9,9 @@ from ...classes import ZenoColumn, ZenoColumnType
 
 
 class ParametricUMAPNode(PipelineNode):
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         super().__init__()
-        self.status = ""
+        self.model = ParametricUMAP(*args, **kwargs)
 
     def get_embeddings(self, table, model_name):
         embedding_col = ZenoColumn(
@@ -23,45 +23,40 @@ class ParametricUMAPNode(PipelineNode):
         embeddings = np.stack(embeddings_pd_col.to_numpy())
         return embeddings
 
-    def fit(self, input):
-        embeddings = self.get_embeddings(input.input_table, input.model)
+    def fit(self):
+        embeddings = self.get_embeddings(self.memory.input_table, self.memory.model)
         self.model.fit(embeddings)
 
         return self
 
-    def transform(self, input):
-        embeddings = self.get_embeddings(input.input_table, input.model)
+    def transform(self):
+        embeddings = self.get_embeddings(self.memory.input_table, self.memory.model)
         self.projections = self.model.transform(embeddings).tolist()
-        self.input = input
 
         return self
 
     def pipe_outputs(self):
-        self.input.projection = [proj for proj in self.projections]
-        id_column = self.input.id_column
-        table = self.input.input_table
+        self.memory.projection = [proj for proj in self.projections]
+        id_column = self.memory.id_column
+        table = self.memory.input_table
         ids = table[str(id_column)].tolist()
-        self.input.nice_projection = self.__package_projection_export(
-            self.projections, ids
+        self.memory.nice_projection = self.__package_projection_export(
+            self.memory.projection, ids
         )
-        return self.input
+        return self.memory
 
     def __package_projection_export(self, projection, instance_ids):
         payload = []
-        for projection, instance_id in zip(projection, instance_ids):
-            packaged_projection = {"proj": projection, "id": instance_id}
+        for proj, instance_id in zip(projection, instance_ids):
+            packaged_projection = {"proj": proj, "id": instance_id}
             payload.append(packaged_projection)
         return payload
 
     def export_outputs_js(self):
-        return {"projection": self.input.nice_projection}
+        return {"projection": self.memory.nice_projection}
 
     def save(self, path: str):
         self.model.save(path)
 
     def load(self, path: str):
         self.model = load_ParametricUMAP(path)
-
-    def init(self, *args, **kwargs):
-        self.model = ParametricUMAP(*args, **kwargs)
-        return self
