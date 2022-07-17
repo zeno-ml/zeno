@@ -149,7 +149,7 @@ class Zeno(object):
     def init_pipeline(self, model: str, uid: str = "0"):
         self.pipeline.set_uid(uid)
         self.pipeline.set_model(model)
-        self.pipeline.set_id_column(str(self.id_column))
+        self.pipeline.set_id_column(self.id_column)
         self.pipeline.set_table(self.df)
 
     def run_pipeline_between(self):
@@ -203,10 +203,9 @@ class Zeno(object):
         self.df.loc[:, new_column_labels_hash] = 0
         self.df.loc[ids, new_column_labels_hash] = labels
 
-        if new_column_labels not in self.complete_columns:
-            self.complete_columns.append(new_column_labels)
-        if new_column_labels not in self.columns:
-            self.columns.append(new_column_labels)
+        self.complete_columns.append(new_column_labels)
+        self.columns.append(new_column_labels)
+        self.status = "Done running weak labeler"
 
         return col_kwargs
 

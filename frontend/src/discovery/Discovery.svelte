@@ -23,6 +23,7 @@
 
 	// props
 	export let scatterWidth = 800;
+
 	export let scatterHeight = 550;
 
 	let projection2D: object[] = [];
@@ -67,7 +68,7 @@
 		if ($model && $table) {
 			pipeline.load({ model: $model, uid: PIPELINE_ID }).then((d) => {
 				if (d !== null) {
-					noReact.setProjection(d);
+					noReact.setProjection(d.projection);
 				}
 			});
 
@@ -114,6 +115,7 @@
 		$settings.metadataColumns.push({ model, name, columnType, transform });
 		settings.set({ ...$settings });
 	}
+	$: console.log(pipelineJSON);
 </script>
 
 <div id="main">
@@ -145,13 +147,16 @@
 							on:click={async () => {
 								let tableIds = $filteredTable;
 								if (lassoSelectTable !== null) {
-									tableIds.intersect(lassoSelectTable);
+									tableIds = tableIds.intersect(lassoSelectTable);
 								}
 								const ids = tableIds.columnArray(
 									columnHash($settings.idColumn)
 								);
 								console.log(ids);
-								await pipeline.idFilter({ ids });
+								const output = await pipeline.idFilter({ ids });
+								if ("projection" in output) {
+									projection2D = output.projection;
+								}
 								pipelineJSON = await pipeline.pipelineJSON();
 							}}>
 							Filter</Button>
@@ -160,7 +165,9 @@
 							title="Click to Project with UMAP"
 							on:click={async () => {
 								const output = await pipeline.parametricUMAP();
-								projection2D = output;
+								if ("projection" in output) {
+									projection2D = output.projection;
+								}
 								pipelineJSON = await pipeline.pipelineJSON();
 							}}>
 							Project</Button>

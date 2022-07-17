@@ -1,3 +1,4 @@
+from ..node import PipelineNode
 import numpy as np
 from umap.parametric_umap import (  # type: ignore
     load_ParametricUMAP,  # type: ignore
@@ -7,8 +8,9 @@ from umap.parametric_umap import (  # type: ignore
 from ...classes import ZenoColumn, ZenoColumnType
 
 
-class ParametricUMAPNode:
+class ParametricUMAPNode(PipelineNode):
     def __init__(self):
+        super().__init__()
         self.status = ""
 
     def get_embeddings(self, table, model_name):
@@ -21,21 +23,27 @@ class ParametricUMAPNode:
         embeddings = np.stack(embeddings_pd_col.to_numpy())
         return embeddings
 
-    def fit(self, input: dict):
-        embeddings = self.get_embeddings(input["input_table"], input["model"])
+    def fit(self, input):
+        embeddings = self.get_embeddings(input.input_table, input.model)
         self.model.fit(embeddings)
 
         return self
 
-    def transform(self, input: dict):
-        embeddings = self.get_embeddings(input["input_table"], input["model"])
+    def transform(self, input):
+        embeddings = self.get_embeddings(input.input_table, input.model)
         self.projections = self.model.transform(embeddings).tolist()
         self.input = input
 
         return self
 
     def pipe_outputs(self):
-        self.input["projection2D"] = [proj for proj in self.projections]
+        self.input.projection = [proj for proj in self.projections]
+        id_column = self.input.id_column
+        table = self.input.input_table
+        ids = table[str(id_column)].tolist()
+        self.input.nice_projection = self.__package_projection_export(
+            self.projections, ids
+        )
         return self.input
 
     def __package_projection_export(self, projection, instance_ids):
@@ -46,10 +54,7 @@ class ParametricUMAPNode:
         return payload
 
     def export_outputs_js(self):
-        id_column = self.input["id_column"]
-        table = self.input["input_table"]
-        ids = table[str(id_column)].tolist()
-        return self.__package_projection_export(self.projections, ids)
+        return {"projection": self.input.nice_projection}
 
     def save(self, path: str):
         self.model.save(path)
@@ -60,9 +65,3 @@ class ParametricUMAPNode:
     def init(self, *args, **kwargs):
         self.model = ParametricUMAP(*args, **kwargs)
         return self
-
-    def __repr__(self):
-        return "ParametricUMAPNode"
-
-    def json(self):
-        return {"type": self.__repr__()}
