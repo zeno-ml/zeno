@@ -15,13 +15,9 @@
 		x: (Math.PI * i) / 2,
 		y: Math.sin(i),
 	}));
-	export let legend = defaultColors.map((c, i) => ({
-		color: c,
-		value: `${i}`,
-	}));
 	export let regionMode = true;
 	export let regionPolygon = [];
-	export let regionStroke = color("#6102EE");
+	export let regionStroke = color("#9B53DF");
 	export let regionFill = opacify(regionStroke, 0.25);
 
 	let mousePos = [0, 0];
@@ -32,7 +28,7 @@
 	let intervalSample = 1;
 	let currInterval = 0;
 
-	$: colorRange = legend.map((item) => item.color);
+	export let colorRange = defaultColors;
 	$: svgPolygon = polygon.map(([x, y]) => [
 		conversion.xViewScale(x),
 		conversion.yViewScale(y),

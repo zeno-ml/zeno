@@ -261,6 +261,7 @@
 					width={scatterWidth}
 					height={scatterHeight}
 					points={legendaryScatterPoints}
+					colorRange={$colorSpec ? $colorSpec.colors : ["#ccc"]}
 					on:create={({ detail }) => {
 						console.log(detail);
 						scatterObj = detail;
