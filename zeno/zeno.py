@@ -171,6 +171,8 @@ class Zeno(object):
         else:
             # within the init I can do cache stuff
             self.init_pipeline(model, uid)
+            self.reset_pipeline()
+            return None
 
     def add_region_labeler_pipeline(self, polygon, name, up_to_id=""):
         self.pipeline.set_name(name)

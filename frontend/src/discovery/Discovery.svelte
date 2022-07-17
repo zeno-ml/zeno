@@ -60,6 +60,7 @@
 	}
 
 	const noReact = {
+		resetScatter: () => (legendaryScatterPoints = []),
 		setProjection: (projection) => (projection2D = projection),
 		setPipeline: (pipeline) => (pipelineJSON = pipeline),
 		setName: (name) => (regionLabelerName = name),
@@ -70,7 +71,17 @@
 	const PIPELINE_ID = "nice";
 	$: {
 		if ($model && $table) {
+			pipeline.pipelineJSON().then((d) => {
+				noReact.setPipeline(d);
+				noReact.setName(d.name);
+				if (d.model !== $model) {
+					noReact.setRepr([]);
+					noReact.setProjection([]);
+					noReact.resetScatter();
+				}
+			});
 			pipeline.load({ model: $model, uid: PIPELINE_ID }).then((d) => {
+				console.log(d);
 				if (d !== null) {
 					if (d.pipeline.length > 0) {
 						noReact.setRepr(d.pipeline);
@@ -79,11 +90,6 @@
 						noReact.setSelectedNode(lastNode);
 					}
 				}
-			});
-
-			pipeline.pipelineJSON().then((d) => {
-				noReact.setPipeline(d);
-				noReact.setName(d.name);
 			});
 		}
 	}
