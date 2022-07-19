@@ -11,6 +11,7 @@
 	import { models, slices, reports, report } from "../../stores";
 
 	import SliceCell from "../SliceCell.svelte";
+	import SparkLine from "../SparkLine.svelte";
 
 	export let predicateIndex: number;
 	export let predicate: ReportPredicate;
@@ -52,7 +53,7 @@
 </script>
 
 <Row style="overflow: visible">
-	<Cell>
+	<Cell class="sticky" style="left: 0px; border-right: 1px solid #e8e8e8">
 		<div class="inline">
 			<div style:width="24px" style:height="24" style:cursor="pointer">
 				<Icon
@@ -94,8 +95,11 @@
 			{/if}
 		</div>
 	</Cell>
-	<Cell>{predicate.transform}</Cell>
+	<Cell style="left: 100px">{predicate.transform}</Cell>
 	<Cell>{predicate.metric}</Cell>
+	{#if $models.length > 2 && modelResults.length > 0}
+		<Cell><SparkLine res={modelResults} /></Cell>
+	{/if}
 	<Cell style="overflow: visible" class="end-cell">
 		{#if editMode}
 			<Select
@@ -130,5 +134,11 @@
 	.inline {
 		display: flex;
 		align-items: center;
+	}
+	:global(.sticky) {
+		position: sticky;
+		left: 0px;
+		background: white;
+		z-index: 2;
 	}
 </style>
