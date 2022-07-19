@@ -1,5 +1,6 @@
-from .memory import PipelineMemory
 from typing import Union
+
+from .memory import PipelineMemory
 
 
 class PipelineNode:

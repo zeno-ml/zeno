@@ -1,5 +1,6 @@
-from ..node import PipelineNode
 from copy import deepcopy
+
+from ..node import PipelineNode
 
 
 class HardFilterNode(PipelineNode):

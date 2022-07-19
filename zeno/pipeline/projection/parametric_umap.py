@@ -1,4 +1,3 @@
-from ..node import PipelineNode
 import numpy as np
 from umap.parametric_umap import (  # type: ignore
     load_ParametricUMAP,  # type: ignore
@@ -6,6 +5,7 @@ from umap.parametric_umap import (  # type: ignore
 )  # type: ignore
 
 from ...classes import ZenoColumn, ZenoColumnType
+from ..node import PipelineNode
 
 
 class ParametricUMAPNode(PipelineNode):

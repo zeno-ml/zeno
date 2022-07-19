@@ -1,5 +1,7 @@
 from typing import Union
+
 from pandas import DataFrame
+
 from ..classes import ZenoColumn
 
 

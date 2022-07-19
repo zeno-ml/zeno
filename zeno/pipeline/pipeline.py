@@ -1,8 +1,9 @@
 from copy import deepcopy
-from .node import PipelineNode
-from .memory import PipelineMemory
+
 from .filter.hard_id_filter import HardFilterNode
 from .lableler.region_based_labler import RegionBasedLabelerNode
+from .memory import PipelineMemory
+from .node import PipelineNode
 from .projection.parametric_umap import ParametricUMAPNode
 
 
