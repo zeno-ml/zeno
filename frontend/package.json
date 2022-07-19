@@ -31,18 +31,18 @@
     "@smui/tooltip": "^6.0.0-beta.16",
     "@sveltejs/vite-plugin-svelte": "^1.0.0-next.30",
     "@tsconfig/svelte": "^2.0.1",
-    "@typescript-eslint/eslint-plugin": "^5.30.5",
-    "eslint": "^8.19.0",
+    "@typescript-eslint/eslint-plugin": "^5.30.7",
+    "eslint": "^8.20.0",
     "eslint-plugin-svelte3": "^4.0.0",
     "prettier": "^2.7.1",
     "prettier-plugin-svelte": "^2.7.0",
     "smui-theme": "^6.0.0-beta.16",
-    "svelte": "^3.44.0",
+    "svelte": "^3.49.0",
     "svelte-check": "^2.8.0",
     "svelte-preprocess": "^4.9.8",
     "tslib": "^2.3.1",
     "typescript": "^4.5.4",
-    "vite": "^2.9.13"
+    "vite": "^2.9.14"
   },
   "dependencies": {
     "@mdi/js": "^6.9.96",
@@ -59,7 +59,7 @@
     "sirv-cli": "^2.0.0",
     "svelte-spa-router": "^3.2.0",
     "svelte-vega": "^1.1.1",
-    "svelte-websocket-store": "^1.1.29",
+    "svelte-websocket-store": "^1.1.31",
     "wavesurfer.js": "^6.2.0"
   }
 }

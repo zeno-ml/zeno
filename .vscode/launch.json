@@ -18,12 +18,20 @@
       "args": ["./examples/cifar/zeno_no_model.toml"]
     },
     {
+      "name": "zenococotagging",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": ["examples/coco-tagging/tests/zeno.toml"]
+    },
+    {
       "name": "zenococo",
       "type": "python",
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "module": "zeno",
-      "args": ["examples/coco/zeno.toml"]
+      "args": ["examples/coco/tests/zeno.toml"]
     },
     {
       "name": "zenoreviews",

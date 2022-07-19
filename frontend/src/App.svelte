@@ -1,17 +1,9 @@
 <script lang="ts">
-	import {
-		mdiChartPie,
-		mdiCheckboxMultipleMarkedCircleOutline,
-		mdiCircleOutline,
-	} from "@mdi/js";
-	import { Svg } from "@smui/common/elements";
-	import IconButton, { Icon } from "@smui/icon-button";
-	import List, { Item, Separator } from "@smui/list";
 	import { onMount } from "svelte";
-	import Router, { location } from "svelte-spa-router";
+	import Router from "svelte-spa-router";
 
-	import { metric, metrics, model, models, ready, status, tab } from "./stores";
-	import { initialFetch, updateTab, updateTableColumns } from "./util";
+	import { metric, metrics, model, models, ready, status } from "./stores";
+	import { initialFetch, updateTableColumns } from "./util";
 
 	import Analysis from "./analysis/Analysis.svelte";
 	import Discovery from "./discovery/Discovery.svelte";
@@ -26,19 +18,11 @@
 		"*": Exploration,
 	};
 
-	tab.set($location.split("/")[1]);
-	location.subscribe((d) => {
-		tab.set(d.split("/")[1]);
-		if (!$tab) {
-			tab.set("exploration");
-		}
-	});
-
 	onMount(() => initialFetch());
 	status.subscribe((w) => updateTableColumns(w));
 	ready.subscribe((r) => {
 		if (r) {
-			model.set($models[0]);
+			model.set($models[$models.length - 1]);
 			metric.set($metrics[0]);
 		}
 	});
@@ -46,42 +30,6 @@
 
 <Header />
 <main>
-	<div id="side-menu">
-		<List class="demo-list" iconList={true}>
-			<Item
-				activated={$tab === "discovery"}
-				on:SMUI:action={() => updateTab("discovery")}>
-				<IconButton>
-					<Icon component={Svg} viewBox="0 0 24 24">
-						<path fill="currentColor" d={mdiCircleOutline} />
-					</Icon>
-				</IconButton>
-			</Item>
-			<Separator />
-			<Item
-				activated={$tab === "exploration"}
-				on:SMUI:action={() => updateTab("exploration")}>
-				<IconButton>
-					<Icon component={Svg} viewBox="0 0 24 24">
-						<path fill="currentColor" d={mdiChartPie} />
-					</Icon>
-				</IconButton>
-			</Item>
-			<Separator />
-			<Item
-				activated={$tab === "analysis"}
-				on:SMUI:action={() => updateTab("analysis")}>
-				<IconButton>
-					<Icon component={Svg} viewBox="0 0 24 24">
-						<path
-							fill="currentColor"
-							d={mdiCheckboxMultipleMarkedCircleOutline} />
-					</Icon>
-				</IconButton>
-			</Item>
-			<Separator />
-		</List>
-	</div>
 	<div id="main">
 		<Router {routes} />
 	</div>
@@ -108,13 +56,8 @@
 		}
 	}
 
-	#side-menu {
-		width: 50px;
-		border-right: 1px solid #e0e0e0;
-		height: calc(100vh - 60px);
-	}
-
 	#main {
-		width: calc(100vw - 50px);
+		width: 100%;
+		overflow-y: hidden;
 	}
 </style>

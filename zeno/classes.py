@@ -40,6 +40,7 @@ class ReportPredicate(CamelModel):
     transform: str
     operation: str
     value: str
+    results: List[int]
 
 
 class Report(CamelModel):
@@ -78,7 +79,7 @@ class FilterPredicate(CamelModel):
 
 
 class ZenoSettings(CamelModel):
-    task: str
+    view: str
     id_column: ZenoColumn
     label_column: ZenoColumn
     data_column: ZenoColumn

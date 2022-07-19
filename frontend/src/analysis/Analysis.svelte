@@ -4,19 +4,50 @@
 	import Button from "@smui/button";
 	import Select, { Option } from "@smui/select";
 
-	import { metric, metrics, transform, transforms } from "../stores";
+	import {
+		metric,
+		metrics,
+		transform,
+		transforms,
+		report,
+		reports,
+	} from "../stores";
 
-	import AnalysisTable from "./AnalysisTable.svelte";
-	import ReportsPanel from "./report/ReportsPanel.svelte";
+	import ReportsList from "./ReportsList.svelte";
+	import SliceTable from "./slice-table/SliceTable.svelte";
+	import ReportTable from "./report/ReportTable.svelte";
 
 	let table: HTMLDivElement;
 </script>
 
 <div class="inline">
 	<div>
-		<ReportsPanel />
+		<ReportsList />
 	</div>
-	<div>
+	<div style:overflow="visible">
+		{#if $reports[$report]}
+			<ReportTable report={$reports[$report]} />
+			<div class="export">
+				<Button
+					variant="outlined"
+					on:click={() => {
+						let img = new Image(220, 100);
+						img.src = "build/zeno.png";
+						img.onload = () => {
+							let divElem = document.createElement("div");
+							divElem.innerHTML = "<br />" + table.innerHTML;
+							divElem.prepend(img);
+							html2pdf(divElem, {
+								margin: [0, 20, 20, 20],
+								filename: "report.pdf",
+								image: { type: "jpeg", quality: 0.98 },
+								html2canvas: { scale: 2 },
+								jsPDF: { orientation: "l" },
+							});
+						};
+					}}>Export</Button>
+			</div>
+		{/if}
 		<div class="settings">
 			{#if $metrics}
 				<Select bind:value={$metric} label="Metric" style="margin-right: 20px;">
@@ -37,28 +68,7 @@
 			{/if}
 		</div>
 		<div class="table" bind:this={table}>
-			<AnalysisTable />
-		</div>
-
-		<div class="export">
-			<Button
-				variant="outlined"
-				on:click={() => {
-					let img = new Image(220, 100);
-					img.src = "build/zeno.png";
-					img.onload = () => {
-						let divElem = document.createElement("div");
-						divElem.innerHTML = "<br />" + table.innerHTML;
-						divElem.prepend(img);
-						html2pdf(divElem, {
-							margin: [0, 20, 20, 20],
-							filename: "report.pdf",
-							image: { type: "jpeg", quality: 0.98 },
-							html2canvas: { scale: 2 },
-							jsPDF: { orientation: "l" },
-						});
-					};
-				}}>Export</Button>
+			<SliceTable />
 		</div>
 	</div>
 </div>
@@ -77,6 +87,6 @@
 		margin-top: 20px;
 	}
 	.settings {
-		margin-top: 10px;
+		margin-top: 30px;
 	}
 </style>

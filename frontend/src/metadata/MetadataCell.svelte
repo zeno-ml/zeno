@@ -106,12 +106,18 @@
 		return counts;
 	}
 
-	function updateData(table: ColumnTable) {
+	function updateData(table: ColumnTable, filteredTable: ColumnTable) {
 		if (
 			(chartType === ChartType.Count || chartType === ChartType.Histogram) &&
 			table.column(hash)
 		) {
+			let filtIndices = new Set(filteredTable.indices());
 			let arr = table.array(hash);
+			arr = arr.map((x, i) => ({
+				value: x,
+				count: 1,
+				filteredCount: filtIndices.has(i) ? 1 : 0,
+			}));
 			data = { table: arr };
 		}
 	}
@@ -150,9 +156,7 @@
 				} else {
 					colorAssignments = colorLabelContin(hash);
 					chartType = ChartType.Histogram;
-					console.time("binning");
 					bins = bin(hash, $table);
-					console.timeEnd("binning");
 					$availableColors = { ...$availableColors, [hash]: colorAssignments };
 				}
 			}
@@ -252,7 +256,7 @@
 	});
 	onMount(() => {
 		drawChart($table);
-		updateData($table);
+		updateData($table, $filteredTable);
 	});
 
 	$: {
@@ -267,14 +271,16 @@
 			filteredCount: filteredCounts[i],
 		}));
 		histoData = { ...histoData };
-		updateData($table);
+		updateData($table, $filteredTable);
 	}
 
 	metadataSelections.subscribe((m) => {
 		if (!m.has(hash) && view) {
-			if (view.getState().signals["brush_data"]) {
+			if (view.getState().signals["brush_x"]) {
 				view.signal("brush", {});
-				view.signal("brush_data", {});
+				if (view.getState().signals["brush_data"]) {
+					view.signal("brush_data", {});
+				}
 				view.signal("brush_x", []);
 				view.runAsync();
 			}
@@ -302,7 +308,8 @@
 		} else if (chartType === ChartType.Count) {
 			view.addSignalListener(
 				"select",
-				(...s) => (selection = s[1].data ? ["points", ...s[1].data] : undefined)
+				(...s) =>
+					(selection = s[1].value ? ["points", ...s[1].value] : undefined)
 			);
 		}
 	}
@@ -408,7 +415,9 @@
 
 <style>
 	.cell {
-		border: 1px solid #e0e0e0;
+		/* border: 1px solid #e0e0e0; */
+		border-top: 1px solid #e0e0e0;
+		border-bottom: 1px solid #e0e0e0;
 		padding: 10px;
 		min-width: 400px;
 		width: fit-content;

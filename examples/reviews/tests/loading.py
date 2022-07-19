@@ -20,6 +20,11 @@ def length(df, ops: ZenoOptions):
     return [len(i) for i in df[ops.data_column]]
 
 
+@distill_function
+def unique_words(df, ops: ZenoOptions):
+    return [len(set(i.split(" "))) for i in df[ops.data_column]]
+
+
 @metric_function
 def accuracy(df, ops: ZenoOptions):
     if len(df) == 0:

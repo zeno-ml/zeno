@@ -43,7 +43,6 @@ class Zeno(object):
     def __init__(
         self,
         metadata_path: Path,
-        task: str,
         tests: Path,
         models: List[Path],
         batch_size,
@@ -58,7 +57,6 @@ class Zeno(object):
 
         self.pipeline = Pipeline()
 
-        self.task = task
         self.tests = tests
         self.batch_size = batch_size
         self.id_column = ZenoColumn(column_type=ZenoColumnType.METADATA, name=id_column)
@@ -111,8 +109,10 @@ class Zeno(object):
             sys.exit(1)
         # TODO: figure out if this breaks for big integers. Need to do this for
         # frontend bigint issues.
-        d = dict.fromkeys(self.df.select_dtypes(np.int64).columns, np.int32)
-        self.df = self.df.astype(d)
+        d = dict.fromkeys(
+            self.df.select_dtypes(np.int64).columns, np.int32  # type: ignore
+        )
+        self.df = self.df.astype(d)  # type: ignore
 
         self.metadata_name = os.path.basename(metadata_path).split(".")[0]
         self.cache_path = cache_path
@@ -472,7 +472,7 @@ class Zeno(object):
                     ],
                 )
                 for out in post_outputs:
-                    self.df.loc[:, str(out[0])] = out[1]
+                    self.df.loc[:, str(out[0])] = out[1]  # type: ignore
                     self.complete_columns.append(out[0])
 
         self.status = "Done running postprocessing"
@@ -540,23 +540,6 @@ class Zeno(object):
         if list_to_get is None:
             return []
         return dataframe[dataframe[column].isin(list_to_get)]
-
-    def run_projection(self, model, instance_ids):
-        filtered_rows = self.__get_df_rows(
-            self.df, str(self.id_column), list_to_get=instance_ids
-        )
-        embedding_col = ZenoColumn(
-            column_type=ZenoColumnType.EMBEDDING,
-            name=model,
-            transform="",
-        )
-        embedding_hash = str(embedding_col)
-        embeds = np.stack(filtered_rows[embedding_hash].to_numpy())
-        projection = self.__run_umap(embeds)
-        payload = [
-            {"proj": proj, "id": id} for proj, id in zip(projection, instance_ids)
-        ]
-        return payload
 
     def get_table(self, columns):
         """Get the metadata DataFrame for a given slice.

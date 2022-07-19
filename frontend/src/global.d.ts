@@ -1,7 +1,7 @@
 /// <reference types="svelte" />
 
 interface Settings {
-	task: string;
+	view: string;
 	idColumn: ZenoColumn;
 	labelColumn: ZenoColumn;
 	dataColumn: ZenoColumn;
@@ -49,6 +49,8 @@ interface ReportPredicate {
 	transform: string;
 	operation: string;
 	value: string;
+	// -1, 0, 1
+	results: number[];
 }
 
 interface Report {

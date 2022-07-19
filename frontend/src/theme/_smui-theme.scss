@@ -4,12 +4,16 @@
 
 // Svelte Colors!
 @use "@material/theme/index" as theme with (
-	$primary: #9b51e0,
+	$primary: #6a1b9a,
 	$secondary: #676778,
 	$surface: #fff,
 	$background: #fff,
 	$error: color-palette.$red-900
 );
+
+.mdc-data-table__table-container {
+	overflow: visible;
+}
 
 html,
 body {
@@ -22,4 +26,8 @@ a {
 }
 a:visited {
 	color: color.scale(#40b3ff, $lightness: -35%);
+}
+
+.overflow-show {
+	overflow: visible;
 }

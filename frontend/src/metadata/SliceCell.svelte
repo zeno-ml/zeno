@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { mdiChevronDown, mdiChevronUp } from "@mdi/js";
+	import { mdiChevronDown, mdiChevronUp, mdiPencilOutline } from "@mdi/js";
 	import { Icon } from "@smui/common";
 	import { Svg } from "@smui/common/elements";
 	import Ripple from "@smui/ripple";
@@ -63,15 +63,17 @@
 						({slice.idxs.length})
 					</span>
 				{/if}
-				<div style:cursor="pointer">
-					<Icon
-						class="material-icons"
+				<div class="inline" style:cursor="pointer">
+					<div
+						style="width: 24px; height: 24px"
 						on:click={(e) => {
 							e.stopPropagation();
 							editSlice(slice);
 						}}>
-						edit
-					</Icon>
+						<Icon component={Svg} viewBox="0 0 24 24">
+							<path fill="black" d={mdiPencilOutline} />
+						</Icon>
+					</div>
 					<Icon
 						class="material-icons"
 						on:click={(e) => {
@@ -82,7 +84,7 @@
 							});
 							fetch("/api/delete-slice/" + encodeURIComponent(slice.sliceName));
 						}}>
-						delete
+						delete_outline
 					</Icon>
 				</div>
 			</div>
@@ -120,6 +122,10 @@
 		align-items: center;
 	}
 	.selected {
-		background: #ebdffc;
+		background: #f9f5ff;
+	}
+	.inline {
+		display: flex;
+		flex-direction: row;
 	}
 </style>
