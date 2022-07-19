@@ -151,7 +151,8 @@
 		width: 100%;
 	}
 	.sample-container {
-		max-height: 225px;
+		width: 100%;
+		height: calc(100vh - 260px);
 		overflow-y: auto;
 		align-content: baseline;
 		border-bottom: 1px solid rgb(224, 224, 224);
