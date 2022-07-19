@@ -89,7 +89,9 @@
 					delete_outline
 				</Icon>
 			</div>
-			<SliceCell {sli} />
+			{#if sli}
+				<SliceCell {sli} />
+			{/if}
 		</div>
 	</Cell>
 	<Cell>{predicate.transform}</Cell>
@@ -111,12 +113,12 @@
 			{predicate.operation} {predicate.value}
 		{/if}
 	</Cell>
-	{#each modelResults.slice().reverse() as r, i}
+	{#each modelResults as r, i}
 		<Cell>
 			<p
 				style:color={predicate.results.length > i &&
 				predicate.results[predicate.results.length - i - 1] === 0
-					? "red"
+					? "#b71c1c"
 					: "black"}>
 				{r ? r.toFixed(2) : ""}
 			</p>

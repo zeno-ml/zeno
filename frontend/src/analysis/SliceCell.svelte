@@ -23,16 +23,21 @@
 	{sli.sliceName}
 </div>
 {#if showTooltip}
-	<div class="tooltip">
-		<SliceDetails {sli} />
+	<div class="tooltip-container">
+		<div class="tooltip">
+			<SliceDetails {sli} />
+		</div>
 	</div>
 {/if}
 
 <style>
-	.tooltip {
+	.tooltip-container {
 		z-index: 2;
-		position: fixed;
-		margin-top: 82px;
+		position: absolute;
+		height: max-content;
+		transform: translateY(100%);
+	}
+	.tooltip {
 		background: white;
 		padding: 10px;
 		box-shadow: 1px 1px 3px 1px #ccc;

@@ -17,7 +17,7 @@
 			<Cell>Transform</Cell>
 			<Cell>Metric</Cell>
 			<Cell class="end-cell">Test</Cell>
-			{#each $models.slice().reverse() as m}
+			{#each $models as m}
 				<Cell>{m}</Cell>
 			{/each}
 		</Row>

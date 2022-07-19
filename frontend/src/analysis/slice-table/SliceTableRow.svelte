@@ -8,6 +8,7 @@
 	import { getMetricsForSlices, updateReports } from "../../util";
 
 	import SliceCell from "../SliceCell.svelte";
+	import SparkLine from "../SparkLine.svelte";
 
 	export let sli: Slice;
 
@@ -59,7 +60,10 @@
 		</div>
 	</Cell>
 	{#await modelResults then res}
-		{#each res.slice().reverse() as r}
+		{#if $models.length > 2}
+			<Cell><SparkLine {res} /></Cell>
+		{/if}
+		{#each res as r}
 			<Cell>
 				{r ? r.toFixed(2) : ""}
 			</Cell>

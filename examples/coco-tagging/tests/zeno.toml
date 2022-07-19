@@ -1,9 +1,10 @@
 view = "zenoml_image_classification"
 metadata = "../coco-tagging.csv"
-# models = [
-# 	'resnet'
-# ]
-data_path = "/Users/acabrera/dev/data/coco-2014/val2014"
+tests = "./"
+models = [
+	'resnet'
+]
+data_path = "/Users/acabrera/dev/data/coco-2017/val2017"
 id_column = "file_name"
 data_column = "file_name"
 label_column = "label"
