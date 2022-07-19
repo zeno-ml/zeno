@@ -1564,11 +1564,14 @@ test = ["hypothesis (>=5.5.3)", "pytest (>=6.0)", "pytest-xdist (>=1.31)"]
 
 [[package]]
 name = "pandas-stubs"
-version = "1.4.3.220710"
+version = "1.4.3.220718"
 description = "Type annotations for pandas"
 category = "dev"
 optional = false
 python-versions = ">=3.8,<3.11"
+
+[package.dependencies]
+types-pytz = ">=2022.1.1"
 
 [[package]]
 name = "pandocfilters"
@@ -2980,6 +2983,14 @@ torchhub = ["filelock", "huggingface-hub (>=0.1.0,<1.0)", "importlib-metadata", 
 vision = ["pillow"]
 
 [[package]]
+name = "types-pytz"
+version = "2022.1.1"
+description = "Typing stubs for pytz"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "typing-extensions"
 version = "4.3.0"
 description = "Backported and Experimental Type Hints for Python 3.7+"
@@ -3222,7 +3233,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "d28e70660a57391101f3a095bbcf47f5b49d04607d0f430dbdf9592c513f0cd3"
+content-hash = "5b9c2c18fdd887b6d0f13c44b213525385f53aa0bc3f817cc41254ba38c47a6d"
 
 [metadata.files]
 absl-py = [
@@ -4200,8 +4211,8 @@ pandas = [
     {file = "pandas-1.4.3.tar.gz", hash = "sha256:2ff7788468e75917574f080cd4681b27e1a7bf36461fe968b49a87b5a54d007c"},
 ]
 pandas-stubs = [
-    {file = "pandas-stubs-1.4.3.220710.tar.gz", hash = "sha256:57afeb068d56012ff9813e61ebdc36473fa225ff1258fc3e4783e524101f4ad0"},
-    {file = "pandas_stubs-1.4.3.220710-py3-none-any.whl", hash = "sha256:90998e8477e7c28a9a2f84b6aa0a6cfca4ae3b98ed1a4484ece9f75da3f7395b"},
+    {file = "pandas-stubs-1.4.3.220718.tar.gz", hash = "sha256:b1ce4d805c56b98c3453935bbedc46b96d169701137c4e03cff7d22731c6bad5"},
+    {file = "pandas_stubs-1.4.3.220718-py3-none-any.whl", hash = "sha256:05e7b0b2cb2b1f07ce27ea8b360b3bdf11e602cf44276199ca7f88a2c2705784"},
 ]
 pandocfilters = [
     {file = "pandocfilters-1.5.0-py2.py3-none-any.whl", hash = "sha256:33aae3f25fd1a026079f5d27bdd52496f0e0803b3469282162bafdcbdf6ef14f"},
@@ -5245,6 +5256,10 @@ traitlets = [
 transformers = [
     {file = "transformers-4.20.1-py3-none-any.whl", hash = "sha256:d284eaf60b10fee45b24688423b5f7ba2d194f8c2dadf8df76cd58c1a9d08b52"},
     {file = "transformers-4.20.1.tar.gz", hash = "sha256:65ee4ae9abdeca8fe3a9e351256345e3c4db2a6a68accd5d6a141cfff6192751"},
+]
+types-pytz = [
+    {file = "types-pytz-2022.1.1.tar.gz", hash = "sha256:4e7add70886dc2ee6ee7535c8184a26eeb0ac9dbafae9962cb882d74b9f67330"},
+    {file = "types_pytz-2022.1.1-py3-none-any.whl", hash = "sha256:581467742f32f15fff1098698b11fd511057a2a8a7568d33b604083f2b03c24f"},
 ]
 typing-extensions = [
     {file = "typing_extensions-4.3.0-py3-none-any.whl", hash = "sha256:25642c956049920a5aa49edcdd6ab1e06d7e5d467fc00e0506c44ac86fbfca02"},
