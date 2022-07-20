@@ -17,13 +17,7 @@
 		filteredTable,
 	} from "../stores";
 	import { columnHash } from "../util";
-	import {
-		generateCountSpec,
-		generateHistogramSpec,
-		countSpec,
-		histogramSpec,
-		histogramSpecNotColored,
-	} from "./vegaSpecs";
+	import { generateCountSpec, generateHistogramSpec } from "./vegaSpecs";
 	import * as aq from "arquero";
 	import * as d3c from "d3-scale-chromatic";
 	import { interpolateColorToArray } from "../discovery/discovery";
@@ -78,6 +72,7 @@
 					filteredCount: counts[i].count,
 					count: d["count"],
 					category: d["category"],
+					color: d["color"],
 				}));
 			} else if (chartType === ChartType.Histogram) {
 				domain = domain.map((d, i) => ({
@@ -85,9 +80,9 @@
 					count: d["count"],
 					binStart: d["binStart"],
 					binEnd: d["binEnd"],
+					color: d["color"],
 				}));
 			}
-			console.log(domain);
 			histoData = { table: domain };
 		}
 	}
@@ -139,6 +134,20 @@
 				column: hash,
 			});
 			domain.forEach((d) => (d["filteredCount"] = d["count"]));
+
+			if (domain.length > 0) {
+				if ("category" in domain[0]) {
+					const colors = d3c.schemeCategory10;
+					domain.forEach((d, i) => (d["color"] = colors[i]));
+				} else if ("binStart" in domain[0]) {
+					const numBins = domain.length;
+					const colors = interpolateColorToArray(
+						d3c.interpolatePurples,
+						numBins
+					);
+					domain.forEach((d, i) => (d["color"] = colors[i]));
+				}
+			}
 		}
 	}
 
@@ -275,9 +284,11 @@
 <div class="cell">
 	<div id="info">
 		<span
-			style:color={selectedHash ? "#9B52DF" : ""}
+			style:color={shouldColor ? (selectedHash ? "#9B52DF" : "") : ""}
 			on:click={() => {
-				colorByHash.set(hash);
+				if (shouldColor) {
+					colorByHash.set(hash);
+				}
 			}}>{col.name}</span>
 		{#if chartType === ChartType.Binary}
 			<div style:display="flex">
@@ -338,8 +349,12 @@
 			on:blur={setSelection}>
 			<VegaLite
 				spec={chartType === ChartType.Histogram
-					? generateHistogramSpec()
-					: generateCountSpec()}
+					? generateHistogramSpec({
+							colors: shouldColor ? domain.map((d) => d["color"]) : [],
+					  })
+					: generateCountSpec({
+							colors: shouldColor ? domain.map((d) => d["color"]) : [],
+					  })}
 				data={histoData}
 				bind:view
 				options={{ tooltip: true, actions: false, theme: "vox" }} />
