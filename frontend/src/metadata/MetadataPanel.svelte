@@ -1,6 +1,4 @@
 <script lang="ts">
-	import Ripple from "@smui/ripple";
-
 	import FolderCell from "./FolderCell.svelte";
 	import MetadataCell from "./MetadataCell.svelte";
 	import NewFolderPopup from "./NewFolderPopup.svelte";
@@ -48,7 +46,6 @@
 
 <div class="side-container">
 	<div
-		use:Ripple={{ surface: true, color: "primary" }}
 		class={"overview " +
 			($sliceSelections.length + $metadataSelections.size === 0
 				? "selected"
@@ -135,6 +132,7 @@
 		justify-content: space-between;
 		padding-right: 10px;
 		margin-right: 10px;
+		margin-top: 10px;
 	}
 	.selected {
 		background: #f9f5ff;

@@ -164,8 +164,7 @@
 		overflow: visible;
 		border: 1px solid #e0e0e0;
 		padding: 10px;
-		min-width: 400px;
-		width: 400px;
+		margin-right: 10px;
 	}
 	.group {
 		display: flex;
@@ -182,8 +181,6 @@
 		flex-direction: row;
 	}
 	.in-folder {
-		width: 375px;
-		min-width: 375px;
 		margin-left: 25px;
 	}
 </style>

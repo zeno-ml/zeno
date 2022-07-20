@@ -11,8 +11,12 @@
 </script>
 
 <div>
-	<Button variant="outlined" on:click={() => (showNewFolder = true)}
-		>New Folder</Button>
+	<Button
+		variant="outlined"
+		style="margin-right: 10px"
+		on:click={() => (showNewFolder = true)}>
+		New Folder
+	</Button>
 	{#if showNewFolder}
 		<div
 			id="paper-container"

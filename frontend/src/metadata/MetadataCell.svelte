@@ -210,7 +210,7 @@
 		border-top: 1px solid #e0e0e0;
 		border-bottom: 1px solid #e0e0e0;
 		padding: 10px;
-		min-width: 400px;
+		min-width: calc(100% - 30px);
 		width: fit-content;
 		display: flex;
 		flex-direction: column;
@@ -219,7 +219,6 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		width: 100%;
 		font-size: 14px;
 		margin-left: 5px;
 		margin-bottom: 5px;

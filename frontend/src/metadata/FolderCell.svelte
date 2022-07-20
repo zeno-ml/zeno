@@ -88,8 +88,7 @@
 		justify-content: space-between;
 		border: 1px solid #e0e0e0;
 		padding: 10px;
-		min-width: 400px;
-		width: 400px;
+		margin-right: 10px;
 	}
 	.hover {
 		background: #f9f5ff;
