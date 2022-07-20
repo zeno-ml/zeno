@@ -18,6 +18,8 @@
 	} from "../stores";
 	import { columnHash } from "../util";
 	import {
+		generateCountSpec,
+		generateHistogramSpec,
 		countSpec,
 		histogramSpec,
 		histogramSpecNotColored,
@@ -25,8 +27,11 @@
 	import * as aq from "arquero";
 	import * as d3c from "d3-scale-chromatic";
 	import { interpolateColorToArray } from "../discovery/discovery";
+	import { computeCountsFromDomain, computeDomain } from "./metadata";
 
 	export let col: ZenoColumn;
+	export let shouldColor: boolean = false;
+
 	$: hash = columnHash(col);
 
 	enum ChartType {
@@ -36,6 +41,7 @@
 		Other,
 	}
 	let chartType: ChartType;
+	let domain: object[];
 
 	interface IColorAssignments {
 		colors: string[];
@@ -57,68 +63,32 @@
 
 	let colorAssignments: IColorAssignments = { colors: [], labels: [], hash };
 
-	function countGivenBins({
-		bins,
-		table,
-	}: {
-		bins: IBin[];
-		table: ColumnTable;
-	}) {
-		let newCounts = bins.map(() => 0);
-		tableIter: for (const row of table) {
-			const value = row[hash];
-			for (let i = 0; i < bins.length; i++) {
-				const bin = bins[i];
-				if (value >= bin.binStart && value < bin.binEnd) {
-					newCounts[i]++;
-					continue tableIter;
-				}
-			}
-		}
-		return newCounts;
-	}
-	function binGroups(columnNames: string[], t = $table, precomputed = "") {
-		const counts = [];
-		const binName = (col) => `bin_${col}`;
-		const countCol = "count";
-		for (const name of columnNames) {
-			const binColName = binName(name);
-			const grouped = t.groupby({ [binColName]: aq.bin(name) });
-
-			const binnedData = grouped
-				.count({ as: countCol })
-				.impute(
-					{ count: () => 0 },
-					{
-						expand: {
-							[binColName]: `(d) => op.sequence(...op.bins(d.${binColName}))`,
-						},
-					}
-				)
-				.orderby(binColName);
-			counts.push({
-				[name]: {
-					bins: binnedData.columnArray(binColName),
-					counts: binnedData.columnArray(countCol),
-				},
-			});
-		}
-		return counts;
-	}
-
 	function updateData(table: ColumnTable, filteredTable: ColumnTable) {
 		if (
 			(chartType === ChartType.Count || chartType === ChartType.Histogram) &&
 			table.column(hash)
 		) {
-			let filtIndices = new Set(filteredTable.indices());
-			let arr = table.array(hash);
-			arr = arr.map((x, i) => ({
-				value: x,
-				count: 1,
-				filteredCount: filtIndices.has(i) ? 1 : 0,
-			}));
-			data = { table: arr };
+			const counts = computeCountsFromDomain({
+				table: filteredTable,
+				domain,
+				column: hash,
+			});
+			if (chartType === ChartType.Count) {
+				domain = domain.map((d, i) => ({
+					filteredCount: counts[i].count,
+					count: d["count"],
+					category: d["category"],
+				}));
+			} else if (chartType === ChartType.Histogram) {
+				domain = domain.map((d, i) => ({
+					filteredCount: counts[i].count,
+					count: d["count"],
+					binStart: d["binStart"],
+					binEnd: d["binEnd"],
+				}));
+			}
+			console.log(domain);
+			histoData = { table: domain };
 		}
 	}
 
@@ -135,17 +105,19 @@
 					.rollup({ a: `d => op.array_agg_distinct(d["${hash}"])` })
 					.object()["a"];
 				if (Number(vals[0]) === 0 && Number(vals[1]) === 1) {
+					chartType = ChartType.Binary;
 					colorAssignments = colorLabelCategorical({
 						hash,
 						colorRange: ["#040265", "#FD9A03"],
 					});
-					chartType = ChartType.Binary;
+
 					$availableColors = { ...$availableColors, [hash]: colorAssignments };
 				}
 			} else if (isOrdinal) {
 				if (unique <= 20) {
 					chartType = ChartType.Count;
 					colorAssignments = colorLabelCategorical({ hash });
+
 					$availableColors = { ...$availableColors, [hash]: colorAssignments };
 				} else {
 					chartType = ChartType.Other;
@@ -154,12 +126,19 @@
 				if (unique < 20) {
 					chartType = ChartType.Count;
 				} else {
-					colorAssignments = colorLabelContin(hash);
 					chartType = ChartType.Histogram;
-					bins = bin(hash, $table);
+					colorAssignments = colorLabelContin(hash);
+
 					$availableColors = { ...$availableColors, [hash]: colorAssignments };
 				}
 			}
+
+			domain = computeDomain({
+				type: chartType,
+				table: $table,
+				column: hash,
+			});
+			domain.forEach((d) => (d["filteredCount"] = d["count"]));
 		}
 	}
 
@@ -220,40 +199,7 @@
 		} as IColorAssignments;
 	}
 
-	function bin(hash: string, t = $table) {
-		const groups = binGroups([hash], t)[0][hash];
-		const inc = groups.bins[1];
-		let formatted = [];
-		let i = 0,
-			k = 1;
-		while (k < groups.bins.length) {
-			const binStart = groups.bins[i];
-			const binEnd = groups.bins[k];
-			const count = groups.counts[i];
-			formatted.push({ binStart, binEnd, count });
-			i++;
-			k++;
-		}
-		const binStart = groups.bins[i];
-		const binEnd = binStart + inc;
-		const count = groups.counts[i];
-		formatted.push({ binStart, binEnd, count });
-		return formatted;
-	}
-
 	table.subscribe((t) => drawChart(t));
-	filteredTable.subscribe((t) => {
-		const filteredCounts = countGivenBins({
-			bins: bins,
-			table: t,
-		});
-		histoData.table = bins.map((d, i) => ({
-			...d,
-			filteredCount: filteredCounts[i],
-			color: colorAssignments.colors[i],
-		}));
-		histoData = { ...histoData };
-	});
 	onMount(() => {
 		drawChart($table);
 		updateData($table, $filteredTable);
@@ -261,16 +207,6 @@
 
 	$: {
 		col;
-		drawChart($table);
-		const filteredCounts = countGivenBins({
-			bins: bins,
-			table: $filteredTable,
-		});
-		histoData.table = bins.map((d, i) => ({
-			...d,
-			filteredCount: filteredCounts[i],
-		}));
-		histoData = { ...histoData };
 		updateData($table, $filteredTable);
 	}
 
@@ -309,7 +245,7 @@
 			view.addSignalListener(
 				"select",
 				(...s) =>
-					(selection = s[1].value ? ["points", ...s[1].value] : undefined)
+					(selection = s[1].category ? ["points", ...s[1].category] : undefined)
 			);
 		}
 	}
@@ -393,7 +329,7 @@
 			</span>
 		{/if}
 	</div>
-	{#if data.table.length > 0 && (chartType === ChartType.Histogram || chartType === ChartType.Count)}
+	{#if (data.table.length > 0 || histoData.table.length > 0) && (chartType === ChartType.Histogram || chartType === ChartType.Count)}
 		<div
 			id="histogram"
 			on:mouseup={setSelection}
@@ -402,11 +338,9 @@
 			on:blur={setSelection}>
 			<VegaLite
 				spec={chartType === ChartType.Histogram
-					? $colorByHash === hash
-						? histogramSpec
-						: histogramSpecNotColored
-					: countSpec}
-				data={chartType === ChartType.Histogram ? histoData : data}
+					? generateHistogramSpec()
+					: generateCountSpec()}
+				data={histoData}
 				bind:view
 				options={{ tooltip: true, actions: false, theme: "vox" }} />
 		</div>

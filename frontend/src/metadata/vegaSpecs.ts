@@ -1,5 +1,175 @@
 import type { VegaLiteSpec } from "svelte-vega";
 
+export function generateCountSpec({
+	width = 350,
+	height = 40,
+	colors = [],
+	opacity = 1.0,
+} = {}) {
+	const countSpec = {
+		$schema: "https://vega.github.io/schema/vega-lite/v5.json",
+		data: {
+			name: "table",
+		},
+		view: {
+			stroke: "transparent",
+		},
+		width: 350,
+		height: 40,
+		layer: [
+			{
+				mark: { type: "bar", opacity: 1.0, fill: "#ddd" },
+				encoding: {
+					x: {
+						field: "category",
+						axis: {
+							title: "",
+							grid: false,
+							tickCount: 2,
+							labelColor: "rgba(0, 0, 0, 0.6)",
+						},
+					},
+					y: {
+						field: "count",
+						type: "quantitative",
+						axis: { title: "", tickCount: 2, labelColor: "rgba(0, 0, 0, 0.6)" },
+					},
+				},
+			},
+			{
+				params: [
+					{
+						name: "highlight",
+						select: { type: "point", on: "mouseover" },
+					},
+					{ name: "select", select: { type: "point", encodings: ["x"] } },
+				],
+				mark: { type: "bar", opacity: 0.5 },
+				encoding: {
+					color: {
+						field: "category",
+						scale: { scheme: "category10" },
+						legend: null,
+					},
+					x: {
+						field: "category",
+					},
+					y: {
+						field: "filteredCount",
+						type: "quantitative",
+					},
+					fillOpacity: {
+						condition: { param: "select", value: 1 },
+						value: 0.3,
+					},
+					strokeWidth: {
+						condition: [
+							{
+								param: "select",
+								empty: false,
+								value: 2,
+							},
+							{
+								param: "highlight",
+								empty: false,
+								value: 1,
+							},
+						],
+						value: 0,
+					},
+				},
+			},
+		],
+	} as VegaLiteSpec;
+	return countSpec;
+}
+
+export function generateHistogramSpec({
+	width = 350,
+	height = 40,
+	colors = [],
+	opacity = 1.0,
+} = {}) {
+	const histogramSpecNotColored = {
+		$schema: "https://vega.github.io/schema/vega-lite/v5.json",
+		data: {
+			name: "table",
+		},
+		view: {
+			stroke: "transparent",
+		},
+		width: 350,
+		height: 40,
+		layer: [
+			{
+				params: [
+					{
+						name: "brush",
+						select: { type: "interval", encodings: ["x"] },
+					},
+				],
+				mark: "bar",
+				encoding: {
+					x: {
+						field: "binStart",
+						bin: { binned: true },
+					},
+					x2: { field: "binEnd" },
+					y: {
+						field: "count",
+						type: "quantitative",
+					},
+					color: { value: "#ddd" },
+				},
+			},
+			{
+				transform: [{ filter: { param: "brush" } }],
+				mark: { type: "bar", opacity: 0.9 },
+				encoding: {
+					size: {
+						legend: null,
+					},
+					x: {
+						field: "binStart",
+						bin: { binned: true },
+						title: "",
+						axis: { title: "", labelColor: "rgba(0, 0, 0, 0.6)" },
+					},
+					x2: { field: "binEnd" },
+					y: {
+						field: "filteredCount",
+						type: "quantitative",
+						title: "count",
+						axis: { title: "", tickCount: 2, labelColor: "rgba(0, 0, 0, 0.6)" },
+					},
+					color: {
+						field: "binStart",
+						scale: {
+							range: [
+								"orange",
+								"red",
+								"green",
+								"blue",
+								"purple",
+								"brown",
+								"pink",
+								"gray",
+								"black",
+								"white",
+								"yellow",
+								"cyan",
+								"violet",
+							],
+						},
+						legend: null,
+					},
+				},
+			},
+		],
+	} as VegaLiteSpec;
+	return histogramSpecNotColored;
+}
+
 export const histogramSpecNotColored = {
 	$schema: "https://vega.github.io/schema/vega-lite/v5.json",
 	data: {
