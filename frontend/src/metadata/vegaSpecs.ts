@@ -81,8 +81,9 @@ export function generateCountSpec({
 	const topLayerBars = countSpec["layer"][1];
 	if (shouldColor) {
 		topLayerBars.encoding.color = {
-			field: "category",
-			scale: { range: colors },
+			field: "color",
+			type: "nominal",
+			scale: null,
 			legend: null,
 		};
 	} else {
@@ -98,8 +99,7 @@ export function generateHistogramSpec({
 	colors = [],
 	opacity = 0.5,
 } = {}) {
-	const shouldColor = colors.length > 0;
-	const histogramSpecNotColored = {
+	const histogramSpec = {
 		$schema: "https://vega.github.io/schema/vega-lite/v5.json",
 		data: {
 			name: "table",
@@ -151,19 +151,25 @@ export function generateHistogramSpec({
 						title: "count",
 						axis: { title: "", tickCount: 2, labelColor: "rgba(0, 0, 0, 0.6)" },
 					},
-					color: {
-						field: "binStart",
-						scale: {
-							range: shouldColor ? colors : ["#6A1B99"],
-						},
-						legend: null,
-					},
 				},
 			},
 		],
 	} as VegaLiteSpec;
 
-	return histogramSpecNotColored;
+	const shouldColor = colors.length > 0;
+	const topLayerBars = histogramSpec["layer"][1];
+	if (shouldColor) {
+		topLayerBars.encoding.color = {
+			field: "color",
+			type: "nominal",
+			scale: null,
+			legend: null,
+		};
+	} else {
+		topLayerBars.mark.fill = "#6A1B99";
+	}
+
+	return histogramSpec;
 }
 
 export const histogramSpecNotColored = {
