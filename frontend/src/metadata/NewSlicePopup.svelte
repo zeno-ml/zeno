@@ -136,7 +136,12 @@
 <svelte:window on:keydown={submit} />
 
 <div>
-	<Button variant="outlined" on:click={() => showNewSlice.set(true)}>
+	<Button
+		variant="outlined"
+		on:click={() => {
+			showNewSlice.set(true);
+			sliceName = "";
+		}}>
 		New Slice
 	</Button>
 	{#if $showNewSlice}

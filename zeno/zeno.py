@@ -506,6 +506,11 @@ class Zeno(object):
     def get_slices(self):
         return [s.dict(by_alias=True) for s in self.slices.values()]
 
+    def set_folders(self, folders):
+        self.folders = folders
+        with open(os.path.join(self.cache_path, "folders.pickle"), "wb") as f:
+            pickle.dump(self.folders, f)
+
     def delete_slice(self, slice_id):
         self.slices.pop(slice_id)
         with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:

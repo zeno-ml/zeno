@@ -20,6 +20,7 @@ import {
 	settings,
 	slices,
 	table,
+	metric,
 	reports,
 } from "./stores";
 import type ColumnTable from "arquero/dist/types/table/column-table";
@@ -32,10 +33,15 @@ export function initialFetch() {
 			fetch("/api/initialize")
 				.then((r) => r.json())
 				.then((r) => {
+					console.log(r);
 					models.set(r.models);
 					metrics.set(r.metrics);
 					transforms.set(r.transforms);
 					folders.set(r.folders);
+
+					model.set(r.models[r.models.length - 1]);
+					metric.set(r.metrics[0]);
+
 					ready.set(true);
 				});
 		});
@@ -70,6 +76,7 @@ export function updateTab(t: string) {
 }
 
 export async function getMetricsForSlices(metricKeys: MetricKey[]) {
+	console.log(metricKeys);
 	if (metricKeys[0].metric === undefined) {
 		return new Array(metricKeys.length).fill("");
 	}

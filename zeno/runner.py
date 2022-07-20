@@ -208,7 +208,7 @@ def run_zeno(args):
 
     @api_app.post("/set-folders")
     def set_folders(folders: List[str]):
-        zeno.folders = folders
+        zeno.set_folders(folders)
 
     @api_app.post("/table")
     def get_table(columns: TableRequest):
