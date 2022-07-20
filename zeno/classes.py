@@ -85,8 +85,16 @@ class ZenoSettings(CamelModel):
     metadata_columns: List[ZenoColumn]
 
 
+class ZenoVariables(CamelModel):
+    metrics: List[str]
+    transforms: List[str]
+    models: List[str]
+    folders: List[str]
+
+
 class Slice(CamelModel):
     slice_name: str
+    folder: str
     filter_predicates: Optional[List[FilterPredicate]]
     idxs: Optional[List[str]]
 

@@ -115,6 +115,13 @@ class Zeno(object):
         self.cache_path = cache_path
         os.makedirs(self.cache_path, exist_ok=True)
 
+        self.folders: List[str] = []
+        try:
+            with open(os.path.join(self.cache_path, "folders.pickle"), "rb") as f:
+                self.folders = pickle.load(f)
+        except FileNotFoundError:
+            pass
+
         self.slices: Dict[str, Slice] = {}
         try:
             with open(os.path.join(self.cache_path, "slices.pickle"), "rb") as f:

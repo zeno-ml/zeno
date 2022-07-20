@@ -24,7 +24,7 @@
 		}
 
 		let idxs = filteredTable.array(columnHash($settings.idColumn));
-		let sli = <Slice>{ sliceName: name, idxs: idxs };
+		let sli = <Slice>{ sliceName: name, folder: "", idxs: idxs };
 
 		return getMetricsForSlices([
 			<MetricKey>{

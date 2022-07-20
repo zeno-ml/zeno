@@ -1,97 +1,42 @@
 <script lang="ts">
-	import Button from "@smui/button";
-	import * as aq from "arquero";
-	import type ColumnTable from "arquero/dist/types/table/column-table";
-
 	import Ripple from "@smui/ripple";
-	import CreateSlice from "../filtering/CreateSlice.svelte";
-	import MetadataNode from "./MetadataCell.svelte";
-	import SliceNode from "./SliceCell.svelte";
 
-	import { clickOutside } from "../clickOutside";
+	import FolderCell from "./FolderCell.svelte";
+	import MetadataCell from "./MetadataCell.svelte";
+	import NewFolderPopup from "./NewFolderPopup.svelte";
+	import NewSlicePopup from "./NewSlicePopup.svelte";
+	import SliceCell from "./SliceCell.svelte";
+
+	import { ZenoColumnType } from "../globals";
 	import {
-		filteredTable,
+		folders,
 		metadataSelections,
+		metric,
 		model,
-		ready,
 		settings,
 		slices,
 		sliceSelections,
 		status,
-		sort,
 		table,
-		metric,
 		transform,
 	} from "../stores";
 	import {
 		columnHash,
-		getFilterFromPredicates,
 		getMetricsForSlices,
+		updateFilteredTable,
 		updateSliceIdxs,
 	} from "../util";
-	import { ZenoColumnType } from "../globals";
-
-	let name = "";
-	let newSlice = false;
-	let mode = "create";
-	let predicates: FilterPredicate[] = [];
 
 	table.subscribe((t) => updateFilteredTable(t));
 	metadataSelections.subscribe(() => updateFilteredTable($table));
 	sliceSelections.subscribe(() => updateFilteredTable($table));
-
-	function updateFilteredTable(t: ColumnTable) {
-		if (!$ready || $table.size === 0) {
-			return;
-		}
-		let tempTable = t;
-
-		// Filter with slices.
-		$sliceSelections.forEach((s) => {
-			let filt = getFilterFromPredicates($slices.get(s).filterPredicates);
-			tempTable = tempTable.filter(`(d) => ${filt}`);
-		});
-
-		// Filter with metadata selections.
-		[...$metadataSelections.entries()].forEach((e) => {
-			let [hash, entry] = e;
-			if (entry.type === "range") {
-				tempTable = tempTable.filter(
-					`(r) => r["${hash}"] > ${entry.values[0]} && r["${hash}"] < ${entry.values[1]}`
-				);
-			} else if (entry.type === "binary") {
-				if (entry.values[0] === "is") {
-					tempTable = tempTable.filter(`(r) => r["${hash}"] == 1`);
-				} else {
-					tempTable = tempTable.filter(`(r) => r["${hash}"] == 0`);
-				}
-			} else {
-				tempTable = tempTable.filter(
-					aq.escape((r) => aq.op.includes(entry.values, r[hash], 0))
-				);
-			}
-		});
-
-		if ($sort) {
-			tempTable = tempTable.orderby(columnHash($sort));
-		}
-
-		filteredTable.set(tempTable);
-	}
-
-	function editSlice(sli: Slice) {
-		predicates = sli.filterPredicates;
-		name = sli.sliceName;
-		mode = "edit";
-		newSlice = true;
-	}
-
 	model.subscribe(() => updateSliceIdxs());
 
 	$: res = getMetricsForSlices([
 		<MetricKey>{
 			sli: <Slice>{
 				sliceName: "overall",
+				folder: "",
 				idxs: $table.array(columnHash($settings.idColumn)),
 			},
 			metric: $metric,
@@ -112,97 +57,42 @@
 			sliceSelections.set([]);
 			metadataSelections.set(new Map());
 		}}>
-		<div class="inline">
-			<!-- <div class="icon">
-				<Icon component={Svg} viewBox="0 0 24 24">
-					<path fill="currentColor" d={mdiTableMultiple} />
-				</Icon>
-			</div> -->
-			<p>All instances</p>
-		</div>
+		<div class="inline" style:height="44px">All instances</div>
 		<div>
 			<span>{#await res then r}{r && r[0] ? r[0].toFixed(2) : ""}{/await}</span>
 			<span class="size">({$table.size})</span>
 		</div>
 	</div>
-	<div class="inline">
+	<div class="inline" style:margin-top="20px">
 		<h4>Slices</h4>
-		<div style:margin-right="13px">
-			<Button
-				variant="outlined"
-				on:click={() => {
-					predicates = [];
-					name = "";
-					newSlice = true;
-				}}>
-				New Slice
-			</Button>
+		<div style:margin-right="13px" class="inline">
+			<NewFolderPopup />
+			<NewSlicePopup />
 		</div>
 	</div>
-	{#if newSlice}
-		<div
-			use:clickOutside
-			on:click_outside={() => {
-				mode = "create";
-				newSlice = false;
-			}}>
-			<CreateSlice bind:newSlice bind:predicates bind:mode bind:name />
-		</div>
-	{/if}
 
-	{#each [...$slices.values()] as s}
-		<SliceNode
-			slice={s}
-			{editSlice}
-			selected={$sliceSelections.includes(s.sliceName)}
-			setSelected={(e) => {
-				if (
-					$sliceSelections.length === 1 &&
-					$sliceSelections.includes(s.sliceName)
-				) {
-					sliceSelections.set([]);
-					return;
-				}
-				if (e.shiftKey) {
-					if ($sliceSelections.includes(s.sliceName)) {
-						sliceSelections.update((sel) => {
-							sel.splice(sel.indexOf(s.sliceName), 1);
-							return [...sel];
-						});
-					} else {
-						sliceSelections.update((slis) => [...slis, s.sliceName]);
-					}
-				} else {
-					if ($sliceSelections.includes(s.sliceName)) {
-						if ($sliceSelections.length > 0) {
-							sliceSelections.set([s.sliceName]);
-						} else {
-							sliceSelections.update((sel) => {
-								sel.splice(sel.indexOf(s.sliceName), 1);
-								return [...sel];
-							});
-						}
-					} else {
-						sliceSelections.set([s.sliceName]);
-					}
-				}
-			}} />
+	{#each $folders as folder}
+		<FolderCell {folder} />
 	{/each}
 
-	<h4>Metadata</h4>
+	{#each [...$slices.values()].filter((s) => s.folder === "") as s}
+		<SliceCell slice={s} />
+	{/each}
+
+	<h4 style:margin-top="40px">Metadata</h4>
 	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.METADATA) as col}
-		<MetadataNode {col} />
+		<MetadataCell {col} />
 	{/each}
 
 	{#if $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL).length > 0}
-		<h4>Distilled Metadata</h4>
+		<h4 style:margin-top="40px">Distilled Metadata</h4>
 	{/if}
 	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL) as col}
-		<MetadataNode {col} />
+		<MetadataCell {col} />
 	{/each}
 	{#if $model}
 		{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.POSTDISTILL && m.model === $model && m.transform === $transform) as col}
-			<MetadataNode {col} />
+			<MetadataCell {col} />
 		{/each}
 	{/if}
 
@@ -220,6 +110,12 @@
 		overflow-y: auto;
 		min-width: 450px;
 		padding: 10px;
+	}
+	.cell {
+		border: 1px solid #e0e0e0;
+		padding: 10px;
+		min-width: 400px;
+		width: 400px;
 	}
 	.inline {
 		display: flex;

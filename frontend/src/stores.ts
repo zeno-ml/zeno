@@ -41,6 +41,7 @@ export const settings: Writable<Settings> = writable(<Settings>{
 export const metrics: Writable<string[]> = writable([]);
 export const models: Writable<string[]> = writable([]);
 export const transforms: Writable<string[]> = writable([]);
+export const folders: Writable<string[]> = writable([]);
 
 export const model: Writable<string> = writable("");
 export const metric: Writable<string> = writable("");
@@ -73,3 +74,6 @@ export const currentColumns: Readable<ZenoColumn[]> = derived(
 			(c) => c.model === "" || c.model === $model
 		)
 );
+
+export const showNewSlice: Writable<boolean> = writable(false);
+export const sliceToEdit: Writable<Slice> = writable(null);

@@ -1,7 +1,16 @@
 import { ZenoColumnType } from "./globals";
 import * as aq from "arquero";
 import { get } from "svelte/store";
-import { model, tab, transforms } from "./stores";
+import {
+	filteredTable,
+	folders,
+	metadataSelections,
+	model,
+	sliceSelections,
+	sort,
+	tab,
+	transforms,
+} from "./stores";
 
 import {
 	metrics,
@@ -13,31 +22,23 @@ import {
 	table,
 	reports,
 } from "./stores";
+import type ColumnTable from "arquero/dist/types/table/column-table";
 
 export function initialFetch() {
-	const fetchSettings = fetch("/api/settings")
+	fetch("/api/settings")
 		.then((r) => r.json())
 		.then((s) => {
 			settings.set(s);
+			fetch("/api/initialize")
+				.then((r) => r.json())
+				.then((r) => {
+					models.set(r.models);
+					metrics.set(r.metrics);
+					transforms.set(r.transforms);
+					folders.set(r.folders);
+					ready.set(true);
+				});
 		});
-	const fetchModels = fetch("/api/models")
-		.then((d) => d.json())
-		.then((d) => models.set(JSON.parse(d)));
-	const fetchMetrics = fetch("/api/metrics")
-		.then((d) => d.json())
-		.then((d) => metrics.set(JSON.parse(d)));
-	const fetchTransforms = fetch("/api/transforms")
-		.then((d) => d.json())
-		.then((d) => transforms.set(JSON.parse(d)));
-
-	const allRequests = Promise.all([
-		fetchSettings,
-		fetchModels,
-		fetchMetrics,
-		fetchTransforms,
-	]);
-
-	allRequests.then(() => ready.set(true));
 }
 
 export async function getSlicesAndReports(t) {
@@ -219,4 +220,44 @@ export function columnHash(col: ZenoColumn) {
 		(col.model ? col.model : "") +
 		(col.transform ? col.transform : "")
 	);
+}
+
+export function updateFilteredTable(t: ColumnTable) {
+	if (!get(ready) || t.size === 0) {
+		return;
+	}
+	let tempTable = t;
+
+	// Filter with slices.
+	get(sliceSelections).forEach((s) => {
+		const filt = getFilterFromPredicates(get(slices).get(s).filterPredicates);
+		tempTable = tempTable.filter(`(d) => ${filt}`);
+	});
+
+	// Filter with metadata selections.
+	[...get(metadataSelections).entries()].forEach((e) => {
+		const [hash, entry] = e;
+		if (entry.type === "range") {
+			tempTable = tempTable.filter(
+				`(r) => r["${hash}"] > ${entry.values[0]} && r["${hash}"] < ${entry.values[1]}`
+			);
+		} else if (entry.type === "binary") {
+			if (entry.values[0] === "is") {
+				tempTable = tempTable.filter(`(r) => r["${hash}"] == 1`);
+			} else {
+				tempTable = tempTable.filter(`(r) => r["${hash}"] == 0`);
+			}
+		} else {
+			tempTable = tempTable.filter(
+				aq.escape((r) => aq.op.includes(entry.values, r[hash], 0))
+			);
+		}
+	});
+
+	const s = get(sort);
+	if (s) {
+		tempTable = tempTable.orderby(columnHash(s));
+	}
+
+	filteredTable.set(tempTable);
 }

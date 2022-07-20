@@ -1,19 +1,57 @@
 <script lang="ts">
-	import { mdiChevronDown, mdiChevronUp, mdiPencilOutline } from "@mdi/js";
+	import { mdiPencilOutline } from "@mdi/js";
 	import { Icon } from "@smui/common";
 	import { Svg } from "@smui/common/elements";
-	import Ripple from "@smui/ripple";
-	import { slide } from "svelte/transition";
 	import SliceDetails from "../SliceDetails.svelte";
-	import { metric, model, slices, transform } from "../stores";
+	import {
+		sliceSelections,
+		metric,
+		model,
+		slices,
+		transform,
+		sliceToEdit,
+		showNewSlice,
+	} from "../stores";
 	import { getMetricsForSlices } from "../util";
 
 	export let slice: Slice;
-	export let selected = false;
-	export let setSelected;
-	export let editSlice;
+	export let inFolder = false;
 
-	let expanded = false;
+	let showTooltip = false;
+	$: selected = $sliceSelections.includes(slice.sliceName);
+
+	function setSelected(e) {
+		if (
+			$sliceSelections.length === 1 &&
+			$sliceSelections.includes(slice.sliceName)
+		) {
+			sliceSelections.set([]);
+			return;
+		}
+		if (e.shiftKey) {
+			if ($sliceSelections.includes(slice.sliceName)) {
+				sliceSelections.update((sel) => {
+					sel.splice(sel.indexOf(slice.sliceName), 1);
+					return [...sel];
+				});
+			} else {
+				sliceSelections.update((slis) => [...slis, slice.sliceName]);
+			}
+		} else {
+			if ($sliceSelections.includes(slice.sliceName)) {
+				if ($sliceSelections.length > 0) {
+					sliceSelections.set([slice.sliceName]);
+				} else {
+					sliceSelections.update((sel) => {
+						sel.splice(sel.indexOf(slice.sliceName), 1);
+						return [...sel];
+					});
+				}
+			} else {
+				sliceSelections.set([slice.sliceName]);
+			}
+		}
+	}
 
 	$: result = getMetricsForSlices([
 		<MetricKey>{
@@ -26,31 +64,34 @@
 </script>
 
 <div
-	use:Ripple={{ surface: true, color: "primary" }}
-	class="cell parent {selected ? 'selected' : ''}"
-	on:click={(e) => setSelected(e)}>
+	class="{inFolder ? 'in-folder' : ''} cell parent {selected ? 'selected' : ''}"
+	on:click={(e) => setSelected(e)}
+	draggable="true"
+	on:dragstart={(ev) => {
+		ev.dataTransfer.setData("text/plain", slice.sliceName);
+		ev.dataTransfer.dropEffect = "copy";
+	}}
+	on:dragend={(ev) => {
+		if (ev.dataTransfer.dropEffect === "none") {
+			slices.update((sls) => {
+				const sli = sls.get(slice.sliceName);
+				sli.folder = "";
+				sls.set(slice.sliceName, sli);
+				return sls;
+			});
+		}
+	}}>
 	<div class="group" style:width="100%">
 		<div class="group" style:width="100%">
-			<div class="group" style:width="max-content">
-				<div
-					style:width="24px"
-					style:height="24px"
-					style:cursor="pointer"
-					style:margin-right="10px">
-					<Icon
-						component={Svg}
-						viewBox="0 0 24 24"
-						class="material-icons"
-						on:click={(e) => {
-							e.stopPropagation();
-							expanded = !expanded;
-						}}>
-						<path
-							fill="currentColor"
-							d={expanded ? mdiChevronUp : mdiChevronDown} />
-					</Icon>
-				</div>
-				<div>{slice.sliceName}</div>
+			<div
+				class="group"
+				style:color="#9b51e0"
+				style:width="max-content"
+				on:mouseover={() => (showTooltip = true)}
+				on:mouseout={() => (showTooltip = false)}
+				on:focus={() => (showTooltip = true)}
+				on:blur={() => (showTooltip = false)}>
+				{slice.sliceName}
 			</div>
 			<div class="group">
 				{#if result}
@@ -68,7 +109,8 @@
 						style="width: 24px; height: 24px"
 						on:click={(e) => {
 							e.stopPropagation();
-							editSlice(slice);
+							sliceToEdit.set(slice);
+							showNewSlice.set(true);
 						}}>
 						<Icon component={Svg} viewBox="0 0 24 24">
 							<path fill="black" d={mdiPencilOutline} />
@@ -90,26 +132,36 @@
 			</div>
 		</div>
 	</div>
-	{#if expanded}
-		<div in:slide out:slide class="details">
-			<SliceDetails sli={slice} />
+	{#if showTooltip}
+		<div class="tooltip-container">
+			<div class="tooltip">
+				<SliceDetails sli={slice} />
+			</div>
 		</div>
 	{/if}
 </div>
 
 <style>
+	.tooltip-container {
+		z-index: 5;
+		background: white;
+		margin-top: 10px;
+		position: absolute;
+		height: max-content;
+	}
+	.tooltip {
+		background: white;
+		padding: 10px;
+		box-shadow: 1px 1px 3px 1px #ccc;
+		border-radius: 3px;
+	}
 	#size {
 		font-style: italic;
 		color: rgba(0, 0, 0, 0.4);
 		margin-right: 10px;
 	}
-	.details {
-		padding-top: 10px;
-		margin-left: 10px;
-		margin-top: 10px;
-		border-top: 1px solid #ccc;
-	}
 	.cell {
+		overflow: visible;
 		border: 1px solid #e0e0e0;
 		padding: 10px;
 		min-width: 400px;
@@ -120,6 +172,7 @@
 		flex-direction: row;
 		justify-content: space-between;
 		align-items: center;
+		cursor: pointer;
 	}
 	.selected {
 		background: #f9f5ff;
@@ -127,5 +180,10 @@
 	.inline {
 		display: flex;
 		flex-direction: row;
+	}
+	.in-folder {
+		width: 375px;
+		min-width: 375px;
+		margin-left: 25px;
 	}
 </style>

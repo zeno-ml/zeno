@@ -4,6 +4,7 @@ import json
 import os
 import sys
 from pathlib import Path
+from typing import List
 from urllib.parse import unquote
 
 import tomli
@@ -19,16 +20,9 @@ from .classes import (
     StatusResponse,
     TableRequest,
     ZenoSettings,
+    ZenoVariables,
 )
 from .zeno import Zeno
-
-TASK_TYPES = [
-    "image-classification",
-    "image-segmentation",
-    "object-detection",
-    "text-classification",
-    "audio-classification",
-]
 
 
 def main():
@@ -195,17 +189,14 @@ def run_zeno(args):
             metadata_columns=zeno.columns,
         )
 
-    @api_app.get("/metrics")
-    def get_metrics():
-        return json.dumps(list(zeno.metric_functions.keys()))
-
-    @api_app.get("/transforms")
-    def get_transforms():
-        return json.dumps(list(zeno.transform_functions.keys()))
-
-    @api_app.get("/models")
-    def get_models():
-        return json.dumps([str(n) for n in zeno.model_names])
+    @api_app.get("/initialize", response_model=ZenoVariables)
+    def get_initial_info():
+        return ZenoVariables(
+            metrics=list(zeno.metric_functions.keys()),
+            transforms=list(zeno.transform_functions.keys()),
+            models=[str(n) for n in zeno.model_names],
+            folders=zeno.folders,
+        )
 
     @api_app.get("/slices")
     def get_slices():
@@ -214,6 +205,10 @@ def run_zeno(args):
     @api_app.get("/delete-slice/{slice_id}")
     def delete_slice(slice_id: str):
         return json.dumps(zeno.delete_slice(unquote(slice_id)))
+
+    @api_app.post("/set-folders")
+    def set_folders(folders: List[str]):
+        zeno.folders = folders
 
     @api_app.post("/table")
     def get_table(columns: TableRequest):
