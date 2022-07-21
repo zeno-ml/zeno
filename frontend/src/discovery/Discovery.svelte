@@ -221,9 +221,6 @@
 						<Button
 							on:click={async () => {
 								if (regionLabeler && regionPolygon.length > 0) {
-									console.log(regionPolygon);
-									console.log(regionLabelerName);
-									console.log(selectedNode.id);
 									const output = await pipeline.regionLabeler({
 										polygon: regionPolygon,
 										name: regionLabelerName,
