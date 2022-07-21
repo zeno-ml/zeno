@@ -79,14 +79,18 @@
 	function opacifyPoints(
 		scatter,
 		opacities = availableOpacities,
-		dataType = "valueB"
+		dataType = "value"
 	) {
 		scatter.set({
 			opacityBy: dataType,
 			opacity: opacities,
 		});
 	}
-	function colorPoints(scatter, colors = availableColors, dataType = "valueA") {
+	function colorPoints(
+		scatter,
+		colors = availableColors,
+		dataType = "category"
+	) {
 		scatter.set({
 			colorBy: dataType,
 			pointColor: colors,
