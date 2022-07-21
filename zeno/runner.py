@@ -19,7 +19,6 @@ from .classes import (
     PipelineProjection,
     PipelineRegionLabeler,
     PipelineReset,
-    ProjectionRequest,
     ReportsRequest,
     StatusResponse,
     TableRequest,
@@ -236,11 +235,6 @@ def run_zeno(args):
     def update_reports(reqs: ReportsRequest):
         return json.dumps(zeno.update_reports(reqs))
 
-    @api_app.post("/projection")
-    def run_projection(model: ProjectionRequest):
-        projection = zeno.run_projection(model.model, model.instance_ids)
-        return json.dumps({"data": projection, "model": model.model})
-
     @api_app.post("/pipe/reset")
     def reset_pipeline(req: PipelineReset):
         zeno.reset_pipeline(req.up_to_id)
@@ -277,10 +271,6 @@ def run_zeno(args):
     def get_pipeline_json():
         js_export = zeno.get_json_pipeline()
         return json.dumps({"status": True, "data": js_export})
-
-    @api_app.get("/bins")
-    def get_bins():
-        pass
 
     @api_app.websocket("/status")
     async def results_websocket(websocket: WebSocket):

@@ -13,7 +13,6 @@ from typing import Dict, List
 
 import numpy as np
 import pandas as pd
-import umap  # type: ignore
 
 from .api import ZenoOptions
 from .classes import (
@@ -525,22 +524,6 @@ class Zeno(object):
         self.reports = reports.reports
         with open(os.path.join(self.cache_path, "reports.pickle"), "wb") as f:
             pickle.dump(self.reports, f)
-
-    def __run_umap(self, embeds):
-        reducer = umap.UMAP()
-        projection = reducer.fit_transform(embeds)
-        self.status = "Done projecting"
-        if isinstance(projection, (np.ndarray)):
-            return projection.tolist()
-        elif isinstance(projection, (list)):
-            return projection
-        else:
-            return []
-
-    def __get_df_rows(self, dataframe, column, list_to_get=None):
-        if list_to_get is None:
-            return []
-        return dataframe[dataframe[column].isin(list_to_get)]
 
     def get_table(self, columns):
         """Get the metadata DataFrame for a given slice.
