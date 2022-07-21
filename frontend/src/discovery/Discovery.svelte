@@ -73,7 +73,6 @@
 				}
 			});
 			pipeline.load({ model: $model, uid: PIPELINE_ID }).then((d) => {
-				console.log(d);
 				if (d !== null) {
 					if (d.pipeline.length > 0) {
 						noReact.setRepr(d.pipeline);
@@ -188,7 +187,6 @@
 								const node = await pipeline.idFilter({ ids });
 								projection2D = node.state.projection;
 								pipelineJSON = await pipeline.pipelineJSON();
-								console.log(scatterObj);
 								resetSelection();
 								pipelineRepr = [...pipelineRepr, node];
 								selectedNode = node;
@@ -223,6 +221,9 @@
 						<Button
 							on:click={async () => {
 								if (regionLabeler && regionPolygon.length > 0) {
+									console.log(regionPolygon);
+									console.log(regionLabelerName);
+									console.log(selectedNode.id);
 									const output = await pipeline.regionLabeler({
 										polygon: regionPolygon,
 										name: regionLabelerName,
@@ -260,7 +261,6 @@
 					points={legendaryScatterPoints}
 					colorRange={$colorSpec ? $colorSpec.colors : ["#ccc"]}
 					on:create={({ detail }) => {
-						console.log(detail);
 						scatterObj = detail;
 					}}
 					on:deselect={() => {

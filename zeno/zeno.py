@@ -195,6 +195,7 @@ class Zeno(object):
 
         ids = js_export["ids"]
         labels = js_export["labels"]
+        assert len(ids) == len(labels), "Yo your're algo is wrong buddy"
         self.df.loc[:, new_column_labels_hash] = 0
         self.df.loc[ids, new_column_labels_hash] = labels
 
