@@ -126,6 +126,7 @@
 	let scatterObj;
 	function resetSelection() {
 		scatterObj.select([]);
+		lassoSelectTable = null;
 	}
 </script>
 
@@ -178,9 +179,9 @@
 							variant="outlined"
 							on:click={async () => {
 								let tableIds = $filteredTable;
-								if (lassoSelectTable !== null) {
-									tableIds = tableIds.intersect(lassoSelectTable);
-								}
+								// if (lassoSelectTable !== null) {
+								// 	tableIds = tableIds.intersect(lassoSelectTable);
+								// }
 								const ids = tableIds.columnArray(
 									columnHash($settings.idColumn)
 								);
@@ -284,7 +285,7 @@
 			<div id="samples-view">
 				<SampleOptions />
 				<Samples
-					table={scatterSelectEmpty(lassoSelectTable)
+					table={lassoSelectTable === null || lassoSelectTable?.size === 0
 						? $filteredTable
 						: lassoSelectTable} />
 			</div>
