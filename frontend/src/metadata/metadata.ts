@@ -2,7 +2,11 @@ import type ColumnTable from "arquero/dist/types/table/column-table";
 import * as aq from "arquero";
 import { columnHash } from "../util";
 import { interpolateColorToArray } from "../discovery/discovery";
-import { interpolatePurples, schemeCategory10 } from "d3-scale-chromatic";
+import {
+	interpolatePurples,
+	schemeCategory10,
+	schemeDark2,
+} from "d3-scale-chromatic";
 
 export enum ChartType {
 	Count,
@@ -230,31 +234,45 @@ export function computeCountsFromDomain({
 	table,
 	column,
 	domain,
+	type,
 }: {
 	table: ColumnTable;
 	column: string;
 	domain: object[];
+	type: ChartType;
 }) {
 	const hash = typeof column === "string" ? column : columnHash(column);
 	if (domain.length === 0) {
 		return [];
 	}
 
-	if ("category" in domain[0]) {
+	if (type === ChartType.Count || type === ChartType.Binary) {
 		return countDomainCategorical({ table, domain, column: hash });
-	} else if ("binStart" in domain[0]) {
+	} else if (type === ChartType.Histogram) {
 		return countDomainContinuousBins({ table, domain, column: hash });
 	} else {
 		return [];
 	}
 }
 
-export function colorDomain({ domain }: { domain: object[] }) {
+export function colorDomain({
+	domain,
+	type,
+}: {
+	domain: object[];
+	type: ChartType;
+}) {
 	if (domain.length > 0) {
-		if ("category" in domain[0]) {
-			const colors = schemeCategory10;
+		if (type === ChartType.Count || type === ChartType.Binary) {
+			let colors = [...schemeCategory10, ...schemeDark2].slice(
+				0,
+				domain.length
+			);
+			if (domain.length === 2) {
+				colors = [schemeCategory10[3], schemeCategory10[0]]; // red and blue
+			}
 			domain.forEach((d, i) => (d["color"] = colors[i]));
-		} else if ("binStart" in domain[0]) {
+		} else if (type === ChartType.Histogram) {
 			const numBins = domain.length;
 			const colors = interpolateColorToArray({
 				colorer: interpolatePurples,
@@ -271,16 +289,18 @@ export function assignColorsFromDomain({
 	assignments,
 	idColumn,
 	column,
+	type,
 }: {
 	table: ColumnTable;
 	domain: object[];
 	assignments: number[];
 	idColumn: ZenoColumn | string;
 	column: ZenoColumn | string;
+	type: ChartType;
 }) {
 	if (domain.length > 0) {
 		if (!("color" in domain[0])) {
-			colorDomain({ domain });
+			colorDomain({ domain, type });
 		}
 		const hash = typeof column === "string" ? column : columnHash(column);
 		const idHash =

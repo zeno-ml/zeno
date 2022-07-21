@@ -49,8 +49,7 @@
 	let selection = undefined;
 	let finalSelection = undefined;
 	let view: View;
-	let data = { table: [] };
-	let histoData = { table: [] };
+	let histogramData = { table: [] };
 
 	let colorAssignments: IColorAssignments = { colors: [], labels: [], hash };
 
@@ -63,6 +62,7 @@
 				table: filteredTable,
 				domain,
 				column: hash,
+				type: chartType,
 			});
 			if (chartType === ChartType.Count) {
 				domain = domain.map((d, i) => ({
@@ -80,7 +80,7 @@
 					color: d["color"],
 				}));
 			}
-			histoData = { table: domain };
+			histogramData = { table: domain };
 		}
 	}
 
@@ -121,7 +121,7 @@
 			domain = localDomain;
 			domain.forEach((d) => (d["filteredCount"] = d["count"]));
 
-			colorDomain({ domain });
+			colorDomain({ domain, type: chartType });
 
 			if (assignColors) {
 				const colors = assignColorsFromDomain({
@@ -130,6 +130,7 @@
 					column: hash,
 					idColumn: $settings.idColumn,
 					table: $table,
+					type: chartType,
 				});
 				setColorsGlobally(colors);
 			}
@@ -219,6 +220,7 @@
 			return m;
 		});
 	}
+
 	$: dynamicSpec =
 		chartType === ChartType.Histogram
 			? generateHistogramSpec
@@ -284,7 +286,7 @@
 			</span>
 		{/if}
 	</div>
-	{#if (data.table.length > 0 || histoData.table.length > 0) && (chartType === ChartType.Histogram || chartType === ChartType.Count)}
+	{#if histogramData.table.length > 0 && (chartType === ChartType.Histogram || chartType === ChartType.Count)}
 		<div
 			id="histogram"
 			on:mouseup={setSelection}
@@ -295,7 +297,7 @@
 				spec={dynamicSpec({
 					colors: shouldColor ? domain.map((d) => d["color"]) : [],
 				})}
-				data={histoData}
+				data={histogramData}
 				bind:view
 				options={{ tooltip: true, actions: false, theme: "vox" }} />
 		</div>
