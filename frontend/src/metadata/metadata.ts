@@ -1,6 +1,8 @@
 import type ColumnTable from "arquero/dist/types/table/column-table";
 import * as aq from "arquero";
 import { columnHash } from "../util";
+import { interpolateColorToArray } from "../discovery/discovery";
+import { interpolatePurples, schemeCategory10 } from "d3-scale-chromatic";
 
 export enum ChartType {
 	Count,
@@ -21,7 +23,10 @@ interface ISpecificDomain {
 export function computeDomain({ type, table, column }: IComputeDomain) {
 	const hash = typeof column === "string" ? column : columnHash(column);
 
-	let specificDomainFunc: (input: ISpecificDomain) => object[];
+	let specificDomainFunc: (input: ISpecificDomain) => {
+		domain: object[];
+		assignments: number[];
+	};
 	switch (type) {
 		case ChartType.Count:
 			specificDomainFunc = computeCountDomain;
@@ -45,12 +50,14 @@ export function computeDomain({ type, table, column }: IComputeDomain) {
 }
 
 function computeCategoricalDomain({ table, column }: ISpecificDomain) {
-	const categoryGroups = table.groupby(column).count().orderby(column);
+	const categoryGroups = table.groupby(column);
+	const categoryKeys = categoryGroups.groups().keys;
+	const categoryData = categoryGroups.count();
 	const output = {
-		category: categoryGroups.columnArray(column),
-		count: categoryGroups.columnArray("count"),
+		category: categoryData.columnArray(column),
+		count: categoryData.columnArray("count"),
 	};
-	return combineOutputOneArray(output);
+	return { domain: combineOutputOneArray(output), assignments: categoryKeys };
 }
 
 function computeCountDomain({ table, column }: ISpecificDomain) {
@@ -64,8 +71,11 @@ function computeBinaryDomain({ table, column }: ISpecificDomain) {
 }
 
 function computeContinuousBinnedDomain({ table, column }: ISpecificDomain) {
-	const output = binTable(table, column);
-	return combineOutputOneArray(output);
+	const bins = binTable(table, column);
+	return {
+		domain: combineOutputOneArray(bins.output),
+		assignments: bins.assignments,
+	};
 }
 
 function computeHistogramDomain({ table, column }: ISpecificDomain) {
@@ -74,7 +84,7 @@ function computeHistogramDomain({ table, column }: ISpecificDomain) {
 }
 
 function computeOtherDomain({ table, column }: ISpecificDomain) {
-	return [];
+	return { domain: [], assignments: [] };
 }
 
 function combineOutputOneArray(obj: object) {
@@ -120,17 +130,10 @@ function binTable(table: ColumnTable, column: string) {
 	const binGroups = table.groupby({
 		[binName]: aq.bin(column, { maxbins: 20 }),
 	});
-	// console.log(binGroups.groups());
+	const binKeys = binGroups.groups().keys;
 	const binnedOutput = binGroups
 		.count({ as: countName })
-		.impute(
-			{ count: () => 0 }
-			// {
-			// 	expand: {
-			// 		[binName]: `(d) => op.sequence(...op.bins(d.${binName}))`,
-			// 	},
-			// }
-		)
+		.impute({ count: () => 0 })
 		.orderby(binName);
 
 	const binsNice = binStartEndFormat(
@@ -142,7 +145,7 @@ function binTable(table: ColumnTable, column: string) {
 		count: binnedOutput.columnArray(countName),
 	};
 
-	return output;
+	return { output, assignments: binKeys };
 }
 
 function countColumn({ table, filterQuery }) {
@@ -243,5 +246,58 @@ export function computeCountsFromDomain({
 		return countDomainContinuousBins({ table, domain, column: hash });
 	} else {
 		return [];
+	}
+}
+
+export function colorDomain({ domain }: { domain: object[] }) {
+	if (domain.length > 0) {
+		if ("category" in domain[0]) {
+			const colors = schemeCategory10;
+			domain.forEach((d, i) => (d["color"] = colors[i]));
+		} else if ("binStart" in domain[0]) {
+			const numBins = domain.length;
+			const colors = interpolateColorToArray({
+				colorer: interpolatePurples,
+				length: numBins,
+				range: [0.15, 1.0],
+			});
+			domain.forEach((d, i) => (d["color"] = colors[i]));
+		}
+	}
+}
+export function assignColorsFromDomain({
+	table,
+	domain,
+	assignments,
+	idColumn,
+	column,
+}: {
+	table: ColumnTable;
+	domain: object[];
+	assignments: number[];
+	idColumn: ZenoColumn | string;
+	column: ZenoColumn | string;
+}) {
+	if (domain.length > 0) {
+		if (!("color" in domain[0])) {
+			colorDomain({ domain });
+		}
+		const hash = typeof column === "string" ? column : columnHash(column);
+		const idHash =
+			typeof idColumn === "string" ? idColumn : columnHash(idColumn);
+		const ids = table.columnArray(idHash);
+		const colorLabels = new Array(assignments.length);
+		for (let i = 0; i < assignments.length; i++) {
+			colorLabels[i] = {
+				id: ids[i],
+				colorIndex: assignments[i],
+			};
+		}
+		const output = {
+			labels: colorLabels,
+			colors: domain.map((d) => d["color"]),
+			hash,
+		};
+		return output;
 	}
 }

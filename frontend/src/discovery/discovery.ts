@@ -1,14 +1,22 @@
 import type ColumnTable from "arquero/dist/types/table/column-table";
 import { color } from "d3-color";
+import { scaleLinear } from "d3-scale";
 
-export function interpolateColorToArray(
-	interpolateColorer: (normalized: number) => string,
-	length: number
-) {
+interface IInterpolateColor {
+	colorer: (normalized: number) => string;
+	range: [number, number];
+	length: number;
+}
+export function interpolateColorToArray({
+	colorer,
+	length,
+	range = [0.0, 1.0],
+}: IInterpolateColor) {
+	const scale = scaleLinear().domain([0.0, 1.0]).range(range);
 	const increment = 1.0 / length;
 	const colorArray = new Array(length);
 	for (let i = 0, t = 0; i < colorArray.length; i++, t += increment) {
-		colorArray[i] = color(interpolateColorer(t)).hex();
+		colorArray[i] = color(colorer(scale(t))).hex();
 	}
 	return colorArray;
 }

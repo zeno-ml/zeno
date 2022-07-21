@@ -18,13 +18,16 @@
 	} from "../stores";
 	import { columnHash } from "../util";
 	import { generateCountSpec, generateHistogramSpec } from "./vegaSpecs";
-	import * as aq from "arquero";
-	import * as d3c from "d3-scale-chromatic";
-	import { interpolateColorToArray } from "../discovery/discovery";
-	import { computeCountsFromDomain, computeDomain } from "./metadata";
+	import {
+		computeCountsFromDomain,
+		computeDomain,
+		assignColorsFromDomain,
+		colorDomain,
+	} from "./metadata";
 
 	export let col: ZenoColumn;
 	export let shouldColor: boolean = false;
+	export let assignColors: boolean = shouldColor;
 
 	$: hash = columnHash(col);
 
@@ -42,18 +45,12 @@
 		labels: { id: string; colorIndex: number }[];
 		hash: string;
 	}
-	interface IBin {
-		binStart: number;
-		binEnd: number;
-		count?: number;
-		filteredCount?: number;
-	}
+
 	let selection = undefined;
 	let finalSelection = undefined;
 	let view: View;
 	let data = { table: [] };
 	let histoData = { table: [] };
-	let bins: IBin[] = [];
 
 	let colorAssignments: IColorAssignments = { colors: [], labels: [], hash };
 
@@ -101,19 +98,10 @@
 					.object()["a"];
 				if (Number(vals[0]) === 0 && Number(vals[1]) === 1) {
 					chartType = ChartType.Binary;
-					colorAssignments = colorLabelCategorical({
-						hash,
-						colorRange: ["#040265", "#FD9A03"],
-					});
-
-					$availableColors = { ...$availableColors, [hash]: colorAssignments };
 				}
 			} else if (isOrdinal) {
 				if (unique <= 20) {
 					chartType = ChartType.Count;
-					colorAssignments = colorLabelCategorical({ hash });
-
-					$availableColors = { ...$availableColors, [hash]: colorAssignments };
 				} else {
 					chartType = ChartType.Other;
 				}
@@ -122,90 +110,36 @@
 					chartType = ChartType.Count;
 				} else {
 					chartType = ChartType.Histogram;
-					colorAssignments = colorLabelContin(hash);
-
-					$availableColors = { ...$availableColors, [hash]: colorAssignments };
 				}
 			}
 
-			domain = computeDomain({
+			const { assignments, domain: localDomain } = computeDomain({
 				type: chartType,
 				table: $table,
 				column: hash,
 			});
+			domain = localDomain;
 			domain.forEach((d) => (d["filteredCount"] = d["count"]));
 
-			if (domain.length > 0) {
-				if ("category" in domain[0]) {
-					const colors = d3c.schemeCategory10;
-					domain.forEach((d, i) => (d["color"] = colors[i]));
-				} else if ("binStart" in domain[0]) {
-					const numBins = domain.length;
-					const colors = interpolateColorToArray(
-						d3c.interpolatePurples,
-						numBins
-					);
-					domain.forEach((d, i) => (d["color"] = colors[i]));
-				}
+			colorDomain({ domain });
+
+			if (assignColors) {
+				const colors = assignColorsFromDomain({
+					assignments,
+					domain,
+					column: hash,
+					idColumn: $settings.idColumn,
+					table: $table,
+				});
+				setColorsGlobally(colors);
 			}
 		}
 	}
 
-	function colorLabelContin(columnName: string, t = $table) {
-		let colorArray = interpolateColorToArray(
-			d3c.interpolatePurples,
-			bins.length
-		);
-		let colorLabels = [];
-		for (const row of t) {
-			let i = 0;
-			for (const bin of bins) {
-				if (row[columnName] >= bin.binStart && row[columnName] < bin.binEnd) {
-					colorLabels.push({
-						id: row[columnHash($settings.idColumn)],
-						colorIndex: i,
-					});
-					break;
-				}
-				i++;
-			}
+	function setColorsGlobally(colors) {
+		if (colors) {
+			$availableColors = { ...$availableColors, [hash]: colors };
 		}
-		return {
-			colors: colorArray,
-			labels: colorLabels,
-			hash,
-		} as IColorAssignments;
-	}
-
-	function colorLabelCategorical({
-		hash,
-		t = $table,
-		colorRange = d3c.schemeCategory10 as string[],
-	}: {
-		hash: string;
-		t?: ColumnTable;
-		colorRange?: string[];
-	}) {
-		let vals = t
-			.orderby(hash)
-			.rollup({ a: `d => op.array_agg_distinct(d["${hash}"])` })
-			.object()["a"];
-		let mapper = new Map();
-		for (let i = 0; i < vals.length; i++) {
-			mapper.set(vals[i], i);
-		}
-		let colorLabels = [];
-		for (const row of t) {
-			colorLabels.push({
-				id: row[columnHash($settings.idColumn)],
-				colorIndex: mapper.get(row[hash]),
-			});
-		}
-		return {
-			colors: colorRange,
-			labels: colorLabels,
-			hash,
-		} as IColorAssignments;
 	}
 
 	table.subscribe((t) => drawChart(t));
@@ -213,6 +147,12 @@
 		drawChart($table);
 		updateData($table, $filteredTable);
 	});
+
+	$: {
+		if (assignColors === true) {
+			drawChart($table);
+		}
+	}
 
 	$: {
 		col;
@@ -279,6 +219,10 @@
 			return m;
 		});
 	}
+	$: dynamicSpec =
+		chartType === ChartType.Histogram
+			? generateHistogramSpec
+			: generateCountSpec;
 </script>
 
 <div class="cell">
@@ -348,13 +292,9 @@
 			on:click={setSelection}
 			on:blur={setSelection}>
 			<VegaLite
-				spec={chartType === ChartType.Histogram
-					? generateHistogramSpec({
-							colors: shouldColor ? domain.map((d) => d["color"]) : [],
-					  })
-					: generateCountSpec({
-							colors: shouldColor ? domain.map((d) => d["color"]) : [],
-					  })}
+				spec={dynamicSpec({
+					colors: shouldColor ? domain.map((d) => d["color"]) : [],
+				})}
 				data={histoData}
 				bind:view
 				options={{ tooltip: true, actions: false, theme: "vox" }} />

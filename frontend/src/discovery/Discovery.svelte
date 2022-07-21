@@ -1,20 +1,12 @@
 <script lang="ts">
 	import MetadataBar from "../metadata/MetadataPanel.svelte";
 	import Scatter from "./scatterplot/LegendaryScatter.svelte";
-	import Select, { Option } from "@smui/select";
 	import Samples from "../samples/Samples.svelte";
 	import SampleOptions from "../samples/SampleOptions.svelte";
 	import Button from "@smui/button";
 	import TextField from "@smui/textfield";
 	import * as pipeline from "./pipeline";
-	import {
-		filteredTable,
-		model,
-		settings,
-		colorByHash,
-		colorSpec,
-		table,
-	} from "../stores";
+	import { filteredTable, model, settings, colorSpec, table } from "../stores";
 	import { columnHash } from "../util";
 
 	import type { LegendaryScatterPoint } from "./scatterplot/scatter";
@@ -130,8 +122,7 @@
 		$settings.metadataColumns.push({ model, name, columnType, transform });
 		settings.set({ ...$settings });
 	}
-	$: console.log(pipelineJSON);
-	let tempProjection;
+
 	let selectedNode;
 	let scatterObj;
 	function resetSelection() {
@@ -140,7 +131,7 @@
 </script>
 
 <div id="main">
-	<MetadataBar />
+	<MetadataBar shouldColor />
 
 	<div>
 		<div
