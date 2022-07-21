@@ -1,6 +1,6 @@
 from enum import IntEnum
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Any
 
 from pydantic import BaseModel
 
@@ -132,11 +132,11 @@ class PipelineReset(BaseModel):
 
 
 class PipelineIdFilter(BaseModel):
-    ids: list[str]
+    ids: List[Any]
 
 
 class PipelineRegionLabeler(BaseModel):
-    polygon: list[list[float]]
+    polygon: List[List[float]]
     name: str = "default"
     up_to_id: str = ""
 

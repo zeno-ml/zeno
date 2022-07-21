@@ -1,12 +1,13 @@
 from ..node import PipelineNode
+from typing import List
 
 
 class RegionBasedLabelerNode(PipelineNode):
-    def __init__(self, polygon: list[list[float]]):
+    def __init__(self, polygon: List[List[float]]):
         super().__init__()
         self.model = polygon
 
-    def point_inside_polygon(self, point: list, polygon: list[list]):
+    def point_inside_polygon(self, point: List[float], polygon: List[List[float]]):
         x, y = point
         n = len(polygon)
         inside = False
@@ -23,7 +24,9 @@ class RegionBasedLabelerNode(PipelineNode):
             p1x, p1y = p2x, p2y
         return inside
 
-    def points_inside_polygon(self, points: list[list], polygon: list[list]):
+    def points_inside_polygon(
+        self, points: List[List[float]], polygon: List[List[float]]
+    ):
         return [int(self.point_inside_polygon(point, polygon)) for point in points]
 
     def fit(self):

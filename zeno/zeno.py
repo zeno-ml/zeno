@@ -151,7 +151,7 @@ class Zeno(object):
         self.pipeline.set_id_column(self.id_column)
         self.pipeline.set_table(self.df)
 
-    def add_id_filter_pipeline(self, ids: list[str]):
+    def add_id_filter_pipeline(self, ids: List[str]):
         self.pipeline.add_filter(ids)
         output, js_export = self.pipeline.run()
         return js_export

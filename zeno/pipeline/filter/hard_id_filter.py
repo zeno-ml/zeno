@@ -1,10 +1,11 @@
 from copy import deepcopy
+from typing import List, Any
 
 from ..node import PipelineNode
 
 
 class HardFilterNode(PipelineNode):
-    def __init__(self, instance_ids: list):
+    def __init__(self, instance_ids: List[Any]):
         super().__init__()
         self.instance_ids = instance_ids
 
