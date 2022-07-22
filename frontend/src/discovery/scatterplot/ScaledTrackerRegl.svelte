@@ -4,6 +4,7 @@
 	import { schemeCategory10 } from "d3-scale-chromatic";
 	import { createEventDispatcher } from "svelte";
 	import type { LegendaryScatterPoint } from "./scatter";
+
 	const dispatch = createEventDispatcher();
 
 	export let canvasStyle = "";

@@ -1,11 +1,8 @@
 <script lang="ts">
 	import { createEventDispatcher } from "svelte";
 	import IconButton from "@smui/icon-button";
-	export let node: Pipeline.Node;
-	export let selectedId: string = "";
-	export let lastNode: boolean = false;
-	const dispatch = createEventDispatcher();
 
+	const dispatch = createEventDispatcher();
 	const icon = {
 		eye: {
 			on: "visibility",
@@ -13,6 +10,11 @@
 		},
 		back: "replay",
 	};
+
+	export let node: Pipeline.Node;
+	export let selectedId: string = "";
+	export let lastNode: boolean = false;
+
 	$: selectedNode = selectedId === node.id;
 </script>
 

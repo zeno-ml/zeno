@@ -4,8 +4,8 @@ import { scaleLinear } from "d3-scale";
 
 interface IInterpolateColor {
 	colorer: (normalized: number) => string;
-	range: [number, number];
 	length: number;
+	range?: [number, number];
 }
 export function interpolateColorToArray({
 	colorer,

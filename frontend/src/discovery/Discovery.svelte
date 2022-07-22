@@ -14,9 +14,9 @@
 	import * as aq from "arquero";
 	import Node from "./node/Node.svelte";
 
-	// props
-	export let scatterWidth = 800;
+	const PIPELINE_ID = "nice";
 
+	export let scatterWidth = 800;
 	export let scatterHeight = 550;
 
 	let projection2D: object[] = [];
@@ -30,10 +30,18 @@
 		labeler: null,
 	};
 	let pipelineRepr: Pipeline.Node[] = [];
+	let selectedNode;
+	let scatterObj;
 
 	$: metadataExists =
 		$settings.metadataColumns.length > 0 || $filteredTable._names.length > 0;
 	$: pointsExist = projection2D.length > 0;
+
+	$: {
+		if ($model && $table) {
+			initPipeline($table, $model);
+		}
+	}
 
 	$: {
 		if (metadataExists && pointsExist && $colorSpec) {
@@ -51,38 +59,27 @@
 		}
 	}
 
-	const noReact = {
-		resetScatter: () => (legendaryScatterPoints = []),
-		setProjection: (projection) => (projection2D = projection),
-		setPipeline: (pipeline) => (pipelineJSON = pipeline),
-		setName: (name) => (regionLabelerName = name),
-		setRepr: (repr) => (pipelineRepr = repr),
-		setSelectedNode: (node) => (selectedNode = node),
-	};
+	async function initPipeline(table: ColumnTable, model: string) {
+		pipeline.pipelineJSON().then((d) => {
+			pipelineJSON = d;
+			regionLabelerName = d.name;
+			if (d.model !== model) {
+				pipelineRepr = [];
+				projection2D = [];
+				legendaryScatterPoints = [];
+			}
+		});
 
-	const PIPELINE_ID = "nice";
-	$: {
-		if ($model && $table) {
-			pipeline.pipelineJSON().then((d) => {
-				noReact.setPipeline(d);
-				noReact.setName(d.name);
-				if (d.model !== $model) {
-					noReact.setRepr([]);
-					noReact.setProjection([]);
-					noReact.resetScatter();
+		pipeline.load({ model: model, uid: PIPELINE_ID }).then((d) => {
+			if (d !== null) {
+				if (d.pipeline.length > 0) {
+					pipelineRepr = d.pipeline;
+					const lastNode = d.pipeline[d.pipeline.length - 1];
+					projection2D = lastNode.state.projection;
+					selectedNode = lastNode;
 				}
-			});
-			pipeline.load({ model: $model, uid: PIPELINE_ID }).then((d) => {
-				if (d !== null) {
-					if (d.pipeline.length > 0) {
-						noReact.setRepr(d.pipeline);
-						const lastNode = d.pipeline[d.pipeline.length - 1];
-						noReact.setProjection(lastNode.state.projection);
-						noReact.setSelectedNode(lastNode);
-					}
-				}
-			});
-		}
+			}
+		});
 	}
 
 	function filterIdsTable(
@@ -119,8 +116,6 @@
 		settings.set({ ...$settings });
 	}
 
-	let selectedNode;
-	let scatterObj;
 	function resetSelection() {
 		scatterObj.select([]);
 		lassoSelectTable = null;

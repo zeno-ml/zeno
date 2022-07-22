@@ -3,8 +3,8 @@
 	import { schemeCategory10 } from "d3-scale-chromatic";
 	import { color, HSLColor, RGBColor } from "d3-color";
 	import { createEventDispatcher } from "svelte";
-	const dispatch = createEventDispatcher();
 
+	const dispatch = createEventDispatcher();
 	const defaultColors = schemeCategory10 as string[];
 
 	export let width = 800;
@@ -19,6 +19,7 @@
 	export let regionPolygon = [];
 	export let regionStroke = color("#9B53DF");
 	export let regionFill = opacify(regionStroke, 0.25);
+	export let colorRange = defaultColors;
 
 	let mousePos = [0, 0];
 	let conversion;
@@ -28,7 +29,6 @@
 	let intervalSample = 1;
 	let currInterval = 0;
 
-	export let colorRange = defaultColors;
 	$: svgPolygon = polygon.map(([x, y]) => [
 		conversion.xViewScale(x),
 		conversion.yViewScale(y),
