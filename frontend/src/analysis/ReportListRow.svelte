@@ -7,7 +7,6 @@
 
 	import { clickOutside } from "../clickOutside";
 	import { report as selectedReport, reports } from "../stores";
-	import { updateReports } from "../util";
 
 	export let report;
 	export let reportIndex;
@@ -22,7 +21,6 @@
 			editMode = false;
 			reports.update((reps) => {
 				reps[reportIndex].name = report.name;
-				updateReports(reps);
 				return reps;
 			});
 		}
@@ -64,7 +62,6 @@
 						e.stopPropagation();
 						reports.update((reps) => {
 							reps.splice(reportIndex, 1);
-							updateReports(reps);
 							return reps;
 						});
 					}}>

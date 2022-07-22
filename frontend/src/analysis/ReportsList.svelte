@@ -3,7 +3,6 @@
 	import Ripple from "@smui/ripple";
 
 	import { report, reports } from "../stores";
-	import { updateReports } from "../util";
 
 	import ReportListRow from "./ReportListRow.svelte";
 
@@ -33,7 +32,6 @@
 					name: "new report",
 					reportPredicates: [],
 				});
-				updateReports(reps);
 				return reps;
 			});
 		}}>New Report</Button>

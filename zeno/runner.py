@@ -4,7 +4,6 @@ import json
 import os
 import sys
 from pathlib import Path
-from urllib.parse import unquote
 
 import tomli
 import uvicorn  # type: ignore
@@ -13,26 +12,20 @@ from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 
 from .classes import (
-    MetricsRequest,
+    MetricKey,
+    Report,
+    Slice,
     PipelineIdFilter,
     PipelineInit,
     PipelineProjection,
     PipelineRegionLabeler,
     PipelineReset,
-    ReportsRequest,
     StatusResponse,
-    TableRequest,
+    ZenoColumn,
     ZenoSettings,
+    ZenoVariables,
 )
 from .zeno import Zeno
-
-TASK_TYPES = [
-    "image-classification",
-    "image-segmentation",
-    "object-detection",
-    "text-classification",
-    "audio-classification",
-]
 
 
 def main():
@@ -199,41 +192,42 @@ def run_zeno(args):
             metadata_columns=zeno.columns,
         )
 
-    @api_app.get("/metrics")
-    def get_metrics():
-        return json.dumps(list(zeno.metric_functions.keys()))
-
-    @api_app.get("/transforms")
-    def get_transforms():
-        return json.dumps(list(zeno.transform_functions.keys()))
-
-    @api_app.get("/models")
-    def get_models():
-        return json.dumps([str(n) for n in zeno.model_names])
+    @api_app.get("/initialize", response_model=ZenoVariables)
+    def get_initial_info():
+        return ZenoVariables(
+            metrics=list(zeno.metric_functions.keys()),
+            transforms=list(zeno.transform_functions.keys()),
+            models=[str(n) for n in zeno.model_names],
+            folders=zeno.folders,
+        )
 
     @api_app.get("/slices")
     def get_slices():
         return json.dumps(zeno.get_slices())
 
-    @api_app.get("/delete-slice/{slice_id}")
-    def delete_slice(slice_id: str):
-        return json.dumps(zeno.delete_slice(unquote(slice_id)))
-
-    @api_app.post("/table")
-    def get_table(columns: TableRequest):
-        return Response(zeno.get_table(columns.columns))
-
-    @api_app.post("/results")
-    def get_results(reqs: MetricsRequest):
-        return json.dumps(zeno.get_results(reqs))
-
     @api_app.get("/reports")
     def get_reports():
         return json.dumps(zeno.get_reports())
 
-    @api_app.post("/update-reports")
-    def update_reports(reqs: ReportsRequest):
-        return json.dumps(zeno.update_reports(reqs))
+    @api_app.post("/results")
+    def get_results(reqs: list[MetricKey]):
+        return json.dumps(zeno.get_results(reqs))
+
+    @api_app.post("/table")
+    def get_table(columns: list[ZenoColumn]):
+        return Response(zeno.get_table(columns))
+
+    @api_app.post("/set-folders")
+    def set_folders(folders: list[str]):
+        zeno.set_folders(folders)
+
+    @api_app.post("/set-slices")
+    def set_slices(slices: list[Slice]):
+        zeno.set_slices(slices)
+
+    @api_app.post("/set-reports")
+    def update_reports(reqs: list[Report]):
+        zeno.set_reports(reqs)
 
     @api_app.post("/pipe/reset")
     def reset_pipeline(req: PipelineReset):

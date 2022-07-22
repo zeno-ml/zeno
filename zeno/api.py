@@ -16,12 +16,14 @@ class ZenoOptions:
         data_path (str): Path to directory with data files.
         label_path (str): Path to directory with label files.
         output_path (str): Path to directory with a given model's output.
+        distill_columns (map[str, str]): Map from distiller name to distill column.
     """
 
     id_column: str
     data_column: str
     label_column: str
     output_column: str
+    distill_columns: dict[str, str]
     data_path: str
     label_path: str
     output_path: str

@@ -76,7 +76,7 @@
 		try {
 			import(v).then((m) => (divFunction = m.default));
 		} catch (e) {
-			console.log(e);
+			console.log("ERROR: failed to load sample view ---", e);
 		}
 	});
 </script>

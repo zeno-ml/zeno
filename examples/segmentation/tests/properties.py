@@ -1,5 +1,6 @@
 import os
 import cv2
+from PIL import Image
 from zeno import ZenoOptions, distill_function
 import numpy as np
 
@@ -60,3 +61,21 @@ def black_box(df, ops):
             box_count.append(0)
 
     return box_count
+
+
+def get_brightness(im):
+    im_grey = im.convert("LA")
+    width, height = im.size
+
+    total = 0
+    for i in range(150, width - 150):
+        for j in range(150, height - 150):
+            total += im_grey.getpixel((i, j))[0]
+
+    return total / (width * height)
+
+
+@distill_function
+def brightness(df, ops):
+    imgs = [Image.open(os.path.join(ops.data_path, img)) for img in df[ops.data_column]]
+    return [get_brightness(im) for im in imgs]

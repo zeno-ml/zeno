@@ -2,11 +2,11 @@
 	import type ColumnTable from "arquero/dist/types/table/column-table";
 	import type { View } from "svelte-vega";
 
-	import Button from "@smui/button";
-	import { Label } from "@smui/common";
-
 	import { VegaLite } from "svelte-vega";
 	import { onMount } from "svelte";
+
+	import Button from "@smui/button";
+	import { Label } from "@smui/common";
 
 	import {
 		metadataSelections,
@@ -15,15 +15,15 @@
 		availableColors,
 		colorByHash,
 		filteredTable,
-	} from "../stores";
-	import { columnHash } from "../util";
+	} from "../../stores";
+	import { columnHash } from "../../util";
 	import { generateCountSpec, generateHistogramSpec } from "./vegaSpecs";
 	import {
 		computeCountsFromDomain,
 		computeDomain,
 		assignColorsFromDomain,
 		colorDomain,
-	} from "./metadata";
+	} from "../metadata";
 
 	export let col: ZenoColumn;
 	export let shouldColor: boolean = false;
@@ -310,7 +310,7 @@
 		border-top: 1px solid #e0e0e0;
 		border-bottom: 1px solid #e0e0e0;
 		padding: 10px;
-		min-width: 400px;
+		min-width: calc(100% - 30px);
 		width: fit-content;
 		display: flex;
 		flex-direction: column;
@@ -319,7 +319,6 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		width: 100%;
 		font-size: 14px;
 		margin-left: 5px;
 		margin-bottom: 5px;

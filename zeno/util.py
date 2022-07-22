@@ -1,9 +1,9 @@
 import dataclasses
 import os
+import pickle
 from importlib import util
 from inspect import getsource
 from pathlib import Path
-from typing import Tuple
 
 import numpy as np
 
@@ -28,6 +28,14 @@ def get_arrow_bytes(df, id_col):
     return bs
 
 
+def read_pickle(file_name: str, cache_path: Path, default):
+    try:
+        with open(os.path.join(cache_path, file_name), "rb") as f:
+            return pickle.load(f)
+    except FileNotFoundError:
+        return default
+
+
 def load_series(df, col_name, save_path):
     try:
         df.loc[:, col_name] = pd.read_pickle(save_path)
@@ -50,7 +58,7 @@ def predistill_data(
     df: pd.DataFrame,
     batch_size: int,
     pos: int,
-) -> Tuple[ZenoColumn, pd.Series]:
+) -> tuple[ZenoColumn, pd.Series]:
     fn = get_function(preprocessor)
     col_hash = str(column)
     col = df[col_hash]
@@ -84,7 +92,7 @@ def transform_data(
     df: pd.DataFrame,
     batch_size: int,
     pos: int,
-) -> Tuple[ZenoColumn, pd.Series]:
+) -> tuple[ZenoColumn, pd.Series]:
     transform_fn = get_function(transform)
     transform_col = ZenoColumn(
         column_type=ZenoColumnType.TRANSFORM,
@@ -136,7 +144,7 @@ def run_inference(
     df: pd.DataFrame,
     batch_size: int,
     pos: int,
-) -> Tuple[ZenoColumn, ZenoColumn, pd.Series, pd.Series]:
+) -> tuple[ZenoColumn, ZenoColumn, pd.Series, pd.Series]:
     model_loader_fn = get_function(model_loader)
     model_name = os.path.basename(model_path).split(".")[0]
 

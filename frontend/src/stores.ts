@@ -4,6 +4,8 @@ import { websocketStore } from "svelte-websocket-store";
 import type ColumnTable from "arquero/dist/types/table/column-table";
 import * as aq from "arquero";
 
+import { folderWritable, reportWritable, sliceWritable } from "./customStores";
+
 export const ready: Writable<boolean> = writable(false);
 export const tab: Writable<string> = writable("results");
 
@@ -41,6 +43,7 @@ export const settings: Writable<Settings> = writable(<Settings>{
 export const metrics: Writable<string[]> = writable([]);
 export const models: Writable<string[]> = writable([]);
 export const transforms: Writable<string[]> = writable([]);
+export const folders: Writable<string[]> = folderWritable();
 
 export const model: Writable<string> = writable("");
 export const metric: Writable<string> = writable("");
@@ -49,8 +52,8 @@ export const transform: Writable<string> = writable("");
 export const report: Writable<number> = writable(undefined);
 export const sort: Writable<ZenoColumn> = writable();
 
-export const slices: Writable<Map<string, Slice>> = writable(new Map());
-export const reports: Writable<Report[]> = writable([]);
+export const slices: Writable<Map<string, Slice>> = sliceWritable();
+export const reports: Writable<Report[]> = reportWritable();
 export const results: Writable<InternMap<MetricKey, number>> = writable(
 	new InternMap(
 		[],
@@ -73,6 +76,9 @@ export const currentColumns: Readable<ZenoColumn[]> = derived(
 			(c) => c.model === "" || c.model === $model
 		)
 );
+
+export const showNewSlice: Writable<boolean> = writable(false);
+export const sliceToEdit: Writable<Slice> = writable(null);
 
 export const colorByHash = writable("0label");
 export const availableColors = writable({});

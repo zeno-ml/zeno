@@ -39,6 +39,7 @@ interface FilterPredicate {
 
 interface Slice {
 	sliceName: string;
+	folder: string;
 	filterPredicates?: FilterPredicate[];
 	idxs?: string[];
 }

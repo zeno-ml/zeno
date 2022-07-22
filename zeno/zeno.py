@@ -9,7 +9,6 @@ from importlib import util
 from inspect import getmembers, getsource, isfunction
 from multiprocessing import Pool
 from pathlib import Path
-from typing import Dict, List
 
 import numpy as np
 import pandas as pd
@@ -17,9 +16,7 @@ import pandas as pd
 from .api import ZenoOptions
 from .classes import (
     MetricKey,
-    MetricsRequest,
     Report,
-    ReportsRequest,
     Slice,
     ZenoColumn,
     ZenoColumnType,
@@ -33,6 +30,7 @@ from .util import (
     load_series,
     postdistill_data,
     predistill_data,
+    read_pickle,
     run_inference,
     transform_data,
 )
@@ -43,7 +41,7 @@ class Zeno(object):
         self,
         metadata_path: Path,
         tests: Path,
-        models: List[Path],
+        models: list[Path],
         batch_size,
         id_column,
         data_column,
@@ -73,6 +71,7 @@ class Zeno(object):
             id_column=str(self.id_column),
             data_column=str(self.data_column),
             label_column=str(self.label_column),
+            distill_columns=dict(),
             data_path=self.data_path,
             label_path=self.label_path,
             output_column="",
@@ -92,9 +91,9 @@ class Zeno(object):
         self.predict_function: ZenoFunction = ZenoFunction(
             name="", file_name=Path(""), fn_type=ZenoFunctionType.PREDICTION
         )
-        self.distill_functions: Dict[str, ZenoFunction] = {}
-        self.metric_functions: Dict[str, ZenoFunction] = {}
-        self.transform_functions: Dict[str, ZenoFunction] = {}
+        self.distill_functions: dict[str, ZenoFunction] = {}
+        self.metric_functions: dict[str, ZenoFunction] = {}
+        self.transform_functions: dict[str, ZenoFunction] = {}
 
         # Read metadata as Pandas for slicing
         if metadata_path.suffix == ".csv":
@@ -106,6 +105,7 @@ class Zeno(object):
                 "Extension of " + metadata_path.suffix + " not one of .csv or .parquet"
             )
             sys.exit(1)
+
         # TODO: figure out if this breaks for big integers. Need to do this for
         # frontend bigint issues.
         d = dict.fromkeys(
@@ -117,26 +117,19 @@ class Zeno(object):
         self.cache_path = cache_path
         os.makedirs(self.cache_path, exist_ok=True)
 
-        self.slices: Dict[str, Slice] = {}
-        try:
-            with open(os.path.join(self.cache_path, "slices.pickle"), "rb") as f:
-                self.slices = pickle.load(f)
-        except FileNotFoundError:
-            pass
-        self.reports: List[Report] = []
-        try:
-            with open(os.path.join(self.cache_path, "reports.pickle"), "rb") as f:
-                self.reports = pickle.load(f)
-        except FileNotFoundError:
-            pass
+        self.folders: list[str] = read_pickle("folders.pickle", self.cache_path, [])
+        self.reports: list[Report] = read_pickle("reports.pickle", self.cache_path, [])
+        self.slices: dict[str, Slice] = read_pickle(
+            "slices.pickle", self.cache_path, {}
+        )
 
         self.df = self.df.rename(columns=lambda x: "0" + str(x))
         self.df[str(self.id_column)].astype(str)
         self.df.set_index(str(self.id_column), inplace=True)
         self.df[str(self.id_column)] = self.df.index
 
-        self.columns: List[ZenoColumn] = []
-        self.complete_columns: List[ZenoColumn] = []
+        self.columns: list[ZenoColumn] = []
+        self.complete_columns: list[ZenoColumn] = []
 
         self.done_processing = False
 
@@ -151,7 +144,7 @@ class Zeno(object):
         self.pipeline.set_id_column(self.id_column)
         self.pipeline.set_table(self.df)
 
-    def add_id_filter_pipeline(self, ids: List[str]):
+    def add_id_filter_pipeline(self, ids: list[str]):
         self.pipeline.add_filter(ids)
         output, js_export = self.pipeline.run()
         return js_export
@@ -208,7 +201,7 @@ class Zeno(object):
         """Parse testing files, distill, and run inference."""
 
         # Get all Zeno core columns before processing.
-        zeno_cols: List[ZenoColumn] = []
+        zeno_cols: list[ZenoColumn] = []
         for metadata_col in self.df.columns:
             col = ZenoColumn(column_type=ZenoColumnType.METADATA, name=metadata_col[1:])
             zeno_cols.append(col)
@@ -305,7 +298,7 @@ class Zeno(object):
 
     def __transform(self):
         """Run transform functions."""
-        transform_to_run: List[ZenoFunction] = []
+        transform_to_run: list[ZenoFunction] = []
         for transform_function in self.transform_functions.values():
             transform_column = ZenoColumn(
                 column_type=ZenoColumnType.TRANSFORM, name=transform_function.name
@@ -342,7 +335,7 @@ class Zeno(object):
     def __predistill(self):
         """Run distilling functions not dependent on model outputs."""
         # Check if we need to preprocess since Pool is expensive
-        predistill_to_run: List[ZenoColumn] = []
+        predistill_to_run: list[ZenoColumn] = []
         for predistill_column in [
             c for c in self.columns if c.column_type == ZenoColumnType.PREDISTILL
         ]:
@@ -435,7 +428,7 @@ class Zeno(object):
         self.status = "Done running inference"
 
         # Check if we need to run postprocessing since Pool is expensive
-        postdistill_to_run: List[ZenoColumn] = []
+        postdistill_to_run: list[ZenoColumn] = []
         for postdistill_column in [
             c for c in self.columns if c.column_type == ZenoColumnType.POSTDISTILL
         ]:
@@ -477,11 +470,11 @@ class Zeno(object):
 
         self.status = "Done running postprocessing"
 
-    def get_results(self, request: MetricsRequest):
+    def get_results(self, requests: list[MetricKey]):
         """Calculate result for each requested combination."""
 
         return_metrics = []
-        for metric_key in request.requests:
+        for metric_key in requests:
             return_metrics.append(self.calculate_metrics(metric_key))
 
         return return_metrics
@@ -498,10 +491,24 @@ class Zeno(object):
         )
         output_hash = str(output_col)
 
+        distill_fns = [
+            c
+            for c in self.columns
+            if (
+                c.column_type == ZenoColumnType.PREDISTILL
+                or c.column_type == ZenoColumnType.POSTDISTILL
+            )
+            and c.transform == metric_key.transform
+            and c.model == metric_key.model
+        ]
+
         local_ops = dataclasses.replace(
             self.zeno_options,
             output_column=output_hash,
             output_path=os.path.join(self.cache_path, output_hash),
+            distill_columns=dict(
+                zip([c.name for c in distill_fns], [str(c) for c in distill_fns])
+            ),
         )
         if sli.idxs and len(sli.idxs) > 0:
             metric_func = get_function(self.metric_functions[metric_key.metric])
@@ -509,21 +516,7 @@ class Zeno(object):
         else:
             result_metric = None
 
-        if len(sli.slice_name) > 0 and sli.idxs and len(sli.idxs) != len(self.df):
-            self.slices[sli.slice_name] = sli
-            with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
-                pickle.dump(self.slices, f)
-
         return result_metric
-
-    def get_reports(self):
-        return [r.dict(by_alias=True) for r in self.reports]
-
-    def update_reports(self, reports: ReportsRequest):
-        """Update reports with results."""
-        self.reports = reports.reports
-        with open(os.path.join(self.cache_path, "reports.pickle"), "wb") as f:
-            pickle.dump(self.reports, f)
 
     def get_table(self, columns):
         """Get the metadata DataFrame for a given slice.
@@ -536,7 +529,20 @@ class Zeno(object):
     def get_slices(self):
         return [s.dict(by_alias=True) for s in self.slices.values()]
 
-    def delete_slice(self, slice_id):
-        self.slices.pop(slice_id)
+    def get_reports(self):
+        return [r.dict(by_alias=True) for r in self.reports]
+
+    def set_folders(self, folders):
+        self.folders = folders
+        with open(os.path.join(self.cache_path, "folders.pickle"), "wb") as f:
+            pickle.dump(self.folders, f)
+
+    def set_reports(self, reports: list[Report]):
+        self.reports = reports
+        with open(os.path.join(self.cache_path, "reports.pickle"), "wb") as f:
+            pickle.dump(self.reports, f)
+
+    def set_slices(self, slices: list[Slice]):
+        self.slices = dict(zip([s.slice_name for s in slices], slices))
         with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
             pickle.dump(self.slices, f)

@@ -6,6 +6,9 @@ node_modules/
 frontend/index.mjs
 *.pt
 coco-tagging.csv
+model10/
+model20/
+model30/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

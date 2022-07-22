@@ -2,7 +2,7 @@
 	import { onMount } from "svelte";
 	import Router from "svelte-spa-router";
 
-	import { metric, metrics, model, models, ready, status } from "./stores";
+	import { status } from "./stores";
 	import { initialFetch, updateTableColumns } from "./util";
 
 	import Analysis from "./analysis/Analysis.svelte";
@@ -20,12 +20,6 @@
 
 	onMount(() => initialFetch());
 	status.subscribe((w) => updateTableColumns(w));
-	ready.subscribe((r) => {
-		if (r) {
-			model.set($models[$models.length - 1]);
-			metric.set($metrics[0]);
-		}
-	});
 </script>
 
 <Header />
