@@ -13,9 +13,13 @@ from fastapi.staticfiles import StaticFiles
 
 from .classes import (
     MetricKey,
-    ProjectionRequest,
     Report,
     Slice,
+    PipelineIdFilter,
+    PipelineInit,
+    PipelineProjection,
+    PipelineRegionLabeler,
+    PipelineReset,
     StatusResponse,
     ZenoColumn,
     ZenoSettings,
@@ -225,10 +229,42 @@ def run_zeno(args):
     def update_reports(reqs: list[Report]):
         zeno.set_reports(reqs)
 
-    @api_app.post("/projection")
-    def run_projection(model: ProjectionRequest):
-        projection = zeno.run_projection(model.model, model.instance_ids)
-        return json.dumps({"data": projection, "model": model.model})
+    @api_app.post("/pipe/reset")
+    def reset_pipeline(req: PipelineReset):
+        zeno.reset_pipeline(req.up_to_id)
+        return json.dumps({"status": True})
+
+    @api_app.post("/pipe/load")
+    def load_pipeline(req: PipelineInit):
+        js_export = zeno.load_pipeline(req.model, req.uid)
+        return json.dumps({"status": True, "data": js_export})
+
+    @api_app.post("/pipe/init")
+    def init_pipeline(req: PipelineInit):
+        zeno.init_pipeline(req.model, req.uid)
+        return json.dumps({"status": True})
+
+    @api_app.post("/pipe/id-filter")
+    def filter_pipeline(req: PipelineIdFilter):
+        js_export = zeno.add_id_filter_pipeline(req.ids)
+        return json.dumps({"status": True, "data": js_export})
+
+    @api_app.post("/pipe/umap")
+    def umap_pipeline(req: PipelineProjection):
+        js_export = zeno.add_umap_pipeline(req.args)
+        return json.dumps({"status": True, "data": js_export})
+
+    @api_app.post("/pipe/region-labeler")
+    def region_labeler_pipeline(req: PipelineRegionLabeler):
+        js_export = zeno.add_region_labeler_pipeline(
+            req.polygon, req.name, req.up_to_id
+        )
+        return json.dumps({"status": True, "data": js_export})
+
+    @api_app.get("/pipe/graph")
+    def get_pipeline_json():
+        js_export = zeno.get_json_pipeline()
+        return json.dumps({"status": True, "data": js_export})
 
     @api_app.websocket("/status")
     async def results_websocket(websocket: WebSocket):

@@ -5,7 +5,6 @@
 	import NewSlicePopup from "./popups/NewSlicePopup.svelte";
 	import SliceCell from "./cells/SliceCell.svelte";
 
-	import { ZenoColumnType } from "../globals";
 	import {
 		folders,
 		metadataSelections,
@@ -24,10 +23,14 @@
 		updateFilteredTable,
 		updateSliceIdxs,
 	} from "../util";
+	import { ZenoColumnType } from "../globals";
+
+	export let shouldColor = false;
 
 	table.subscribe((t) => updateFilteredTable(t));
 	metadataSelections.subscribe(() => updateFilteredTable($table));
 	sliceSelections.subscribe(() => updateFilteredTable($table));
+
 	model.subscribe(() => updateSliceIdxs());
 
 	$: res = getMetricsForSlices([
@@ -60,7 +63,15 @@
 			<span class="size">({$table.size})</span>
 		</div>
 	</div>
-	<div class="inline" style:margin-top="20px">
+
+	<h4>Weak Labels</h4>
+	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.WEAK_LABEL) as col}
+		<MetadataCell {col} {shouldColor} />
+	{:else}
+		No weak labels yet.
+	{/each}
+
+	<div class="inline">
 		<h4>Slices</h4>
 		<div style:margin-right="13px" class="inline">
 			<NewFolderPopup />
@@ -78,22 +89,22 @@
 
 	<h4 style:margin-top="40px">Metadata</h4>
 	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.METADATA) as col}
-		<MetadataCell {col} />
+		<MetadataCell {col} {shouldColor} />
 	{/each}
 
 	{#if $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL).length > 0}
 		<h4 style:margin-top="40px">Distilled Metadata</h4>
 	{/if}
+
 	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL) as col}
 		<MetadataCell {col} />
 	{/each}
+
 	{#if $model}
 		{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.POSTDISTILL && m.model === $model && m.transform === $transform) as col}
-			<MetadataCell {col} />
+			<MetadataCell {col} {shouldColor} />
 		{/each}
 	{/if}
-
-	<div style:height="50px" />
 </div>
 
 <style>

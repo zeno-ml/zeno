@@ -1,6 +1,6 @@
 from enum import IntEnum
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel
 
@@ -12,6 +12,7 @@ class ZenoColumnType(IntEnum):
     EMBEDDING = 3
     POSTDISTILL = 4
     TRANSFORM = 5
+    WEAK_LABEL = 6
 
 
 class ZenoFunctionType(IntEnum):
@@ -112,6 +113,24 @@ class StatusResponse(CamelModel):
     complete_columns: list[ZenoColumn]
 
 
-class ProjectionRequest(BaseModel):
+class PipelineInit(BaseModel):
     model: str
-    instance_ids: list[str]
+    uid: str = "id:0"
+
+
+class PipelineReset(BaseModel):
+    up_to_id: str = ""
+
+
+class PipelineIdFilter(BaseModel):
+    ids: list[Any]
+
+
+class PipelineRegionLabeler(BaseModel):
+    polygon: list[list[float]]
+    name: str = "default"
+    up_to_id: str = ""
+
+
+class PipelineProjection(BaseModel):
+    args: dict

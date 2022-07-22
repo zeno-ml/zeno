@@ -1,243 +1,287 @@
 <script lang="ts">
 	import MetadataBar from "../metadata/MetadataPanel.svelte";
-	import SelectionBar from "../metadata/SelectionBar.svelte";
-	import LegendaryScatter from "./scatter/LegendaryScatter.svelte";
-	import Select, { Option } from "@smui/select";
+	import Scatter from "./scatterplot/LegendaryScatter.svelte";
 	import Samples from "../samples/Samples.svelte";
 	import SampleOptions from "../samples/SampleOptions.svelte";
-	import * as d3chromatic from "d3-scale-chromatic";
-	import {
-		projectEmbeddings2D,
-		reformatAPI,
-		interpolateColorToArray,
-		indexTable,
-		binContinuous,
-		getDataRange as uniqueOutputs,
-	} from "./discovery";
-	import { filteredTable, model, settings } from "../stores";
+	import Button from "@smui/button";
+	import TextField from "@smui/textfield";
+	import * as pipeline from "./pipeline";
+	import { filteredTable, model, settings, colorSpec, table } from "../stores";
 	import { columnHash } from "../util";
 
-	import type { dataType } from "./discovery";
-	import type {
-		LegendaryScatterPoint,
-		LegendaryLegendEntry,
-	} from "./scatter/scatter";
+	import type { LegendaryScatterPoint } from "./scatterplot/scatter";
 	import type ColumnTable from "arquero/dist/types/table/column-table";
+	import * as aq from "arquero";
+	import Node from "./node/Node.svelte";
 
-	// props
-	export let scatterWidth = 900;
-	export let scatterHeight = 700;
-	export let colorsCategorical = d3chromatic.schemeCategory10 as string[];
-	export let colorsContinuous = d3chromatic.interpolateBuPu;
+	const PIPELINE_ID = "nice";
 
-	let projection2D: number[][] = [];
-	let colorValues: number[] = [];
-	let opacityValues: number[] = [];
-	let colorBy: string = "label";
-	// eslint-disable-next-line
-	let dataType: dataType = "categorical";
-	let colorRange: string[] = colorsCategorical;
+	export let scatterWidth = 800;
+	export let scatterHeight = 550;
+
+	let projection2D: object[] = [];
 	let lassoSelectTable = null;
+	let regionLabeler = false;
+	let regionPolygon = [];
+	let regionLabelerName = "name";
+	let legendaryScatterPoints: LegendaryScatterPoint[] = [];
+	let pipelineJSON: { pipeline: unknown[]; labeler: null | unknown } = {
+		pipeline: [],
+		labeler: null,
+	};
+	let pipelineRepr: Pipeline.Node[] = [];
+	let selectedNode;
+	let scatterObj;
 
-	// stuff that gets updated (reactive)
 	$: metadataExists =
 		$settings.metadataColumns.length > 0 || $filteredTable._names.length > 0;
-
 	$: pointsExist = projection2D.length > 0;
 
-	// absolutely cursed reactive stuff here
-	// whenever stuff is mentioned as the parameter it will update/recompute for that variable
-	// so I hid stuff (global variables) within the function so they don't call the reactive on update
-	// this cursed black magic can be removed once I get a better copying and caching system down
-	// for the pipeline
-	let oldIds = [],
-		newIds = [];
 	$: {
-		oldIds = saveIds();
-		updateColors({ colorBy });
-	}
-	$: {
-		if (metadataExists && $filteredTable) {
-			newIds = saveIds();
+		if ($model && $table) {
+			initPipeline($table, $model);
 		}
 	}
+
 	$: {
-		opacityValues = oldIds.map((id) => (newIds.includes(id) ? 0.75 : 0.15));
-	}
-	$: {
-		if (metadataExists && pointsExist) {
-			updateLegendaryScatter({
-				colorRange,
-				colorValues,
-				dataRange,
-				projection2D,
-				opacityValues,
+		if (metadataExists && pointsExist && $colorSpec) {
+			legendaryScatterPoints = projection2D.map((item) => {
+				const proj = item["proj"],
+					id = item["id"];
+				return {
+					x: proj[0],
+					y: proj[1],
+					opacity: 0.75,
+					color: $colorSpec.labels.find((label) => label.id === id).colorIndex,
+					id,
+				};
 			});
 		}
 	}
 
-	// functions
-	function scatterSelectEmpty(table: ColumnTable) {
-		return table === null;
-	}
-	function saveIds() {
-		if ($filteredTable) {
-			return $filteredTable
-				.columnArray(columnHash($settings.idColumn))
-				.map((d) => d) as string[];
-		} else {
-			return [];
-		}
-	}
-	function getMetadata(table: ColumnTable, colorBy: string) {
-		return table.columnArray(colorBy) as Array<unknown>;
-	}
-
-	let selectedMetadataOutputs,
-		dataRange,
-		legendaryScatterLegend: LegendaryLegendEntry[],
-		legendaryScatterPoints: LegendaryScatterPoint[];
-
-	function inferOutputsType(
-		colorBy: string,
-		table: ColumnTable = $filteredTable
-	) {
-		// get the range and type of data
-		const metadata = getMetadata(table, colorBy); // get columns for selected metadata
-		const { range, type } = uniqueOutputs(metadata); // return the unique categorical or continuous range
-		return { metadata, range, type };
-	}
-	function selectColorsForRange(
-		type: dataType,
-		metadata: unknown[],
-		range: unknown[]
-	) {
-		// based on datatype inferred color differently
-		let colorRange, colorValues;
-		if (type === "categorical") {
-			colorValues = metadata.map((md) => range.indexOf(md));
-			colorRange = colorsCategorical;
-		} else if (type === "continuous") {
-			const binAssignments = binContinuous(metadata);
-			colorValues = binAssignments.map((ass) => range[ass]);
-			colorRange = interpolateColorToArray(colorsContinuous, range.length);
-		}
-		return { colorRange, colorValues };
-	}
-	function updateColors({ colorBy = "label", table = $filteredTable } = {}) {
-		// compute coloring stuff
-		const { metadata, range, type } = inferOutputsType(colorBy, table);
-		const { colorRange: cRange, colorValues: cValues } = selectColorsForRange(
-			type,
-			metadata,
-			range
-		);
-
-		// save globally
-		selectedMetadataOutputs = metadata;
-		dataRange = range;
-		// eslint-disable-next-line
-		dataType = type;
-		colorRange = cRange;
-		colorValues = cValues;
-	}
-
-	function packageLegendaryScatterPoints({
-		colorRange,
-		dataRange,
-		projection2D,
-		colorValues,
-		opacityValues,
-	}) {
-		const legend = reformatAPI.legendaryScatter.legend(colorRange, dataRange);
-		const scatter = reformatAPI.legendaryScatter.points(
-			projection2D,
-			colorValues,
-			opacityValues
-		);
-		return { scatter, legend };
-	}
-	function updateLegendaryScatter({
-		colorRange,
-		colorValues,
-		dataRange,
-		opacityValues,
-		projection2D,
-	}) {
-		const { legend, scatter } = packageLegendaryScatterPoints({
-			colorRange,
-			colorValues,
-			dataRange,
-			opacityValues,
-			projection2D,
+	async function initPipeline(table: ColumnTable, model: string) {
+		pipeline.pipelineJSON().then((d) => {
+			pipelineJSON = d;
+			regionLabelerName = d.name;
+			if (d.model !== model) {
+				pipelineRepr = [];
+				projection2D = [];
+				legendaryScatterPoints = [];
+			}
 		});
-		// update global variables for rendering
-		legendaryScatterLegend = legend;
-		legendaryScatterPoints = scatter;
+
+		pipeline.load({ model: model, uid: PIPELINE_ID }).then((d) => {
+			if (d !== null) {
+				if (d.pipeline.length > 0) {
+					pipelineRepr = d.pipeline;
+					const lastNode = d.pipeline[d.pipeline.length - 1];
+					projection2D = lastNode.state.projection;
+					selectedNode = lastNode;
+				}
+			}
+		});
+	}
+
+	function filterIdsTable(
+		table: ColumnTable,
+		idColumn: string = columnHash($settings.idColumn),
+		ids: string[]
+	) {
+		let rows = [];
+		for (const row of $filteredTable) {
+			if (ids.includes(row[idColumn])) {
+				rows.push(row);
+			}
+		}
+		let accumulate = {};
+		rows.forEach((row) => {
+			Object.keys(row).forEach((key) => {
+				if (!(key in accumulate)) {
+					accumulate[key] = [];
+				}
+				accumulate[key].push(row[key]);
+			});
+		});
+		const newTable = aq.table(accumulate);
+		return newTable;
+	}
+
+	function addZenoColumn({
+		model = "",
+		name = "",
+		columnType,
+		transform = "",
+	}: ZenoColumn) {
+		$settings.metadataColumns.push({ model, name, columnType, transform });
+		settings.set({ ...$settings });
+	}
+
+	function resetSelection() {
+		scatterObj.select([]);
+		lassoSelectTable = null;
 	}
 </script>
 
 <div id="main">
-	<MetadataBar />
-	<div>
-		<!-- Color Dropdown -->
-		<div id="color-by">
-			{#if metadataExists}
-				<Select bind:value={colorBy} label={"Color Points By"}>
-					{#each $settings.metadataColumns as metadataName, i}
-						<Option value={metadataName}>{metadataName}</Option>
-					{/each}
-				</Select>
-			{/if}
-		</div>
+	<MetadataBar shouldColor />
 
-		<!-- Scatter View -->
-		<div id="scatter-view" style:margin-top="10px">
+	<div>
+		<div
+			id="scatter-view"
+			style:margin-top="10px"
+			style:height="{scatterHeight}px">
+			<div id="pipeline-view" class="paper" style:height="{scatterHeight}px">
+				<h4>Pipeline Labeler</h4>
+				<div>
+					<TextField bind:value={regionLabelerName} label={"Name"} />
+				</div>
+				<h4>Pipeline</h4>
+				<div>
+					<div id="weak-labeler-pipeline">
+						{#each pipelineRepr as node, i}
+							<Node
+								{node}
+								on:backClick={async () => {
+									await pipeline.reset({ upToId: node.id });
+									let newSubset = [];
+									for (let i = 0; i < pipelineRepr.length; i++) {
+										newSubset.push(pipelineRepr[i]);
+										if (pipelineRepr[i].id === node.id) {
+											break;
+										}
+									}
+									pipelineRepr = newSubset;
+									selectedNode = node;
+									projection2D = node.state.projection;
+									pipelineJSON = await pipeline.pipelineJSON();
+								}}
+								on:eyeClick={() => {
+									selectedNode = node;
+									projection2D = node.state.projection;
+								}}
+								selectedId={selectedNode.id}
+								lastNode={i === pipelineRepr.length - 1} />
+						{:else}
+							<div>Empty pipeline</div>
+						{/each}
+					</div>
+					<div>
+						<Button
+							title="Click to Filter Current Selection"
+							variant="outlined"
+							on:click={async () => {
+								let tableIds = $filteredTable;
+								// if (lassoSelectTable !== null) {
+								// 	tableIds = tableIds.intersect(lassoSelectTable);
+								// }
+								const ids = tableIds.columnArray(
+									columnHash($settings.idColumn)
+								);
+								const node = await pipeline.idFilter({ ids });
+								projection2D = node.state.projection;
+								pipelineJSON = await pipeline.pipelineJSON();
+								resetSelection();
+								pipelineRepr = [...pipelineRepr, node];
+								selectedNode = node;
+							}}>
+							Filter</Button>
+						<Button
+							variant="outlined"
+							title="Click to Project with UMAP"
+							on:click={async () => {
+								const node = await pipeline.parametricUMAP();
+								projection2D = node.state.projection;
+								pipelineJSON = await pipeline.pipelineJSON();
+								pipelineRepr = [...pipelineRepr, node];
+								selectedNode = node;
+							}}>
+							Project</Button>
+					</div>
+					<div>
+						<Button
+							title="Reset entire pipeline"
+							color={regionLabeler ? "secondary" : "primary"}
+							on:click={async () => {
+								await pipeline.reset();
+								await pipeline.init({ model: $model, uid: PIPELINE_ID });
+								projection2D = [];
+								legendaryScatterPoints = [];
+								regionLabelerName = "default";
+								pipelineJSON = await pipeline.pipelineJSON();
+								pipelineRepr = [];
+							}}>
+							Reset</Button>
+						<Button
+							on:click={async () => {
+								if (regionLabeler && regionPolygon.length > 0) {
+									const output = await pipeline.regionLabeler({
+										polygon: regionPolygon,
+										name: regionLabelerName,
+										upToId: selectedNode.id,
+									});
+									const column = output["col_name"];
+									addZenoColumn({
+										model: column.model,
+										name: column.name,
+										columnType: column.column_type,
+										transform: column.transform,
+									});
+									regionLabeler = false;
+									regionPolygon = [];
+								} else {
+									regionPolygon = [];
+									regionLabeler = true;
+								}
+								pipelineJSON = await pipeline.pipelineJSON();
+							}}>
+							{regionLabeler
+								? "Click Here to Confirm"
+								: "Create Labeler"}</Button>
+					</div>
+				</div>
+			</div>
+
 			<div
 				class="paper"
 				style:width="{scatterWidth}px"
 				style:height="{scatterHeight}px">
-				<LegendaryScatter
+				<Scatter
 					width={scatterWidth}
 					height={scatterHeight}
-					legend={legendaryScatterLegend}
 					points={legendaryScatterPoints}
+					colorRange={$colorSpec ? $colorSpec.colors : ["#ccc"]}
+					on:create={({ detail }) => {
+						scatterObj = detail;
+					}}
 					on:deselect={() => {
 						lassoSelectTable = null;
 					}}
 					on:select={({ detail }) => {
-						const indexInstances = detail.map(({ index }) => index);
-						lassoSelectTable = indexTable($filteredTable, indexInstances);
-					}} />
-			</div>
-			<div>
-				<p>{$filteredTable.size} instances</p>
-				<SelectionBar />
-			</div>
-		</div>
-		<div>
-			<button
-				on:click={async () => {
-					if ($filteredTable) {
-						const filteredIds = $filteredTable.columnArray(
-							columnHash($settings.idColumn)
+						const idedInstanced = detail.map(({ id }) => id);
+						lassoSelectTable = filterIdsTable(
+							$filteredTable,
+							columnHash($settings.idColumn),
+							idedInstanced
 						);
-						const _projection = await projectEmbeddings2D($model, filteredIds);
-						projection2D = _projection.data.map(({ proj }) => proj);
-					}
-				}}
-				>Compute projection
-			</button>
+					}}
+					bind:regionPolygon
+					regionMode={regionLabeler} />
+			</div>
 		</div>
-	</div>
-
-	<!-- Instances view -->
-	<div id="instance-view">
-		<SampleOptions />
-		<Samples
-			table={scatterSelectEmpty(lassoSelectTable)
-				? $filteredTable
-				: lassoSelectTable} />
+		<div
+			class="horizontal-divider"
+			style:margin-top="10px"
+			style:margin-bottom="5px" />
+		<!-- Instances view -->
+		<div id="instance-view">
+			<div id="samples-view">
+				<SampleOptions />
+				<Samples
+					table={lassoSelectTable === null || lassoSelectTable?.size === 0
+						? $filteredTable
+						: lassoSelectTable} />
+			</div>
+		</div>
 	</div>
 </div>
 
@@ -247,6 +291,38 @@
 		flex-direction: row;
 	}
 	.paper {
-		box-shadow: 0px 0px 3px 3px hsla(0, 0%, 0%, 0.1);
+		border: 1px #e0e0e0 solid;
+	}
+	#scatter-view {
+		display: flex;
+		justify-content: center;
+		gap: 10px;
+	}
+	#instance-view {
+		display: flex;
+	}
+	#pipeline-view {
+		width: 400px;
+		padding-left: 20px;
+		overflow-y: scroll;
+	}
+	.horizontal-divider {
+		width: 100%;
+		background-color: #e0e0e0;
+		height: 1px;
+	}
+
+	h4 {
+		font-weight: 500;
+		color: rgba(0, 0, 0, 0.7);
+		margin-bottom: 8px;
+		margin-top: 25px;
+	}
+
+	#weak-labeler-pipeline {
+		margin-bottom: 10px;
+		display: flex;
+		flex-direction: column;
+		gap: 5px;
 	}
 </style>
