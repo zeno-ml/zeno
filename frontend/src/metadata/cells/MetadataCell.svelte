@@ -2,14 +2,14 @@
 	import type ColumnTable from "arquero/dist/types/table/column-table";
 	import type { View } from "svelte-vega";
 
-	import Button from "@smui/button";
-	import { Label } from "@smui/common";
-
 	import { VegaLite } from "svelte-vega";
 	import { onMount } from "svelte";
 
-	import { metadataSelections, table, filteredTable } from "../stores";
-	import { columnHash } from "../util";
+	import Button from "@smui/button";
+	import { Label } from "@smui/common";
+
+	import { metadataSelections, table, filteredTable } from "../../stores";
+	import { columnHash } from "../../util";
 	import { countSpec, histogramSpec } from "./vegaSpecs";
 
 	export let col: ZenoColumn;

@@ -3,7 +3,7 @@
 	import { Icon } from "@smui/common";
 	import { Svg } from "@smui/common/elements";
 	import { slide } from "svelte/transition";
-	import { folders, slices } from "../stores";
+	import { folders, slices } from "../../stores";
 	import SliceCell from "./SliceCell.svelte";
 
 	export let folder: string;
@@ -58,13 +58,6 @@
 					});
 					folders.update((folders) => {
 						folders.splice(folders.indexOf(folder), 1);
-						fetch("/api/set-folders", {
-							method: "POST",
-							headers: {
-								"Content-Type": "application/json",
-							},
-							body: JSON.stringify(folders),
-						});
 						return folders;
 					});
 				}}>

@@ -2,9 +2,9 @@
 	import Button from "@smui/button";
 	import Paper, { Content } from "@smui/paper";
 	import Textfield from "@smui/textfield";
-	import { folders } from "../stores";
 
-	import { clickOutside } from "../clickOutside";
+	import { folders } from "../../stores";
+	import { clickOutside } from "../../clickOutside";
 
 	let folderName = "";
 	let showNewFolder = false;
@@ -31,15 +31,8 @@
 						on:click={() => {
 							folders.update((f) => {
 								f.push(folderName);
-								fetch("/api/set-folders", {
-									method: "POST",
-									headers: {
-										"Content-Type": "application/json",
-									},
-									body: JSON.stringify(f),
-								});
 								folderName = "";
-								return f;
+								return [...f];
 							});
 							showNewFolder = false;
 						}}>Create</Button>

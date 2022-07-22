@@ -1,9 +1,9 @@
 <script lang="ts">
-	import FolderCell from "./FolderCell.svelte";
-	import MetadataCell from "./MetadataCell.svelte";
-	import NewFolderPopup from "./NewFolderPopup.svelte";
-	import NewSlicePopup from "./NewSlicePopup.svelte";
-	import SliceCell from "./SliceCell.svelte";
+	import FolderCell from "./cells/FolderCell.svelte";
+	import MetadataCell from "./cells/MetadataCell.svelte";
+	import NewFolderPopup from "./popups/NewFolderPopup.svelte";
+	import NewSlicePopup from "./popups/NewSlicePopup.svelte";
+	import SliceCell from "./cells/SliceCell.svelte";
 
 	import { ZenoColumnType } from "../globals";
 	import {

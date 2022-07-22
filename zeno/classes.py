@@ -1,19 +1,8 @@
 from enum import IntEnum
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel
-
-
-def to_camel(string):
-    components = string.split("_")
-    return components[0] + "".join(x.title() for x in components[1:])
-
-
-class CamelModel(BaseModel):
-    class Config:
-        alias_generator = to_camel
-        allow_population_by_field_name = True
 
 
 class ZenoColumnType(IntEnum):
@@ -33,18 +22,29 @@ class ZenoFunctionType(IntEnum):
     METRIC = 4
 
 
+def to_camel(string):
+    components = string.split("_")
+    return components[0] + "".join(x.title() for x in components[1:])
+
+
+class CamelModel(BaseModel):
+    class Config:
+        alias_generator = to_camel
+        allow_population_by_field_name = True
+
+
 class ReportPredicate(CamelModel):
     slice_name: str
     metric: str
     transform: str
     operation: str
     value: str
-    results: List[int]
+    results: list[int]
 
 
 class Report(CamelModel):
     name: str
-    report_predicates: List[ReportPredicate]
+    report_predicates: list[ReportPredicate]
 
 
 class ZenoFunction(CamelModel):
@@ -82,21 +82,21 @@ class ZenoSettings(CamelModel):
     id_column: ZenoColumn
     label_column: ZenoColumn
     data_column: ZenoColumn
-    metadata_columns: List[ZenoColumn]
+    metadata_columns: list[ZenoColumn]
 
 
 class ZenoVariables(CamelModel):
-    metrics: List[str]
-    transforms: List[str]
-    models: List[str]
-    folders: List[str]
+    metrics: list[str]
+    transforms: list[str]
+    models: list[str]
+    folders: list[str]
 
 
 class Slice(CamelModel):
     slice_name: str
     folder: str
-    filter_predicates: Optional[List[FilterPredicate]]
-    idxs: Optional[List[str]]
+    filter_predicates: Optional[list[FilterPredicate]]
+    idxs: Optional[list[str]]
 
 
 class MetricKey(CamelModel):
@@ -109,21 +109,9 @@ class MetricKey(CamelModel):
 class StatusResponse(CamelModel):
     status: str
     done_processing: bool
-    complete_columns: List[ZenoColumn]
-
-
-class TableRequest(BaseModel):
-    columns: List[ZenoColumn]
-
-
-class ReportsRequest(CamelModel):
-    reports: List[Report]
-
-
-class MetricsRequest(BaseModel):
-    requests: List[MetricKey]
+    complete_columns: list[ZenoColumn]
 
 
 class ProjectionRequest(BaseModel):
     model: str
-    instance_ids: List[str]
+    instance_ids: list[str]

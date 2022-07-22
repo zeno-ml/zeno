@@ -2,7 +2,7 @@
 	import { mdiPencilOutline } from "@mdi/js";
 	import { Icon } from "@smui/common";
 	import { Svg } from "@smui/common/elements";
-	import SliceDetails from "../SliceDetails.svelte";
+	import SliceDetails from "../../SliceDetails.svelte";
 	import {
 		sliceSelections,
 		metric,
@@ -11,8 +11,8 @@
 		transform,
 		sliceToEdit,
 		showNewSlice,
-	} from "../stores";
-	import { getMetricsForSlices } from "../util";
+	} from "../../stores";
+	import { getMetricsForSlices } from "../../util";
 
 	export let slice: Slice;
 	export let inFolder = false;
@@ -124,7 +124,6 @@
 								s.delete(slice.sliceName);
 								return s;
 							});
-							fetch("/api/delete-slice/" + encodeURIComponent(slice.sliceName));
 						}}>
 						delete_outline
 					</Icon>

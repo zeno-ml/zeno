@@ -72,4 +72,4 @@ def iou(df, ops: ZenoOptions):
 
 @metric_function
 def average_iou(df, ops: ZenoOptions):
-    return df["4iouweights"].mean()
+    return df[ops.distill_columns["iou"]].mean()

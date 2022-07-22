@@ -5,7 +5,7 @@
 	import { Cell, Row } from "@smui/data-table";
 
 	import { metric, models, report, reports, transform } from "../../stores";
-	import { getMetricsForSlices, updateReports } from "../../util";
+	import { getMetricsForSlices } from "../../util";
 
 	import SliceCell from "../SliceCell.svelte";
 	import SparkLine from "../SparkLine.svelte";
@@ -48,7 +48,6 @@
 									results: [],
 								});
 								reps[$report] = rep;
-								updateReports(reps);
 								return reps;
 							});
 						}}>

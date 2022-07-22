@@ -6,7 +6,7 @@
 
 	import autoAnimate from "@formkit/auto-animate";
 
-	import { clickOutside } from "../clickOutside";
+	import { clickOutside } from "../../clickOutside";
 	import {
 		metadataSelections,
 		settings,
@@ -15,10 +15,10 @@
 		table,
 		showNewSlice,
 		sliceToEdit,
-	} from "../stores";
-	import { columnHash, getFilterFromPredicates } from "../util";
+	} from "../../stores";
+	import { columnHash, getFilterFromPredicates } from "../../util";
 
-	import FilterEntry from "./FilterEntry.svelte";
+	import FilterEntry from "../FilterEntry.svelte";
 
 	let sliceName: string = "";
 	let predicates: FilterPredicate[] = [];

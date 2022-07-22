@@ -7,7 +7,7 @@
 	import Textfield from "@smui/textfield";
 	import HelperText from "@smui/textfield/helper-text";
 
-	import { getMetricsForSlices, updateReports } from "../../util";
+	import { getMetricsForSlices } from "../../util";
 	import { models, slices, reports, report } from "../../stores";
 
 	import SliceCell from "../SliceCell.svelte";
@@ -40,13 +40,12 @@
 					return 0;
 				}
 			}
-			return -1;
+			return 1;
 		});
 		let rep = $reports[$report];
 		rep.reportPredicates[predicateIndex].results = outcomes;
 		reports.update((reps) => {
 			reps[$report] = rep;
-			updateReports(reps);
 			return reps;
 		});
 	}
@@ -83,7 +82,6 @@
 						rep.reportPredicates.splice(predicateIndex, 1);
 						reports.update((reps) => {
 							reps[$report] = rep;
-							updateReports(reps);
 							return reps;
 						});
 					}}>
@@ -120,10 +118,9 @@
 	{#each modelResults as r, i}
 		<Cell>
 			<p
-				style:color={predicate.results.length > i &&
-				predicate.results[predicate.results.length - i - 1] === 0
-					? "#b71c1c"
-					: "black"}>
+				style:color={predicate.results.length > i && predicate.results[i] === 1
+					? "black"
+					: "#b71c1c"}>
 				{r ? r.toFixed(2) : ""}
 			</p>
 		</Cell>

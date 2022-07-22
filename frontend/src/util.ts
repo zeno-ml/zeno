@@ -1,4 +1,4 @@
-import { ZenoColumnType } from "./globals";
+import type ColumnTable from "arquero/dist/types/table/column-table";
 import * as aq from "arquero";
 import { get } from "svelte/store";
 import {
@@ -10,9 +10,6 @@ import {
 	sort,
 	tab,
 	transforms,
-} from "./stores";
-
-import {
 	metrics,
 	models,
 	ready,
@@ -23,7 +20,7 @@ import {
 	metric,
 	reports,
 } from "./stores";
-import type ColumnTable from "arquero/dist/types/table/column-table";
+import { ZenoColumnType } from "./globals";
 
 export function initialFetch() {
 	fetch("/api/settings")
@@ -33,7 +30,6 @@ export function initialFetch() {
 			fetch("/api/initialize")
 				.then((r) => r.json())
 				.then((r) => {
-					console.log(r);
 					models.set(r.models);
 					metrics.set(r.metrics);
 					transforms.set(r.transforms);
@@ -50,6 +46,7 @@ export function initialFetch() {
 export async function getSlicesAndReports(t) {
 	const slicesRes = await fetch("/api/slices").then((d) => d.json());
 	const slis = JSON.parse(slicesRes) as Slice[];
+	console.log(slicesRes);
 	slis.forEach((s: Slice) => {
 		if (s.filterPredicates.length !== 0) {
 			s.idxs = t
@@ -76,7 +73,6 @@ export function updateTab(t: string) {
 }
 
 export async function getMetricsForSlices(metricKeys: MetricKey[]) {
-	console.log(metricKeys);
 	if (metricKeys[0].metric === undefined) {
 		return new Array(metricKeys.length).fill("");
 	}
@@ -99,9 +95,7 @@ export async function getMetricsForSlices(metricKeys: MetricKey[]) {
 			headers: {
 				"Content-type": "application/json",
 			},
-			body: JSON.stringify({
-				requests: requiredIndices.map((i) => metricKeys[i]),
-			}),
+			body: JSON.stringify(requiredIndices.map((i) => metricKeys[i])),
 		}).then((d) => d.json());
 		res = JSON.parse(res);
 		results.update((resmap) => {
@@ -191,7 +185,7 @@ export function updateTableColumns(w: WSResponse) {
 			headers: {
 				"Content-type": "application/json",
 			},
-			body: JSON.stringify({ columns: missingColumns }),
+			body: JSON.stringify(missingColumns),
 		})
 			.then((d: Response) => d.arrayBuffer())
 			.then((d) => {
@@ -208,16 +202,6 @@ export function updateTableColumns(w: WSResponse) {
 				}
 			});
 	}
-}
-
-export function updateReports(reps) {
-	fetch("/api/update-reports", {
-		method: "POST",
-		headers: {
-			"Content-type": "application/json",
-		},
-		body: JSON.stringify({ reports: reps }),
-	}).then((d: Response) => d.json());
 }
 
 export function columnHash(col: ZenoColumn) {
