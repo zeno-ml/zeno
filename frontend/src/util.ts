@@ -46,7 +46,6 @@ export function initialFetch() {
 export async function getSlicesAndReports(t) {
 	const slicesRes = await fetch("/api/slices").then((d) => d.json());
 	const slis = JSON.parse(slicesRes) as Slice[];
-	console.log(slicesRes);
 	slis.forEach((s: Slice) => {
 		if (s.filterPredicates.length !== 0) {
 			s.idxs = t
@@ -251,6 +250,7 @@ export function updateFilteredTable(t: ColumnTable) {
 	}
 
 	filteredTable.set(tempTable);
+}
 
 export function enforce({ rule, name }: { rule: boolean; name: string }) {
 	if (rule !== true) {

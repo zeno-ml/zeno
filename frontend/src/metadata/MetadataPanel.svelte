@@ -97,7 +97,7 @@
 	{/if}
 
 	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL) as col}
-		<MetadataCell {col} />
+		<MetadataCell {col} {shouldColor} />
 	{/each}
 
 	{#if $model}
