@@ -13,13 +13,13 @@ from fastapi.staticfiles import StaticFiles
 
 from .classes import (
     MetricKey,
-    Report,
-    Slice,
     PipelineIdFilter,
     PipelineInit,
     PipelineProjection,
     PipelineRegionLabeler,
     PipelineReset,
+    Report,
+    Slice,
     StatusResponse,
     ZenoColumn,
     ZenoSettings,

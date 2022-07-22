@@ -1,6 +1,6 @@
 import type { TypedArray } from "arquero/dist/types/table/table";
-import { enforce } from "../util";
-import request from "../request";
+import { enforce } from "../util/util";
+import request from "../util/request";
 
 export const apiEndpoint = "api/pipe";
 export const postPipe = request.generator.post(apiEndpoint);
@@ -13,6 +13,7 @@ function dataAccessor(obj: object) {
 		return undefined;
 	}
 }
+
 export async function reset({ upToId = "" }: { upToId?: string } = {}) {
 	const output = await postPipe({
 		url: "reset",
@@ -24,6 +25,7 @@ export async function reset({ upToId = "" }: { upToId?: string } = {}) {
 	});
 	return dataAccessor(output);
 }
+
 export async function init({ model, uid }: { model: string; uid?: string }) {
 	const output = await postPipe({
 		url: "init",

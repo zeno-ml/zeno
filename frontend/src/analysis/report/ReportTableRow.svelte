@@ -7,7 +7,7 @@
 	import Textfield from "@smui/textfield";
 	import HelperText from "@smui/textfield/helper-text";
 
-	import { getMetricsForSlices } from "../../util";
+	import { getMetricsForSlices } from "../../util/util";
 	import { models, slices, reports, report } from "../../stores";
 
 	import SliceCell from "../SliceCell.svelte";

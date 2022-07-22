@@ -4,7 +4,11 @@ import { websocketStore } from "svelte-websocket-store";
 import type ColumnTable from "arquero/dist/types/table/column-table";
 import * as aq from "arquero";
 
-import { folderWritable, reportWritable, sliceWritable } from "./customStores";
+import {
+	folderWritable,
+	reportWritable,
+	sliceWritable,
+} from "./util/customStores";
 
 export const ready: Writable<boolean> = writable(false);
 export const tab: Writable<string> = writable("results");

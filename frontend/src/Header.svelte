@@ -11,7 +11,7 @@
 		mdiGithub,
 	} from "@mdi/js";
 
-	import { updateTab } from "./util";
+	import { updateTab } from "./util/util";
 	import { location } from "svelte-spa-router";
 	import { status, tab } from "./stores";
 
@@ -120,7 +120,6 @@
 		padding-bottom: 5px;
 		padding-right: 20px;
 		padding-left: 20px;
-		/* background: #6a1b9a; */
 		background: #fafafa;
 		border-bottom: 1px solid #e0e0e0;
 	}

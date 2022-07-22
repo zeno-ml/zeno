@@ -1,12 +1,14 @@
 import type ColumnTable from "arquero/dist/types/table/column-table";
+
 import * as aq from "arquero";
-import { columnHash } from "../util";
-import { interpolateColorToArray } from "../discovery/discovery";
 import {
 	interpolatePurples,
 	schemeCategory10,
 	schemeDark2,
 } from "d3-scale-chromatic";
+
+import { columnHash } from "../util/util";
+import { interpolateColorToArray } from "../discovery/discovery";
 
 export enum ChartType {
 	Count,
@@ -20,10 +22,12 @@ interface IComputeDomain {
 	table: ColumnTable;
 	column: string | ZenoColumn;
 }
+
 interface ISpecificDomain {
 	table: ColumnTable;
 	column: string;
 }
+
 export function computeDomain({ type, table, column }: IComputeDomain) {
 	const hash = typeof column === "string" ? column : columnHash(column);
 
@@ -31,6 +35,7 @@ export function computeDomain({ type, table, column }: IComputeDomain) {
 		domain: object[];
 		assignments: number[];
 	};
+
 	switch (type) {
 		case ChartType.Count:
 			specificDomainFunc = computeCountDomain;
@@ -128,6 +133,7 @@ function binStartEndFormat(binsUgly: number[]) {
 	formatted.push({ binStart, binEnd });
 	return formatted;
 }
+
 function binTable(table: ColumnTable, column: string) {
 	const binName = `bin_${column}`;
 	const countName = "count";

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { TrailingIcon } from "@smui/chips";
-	import { columnHash, getMetricsForSlices } from "../util";
+	import { columnHash, getMetricsForSlices } from "../util/util";
 
 	import {
 		table,

@@ -8,6 +8,8 @@
 	import Button from "@smui/button";
 	import { Label } from "@smui/common";
 
+	import { columnHash } from "../../util/util";
+	import { generateCountSpec, generateHistogramSpec } from "./vegaSpecs";
 	import {
 		metadataSelections,
 		table,
@@ -16,29 +18,13 @@
 		colorByHash,
 		filteredTable,
 	} from "../../stores";
-	import { columnHash } from "../../util";
-	import { generateCountSpec, generateHistogramSpec } from "./vegaSpecs";
 	import {
 		computeCountsFromDomain,
 		computeDomain,
 		assignColorsFromDomain,
 		colorDomain,
+		ChartType,
 	} from "../metadata";
-
-	export let col: ZenoColumn;
-	export let shouldColor: boolean = false;
-	export let assignColors: boolean = shouldColor;
-
-	$: hash = columnHash(col);
-
-	enum ChartType {
-		Count,
-		Histogram,
-		Binary,
-		Other,
-	}
-	let chartType: ChartType;
-	let domain: object[];
 
 	interface IColorAssignments {
 		colors: string[];
@@ -46,12 +32,43 @@
 		hash: string;
 	}
 
+	export let col: ZenoColumn;
+	export let shouldColor: boolean = false;
+	export let assignColors: boolean = shouldColor;
+
+	let chartType: ChartType;
+	let domain: object[];
 	let selection = undefined;
 	let finalSelection = undefined;
 	let view: View;
 	let histogramData = { table: [] };
+	let colorAssignments: IColorAssignments = {
+		colors: [],
+		labels: [],
+		hash: "",
+	};
 
-	let colorAssignments: IColorAssignments = { colors: [], labels: [], hash };
+	$: hash = columnHash(col);
+	$: {
+		if (assignColors === true) {
+			drawChart($table);
+		}
+	}
+	$: selectedHash = $colorByHash === hash;
+	$: {
+		col;
+		updateData($table, $filteredTable);
+	}
+	$: dynamicSpec =
+		chartType === ChartType.Histogram
+			? generateHistogramSpec
+			: generateCountSpec;
+
+	table.subscribe((t) => drawChart(t));
+	onMount(() => {
+		drawChart($table);
+		updateData($table, $filteredTable);
+	});
 
 	function updateData(table: ColumnTable, filteredTable: ColumnTable) {
 		if (
@@ -132,32 +149,11 @@
 					table: $table,
 					type: chartType,
 				});
-				setColorsGlobally(colors);
+				if (colors) {
+					availableColors.set({ ...$availableColors, [hash]: colors });
+				}
 			}
 		}
-	}
-
-	function setColorsGlobally(colors) {
-		if (colors) {
-			$availableColors = { ...$availableColors, [hash]: colors };
-		}
-	}
-
-	table.subscribe((t) => drawChart(t));
-	onMount(() => {
-		drawChart($table);
-		updateData($table, $filteredTable);
-	});
-
-	$: {
-		if (assignColors === true) {
-			drawChart($table);
-		}
-	}
-
-	$: {
-		col;
-		updateData($table, $filteredTable);
 	}
 
 	metadataSelections.subscribe((m) => {
@@ -199,7 +195,6 @@
 			);
 		}
 	}
-	$: selectedHash = $colorByHash === hash;
 
 	function setSelection() {
 		if (selection === finalSelection) {
@@ -220,11 +215,6 @@
 			return m;
 		});
 	}
-
-	$: dynamicSpec =
-		chartType === ChartType.Histogram
-			? generateHistogramSpec
-			: generateCountSpec;
 </script>
 
 <div class="cell">
@@ -306,7 +296,6 @@
 
 <style>
 	.cell {
-		/* border: 1px solid #e0e0e0; */
 		border-top: 1px solid #e0e0e0;
 		border-bottom: 1px solid #e0e0e0;
 		padding: 10px;

@@ -1,20 +1,14 @@
 <script lang="ts">
 	import ScaledTrackerRegl from "./ScaledTrackerRegl.svelte";
 	import type { LegendaryScatterPoint } from "./scatter";
-	import { extentXY } from "../../util";
+	import { extentXY } from "../../util/util";
 	import { schemeCategory10 } from "d3-scale-chromatic";
 
 	export let width = 500;
 	export let height = 500;
 	export let colorRange = schemeCategory10 as string[];
-	export let points: LegendaryScatterPoint[] = new Array(100_00)
-		.fill(0)
-		.map(() => ({
-			x: Math.random() * 3,
-			y: Math.random() * 5,
-			color: Math.random(),
-			opacity: Math.random(),
-		}));
+	export let points: LegendaryScatterPoint[] = [];
+
 	$: extent = extentXY(
 		points,
 		(d) => d.x,
@@ -25,9 +19,11 @@
 	$: yMinMax = convertExtentToArray(newExtent.yExtent);
 
 	const convertExtentToArray = (extent) => [extent.min, extent.max];
+
 	function extentRange(extent: { min: number; max: number }) {
 		return extent.max - extent.min;
 	}
+
 	function fitSmallerExtent(
 		largerRange: number,
 		smallerExtent: { min: number; max: number }
@@ -39,6 +35,7 @@
 			max: smallerMidpoint + halfRange,
 		};
 	}
+
 	function adjustExtentToFit(extent) {
 		let newExtent = { xExtent: null, yExtent: null };
 		const xRange = extentRange(extent.xExtent);

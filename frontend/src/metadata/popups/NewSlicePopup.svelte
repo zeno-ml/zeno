@@ -6,7 +6,7 @@
 
 	import autoAnimate from "@formkit/auto-animate";
 
-	import { clickOutside } from "../../clickOutside";
+	import { clickOutside } from "../../util/clickOutside";
 	import {
 		metadataSelections,
 		settings,
@@ -16,7 +16,7 @@
 		showNewSlice,
 		sliceToEdit,
 	} from "../../stores";
-	import { columnHash, getFilterFromPredicates } from "../../util";
+	import { columnHash, getFilterFromPredicates } from "../../util/util";
 
 	import FilterEntry from "../FilterEntry.svelte";
 

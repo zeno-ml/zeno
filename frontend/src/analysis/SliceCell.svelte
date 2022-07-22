@@ -2,7 +2,7 @@
 	import SliceDetails from "../SliceDetails.svelte";
 
 	import { metadataSelections, sliceSelections } from "../stores";
-	import { updateTab } from "../util";
+	import { updateTab } from "../util/util";
 
 	export let sli: Slice;
 

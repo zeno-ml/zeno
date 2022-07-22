@@ -1,4 +1,5 @@
 import type ColumnTable from "arquero/dist/types/table/column-table";
+
 import * as aq from "arquero";
 import { get } from "svelte/store";
 import {
@@ -19,8 +20,8 @@ import {
 	table,
 	metric,
 	reports,
-} from "./stores";
-import { ZenoColumnType } from "./globals";
+} from "../stores";
+import { ZenoColumnType } from "../globals";
 
 export function initialFetch() {
 	fetch("/api/settings")

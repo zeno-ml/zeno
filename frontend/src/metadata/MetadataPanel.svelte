@@ -22,7 +22,7 @@
 		getMetricsForSlices,
 		updateFilteredTable,
 		updateSliceIdxs,
-	} from "../util";
+	} from "../util/util";
 	import { ZenoColumnType } from "../globals";
 
 	export let shouldColor = false;
@@ -64,12 +64,12 @@
 		</div>
 	</div>
 
-	<h4>Weak Labels</h4>
-	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.WEAK_LABEL) as col}
-		<MetadataCell {col} {shouldColor} />
-	{:else}
-		No weak labels yet.
-	{/each}
+	{#if $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.WEAK_LABEL).length > 0}
+		<h4>Weak Labels</h4>
+		{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.WEAK_LABEL) as col}
+			<MetadataCell {col} {shouldColor} />
+		{/each}
+	{/if}
 
 	<div class="inline">
 		<h4>Slices</h4>

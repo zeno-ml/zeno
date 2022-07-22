@@ -12,7 +12,7 @@
 		transform,
 		transforms,
 	} from "../stores";
-	import { columnHash } from "../util";
+	import { columnHash } from "../util/util";
 
 	import SelectionBar from "../metadata/SelectionBar.svelte";
 

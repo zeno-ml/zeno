@@ -7,17 +7,17 @@
 	import TextField from "@smui/textfield";
 	import * as pipeline from "./pipeline";
 	import { filteredTable, model, settings, colorSpec, table } from "../stores";
-	import { columnHash } from "../util";
+	import { columnHash } from "../util/util";
 
 	import type { LegendaryScatterPoint } from "./scatterplot/scatter";
 	import type ColumnTable from "arquero/dist/types/table/column-table";
 	import * as aq from "arquero";
 	import Node from "./node/Node.svelte";
 
-	const PIPELINE_ID = "nice";
-
 	export let scatterWidth = 800;
 	export let scatterHeight = 550;
+
+	const PIPELINE_ID = "initial_pipeline";
 
 	let projection2D: object[] = [];
 	let lassoSelectTable = null;
@@ -25,10 +25,6 @@
 	let regionPolygon = [];
 	let regionLabelerName = "name";
 	let legendaryScatterPoints: LegendaryScatterPoint[] = [];
-	let pipelineJSON: { pipeline: unknown[]; labeler: null | unknown } = {
-		pipeline: [],
-		labeler: null,
-	};
 	let pipelineRepr: Pipeline.Node[] = [];
 	let selectedNode;
 	let scatterObj;
@@ -61,7 +57,6 @@
 
 	async function initPipeline(table: ColumnTable, model: string) {
 		pipeline.pipelineJSON().then((d) => {
-			pipelineJSON = d;
 			regionLabelerName = d.name;
 			if (d.model !== model) {
 				pipelineRepr = [];
@@ -83,7 +78,6 @@
 	}
 
 	function filterIdsTable(
-		table: ColumnTable,
 		idColumn: string = columnHash($settings.idColumn),
 		ids: string[]
 	) {
@@ -153,7 +147,6 @@
 									pipelineRepr = newSubset;
 									selectedNode = node;
 									projection2D = node.state.projection;
-									pipelineJSON = await pipeline.pipelineJSON();
 								}}
 								on:eyeClick={() => {
 									selectedNode = node;
@@ -179,7 +172,6 @@
 								);
 								const node = await pipeline.idFilter({ ids });
 								projection2D = node.state.projection;
-								pipelineJSON = await pipeline.pipelineJSON();
 								resetSelection();
 								pipelineRepr = [...pipelineRepr, node];
 								selectedNode = node;
@@ -191,7 +183,6 @@
 							on:click={async () => {
 								const node = await pipeline.parametricUMAP();
 								projection2D = node.state.projection;
-								pipelineJSON = await pipeline.pipelineJSON();
 								pipelineRepr = [...pipelineRepr, node];
 								selectedNode = node;
 							}}>
@@ -207,7 +198,6 @@
 								projection2D = [];
 								legendaryScatterPoints = [];
 								regionLabelerName = "default";
-								pipelineJSON = await pipeline.pipelineJSON();
 								pipelineRepr = [];
 							}}>
 							Reset</Button>
@@ -232,7 +222,6 @@
 									regionPolygon = [];
 									regionLabeler = true;
 								}
-								pipelineJSON = await pipeline.pipelineJSON();
 							}}>
 							{regionLabeler
 								? "Click Here to Confirm"
@@ -259,7 +248,6 @@
 					on:select={({ detail }) => {
 						const idedInstanced = detail.map(({ id }) => id);
 						lassoSelectTable = filterIdsTable(
-							$filteredTable,
 							columnHash($settings.idColumn),
 							idedInstanced
 						);
@@ -273,14 +261,12 @@
 			style:margin-top="10px"
 			style:margin-bottom="5px" />
 		<!-- Instances view -->
-		<div id="instance-view">
-			<div id="samples-view">
-				<SampleOptions />
-				<Samples
-					table={lassoSelectTable === null || lassoSelectTable?.size === 0
-						? $filteredTable
-						: lassoSelectTable} />
-			</div>
+		<div id="samples-view">
+			<SampleOptions />
+			<Samples
+				table={lassoSelectTable === null || lassoSelectTable?.size === 0
+					? $filteredTable
+					: lassoSelectTable} />
 		</div>
 	</div>
 </div>
@@ -297,9 +283,6 @@
 		display: flex;
 		justify-content: center;
 		gap: 10px;
-	}
-	#instance-view {
-		display: flex;
 	}
 	#pipeline-view {
 		width: 400px;

@@ -1,15 +1,14 @@
 <script lang="ts">
+	import type { Properties } from "regl-scatterplot/dist/types";
+
 	import { onDestroy, onMount, createEventDispatcher } from "svelte";
 	import createScatterPlot from "regl-scatterplot";
-	import type { Properties } from "regl-scatterplot/dist/types";
 	import { interpolateBuPu } from "d3-scale-chromatic";
 	import { interpolateColorToArray } from "../discovery";
 
-	const dispatch = createEventDispatcher();
-
 	export let width: number;
 	export let height: number;
-	export let points = generatePoints(10000);
+	export let points = [];
 	export let availableColors = interpolateColorToArray({
 		colorer: interpolateBuPu,
 		length: 100,
@@ -17,6 +16,8 @@
 	export let availableOpacities = opacityRange(100);
 	export let canvasStyle: string = "";
 	export let createScatterConfig: Partial<Properties> = {};
+
+	const dispatch = createEventDispatcher();
 
 	let canvasEl: HTMLCanvasElement;
 	let scatterRef;
@@ -75,6 +76,7 @@
 			opacity: opacities,
 		});
 	}
+
 	function colorPoints(
 		scatter,
 		colors = availableColors,
@@ -85,10 +87,12 @@
 			pointColor: colors,
 		});
 	}
+
 	function addSelectionDispatch(scatter) {
 		scatter.subscribe("deselect", deselectPoints, null);
 		scatter.subscribe("select", (d) => exportSelectedPoints(d.points), null);
 	}
+
 	function exportSelectedPoints(idx: number[]) {
 		const pointsExport = idx.map((i) => ({
 			index: i,
@@ -97,32 +101,9 @@
 		}));
 		dispatch("select", pointsExport);
 	}
+
 	function deselectPoints() {
 		dispatch("deselect", { deseleted: true });
-	}
-
-	function generatePoints(num) {
-		const newPoints = [
-			...new Array(Math.round((num * 2) / 12)).fill(0).map(() => [
-				-1 + (Math.random() * 2 * 1) / 3, // x
-				-1 + Math.random() * 2, // y
-				0, // category
-				Math.random(),
-			]),
-			...new Array(Math.round((num * 4) / 12)).fill(0).map(() => [
-				-1 + 2 / 3 + (Math.random() * 2 * 1) / 3, // x
-				-1 + Math.random() * 2, // y
-				1, // value
-				Math.random(), // value
-			]),
-			...new Array(Math.round((num * 6) / 12)).fill(0).map(() => [
-				-1 + 4 / 3 + (Math.random() * 2 * 1) / 3, // x
-				-1 + Math.random() * 2, // y
-				90,
-				Math.random(),
-			]),
-		];
-		return newPoints;
 	}
 
 	function opacityRange(n: number = 10) {

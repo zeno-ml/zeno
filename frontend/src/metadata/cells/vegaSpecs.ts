@@ -18,6 +18,13 @@ export function generateCountSpec({
 		height: height,
 		layer: [
 			{
+				params: [
+					{
+						name: "highlight",
+						select: { type: "point", on: "mouseover" },
+					},
+					{ name: "select", select: { type: "point", encodings: ["x"] } },
+				],
 				mark: { type: "bar", opacity: opacity, fill: "#ddd" },
 				encoding: {
 					x: {
@@ -37,13 +44,6 @@ export function generateCountSpec({
 				},
 			},
 			{
-				params: [
-					{
-						name: "highlight",
-						select: { type: "point", on: "mouseover" },
-					},
-					{ name: "select", select: { type: "point", encodings: ["x"] } },
-				],
 				mark: { type: "bar", opacity: opacity },
 				encoding: {
 					x: {
@@ -132,7 +132,6 @@ export function generateHistogramSpec({
 				},
 			},
 			{
-				transform: [{ filter: { param: "brush" } }],
 				mark: { type: "bar", opacity: opacity },
 				encoding: {
 					size: {

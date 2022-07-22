@@ -5,7 +5,7 @@
 	import Select, { Option } from "@smui/select";
 
 	import { ZenoColumnType } from "../globals";
-	import { columnHash } from "../util";
+	import { columnHash } from "../util/util";
 	import { model, settings, status, transform } from "../stores";
 
 	export let table;

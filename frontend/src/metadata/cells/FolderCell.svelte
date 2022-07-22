@@ -8,10 +8,10 @@
 
 	export let folder: string;
 
-	$: sls = [...$slices.values()].filter((s) => s.folder === folder);
-
 	let expandFolder = false;
 	let dragOver = false;
+
+	$: sls = [...$slices.values()].filter((s) => s.folder === folder);
 </script>
 
 <div

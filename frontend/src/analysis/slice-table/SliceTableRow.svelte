@@ -5,7 +5,7 @@
 	import { Cell, Row } from "@smui/data-table";
 
 	import { metric, models, report, reports, transform } from "../../stores";
-	import { getMetricsForSlices } from "../../util";
+	import { getMetricsForSlices } from "../../util/util";
 
 	import SliceCell from "../SliceCell.svelte";
 	import SparkLine from "../SparkLine.svelte";

@@ -5,7 +5,7 @@
 	import { Svg } from "@smui/common/elements";
 	import { mdiPencilOutline } from "@mdi/js";
 
-	import { clickOutside } from "../clickOutside";
+	import { clickOutside } from "../util/clickOutside";
 	import { report as selectedReport, reports } from "../stores";
 
 	export let report;

@@ -3,7 +3,7 @@
 	import Router from "svelte-spa-router";
 
 	import { status } from "./stores";
-	import { initialFetch, updateTableColumns } from "./util";
+	import { initialFetch, updateTableColumns } from "./util/util";
 
 	import Analysis from "./analysis/Analysis.svelte";
 	import Discovery from "./discovery/Discovery.svelte";

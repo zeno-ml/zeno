@@ -1,3 +1,8 @@
+interface IRequest {
+	url: string;
+	payload?: object;
+}
+
 export async function getRequest({ url }: { url: string }) {
 	const response = await fetch(url, {
 		method: "GET",
@@ -5,6 +10,7 @@ export async function getRequest({ url }: { url: string }) {
 	const output = await response.json();
 	return JSON.parse(output);
 }
+
 export async function postRequest({
 	url,
 	payload = {},
@@ -23,6 +29,7 @@ export async function postRequest({
 	const output = await response.json();
 	return JSON.parse(output);
 }
+
 export function postEndpointGenerator(endpoint: string) {
 	function postFunc({ url, payload = {} }: { url: string; payload?: object }) {
 		return postRequest({ url: `${endpoint}/${url}`, payload });
@@ -37,10 +44,6 @@ export function getEndpointGenerator(endpoint: string) {
 	return getFunc;
 }
 
-interface IRequest {
-	url: string;
-	payload?: object;
-}
 export function requestGenerator(
 	request: ({ url, payload }: IRequest) => Promise<object>,
 	paramModifier: ({ url, payload }: IRequest) => IRequest,

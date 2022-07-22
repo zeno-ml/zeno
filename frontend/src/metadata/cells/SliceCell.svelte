@@ -12,7 +12,7 @@
 		sliceToEdit,
 		showNewSlice,
 	} from "../../stores";
-	import { getMetricsForSlices } from "../../util";
+	import { getMetricsForSlices } from "../../util/util";
 
 	export let slice: Slice;
 	export let inFolder = false;

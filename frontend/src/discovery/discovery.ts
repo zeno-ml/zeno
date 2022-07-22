@@ -7,6 +7,7 @@ interface IInterpolateColor {
 	length: number;
 	range?: [number, number];
 }
+
 export function interpolateColorToArray({
 	colorer,
 	length,

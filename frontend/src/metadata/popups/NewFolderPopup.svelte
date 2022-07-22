@@ -4,7 +4,7 @@
 	import Textfield from "@smui/textfield";
 
 	import { folders } from "../../stores";
-	import { clickOutside } from "../../clickOutside";
+	import { clickOutside } from "../../util/clickOutside";
 
 	let folderName = "";
 	let showNewFolder = false;
