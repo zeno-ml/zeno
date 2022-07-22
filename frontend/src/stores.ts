@@ -73,3 +73,13 @@ export const currentColumns: Readable<ZenoColumn[]> = derived(
 			(c) => c.model === "" || c.model === $model
 		)
 );
+
+export const colorByHash = writable("0label");
+export const availableColors = writable({});
+export const colorSpec = derived(
+	[colorByHash, availableColors],
+	([$colorByHash, $availableColors]) => {
+		const color = $availableColors[$colorByHash];
+		return color;
+	}
+);

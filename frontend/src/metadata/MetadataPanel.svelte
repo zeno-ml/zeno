@@ -31,6 +31,8 @@
 	} from "../util";
 	import { ZenoColumnType } from "../globals";
 
+	export let shouldColor = false;
+
 	let name = "";
 	let newSlice = false;
 	let mode = "create";
@@ -77,6 +79,7 @@
 		}
 
 		filteredTable.set(tempTable);
+		return tempTable;
 	}
 
 	function editSlice(sli: Slice) {
@@ -125,6 +128,14 @@
 			<span class="size">({$table.size})</span>
 		</div>
 	</div>
+
+	<h4>Weak Labels</h4>
+	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.WEAK_LABEL) as col}
+		<MetadataNode {col} {shouldColor} />
+	{:else}
+		No weak labels yet.
+	{/each}
+
 	<div class="inline">
 		<h4>Slices</h4>
 		<div style:margin-right="13px">
@@ -191,18 +202,18 @@
 
 	<h4>Metadata</h4>
 	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.METADATA) as col}
-		<MetadataNode {col} />
+		<MetadataNode {col} {shouldColor} />
 	{/each}
 
 	{#if $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL).length > 0}
 		<h4>Distilled Metadata</h4>
 	{/if}
 	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL) as col}
-		<MetadataNode {col} />
+		<MetadataNode {col} {shouldColor} />
 	{/each}
 	{#if $model}
 		{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.POSTDISTILL && m.model === $model && m.transform === $transform) as col}
-			<MetadataNode {col} />
+			<MetadataNode {col} {shouldColor} />
 		{/each}
 	{/if}
 

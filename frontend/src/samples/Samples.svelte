@@ -17,7 +17,11 @@
 
 	status.subscribe((s) => {
 		let obj = s.completeColumns.find((c) => {
-			return c.columnType === ZenoColumnType.OUTPUT && c.name === $model;
+			return (
+				c.columnType === ZenoColumnType.OUTPUT &&
+				c.name === $model &&
+				c.transform === $transform
+			);
 		});
 		modelColumn = obj ? columnHash(obj) : "";
 	});
