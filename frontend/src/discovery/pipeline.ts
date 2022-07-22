@@ -60,7 +60,7 @@ export async function regionLabeler({
 	return dataAccessor(output);
 }
 
-export async function idFilter({ ids }: { ids: any[] | TypedArray }) {
+export async function idFilter<T>({ ids }: { ids: T[] | TypedArray }) {
 	const output = await postPipe({
 		url: "id-filter",
 		payload: {

@@ -66,6 +66,7 @@ interface ZenoColumn {
 	transform?: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 namespace Pipeline {
 	export type Projection = { proj: [number, number]; id: string };
 	export interface State {

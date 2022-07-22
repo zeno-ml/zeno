@@ -87,6 +87,7 @@ function computeHistogramDomain({ table, column }: ISpecificDomain) {
 	return output;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function computeOtherDomain({ table, column }: ISpecificDomain) {
 	return { domain: [], assignments: [] };
 }

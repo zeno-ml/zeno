@@ -42,9 +42,9 @@ interface IRequest {
 	payload?: object;
 }
 export function requestGenerator(
-	request: ({ url, payload }: IRequest) => Promise<any>,
+	request: ({ url, payload }: IRequest) => Promise<object>,
 	paramModifier: ({ url, payload }: IRequest) => IRequest,
-	afterRequest: () => any
+	afterRequest: () => object
 ) {
 	async function req({ url, payload }: IRequest) {
 		const modifiedRequest = paramModifier({ url, payload });

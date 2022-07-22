@@ -25,7 +25,7 @@
 	let regionPolygon = [];
 	let regionLabelerName = "name";
 	let legendaryScatterPoints: LegendaryScatterPoint[] = [];
-	let pipelineJSON: { pipeline: any[]; labeler: null | any } = {
+	let pipelineJSON: { pipeline: unknown[]; labeler: null | unknown } = {
 		pipeline: [],
 		labeler: null,
 	};
@@ -85,9 +85,6 @@
 		}
 	}
 
-	function scatterSelectEmpty(table: ColumnTable) {
-		return table === null;
-	}
 	function filterIdsTable(
 		table: ColumnTable,
 		idColumn: string = columnHash($settings.idColumn),
@@ -298,9 +295,6 @@
 		display: flex;
 		flex-direction: row;
 	}
-	.shadow-paper {
-		box-shadow: 0px 0px 3px 3px hsla(0, 0%, 0%, 0.1);
-	}
 	.paper {
 		border: 1px #e0e0e0 solid;
 	}
@@ -316,13 +310,6 @@
 		width: 400px;
 		padding-left: 20px;
 		overflow-y: scroll;
-	}
-	#samples-view {
-	}
-	.vertical-divider {
-		width: 1px;
-		background-color: #e0e0e0;
-		height: 100%;
 	}
 	.horizontal-divider {
 		width: 100%;
