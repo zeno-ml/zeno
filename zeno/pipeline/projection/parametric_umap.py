@@ -37,6 +37,8 @@ class ParametricUMAPNode(PipelineNode):
 
     def pipe_outputs(self):
         self.memory.projection = [proj for proj in self.projections]
+        assert self.memory.input_table is not None, "input_table must be present"
+        assert self.memory.id_column is not None, "id_column must be present"
         id_column = self.memory.id_column
         table = self.memory.input_table
         ids = table[str(id_column)].tolist()

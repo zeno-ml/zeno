@@ -1,6 +1,6 @@
 from enum import IntEnum
 from pathlib import Path
-from typing import List, Optional, Any
+from typing import Any, List, Optional
 
 from pydantic import BaseModel
 
@@ -117,11 +117,6 @@ class MetricsRequest(BaseModel):
     requests: List[MetricKey]
 
 
-class ProjectionRequest(BaseModel):
-    model: str
-    instance_ids: List[str]
-
-
 class PipelineInit(BaseModel):
     model: str
     uid: str = "id:0"
@@ -132,11 +127,11 @@ class PipelineReset(BaseModel):
 
 
 class PipelineIdFilter(BaseModel):
-    ids: List[Any]
+    ids: list[Any]
 
 
 class PipelineRegionLabeler(BaseModel):
-    polygon: List[List[float]]
+    polygon: list[list[float]]
     name: str = "default"
     up_to_id: str = ""
 

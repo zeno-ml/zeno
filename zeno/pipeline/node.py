@@ -1,5 +1,3 @@
-from typing import Union
-
 from .memory import PipelineMemory
 
 
@@ -7,19 +5,19 @@ class PipelineNode:
     def __init__(self):
         self.id = NodeId()
         self.state = {}
-        self.memory: Union[PipelineMemory, None] = None
+        self.memory: PipelineMemory
 
-    def fit(self):
-        pass
+    def fit(self) -> "PipelineNode":
+        return self
 
-    def transform(self):
-        pass
+    def transform(self) -> "PipelineNode":
+        return self
 
-    def pipe_outputs(self):
-        pass
+    def pipe_outputs(self) -> PipelineMemory:
+        return self.memory
 
-    def export_outputs_js(self):
-        pass
+    def export_outputs_js(self) -> dict:
+        return {}
 
     def save(self, path: str):
         pass
@@ -27,14 +25,12 @@ class PipelineNode:
     def load(self, path: str):
         pass
 
-    def init(self):
-        pass
-
     def get_memory(self):
         return self.memory
 
-    def set_memory(self, memory: PipelineMemory):
+    def set_memory(self, memory: PipelineMemory) -> "PipelineNode":
         self.memory = memory
+        return self
 
     def __repr__(self):
         return f"{self.__class__.__name__}"

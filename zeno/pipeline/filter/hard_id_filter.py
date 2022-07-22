@@ -1,20 +1,17 @@
 from copy import deepcopy
-from typing import List, Any
 
 from ..node import PipelineNode
 
 
 class HardFilterNode(PipelineNode):
-    def __init__(self, instance_ids: List[Any]):
+    def __init__(self, instance_ids: list):
         super().__init__()
         self.instance_ids = instance_ids
 
     def fit(self):
         return self
 
-    def __get_df_rows(self, dataframe, column, list_to_get=None):
-        if list_to_get is None:
-            return []
+    def __get_df_rows(self, dataframe, column, list_to_get):
         return dataframe[dataframe[column].isin(list_to_get)]
 
     def transform(self):

@@ -1,5 +1,4 @@
 from copy import deepcopy
-from typing import List
 
 from .filter.hard_id_filter import HardFilterNode
 from .lableler.region_based_labler import RegionBasedLabelerNode
@@ -11,8 +10,8 @@ from .projection.parametric_umap import ParametricUMAPNode
 class Pipeline:
     def __init__(self):
         self.uid = None
-        self.global_memory = PipelineMemory()
-        self.pipeline: List[PipelineNode] = []
+        self.global_memory: PipelineMemory = PipelineMemory()  # type: ignore
+        self.pipeline: list[PipelineNode] = []
         self.labeler = None
 
         self.table = None
@@ -24,7 +23,8 @@ class Pipeline:
         self.labeler = None
 
     def reset_memory(self):
-        self.global_memory.reset()
+        if self.global_memory is not None:
+            self.global_memory.reset()
         if self.table is not None:
             self.set_table(self.table)
         if self.id_column is not None:
@@ -92,22 +92,26 @@ class Pipeline:
         js_export = {}
         up_to_id_exist = len(up_to_id) > 0
 
+        curr_node = None
         for step_node in self.pipeline:
-            step_node.transform()
+            curr_node = step_node.transform()
             self.global_memory = step_node.pipe_outputs()
             if up_to_id_exist is True and up_to_id == str(step_node.id):
                 break
 
-        js_export = step_node.json()
+        if curr_node is not None:
+            js_export = curr_node.json()
 
         return self.global_memory, js_export
 
     def run_labeler(self, up_to_id=""):
+        js_export = {}
+        self.global_memory, js_export = self.run(up_to_id)
         if self.labeler is not None:
-            self.global_memory, js_export = self.run(up_to_id)
-            self.labeler.transform()
-            self.global_memory = self.labeler.pipe_outputs()
-            return self.global_memory, self.labeler.json()
+            self.global_memory = self.labeler.transform().pipe_outputs()
+            js_export = self.labeler.json()
+
+        return self.global_memory, js_export
 
     def __repr__(self):
         result = f"UID: {self.uid}: "
