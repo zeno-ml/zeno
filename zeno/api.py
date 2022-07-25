@@ -1,5 +1,6 @@
 import functools
 from dataclasses import dataclass
+from typing import Dict
 
 
 @dataclass
@@ -23,7 +24,7 @@ class ZenoOptions:
     data_column: str
     label_column: str
     output_column: str
-    distill_columns: dict[str, str]
+    distill_columns: Dict[str, str]
     data_path: str
     label_path: str
     output_path: str

@@ -1,6 +1,6 @@
 from enum import IntEnum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 from pydantic import BaseModel
 
@@ -40,12 +40,12 @@ class ReportPredicate(CamelModel):
     transform: str
     operation: str
     value: str
-    results: list[int]
+    results: List[int]
 
 
 class Report(CamelModel):
     name: str
-    report_predicates: list[ReportPredicate]
+    report_predicates: List[ReportPredicate]
 
 
 class ZenoFunction(CamelModel):
@@ -83,21 +83,21 @@ class ZenoSettings(CamelModel):
     id_column: ZenoColumn
     label_column: ZenoColumn
     data_column: ZenoColumn
-    metadata_columns: list[ZenoColumn]
+    metadata_columns: List[ZenoColumn]
 
 
 class ZenoVariables(CamelModel):
-    metrics: list[str]
-    transforms: list[str]
-    models: list[str]
-    folders: list[str]
+    metrics: List[str]
+    transforms: List[str]
+    models: List[str]
+    folders: List[str]
 
 
 class Slice(CamelModel):
     slice_name: str
     folder: str
-    filter_predicates: Optional[list[FilterPredicate]]
-    idxs: Optional[list[str]]
+    filter_predicates: Optional[List[FilterPredicate]]
+    idxs: Optional[List[str]]
 
 
 class MetricKey(CamelModel):
@@ -110,7 +110,7 @@ class MetricKey(CamelModel):
 class StatusResponse(CamelModel):
     status: str
     done_processing: bool
-    complete_columns: list[ZenoColumn]
+    complete_columns: List[ZenoColumn]
 
 
 class PipelineInit(BaseModel):
@@ -123,11 +123,11 @@ class PipelineReset(BaseModel):
 
 
 class PipelineIdFilter(BaseModel):
-    ids: list[Any]
+    ids: List[Any]
 
 
 class PipelineRegionLabeler(BaseModel):
-    polygon: list[list[float]]
+    polygon: List[List[float]]
     name: str = "default"
     up_to_id: str = ""
 

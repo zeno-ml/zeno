@@ -1,4 +1,5 @@
 from copy import deepcopy
+from typing import List
 
 from .filter.hard_id_filter import HardFilterNode
 from .lableler.region_based_labler import RegionBasedLabelerNode
@@ -11,7 +12,7 @@ class Pipeline:
     def __init__(self):
         self.uid = None
         self.global_memory: PipelineMemory = PipelineMemory()  # type: ignore
-        self.pipeline: list[PipelineNode] = []
+        self.pipeline: List[PipelineNode] = []
         self.labeler = None
 
         self.table = None

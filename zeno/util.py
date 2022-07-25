@@ -4,6 +4,7 @@ import pickle
 from importlib import util
 from inspect import getsource
 from pathlib import Path
+from typing import Tuple
 
 import numpy as np
 
@@ -58,7 +59,7 @@ def predistill_data(
     df: pd.DataFrame,
     batch_size: int,
     pos: int,
-) -> tuple[ZenoColumn, pd.Series]:
+) -> Tuple[ZenoColumn, pd.Series]:
     fn = get_function(preprocessor)
     col_hash = str(column)
     col = df[col_hash]
@@ -92,7 +93,7 @@ def transform_data(
     df: pd.DataFrame,
     batch_size: int,
     pos: int,
-) -> tuple[ZenoColumn, pd.Series]:
+) -> Tuple[ZenoColumn, pd.Series]:
     transform_fn = get_function(transform)
     transform_col = ZenoColumn(
         column_type=ZenoColumnType.TRANSFORM,
@@ -144,7 +145,7 @@ def run_inference(
     df: pd.DataFrame,
     batch_size: int,
     pos: int,
-) -> tuple[ZenoColumn, ZenoColumn, pd.Series, pd.Series]:
+) -> Tuple[ZenoColumn, ZenoColumn, pd.Series, pd.Series]:
     model_loader_fn = get_function(model_loader)
     model_name = os.path.basename(model_path).split(".")[0]
 

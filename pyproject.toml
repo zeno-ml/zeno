@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "zenoml"
-version = "0.0.3"
-description = "Behavioral Testing for Machine Learning"
+version = "0.0.5"
+description = "Behavioral Evaluation Framework for Machine Learning"
 license = "MIT"
 authors = ["Ángel Alexander Cabrera <alex.cabrera@gmail.com>"]
 readme = "README.md"  # Markdown files are supported
@@ -17,7 +17,7 @@ include = [
 exclude = ["zeno/tests/*"]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.11" 
+python = ">=3.8,<3.11" 
 pandas = "^1.4.0"
 pyarrow = "^7.0.0"
 uvicorn = ">=0.17.5,<0.19.0"
@@ -26,6 +26,7 @@ websockets = "^10.2"
 umap-learn = "^0.5.3"
 tqdm = "^4.64.0"
 tomli = "^2.0.1"
+tensorflow = "^2.9.0"
 
 [tool.poetry.dev-dependencies]
 pandas-stubs = "^1.4.3"
@@ -39,7 +40,7 @@ sphinx-autobuild = "^2021.3.14"
 sphinx-rtd-theme = "^1.0.0"
 black = "^22.6.0"
 flake8 = "^4.0.1"
-mypy = "^0.961"
+mypy = "^0.971"
 pyright = "^1.1.261"
 jupyter-book = "^0.13.0"
 usort = "^1.0.1"
@@ -51,7 +52,6 @@ importlib-resources = "^5.8.0"
 transformers = "^4.20.1"
 segmentation-models = "^1.0.1"
 keras = "^2.9.0"
-tensorflow = "^2.9.0"
 librosa = "^0.9.2"
 zenoml-audio-transcription = {path = "views/audio-transcription", develop = true}
 zenoml-image-classification = {path = "views/image-classification", develop = true}

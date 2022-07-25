@@ -1,4 +1,4 @@
-from typing import Union
+from typing import List, Union
 
 from pandas import DataFrame
 
@@ -8,14 +8,14 @@ from ..classes import ZenoColumn
 class PipelineMemory:
     def __init__(
         self,
-        projection: Union[list[list[float]], None] = None,
-        nice_projection: Union[list[dict], None] = None,
+        projection: Union[List[List[float]], None] = None,
+        nice_projection: Union[List[dict], None] = None,
         input_table: Union[DataFrame, None] = None,
         global_table: Union[DataFrame, None] = None,
         name: Union[str, None] = None,
         id_column: Union[ZenoColumn, None] = None,
         model: Union[str, None] = None,
-        labels: Union[list[Union[int, bool]], None] = None,
+        labels: Union[List[Union[int, bool]], None] = None,
     ):
         self.projection = projection
         self.nice_projection = nice_projection

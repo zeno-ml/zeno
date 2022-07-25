@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "zenoml-image-classification"
-version = "0.0.1"
+version = "0.0.2"
 description = "Image Classification for Zeno"
 license = "MIT"
 authors = ["Ángel Alexander Cabrera <alex.cabrera@gmail.com>"]
@@ -16,7 +16,7 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.11" 
+python = ">=3.8,<3.11" 
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
