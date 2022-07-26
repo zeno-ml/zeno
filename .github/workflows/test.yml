@@ -69,16 +69,3 @@ jobs:
         uses: codecov/codecov-action@v2.1.0
         with:
           fail_ci_if_error: true
-
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v3
-      - uses: psf/black@stable
-        with:
-          src: "./zeno"
-          version: "22.3.0"
-      - uses: py-actions/flake8@v2
-        with:
-          path: "./zeno"
