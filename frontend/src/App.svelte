@@ -34,10 +34,6 @@
 		max-width: 50px;
 	}
 
-	* :global(.mdc-deprecated-list-item) {
-		padding-left: 0px;
-	}
-
 	main {
 		display: flex;
 		flex-direction: row;

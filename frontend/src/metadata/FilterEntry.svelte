@@ -22,7 +22,7 @@
 	{:else}
 		<Select
 			bind:value={predicate.join}
-			label="Operation"
+			label="Join"
 			style="margin-right: 20px;">
 			{#each ["AND", "OR"] as o}
 				<Option value={o}>{o}</Option>
@@ -47,12 +47,12 @@
 		</Select>
 	</div>
 
-	<div class="selector">
+	<div>
 		<Textfield bind:value={predicate.value} label="Value">
 			<HelperText slot="helper">0</HelperText>
 		</Textfield>
 	</div>
-	<div class="selector">
+	<div class="selector" style:margin-top="10px">
 		<IconButton on:click={deletePredicate}>
 			<Icon component={Svg} viewBox="0 0 24 24">
 				<path fill="currentColor" d={mdiTrashCanOutline} />
@@ -69,10 +69,9 @@
 	#group {
 		display: flex;
 		flex-direction: inline;
-		align-items: flex-start;
 	}
 	#where {
 		margin-top: 15px;
-		width: 210px;
+		width: 220px;
 	}
 </style>

@@ -25,7 +25,7 @@
 {#if showTooltip}
 	<div class="tooltip-container">
 		<div class="tooltip">
-			<SliceDetails {sli} />
+			<SliceDetails predicateGroup={sli.filterPredicates} />
 		</div>
 	</div>
 {/if}

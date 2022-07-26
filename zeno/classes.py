@@ -1,6 +1,6 @@
 from enum import IntEnum
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 
 from pydantic import BaseModel
 
@@ -78,6 +78,11 @@ class FilterPredicate(CamelModel):
     group_indicator: Optional[str]
 
 
+class FilterPredicateGroup(CamelModel):
+    predicates: List[Union[FilterPredicate, "FilterPredicateGroup"]]
+    join: str
+
+
 class ZenoSettings(CamelModel):
     view: str
     id_column: ZenoColumn
@@ -96,7 +101,7 @@ class ZenoVariables(CamelModel):
 class Slice(CamelModel):
     slice_name: str
     folder: str
-    filter_predicates: Optional[List[FilterPredicate]]
+    filter_predicates: Optional[FilterPredicateGroup]
     idxs: Optional[List[str]]
 
 

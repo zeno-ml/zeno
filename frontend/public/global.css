@@ -14,10 +14,6 @@ body {
 		Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 }
 
-.mdc-deprecated-list-item {
-	height: 70px;
-}
-
 h2 {
 	font-weight: 500;
 }
@@ -25,6 +21,7 @@ h2 {
 .mdc-data-table__pagination {
 	border-top-width: 0px;
 }
+
 .mdc-data-table__table-container {
 	overflow: visible !important;
 }

@@ -8,7 +8,30 @@
 
 	let folderName = "";
 	let showNewFolder = false;
+
+	let input;
+
+	function createFolder() {
+		folders.update((f) => {
+			f.push(folderName);
+			folderName = "";
+			return [...f];
+		});
+		showNewFolder = false;
+	}
+
+	function submit(e) {
+		if (showNewFolder && e.key === "Enter") {
+			createFolder();
+		}
+	}
+
+	$: if (showNewFolder && input) {
+		input.getElement().focus();
+	}
 </script>
+
+<svelte:window on:keydown={submit} />
 
 <div>
 	<Button
@@ -24,18 +47,14 @@
 			on:click_outside={() => (showNewFolder = false)}>
 			<Paper elevation={7}>
 				<Content style="display: flex; align-items: center;">
-					<Textfield bind:value={folderName} label="Folder Name" />
+					<Textfield
+						bind:value={folderName}
+						label="Folder Name"
+						bind:this={input} />
 					<Button
 						style="margin-left: 20px;"
 						variant="outlined"
-						on:click={() => {
-							folders.update((f) => {
-								f.push(folderName);
-								folderName = "";
-								return [...f];
-							});
-							showNewFolder = false;
-						}}>Create</Button>
+						on:click={() => createFolder()}>Create</Button>
 				</Content>
 			</Paper>
 		</div>

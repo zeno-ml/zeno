@@ -27,20 +27,25 @@ interface MetadataSelection {
 	values: Array;
 }
 
+interface FilterPredicateGroup {
+	predicates: Array<FilterPredicate | FilterPredicateGroup>;
+	// '', AND or OR
+	join: string;
+}
+
 interface FilterPredicate {
 	column: ZenoColumn;
 	// >, <, ==, !=, >=, <=
 	operation: string;
 	value: string;
+	// '', AND or OR
 	join: string;
-	// 'start' or 'end'
-	groupIndicator?: string;
 }
 
 interface Slice {
 	sliceName: string;
 	folder: string;
-	filterPredicates?: FilterPredicate[];
+	filterPredicates?: FilterPredicateGroup;
 	idxs?: string[];
 }
 
