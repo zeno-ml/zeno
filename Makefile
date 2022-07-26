@@ -1,4 +1,4 @@
-all: check lint typecheck cover book 
+all: check lint typecheck test book 
 
 .PHONY: install
 install:
@@ -33,12 +33,6 @@ test:
 	@poetry run pytest -svv zeno/tests/*
 	@cd frontend && npm run test
 
-.PHONY: cover
-cover:
-	@echo "==> 🧪 Tests with Coverage =="
-	@poetry run pytest --cov=zeno --cov-report=xml ./zeno/tests/*
-	@cd frontend && npm run test:coverage
-
 book:
 	@echo "==> 📕 Book"
 	@poetry run jupyter-book build docs
@@ -57,9 +51,7 @@ publish: build
 .PHONY: clean
 clean:
 	@poetry run jupyter-book clean docs
-	@rm -rf coverage.xml
 	@rm -rf dist
-	@rm -rf frontend/coverage
 	@find . -type d -name '.mypy_cache' -exec rm -rf {} +
 	@find . -type d -name '__pycache__' -exec rm -rf {} +
 	@find . -type d -name '*pytest_cache*' -exec rm -rf {} +

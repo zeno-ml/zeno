@@ -1,37 +1,39 @@
 # Development
 
-## Environment
+After cloning the repository:
 
-Please install [`Poetry`](https://python-poetry.org/docs/master/#installing-with-the-official-installer) and use VSCode as your editor.
+- Install [`Poetry`](https://python-poetry.org/docs/master/#installing-with-the-official-installer), [`nodejs`](https://nodejs.org/en/download/) and use [`VSCode`](https://code.visualstudio.com/) as your editor.
+- `poetry config virtualenvs.in-project true`
+- `make install`
 
-## Install
+You should now be able to run `poetry run zeno`
 
-Suggest setting poetry to install the virtual env locally, which VSCode can use directly:
+To run the CIFAR-10 example:
 
-`poetry config virtualenvs.in-project true`
+- `mkdir data; cd data; git clone https://github.com/YoongiKim/CIFAR-10-images`
+- `poetry run zeno ./examples/cifar/tests/zeno.toml`
+- For debugging, you can use the "Run and Debug" sidebar in VSCode (a play button with a bug icon), and run the `zenocifar` configuration.
 
-`poetry install`
+To see live changes to the frontend:
 
-## Running
+- `cd frontend; npm run dev`
 
-`poetry run zeno`
+## Development Commands
 
-## Formatting and Linting
+The following make recipes can be used to check properties such as tests and linting. **Please ensure `make` passes before submitting a pull request.**
+
+### All Checks
 
 `make`
 
-## Testing
+### Linting
+
+`make lint`
+
+### Testing
 
 `make test`
 
-## Build Docs
+### Build Docs
 
 `make book`
-
-## Build
-
-`make build`
-
-## Publish
-
-`make publish`

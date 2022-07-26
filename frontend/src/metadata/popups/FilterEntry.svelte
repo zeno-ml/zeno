@@ -23,7 +23,7 @@
 		<Select
 			bind:value={predicate.join}
 			label="Join"
-			style="margin-right: 20px; width: 100px">
+			style="margin-right: 20px; width: 90px">
 			{#each ["AND", "OR"] as o}
 				<Option value={o}>{o}</Option>
 			{/each}
@@ -72,6 +72,6 @@
 	}
 	#where {
 		margin-top: 15px;
-		margin-right: 72px;
+		margin-right: 70px;
 	}
 </style>

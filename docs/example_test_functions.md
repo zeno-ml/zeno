@@ -1,6 +1,6 @@
 (test-examples)=
 
-# Example Test Functions
+# Example functions
 
 ```{tableofcontents}
 

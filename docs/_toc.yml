@@ -4,13 +4,15 @@
 format: jb-book
 root: intro
 chapters:
+  - file: getting_started
   - file: decorators
   - file: api
-  - file: example_test_functions
-    sections:
-      - file: predict_functions/predict_functions
-      - file: distill_functions/distill_functions
-      - file: metric_functions/metric_functions
-  - file: example_analyses/example_analyses
-    sections:
-      - file: example_analyses/cifar
+  - file: views
+  # - file: example_test_functions
+  #   sections:
+  #     - file: predict_functions/predict_functions
+  #     - file: distill_functions/distill_functions
+  #     - file: metric_functions/metric_functions
+  # - file: example_analyses/example_analyses
+  #   sections:
+  #     - file: example_analyses/cifar

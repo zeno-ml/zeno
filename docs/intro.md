@@ -1,8 +1,8 @@
-# Zeno: Behavioral Evaluation Platform for ML
+# Zeno: Behavioral Evaluation Framework for ML
 
-Zeno is a platform for behavioral evaluation of machine learning models using Python functions and an interactive UI.
-The Python API runs model inference and derives new metadata for analysis of unstructured data.
-The interactive UI lets users explore model performance, create behavioral tests, and compare model performance.
+Zeno is a general-purpose framework for evaluating machine learning models.
+It combines a **Python API** with an **interactive UI** to allow users to discover, explore, and analyze the performance of their models across diverse use cases.
+Zeno can be used for any data type or task with _modular views_ for everything from object detection to audio transcription.
 
 ::::{grid}
 :gutter: 2
@@ -26,8 +26,6 @@ def accuracy(df, ops):
 ![teaser](./teaser.png)
 :::
 ::::
-
-![workflow](./workflow.png)
 
 ## Quickstart
 

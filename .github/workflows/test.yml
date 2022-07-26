@@ -64,9 +64,3 @@ jobs:
         run: |
           cd frontend/
           npm run test:coverage
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3.1.0
-        with:
-          files: ./.coverage,./frontend/coverage/cobertura-coverage.xml
-          fail_ci_if_error: true

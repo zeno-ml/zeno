@@ -1,6 +1,6 @@
 (api)=
 
-## Running Tests
+## TOML configuration file
 
 Zeno options are set using a `TOML` file:
 

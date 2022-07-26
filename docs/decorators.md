@@ -1,6 +1,6 @@
 (writing_tests)=
 
-# Writing Tests
+# Python API
 
 Zeno has 3 primary decorator functions: `predict_function`, `distill_function` and `metric_function`.
 

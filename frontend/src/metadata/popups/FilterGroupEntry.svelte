@@ -28,7 +28,7 @@
 			<Select
 				bind:value={predicateGroup.join}
 				label="Join"
-				style="margin-right: 20px; width: 100px">
+				style="margin-right: 20px; width: 90px">
 				{#each ["AND", "OR"] as o}
 					<Option value={o}>{o}</Option>
 				{/each}

@@ -17,10 +17,5 @@
 	"testEnvironment": "jsdom",
 	"setupFilesAfterEnv": [
 		"@testing-library/jest-dom/extend-expect"
-	],
-	"coverageProvider": "v8",
-	"coverageReporters": [
-		"text",
-		"cobertura"
 	]
 }
