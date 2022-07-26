@@ -58,9 +58,9 @@ jobs:
           npm run build
 
       - name: Run Python tests
-        run: poetry run pytest --cov=./ --cov-report=xml ./zeno/tests/*
+        run: poetry run pytest ./zeno/tests/*
 
       - name: Run Frontend tests
         run: |
           cd frontend/
-          npm run test:coverage
+          npm run test
