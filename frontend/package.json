@@ -7,6 +7,7 @@
     "dev": "npm run smui-theme && vite build && vite",
     "build": "npm run smui-theme && vite build",
     "smui-theme": "smui-theme compile public/smui.css -i src/theme",
+    "lint": "npx eslint src && npx prettier --check src",
     "test": "npx jest tests",
     "test:coverage": "npx jest tests --collectCoverage=true",
     "check": "svelte-check --tsconfig ./tsconfig.json"

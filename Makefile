@@ -19,14 +19,13 @@ lint:
 	@poetry run black zeno/
 	@poetry run usort format zeno/
 	@poetry run flake8 zeno --statistics
-	@cd frontend && npx prettier --check ./src/**/*
+	@cd frontend && npm run lint 
 
 .PHONY: typecheck
 typecheck:
 	@echo "==> ✅ Type checks"
 	@poetry run mypy -p zeno 
 	@poetry run pyright zeno 
-	@cd frontend && ./node_modules/.bin/eslint ./src/
 
 .PHONY: test
 test:
