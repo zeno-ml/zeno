@@ -36,7 +36,7 @@ test:
 .PHONY: cover
 cover:
 	@echo "==> 🧪 Tests with Coverage =="
-	@poetry run pytest --cov=zeno --cov-report=term-missing ./zeno/tests/*
+	@poetry run pytest --cov=zeno --cov-report=xml ./zeno/tests/*
 	@cd frontend && npm run test:coverage
 
 book:
