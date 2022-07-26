@@ -19,6 +19,7 @@ jobs:
 
       - name: Install Poetry
         uses: snok/install-poetry@v1.3
+
       - name: Cache Poetry virtualenv
         uses: actions/cache@v3.0.4
         id: cache
@@ -27,35 +28,47 @@ jobs:
           key: poetry-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
             poetry-${{ hashFiles('**/poetry.lock') }}
+
       - name: Set Poetry config
         run: |
           poetry config virtualenvs.in-project false
           poetry config virtualenvs.path ~/.virtualenvs
+
       - name: Install dependencies
         run: poetry install --no-interaction
         if: steps.cache.outputs.cache-hit != 'true'
+
+      - name: Check types
+        run: make typecheck
+
+      - name: Check Poetry
+        run: make check
 
       - name: Install NPM packages
         run: |
           cd frontend/
           npm i
 
-      - name: Run tests
-        run: poetry run pytest --cov=./ --cov-report=xml ./zeno/tests/*
-      - name: Check types
-        run: make typecheck
-      - name: Check Poetry
-        run: make check
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2.1.0
-        with:
-          fail_ci_if_error: true
+      - name: Lint
+        run: make lint
 
       - name: Build frontend
         run: |
           cd frontend/
           npm run build
+
+      - name: Run Python tests
+        run: poetry run pytest --cov=./ --cov-report=xml ./zeno/tests/*
+
+      - name: Run Frontend tests
+        run: |
+          cd frontend/
+          npm run test:coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2.1.0
+        with:
+          fail_ci_if_error: true
 
   lint:
     runs-on: ubuntu-latest
