@@ -48,7 +48,7 @@ export async function getSlicesAndReports(t) {
 	const slicesRes = await fetch("/api/slices").then((d) => d.json());
 	const slis = JSON.parse(slicesRes) as Slice[];
 	slis.forEach((s: Slice) => {
-		if (s.filterPredicates.length !== 0) {
+		if (s.filterPredicates) {
 			s.idxs = t
 				.filter("(d) => " + getFilterFromPredicates(s.filterPredicates))
 				.array(columnHash(get(settings).idColumn));
@@ -119,57 +119,63 @@ export function updateSliceIdxs() {
 	});
 }
 
-export function getFilterFromPredicates(predicates: FilterPredicate[]) {
-	if (predicates.length === 0) {
+const PREDICATE_MAP = {
+	"": "",
+	AND: "&&",
+	OR: "||",
+};
+
+export function getFilterFromPredicates(
+	predicateGroup: FilterPredicateGroup,
+	groupIndex = 0
+) {
+	if (predicateGroup.predicates.length === 0) {
 		return "true";
 	}
-	const stringPreds = predicates.map((p: FilterPredicate, i) => {
-		if (p.column.columnType === ZenoColumnType.POSTDISTILL) {
-			p.column.model = get(model);
+
+	let ret = (groupIndex > 0 ? PREDICATE_MAP[predicateGroup.join] : "") + " (";
+
+	predicateGroup.predicates.forEach(
+		(p: FilterPredicate | FilterPredicateGroup, predicateIndex) => {
+			if ("predicates" in p) {
+				ret += getFilterFromPredicates(p, groupIndex + predicateIndex);
+				return;
+			}
+
+			if (p.column.columnType === ZenoColumnType.POSTDISTILL) {
+				p.column.model = get(model);
+			}
+
+			const hash = columnHash(p.column);
+
+			if (p.join === "") {
+				ret +=
+					` (d["${hash}"]` +
+					" " +
+					p.operation +
+					" " +
+					(isNaN(parseFloat(p.value)) ? `"${p.value}"` : p.value) +
+					") ";
+			} else {
+				let join = "";
+				if (predicateIndex !== 0) {
+					join = PREDICATE_MAP[p.join];
+				}
+				ret +=
+					join +
+					" (" +
+					`d["${hash}"]` +
+					" " +
+					p.operation +
+					" " +
+					(isNaN(parseFloat(p.value)) ? `"${p.value}"` : p.value) +
+					") ";
+			}
 		}
-		let join = "";
-		if (i !== 0) {
-			join = p.join;
-		}
+	);
 
-		let ret = "";
-
-		if (p.groupIndicator === "start" && join) {
-			ret += "&& (";
-		} else if (p.groupIndicator === "start") {
-			ret += "(";
-		}
-
-		const hash = columnHash(p.column);
-
-		if (join === "") {
-			ret +=
-				`(d["${hash}"]` +
-				" " +
-				p.operation +
-				" " +
-				(isNaN(parseFloat(p.value)) ? `"${p.value}"` : p.value) +
-				")";
-		} else {
-			ret +=
-				(join === "AND" ? "&&" : "||") +
-				" (" +
-				`d["${hash}"]` +
-				" " +
-				p.operation +
-				" " +
-				(isNaN(parseFloat(p.value)) ? `"${p.value}"` : p.value) +
-				")";
-		}
-
-		if (p.groupIndicator === "end") {
-			ret += ")";
-		}
-
-		return ret;
-	});
-
-	return stringPreds.join(" ");
+	ret += ") ";
+	return ret;
 }
 
 export function updateTableColumns(w: WSResponse) {

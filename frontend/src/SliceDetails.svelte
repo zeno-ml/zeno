@@ -1,17 +1,34 @@
 <script lang="ts">
-	export let sli: Slice;
+	export let predicateGroup: FilterPredicateGroup;
 </script>
 
 <div class="chip">
-	{#each sli.filterPredicates as pred, i}
-		<div class="meta-chip">
-			{pred.groupIndicator === "start" ? "(" : ""}
-			{i === 0 ? "" : pred.join}
-			{pred.column.name}
-			{pred.operation}
-			{!isNaN(Number(pred.value)) ? Number(pred.value).toFixed(2) : pred.value}
-			{pred.groupIndicator === "end" ? ")" : ""}
-		</div>
+	{#each predicateGroup.predicates as pred, i}
+		{#if "predicates" in pred}
+			<hr />
+			{#if i !== 0}
+				<div class="meta-chip">
+					{pred.join}
+				</div>
+			{/if}
+			<div class="meta-chip">
+				{"("}
+			</div>
+			<svelte:self predicateGroup={pred} />
+			<div class="meta-chip">
+				{")"}
+			</div>
+			<hr />
+		{:else}
+			<div class="meta-chip">
+				{i === 0 ? "" : pred.join}
+				{pred.column.name}
+				{pred.operation}
+				{!isNaN(Number(pred.value))
+					? Number(pred.value).toFixed(2)
+					: pred.value}
+			</div>
+		{/if}
 	{/each}
 </div>
 
@@ -29,7 +46,10 @@
 		margin-left: 5px;
 		margin-right: 5px;
 		margin-top: 2px;
-		margin-bottom: 2px;
 		border-radius: 5px;
+	}
+	hr {
+		width: 100%;
+		border: none;
 	}
 </style>

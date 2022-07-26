@@ -4,46 +4,49 @@
 	import Textfield from "@smui/textfield";
 	import HelperText from "@smui/textfield/helper-text";
 
-	import autoAnimate from "@formkit/auto-animate";
-
-	import { clickOutside } from "../../util/clickOutside";
 	import {
 		metadataSelections,
 		settings,
+		showNewSlice,
 		slices,
 		sliceSelections,
-		table,
-		showNewSlice,
 		sliceToEdit,
+		table,
 	} from "../../stores";
+	import { clickOutside } from "../../util/clickOutside";
 	import { columnHash, getFilterFromPredicates } from "../../util/util";
 
-	import FilterEntry from "../FilterEntry.svelte";
+	import FilterGroupEntry from "./FilterGroupEntry.svelte";
 
 	let sliceName: string = "";
-	let predicates: FilterPredicate[] = [];
+	let predicateGroup: FilterPredicateGroup = { predicates: [], join: "" };
+	let nameInput;
+
+	$: if ($showNewSlice && nameInput) {
+		nameInput.getElement().focus();
+	}
 
 	showNewSlice.subscribe(() => updatePredicates());
 
 	function updatePredicates() {
 		if ($sliceToEdit) {
 			sliceName = $sliceToEdit.sliceName;
-			predicates = $sliceToEdit.filterPredicates;
+			predicateGroup = $sliceToEdit.filterPredicates;
 			return;
 		}
 		// Pre-fill slice creation with current metadata selections.
 		if ($metadataSelections.size !== 0) {
-			predicates = [];
+			predicateGroup.predicates = [];
 			[...$metadataSelections.values()].forEach((entry) => {
 				// TODO: support slice selections
 				if (entry.type === "range") {
-					predicates.push({
+					predicateGroup.predicates.push({
 						column: entry.column,
 						operation: ">=",
 						value: "" + entry.values[0],
 						join: "AND",
 					});
-					predicates.push({
+					predicateGroup.predicates.push({
 						column: entry.column,
 						operation: "<=",
 						value: "" + entry.values[1],
@@ -51,7 +54,7 @@
 					});
 				} else if (entry.type === "binary") {
 					let val = entry.values[0] === "is" ? "1" : "0";
-					predicates.push({
+					predicateGroup.predicates.push({
 						column: entry.column,
 						operation: "==",
 						value: val,
@@ -59,47 +62,38 @@
 					});
 				} else {
 					if (entry.values.length === 1) {
-						predicates.push({
+						predicateGroup.predicates.push({
 							column: entry.column,
 							operation: "==",
 							value: "" + entry.values[0],
 							join: "AND",
 						});
 					} else {
-						entry.values.forEach((v, j) => {
-							let indicator = "";
-							if (entry.values.length > 1 && j === 0) {
-								indicator = "start";
-							} else if (
-								entry.values.length > 1 &&
-								j === entry.values.length - 1
-							) {
-								indicator = "end";
-							}
-							predicates.push({
+						let group = {
+							predicates: [],
+							join: "AND",
+						};
+						entry.values.forEach((v) =>
+							group.predicates.push({
 								column: entry.column,
 								operation: "==",
 								value: "" + v,
 								join: "OR",
-								groupIndicator: indicator,
-							});
-						});
+								depth: 1,
+							})
+						);
+						predicateGroup.predicates.push(group);
 					}
 				}
 			});
-		} else if (predicates.length === 0) {
-			predicates.push({
+		} else if (predicateGroup.predicates.length === 0) {
+			predicateGroup.predicates.push({
 				column: undefined,
 				operation: "",
 				value: "",
 				join: "",
 			});
 		}
-	}
-
-	function deletePredicate(i) {
-		predicates.splice(i, 1);
-		predicates = predicates;
 	}
 
 	function createSlice() {
@@ -109,14 +103,14 @@
 		showNewSlice.set(false);
 		sliceToEdit.set(null);
 
-		const filt = getFilterFromPredicates(predicates);
+		const filt = getFilterFromPredicates(predicateGroup);
 		let tempTable = $table.filter(`(d) => ${filt}`);
 
 		slices.update((s) => {
 			s.set(sliceName, <Slice>{
 				sliceName: sliceName,
 				folder: "",
-				filterPredicates: predicates,
+				filterPredicates: predicateGroup,
 				transform: "",
 				idxs: tempTable.array(columnHash($settings.idColumn)) as string[],
 			});
@@ -126,8 +120,13 @@
 		sliceSelections.set([]);
 	}
 
+	function deletePredicate(i) {
+		predicateGroup.predicates.splice(i, 1);
+		predicateGroup = predicateGroup;
+	}
+
 	function submit(e) {
-		if (e.key === "Enter") {
+		if ($showNewSlice && e.key === "Enter") {
 			createSlice();
 		}
 	}
@@ -151,32 +150,13 @@
 			on:click_outside={() => showNewSlice.set(false)}>
 			<Paper elevation={7}>
 				<Content>
-					<Textfield bind:value={sliceName} label="Name">
+					<Textfield bind:value={sliceName} label="Name" bind:this={nameInput}>
 						<HelperText slot="helper">Slice 1</HelperText>
 					</Textfield>
-					<ul use:autoAnimate>
-						{#each predicates as p, i}
-							<li>
-								<FilterEntry
-									first={i === 0 ? true : false}
-									deletePredicate={() => deletePredicate(i)}
-									bind:predicate={p} />
-							</li>
-						{/each}
-					</ul>
-					<div
-						class="add"
-						on:click={() => {
-							predicates.push({
-								column: undefined,
-								operation: "",
-								value: "",
-								join: "AND",
-							});
-							predicates = predicates;
-						}}>
-						add filter
-					</div>
+					<FilterGroupEntry
+						index={-1}
+						deletePredicate={() => deletePredicate(-1)}
+						bind:predicateGroup />
 					<div id="submit">
 						<Button variant="outlined" on:click={createSlice}>
 							{$sliceToEdit !== null ? "Edit Slice" : "Create Slice"}
@@ -197,26 +177,11 @@
 	#paper-container {
 		position: absolute;
 		z-index: 1;
-		min-width: 900px;
 		margin-top: 10px;
 	}
 	#submit {
 		display: flex;
 		flex-direction: row-reverse;
 		align-items: center;
-	}
-	.add {
-		padding: 5px;
-		width: max-content;
-		margin-top: 10px;
-		cursor: pointer;
-		color: #6200ee;
-	}
-	.add:hover {
-		background: #ede1fd;
-		border-radius: 5px;
-	}
-	ul {
-		list-style-type: none;
 	}
 </style>
