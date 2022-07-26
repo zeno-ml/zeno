@@ -1,12 +1,27 @@
-(api)=
+---
+sidebar_position: 3
+---
 
-## TOML configuration file
+# Configuration file
 
-Zeno options are set using a `TOML` file:
+Zeno options are set using a `TOML` file such as the following:
 
+```toml
+tests = "./tests/"
+view = "zenoml-image-classification"
+metadata = "./metadata.csv"
+models = [
+	"./cifar_net_2.pth",
+	"./cifar_net_5.pth",
+	"./cifar_net_10.pth",
+	"./cifar_net_20.pth"
+]
+data_path = "./data/"
+data_column = "id"
+data_type = "path"
 ```
-zeno zeno_config.toml
-```
+
+## Configuration options
 
 The configuration file has the the following options.
 

@@ -11,28 +11,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: 3.9
-
-      - name: Install Poetry
-        uses: snok/install-poetry@v1.3
-      - name: Cache Poetry virtualenv
-        uses: actions/cache@v3.0.4
-        id: cache
-        with:
-          path: ~/.virtualenvs
-          key: poetry-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            poetry-${{ hashFiles('**/poetry.lock') }}
-      - name: Set Poetry config
-        run: |
-          poetry config virtualenvs.in-project false
-          poetry config virtualenvs.path ~/.virtualenvs
-      - name: Install dependencies
-        run: poetry install --no-interaction
-        if: steps.cache.outputs.cache-hit != 'true'
+      - uses: actions/setup-node@v3
 
       - name: Make book
         run: make book
@@ -40,4 +19,4 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/_build/html
+          publish_dir: ./docs/build
