@@ -120,6 +120,10 @@
 						class="material-icons"
 						on:click={(e) => {
 							e.stopPropagation();
+							sliceSelections.update((s) => {
+								s.splice(s.indexOf(slice.sliceName), 1);
+								return s;
+							});
 							slices.update((s) => {
 								s.delete(slice.sliceName);
 								return s;

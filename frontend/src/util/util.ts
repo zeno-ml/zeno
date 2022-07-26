@@ -175,8 +175,6 @@ export function getFilterFromPredicates(
 	);
 
 	ret += ") ";
-
-	console.log(ret);
 	return ret;
 }
 

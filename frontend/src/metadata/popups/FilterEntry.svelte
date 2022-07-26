@@ -7,23 +7,23 @@
 	import HelperText from "@smui/textfield/helper-text";
 	import { mdiTrashCanOutline } from "@mdi/js";
 
-	import { currentColumns } from "../stores";
+	import { currentColumns } from "../../stores";
 
 	export let predicate: FilterPredicate;
 	export let deletePredicate: () => void;
-	export let first;
+	export let index;
 
 	let operations = ["==", "!=", ">", "<", ">=", "<="];
 </script>
 
 <div id="group">
-	{#if first}
+	{#if index === 0}
 		<span id="where">Where</span>
 	{:else}
 		<Select
 			bind:value={predicate.join}
 			label="Join"
-			style="margin-right: 20px;">
+			style="margin-right: 20px; width: 100px">
 			{#each ["AND", "OR"] as o}
 				<Option value={o}>{o}</Option>
 			{/each}
@@ -40,7 +40,7 @@
 		<Select
 			bind:value={predicate.operation}
 			label="Operation"
-			style="margin-right: 20px;">
+			style="margin-right: 20px; width:125px">
 			{#each operations as o}
 				<Option value={o}>{o}</Option>
 			{/each}
@@ -48,7 +48,7 @@
 	</div>
 
 	<div>
-		<Textfield bind:value={predicate.value} label="Value">
+		<Textfield bind:value={predicate.value} label="Value" style="width: 100px">
 			<HelperText slot="helper">0</HelperText>
 		</Textfield>
 	</div>
@@ -72,6 +72,6 @@
 	}
 	#where {
 		margin-top: 15px;
-		width: 220px;
+		margin-right: 72px;
 	}
 </style>

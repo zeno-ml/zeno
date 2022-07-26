@@ -4,26 +4,27 @@
 	import Textfield from "@smui/textfield";
 	import HelperText from "@smui/textfield/helper-text";
 
-	import autoAnimate from "@formkit/auto-animate";
-
-	import { clickOutside } from "../../util/clickOutside";
 	import {
 		metadataSelections,
 		settings,
+		showNewSlice,
 		slices,
 		sliceSelections,
-		table,
-		showNewSlice,
 		sliceToEdit,
+		table,
 	} from "../../stores";
+	import { clickOutside } from "../../util/clickOutside";
 	import { columnHash, getFilterFromPredicates } from "../../util/util";
 
-	import FilterEntry from "../FilterEntry.svelte";
-	import FilterGroupEntry from "../FilterGroupEntry.svelte";
+	import FilterGroupEntry from "./FilterGroupEntry.svelte";
 
 	let sliceName: string = "";
 	let predicateGroup: FilterPredicateGroup = { predicates: [], join: "" };
 	let nameInput;
+
+	$: if ($showNewSlice && nameInput) {
+		nameInput.getElement().focus();
+	}
 
 	showNewSlice.subscribe(() => updatePredicates());
 
@@ -72,7 +73,7 @@
 							predicates: [],
 							join: "AND",
 						};
-						entry.values.forEach((v, j) =>
+						entry.values.forEach((v) =>
 							group.predicates.push({
 								column: entry.column,
 								operation: "==",
@@ -93,11 +94,6 @@
 				join: "",
 			});
 		}
-	}
-
-	function deletePredicate(i) {
-		predicateGroup.predicates.splice(i, 1);
-		predicateGroup = predicateGroup;
 	}
 
 	function createSlice() {
@@ -124,14 +120,15 @@
 		sliceSelections.set([]);
 	}
 
+	function deletePredicate(i) {
+		predicateGroup.predicates.splice(i, 1);
+		predicateGroup = predicateGroup;
+	}
+
 	function submit(e) {
 		if ($showNewSlice && e.key === "Enter") {
 			createSlice();
 		}
-	}
-
-	$: if ($showNewSlice && nameInput) {
-		nameInput.getElement().focus();
 	}
 </script>
 
@@ -157,7 +154,7 @@
 						<HelperText slot="helper">Slice 1</HelperText>
 					</Textfield>
 					<FilterGroupEntry
-						first={true}
+						index={-1}
 						deletePredicate={() => deletePredicate(-1)}
 						bind:predicateGroup />
 					<div id="submit">
@@ -180,18 +177,11 @@
 	#paper-container {
 		position: absolute;
 		z-index: 1;
-		min-width: 900px;
 		margin-top: 10px;
 	}
 	#submit {
 		display: flex;
 		flex-direction: row-reverse;
 		align-items: center;
-	}
-	ul {
-		list-style-type: none;
-		padding: 10px;
-		background: #fafafa;
-		border-radius: 5px;
 	}
 </style>
