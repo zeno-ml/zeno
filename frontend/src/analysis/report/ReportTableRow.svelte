@@ -133,9 +133,9 @@
 		align-items: center;
 	}
 	:global(.sticky) {
-		position: sticky;
+		overflow: visible;
 		left: 0px;
 		background: white;
-		z-index: 2;
+		z-index: 0;
 	}
 </style>

@@ -22,6 +22,7 @@
 	on:blur={() => (showTooltip = false)}>
 	{sli.sliceName}
 </div>
+
 {#if showTooltip}
 	<div class="tooltip-container">
 		<div class="tooltip">
@@ -32,7 +33,7 @@
 
 <style>
 	.tooltip-container {
-		z-index: 2;
+		z-index: 10;
 		position: absolute;
 		height: max-content;
 		transform: translateY(100%);

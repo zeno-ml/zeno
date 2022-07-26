@@ -38,7 +38,7 @@
 </div>
 
 <div bind:this={table}>
-	<DataTable style="max-width: calc(100vw - 500px); overflow-x: scroll;">
+	<DataTable style="max-width: calc(100vw - 500px)">
 		<Head>
 			<Row>
 				<Cell class="sticky" style="border-right: 1px solid #e8e8e8">

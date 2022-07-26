@@ -22,10 +22,6 @@ h2 {
 	border-top-width: 0px;
 }
 
-.mdc-data-table__table-container {
-	overflow: visible !important;
-}
-
 table {
 	overflow: visible;
 }

@@ -12,6 +12,9 @@
 );
 
 .mdc-data-table__table-container {
+	overflow-x: scroll;
+}
+.mdc-data-table__cell {
 	overflow: visible;
 }
 
