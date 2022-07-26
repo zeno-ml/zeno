@@ -57,7 +57,7 @@ publish: build
 .PHONY: clean
 clean:
 	@poetry run jupyter-book clean docs
-	@rm -rf .coverage
+	@rm -rf coverage.xml
 	@rm -rf dist
 	@rm -rf frontend/coverage
 	@find . -type d -name '.mypy_cache' -exec rm -rf {} +

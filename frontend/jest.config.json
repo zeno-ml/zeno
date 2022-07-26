@@ -3,20 +3,22 @@
 		"^.+\\.svelte$": [
 			"svelte-jester",
 			{
+				"rootMode": "upward",
 				"preprocess": true
 			}
 		],
 		"^.+\\.ts$": "ts-jest"
 	},
 	"moduleFileExtensions": [
-		"ts",
 		"js",
+		"ts",
 		"svelte"
 	],
 	"testEnvironment": "jsdom",
 	"setupFilesAfterEnv": [
 		"@testing-library/jest-dom/extend-expect"
 	],
+	"coverageProvider": "v8",
 	"coverageReporters": [
 		"text",
 		"cobertura"
