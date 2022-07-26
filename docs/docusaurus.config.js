@@ -9,7 +9,7 @@ const config = {
   title: "Zeno",
   tagline: "Powerful and Interactive Machine Learning Evaluation",
   url: "https://zenoml.com",
-  baseUrl: "/zeno/",
+  baseUrl: "/",
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.png",
