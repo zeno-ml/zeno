@@ -25,7 +25,6 @@ lint:
 typecheck:
 	@echo "==> ✅ Type checks"
 	@poetry run mypy -p zeno 
-	@make mypy pyright eslint
 	@poetry run pyright zeno 
 	@cd frontend && ./node_modules/.bin/eslint ./src/
 
