@@ -8,8 +8,8 @@
     "build": "npm run smui-theme && vite build",
     "smui-theme": "smui-theme compile public/smui.css -i src/theme",
     "lint": "npx eslint src && npx prettier --check src",
-    "test": "npx jest tests",
-    "test:coverage": "npx jest tests --collectCoverage=true",
+    "test": "npx jest tests src",
+    "test:coverage": "npx jest tests src --collectCoverage=true --collectCoverageFrom=src/**/*.{js,ts,svelte}",
     "check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "devDependencies": {
