@@ -1,26 +1,56 @@
 <script lang="ts">
 	import { mdiPencilOutline } from "@mdi/js";
+	import Button, { Label } from "@smui/button";
 	import { Icon } from "@smui/common";
 	import { Svg } from "@smui/common/elements";
+	import Dialog, { Actions, Content, Title, InitialFocus } from "@smui/dialog";
 	import SliceDetails from "../../SliceDetails.svelte";
 	import {
-		sliceSelections,
 		metric,
 		model,
-		slices,
-		transform,
-		sliceToEdit,
 		showNewSlice,
+		slices,
+		sliceSelections,
+		sliceToEdit,
+		transform,
+		reports,
 	} from "../../stores";
 	import { getMetricsForSlices } from "../../util/util";
 
 	export let slice: Slice;
 	export let inFolder = false;
 
+	let confirmDelete = false;
+	let relatedReports = 0;
+
 	let showTooltip = false;
 	$: selected = $sliceSelections.includes(slice.sliceName);
 
+	function deleteSlice() {
+		confirmDelete = false;
+		relatedReports = 0;
+
+		sliceSelections.update((s) => {
+			s.splice(s.indexOf(slice.sliceName), 1);
+			return s;
+		});
+		slices.update((s) => {
+			s.delete(slice.sliceName);
+			return s;
+		});
+		reports.update((reps) => {
+			reps = reps.map((r) => {
+				r.reportPredicates = r.reportPredicates.filter(
+					(p) => p.sliceName !== slice.sliceName
+				);
+				return r;
+			});
+			return reps;
+		});
+	}
+
 	function setSelected(e) {
+		// Imitate selections in Vega bar charts.
 		if (
 			$sliceSelections.length === 1 &&
 			$sliceSelections.includes(slice.sliceName)
@@ -120,14 +150,22 @@
 						class="material-icons"
 						on:click={(e) => {
 							e.stopPropagation();
-							sliceSelections.update((s) => {
-								s.splice(s.indexOf(slice.sliceName), 1);
-								return s;
+							$reports.forEach((r) => {
+								let hasSlice = false;
+								r.reportPredicates.forEach((p) => {
+									if (p.sliceName === slice.sliceName) {
+										hasSlice = true;
+									}
+								});
+								if (hasSlice) {
+									relatedReports++;
+								}
 							});
-							slices.update((s) => {
-								s.delete(slice.sliceName);
-								return s;
-							});
+							if (relatedReports > 0) {
+								confirmDelete = true;
+							} else {
+								deleteSlice();
+							}
 						}}>
 						delete_outline
 					</Icon>
@@ -143,6 +181,27 @@
 		</div>
 	{/if}
 </div>
+
+<Dialog
+	bind:open={confirmDelete}
+	scrimClickAction=""
+	escapeKeyAction=""
+	aria-labelledby="delete-slice"
+	aria-describedby="delete-slice">
+	<Title id="simple-title">Delete Slice</Title>
+	<Content id="simple-content"
+		>This slice will be removed from {relatedReports} report{relatedReports > 1
+			? "s"
+			: ""}. Continue?</Content>
+	<Actions>
+		<Button on:click={() => (confirmDelete = false)}>
+			<Label>No</Label>
+		</Button>
+		<Button use={[InitialFocus]} on:click={() => deleteSlice()}>
+			<Label>Yes</Label>
+		</Button>
+	</Actions>
+</Dialog>
 
 <style>
 	.tooltip-container {
