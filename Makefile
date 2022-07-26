@@ -35,7 +35,7 @@ test:
 
 book:
 	@echo "==> 📕 Book"
-	@poetry run jupyter-book build docs
+	@cd docs; npm i; npm run build;
 
 .PHONY: build
 build:
