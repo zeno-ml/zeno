@@ -23,6 +23,12 @@ import {
 } from "../stores";
 import { ZenoColumnType } from "../globals";
 
+const PREDICATE_MAP = {
+	"": "",
+	AND: "&&",
+	OR: "||",
+};
+
 export function initialFetch() {
 	fetch("/api/settings")
 		.then((r) => r.json())
@@ -118,12 +124,6 @@ export function updateSliceIdxs() {
 		return slis;
 	});
 }
-
-const PREDICATE_MAP = {
-	"": "",
-	AND: "&&",
-	OR: "||",
-};
 
 export function getFilterFromPredicates(
 	predicateGroup: FilterPredicateGroup,

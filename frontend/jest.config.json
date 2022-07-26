@@ -1,0 +1,24 @@
+{
+	"transform": {
+		"^.+\\.svelte$": [
+			"svelte-jester",
+			{
+				"preprocess": true
+			}
+		],
+		"^.+\\.ts$": "ts-jest"
+	},
+	"moduleFileExtensions": [
+		"ts",
+		"js",
+		"svelte"
+	],
+	"testEnvironment": "jsdom",
+	"setupFilesAfterEnv": [
+		"@testing-library/jest-dom/extend-expect"
+	],
+	"coverageReporters": [
+		"text",
+		"cobertura"
+	]
+}
