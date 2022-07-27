@@ -6,6 +6,7 @@
 	import { onMount } from "svelte";
 
 	import Button from "@smui/button";
+	import IconButton from "@smui/icon-button";
 	import { Label } from "@smui/common";
 
 	import { columnHash } from "../../util/util";
@@ -47,6 +48,7 @@
 		labels: [],
 		hash: "",
 	};
+	let hoveringCell = false;
 
 	$: hash = columnHash(col);
 	$: {
@@ -55,6 +57,7 @@
 		}
 	}
 	$: selectedHash = $colorByHash === hash;
+	$: selectedHashColor = shouldColor ? (selectedHash ? "#9B52DF" : "") : "";
 	$: {
 		col;
 		updateData($table, $filteredTable);
@@ -217,57 +220,75 @@
 	}
 </script>
 
-<div class="cell">
+<div
+	class="cell"
+	on:mouseenter={() => (hoveringCell = true)}
+	on:mouseleave={() => (hoveringCell = false)}>
 	<div id="info">
-		<span
-			style:color={shouldColor ? (selectedHash ? "#9B52DF" : "") : ""}
-			on:click={() => {
-				if (shouldColor) {
-					colorByHash.set(hash);
-				}
-			}}>{col.name}</span>
-		{#if chartType === ChartType.Binary}
-			<div style:display="flex">
-				<div class="binary-button">
-					<Button
-						variant="outlined"
-						on:click={() => {
-							selection =
-								selection && selection[1] === "is"
-									? undefined
-									: ["binary", "is"];
-							setSelection();
-						}}>
-						<Label
-							style="color: {selectedHash ? colorAssignments.colors[1] : ''};"
-							>Is</Label>
-					</Button>
-					{$table.filter(`d => d["${hash}"] == 1`).count().object()["count"]}
+		<div id="label" class="top-text">
+			<span style:color={selectedHashColor}>{col.name}</span>
+		</div>
+
+		<div class="top-right-cell">
+			{#if chartType === ChartType.Binary}
+				<div style:display="flex">
+					<div class="binary-button">
+						<Button
+							variant="outlined"
+							on:click={() => {
+								selection =
+									selection && selection[1] === "is"
+										? undefined
+										: ["binary", "is"];
+								setSelection();
+							}}>
+							<Label
+								style="color: {selectedHash ? colorAssignments.colors[1] : ''};"
+								>Is</Label>
+						</Button>
+						{$table.filter(`d => d["${hash}"] == 1`).count().object()["count"]}
+					</div>
+					<div class="binary-button">
+						<Button
+							variant="outlined"
+							on:click={() => {
+								selection =
+									selection && selection[1] === "is not"
+										? undefined
+										: ["binary", "is not"];
+								setSelection();
+							}}>
+							<Label
+								style="color: {selectedHash ? colorAssignments.colors[0] : ''};"
+								>Is Not</Label>
+						</Button>
+						{$table.filter(`d => d["${hash}"] == 0`).count().object()["count"]}
+					</div>
 				</div>
-				<div class="binary-button">
-					<Button
-						variant="outlined"
-						on:click={() => {
-							selection =
-								selection && selection[1] === "is not"
-									? undefined
-									: ["binary", "is not"];
-							setSelection();
-						}}>
-						<Label
-							style="color: {selectedHash ? colorAssignments.colors[0] : ''};"
-							>Is Not</Label>
-					</Button>
-					{$table.filter(`d => d["${hash}"] == 0`).count().object()["count"]}
+			{/if}
+
+			{#if selection && selection[0] === "range"}
+				<div class="top-text">
+					<span>
+						{selection ? selection[1].toFixed(2) + " - " : ""}
+						{selection ? selection[2].toFixed(2) : ""}
+					</span>
 				</div>
-			</div>
-		{/if}
-		{#if selection && selection[0] === "range"}
-			<span>
-				{selection ? selection[1].toFixed(2) + " - " : ""}
-				{selection ? selection[2].toFixed(2) : ""}
-			</span>
-		{/if}
+			{/if}
+
+			{#if chartType !== ChartType.Other && shouldColor && (hoveringCell || selectedHash)}
+				<div class="top-text">
+					<IconButton
+						size="mini"
+						class="material-icons"
+						style="color: {selectedHashColor}; margin-top: -10px;"
+						on:click={() => {
+							colorByHash.set(hash);
+						}}>format_paint</IconButton>
+				</div>
+			{/if}
+		</div>
+
 		{#if $table.column(hash) && chartType === ChartType.Other}
 			<span style:margin-right="5px">
 				unique values: {$table
@@ -285,7 +306,8 @@
 			on:blur={setSelection}>
 			<VegaLite
 				spec={dynamicSpec({
-					colors: shouldColor ? domain.map((d) => d["color"]) : [],
+					colors:
+						shouldColor && selectedHash ? domain.map((d) => d["color"]) : [],
 				})}
 				data={histogramData}
 				bind:view
@@ -317,5 +339,14 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+	}
+	.top-right-cell {
+		display: flex;
+		align-items: center;
+		gap: 2px;
+	}
+	.top-text {
+		height: 18px;
+		z-index: 999;
 	}
 </style>
