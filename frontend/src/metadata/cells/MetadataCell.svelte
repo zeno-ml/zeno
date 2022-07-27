@@ -1,12 +1,12 @@
 <script lang="ts">
 	import type ColumnTable from "arquero/dist/types/table/column-table";
 	import type { View } from "svelte-vega";
-	import IconButton from "@smui/icon-button";
 
 	import { VegaLite } from "svelte-vega";
 	import { onMount } from "svelte";
 
 	import Button from "@smui/button";
+	import IconButton from "@smui/icon-button";
 	import { Label } from "@smui/common";
 
 	import { columnHash } from "../../util/util";
@@ -218,9 +218,11 @@
 			return m;
 		});
 	}
+
 	function mouseEnterCell() {
 		hoveringCell = true;
 	}
+
 	function mouseLeaveCell() {
 		hoveringCell = false;
 	}
