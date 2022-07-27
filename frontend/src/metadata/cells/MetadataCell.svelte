@@ -303,7 +303,8 @@
 			on:blur={setSelection}>
 			<VegaLite
 				spec={dynamicSpec({
-					colors: shouldColor ? domain.map((d) => d["color"]) : [],
+					colors:
+						shouldColor && selectedHash ? domain.map((d) => d["color"]) : [],
 				})}
 				data={histogramData}
 				bind:view
