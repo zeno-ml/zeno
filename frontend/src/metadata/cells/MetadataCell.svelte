@@ -48,6 +48,7 @@
 		labels: [],
 		hash: "",
 	};
+	let hoveringCell = false;
 
 	$: hash = columnHash(col);
 	$: {
@@ -56,6 +57,7 @@
 		}
 	}
 	$: selectedHash = $colorByHash === hash;
+	$: selectedHashColor = shouldColor ? (selectedHash ? "#9B52DF" : "") : "";
 	$: {
 		col;
 		updateData($table, $filteredTable);
@@ -216,67 +218,74 @@
 			return m;
 		});
 	}
+	function mouseEnterCell() {
+		hoveringCell = true;
+	}
+	function mouseLeaveCell() {
+		hoveringCell = false;
+	}
 </script>
 
-<div class="cell">
+<div class="cell" on:mouseenter={mouseEnterCell} on:mouseleave={mouseLeaveCell}>
 	<div id="info">
 		<div id="label">
-			{#if true}
-				{@const color = shouldColor ? (selectedHash ? "#9B52DF" : "") : ""}
-				{#if chartType !== ChartType.Other && shouldColor}
-					<IconButton
-						size="button"
-						class="material-icons"
-						style="color: {color}"
-						on:click={() => {
-							colorByHash.set(hash);
-						}}>format_color_fill</IconButton>
-				{/if}
-				<span style:color>{col.name}</span>
+			<span style:color={selectedHashColor}>{col.name}</span>
+		</div>
+
+		<div class="top-right-cell">
+			{#if chartType === ChartType.Binary}
+				<div style:display="flex">
+					<div class="binary-button">
+						<Button
+							variant="outlined"
+							on:click={() => {
+								selection =
+									selection && selection[1] === "is"
+										? undefined
+										: ["binary", "is"];
+								setSelection();
+							}}>
+							<Label
+								style="color: {selectedHash ? colorAssignments.colors[1] : ''};"
+								>Is</Label>
+						</Button>
+						{$table.filter(`d => d["${hash}"] == 1`).count().object()["count"]}
+					</div>
+					<div class="binary-button">
+						<Button
+							variant="outlined"
+							on:click={() => {
+								selection =
+									selection && selection[1] === "is not"
+										? undefined
+										: ["binary", "is not"];
+								setSelection();
+							}}>
+							<Label
+								style="color: {selectedHash ? colorAssignments.colors[0] : ''};"
+								>Is Not</Label>
+						</Button>
+						{$table.filter(`d => d["${hash}"] == 0`).count().object()["count"]}
+					</div>
+				</div>
+			{/if}
+			{#if selection && selection[0] === "range"}
+				<span>
+					{selection ? selection[1].toFixed(2) + " - " : ""}
+					{selection ? selection[2].toFixed(2) : ""}
+				</span>
+			{/if}
+			{#if chartType !== ChartType.Other && shouldColor && (hoveringCell || selectedHash)}
+				<IconButton
+					size="button"
+					class="material-icons"
+					style="color: {selectedHashColor}; height: 100%; font-size: 18px;"
+					on:click={() => {
+						colorByHash.set(hash);
+					}}>format_paint</IconButton>
 			{/if}
 		</div>
-		{#if chartType === ChartType.Binary}
-			<div style:display="flex">
-				<div class="binary-button">
-					<Button
-						variant="outlined"
-						on:click={() => {
-							selection =
-								selection && selection[1] === "is"
-									? undefined
-									: ["binary", "is"];
-							setSelection();
-						}}>
-						<Label
-							style="color: {selectedHash ? colorAssignments.colors[1] : ''};"
-							>Is</Label>
-					</Button>
-					{$table.filter(`d => d["${hash}"] == 1`).count().object()["count"]}
-				</div>
-				<div class="binary-button">
-					<Button
-						variant="outlined"
-						on:click={() => {
-							selection =
-								selection && selection[1] === "is not"
-									? undefined
-									: ["binary", "is not"];
-							setSelection();
-						}}>
-						<Label
-							style="color: {selectedHash ? colorAssignments.colors[0] : ''};"
-							>Is Not</Label>
-					</Button>
-					{$table.filter(`d => d["${hash}"] == 0`).count().object()["count"]}
-				</div>
-			</div>
-		{/if}
-		{#if selection && selection[0] === "range"}
-			<span>
-				{selection ? selection[1].toFixed(2) + " - " : ""}
-				{selection ? selection[2].toFixed(2) : ""}
-			</span>
-		{/if}
+
 		{#if $table.column(hash) && chartType === ChartType.Other}
 			<span style:margin-right="5px">
 				unique values: {$table
@@ -326,5 +335,10 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+	}
+	.top-right-cell {
+		display: flex;
+		align-items: center;
+		gap: 2px;
 	}
 </style>
