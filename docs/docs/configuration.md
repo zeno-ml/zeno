@@ -31,7 +31,7 @@ The configuration file has the the following options.
 
 The Zeno View used for the given data and task, e.g. `zenoml-image-classification`. **Required**
 
-See [Instance views](/docs/views/views) for a list of available views.
+See [Instance views](/docs/views) for a list of available views.
 
 ### `tests`
 
