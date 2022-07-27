@@ -62,11 +62,37 @@ function computeCategoricalDomain({ table, column }: ISpecificDomain) {
 	const categoryGroups = table.groupby(column);
 	const categoryKeys = categoryGroups.groups().keys;
 	const categoryData = categoryGroups.count();
+	const orderedCategoryData = categoryData.orderby(column);
+	const originalCategories = categoryData.columnArray(column);
+	const newCategories = orderedCategoryData.columnArray(column);
+
+	// only necessary because the categoryKeys (assignments) need to match the newCategories
+	// since those are always ordered the same way (alphabetical)
+	/**
+	 * @todo: remove this hack in the future
+	 */
+	const indexToOriginal = new Map();
+	const newToIndex = new Map();
+	for (let i = 0; i < originalCategories.length; i++) {
+		indexToOriginal.set(i, originalCategories[i]);
+		newToIndex.set(newCategories[i], i);
+	}
+
+	const shiftIndex = (index: number) =>
+		newToIndex.get(indexToOriginal.get(index));
+
+	const assignments = [];
+	for (let i = 0; i < categoryKeys.length; i++) {
+		const correctIndex = shiftIndex(categoryKeys[i]);
+		assignments.push(correctIndex);
+	}
+
 	const output = {
-		category: categoryData.columnArray(column),
-		count: categoryData.columnArray("count"),
+		category: newCategories,
+		count: orderedCategoryData,
 	};
-	return { domain: combineOutputOneArray(output), assignments: categoryKeys };
+
+	return { domain: combineOutputOneArray(output), assignments };
 }
 
 function computeCountDomain({ table, column }: ISpecificDomain) {
