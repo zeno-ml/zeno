@@ -118,13 +118,9 @@
 
 <div id="main">
 	<MetadataBar shouldColor />
-
 	<div>
-		<div
-			id="scatter-view"
-			style:margin-top="10px"
-			style:height="{scatterHeight}px">
-			<div id="pipeline-view" class="paper" style:height="{scatterHeight}px">
+		<div id="scatter-view" style:height="{scatterHeight}px">
+			<div id="pipeline-view" style:height="{scatterHeight}px">
 				<h4>Pipeline Labeler</h4>
 				<div>
 					<TextField bind:value={regionLabelerName} label={"Name"} />
@@ -230,10 +226,9 @@
 				</div>
 			</div>
 
-			<div
-				class="paper"
-				style:width="{scatterWidth}px"
-				style:height="{scatterHeight}px">
+			<div class="vertical-divider" />
+
+			<div style:width="{scatterWidth}px" style:height="{scatterHeight}px">
 				<Scatter
 					width={scatterWidth}
 					height={scatterHeight}
@@ -256,10 +251,7 @@
 					regionMode={regionLabeler} />
 			</div>
 		</div>
-		<div
-			class="horizontal-divider"
-			style:margin-top="10px"
-			style:margin-bottom="5px" />
+		<div class="horizontal-divider" style:margin-bottom="5px" />
 		<!-- Instances view -->
 		<div id="samples-view">
 			<SampleOptions />
@@ -289,23 +281,32 @@
 		padding-left: 20px;
 		overflow-y: scroll;
 	}
+	.vertical-divider {
+		width: 1px;
+		background-color: #e0e0e0;
+		height: 100%;
+	}
 	.horizontal-divider {
 		width: 100%;
 		background-color: #e0e0e0;
 		height: 1px;
 	}
-
+	#samples-view {
+		margin-left: 10px;
+	}
 	h4 {
 		font-weight: 500;
 		color: rgba(0, 0, 0, 0.7);
 		margin-bottom: 8px;
 		margin-top: 25px;
 	}
-
 	#weak-labeler-pipeline {
 		margin-bottom: 10px;
 		display: flex;
 		flex-direction: column;
-		gap: 5px;
+		gap: 10px;
+	}
+	#pipeline-view::-webkit-scrollbar {
+		display: none;
 	}
 </style>
