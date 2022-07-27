@@ -57,10 +57,11 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
-        title: "Zeno",
+        // title: "Zeno",
         logo: {
           alt: "Zeno Logo",
           src: "img/zeno.png",
+          srcDark: "img/zeno_dark.png",
         },
         items: [
           {
@@ -72,8 +73,10 @@ const config = {
           { to: "/blog", label: "Blog", position: "left" },
           {
             href: "https://github.com/cmudig/zeno",
-            label: "GitHub",
+            // label: "GitHub",
             position: "right",
+            className: "header-github-link",
+            "aria-label": "GitHub repository",
           },
         ],
       },
@@ -117,6 +120,7 @@ const config = {
       prism: {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,
+        additionalLanguages: ["toml"],
       },
     }),
 };

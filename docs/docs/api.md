@@ -10,7 +10,7 @@ You can pass any number of files with decorated functions to Zeno, but you **mus
 
 ## ZenoOptions
 
-Every Zeno test module is passed a ZenoOptions object with the following parameters.
+Every Zeno function is passed a ZenoOptions object with the following parameters.
 The column values refer to column names in the DataFrame and the paths refer to directories relative to the Zeno configuration file.
 
 ```python

@@ -10,9 +10,8 @@ sidebar_position: 1
 pip install zenoml
 ```
 
-2. Create a folder with at least one Python file and a `predict_function`.
-   Add any number of Zeno modules using the `distill` and `metric` functions.
-   See the [Python API](/docs/api) for details on each of these modules.
+2. Create a folder with at least one Python file, a [`predict_function`](/docs/api#predict), and any number of
+   additional [Zeno functions](/docs/api/).
 
 3. Install a Zeno View for your given task from the [list of supported views](/docs/views), e.g. for image classification:
 
