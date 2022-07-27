@@ -89,7 +89,7 @@ function computeCategoricalDomain({ table, column }: ISpecificDomain) {
 
 	const output = {
 		category: newCategories,
-		count: orderedCategoryData,
+		count: orderedCategoryData.columnArray("count"),
 	};
 
 	return { domain: combineOutputOneArray(output), assignments };
