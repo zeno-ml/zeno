@@ -218,17 +218,12 @@
 			return m;
 		});
 	}
-
-	function mouseEnterCell() {
-		hoveringCell = true;
-	}
-
-	function mouseLeaveCell() {
-		hoveringCell = false;
-	}
 </script>
 
-<div class="cell" on:mouseenter={mouseEnterCell} on:mouseleave={mouseLeaveCell}>
+<div
+	class="cell"
+	on:mouseenter={() => (hoveringCell = true)}
+	on:mouseleave={() => (hoveringCell = false)}>
 	<div id="info">
 		<div id="label">
 			<span style:color={selectedHashColor}>{col.name}</span>
