@@ -225,7 +225,7 @@
 	on:mouseenter={() => (hoveringCell = true)}
 	on:mouseleave={() => (hoveringCell = false)}>
 	<div id="info">
-		<div id="label">
+		<div id="label" class="top-text">
 			<span style:color={selectedHashColor}>{col.name}</span>
 		</div>
 
@@ -266,20 +266,26 @@
 					</div>
 				</div>
 			{/if}
+
 			{#if selection && selection[0] === "range"}
-				<span>
-					{selection ? selection[1].toFixed(2) + " - " : ""}
-					{selection ? selection[2].toFixed(2) : ""}
-				</span>
+				<div class="top-text">
+					<span>
+						{selection ? selection[1].toFixed(2) + " - " : ""}
+						{selection ? selection[2].toFixed(2) : ""}
+					</span>
+				</div>
 			{/if}
+
 			{#if chartType !== ChartType.Other && shouldColor && (hoveringCell || selectedHash)}
-				<IconButton
-					size="button"
-					class="material-icons"
-					style="color: {selectedHashColor}; height: 100%; font-size: 18px;"
-					on:click={() => {
-						colorByHash.set(hash);
-					}}>format_paint</IconButton>
+				<div class="top-text">
+					<IconButton
+						size="mini"
+						class="material-icons"
+						style="color: {selectedHashColor}; margin-top: -10px;"
+						on:click={() => {
+							colorByHash.set(hash);
+						}}>format_paint</IconButton>
+				</div>
 			{/if}
 		</div>
 
@@ -338,5 +344,9 @@
 		display: flex;
 		align-items: center;
 		gap: 2px;
+	}
+	.top-text {
+		height: 18px;
+		z-index: 999;
 	}
 </style>
