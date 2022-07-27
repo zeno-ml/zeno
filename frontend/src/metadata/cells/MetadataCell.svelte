@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type ColumnTable from "arquero/dist/types/table/column-table";
 	import type { View } from "svelte-vega";
+	import IconButton from "@smui/icon-button";
 
 	import { VegaLite } from "svelte-vega";
 	import { onMount } from "svelte";
@@ -219,13 +220,21 @@
 
 <div class="cell">
 	<div id="info">
-		<span
-			style:color={shouldColor ? (selectedHash ? "#9B52DF" : "") : ""}
-			on:click={() => {
-				if (shouldColor) {
-					colorByHash.set(hash);
-				}
-			}}>{col.name}</span>
+		<div id="label">
+			{#if true}
+				{@const color = shouldColor ? (selectedHash ? "#9B52DF" : "") : ""}
+				{#if chartType !== ChartType.Other && shouldColor}
+					<IconButton
+						size="button"
+						class="material-icons"
+						style="color: {color}"
+						on:click={() => {
+							colorByHash.set(hash);
+						}}>format_color_fill</IconButton>
+				{/if}
+				<span style:color>{col.name}</span>
+			{/if}
+		</div>
 		{#if chartType === ChartType.Binary}
 			<div style:display="flex">
 				<div class="binary-button">
