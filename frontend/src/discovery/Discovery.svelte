@@ -6,7 +6,15 @@
 	import Button from "@smui/button";
 	import TextField from "@smui/textfield";
 	import * as pipeline from "./pipeline";
-	import { filteredTable, model, settings, colorSpec, table } from "../stores";
+	import {
+		filteredTable,
+		model,
+		settings,
+		colorSpec,
+		table,
+		metadataSelections,
+		sliceSelections,
+	} from "../stores";
 	import { columnHash } from "../util/util";
 
 	import type { LegendaryScatterPoint } from "./scatterplot/scatter";
@@ -114,6 +122,37 @@
 		scatterObj.select([]);
 		lassoSelectTable = null;
 	}
+
+	function saveFilter() {
+		return {
+			slices: $sliceSelections.map((d) => d),
+			metadata: new Map($metadataSelections),
+		};
+	}
+	function loadFilter(cpy: {
+		slices: string[];
+		metadata: Map<string, MetadataSelection>;
+	}) {
+		sliceSelections.set(cpy.slices);
+		metadataSelections.set(cpy.metadata);
+	}
+
+	async function goBackPipeline(nodeToReset?: Pipeline.Node) {
+		await pipeline.reset({ upToId: nodeToReset.id });
+		let newSubset = [];
+		for (let i = 0; i < pipelineRepr.length; i++) {
+			newSubset.push(pipelineRepr[i]);
+			if (pipelineRepr[i].id === nodeToReset.id) {
+				break;
+			}
+		}
+		pipelineRepr = newSubset;
+	}
+
+	function selectNode(node: Pipeline.Node) {
+		selectedNode = node;
+		projection2D = node.state.projection;
+	}
 </script>
 
 <div id="main">
@@ -132,21 +171,11 @@
 							<Node
 								{node}
 								on:backClick={async () => {
-									await pipeline.reset({ upToId: node.id });
-									let newSubset = [];
-									for (let i = 0; i < pipelineRepr.length; i++) {
-										newSubset.push(pipelineRepr[i]);
-										if (pipelineRepr[i].id === node.id) {
-											break;
-										}
-									}
-									pipelineRepr = newSubset;
-									selectedNode = node;
-									projection2D = node.state.projection;
+									await goBackPipeline(node);
+									selectNode(node);
 								}}
 								on:eyeClick={() => {
-									selectedNode = node;
-									projection2D = node.state.projection;
+									selectNode(node);
 								}}
 								selectedId={selectedNode.id}
 								lastNode={i === pipelineRepr.length - 1} />
@@ -168,6 +197,7 @@
 								);
 								const node = await pipeline.idFilter({ ids });
 								projection2D = node.state.projection;
+								node.filter = [];
 								resetSelection();
 								pipelineRepr = [...pipelineRepr, node];
 								selectedNode = node;
