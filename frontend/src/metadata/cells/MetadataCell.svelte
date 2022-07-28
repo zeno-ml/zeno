@@ -347,6 +347,6 @@
 	}
 	.top-text {
 		height: 18px;
-		z-index: 999;
+		z-index: 998;
 	}
 </style>
