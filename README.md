@@ -13,5 +13,7 @@ Zeno can be used for any data type or task with _modular views_ for everything f
 
 Check out the quickstart tutorial and API reference to get started with Zeno:
 
-- [Zeno Quickstart: A CIFAR-10 Example](https://dig.cmu.edu/zeno/getting_started.html)
-- [Python API Reference](https://dig.cmu.edu/zeno/decorators.html)
+- [Introduction](http://zenoml.com/docs/intro/) - Learn more about Zeno.
+- [Getting Started](http://zenoml.com/docs/intro/get_started) - Setup Zeno with your own data and models.
+- [CIFAR-10 Example](http://zenoml.com/docs/intro/cifar) - Learn how to use Zeno with a CIFAR-10 classification example.
+- [Documentation & API](http://zenoml.com/docs/intro/) - Full documentation and API reference.
