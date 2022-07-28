@@ -14,7 +14,7 @@
 		length: 100,
 	}) as string[];
 	export let availableOpacities = opacityRange(100);
-	export let canvasStyle: string = "";
+	export let canvasStyle = "";
 	export let createScatterConfig: Partial<Properties> = {};
 
 	const dispatch = createEventDispatcher();
@@ -106,7 +106,7 @@
 		dispatch("deselect", { deseleted: true });
 	}
 
-	function opacityRange(n: number = 10) {
+	function opacityRange(n = 10) {
 		return new Array(n).fill(0).map((_, i) => (i + 1) / n);
 	}
 </script>

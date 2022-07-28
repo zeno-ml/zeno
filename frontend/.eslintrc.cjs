@@ -11,8 +11,6 @@ module.exports = {
 			processor: "svelte3/svelte3",
 			extends: ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
 			rules: {
-				"@typescript-eslint/no-inferrable-types": 0,
-				"@typescript-eslint/no-unsafe-member-access": 0,
 				"no-undef": "off",
 			},
 		},
@@ -22,7 +20,6 @@ module.exports = {
 		},
 	],
 	rules: {
-		"@typescript-eslint/explicit-module-boundary-types": "off",
 		curly: "error",
 		"no-var": "error",
 		eqeqeq: "error",

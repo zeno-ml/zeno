@@ -34,7 +34,7 @@
 	}
 
 	export let col: ZenoColumn;
-	export let shouldColor: boolean = false;
+	export let shouldColor = false;
 	export let assignColors: boolean = shouldColor;
 
 	let chartType: ChartType;

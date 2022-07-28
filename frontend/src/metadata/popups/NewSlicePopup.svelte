@@ -18,7 +18,7 @@
 
 	import FilterGroupEntry from "./FilterGroupEntry.svelte";
 
-	let sliceName: string = "";
+	let sliceName = "";
 	let predicateGroup: FilterPredicateGroup = { predicates: [], join: "" };
 	let nameInput;
 

@@ -68,6 +68,3 @@ build-backend = "poetry.core.masonry.api"
 [tool.pyright]
 include = ["zeno"]
 useLibraryCodeForTypes = true
-
-[tool.black]
-exclude = "docs/conf.py"
