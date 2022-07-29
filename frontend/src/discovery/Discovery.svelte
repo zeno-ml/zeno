@@ -27,7 +27,7 @@
 
 	const PIPELINE_ID = "initial_pipeline";
 
-	let projection2D: object[] = [];
+	let projection2D: { proj: [number, number]; id: string }[] = [];
 	let lassoSelectTable = null;
 	let regionLabeler = false;
 	let regionPolygon = [];
@@ -49,15 +49,19 @@
 	$: {
 		if (metadataExists && $colorSpec) {
 			legendaryScatterPoints = projection2D.map((item) => {
-				const proj = item["proj"],
-					id = item["id"];
-				return {
-					x: proj[0],
-					y: proj[1],
-					opacity: 0.75,
-					color: $colorSpec.labels.find((label) => label.id === id).colorIndex,
-					id,
-				};
+				const { proj, id } = item;
+				const [x, y] = proj;
+
+				const opacity = $filteredTable
+					.columnArray(columnHash($settings.idColumn))
+					.includes(id)
+					? 0.75
+					: 0.15;
+				const color = $colorSpec.labels.find(
+					(label) => label.id === id
+				).colorIndex;
+				const formatted = { x, y, opacity, id, color };
+				return formatted;
 			});
 		}
 	}
