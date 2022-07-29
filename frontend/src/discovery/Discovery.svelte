@@ -51,12 +51,7 @@
 			legendaryScatterPoints = projection2D.map((item) => {
 				const { proj, id } = item;
 				const [x, y] = proj;
-
-				const opacity = $filteredTable
-					.columnArray(columnHash($settings.idColumn))
-					.includes(id)
-					? 0.75
-					: 0.15;
+				const opacity = 0.65;
 				const color = $colorSpec.labels.find(
 					(label) => label.id === id
 				).colorIndex;
