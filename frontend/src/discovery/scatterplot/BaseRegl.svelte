@@ -41,7 +41,11 @@
 		if (scatterCreated && pointsPopulated) {
 			opacifyPoints(scatterRef, availableOpacities);
 			colorPoints(scatterRef, colorCorrectRange);
-			scatterRef.draw(colorCorrectPoints);
+			scatterRef.draw(colorCorrectPoints, {
+				transition: true,
+				transitionDuration: 1200,
+				transitionEasing: "cubicInOut",
+			});
 			dispatch("draw", scatterRef);
 		}
 	}
