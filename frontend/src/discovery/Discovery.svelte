@@ -39,7 +39,6 @@
 
 	$: metadataExists =
 		$settings.metadataColumns.length > 0 || $filteredTable._names.length > 0;
-	$: pointsExist = projection2D.length > 0;
 
 	$: {
 		if ($model && $table) {
@@ -48,7 +47,7 @@
 	}
 
 	$: {
-		if (metadataExists && pointsExist && $colorSpec) {
+		if (metadataExists && $colorSpec) {
 			legendaryScatterPoints = projection2D.map((item) => {
 				const proj = item["proj"],
 					id = item["id"];
@@ -149,14 +148,33 @@
 		pipelineRepr = newSubset;
 	}
 
+	async function filterPipeline(ids) {
+		const node = await pipeline.idFilter({ ids });
+		node.filter = [];
+		resetSelection();
+		addToPipelineRepr(node);
+		selectNode(node);
+	}
+
+	function addToPipelineRepr(node: Pipeline.Node) {
+		pipelineRepr = [...pipelineRepr, node];
+	}
+
 	function selectNode(node: Pipeline.Node) {
 		selectedNode = node;
 		projection2D = node.state.projection;
 	}
+
+	function resetScatterPoints() {
+		projection2D = [];
+	}
 </script>
 
 <div id="main">
-	<MetadataBar shouldColor />
+	<div id="metadata-bar-view">
+		<MetadataBar shouldColor />
+	</div>
+	<div class="vertical-divider" />
 	<div>
 		<div id="scatter-view" style:height="{scatterHeight}px">
 			<div id="pipeline-view" style:height="{scatterHeight}px">
@@ -188,19 +206,11 @@
 							title="Click to Filter Current Selection"
 							variant="outlined"
 							on:click={async () => {
-								let tableIds = $filteredTable;
-								// if (lassoSelectTable !== null) {
-								// 	tableIds = tableIds.intersect(lassoSelectTable);
-								// }
+								const tableIds = $filteredTable;
 								const ids = tableIds.columnArray(
 									columnHash($settings.idColumn)
 								);
-								const node = await pipeline.idFilter({ ids });
-								projection2D = node.state.projection;
-								node.filter = [];
-								resetSelection();
-								pipelineRepr = [...pipelineRepr, node];
-								selectedNode = node;
+								await filterPipeline(ids);
 							}}>
 							Filter</Button>
 						<Button
@@ -208,9 +218,8 @@
 							title="Click to Project with UMAP"
 							on:click={async () => {
 								const node = await pipeline.parametricUMAP();
-								projection2D = node.state.projection;
-								pipelineRepr = [...pipelineRepr, node];
-								selectedNode = node;
+								selectNode(node);
+								addToPipelineRepr(node);
 							}}>
 							Project</Button>
 					</div>
@@ -221,8 +230,7 @@
 							on:click={async () => {
 								await pipeline.reset();
 								await pipeline.init({ model: $model, uid: PIPELINE_ID });
-								projection2D = [];
-								legendaryScatterPoints = [];
+								resetScatterPoints();
 								regionLabelerName = "default";
 								pipelineRepr = [];
 							}}>
