@@ -36,6 +36,7 @@
 	let pipelineRepr: Pipeline.Node[] = [];
 	let selectedNode;
 	let scatterObj;
+	let cpyFilteredTable = null;
 
 	$: metadataExists =
 		$settings.metadataColumns.length > 0 || $filteredTable._names.length > 0;
@@ -282,14 +283,24 @@
 					}}
 					on:deselect={() => {
 						lassoSelectTable = null;
+						if (cpyFilteredTable !== null) {
+							filteredTable.set(cpyFilteredTable);
+						}
 					}}
 					on:select={({ detail }) => {
+						if (cpyFilteredTable !== null) {
+							filteredTable.set(cpyFilteredTable);
+						}
 						const ids = detail.map(({ id }) => id);
-						lassoSelectTable = filterIdsTable({
-							table: $table,
-							idColumn: columnHash($settings.idColumn),
-							ids,
-						});
+						if (ids.length > 0) {
+							cpyFilteredTable = $filteredTable;
+							lassoSelectTable = filterIdsTable({
+								table: $table,
+								idColumn: columnHash($settings.idColumn),
+								ids,
+							});
+							filteredTable.set(lassoSelectTable);
+						}
 					}}
 					bind:regionPolygon
 					regionMode={regionLabeler} />
@@ -299,10 +310,7 @@
 		<!-- Instances view -->
 		<div id="samples-view">
 			<SampleOptions />
-			<Samples
-				table={lassoSelectTable === null || lassoSelectTable?.size === 0
-					? $filteredTable
-					: lassoSelectTable} />
+			<Samples table={$filteredTable} />
 		</div>
 	</div>
 </div>
