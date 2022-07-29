@@ -75,7 +75,9 @@
 
 	function updateData(table: ColumnTable, filteredTable: ColumnTable) {
 		if (
-			(chartType === ChartType.Count || chartType === ChartType.Histogram) &&
+			(chartType === ChartType.Count ||
+				chartType === ChartType.Histogram ||
+				chartType === ChartType.Binary) &&
 			table.column(hash)
 		) {
 			const counts = computeCountsFromDomain({
@@ -84,7 +86,7 @@
 				column: hash,
 				type: chartType,
 			});
-			if (chartType === ChartType.Count) {
+			if (chartType === ChartType.Count || chartType === ChartType.Binary) {
 				domain = domain.map((d, i) => ({
 					filteredCount: counts[i].count,
 					count: d["count"],
@@ -235,6 +237,9 @@
 					<div class="binary-button">
 						<Button
 							variant="outlined"
+							style="color: {selectedHash
+								? histogramData.table.find((d) => d.category === 1).color
+								: ''};"
 							on:click={() => {
 								selection =
 									selection && selection[1] === "is"
@@ -251,6 +256,9 @@
 					<div class="binary-button">
 						<Button
 							variant="outlined"
+							style="color: {selectedHash
+								? histogramData.table.find((d) => d.category === 0).color
+								: ''};"
 							on:click={() => {
 								selection =
 									selection && selection[1] === "is not"
@@ -284,7 +292,7 @@
 						style="color: {selectedHashColor}; margin-top: -10px;"
 						on:click={() => {
 							colorByHash.set(hash);
-						}}>format_paint</IconButton>
+						}}>brush</IconButton>
 				</div>
 			{/if}
 		</div>
