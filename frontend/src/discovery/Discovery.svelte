@@ -84,12 +84,17 @@
 		});
 	}
 
-	function filterIdsTable(
-		idColumn: string = columnHash($settings.idColumn),
-		ids: string[]
-	) {
+	function filterIdsTable({
+		table,
+		idColumn,
+		ids,
+	}: {
+		table: ColumnTable;
+		idColumn: string;
+		ids: string[];
+	}) {
 		let rows = [];
-		for (const row of $filteredTable) {
+		for (const row of table) {
 			if (ids.includes(row[idColumn])) {
 				rows.push(row);
 			}
@@ -174,7 +179,6 @@
 	<div id="metadata-bar-view">
 		<MetadataBar shouldColor />
 	</div>
-	<div class="vertical-divider" />
 	<div>
 		<div id="scatter-view" style:height="{scatterHeight}px">
 			<div id="pipeline-view" style:height="{scatterHeight}px">
@@ -279,11 +283,12 @@
 						lassoSelectTable = null;
 					}}
 					on:select={({ detail }) => {
-						const idedInstanced = detail.map(({ id }) => id);
-						lassoSelectTable = filterIdsTable(
-							columnHash($settings.idColumn),
-							idedInstanced
-						);
+						const ids = detail.map(({ id }) => id);
+						lassoSelectTable = filterIdsTable({
+							table: $table,
+							idColumn: columnHash($settings.idColumn),
+							ids,
+						});
 					}}
 					bind:regionPolygon
 					regionMode={regionLabeler} />
@@ -346,5 +351,8 @@
 	}
 	#pipeline-view::-webkit-scrollbar {
 		display: none;
+	}
+	#metadata-bar-view {
+		border-right: 1px solid #e0e0e0;
 	}
 </style>
