@@ -58,10 +58,13 @@ def load_series(df, col_name, save_path):
 
 
 def get_function(fn: ZenoFunction):
-    spec = util.spec_from_file_location("module.name", fn.file_name)
-    test_module = util.module_from_spec(spec)  # type: ignore
-    spec.loader.exec_module(test_module)  # type: ignore
-    return getattr(test_module, fn.name)  # type: ignore
+    # To allow relative imports in test files,
+    # add their directory to path temporarily.
+    with add_to_path(os.path.dirname(os.path.abspath(fn.file_name))):
+        spec = util.spec_from_file_location("module.name", fn.file_name)
+        test_module = util.module_from_spec(spec)  # type: ignore
+        spec.loader.exec_module(test_module)  # type: ignore
+        return getattr(test_module, fn.name)  # type: ignore
 
 
 def predistill_data(
