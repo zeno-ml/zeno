@@ -57,6 +57,7 @@ zenoml-image-classification = {path = "views/image-classification", develop = tr
 zenoml-image-object-detection = {path = "views/image-object-detection", develop = true}
 zenoml-image-segmentation = {path = "views/image-segmentation", develop = true}
 zenoml-text-classification = {path = "views/text-classification", develop = true}
+zenoml-timeseries = {path = "views/timeseries", develop = true}
 
 [tool.poetry.scripts]
 zeno = "zeno.runner:main"
