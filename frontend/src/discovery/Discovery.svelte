@@ -236,6 +236,8 @@
 								resetScatterPoints();
 								regionLabelerName = "default";
 								pipelineRepr = [];
+								metadataSelections.set(new Map());
+								sliceSelections.set([]);
 							}}>
 							Reset</Button>
 						<Button
