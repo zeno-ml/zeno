@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 import dataclasses
 import os
 import pickle
@@ -7,13 +8,25 @@ from pathlib import Path
 from typing import Tuple
 
 import numpy as np
-
 import pandas as pd
 import pyarrow as pa  # type: ignore
 from tqdm import trange  # type: ignore
 
 from .api import ZenoOptions
 from .classes import ZenoColumn, ZenoColumnType, ZenoFunction
+
+
+@contextmanager
+def add_to_path(p):
+    import sys
+
+    old_path = sys.path
+    sys.path = sys.path[:]
+    sys.path.insert(0, p)
+    try:
+        yield
+    finally:
+        sys.path = old_path
 
 
 def get_arrow_bytes(df, id_col):
