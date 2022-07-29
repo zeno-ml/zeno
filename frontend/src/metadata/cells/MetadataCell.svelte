@@ -8,6 +8,7 @@
 	import Button from "@smui/button";
 	import IconButton from "@smui/icon-button";
 	import { Label } from "@smui/common";
+	import ConstScope from "../../cursed/ConstScope.svelte";
 
 	import { columnHash } from "../../util/util";
 	import { generateCountSpec, generateHistogramSpec } from "./vegaSpecs";
@@ -27,12 +28,6 @@
 		ChartType,
 	} from "../metadata";
 
-	interface IColorAssignments {
-		colors: string[];
-		labels: { id: string; colorIndex: number }[];
-		hash: string;
-	}
-
 	export let col: ZenoColumn;
 	export let shouldColor: boolean = false;
 	export let assignColors: boolean = shouldColor;
@@ -43,11 +38,6 @@
 	let finalSelection = undefined;
 	let view: View;
 	let histogramData = { table: [] };
-	let colorAssignments: IColorAssignments = {
-		colors: [],
-		labels: [],
-		hash: "",
-	};
 	let hoveringCell = false;
 
 	$: hash = columnHash(col);
@@ -220,6 +210,21 @@
 			return m;
 		});
 	}
+
+	function findTableCategory({
+		category,
+		table = histogramData.table,
+	}: {
+		category: number | string;
+		table?: {
+			category: number | string;
+			color: string;
+			count: number;
+			filteredCount: number;
+		}[];
+	}) {
+		return table.find((d) => d.category === category);
+	}
 </script>
 
 <div
@@ -234,44 +239,51 @@
 		<div class="top-right-cell">
 			{#if chartType === ChartType.Binary}
 				<div style:display="flex">
-					<div class="binary-button">
-						<Button
-							variant="outlined"
-							style="color: {selectedHash
-								? histogramData.table.find((d) => d.category === 1).color
-								: ''};"
-							on:click={() => {
-								selection =
-									selection && selection[1] === "is"
-										? undefined
-										: ["binary", "is"];
-								setSelection();
-							}}>
-							<Label
-								style="color: {selectedHash ? colorAssignments.colors[1] : ''};"
-								>Is</Label>
-						</Button>
-						{$table.filter(`d => d["${hash}"] == 1`).count().object()["count"]}
-					</div>
-					<div class="binary-button">
-						<Button
-							variant="outlined"
-							style="color: {selectedHash
-								? histogramData.table.find((d) => d.category === 0).color
-								: ''};"
-							on:click={() => {
-								selection =
-									selection && selection[1] === "is not"
-										? undefined
-										: ["binary", "is not"];
-								setSelection();
-							}}>
-							<Label
-								style="color: {selectedHash ? colorAssignments.colors[0] : ''};"
-								>Is Not</Label>
-						</Button>
-						{$table.filter(`d => d["${hash}"] == 0`).count().object()["count"]}
-					</div>
+					<ConstScope>
+						{@const IS = findTableCategory({
+							category: 1,
+							table: histogramData.table,
+						})}
+
+						<div class="binary-button">
+							<Button
+								variant="outlined"
+								style="color: {selectedHash ? IS.color : ''};"
+								on:click={() => {
+									selection =
+										selection && selection[1] === "is"
+											? undefined
+											: ["binary", "is"];
+									setSelection();
+								}}>
+								<Label>Is</Label>
+							</Button>
+							{IS.filteredCount}
+						</div>
+					</ConstScope>
+
+					<ConstScope>
+						{@const NOT = findTableCategory({
+							category: 0,
+							table: histogramData.table,
+						})}
+
+						<div class="binary-button">
+							<Button
+								variant="outlined"
+								style="color: {selectedHash ? NOT.color : ''};"
+								on:click={() => {
+									selection =
+										selection && selection[1] === "is not"
+											? undefined
+											: ["binary", "is not"];
+									setSelection();
+								}}>
+								<Label>Is Not</Label>
+							</Button>
+							{NOT.filteredCount}
+						</div>
+					</ConstScope>
 				</div>
 			{/if}
 
