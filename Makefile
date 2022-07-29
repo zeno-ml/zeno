@@ -33,6 +33,18 @@ test:
 	@poetry run pytest -svv zeno/tests/*
 	@cd frontend && npm run test
 
+.PHONY: profile 
+profile:
+	@echo "==> 🧪 Profile"
+	@poetry run python -m cProfile -o p.profile -m zeno        
+	@snakeviz p.profile
+
+.PHONY: profile-import
+profile-import:
+	@echo "==> 🧪 Profile Imports"
+	@poetry run python -X importtime -m zeno 2> p.profile      
+	@tuna p.profile
+
 book:
 	@echo "==> 📕 Book"
 	@cd docs; npm i; npm run build;
