@@ -92,7 +92,7 @@
 
 	<div class="icons">
 		<Wrapper>
-			<IconButton href="https://dig.cmu.edu/zeno/intro.html">
+			<IconButton href="http://zenoml.com/docs/intro/">
 				<Icon component={Svg} viewBox="0 0 24 24">
 					<path fill="black" d={mdiApi} />
 				</Icon>

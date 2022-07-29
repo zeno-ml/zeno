@@ -5,6 +5,7 @@ import os
 import sys
 from pathlib import Path
 from typing import List
+import pkg_resources
 
 import tomli
 import uvicorn  # type: ignore
@@ -30,13 +31,36 @@ from .zeno import Zeno
 
 
 def main():
+
+    if len(sys.argv) == 1:
+        print(
+            "\n \033[1mZeno\033[0m",
+            pkg_resources.get_distribution("zenoml").version,
+            " - Machine learning evaluation framework.",
+            "\n\n",
+            "\033[1mUSAGE \033[0m \n\t",
+            "zeno [-h] [-v] <config.toml>",
+            "\n\n",
+            "\033[1mARGUMENTS \033[0m \n\t",
+            "<config.toml>\t\tZeno configuration file.\n\n"
+            "\033[1m GLOBAL OPTIONS \033[0m \n\t",
+            "-h (--help)\t\tDisplay this help message.\n"
+            "\t -v (--version)\t\tDisplay this application version.\n",
+        )
+
+        sys.exit(0)
+
     if len(sys.argv) != 2:
         print(
-            "ERROR: Zeno take one argument, a configuration TOML file."
+            "ERROR: Zeno take one argument, a configuration TOML file. "
             + "{0} arguments were passed.",
             len(sys.argv),
         )
         sys.exit(1)
+
+    if sys.argv[1] == "-v" or sys.argv[1] == "--version":
+        print(pkg_resources.get_distribution("zenoml").version)
+        sys.exit(0)
 
     args = {}
     try:
