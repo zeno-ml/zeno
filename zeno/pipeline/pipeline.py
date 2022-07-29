@@ -1,11 +1,11 @@
 from copy import deepcopy
 from typing import List
 
-from .filter.hard_id_filter import HardFilterNode
-from .lableler.region_based_labler import RegionBasedLabelerNode
-from .memory import PipelineMemory
-from .node import PipelineNode
-from .projection.parametric_umap import ParametricUMAPNode
+from zeno.pipeline.filter.hard_id_filter import HardFilterNode
+from zeno.pipeline.lableler.region_based_labler import RegionBasedLabelerNode
+from zeno.pipeline.memory import PipelineMemory
+from zeno.pipeline.node import PipelineNode
+from zeno.pipeline.projection.parametric_umap import ParametricUMAPNode
 
 
 class Pipeline:

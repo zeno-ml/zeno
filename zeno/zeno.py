@@ -14,8 +14,8 @@ from typing import Dict, List
 import numpy as np
 import pandas as pd
 
-from .api import ZenoOptions
-from .classes import (
+from zeno.api import ZenoOptions
+from zeno.classes import (
     MetricKey,
     Report,
     Slice,
@@ -24,8 +24,8 @@ from .classes import (
     ZenoFunction,
     ZenoFunctionType,
 )
-from .pipeline.pipeline import Pipeline
-from .util import (
+from zeno.pipeline.pipeline import Pipeline
+from zeno.util import (
     add_to_path,
     get_arrow_bytes,
     get_function,

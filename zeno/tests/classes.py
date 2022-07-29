@@ -1,4 +1,4 @@
-from ..classes import to_camel
+from zeno.classes import to_camel
 
 
 def test_camel():

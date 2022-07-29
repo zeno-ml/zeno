@@ -1,7 +1,7 @@
-from contextlib import contextmanager
 import dataclasses
 import os
 import pickle
+from contextlib import contextmanager
 from importlib import util
 from inspect import getsource
 from pathlib import Path
@@ -12,8 +12,8 @@ import pandas as pd
 import pyarrow as pa  # type: ignore
 from tqdm import trange  # type: ignore
 
-from .api import ZenoOptions
-from .classes import ZenoColumn, ZenoColumnType, ZenoFunction
+from zeno.api import ZenoOptions
+from zeno.classes import ZenoColumn, ZenoColumnType, ZenoFunction
 
 
 @contextmanager

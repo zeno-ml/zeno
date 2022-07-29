@@ -5,7 +5,8 @@ import os
 import sys
 from pathlib import Path
 from typing import List
-import pkg_resources
+
+import pkg_resources  # type: ignore
 
 import tomli
 import uvicorn  # type: ignore
@@ -13,7 +14,7 @@ from fastapi import FastAPI, WebSocket
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 
-from .classes import (
+from zeno.classes import (
     MetricKey,
     PipelineIdFilter,
     PipelineInit,
@@ -27,7 +28,7 @@ from .classes import (
     ZenoSettings,
     ZenoVariables,
 )
-from .zeno import Zeno
+from zeno.zeno import Zeno
 
 
 def main():

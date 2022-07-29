@@ -4,8 +4,8 @@ from umap.parametric_umap import (  # type: ignore
     ParametricUMAP,  # type: ignore
 )  # type: ignore
 
-from ...classes import ZenoColumn, ZenoColumnType
-from ..node import PipelineNode
+from zeno.classes import ZenoColumn, ZenoColumnType
+from zeno.pipeline.node import PipelineNode
 
 
 class ParametricUMAPNode(PipelineNode):
