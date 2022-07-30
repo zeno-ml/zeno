@@ -5,6 +5,7 @@
 	import SampleOptions from "../samples/SampleOptions.svelte";
 	import Button from "@smui/button";
 	import TextField from "@smui/textfield";
+	import MirrorLogo from "./MirrorLogo.svelte";
 	import * as pipeline from "./pipeline";
 	import {
 		filteredTable,
@@ -22,7 +23,7 @@
 	import * as aq from "arquero";
 	import Node from "./node/Node.svelte";
 
-	export let scatterWidth = 800;
+	export let scatterWidth = 899;
 	export let scatterHeight = 550;
 
 	const PIPELINE_ID = "initial_pipeline";
@@ -182,16 +183,32 @@
 	<div>
 		<div id="scatter-view" style:height="{scatterHeight}px">
 			<div id="pipeline-view" style:height="{scatterHeight}px">
-				<h4>Pipeline Labeler</h4>
-				<div>
-					<TextField bind:value={regionLabelerName} label={"Name"} />
+				<div id="logo">
+					<div style:height="20px" style:margin-top="14px">
+						<MirrorLogo scale={0.25} />
+					</div>
+					<span id="pipeline-title">Pipeline</span>
 				</div>
-				<h4>Pipeline</h4>
 				<div>
+					<Button
+						title="Reset entire pipeline"
+						style="color: lightgrey;"
+						color={regionLabeler ? "secondary" : "primary"}
+						on:click={async () => {
+							await pipeline.reset();
+							await pipeline.init({ model: $model, uid: PIPELINE_ID });
+							resetScatterPoints();
+							regionLabelerName = "default";
+							pipelineRepr = [];
+							metadataSelections.set(new Map());
+							sliceSelections.set([]);
+						}}>
+						Reset All</Button>
 					<div id="weak-labeler-pipeline">
 						{#each pipelineRepr as node, i}
 							<Node
 								{node}
+								maxCount={$table ? $table.size : 0}
 								on:backClick={async () => {
 									await goBackPipeline(node);
 									selectNode(node);
@@ -205,7 +222,8 @@
 							<div>Empty pipeline</div>
 						{/each}
 					</div>
-					<div>
+					<div
+						style="display: flex; justify-content:left; gap: 10px; margin-top: 25px;">
 						<Button
 							title="Click to Filter Current Selection"
 							variant="outlined"
@@ -227,46 +245,36 @@
 							}}>
 							Project</Button>
 					</div>
-					<div>
-						<Button
-							title="Reset entire pipeline"
-							color={regionLabeler ? "secondary" : "primary"}
-							on:click={async () => {
-								await pipeline.reset();
-								await pipeline.init({ model: $model, uid: PIPELINE_ID });
-								resetScatterPoints();
-								regionLabelerName = "default";
-								pipelineRepr = [];
-								metadataSelections.set(new Map());
-								sliceSelections.set([]);
-							}}>
-							Reset</Button>
-						<Button
-							on:click={async () => {
-								if (regionLabeler && regionPolygon.length > 0) {
-									const output = await pipeline.regionLabeler({
-										polygon: regionPolygon,
-										name: regionLabelerName,
-										upToId: selectedNode.id,
-									});
-									const column = output["col_name"];
-									addZenoColumn({
-										model: column.model,
-										name: column.name,
-										columnType: column.column_type,
-										transform: column.transform,
-									});
-									regionLabeler = false;
-									regionPolygon = [];
-								} else {
-									regionPolygon = [];
-									regionLabeler = true;
-								}
-							}}>
-							{regionLabeler
-								? "Click Here to Confirm"
-								: "Create Labeler"}</Button>
-					</div>
+					<Button
+						on:click={async () => {
+							if (regionLabeler && regionPolygon.length > 0) {
+								const output = await pipeline.regionLabeler({
+									polygon: regionPolygon,
+									name: regionLabelerName,
+									upToId: selectedNode.id,
+								});
+								const column = output["col_name"];
+								addZenoColumn({
+									model: column.model,
+									name: column.name,
+									columnType: column.column_type,
+									transform: column.transform,
+								});
+								regionLabeler = false;
+								regionPolygon = [];
+							} else {
+								regionPolygon = [];
+								regionLabeler = true;
+							}
+						}}>
+						{regionLabeler
+							? "Confirm Region"
+							: "Create Region Based Labeler"}</Button>
+					{#if regionLabeler}
+						<div>
+							<TextField bind:value={regionLabelerName} label={"Name"} />
+						</div>
+					{/if}
 				</div>
 			</div>
 
@@ -325,11 +333,11 @@
 	}
 	#scatter-view {
 		display: flex;
-		justify-content: center;
+		/* justify-content: center; */
 		gap: 10px;
 	}
 	#pipeline-view {
-		width: 400px;
+		width: 350px;
 		padding-left: 20px;
 		overflow-y: scroll;
 	}
@@ -346,11 +354,11 @@
 	#samples-view {
 		margin-left: 10px;
 	}
-	h4 {
-		font-weight: 500;
-		color: rgba(0, 0, 0, 0.7);
-		margin-bottom: 8px;
-		margin-top: 25px;
+	#logo {
+		display: flex;
+		align-items: center;
+		gap: 1ch;
+		margin-bottom: 15px;
 	}
 	#weak-labeler-pipeline {
 		margin-bottom: 10px;
@@ -363,5 +371,12 @@
 	}
 	#metadata-bar-view {
 		border-right: 1px solid #e0e0e0;
+	}
+	#pipeline-title {
+		font-weight: 400;
+		color: rgba(0, 0, 0, 0.7);
+		font-size: 25px;
+		margin-bottom: 8px;
+		margin-top: 25px;
 	}
 </style>

@@ -5,6 +5,7 @@
 	export let node: Pipeline.Node;
 	export let selectedId: string = "";
 	export let lastNode: boolean = false;
+	export let maxCount = 10_000;
 
 	const dispatch = createEventDispatcher();
 	const icon = {
@@ -22,23 +23,35 @@
 	<div class="reset">
 		{#if !lastNode}
 			<IconButton
+				size="mini"
 				class="material-icons"
 				on:click={() => {
 					dispatch("backClick");
 				}}>{icon.back}</IconButton>
 		{/if}
 	</div>
-	<div class="view">
-		<IconButton
-			class="material-icons"
-			on:click={() => dispatch("eyeClick")}
-			disabled={selectedNode}>
-			{selectedNode ? icon.eye.on : icon.eye.off}
-		</IconButton>
+
+	<div
+		on:click
+		style="position:relative;"
+		class="chip node"
+		class:off={!selectedNode}
+		on:mouseenter
+		on:mouseleave
+		on:click={() => dispatch("eyeClick")}
+		style:cursor="pointer">
+		<div id="node-text">
+			{node.type}
+		</div>
+		<div
+			id="bar"
+			style:width="{(node.state.projection.length / maxCount) * 100}%"
+			style:height="3px"
+			style:background-color="#00000020"
+			style="left: 0; bottom: 0;" />
 	</div>
-	<div on:click class="chip node" on:mouseenter on:mouseleave>{node.type}</div>
 	<div class="count">
-		({node.state.projection.length} points)
+		({node.state.projection.length})
 	</div>
 </div>
 
@@ -51,15 +64,30 @@
 		height: 100%;
 		position: relative;
 		gap: 3px;
-		--h: 271;
-		--s: 69%;
-		--l: 60%;
-		--a: 1;
+		--h-primary: 278;
+		--s-primary: 70%;
+		--l-primary: 35%;
+		--a-primary: 1;
+
+		--h-secondary: 0;
+		--s-secondary: 0%;
+		--l-secondary: 30%;
+		--a-secondary: 1;
 	}
 	.chip {
-		padding: 5px;
-		color: hsla(var(--h), var(--s), var(--l), var(--a));
-		background-color: hsla(var(--h), var(--s), var(--l), 0.1);
+		/* padding: 5px; */
+		color: hsla(
+			var(--h-primary),
+			var(--s-primary),
+			var(--l-primary),
+			var(--a-primary)
+		);
+		background-color: hsla(
+			var(--h-primary),
+			var(--s-primary),
+			var(--l-primary),
+			0.1
+		);
 		margin-left: 5px;
 		margin-right: 5px;
 		margin-top: 2px;
@@ -69,6 +97,20 @@
 		text-transform: uppercase;
 		width: fit-content;
 	}
+	.chip.off {
+		color: hsla(
+			var(--h-secondary),
+			var(--s-secondary),
+			var(--l-secondary),
+			var(--a-secondary)
+		);
+		background-color: hsla(
+			var(--h-secondary),
+			var(--s-secondary),
+			var(--l-secondary),
+			0.1
+		);
+	}
 	.reset {
 		width: 50px;
 	}
@@ -76,11 +118,20 @@
 		width: 50px;
 	}
 	.node {
-		width: 10ch;
+		width: 20ch;
+	}
+	#node-text {
+		padding-top: 5px;
+		padding-bottom: 5px;
 	}
 	.count {
-		width: 12ch;
-		text-align: left;
-		color: hsla(var(--h), var(--s), var(--l), 0.4);
+		width: 10ch;
+		text-align: center;
+		color: hsla(
+			var(--h-secondary),
+			var(--s-secondary),
+			var(--l-secondary),
+			0.2
+		);
 	}
 </style>
