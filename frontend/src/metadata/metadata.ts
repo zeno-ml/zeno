@@ -4,7 +4,7 @@ import * as aq from "arquero";
 import {
 	interpolatePurples,
 	schemeCategory10,
-	schemeDark2,
+	schemeTableau10,
 } from "d3-scale-chromatic";
 
 import { columnHash } from "../util/util";
@@ -297,12 +297,12 @@ export function colorDomain({
 }) {
 	if (domain.length > 0) {
 		if (type === ChartType.Count || type === ChartType.Binary) {
-			let colors = [...schemeCategory10, ...schemeDark2].slice(
+			let colors = [...schemeTableau10, ...schemeCategory10].slice(
 				0,
 				domain.length
 			);
 			if (domain.length === 2) {
-				colors = [schemeCategory10[3], schemeCategory10[0]]; // red and blue
+				colors = [schemeTableau10[2], schemeTableau10[0]];
 			}
 			domain.forEach((d, i) => (d["color"] = colors[i]));
 		} else if (type === ChartType.Histogram) {

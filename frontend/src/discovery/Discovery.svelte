@@ -38,6 +38,10 @@
 	let selectedNode;
 	let scatterObj;
 	let cpyFilteredTable = null;
+	let cpyFilter: {
+		slices?: string[];
+		metadata?: Map<string, MetadataSelection>;
+	} = {};
 
 	$: metadataExists =
 		$settings.metadataColumns.length > 0 || $filteredTable._names.length > 0;
@@ -135,8 +139,8 @@
 		};
 	}
 	function loadFilter(cpy: {
-		slices: string[];
-		metadata: Map<string, MetadataSelection>;
+		slices?: string[];
+		metadata?: Map<string, MetadataSelection>;
 	}) {
 		sliceSelections.set(cpy.slices);
 		metadataSelections.set(cpy.metadata);
@@ -293,15 +297,20 @@
 						lassoSelectTable = null;
 						if (cpyFilteredTable !== null) {
 							filteredTable.set(cpyFilteredTable);
+							loadFilter(cpyFilter);
 						}
 					}}
 					on:select={({ detail }) => {
-						if (cpyFilteredTable !== null) {
-							filteredTable.set(cpyFilteredTable);
-						}
 						const ids = detail.map(({ id }) => id);
-						if (ids.length > 0) {
+						if (lassoSelectTable === null) {
+							cpyFilter = saveFilter();
 							cpyFilteredTable = $filteredTable;
+						}
+						if (ids.length > 0) {
+							loadFilter({
+								metadata: new Map(),
+								slices: [],
+							});
 							lassoSelectTable = filterIdsTable({
 								table: $table,
 								idColumn: columnHash($settings.idColumn),
