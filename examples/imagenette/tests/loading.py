@@ -88,8 +88,12 @@ def load_model(model_path):
     label_mapper = imagenet_labeler()
     use_clip = model_path == "resnet+clip.donny"
 
+    clip_model, clip_preprocess = None, None
     if use_clip is True:
         clip_model, clip_preprocess = load_clip()
+    clip_present = (
+        use_clip is True and clip_model is not None and clip_preprocess is not None
+    )
 
     def pred(df, ops):
         def open_image(img):
@@ -100,17 +104,17 @@ def load_model(model_path):
 
         imgs = [open_image(img) for img in df[ops.data_column]]
         transformed = torch.stack([transform(im) for im in imgs])
-        clip_transformed = torch.stack([clip_preprocess(im) for im in imgs])
 
         resnet_output = resnet_predict(model=model, batch=transformed, store=store)
         correct_labels = label_mapper(resnet_output["pred"])
 
-        if use_clip is True:
+        if clip_present is True:
+            clip_transformed = torch.stack([clip_preprocess(im) for im in imgs])
             clip_output = clip_it(model=clip_model, batch=clip_transformed)
 
         return (
             correct_labels,
-            clip_output["image"] if use_clip is True else resnet_output["embed"],
+            clip_output["image"] if clip_present is True else resnet_output["embed"],
         )
 
     return pred

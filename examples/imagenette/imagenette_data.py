@@ -5,7 +5,7 @@ import pandas as pd
 BASE = "../../data/imagenette"
 CSV = f"{BASE}/imagenette.csv"
 
-OUT_CSV = "./imagenette_valid.csv"
+OUT_CSV = "./imagenette_all.csv"
 
 
 def extract(in_filename: str, select_split: str = "all"):
@@ -1041,7 +1041,7 @@ def imagenet_labeler():
 
 if __name__ == "__main__":
 
-    df = extract(in_filename=CSV, select_split="valid")
+    df = extract(in_filename=CSV, select_split="all")
 
     label_map = imagenet_labeler()
     df["label"] = label_map(df["label"].tolist())
