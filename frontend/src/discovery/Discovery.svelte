@@ -271,9 +271,7 @@
 								regionLabeler = true;
 							}
 						}}>
-						{regionLabeler
-							? "Confirm Region"
-							: "Create Region Based Labeler"}</Button>
+						{regionLabeler ? "Confirm" : "Create Labeler"}</Button>
 					{#if regionLabeler}
 						<div>
 							<TextField bind:value={regionLabelerName} label={"Name"} />
