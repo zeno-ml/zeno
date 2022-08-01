@@ -19,6 +19,7 @@
 		availableColors,
 		colorByHash,
 		filteredTable,
+		model,
 	} from "../../stores";
 	import {
 		computeCountsFromDomain,
@@ -42,7 +43,7 @@
 
 	$: hash = columnHash(col);
 	$: {
-		if (assignColors === true) {
+		if (assignColors === true && $model) {
 			drawChart($table);
 		}
 	}
