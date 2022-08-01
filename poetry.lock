@@ -1527,7 +1527,7 @@ test = ["hypothesis (>=5.5.3)", "pytest (>=6.0)", "pytest-xdist (>=1.31)"]
 
 [[package]]
 name = "pandas-stubs"
-version = "1.4.3.220724"
+version = "1.4.3.220801"
 description = "Type annotations for pandas"
 category = "dev"
 optional = false
@@ -3106,6 +3106,19 @@ type = "directory"
 url = "views/text-classification"
 
 [[package]]
+name = "zenoml-timeseries"
+version = "0.0.1"
+description = "Timeseries for Zeno"
+category = "dev"
+optional = false
+python-versions = ">=3.8,<3.11" 
+develop = true
+
+[package.source]
+type = "directory"
+url = "views/timeseries"
+
+[[package]]
 name = "zipp"
 version = "3.8.1"
 description = "Backport of pathlib-compatible object wrapper for zip files"
@@ -3120,7 +3133,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "821a6c3f002d4e6b1b7a994dc00716a2a2ee42f726a7edf3b059bb96c7f933be"
+content-hash = "00140ed0ba60cca04e9d08592afd607bb562de35f502d65858bbd38f505cb4cd"
 
 [metadata.files]
 absl-py = [
@@ -3746,6 +3759,7 @@ libclang = [
     {file = "libclang-14.0.1-py2.py3-none-manylinux2014_armv7l.whl", hash = "sha256:7c7b8c7c82c0cdc088052c6b7b2be4a45b6b06f5f856e7e7058e598f05c09910"},
     {file = "libclang-14.0.1-py2.py3-none-musllinux_1_2_x86_64.whl", hash = "sha256:58b9679868b2d6b5172ded26026c2f71306c4cabd6d15b93b597446fd677eb98"},
     {file = "libclang-14.0.1-py2.py3-none-win_amd64.whl", hash = "sha256:1a4f0d5959c801c975950926cffb9b45521c890d7c4b730d8a1f688d75b25de9"},
+    {file = "libclang-14.0.1-py2.py3-none-win_arm64.whl", hash = "sha256:7c344b16d32e80c06cd7d42bfad0ef3ffeadc96fd77b6674dd66d97bf23889ea"},
     {file = "libclang-14.0.1.tar.gz", hash = "sha256:332e539201b46cd4676bee992bbf4b3e50450fc17f71ff33d4afc9da09cf46cb"},
 ]
 libcst = [
@@ -4090,8 +4104,8 @@ pandas = [
     {file = "pandas-1.4.3.tar.gz", hash = "sha256:2ff7788468e75917574f080cd4681b27e1a7bf36461fe968b49a87b5a54d007c"},
 ]
 pandas-stubs = [
-    {file = "pandas-stubs-1.4.3.220724.tar.gz", hash = "sha256:5332d239d4b8d9d37927e3da207d637d1bde6aed490a0ef80de0efbd6af8e023"},
-    {file = "pandas_stubs-1.4.3.220724-py3-none-any.whl", hash = "sha256:8e6bda51bfa8b3d90ef9ae8d9504e7fbe59e884ccdd9810e6e59a83ef4b35b03"},
+    {file = "pandas-stubs-1.4.3.220801.tar.gz", hash = "sha256:16e15308ad4dab35f485c3cccdcec63be92e43395de6809435616d353e826d00"},
+    {file = "pandas_stubs-1.4.3.220801-py3-none-any.whl", hash = "sha256:abe78bfebab257cbdf766b4974c92a592a869f5de2393a5077acab239ec30648"},
 ]
 pandocfilters = [
     {file = "pandocfilters-1.5.0-py2.py3-none-any.whl", hash = "sha256:33aae3f25fd1a026079f5d27bdd52496f0e0803b3469282162bafdcbdf6ef14f"},
@@ -5194,6 +5208,7 @@ zenoml-image-classification = []
 zenoml-image-object-detection = []
 zenoml-image-segmentation = []
 zenoml-text-classification = []
+zenoml-timeseries = []
 zipp = [
     {file = "zipp-3.8.1-py3-none-any.whl", hash = "sha256:47c40d7fe183a6f21403a199b3e4192cca5774656965b0a4988ad2f8feb5f009"},
     {file = "zipp-3.8.1.tar.gz", hash = "sha256:05b45f1ee8f807d0cc928485ca40a07cb491cf092ff587c0df9cb1fd154848d2"},
