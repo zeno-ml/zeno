@@ -63,7 +63,6 @@ publish: build
 
 .PHONY: clean
 clean:
-	@poetry run jupyter-book clean docs
 	@rm -rf dist
 	@find . -type d -name '.mypy_cache' -exec rm -rf {} +
 	@find . -type d -name '__pycache__' -exec rm -rf {} +
