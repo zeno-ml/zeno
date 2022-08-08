@@ -19,7 +19,7 @@ exclude = ["zeno/tests/*"]
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11" 
 pandas = "^1.4.0"
-pyarrow = "^7.0.0"
+pyarrow = ">=7,<10"
 uvicorn = ">=0.17.5,<0.19.0"
 fastapi = ">=0.75,<0.80"
 websockets = "^10.2"
