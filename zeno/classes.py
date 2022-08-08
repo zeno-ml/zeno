@@ -89,6 +89,7 @@ class ZenoSettings(CamelModel):
     label_column: ZenoColumn
     data_column: ZenoColumn
     metadata_columns: List[ZenoColumn]
+    samples: int
 
 
 class ZenoVariables(CamelModel):

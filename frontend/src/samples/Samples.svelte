@@ -6,14 +6,25 @@
 
 	import { ZenoColumnType } from "../globals";
 	import { columnHash } from "../util/util";
-	import { model, settings, status, transform } from "../stores";
+	import { model, settings, status, transform, rowsPerPage } from "../stores";
 
 	export let table;
 
-	let rowsPerPage = 60;
+	let sampleOptions = [5, 15, 30, 60, 100, $settings.samples].sort(
+		(a, b) => a - b
+	);
+
 	let currentPage = 0;
+	let end = 0;
+	let lastPage = 0;
 
 	let modelColumn = "";
+	let transformColumn = "";
+
+	let sampleDiv;
+	let divFunction;
+
+	$: start = currentPage * $rowsPerPage;
 
 	status.subscribe((s) => {
 		let obj = s.completeColumns.find((c) => {
@@ -26,22 +37,17 @@
 		modelColumn = obj ? columnHash(obj) : "";
 	});
 
-	$: start = currentPage * rowsPerPage;
-	let end = 0;
-	let lastPage = 0;
-
 	$: if (table) {
-		end = Math.min(start + rowsPerPage, table.size);
+		end = Math.min(start + $rowsPerPage, table.size);
 	}
 	$: if (table) {
-		lastPage = Math.max(Math.ceil(table.size / rowsPerPage) - 1, 0);
+		lastPage = Math.max(Math.ceil(table.size / $rowsPerPage) - 1, 0);
 	}
 
 	$: if (currentPage > lastPage) {
 		currentPage = lastPage;
 	}
 
-	let transformColumn = "";
 	transform.subscribe((t) => {
 		if (t) {
 			let col = <ZenoColumn>{
@@ -53,9 +59,6 @@
 			transformColumn = "";
 		}
 	});
-
-	let sampleDiv;
-	let divFunction;
 
 	$: if (sampleDiv && divFunction) {
 		sampleDiv.innerHTML = "";
@@ -88,11 +91,10 @@
 	<Pagination slot="paginate" class="pagination">
 		<svelte:fragment slot="rowsPerPage">
 			<Label>Rows Per Page</Label>
-			<Select variant="outlined" bind:value={rowsPerPage} noLabel>
-				<Option value={15}>15</Option>
-				<Option value={30}>30</Option>
-				<Option value={60}>60</Option>
-				<Option value={100}>100</Option>
+			<Select variant="outlined" bind:value={$rowsPerPage} noLabel>
+				{#each sampleOptions as option}
+					<Option value={option}>{option}</Option>
+				{/each}
 			</Select>
 		</svelte:fragment>
 		<svelte:fragment slot="total">

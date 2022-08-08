@@ -146,6 +146,9 @@ def main():
     if "label_column" not in args:
         args["label_column"] = "label"
 
+    if "samples" not in args:
+        args["samples"] = 30
+
     if "port" not in args:
         args["port"] = 8000
 
@@ -216,6 +219,7 @@ def run_zeno(args):
             label_column=zeno.label_column,
             data_column=zeno.data_column,
             metadata_columns=zeno.columns,
+            samples=args["samples"],
         )
 
     @api_app.get("/initialize", response_model=ZenoVariables)

@@ -87,6 +87,10 @@ Where cache outputs are stored. **Optional**
 
 By default it is `.zeno_cache` in the same directory as the `TOML` file. Cache stores preprocesssing and model outputs.
 
+### `samples`
+
+Number of samples to show by default in view. Default 30. **Optional**
+
 ### `port`
 
 The port to run Zeno on. **Optional**

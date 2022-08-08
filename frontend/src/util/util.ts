@@ -20,6 +20,7 @@ import {
 	table,
 	metric,
 	reports,
+	rowsPerPage,
 } from "../stores";
 import { ZenoColumnType } from "../globals";
 
@@ -34,6 +35,7 @@ export function initialFetch() {
 		.then((r) => r.json())
 		.then((s) => {
 			settings.set(s);
+			rowsPerPage.set(s.samples);
 			fetch("/api/initialize")
 				.then((r) => r.json())
 				.then((r) => {

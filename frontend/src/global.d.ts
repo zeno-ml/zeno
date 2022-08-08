@@ -6,6 +6,7 @@ interface Settings {
 	labelColumn: ZenoColumn;
 	dataColumn: ZenoColumn;
 	metadataColumns: ZenoColumn[];
+	samples: number;
 }
 
 interface WSResponse {

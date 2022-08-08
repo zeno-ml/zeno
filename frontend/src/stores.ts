@@ -52,6 +52,7 @@ export const folders: Writable<string[]> = folderWritable();
 export const model: Writable<string> = writable("");
 export const metric: Writable<string> = writable("");
 export const transform: Writable<string> = writable("");
+export const rowsPerPage = writable(0);
 
 export const report: Writable<number> = writable(undefined);
 export const sort: Writable<ZenoColumn> = writable();
