@@ -2,7 +2,9 @@
   import { mdiPause, mdiPlay } from "@mdi/js";
   import { Svg } from "@smui/common/elements";
   import IconButton, { Icon } from "@smui/icon-button";
-  import WaveSurfer from "wavesurfer.js";
+  import WaveSurfer from "wavesurfer.js/dist/wavesurfer.js";
+  import SpectrogramPlugin from "wavesurfer.js/dist/plugin/wavesurfer.spectrogram.js";
+  import colormap from "colormap";
 
   // List of objects with keys corresponding to the following props.
   export let table;
@@ -17,17 +19,34 @@
   // Key for unique identifier of each item.
   export let idColumn;
 
+  const colors = colormap({
+    colormap: "hot",
+    nshades: 256,
+    format: "float",
+  });
+
   let divs = [];
+  let specDivs = [];
 
   $: waves = divs.map((d, i) => {
     if (d) {
       d.innerHTML = "";
-      let w = WaveSurfer.create({
+      let w;
+      w = WaveSurfer.create({
         container: d,
         waveColor: "violet",
         progressColor: "purple",
         mediaControls: true,
         height: 50,
+        plugins: [
+          SpectrogramPlugin.create({
+            container: specDivs[i],
+            labels: false,
+            height: 50,
+            frequencyMax: 4410,
+            colorMap: colors,
+          }),
+        ],
       });
       if (!transformColumn) {
         w.load(`/data/${table[i][idColumn]}`);
@@ -62,7 +81,7 @@
           id={"wave_" + row[idColumn]}
         />
       </div>
-      <br />
+      <div class="spec" bind:this={specDivs[i]} />
       <span class="label">label: </span><span class="value">
         {row[idColumn]}
       </span>
@@ -76,6 +95,11 @@
 </div>
 
 <style>
+  .spec {
+    height: 75px;
+    width: 150px;
+    margin-left: 48px;
+  }
   .label {
     font-size: 10px;
     color: rgba(0, 0, 0, 0.5);
