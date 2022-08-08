@@ -5,14 +5,18 @@
 	import NewSlicePopup from "./popups/NewSlicePopup.svelte";
 	import SliceCell from "./cells/SliceCell.svelte";
 
+	import Button from "@smui/button";
+
 	import {
 		folders,
 		metadataSelections,
 		metric,
 		model,
 		settings,
+		showNewSlice,
 		slices,
 		sliceSelections,
+		sliceToEdit,
 		status,
 		table,
 		transform,
@@ -26,6 +30,8 @@
 	import { ZenoColumnType } from "../globals";
 
 	export let shouldColor = false;
+
+	let showNewFolder = false;
 
 	table.subscribe((t) => updateFilteredTable(t));
 	metadataSelections.subscribe(() => updateFilteredTable($table));
@@ -74,8 +80,30 @@
 	<div class="inline">
 		<h4>Slices</h4>
 		<div style:margin-right="13px" class="inline">
-			<NewFolderPopup />
-			<NewSlicePopup />
+			<div>
+				<Button
+					variant="outlined"
+					style="margin-right: 10px"
+					on:click={() => (showNewFolder = true)}>
+					New Folder
+				</Button>
+				{#if showNewFolder}
+					<NewFolderPopup bind:showNewFolder />
+				{/if}
+			</div>
+			<div>
+				<Button
+					variant="outlined"
+					on:click={() => {
+						sliceToEdit.set(undefined);
+						showNewSlice.set(true);
+					}}>
+					New Slice
+				</Button>
+				{#if $showNewSlice}
+					<NewSlicePopup />
+				{/if}
+			</div>
 		</div>
 	</div>
 

@@ -134,43 +134,31 @@
 
 <svelte:window on:keydown={submit} />
 
-<div>
-	<Button
-		variant="outlined"
-		on:click={() => {
-			showNewSlice.set(true);
-			sliceName = "";
-		}}>
-		New Slice
-	</Button>
-	{#if $showNewSlice}
-		<div
-			id="paper-container"
-			use:clickOutside
-			on:click_outside={() => showNewSlice.set(false)}>
-			<Paper elevation={7}>
-				<Content>
-					<Textfield bind:value={sliceName} label="Name" bind:this={nameInput}>
-						<HelperText slot="helper">Slice 1</HelperText>
-					</Textfield>
-					<FilterGroupEntry
-						index={-1}
-						deletePredicate={() => deletePredicate(-1)}
-						bind:predicateGroup />
-					<div id="submit">
-						<Button variant="outlined" on:click={createSlice}>
-							{$sliceToEdit !== null ? "Edit Slice" : "Create Slice"}
-						</Button>
-						{#if $slices.has(sliceName) && $sliceToEdit === null}
-							<p style:margin-right="10px" style:color="red">
-								slice already exists
-							</p>
-						{/if}
-					</div>
-				</Content>
-			</Paper>
-		</div>
-	{/if}
+<div
+	id="paper-container"
+	use:clickOutside
+	on:click_outside={() => showNewSlice.set(false)}>
+	<Paper elevation={7}>
+		<Content>
+			<Textfield bind:value={sliceName} label="Name" bind:this={nameInput}>
+				<HelperText slot="helper">Slice 1</HelperText>
+			</Textfield>
+			<FilterGroupEntry
+				index={-1}
+				deletePredicate={() => deletePredicate(-1)}
+				bind:predicateGroup />
+			<div id="submit">
+				<Button variant="outlined" on:click={createSlice}>
+					{$sliceToEdit !== null ? "Edit Slice" : "Create Slice"}
+				</Button>
+				{#if $slices.has(sliceName) && $sliceToEdit === null}
+					<p style:margin-right="10px" style:color="red">
+						slice already exists
+					</p>
+				{/if}
+			</div>
+		</Content>
+	</Paper>
 </div>
 
 <style>

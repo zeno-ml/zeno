@@ -11,4 +11,5 @@ data_path = "../../../data/CIFAR-10-images/test/"
 data_column = "id"
 data_type = "path"
 batch_size = 16
+samples = 80
 port = 8000

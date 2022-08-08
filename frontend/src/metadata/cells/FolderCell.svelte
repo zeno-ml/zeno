@@ -1,15 +1,17 @@
 <script lang="ts">
-	import { mdiChevronDown, mdiChevronUp } from "@mdi/js";
+	import { mdiChevronDown, mdiChevronUp, mdiPencilOutline } from "@mdi/js";
 	import { Icon } from "@smui/common";
 	import { Svg } from "@smui/common/elements";
 	import { slide } from "svelte/transition";
 	import { folders, slices } from "../../stores";
+	import NewFolderPopup from "../popups/NewFolderPopup.svelte";
 	import SliceCell from "./SliceCell.svelte";
 
 	export let folder: string;
 
 	let expandFolder = false;
 	let dragOver = false;
+	let showNewFolder = false;
 
 	$: sls = [...$slices.values()].filter((s) => s.folder === folder);
 </script>
@@ -43,7 +45,17 @@
 		<div style:margin-right="10px">
 			{sls.length} slice{sls.length === 1 ? "" : "s"}
 		</div>
-		<div style:cursor="pointer">
+		<div
+			style="width: 24px; height: 24px; cursor: pointer;"
+			on:click={(e) => {
+				e.stopPropagation();
+				showNewFolder = true;
+			}}>
+			<Icon component={Svg} viewBox="0 0 24 24">
+				<path fill="black" d={mdiPencilOutline} />
+			</Icon>
+		</div>
+		<div style:cursor="pointer" style:height="24px" style:width="24px">
 			<Icon
 				class="material-icons"
 				on:click={(e) => {
@@ -72,6 +84,9 @@
 			<SliceCell slice={s} inFolder={true} />
 		{/each}
 	</div>
+{/if}
+{#if showNewFolder}
+	<NewFolderPopup folderName={folder} edit={true} bind:showNewFolder />
 {/if}
 
 <style>
