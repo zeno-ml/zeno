@@ -5880,18 +5880,18 @@ function add_css(target) {
 
 function get_each_context(ctx, list, i) {
 	const child_ctx = ctx.slice();
-	child_ctx[9] = list[i];
-	child_ctx[10] = list;
-	child_ctx[11] = i;
+	child_ctx[12] = list[i];
+	child_ctx[13] = list;
+	child_ctx[14] = i;
 	return child_ctx;
 }
 
-// (73:2) {#each table as row, i}
+// (107:2) {#each table as row, i}
 function create_each_block(ctx) {
 	let div;
-	let i = /*i*/ ctx[11];
-	const assign_div = () => /*div_binding*/ ctx[7](div, i);
-	const unassign_div = () => /*div_binding*/ ctx[7](null, i);
+	let i = /*i*/ ctx[14];
+	const assign_div = () => /*div_binding*/ ctx[9](div, i);
+	const unassign_div = () => /*div_binding*/ ctx[9](null, i);
 
 	return {
 		c() {
@@ -5904,9 +5904,9 @@ function create_each_block(ctx) {
 		p(new_ctx, dirty) {
 			ctx = new_ctx;
 
-			if (i !== /*i*/ ctx[11]) {
+			if (i !== /*i*/ ctx[14]) {
 				unassign_div();
-				i = /*i*/ ctx[11];
+				i = /*i*/ ctx[14];
 				assign_div();
 			}
 		},
@@ -5918,8 +5918,10 @@ function create_each_block(ctx) {
 }
 
 function create_fragment(ctx) {
-	let div;
-	let t;
+	let div1;
+	let div0;
+	let t0;
+	let t1;
 	let link;
 	let each_value = /*table*/ ctx[0];
 	let each_blocks = [];
@@ -5930,27 +5932,32 @@ function create_fragment(ctx) {
 
 	return {
 		c() {
-			div = element("div");
+			div1 = element("div");
+			div0 = element("div");
+			t0 = space();
 
 			for (let i = 0; i < each_blocks.length; i += 1) {
 				each_blocks[i].c();
 			}
 
-			t = space();
+			t1 = space();
 			link = element("link");
-			attr(div, "id", "container");
-			attr(div, "class", "svelte-1td1g7e");
+			attr(div1, "id", "container");
+			attr(div1, "class", "svelte-1td1g7e");
 			attr(link, "rel", "stylesheet");
 			attr(link, "href", "https://unpkg.com/uplot@1.6.21/dist/uPlot.min.css");
 		},
 		m(target, anchor) {
-			insert(target, div, anchor);
+			insert(target, div1, anchor);
+			append(div1, div0);
+			/*div0_binding*/ ctx[8](div0);
+			append(div1, t0);
 
 			for (let i = 0; i < each_blocks.length; i += 1) {
-				each_blocks[i].m(div, null);
+				each_blocks[i].m(div1, null);
 			}
 
-			insert(target, t, anchor);
+			insert(target, t1, anchor);
 			append(document.head, link);
 		},
 		p(ctx, [dirty]) {
@@ -5966,7 +5973,7 @@ function create_fragment(ctx) {
 					} else {
 						each_blocks[i] = create_each_block(child_ctx);
 						each_blocks[i].c();
-						each_blocks[i].m(div, null);
+						each_blocks[i].m(div1, null);
 					}
 				}
 
@@ -5980,9 +5987,10 @@ function create_fragment(ctx) {
 		i: noop,
 		o: noop,
 		d(detaching) {
-			if (detaching) detach(div);
+			if (detaching) detach(div1);
+			/*div0_binding*/ ctx[8](null);
 			destroy_each(each_blocks, detaching);
-			if (detaching) detach(t);
+			if (detaching) detach(t1);
 			detach(link);
 		}
 	};
@@ -5995,7 +6003,15 @@ function instance($$self, $$props, $$invalidate) {
 	let { dataColumn } = $$props;
 	let { transformColumn } = $$props;
 	let { idColumn } = $$props;
+
+	/** @type HTMLDivElement[] */
 	let divs = [];
+
+	/** @type HTMLDivElement[] */
+	let legends = [];
+
+	/** @type HTMLDivElement */
+	let legend;
 
 	let colors = [
 		"#ea5545",
@@ -6037,13 +6053,49 @@ function instance($$self, $$props, $$invalidate) {
 						width: 400,
 						height: 150,
 						series,
-						scales: { x: { time: false } }
+						scales: { x: { time: false } },
+						hooks: {
+							ready: [
+								u => {
+									let thisLegend = u.root.querySelector(".u-legend");
+									legends.push(thisLegend);
+
+									if (legends.length === 1) {
+										legend.appendChild(thisLegend);
+									} else {
+										thisLegend.style.display = "none";
+									}
+
+									// legends.appendChild(thisLegend);
+									// u.over.addEventListener("mouseleave", () => {
+									//   legend.innerHTML = "";
+									//   thisLegend.style.display = "none";
+									// });
+									u.over.addEventListener("mouseenter", e => {
+										$$invalidate(2, legend.firstChild.display = "none", legend);
+										$$invalidate(2, legend.innerHTML = "", legend);
+										legend.appendChild(thisLegend);
+										thisLegend.style.display = "block";
+									}); // for (let legend of document.querySelectorAll(".u-legend")) {
+									//   legend.style.display =
+									//     legend === thisLegend ? "block" : "none";
+									// }
+								}
+							]
+						}
 					},
 				dat,
 				divs[i]);
 			});
 		});
 	});
+
+	function div0_binding($$value) {
+		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
+			legend = $$value;
+			$$invalidate(2, legend);
+		});
+	}
 
 	function div_binding($$value, i) {
 		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
@@ -6054,21 +6106,23 @@ function instance($$self, $$props, $$invalidate) {
 
 	$$self.$$set = $$props => {
 		if ('table' in $$props) $$invalidate(0, table = $$props.table);
-		if ('modelColumn' in $$props) $$invalidate(2, modelColumn = $$props.modelColumn);
-		if ('labelColumn' in $$props) $$invalidate(3, labelColumn = $$props.labelColumn);
-		if ('dataColumn' in $$props) $$invalidate(4, dataColumn = $$props.dataColumn);
-		if ('transformColumn' in $$props) $$invalidate(5, transformColumn = $$props.transformColumn);
-		if ('idColumn' in $$props) $$invalidate(6, idColumn = $$props.idColumn);
+		if ('modelColumn' in $$props) $$invalidate(3, modelColumn = $$props.modelColumn);
+		if ('labelColumn' in $$props) $$invalidate(4, labelColumn = $$props.labelColumn);
+		if ('dataColumn' in $$props) $$invalidate(5, dataColumn = $$props.dataColumn);
+		if ('transformColumn' in $$props) $$invalidate(6, transformColumn = $$props.transformColumn);
+		if ('idColumn' in $$props) $$invalidate(7, idColumn = $$props.idColumn);
 	};
 
 	return [
 		table,
 		divs,
+		legend,
 		modelColumn,
 		labelColumn,
 		dataColumn,
 		transformColumn,
 		idColumn,
+		div0_binding,
 		div_binding
 	];
 }
@@ -6085,11 +6139,11 @@ class Component extends SvelteComponent {
 			safe_not_equal,
 			{
 				table: 0,
-				modelColumn: 2,
-				labelColumn: 3,
-				dataColumn: 4,
-				transformColumn: 5,
-				idColumn: 6
+				modelColumn: 3,
+				labelColumn: 4,
+				dataColumn: 5,
+				transformColumn: 6,
+				idColumn: 7
 			},
 			add_css
 		);

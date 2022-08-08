@@ -1,6 +1,7 @@
 import importlib
 
 import numpy as np
+
 from zeno.classes import ZenoColumn, ZenoColumnType
 from zeno.pipeline.node import PipelineNode
 

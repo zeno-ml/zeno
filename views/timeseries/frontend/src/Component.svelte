@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
   import { onMount } from "svelte";
   import { csv } from "d3-fetch";
 
@@ -17,7 +17,12 @@
   // Key for unique identifier of each item.
   export let idColumn;
 
+  /** @type HTMLDivElement[] */
   let divs = [];
+  /** @type HTMLDivElement[] */
+  let legends = [];
+  /** @type HTMLDivElement */
+  let legend;
 
   let colors = [
     "#ea5545",
@@ -60,6 +65,25 @@
             height: 150,
             series: series,
             scales: { x: { time: false } },
+            hooks: {
+              ready: [
+                (u) => {
+                  let thisLegend = u.root.querySelector(".u-legend");
+                  legends.push(thisLegend);
+                  if (legends.length === 1) {
+                    legend.appendChild(thisLegend);
+                  } else {
+                    thisLegend.style.display = "none";
+                  }
+                  u.over.addEventListener("mouseenter", (e) => {
+                    legend.firstChild.display = "none";
+                    legend.innerHTML = "";
+                    legend.appendChild(thisLegend);
+                    thisLegend.style.display = "block";
+                  });
+                },
+              ],
+            },
           },
           dat,
           divs[i]
@@ -70,6 +94,7 @@
 </script>
 
 <div id="container">
+  <div bind:this={legend} />
   {#each table as row, i}
     <div bind:this={divs[i]} />
   {/each}
