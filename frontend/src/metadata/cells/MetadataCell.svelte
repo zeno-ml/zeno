@@ -39,7 +39,7 @@
 
 	let chartType: ChartType;
 	let domain: object[];
-	let selection = undefined;
+	let selection = [];
 	let finalSelection = undefined;
 	let view: View;
 	let histogramData = { table: [] };
@@ -63,7 +63,7 @@
 		updateData($table, $filteredTable);
 	}
 	$: dynamicSpec =
-		chartType === ChartType.Histogram
+		chartType === ChartType.HISTOGRAM
 			? generateHistogramSpec
 			: generateCountSpec;
 
@@ -75,7 +75,7 @@
 
 	function updateData(table: ColumnTable, filteredTable: ColumnTable) {
 		if (
-			(chartType === ChartType.Count || chartType === ChartType.Histogram) &&
+			(chartType === ChartType.COUNT || chartType === ChartType.HISTOGRAM) &&
 			table.column(hash)
 		) {
 			const counts = computeCountsFromDomain({
@@ -84,14 +84,14 @@
 				column: hash,
 				type: chartType,
 			});
-			if (chartType === ChartType.Count) {
+			if (chartType === ChartType.COUNT) {
 				domain = domain.map((d, i) => ({
 					filteredCount: counts[i].count,
 					count: d["count"],
 					category: d["category"],
 					color: d["color"],
 				}));
-			} else if (chartType === ChartType.Histogram) {
+			} else if (chartType === ChartType.HISTOGRAM) {
 				domain = domain.map((d, i) => ({
 					filteredCount: counts[i].count,
 					count: d["count"],
@@ -117,19 +117,19 @@
 					.rollup({ a: `d => op.array_agg_distinct(d["${hash}"])` })
 					.object()["a"];
 				if (Number(vals[0]) === 0 && Number(vals[1]) === 1) {
-					chartType = ChartType.Binary;
+					chartType = ChartType.BINARY;
 				}
 			} else if (isOrdinal) {
 				if (unique <= 20) {
-					chartType = ChartType.Count;
-				} else {
-					chartType = ChartType.Other;
+					chartType = ChartType.COUNT;
+				} else if (!isNaN(Date.parse(t.column(hash).get(0)))) {
+					chartType = ChartType.DATE;
 				}
 			} else {
 				if (unique < 20) {
-					chartType = ChartType.Count;
+					chartType = ChartType.COUNT;
 				} else {
-					chartType = ChartType.Histogram;
+					chartType = ChartType.HISTOGRAM;
 				}
 			}
 
@@ -140,6 +140,10 @@
 			});
 			domain = localDomain;
 			domain.forEach((d) => (d["filteredCount"] = d["count"]));
+
+			if (chartType === ChartType.DATE) {
+				selection = ["date", domain[0], domain[1]];
+			}
 
 			colorDomain({ domain, type: chartType });
 
@@ -184,13 +188,13 @@
 	});
 
 	$: if (view) {
-		if (chartType === ChartType.Histogram) {
+		if (chartType === ChartType.HISTOGRAM) {
 			view.addSignalListener("brush", (...s) => {
 				return (selection = s[1].binStart
 					? ["range", ...s[1].binStart]
 					: undefined);
 			});
-		} else if (chartType === ChartType.Count) {
+		} else if (chartType === ChartType.COUNT) {
 			view.addSignalListener(
 				"select",
 				(...s) =>
@@ -200,7 +204,7 @@
 	}
 
 	function setSelection() {
-		if (selection === finalSelection) {
+		if (selection === finalSelection || (selection && selection.length === 0)) {
 			return;
 		}
 
@@ -230,7 +234,7 @@
 		</div>
 
 		<div class="top-right-cell">
-			{#if chartType === ChartType.Binary}
+			{#if chartType === ChartType.BINARY}
 				<div style:display="flex">
 					<div class="binary-button">
 						<Button
@@ -276,7 +280,7 @@
 				</div>
 			{/if}
 
-			{#if chartType !== ChartType.Other && shouldColor && (hoveringCell || selectedHash)}
+			{#if chartType !== ChartType.OTHER && shouldColor && (hoveringCell || selectedHash)}
 				<div class="top-text">
 					<IconButton
 						size="mini"
@@ -289,7 +293,7 @@
 			{/if}
 		</div>
 
-		{#if $table.column(hash) && chartType === ChartType.Other}
+		{#if $table.column(hash) && (chartType === ChartType.OTHER || chartType === ChartType.DATE)}
 			<span style:margin-right="5px">
 				unique values: {$table
 					.rollup({ unique: `d => op.distinct(d["${hash}"])` })
@@ -297,7 +301,36 @@
 			</span>
 		{/if}
 	</div>
-	{#if histogramData.table.length > 0 && (chartType === ChartType.Histogram || chartType === ChartType.Count)}
+
+	{#if chartType === ChartType.DATE}
+		<div class="inline">
+			<div class="date-container">
+				start: <input
+					type="datetime-local"
+					on:change={(el) => {
+						selection[1] = new Date(el.target.value);
+						setSelection();
+					}}
+					value={selection && selection[1]
+						? selection[1].toISOString().slice(0, 16)
+						: domain[0].toISOString().slice(0, 16)} />
+			</div>
+			<div class="date-container">
+				end:
+				<input
+					type="datetime-local"
+					on:change={(el) => {
+						selection[2] = new Date(el.target.value);
+						setSelection();
+					}}
+					value={selection && selection[2]
+						? selection[2].toISOString().slice(0, 16)
+						: domain[1].toISOString().slice(0, 16)} />
+			</div>
+		</div>
+	{/if}
+
+	{#if histogramData.table.length > 0 && (chartType === ChartType.HISTOGRAM || chartType === ChartType.COUNT)}
 		<div
 			id="histogram"
 			on:mouseup={setSelection}
@@ -348,5 +381,10 @@
 	.top-text {
 		height: 18px;
 		z-index: 999;
+	}
+	.date-container {
+		margin-left: 5px;
+		margin-top: 5px;
+		margin-bottom: 5px;
 	}
 </style>

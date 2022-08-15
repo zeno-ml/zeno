@@ -11,10 +11,11 @@ import { columnHash } from "../util/util";
 import { interpolateColorToArray } from "../discovery/discovery";
 
 export enum ChartType {
-	Count,
-	Histogram,
-	Binary,
-	Other,
+	COUNT,
+	HISTOGRAM,
+	BINARY,
+	DATE,
+	OTHER,
 }
 
 interface IComputeDomain {
@@ -37,16 +38,19 @@ export function computeDomain({ type, table, column }: IComputeDomain) {
 	};
 
 	switch (type) {
-		case ChartType.Count:
+		case ChartType.COUNT:
 			specificDomainFunc = computeCountDomain;
 			break;
-		case ChartType.Histogram:
+		case ChartType.HISTOGRAM:
 			specificDomainFunc = computeHistogramDomain;
 			break;
-		case ChartType.Binary:
+		case ChartType.BINARY:
 			specificDomainFunc = computeBinaryDomain;
 			break;
-		case ChartType.Other:
+		case ChartType.DATE:
+			specificDomainFunc = computeDateDomain;
+			break;
+		case ChartType.OTHER:
 			specificDomainFunc = computeOtherDomain;
 			break;
 		default:
@@ -77,6 +81,14 @@ function computeCountDomain({ table, column }: ISpecificDomain) {
 function computeBinaryDomain({ table, column }: ISpecificDomain) {
 	const output = computeCategoricalDomain({ table, column });
 	return output;
+}
+
+function computeDateDomain({ table, column }: ISpecificDomain) {
+	const dates = table
+		.array(column)
+		.map((date) => new Date(date))
+		.sort((a, b) => a - b);
+	return { domain: [dates[0], dates[dates.length - 1]], assignments: [] };
 }
 
 function computeContinuousBinnedDomain({ table, column }: ISpecificDomain) {
@@ -253,9 +265,9 @@ export function computeCountsFromDomain({
 		return [];
 	}
 
-	if (type === ChartType.Count || type === ChartType.Binary) {
+	if (type === ChartType.COUNT || type === ChartType.BINARY) {
 		return countDomainCategorical({ table, domain, column: hash });
-	} else if (type === ChartType.Histogram) {
+	} else if (type === ChartType.HISTOGRAM) {
 		return countDomainContinuousBins({ table, domain, column: hash });
 	} else {
 		return [];
@@ -270,7 +282,7 @@ export function colorDomain({
 	type: ChartType;
 }) {
 	if (domain.length > 0) {
-		if (type === ChartType.Count || type === ChartType.Binary) {
+		if (type === ChartType.COUNT || type === ChartType.BINARY) {
 			let colors = [...schemeCategory10, ...schemeDark2].slice(
 				0,
 				domain.length
@@ -279,7 +291,7 @@ export function colorDomain({
 				colors = [schemeCategory10[3], schemeCategory10[0]]; // red and blue
 			}
 			domain.forEach((d, i) => (d["color"] = colors[i]));
-		} else if (type === ChartType.Histogram) {
+		} else if (type === ChartType.HISTOGRAM) {
 			const numBins = domain.length;
 			const colors = interpolateColorToArray({
 				colorer: interpolatePurples,

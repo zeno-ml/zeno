@@ -246,6 +246,15 @@ export function updateFilteredTable(t: ColumnTable) {
 			} else {
 				tempTable = tempTable.filter(`(r) => r["${hash}"] == 0`);
 			}
+		} else if (entry.type === "date") {
+			console.log(entry);
+			tempTable = tempTable.filter(
+				aq.escape(
+					(r) =>
+						new Date(r[hash]) > entry.values[0] &&
+						new Date(r[hash]) < entry.values[1]
+				)
+			);
 		} else {
 			tempTable = tempTable.filter(
 				aq.escape((r) => aq.op.includes(entry.values, r[hash], 0))
