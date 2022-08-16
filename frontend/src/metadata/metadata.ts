@@ -6,19 +6,13 @@ import {
 	schemeCategory10,
 	schemeDark2,
 } from "d3-scale-chromatic";
+import { MetadataType } from "../globals";
 
 import { columnHash } from "../util/util";
 import { interpolateColorToArray } from "../discovery/discovery";
 
-export enum ChartType {
-	Count,
-	Histogram,
-	Binary,
-	Other,
-}
-
 interface IComputeDomain {
-	type: ChartType;
+	type: MetadataType;
 	table: ColumnTable;
 	column: string | ZenoColumn;
 }
@@ -37,16 +31,19 @@ export function computeDomain({ type, table, column }: IComputeDomain) {
 	};
 
 	switch (type) {
-		case ChartType.Count:
+		case MetadataType.COUNT:
 			specificDomainFunc = computeCountDomain;
 			break;
-		case ChartType.Histogram:
+		case MetadataType.HISTOGRAM:
 			specificDomainFunc = computeHistogramDomain;
 			break;
-		case ChartType.Binary:
+		case MetadataType.BINARY:
 			specificDomainFunc = computeBinaryDomain;
 			break;
-		case ChartType.Other:
+		case MetadataType.DATE:
+			specificDomainFunc = computeDateDomain;
+			break;
+		case MetadataType.OTHER:
 			specificDomainFunc = computeOtherDomain;
 			break;
 		default:
@@ -77,6 +74,14 @@ function computeCountDomain({ table, column }: ISpecificDomain) {
 function computeBinaryDomain({ table, column }: ISpecificDomain) {
 	const output = computeCategoricalDomain({ table, column });
 	return output;
+}
+
+function computeDateDomain({ table, column }: ISpecificDomain) {
+	const dates = table
+		.array(column)
+		.map((date) => new Date(date))
+		.sort((a, b) => a - b);
+	return { domain: [dates[0], dates[dates.length - 1]], assignments: [] };
 }
 
 function computeContinuousBinnedDomain({ table, column }: ISpecificDomain) {
@@ -246,16 +251,16 @@ export function computeCountsFromDomain({
 	table: ColumnTable;
 	column: string;
 	domain: object[];
-	type: ChartType;
+	type: MetadataType;
 }) {
 	const hash = typeof column === "string" ? column : columnHash(column);
 	if (domain.length === 0) {
 		return [];
 	}
 
-	if (type === ChartType.Count || type === ChartType.Binary) {
+	if (type === MetadataType.COUNT || type === MetadataType.BINARY) {
 		return countDomainCategorical({ table, domain, column: hash });
-	} else if (type === ChartType.Histogram) {
+	} else if (type === MetadataType.HISTOGRAM) {
 		return countDomainContinuousBins({ table, domain, column: hash });
 	} else {
 		return [];
@@ -267,10 +272,10 @@ export function colorDomain({
 	type,
 }: {
 	domain: object[];
-	type: ChartType;
+	type: MetadataType;
 }) {
 	if (domain.length > 0) {
-		if (type === ChartType.Count || type === ChartType.Binary) {
+		if (type === MetadataType.COUNT || type === MetadataType.BINARY) {
 			let colors = [...schemeCategory10, ...schemeDark2].slice(
 				0,
 				domain.length
@@ -279,7 +284,7 @@ export function colorDomain({
 				colors = [schemeCategory10[3], schemeCategory10[0]]; // red and blue
 			}
 			domain.forEach((d, i) => (d["color"] = colors[i]));
-		} else if (type === ChartType.Histogram) {
+		} else if (type === MetadataType.HISTOGRAM) {
 			const numBins = domain.length;
 			const colors = interpolateColorToArray({
 				colorer: interpolatePurples,
@@ -303,7 +308,7 @@ export function assignColorsFromDomain({
 	assignments: number[];
 	idColumn: ZenoColumn | string;
 	column: ZenoColumn | string;
-	type: ChartType;
+	type: MetadataType;
 }) {
 	if (domain.length > 0) {
 		if (!("color" in domain[0])) {

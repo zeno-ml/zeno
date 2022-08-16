@@ -1,3 +1,4 @@
+import { MetadataType } from "./../globals";
 import type ColumnTable from "arquero/dist/types/table/column-table";
 
 import * as aq from "arquero";
@@ -236,16 +237,24 @@ export function updateFilteredTable(t: ColumnTable) {
 	// Filter with metadata selections.
 	[...get(metadataSelections).entries()].forEach((e) => {
 		const [hash, entry] = e;
-		if (entry.type === "range") {
+		if (entry.type === MetadataType.HISTOGRAM) {
 			tempTable = tempTable.filter(
 				`(r) => r["${hash}"] > ${entry.values[0]} && r["${hash}"] < ${entry.values[1]}`
 			);
-		} else if (entry.type === "binary") {
+		} else if (entry.type === MetadataType.BINARY) {
 			if (entry.values[0] === "is") {
 				tempTable = tempTable.filter(`(r) => r["${hash}"] == 1`);
 			} else {
 				tempTable = tempTable.filter(`(r) => r["${hash}"] == 0`);
 			}
+		} else if (entry.type === MetadataType.DATE) {
+			tempTable = tempTable.filter(
+				aq.escape(
+					(r) =>
+						(entry.values[0] ? new Date(r[hash]) > entry.values[0] : true) &&
+						(entry.values[1] ? new Date(r[hash]) < entry.values[1] : true)
+				)
+			);
 		} else {
 			tempTable = tempTable.filter(
 				aq.escape((r) => aq.op.includes(entry.values, r[hash], 0))

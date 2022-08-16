@@ -6,8 +6,6 @@
 	import SliceTableRow from "./SliceTableRow.svelte";
 
 	let selectedFolder = "";
-
-	$: console.log($slices);
 </script>
 
 <div id="tabs">

@@ -16,15 +16,15 @@
 	import ReportTable from "./report/ReportTable.svelte";
 </script>
 
-{#if $ready}
-	<div class="inline">
-		<div>
+<main>
+	{#if $ready}
+		<div id="reports">
 			<ReportsList />
-		</div>
-		<div style:width="100%">
 			{#if $reports[$report]}
 				<ReportTable report={$reports[$report]} />
 			{/if}
+		</div>
+		<div id="slices">
 			<div class="settings">
 				{#if $metrics}
 					<Select
@@ -49,16 +49,30 @@
 			</div>
 			<SliceTable />
 		</div>
-	</div>
-{/if}
+	{/if}
+</main>
 
 <style>
-	.inline {
+	main {
+		display: flex;
+		flex-direction: column;
+		max-height: calc(100vh - 80px);
+	}
+	#slices {
+		padding: 20px;
+		border-top: 1px solid #e0e0e0;
+		background: #fafafa;
+		max-height: 300px;
+		min-height: 300px;
+		overflow-y: scroll;
+	}
+	#reports {
 		display: flex;
 		flex-direction: row;
+		max-height: calc(100vh - 420px);
+		min-height: calc(100vh - 420px);
 	}
 	.settings {
-		margin-top: 20px;
 		margin-bottom: 10px;
 	}
 </style>

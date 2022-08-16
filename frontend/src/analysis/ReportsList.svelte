@@ -42,7 +42,6 @@
 		padding: 10px;
 		margin-left: 10px;
 		margin-right: 10px;
-		height: calc(100vh - 90px);
 		overflow-y: auto;
 		min-width: 450px;
 		border-right: 1px solid #e8e8e8;

@@ -132,25 +132,25 @@ classes = [
 ]
 
 
-@predict_function
-def load_model(model_path):
-    net = get_model(
-        out_features=80,
-        mode="eval",
-        parent="/Users/acabrera/dev-research/22-zeno/model.pt",
-    )
+# @predict_function
+# def load_model(model_path):
+#     net = get_model(
+#         out_features=80,
+#         mode="eval",
+#         parent="/Users/acabrera/dev-research/22-zeno/model.pt",
+#     )
 
-    def pred(df, ops):
-        imgs = [
-            Image.open(os.path.join(ops.data_path, img)) for img in df[ops.data_column]
-        ]
-        imgs = torch.stack([preprocess(img) for img in imgs])
-        with torch.no_grad():
-            out = net(imgs)
+#     def pred(df, ops):
+#         imgs = [
+#             Image.open(os.path.join(ops.data_path, img)) for img in df[ops.data_column]
+#         ]
+#         imgs = torch.stack([preprocess(img) for img in imgs])
+#         with torch.no_grad():
+#             out = net(imgs)
 
-        return [
-            ",".join(list(map(lambda x: classes[x], np.argwhere(o > 0))))
-            for o in out.detach().numpy()
-        ]
+#         return [
+#             ",".join(list(map(lambda x: classes[x], np.argwhere(o > 0))))
+#             for o in out.detach().numpy()
+#         ]
 
-    return pred
+#     return pred

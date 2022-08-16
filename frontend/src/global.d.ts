@@ -24,7 +24,7 @@ interface MetricKey {
 
 interface MetadataSelection {
 	column: ZenoColumn;
-	type: string;
+	type: ChartType;
 	values: Array;
 }
 
