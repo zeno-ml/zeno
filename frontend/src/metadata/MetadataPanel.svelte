@@ -1,11 +1,13 @@
 <script lang="ts">
+	import { Svg } from "@smui/common/elements";
+	import IconButton, { Icon } from "@smui/icon-button";
+	import { mdiFolderPlusOutline, mdiPlus } from "@mdi/js";
+
 	import FolderCell from "./cells/FolderCell.svelte";
 	import MetadataCell from "./cells/MetadataCell.svelte";
 	import NewFolderPopup from "./popups/NewFolderPopup.svelte";
 	import NewSlicePopup from "./popups/NewSlicePopup.svelte";
 	import SliceCell from "./cells/SliceCell.svelte";
-
-	import Button from "@smui/button";
 
 	import {
 		folders,
@@ -81,25 +83,29 @@
 		<h4>Slices</h4>
 		<div style:margin-right="13px" class="inline">
 			<div>
-				<Button
-					variant="outlined"
-					style="margin-right: 10px"
-					on:click={() => (showNewFolder = true)}>
-					New Folder
-				</Button>
+				<div on:click={() => (showNewFolder = true)}>
+					<IconButton>
+						<Icon component={Svg} viewBox="0 0 24 24">
+							<path fill="black" d={mdiFolderPlusOutline} />
+						</Icon>
+					</IconButton>
+				</div>
 				{#if showNewFolder}
 					<NewFolderPopup bind:showNewFolder />
 				{/if}
 			</div>
 			<div>
-				<Button
-					variant="outlined"
+				<div
 					on:click={() => {
 						sliceToEdit.set(undefined);
 						showNewSlice.set(true);
 					}}>
-					New Slice
-				</Button>
+					<IconButton>
+						<Icon component={Svg} viewBox="0 0 24 24">
+							<path fill="black" d={mdiPlus} />
+						</Icon>
+					</IconButton>
+				</div>
 				{#if $showNewSlice}
 					<NewSlicePopup />
 				{/if}
@@ -142,7 +148,7 @@
 	}
 	.side-container {
 		margin-left: 10px;
-		height: calc(100vh - 82px);
+		height: calc(100vh - 165px);
 		overflow-y: auto;
 		min-width: 450px;
 		padding: 10px;

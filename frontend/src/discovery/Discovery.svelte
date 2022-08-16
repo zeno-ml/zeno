@@ -1,18 +1,21 @@
 <script lang="ts">
+	import type { LegendaryScatterPoint } from "./scatterplot/scatter";
+	import type ColumnTable from "arquero/dist/types/table/column-table";
+
+	import * as aq from "arquero";
+
+	import Button from "@smui/button";
+	import TextField from "@smui/textfield";
+
 	import MetadataBar from "../metadata/MetadataPanel.svelte";
 	import Scatter from "./scatterplot/LegendaryScatter.svelte";
 	import Samples from "../samples/Samples.svelte";
-	import SampleOptions from "../samples/SampleOptions.svelte";
-	import Button from "@smui/button";
-	import TextField from "@smui/textfield";
+	import OptionsBar from "../OptionsBar.svelte";
+	import Node from "./node/Node.svelte";
+
 	import * as pipeline from "./pipeline";
 	import { filteredTable, model, settings, colorSpec, table } from "../stores";
 	import { columnHash } from "../util/util";
-
-	import type { LegendaryScatterPoint } from "./scatterplot/scatter";
-	import type ColumnTable from "arquero/dist/types/table/column-table";
-	import * as aq from "arquero";
-	import Node from "./node/Node.svelte";
 
 	export let scatterWidth = 800;
 	export let scatterHeight = 550;
@@ -116,6 +119,7 @@
 	}
 </script>
 
+<OptionsBar />
 <div id="main">
 	<MetadataBar shouldColor />
 
@@ -262,7 +266,6 @@
 			style:margin-bottom="5px" />
 		<!-- Instances view -->
 		<div id="samples-view">
-			<SampleOptions />
 			<Samples
 				table={lassoSelectTable === null || lassoSelectTable?.size === 0
 					? $filteredTable

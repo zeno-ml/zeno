@@ -16,6 +16,7 @@
 		transform,
 		rowsPerPage,
 	} from "../stores";
+	import SelectionBar from "../metadata/SelectionBar.svelte";
 
 	export let table: ColumnTable;
 
@@ -99,6 +100,7 @@
 </script>
 
 {#if table}
+	<SelectionBar />
 	<div class="container sample-container">
 		<div bind:this={sampleDiv} />
 	</div>
@@ -145,7 +147,7 @@
 <style>
 	.sample-container {
 		width: 100%;
-		height: calc(100vh - 260px);
+		height: calc(100vh - 240px);
 		overflow-y: auto;
 		align-content: baseline;
 		border-bottom: 1px solid rgb(224, 224, 224);

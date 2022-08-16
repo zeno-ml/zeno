@@ -1,22 +1,19 @@
 <script lang="ts">
-	import Select, { Option } from "@smui/select";
-
 	import {
-		currentColumns,
-		sort,
-		metric,
 		metrics,
-		model,
 		models,
+		model,
+		metric,
 		transform,
 		transforms,
-	} from "../stores";
-
-	import SelectionBar from "../metadata/SelectionBar.svelte";
+		sort,
+		currentColumns,
+	} from "./stores";
+	import Select, { Option } from "@smui/select";
 </script>
 
-<div id="options-container">
-	<div class="container">
+<div id="container">
+	<div>
 		{#if $models && $models.length > 0}
 			<Select bind:value={$model} label="Model" style="margin-right: 20px;">
 				{#each $models as m}
@@ -53,15 +50,21 @@
 		</Select>
 	</div>
 </div>
-<SelectionBar />
 
 <style>
-	#options-container {
+	#container {
 		display: flex;
 		flex-direction: row;
 		justify-content: space-between;
 		align-items: center;
-		padding-bottom: 10px;
+		margin-right: 20px;
+		margin-left: 20px;
+	}
+	#selects {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
 		margin-bottom: 10px;
 		margin-right: 20px;
 	}
