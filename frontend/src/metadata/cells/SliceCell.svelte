@@ -127,7 +127,7 @@
 				{#if result}
 					<span style:margin-right="10px">
 						{#await result then res}
-							{res && res[0] ? res[0].toFixed(2) : ""}
+							{res && res[0] !== undefined ? res[0].toFixed(2) : ""}
 						{/await}
 					</span>
 					<span id="size">

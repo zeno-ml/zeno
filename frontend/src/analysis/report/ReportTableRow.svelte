@@ -93,12 +93,7 @@
 			{/if}
 		</div>
 	</Cell>
-	<Cell style="left: 100px">{predicate.transform}</Cell>
-	<Cell>{predicate.metric}</Cell>
-	{#if $models.length > 2 && modelResults.length > 0}
-		<Cell><SparkLine res={modelResults} /></Cell>
-	{/if}
-	<Cell style="overflow: visible" class="end-cell">
+	<Cell style="overflow: visible">
 		{#if editMode}
 			<Select
 				bind:value={predicate.operation}
@@ -115,12 +110,17 @@
 			{predicate.operation} {predicate.value}
 		{/if}
 	</Cell>
+	<Cell style="left: 100px">{predicate.transform}</Cell>
+	<Cell>{predicate.metric}</Cell>
+	{#if $models.length > 2 && modelResults.length > 0}
+		<Cell class="end-cell"><SparkLine res={modelResults} /></Cell>
+	{/if}
 	{#each modelResults as r, i}
 		<Cell>
 			<p
-				style:color={predicate.results.length > i && predicate.results[i] === 1
-					? "black"
-					: "#b71c1c"}>
+				style={predicate.results[i] === undefined || predicate.results[i] === 1
+					? "color: black"
+					: "color: #b71c1c; font-weight: 500"}>
 				{r ? r.toFixed(2) : ""}
 			</p>
 		</Cell>
