@@ -262,11 +262,6 @@ export function updateFilteredTable(t: ColumnTable) {
 		}
 	});
 
-	const s = get(sort);
-	if (s) {
-		tempTable = tempTable.orderby(columnHash(s));
-	}
-
 	filteredTable.set(tempTable);
 }
 

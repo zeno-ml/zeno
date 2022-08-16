@@ -1,4 +1,6 @@
 <script lang="ts">
+	import type ColumnTable from "arquero/dist/types/table/column-table";
+
 	import { Label } from "@smui/button";
 	import { Pagination } from "@smui/data-table";
 	import IconButton from "@smui/icon-button";
@@ -6,9 +8,16 @@
 
 	import { ZenoColumnType } from "../globals";
 	import { columnHash } from "../util/util";
-	import { model, settings, status, transform, rowsPerPage } from "../stores";
+	import {
+		model,
+		sort,
+		settings,
+		status,
+		transform,
+		rowsPerPage,
+	} from "../stores";
 
-	export let table;
+	export let table: ColumnTable;
 
 	let sampleOptions = [5, 15, 30, 60, 100, $settings.samples].sort(
 		(a, b) => a - b
@@ -62,9 +71,14 @@
 
 	$: if (sampleDiv && divFunction) {
 		sampleDiv.innerHTML = "";
+		let sampleTable = table.slice(start, end);
+		if ($sort) {
+			sampleTable = sampleTable.orderby(columnHash($sort));
+		}
+
 		sampleDiv.appendChild(
 			divFunction(
-				table.slice(start, end).objects(),
+				sampleTable.objects(),
 				modelColumn,
 				columnHash($settings.labelColumn),
 				columnHash($settings.dataColumn),

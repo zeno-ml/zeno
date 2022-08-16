@@ -3,7 +3,6 @@
 
 	import {
 		currentColumns,
-		filteredTable,
 		sort,
 		metric,
 		metrics,
@@ -12,18 +11,8 @@
 		transform,
 		transforms,
 	} from "../stores";
-	import { columnHash } from "../util/util";
 
 	import SelectionBar from "../metadata/SelectionBar.svelte";
-
-	sort.subscribe((s) => {
-		filteredTable.update((table) => {
-			if (table && s) {
-				return table.orderby(columnHash(s));
-			}
-			return table;
-		});
-	});
 </script>
 
 <div id="options-container">
