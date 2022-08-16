@@ -116,27 +116,31 @@
 				.rollup({ unique: `d => op.distinct(d["${hash}"])` })
 				.object()["unique"];
 
-			if (!isOrdinal && unique === 2) {
-				let vals = t
-					.orderby(hash)
-					.rollup({ a: `d => op.array_agg_distinct(d["${hash}"])` })
-					.object()["a"];
-				if (Number(vals[0]) === 0 && Number(vals[1]) === 1) {
-					chartType = MetadataType.BINARY;
-				}
-			} else if (isOrdinal) {
+			console.log(isOrdinal, unique);
+			if (isOrdinal) {
 				if (unique <= 20) {
 					chartType = MetadataType.COUNT;
 				} else if (!isNaN(Date.parse(t.column(hash).get(0)))) {
 					chartType = MetadataType.DATE;
+				} else {
+					chartType = MetadataType.OTHER;
 				}
 			} else {
-				if (unique < 20) {
+				if (unique === 2) {
+					let vals = t
+						.orderby(hash)
+						.rollup({ a: `d => op.array_agg_distinct(d["${hash}"])` })
+						.object()["a"];
+					if (Number(vals[0]) === 0 && Number(vals[1]) === 1) {
+						chartType = MetadataType.BINARY;
+					}
+				} else if (unique < 20) {
 					chartType = MetadataType.COUNT;
 				} else {
 					chartType = MetadataType.HISTOGRAM;
 				}
 			}
+			console.log(chartType);
 
 			const { assignments, domain: localDomain } = computeDomain({
 				type: chartType,
