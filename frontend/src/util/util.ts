@@ -85,7 +85,7 @@ export async function getMetricsForSlices(metricKeys: MetricKey[]) {
 		return new Array(metricKeys.length).fill("");
 	}
 	const returnValues = metricKeys.map((k) => {
-		if (k.sli.sliceName === "overall") {
+		if (k.sli.sliceName === "overall" || k.sli.sliceName === "") {
 			return undefined;
 		}
 		return get(results).get(k);
