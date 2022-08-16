@@ -25,6 +25,7 @@
 	import DateMetadataCell from "./DateMetadataCell.svelte";
 	import BinaryMetadataCell from "./BinaryMetadataCell.svelte";
 	import ChartMetadataCell from "./ChartMetadataCell.svelte";
+	import TextMetadataCell from "./TextMetadataCell.svelte";
 
 	interface IColorAssignments {
 		colors: string[];
@@ -116,7 +117,6 @@
 				.rollup({ unique: `d => op.distinct(d["${hash}"])` })
 				.object()["unique"];
 
-			console.log(isOrdinal, unique);
 			if (isOrdinal) {
 				if (unique <= 20) {
 					chartType = MetadataType.COUNT;
@@ -140,7 +140,6 @@
 					chartType = MetadataType.HISTOGRAM;
 				}
 			}
-			console.log(chartType);
 
 			const { assignments, domain: localDomain } = computeDomain({
 				type: chartType,
@@ -201,6 +200,10 @@
 					{colorAssignments} />
 			{/if}
 
+			{#if chartType === MetadataType.OTHER}
+				<TextMetadataCell bind:selection {setSelection} {hash} />
+			{/if}
+
 			{#if selection.values && selection.type === MetadataType.HISTOGRAM}
 				<div>
 					<span>
@@ -222,14 +225,6 @@
 				</div>
 			{/if}
 		</div>
-
-		{#if $table.column(hash) && (chartType === MetadataType.OTHER || chartType === MetadataType.DATE)}
-			<span style:margin-right="5px">
-				unique values: {$table
-					.rollup({ unique: `d => op.distinct(d["${hash}"])` })
-					.object()["unique"]}
-			</span>
-		{/if}
 	</div>
 
 	{#if chartType === MetadataType.DATE && domain}

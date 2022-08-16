@@ -120,8 +120,8 @@
 		padding-bottom: 5px;
 		padding-right: 20px;
 		padding-left: 20px;
-		background: #fafafa;
-		border-bottom: 1px solid #e0e0e0;
+		background: #f9f9f9;
+		border-bottom: 1px solied #e0e0e0;
 	}
 
 	img {
@@ -156,8 +156,8 @@
 	}
 
 	.selected {
-		background-color: white;
 		color: #6a1b9a;
+		font-weight: 500;
 	}
 
 	#tabs {

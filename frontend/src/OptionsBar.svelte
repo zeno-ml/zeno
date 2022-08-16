@@ -57,8 +57,9 @@
 		flex-direction: row;
 		justify-content: space-between;
 		align-items: center;
-		margin-right: 20px;
-		margin-left: 20px;
+		padding-left: 20px;
+		padding-bottom: 10px;
+		border-bottom: 1px solid #e0e0e0;
 	}
 	#selects {
 		display: flex;

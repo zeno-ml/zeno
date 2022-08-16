@@ -19,7 +19,6 @@
 
 <style>
 	#samples {
-		margin-top: 10px;
 		width: 100%;
 		margin-right: 20px;
 	}

@@ -254,9 +254,13 @@ export function updateFilteredTable(t: ColumnTable) {
 						(entry.values[1] ? new Date(r[hash]) < entry.values[1] : true)
 				)
 			);
-		} else {
+		} else if (entry.type === MetadataType.COUNT) {
 			tempTable = tempTable.filter(
 				aq.escape((r) => aq.op.includes(entry.values, r[hash], 0))
+			);
+		} else {
+			tempTable = tempTable.filter(
+				`(r) => op.match(r["${hash}"], "${entry.values[0]}")`
 			);
 		}
 	});
