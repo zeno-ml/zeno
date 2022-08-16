@@ -9,7 +9,6 @@ import {
 	metadataSelections,
 	model,
 	sliceSelections,
-	sort,
 	tab,
 	transforms,
 	metrics,
@@ -86,7 +85,7 @@ export async function getMetricsForSlices(metricKeys: MetricKey[]) {
 		return new Array(metricKeys.length).fill("");
 	}
 	const returnValues = metricKeys.map((k) => {
-		if (k.sli.sliceName === "") {
+		if (k.sli.sliceName === "overall") {
 			return undefined;
 		}
 		return get(results).get(k);
