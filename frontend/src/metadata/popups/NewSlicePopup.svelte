@@ -15,6 +15,7 @@
 	} from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 	import { columnHash, getFilterFromPredicates } from "../../util/util";
+	import { MetadataType } from "../../globals";
 
 	import FilterGroupEntry from "./FilterGroupEntry.svelte";
 
@@ -39,7 +40,7 @@
 			predicateGroup.predicates = [];
 			[...$metadataSelections.values()].forEach((entry) => {
 				// TODO: support slice selections
-				if (entry.type === "range") {
+				if (entry.type === MetadataType.HISTOGRAM) {
 					predicateGroup.predicates.push({
 						column: entry.column,
 						operation: ">=",
@@ -52,7 +53,7 @@
 						value: "" + entry.values[1],
 						join: "AND",
 					});
-				} else if (entry.type === "binary") {
+				} else if (entry.type === MetadataType.BINARY) {
 					let val = entry.values[0] === "is" ? "1" : "0";
 					predicateGroup.predicates.push({
 						column: entry.column,
@@ -60,7 +61,7 @@
 						value: val,
 						join: "AND",
 					});
-				} else {
+				} else if (entry.type === MetadataType.COUNT) {
 					if (entry.values.length === 1) {
 						predicateGroup.predicates.push({
 							column: entry.column,
@@ -149,7 +150,7 @@
 				bind:predicateGroup />
 			<div id="submit">
 				<Button variant="outlined" on:click={createSlice}>
-					{$sliceToEdit !== null ? "Edit Slice" : "Create Slice"}
+					{$sliceToEdit ? "Edit Slice" : "Create Slice"}
 				</Button>
 				{#if $slices.has(sliceName) && $sliceToEdit === null}
 					<p style:margin-right="10px" style:color="red">

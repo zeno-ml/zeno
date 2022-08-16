@@ -12,6 +12,7 @@
 		transform,
 		settings,
 	} from "../stores";
+	import { MetadataType } from "../globals";
 
 	async function updateResult(model, metric, transform, filteredTable) {
 		if (filteredTable.size === 0) {
@@ -66,15 +67,23 @@
 	{#each [...$metadataSelections.entries()] as [hash, chip]}
 		<div class="meta-chip">
 			<span>
-				{#if chip.type === "range"}
+				{#if chip.type === MetadataType.HISTOGRAM}
 					{chip.values[0].toFixed(2)}
 					{"<"}
 					{chip.column.name}
 					{"<"}
 					{chip.values[1].toFixed(2)}
-				{:else if chip.type === "binary"}
+				{:else if chip.type === MetadataType.BINARY}
 					{chip.values[0]}
 					{chip.column.name}
+				{:else if chip.type === MetadataType.DATE}
+					{#if !chip.values[1]}
+						start {chip.values[0].toLocaleString()}
+					{:else if !chip.values[0]}
+						end {chip.values[0].toLocaleString()}
+					{:else}
+						from {chip.values[0].toLocaleString()} to {chip.values[1].toLocaleString()}
+					{/if}
 				{:else}
 					{chip.column.name}
 					{"=="}

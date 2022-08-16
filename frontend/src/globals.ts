@@ -7,3 +7,11 @@ export enum ZenoColumnType {
 	TRANSFORM,
 	WEAK_LABEL,
 }
+
+export enum MetadataType {
+	COUNT,
+	HISTOGRAM,
+	BINARY,
+	DATE,
+	OTHER,
+}
