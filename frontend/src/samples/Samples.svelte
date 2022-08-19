@@ -17,6 +17,7 @@
 		rowsPerPage,
 	} from "../stores";
 	import SelectionBar from "../metadata/SelectionBar.svelte";
+	import { desc } from "arquero";
 
 	export let table: ColumnTable;
 
@@ -36,6 +37,16 @@
 
 	$: start = currentPage * $rowsPerPage;
 
+	$: if (table) {
+		end = Math.min(start + $rowsPerPage, table.size);
+	}
+	$: if (table) {
+		lastPage = Math.max(Math.ceil(table.size / $rowsPerPage) - 1, 0);
+	}
+	$: if (currentPage > lastPage) {
+		currentPage = lastPage;
+	}
+
 	status.subscribe((s) => {
 		let obj = s.completeColumns.find((c) => {
 			return (
@@ -46,17 +57,6 @@
 		});
 		modelColumn = obj ? columnHash(obj) : "";
 	});
-
-	$: if (table) {
-		end = Math.min(start + $rowsPerPage, table.size);
-	}
-	$: if (table) {
-		lastPage = Math.max(Math.ceil(table.size / $rowsPerPage) - 1, 0);
-	}
-
-	$: if (currentPage > lastPage) {
-		currentPage = lastPage;
-	}
 
 	transform.subscribe((t) => {
 		if (t) {
@@ -72,10 +72,11 @@
 
 	$: if (sampleDiv && divFunction) {
 		sampleDiv.innerHTML = "";
-		let sampleTable = table.slice(start, end);
+		let sampleTable = table;
 		if ($sort) {
-			sampleTable = sampleTable.orderby(columnHash($sort));
+			sampleTable = sampleTable.orderby(desc(columnHash($sort)));
 		}
+		sampleTable = sampleTable.slice(start, end);
 
 		sampleDiv.appendChild(
 			divFunction(

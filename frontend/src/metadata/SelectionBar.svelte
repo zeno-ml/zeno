@@ -130,7 +130,8 @@
 	}
 	.meta-chip {
 		padding: 5px;
-		background: rgba(0, 0, 0, 0.07);
+		background: #f8f8f8;
+		border: 1px solid #e8e8e8;
 		margin-left: 5px;
 		margin-right: 5px;
 		margin-top: 2px;
@@ -142,7 +143,7 @@
 		padding: 5px;
 		margin-left: 10px;
 		cursor: pointer;
-		color: #6200ee;
+		color: #6a1b9a;
 	}
 	.clear:hover {
 		background: #ede1fd;

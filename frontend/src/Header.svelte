@@ -42,7 +42,7 @@
 			src="build/zeno.png"
 			alt="Square spiral logo next to 'Zeno'" />
 		<div id="tabs">
-			<div
+			<!-- <div
 				class="item {$tab === 'discovery' ? 'selected' : ''}"
 				on:click={() => updateTab("discovery")}>
 				<div class="icon">
@@ -53,7 +53,7 @@
 					</Icon>
 				</div>
 				<div class="tab-text">Discovery</div>
-			</div>
+			</div> -->
 			<div
 				class="item {$tab === 'exploration' ? 'selected' : ''}"
 				on:click={() => updateTab("exploration")}>
@@ -120,7 +120,7 @@
 		padding-bottom: 5px;
 		padding-right: 20px;
 		padding-left: 20px;
-		background: #f9f9f9;
+		background: #f8f8f8;
 		border-bottom: 1px solied #e0e0e0;
 	}
 
