@@ -23,7 +23,20 @@ def split(df: pd.DataFrame, select: str = "all"):
     return df[df["split"] == select]
 
 
-labels = [
+def map_simple_labels(labels):
+    return [simple_labels[label_index] for label_index in labels]
+
+
+if __name__ == "__main__":
+
+    df = extract(in_filename=CSV, select_split="all")
+
+    df["label"] = map_simple_labels(df["label"].tolist())
+
+    df.to_csv(OUT_CSV, index=False)
+
+
+simple_labels = [
     "tench",
     "goldfish",
     "great white shark",
@@ -1025,25 +1038,3 @@ labels = [
     "ear",
     "toilet paper",
 ]
-
-
-def label_map_generator(labels: list[str]):
-    def _mapper(idx: list[int]):
-        mapping = [labels[i] for i in idx]
-        return mapping
-
-    return _mapper
-
-
-def imagenet_labeler():
-    return label_map_generator(labels)
-
-
-if __name__ == "__main__":
-
-    df = extract(in_filename=CSV, select_split="all")
-
-    label_map = imagenet_labeler()
-    df["label"] = label_map(df["label"].tolist())
-
-    df.to_csv(OUT_CSV, index=False)

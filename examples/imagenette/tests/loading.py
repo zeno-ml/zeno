@@ -25,51 +25,41 @@ def image_transform(
     return transform
 
 
-def array_parse(string: str):
-    return [float(char) for char in string[1:-1].split(",")]
+class Resnet50Model(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
 
+        def layer_output(model, input, output):
+            self.embedding = output.detach()
+            self.embedding = self.embedding.reshape(-1, self.embedding.shape[0]).T
 
-def image_model(store={}):
+        self.model = resnet(weights=ResNet50_Weights.IMAGENET1K_V1)
+        self.model.avgpool.register_forward_hook(layer_output)
 
-    model = resnet(weights=ResNet50_Weights.IMAGENET1K_V1)
-
-    store = {}
-
-    def get_output(name):
-        def hook(model, input, output):
-            store[name] = output.detach()
-
-        return hook
-
-    embedding_hook = get_output("embedding")
-    model.avgpool.register_forward_hook(embedding_hook)
-
-    return model, store
+    def forward(self, x):
+        return self.model(x)
 
 
 @torch.no_grad()
-def resnet_predict(model: torch.nn.Module, batch, store):
+def resnet_predict(model: torch.nn.Module, batch):
     model.to(DEVICE).eval()
     x: torch.Tensor = batch.to(DEVICE)
     out: torch.Tensor = model(x)
-    embedding = store["embedding"]
-    embedding_output = embedding.reshape(-1, embedding.shape[0]).T
+    embedding: torch.Tensor = model.embedding
 
     return {
-        "pred": out.cpu().numpy().argmax(axis=-1),
-        "embed": embedding_output.cpu().numpy(),
-        "probs": torch.softmax(out, axis=-1).cpu().numpy(),
+        "predictions": out.cpu().numpy().argmax(axis=-1),
+        "embeddings": embedding.cpu().numpy(),
+        "probabilities": torch.softmax(out, axis=-1).cpu().numpy(),
     }
 
 
 @torch.no_grad()
-def clip_it(model, batch):
+def clip_image_encode(model, batch):
     x: torch.Tensor = batch.to(DEVICE)
     out: torch.Tensor = model.encode_image(x)
 
-    return {
-        "image": out.cpu().numpy(),
-    }
+    return out.cpu().numpy()
 
 
 def load_clip(variant="ViT-B/32"):
@@ -77,16 +67,12 @@ def load_clip(variant="ViT-B/32"):
     return clip_model, preprocess
 
 
-def convert_greyscale_to_rgb_tensor(tensor):
-    return torch.stack([tensor, tensor, tensor], dim=1)
-
-
 @predict_function
 def load_model(model_path):
-    model, store = image_model()
+    model = Resnet50Model()
     transform = image_transform()
-    label_mapper = imagenet_labeler()
-    use_clip = model_path == "resnet+clip.donny"
+
+    use_clip = model_path == "resnet+clip"
 
     clip_model, clip_preprocess = None, None
     if use_clip is True:
@@ -105,22 +91,28 @@ def load_model(model_path):
         imgs = [open_image(img) for img in df[ops.data_column]]
         transformed = torch.stack([transform(im) for im in imgs])
 
-        resnet_output = resnet_predict(model=model, batch=transformed, store=store)
-        correct_labels = label_mapper(resnet_output["pred"])
+        resnet_output = resnet_predict(model=model, batch=transformed)
+        str_imagenet_pred_labels = [
+            simple_labels[pred] for pred in resnet_output["predictions"]
+        ]
 
         if clip_present is True:
             clip_transformed = torch.stack([clip_preprocess(im) for im in imgs])
-            clip_output = clip_it(model=clip_model, batch=clip_transformed)
+            clip_image_encoding = clip_image_encode(
+                model=clip_model, batch=clip_transformed
+            )
 
         return (
-            correct_labels,
-            clip_output["image"] if clip_present is True else resnet_output["embed"],
+            str_imagenet_pred_labels,
+            clip_image_encoding
+            if clip_present is True
+            else resnet_output["embeddings"],
         )
 
     return pred
 
 
-labels = [
+simple_labels = [
     "tench",
     "goldfish",
     "great white shark",
@@ -1122,15 +1114,3 @@ labels = [
     "ear",
     "toilet paper",
 ]
-
-
-def label_map_generator(labels: list[str]):
-    def _mapper(idx: list[int]):
-        mapping = [labels[i] for i in idx]
-        return mapping
-
-    return _mapper
-
-
-def imagenet_labeler():
-    return label_map_generator(labels)

@@ -2,8 +2,8 @@ tests = "./"
 view = "zenoml_image_classification"
 metadata = "../imagenette_valid.csv"
 models = [
-    "resnet.donny",
-    "resnet+clip.donny",
+    "resnet",
+    "resnet+clip",
 ]
 data_path = "../../../data/imagenette/"
 data_column = "id"
