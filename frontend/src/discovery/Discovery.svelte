@@ -213,11 +213,11 @@
 							<Node
 								{node}
 								maxCount={$table ? $table.size : 0}
-								on:backClick={async () => {
+								on:reset={async () => {
 									await goBackPipeline(node);
 									selectNode(node);
 								}}
-								on:eyeClick={() => {
+								on:select={() => {
 									selectNode(node);
 								}}
 								selectedId={selectedNode.id}

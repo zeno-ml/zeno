@@ -26,7 +26,7 @@
 				size="mini"
 				class="material-icons"
 				on:click={() => {
-					dispatch("backClick");
+					dispatch("reset");
 				}}>{icon.back}</IconButton>
 		{/if}
 	</div>
@@ -38,7 +38,9 @@
 		class:off={!selectedNode}
 		on:mouseenter
 		on:mouseleave
-		on:click={() => dispatch("eyeClick")}
+		on:click={() => {
+			dispatch("select");
+		}}
 		style:cursor="pointer">
 		<div id="node-text">
 			{node.type}
