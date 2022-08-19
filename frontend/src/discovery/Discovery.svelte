@@ -335,9 +335,6 @@
 		display: flex;
 		flex-direction: row;
 	}
-	.paper {
-		border: 1px #e0e0e0 solid;
-	}
 	#scatter-view {
 		display: flex;
 		/* justify-content: center; */

@@ -114,9 +114,6 @@
 	.reset {
 		width: 50px;
 	}
-	.view {
-		width: 50px;
-	}
 	.node {
 		width: 20ch;
 	}
