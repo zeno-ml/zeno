@@ -5,8 +5,10 @@
 	import SampleOptions from "../samples/SampleOptions.svelte";
 	import Button from "@smui/button";
 	import TextField from "@smui/textfield";
-	import MirrorLogo from "./MirrorLogo.svelte";
-	import * as pipeline from "./pipeline";
+	import PipelineLogo from "./pipeline/Logo.svelte";
+	import PipelineNode from "./pipeline/Node.svelte";
+
+	import * as pipeline from "./pipeline/";
 	import {
 		filteredTable,
 		model,
@@ -17,11 +19,10 @@
 		sliceSelections,
 	} from "../stores";
 	import { columnHash } from "../util/util";
+	import * as aq from "arquero";
 
 	import type { LegendaryScatterPoint } from "./scatterplot/scatter";
 	import type ColumnTable from "arquero/dist/types/table/column-table";
-	import * as aq from "arquero";
-	import Node from "./node/Node.svelte";
 
 	export let scatterWidth = 899;
 	export let scatterHeight = 550;
@@ -189,7 +190,7 @@
 			<div id="pipeline-view" style:height="{scatterHeight}px">
 				<div id="logo">
 					<div style:height="20px" style:margin-top="14px">
-						<MirrorLogo scale={0.25} />
+						<PipelineLogo scale={0.25} />
 					</div>
 					<span id="pipeline-title">Pipeline</span>
 				</div>
@@ -210,7 +211,7 @@
 						Reset All</Button>
 					<div id="weak-labeler-pipeline">
 						{#each pipelineRepr as node, i}
-							<Node
+							<PipelineNode
 								{node}
 								maxCount={$table ? $table.size : 0}
 								on:reset={async () => {
