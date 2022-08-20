@@ -11,18 +11,27 @@
 	import Scatter from "./scatterplot/LegendaryScatter.svelte";
 	import Samples from "../samples/Samples.svelte";
 	import OptionsBar from "../OptionsBar.svelte";
-	import Node from "./node/Node.svelte";
+	import PipelineLogo from "./pipeline/Logo.svelte";
+	import PipelineNode from "./pipeline/Node.svelte";
 
-	import * as pipeline from "./pipeline";
-	import { filteredTable, model, settings, colorSpec, table } from "../stores";
+	import * as pipeline from "./pipeline/";
+	import {
+		filteredTable,
+		model,
+		settings,
+		colorSpec,
+		table,
+		metadataSelections,
+		sliceSelections,
+	} from "../stores";
 	import { columnHash } from "../util/util";
 
-	export let scatterWidth = 800;
+	export let scatterWidth = 899;
 	export let scatterHeight = 550;
 
 	const PIPELINE_ID = "initial_pipeline";
 
-	let projection2D: object[] = [];
+	let projection2D: { proj: [number, number]; id: string }[] = [];
 	let lassoSelectTable = null;
 	let regionLabeler = false;
 	let regionPolygon = [];
@@ -31,10 +40,14 @@
 	let pipelineRepr: Pipeline.Node[] = [];
 	let selectedNode;
 	let scatterObj;
+	let cpyFilteredTable = null;
+	let cpyFilter: {
+		slices?: string[];
+		metadata?: Map<string, MetadataSelection>;
+	} = {};
 
 	$: metadataExists =
 		$settings.metadataColumns.length > 0 || $filteredTable._names.length > 0;
-	$: pointsExist = projection2D.length > 0;
 
 	$: {
 		if ($model && $table) {
@@ -43,17 +56,16 @@
 	}
 
 	$: {
-		if (metadataExists && pointsExist && $colorSpec) {
+		if (metadataExists && $colorSpec) {
 			legendaryScatterPoints = projection2D.map((item) => {
-				const proj = item["proj"],
-					id = item["id"];
-				return {
-					x: proj[0],
-					y: proj[1],
-					opacity: 0.75,
-					color: $colorSpec.labels.find((label) => label.id === id).colorIndex,
-					id,
-				};
+				const { proj, id } = item;
+				const [x, y] = proj;
+				const opacity = 0.65;
+				const color = $colorSpec.labels.find(
+					(label) => label.id === id
+				).colorIndex;
+				const formatted = { x, y, opacity, id, color };
+				return formatted;
 			});
 		}
 	}
@@ -80,12 +92,17 @@
 		});
 	}
 
-	function filterIdsTable(
-		idColumn: string = columnHash($settings.idColumn),
-		ids: string[]
-	) {
+	function filterIdsTable({
+		table,
+		idColumn,
+		ids,
+	}: {
+		table: ColumnTable;
+		idColumn: string;
+		ids: string[];
+	}) {
 		let rows = [];
-		for (const row of $filteredTable) {
+		for (const row of table) {
 			if (ids.includes(row[idColumn])) {
 				rows.push(row);
 			}
@@ -117,44 +134,94 @@
 		scatterObj.select([]);
 		lassoSelectTable = null;
 	}
+
+	function saveFilter() {
+		return {
+			slices: $sliceSelections.map((d) => d),
+			metadata: new Map($metadataSelections),
+		};
+	}
+	function loadFilter(cpy: {
+		slices?: string[];
+		metadata?: Map<string, MetadataSelection>;
+	}) {
+		sliceSelections.set(cpy.slices);
+		metadataSelections.set(cpy.metadata);
+	}
+
+	async function goBackPipeline(nodeToReset?: Pipeline.Node) {
+		await pipeline.reset({ upToId: nodeToReset.id });
+		let newSubset = [];
+		for (let i = 0; i < pipelineRepr.length; i++) {
+			newSubset.push(pipelineRepr[i]);
+			if (pipelineRepr[i].id === nodeToReset.id) {
+				break;
+			}
+		}
+		pipelineRepr = newSubset;
+	}
+
+	async function filterPipeline(ids) {
+		const node = await pipeline.idFilter({ ids });
+		node.filter = [];
+		resetSelection();
+		addToPipelineRepr(node);
+		selectNode(node);
+	}
+
+	function addToPipelineRepr(node: Pipeline.Node) {
+		pipelineRepr = [...pipelineRepr, node];
+	}
+
+	function selectNode(node: Pipeline.Node) {
+		selectedNode = node;
+		projection2D = node.state.projection;
+	}
+
+	function resetScatterPoints() {
+		projection2D = [];
+	}
 </script>
 
-<OptionsBar />
 <div id="main">
-	<MetadataBar shouldColor />
-
+	<div id="metadata-bar-view">
+		<MetadataBar shouldColor />
+	</div>
 	<div>
-		<div
-			id="scatter-view"
-			style:margin-top="10px"
-			style:height="{scatterHeight}px">
-			<div id="pipeline-view" class="paper" style:height="{scatterHeight}px">
-				<h4>Pipeline Labeler</h4>
-				<div>
-					<TextField bind:value={regionLabelerName} label={"Name"} />
+		<div id="scatter-view" style:height="{scatterHeight}px">
+			<div id="pipeline-view" style:height="{scatterHeight}px">
+				<div id="logo">
+					<div style:height="20px" style:margin-top="14px">
+						<PipelineLogo scale={0.25} />
+					</div>
+					<span id="pipeline-title">Pipeline</span>
 				</div>
-				<h4>Pipeline</h4>
 				<div>
+					<Button
+						title="Reset entire pipeline"
+						style="color: lightgrey;"
+						color={regionLabeler ? "secondary" : "primary"}
+						on:click={async () => {
+							await pipeline.reset();
+							await pipeline.init({ model: $model, uid: PIPELINE_ID });
+							resetScatterPoints();
+							regionLabelerName = "default";
+							pipelineRepr = [];
+							metadataSelections.set(new Map());
+							sliceSelections.set([]);
+						}}>
+						Reset All</Button>
 					<div id="weak-labeler-pipeline">
 						{#each pipelineRepr as node, i}
-							<Node
+							<PipelineNode
 								{node}
-								on:backClick={async () => {
-									await pipeline.reset({ upToId: node.id });
-									let newSubset = [];
-									for (let i = 0; i < pipelineRepr.length; i++) {
-										newSubset.push(pipelineRepr[i]);
-										if (pipelineRepr[i].id === node.id) {
-											break;
-										}
-									}
-									pipelineRepr = newSubset;
-									selectedNode = node;
-									projection2D = node.state.projection;
+								maxCount={$table ? $table.size : 0}
+								on:reset={async () => {
+									await goBackPipeline(node);
+									selectNode(node);
 								}}
-								on:eyeClick={() => {
-									selectedNode = node;
-									projection2D = node.state.projection;
+								on:select={() => {
+									selectNode(node);
 								}}
 								selectedId={selectedNode.id}
 								lastNode={i === pipelineRepr.length - 1} />
@@ -162,23 +229,17 @@
 							<div>Empty pipeline</div>
 						{/each}
 					</div>
-					<div>
+					<div
+						style="display: flex; justify-content:left; gap: 10px; margin-top: 25px;">
 						<Button
 							title="Click to Filter Current Selection"
 							variant="outlined"
 							on:click={async () => {
-								let tableIds = $filteredTable;
-								// if (lassoSelectTable !== null) {
-								// 	tableIds = tableIds.intersect(lassoSelectTable);
-								// }
+								const tableIds = $filteredTable;
 								const ids = tableIds.columnArray(
 									columnHash($settings.idColumn)
 								);
-								const node = await pipeline.idFilter({ ids });
-								projection2D = node.state.projection;
-								resetSelection();
-								pipelineRepr = [...pipelineRepr, node];
-								selectedNode = node;
+								await filterPipeline(ids);
 							}}>
 							Filter</Button>
 						<Button
@@ -186,58 +247,45 @@
 							title="Click to Project with UMAP"
 							on:click={async () => {
 								const node = await pipeline.parametricUMAP();
-								projection2D = node.state.projection;
-								pipelineRepr = [...pipelineRepr, node];
-								selectedNode = node;
+								selectNode(node);
+								addToPipelineRepr(node);
 							}}>
 							Project</Button>
 					</div>
-					<div>
-						<Button
-							title="Reset entire pipeline"
-							color={regionLabeler ? "secondary" : "primary"}
-							on:click={async () => {
-								await pipeline.reset();
-								await pipeline.init({ model: $model, uid: PIPELINE_ID });
-								projection2D = [];
-								legendaryScatterPoints = [];
-								regionLabelerName = "default";
-								pipelineRepr = [];
-							}}>
-							Reset</Button>
-						<Button
-							on:click={async () => {
-								if (regionLabeler && regionPolygon.length > 0) {
-									const output = await pipeline.regionLabeler({
-										polygon: regionPolygon,
-										name: regionLabelerName,
-										upToId: selectedNode.id,
-									});
-									const column = output["col_name"];
-									addZenoColumn({
-										model: column.model,
-										name: column.name,
-										columnType: column.column_type,
-										transform: column.transform,
-									});
-									regionLabeler = false;
-									regionPolygon = [];
-								} else {
-									regionPolygon = [];
-									regionLabeler = true;
-								}
-							}}>
-							{regionLabeler
-								? "Click Here to Confirm"
-								: "Create Labeler"}</Button>
-					</div>
+					<Button
+						on:click={async () => {
+							if (regionLabeler && regionPolygon.length > 0) {
+								const output = await pipeline.regionLabeler({
+									polygon: regionPolygon,
+									name: regionLabelerName,
+									upToId: selectedNode.id,
+								});
+								const column = output["col_name"];
+								addZenoColumn({
+									model: column.model,
+									name: column.name,
+									columnType: column.column_type,
+									transform: column.transform,
+								});
+								regionLabeler = false;
+								regionPolygon = [];
+							} else {
+								regionPolygon = [];
+								regionLabeler = true;
+							}
+						}}>
+						{regionLabeler ? "Confirm" : "Create Labeler"}</Button>
+					{#if regionLabeler}
+						<div>
+							<TextField bind:value={regionLabelerName} label={"Name"} />
+						</div>
+					{/if}
 				</div>
 			</div>
 
-			<div
-				class="paper"
-				style:width="{scatterWidth}px"
-				style:height="{scatterHeight}px">
+			<div class="vertical-divider" />
+
+			<div style:width="{scatterWidth}px" style:height="{scatterHeight}px">
 				<Scatter
 					width={scatterWidth}
 					height={scatterHeight}
@@ -248,28 +296,39 @@
 					}}
 					on:deselect={() => {
 						lassoSelectTable = null;
+						if (cpyFilteredTable !== null) {
+							filteredTable.set(cpyFilteredTable);
+							loadFilter(cpyFilter);
+						}
 					}}
 					on:select={({ detail }) => {
-						const idedInstanced = detail.map(({ id }) => id);
-						lassoSelectTable = filterIdsTable(
-							columnHash($settings.idColumn),
-							idedInstanced
-						);
+						const ids = detail.map(({ id }) => id);
+						if (lassoSelectTable === null) {
+							cpyFilter = saveFilter();
+							cpyFilteredTable = $filteredTable;
+						}
+						if (ids.length > 0) {
+							loadFilter({
+								metadata: new Map(),
+								slices: [],
+							});
+							lassoSelectTable = filterIdsTable({
+								table: $table,
+								idColumn: columnHash($settings.idColumn),
+								ids,
+							});
+							filteredTable.set(lassoSelectTable);
+						}
 					}}
 					bind:regionPolygon
 					regionMode={regionLabeler} />
 			</div>
 		</div>
-		<div
-			class="horizontal-divider"
-			style:margin-top="10px"
-			style:margin-bottom="5px" />
+		<div class="horizontal-divider" style:margin-bottom="5px" />
 		<!-- Instances view -->
 		<div id="samples-view">
-			<Samples
-				table={lassoSelectTable === null || lassoSelectTable?.size === 0
-					? $filteredTable
-					: lassoSelectTable} />
+			<OptionsBar />
+			<Samples table={$filteredTable} />
 		</div>
 	</div>
 </div>
@@ -279,36 +338,52 @@
 		display: flex;
 		flex-direction: row;
 	}
-	.paper {
-		border: 1px #e0e0e0 solid;
-	}
 	#scatter-view {
 		display: flex;
-		justify-content: center;
+		/* justify-content: center; */
 		gap: 10px;
 	}
 	#pipeline-view {
-		width: 400px;
+		width: 350px;
 		padding-left: 20px;
 		overflow-y: scroll;
+	}
+	.vertical-divider {
+		width: 1px;
+		background-color: #e0e0e0;
+		height: 100%;
 	}
 	.horizontal-divider {
 		width: 100%;
 		background-color: #e0e0e0;
 		height: 1px;
 	}
-
-	h4 {
-		font-weight: 500;
-		color: rgba(0, 0, 0, 0.7);
-		margin-bottom: 8px;
-		margin-top: 25px;
+	#samples-view {
+		margin-left: 10px;
 	}
-
+	#logo {
+		display: flex;
+		align-items: center;
+		gap: 1ch;
+		margin-bottom: 15px;
+	}
 	#weak-labeler-pipeline {
 		margin-bottom: 10px;
 		display: flex;
 		flex-direction: column;
-		gap: 5px;
+		gap: 10px;
+	}
+	#pipeline-view::-webkit-scrollbar {
+		display: none;
+	}
+	#metadata-bar-view {
+		border-right: 1px solid #e0e0e0;
+	}
+	#pipeline-title {
+		font-weight: 400;
+		color: rgba(0, 0, 0, 0.7);
+		font-size: 25px;
+		margin-bottom: 8px;
+		margin-top: 25px;
 	}
 </style>

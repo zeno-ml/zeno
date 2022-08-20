@@ -35,8 +35,9 @@ class RegionBasedLabelerNode(PipelineNode):
         return self
 
     def transform(self):
-        assert self.memory.projection is not None, "projection must be present"
-        self.labels = self.points_inside_polygon(self.memory.projection, self.model)
+        assert self.memory.nice_projection is not None, "projection must be present"
+        projection = [d["proj"] for d in self.memory.nice_projection]
+        self.labels = self.points_inside_polygon(projection, self.model)
         return self
 
     def pipe_outputs(self):

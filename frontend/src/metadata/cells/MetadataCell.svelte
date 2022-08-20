@@ -2,6 +2,7 @@
 	import type ColumnTable from "arquero/dist/types/table/column-table";
 
 	import { onMount } from "svelte";
+
 	import IconButton from "@smui/icon-button";
 
 	import { columnHash } from "../../util/util";
@@ -14,6 +15,7 @@
 		availableColors,
 		colorByHash,
 		filteredTable,
+		model,
 	} from "../../stores";
 	import {
 		computeCountsFromDomain,
@@ -55,7 +57,7 @@
 
 	$: hash = columnHash(col);
 	$: {
-		if (assignColors === true) {
+		if (assignColors === true && $model) {
 			drawChart($table);
 		}
 	}
@@ -221,7 +223,7 @@
 						style="color: {selectedHashColor}; margin-top: -10px;"
 						on:click={() => {
 							colorByHash.set(hash);
-						}}>format_paint</IconButton>
+						}}>brush</IconButton>
 				</div>
 			{/if}
 		</div>
@@ -271,5 +273,14 @@
 	}
 	.top-text {
 		height: 18px;
+	}
+	.top-right-cell {
+		display: flex;
+		align-items: center;
+		gap: 2px;
+	}
+	.top-text {
+		height: 18px;
+		z-index: 998;
 	}
 </style>

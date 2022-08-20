@@ -23,6 +23,13 @@
 	let scatterRef;
 	let mounted = false;
 
+	$: colorCorrectRange = ["#cccccc", "#000000", ...availableColors];
+	$: colorCorrectPoints = points.map((p) => {
+		let corrected = [...p];
+		corrected[2] += 2;
+		return corrected;
+	});
+
 	$: {
 		if (canvasEl && mounted) {
 			createScatter(canvasEl, createScatterConfig);
@@ -33,8 +40,12 @@
 		const scatterCreated = scatterRef !== undefined;
 		if (scatterCreated && pointsPopulated) {
 			opacifyPoints(scatterRef, availableOpacities);
-			colorPoints(scatterRef, availableColors);
-			scatterRef.draw(points);
+			colorPoints(scatterRef, colorCorrectRange);
+			scatterRef.draw(colorCorrectPoints, {
+				transition: true,
+				transitionDuration: 1200,
+				transitionEasing: "cubicInOut",
+			});
 			dispatch("draw", scatterRef);
 		}
 	}
@@ -60,7 +71,7 @@
 
 			addSelectionDispatch(scatter);
 			opacifyPoints(scatter, availableOpacities);
-			colorPoints(scatter, availableColors);
+			colorPoints(scatter, colorCorrectRange);
 			scatterRef = scatter;
 			dispatch("create", scatterRef);
 		}
@@ -79,7 +90,7 @@
 
 	function colorPoints(
 		scatter,
-		colors = availableColors,
+		colors = colorCorrectRange,
 		dataType = "category"
 	) {
 		scatter.set({

@@ -65,7 +65,7 @@
 
 	<div class="inline">
 		<h4>Slices</h4>
-		<div style:margin-right="13px" class="inline">
+		<div style:margin-right="13px" class="inline top-layer">
 			<div>
 				<div on:click={() => (showNewFolder = true)}>
 					<IconButton>
@@ -193,5 +193,8 @@
 		color: rgba(0, 0, 0, 0.4);
 		margin-right: 10px;
 		margin-left: 10px;
+	}
+	.top-layer {
+		z-index: 999;
 	}
 </style>

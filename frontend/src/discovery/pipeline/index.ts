@@ -1,6 +1,6 @@
 import type { TypedArray } from "arquero/dist/types/table/table";
-import { enforce } from "../util/util";
-import request from "../util/request";
+import { enforce } from "../../util/util";
+import request from "../../util/request";
 
 export const apiEndpoint = "api/pipe";
 export const postPipe = request.generator.post(apiEndpoint);
