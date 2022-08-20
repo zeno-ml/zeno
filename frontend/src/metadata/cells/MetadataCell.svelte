@@ -3,10 +3,7 @@
 
 	import { onMount } from "svelte";
 
-	import Button from "@smui/button";
 	import IconButton from "@smui/icon-button";
-	import { Label } from "@smui/common";
-	import ConstScope from "../../cursed/ConstScope.svelte";
 
 	import { columnHash } from "../../util/util";
 	import { MetadataType } from "../../globals";
@@ -241,29 +238,9 @@
 						style="color: {selectedHashColor}; margin-top: -10px;"
 						on:click={() => {
 							colorByHash.set(hash);
-						}}>format_paint</IconButton>
+						}}>brush</IconButton>
 				</div>
 			{/if}
-		</div>
-	</div>
-
-	{#if chartType === MetadataType.DATE && domain}
-		<DateMetadataCell bind:selection bind:domain {hash} {setSelection} />
-	{/if}
-
-	{#if histogramData.table.length > 0 && (chartType === MetadataType.HISTOGRAM || chartType === MetadataType.COUNT)}
-		<ChartMetadataCell
-			bind:selection
-			{setSelection}
-			{dynamicSpec}
-			{shouldColor}
-			{selectedHash}
-			{domain}
-			{histogramData}
-			{hash}
-			{chartType} />
-	{/if}
->>>>>>> main
 		</div>
 	</div>
 

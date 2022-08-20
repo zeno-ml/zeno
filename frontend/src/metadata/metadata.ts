@@ -302,10 +302,8 @@ export function colorDomain({
 }) {
 	if (domain.length > 0) {
 		if (type === MetadataType.COUNT || type === MetadataType.BINARY) {
-			let colors = [...schemeCategory10, ...schemeDark2].slice(
-				0,
-				domain.length
-			);
+			const colors20 = [...schemeTableau10, ...schemeCategory10];
+			let colors = colors20.slice(0, domain.length);
 			if (domain.length === 2) {
 				colors = [schemeTableau10[2], schemeTableau10[0]];
 			}

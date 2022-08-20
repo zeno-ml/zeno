@@ -10,9 +10,7 @@
 	import MetadataBar from "../metadata/MetadataPanel.svelte";
 	import Scatter from "./scatterplot/LegendaryScatter.svelte";
 	import Samples from "../samples/Samples.svelte";
-	import SampleOptions from "../samples/SampleOptions.svelte";
-	import Button from "@smui/button";
-	import TextField from "@smui/textfield";
+	import OptionsBar from "../OptionsBar.svelte";
 	import PipelineLogo from "./pipeline/Logo.svelte";
 	import PipelineNode from "./pipeline/Node.svelte";
 
@@ -27,10 +25,6 @@
 		sliceSelections,
 	} from "../stores";
 	import { columnHash } from "../util/util";
-	import * as aq from "arquero";
-
-	import type { LegendaryScatterPoint } from "./scatterplot/scatter";
-	import type ColumnTable from "arquero/dist/types/table/column-table";
 
 	export let scatterWidth = 899;
 	export let scatterHeight = 550;
@@ -333,7 +327,7 @@
 		<div class="horizontal-divider" style:margin-bottom="5px" />
 		<!-- Instances view -->
 		<div id="samples-view">
-			<SampleOptions />
+			<OptionsBar />
 			<Samples table={$filteredTable} />
 		</div>
 	</div>
