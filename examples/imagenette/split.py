@@ -2,19 +2,15 @@ import pandas as pd
 
 
 # executed inside of examples/imagenette
-BASE = "../../data/imagenette"
-CSV = f"{BASE}/imagenette.csv"
-
-OUT_CSV = "./imagenette_all.csv"
+CSV = "./imagenette.csv"
+OUT_CSV = "./imagenette_split.csv"
+SPLIT = "valid"  # "all" | "valid" | "train"
 
 
 def extract(in_filename: str, select_split: str = "all"):
     df = pd.read_csv(in_filename)
     df = split(df, select=select_split)
-    df_renamed = df[["img_path", "label_idx"]]
-    df_renamed = df_renamed.rename(columns={"img_path": "id", "label_idx": "label"})
-
-    return df_renamed
+    return df
 
 
 def split(df: pd.DataFrame, select: str = "all"):
@@ -25,15 +21,6 @@ def split(df: pd.DataFrame, select: str = "all"):
 
 def map_simple_labels(labels):
     return [simple_labels[label_index] for label_index in labels]
-
-
-if __name__ == "__main__":
-
-    df = extract(in_filename=CSV, select_split="all")
-
-    df["label"] = map_simple_labels(df["label"].tolist())
-
-    df.to_csv(OUT_CSV, index=False)
 
 
 simple_labels = [
@@ -1038,3 +1025,11 @@ simple_labels = [
     "ear",
     "toilet paper",
 ]
+
+if __name__ == "__main__":
+
+    df = extract(in_filename=CSV, select_split=SPLIT)
+
+    df["label"] = [simple_labels[label_index] for label_index in df["label"].tolist()]
+
+    df.to_csv(OUT_CSV, index=False)

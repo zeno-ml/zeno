@@ -1,6 +1,6 @@
 tests = "./"
 view = "zenoml_image_classification"
-metadata = "../imagenette_valid.csv"
+metadata = "../imagenette.csv"
 models = [
     "resnet",
     "resnet+clip",
