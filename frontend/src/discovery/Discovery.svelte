@@ -1,4 +1,12 @@
 <script lang="ts">
+	import type { LegendaryScatterPoint } from "./scatterplot/scatter";
+	import type ColumnTable from "arquero/dist/types/table/column-table";
+
+	import * as aq from "arquero";
+
+	import Button from "@smui/button";
+	import TextField from "@smui/textfield";
+
 	import MetadataBar from "../metadata/MetadataPanel.svelte";
 	import Scatter from "./scatterplot/LegendaryScatter.svelte";
 	import Samples from "../samples/Samples.svelte";

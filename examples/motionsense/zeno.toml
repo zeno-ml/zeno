@@ -1,0 +1,7 @@
+view = "zenoml-timeseries"
+metadata = "/Users/acabrera/dev-research/22-zeno/motionsense/motionsense.csv"
+data_path = "/Users/acabrera/dev-research/22-zeno/motionsense/A_DeviceMotion_data/A_DeviceMotion_data"
+data_column = "file"
+label_column = "label"
+batch_size = 16
+port = 8005

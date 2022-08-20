@@ -1,6 +1,6 @@
 from typing import List
 
-from ..node import PipelineNode
+from zeno.pipeline.node import PipelineNode
 
 
 class RegionBasedLabelerNode(PipelineNode):

@@ -1,17 +1,19 @@
-import numpy as np
-from umap.parametric_umap import (  # type: ignore
-    load_ParametricUMAP,  # type: ignore
-    ParametricUMAP,  # type: ignore
-)  # type: ignore
+import importlib
 
-from ...classes import ZenoColumn, ZenoColumnType
-from ..node import PipelineNode
+import numpy as np
+
+from zeno.classes import ZenoColumn, ZenoColumnType
+from zeno.pipeline.node import PipelineNode
 
 
 class ParametricUMAPNode(PipelineNode):
     def __init__(self, *args, **kwargs):
         super().__init__()
-        self.model = ParametricUMAP(*args, **kwargs)
+        umap_module = importlib.import_module("umap")
+        self.load_ParametricUMAP = umap_module.parametric_umap.load_ParametricUMAP
+        self.ParametricUMAP = umap_module.parametric_umap.ParametricUMAP
+
+        self.model = self.ParametricUMAP(*args, **kwargs)
 
     def get_embeddings(self, table, model_name):
         embedding_col = ZenoColumn(
@@ -59,7 +61,7 @@ class ParametricUMAPNode(PipelineNode):
         self.model.save(path)
 
     def load(self, path: str):
-        self.model = load_ParametricUMAP(path)
+        self.model = self.load_ParametricUMAP(path)
 
     def __repr__(self):
         return "Projection"

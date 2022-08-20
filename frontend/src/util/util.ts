@@ -1,3 +1,4 @@
+import { MetadataType } from "./../globals";
 import type ColumnTable from "arquero/dist/types/table/column-table";
 
 import * as aq from "arquero";
@@ -8,7 +9,6 @@ import {
 	metadataSelections,
 	model,
 	sliceSelections,
-	sort,
 	tab,
 	transforms,
 	metrics,
@@ -20,6 +20,7 @@ import {
 	table,
 	metric,
 	reports,
+	rowsPerPage,
 } from "../stores";
 import { ZenoColumnType } from "../globals";
 
@@ -34,6 +35,7 @@ export function initialFetch() {
 		.then((r) => r.json())
 		.then((s) => {
 			settings.set(s);
+			rowsPerPage.set(s.samples);
 			fetch("/api/initialize")
 				.then((r) => r.json())
 				.then((r) => {
@@ -83,7 +85,7 @@ export async function getMetricsForSlices(metricKeys: MetricKey[]) {
 		return new Array(metricKeys.length).fill("");
 	}
 	const returnValues = metricKeys.map((k) => {
-		if (k.sli.sliceName === "") {
+		if (k.sli.sliceName === "overall" || k.sli.sliceName === "") {
 			return undefined;
 		}
 		return get(results).get(k);
@@ -234,27 +236,34 @@ export function updateFilteredTable(t: ColumnTable) {
 	// Filter with metadata selections.
 	[...get(metadataSelections).entries()].forEach((e) => {
 		const [hash, entry] = e;
-		if (entry.type === "range") {
+		if (entry.type === MetadataType.HISTOGRAM) {
 			tempTable = tempTable.filter(
 				`(r) => r["${hash}"] > ${entry.values[0]} && r["${hash}"] < ${entry.values[1]}`
 			);
-		} else if (entry.type === "binary") {
+		} else if (entry.type === MetadataType.BINARY) {
 			if (entry.values[0] === "is") {
 				tempTable = tempTable.filter(`(r) => r["${hash}"] == 1`);
 			} else {
 				tempTable = tempTable.filter(`(r) => r["${hash}"] == 0`);
 			}
-		} else {
+		} else if (entry.type === MetadataType.DATE) {
+			tempTable = tempTable.filter(
+				aq.escape(
+					(r) =>
+						(entry.values[0] ? new Date(r[hash]) > entry.values[0] : true) &&
+						(entry.values[1] ? new Date(r[hash]) < entry.values[1] : true)
+				)
+			);
+		} else if (entry.type === MetadataType.COUNT) {
 			tempTable = tempTable.filter(
 				aq.escape((r) => aq.op.includes(entry.values, r[hash], 0))
 			);
+		} else {
+			tempTable = tempTable.filter(
+				`(r) => op.match(r["${hash}"], "${entry.values[0]}")`
+			);
 		}
 	});
-
-	const s = get(sort);
-	if (s) {
-		tempTable = tempTable.orderby(columnHash(s));
-	}
 
 	filteredTable.set(tempTable);
 }

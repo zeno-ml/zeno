@@ -24,6 +24,7 @@
     "@mdi/js": "^6.9.96",
     "@smui/common": "^6.0.0-beta.16",
     "@smui/icon-button": "^6.0.0-beta.16",
+    "colormap": "^2.3.2",
     "wavesurfer.js": "^6.2.0"
   }
 }

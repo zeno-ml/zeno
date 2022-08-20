@@ -10,6 +10,7 @@ model10/
 model20/
 model30/
 coverage/
+*.profile
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

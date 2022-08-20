@@ -1,4 +1,4 @@
-from .memory import PipelineMemory
+from zeno.pipeline.memory import PipelineMemory
 
 
 class PipelineNode:

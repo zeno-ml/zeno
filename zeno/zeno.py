@@ -14,8 +14,8 @@ from typing import Dict, List
 import numpy as np
 import pandas as pd
 
-from .api import ZenoOptions
-from .classes import (
+from zeno.api import ZenoOptions
+from zeno.classes import (
     MetricKey,
     Report,
     Slice,
@@ -24,8 +24,9 @@ from .classes import (
     ZenoFunction,
     ZenoFunctionType,
 )
-from .pipeline.pipeline import Pipeline
-from .util import (
+from zeno.pipeline.pipeline import Pipeline
+from zeno.util import (
+    add_to_path,
     get_arrow_bytes,
     get_function,
     load_series,
@@ -151,6 +152,7 @@ class Zeno(object):
             self.status = "Done processing"
             return
 
+        # Add directory with tests to path for relative imports.
         for f in list(self.tests.rglob("*.py")):
             self.__parse_testing_file(f)
 
@@ -175,9 +177,12 @@ class Zeno(object):
         self.__thread.start()
 
     def __parse_testing_file(self, test_file: Path):
-        spec = util.spec_from_file_location("module.name", test_file)
-        test_module = util.module_from_spec(spec)  # type: ignore
-        spec.loader.exec_module(test_module)  # type: ignore
+        # To allow relative imports in test files,
+        # add their directory to path temporarily.
+        with add_to_path(os.path.dirname(os.path.abspath(test_file))):
+            spec = util.spec_from_file_location(str(test_file), test_file)
+            test_module = util.module_from_spec(spec)  # type: ignore
+            spec.loader.exec_module(test_module)  # type: ignore
 
         for func_name, func in getmembers(test_module):
             if isfunction(func):

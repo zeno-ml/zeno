@@ -1,19 +1,32 @@
 import dataclasses
 import os
 import pickle
+from contextlib import contextmanager
 from importlib import util
 from inspect import getsource
 from pathlib import Path
 from typing import Tuple
 
 import numpy as np
-
 import pandas as pd
 import pyarrow as pa  # type: ignore
 from tqdm import trange  # type: ignore
 
-from .api import ZenoOptions
-from .classes import ZenoColumn, ZenoColumnType, ZenoFunction
+from zeno.api import ZenoOptions
+from zeno.classes import ZenoColumn, ZenoColumnType, ZenoFunction
+
+
+@contextmanager
+def add_to_path(p):
+    import sys
+
+    old_path = sys.path
+    sys.path = sys.path[:]
+    sys.path.insert(0, p)
+    try:
+        yield
+    finally:
+        sys.path = old_path
 
 
 def get_arrow_bytes(df, id_col):
@@ -45,10 +58,13 @@ def load_series(df, col_name, save_path):
 
 
 def get_function(fn: ZenoFunction):
-    spec = util.spec_from_file_location("module.name", fn.file_name)
-    test_module = util.module_from_spec(spec)  # type: ignore
-    spec.loader.exec_module(test_module)  # type: ignore
-    return getattr(test_module, fn.name)  # type: ignore
+    # To allow relative imports in test files,
+    # add their directory to path temporarily.
+    with add_to_path(os.path.dirname(os.path.abspath(fn.file_name))):
+        spec = util.spec_from_file_location("module.name", fn.file_name)
+        test_module = util.module_from_spec(spec)  # type: ignore
+        spec.loader.exec_module(test_module)  # type: ignore
+        return getattr(test_module, fn.name)  # type: ignore
 
 
 def predistill_data(

@@ -1,4 +1,4 @@
-from .api import (
+from zeno.api import (
     distill_function,
     metric_function,
     predict_function,

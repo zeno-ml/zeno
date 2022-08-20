@@ -1,4 +1,4 @@
-all: check lint typecheck test book 
+all: check lint typecheck test docs 
 
 .PHONY: install
 install:
@@ -33,8 +33,21 @@ test:
 	@poetry run pytest -svv zeno/tests/*
 	@cd frontend && npm run test
 
-book:
-	@echo "==> 📕 Book"
+.PHONY: profile 
+profile:
+	@echo "==> 🧪 Profile"
+	@poetry run python -m cProfile -o p.profile -m zeno        
+	@snakeviz p.profile
+
+.PHONY: profile-import
+profile-import:
+	@echo "==> 🧪 Profile Imports"
+	@poetry run python -X importtime -m zeno 2> p.profile      
+	@tuna p.profile
+
+.PHONY: docs
+docs:
+	@echo "==> 📕 Docs"
 	@cd docs; npm i; npm run build;
 
 .PHONY: build
@@ -50,7 +63,6 @@ publish: build
 
 .PHONY: clean
 clean:
-	@poetry run jupyter-book clean docs
 	@rm -rf dist
 	@find . -type d -name '.mypy_cache' -exec rm -rf {} +
 	@find . -type d -name '__pycache__' -exec rm -rf {} +

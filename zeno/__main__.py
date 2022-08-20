@@ -1,3 +1,3 @@
-from .runner import main
+from zeno.runner import main
 
 main()

@@ -1,4 +1,8 @@
 <script lang="ts">
+	import { Svg } from "@smui/common/elements";
+	import IconButton, { Icon } from "@smui/icon-button";
+	import { mdiFolderPlusOutline, mdiPlus } from "@mdi/js";
+
 	import FolderCell from "./cells/FolderCell.svelte";
 	import MetadataCell from "./cells/MetadataCell.svelte";
 	import NewFolderPopup from "./popups/NewFolderPopup.svelte";
@@ -11,8 +15,10 @@
 		metric,
 		model,
 		settings,
+		showNewSlice,
 		slices,
 		sliceSelections,
+		sliceToEdit,
 		status,
 		table,
 		transform,
@@ -26,6 +32,8 @@
 	import { ZenoColumnType } from "../globals";
 
 	export let shouldColor = false;
+
+	let showNewFolder = false;
 
 	table.subscribe((t) => updateFilteredTable(t));
 	metadataSelections.subscribe(() => updateFilteredTable($table));
@@ -48,6 +56,46 @@
 </script>
 
 <div class="side-container">
+	{#if $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.WEAK_LABEL).length > 0}
+		<h4>Weak Labels</h4>
+		{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.WEAK_LABEL) as col}
+			<MetadataCell {col} {shouldColor} />
+		{/each}
+	{/if}
+
+	<div class="inline">
+		<h4>Slices</h4>
+		<div style:margin-right="13px" class="inline">
+			<div>
+				<div on:click={() => (showNewFolder = true)}>
+					<IconButton>
+						<Icon component={Svg} viewBox="0 0 24 24">
+							<path fill="black" d={mdiFolderPlusOutline} />
+						</Icon>
+					</IconButton>
+				</div>
+				{#if showNewFolder}
+					<NewFolderPopup bind:showNewFolder />
+				{/if}
+			</div>
+			<div>
+				<div
+					on:click={() => {
+						sliceToEdit.set(undefined);
+						showNewSlice.set(true);
+					}}>
+					<IconButton>
+						<Icon component={Svg} viewBox="0 0 24 24">
+							<path fill="black" d={mdiPlus} />
+						</Icon>
+					</IconButton>
+				</div>
+				{#if $showNewSlice}
+					<NewSlicePopup />
+				{/if}
+			</div>
+		</div>
+	</div>
 	<div
 		class={"overview " +
 			($sliceSelections.length + $metadataSelections.size === 0
@@ -58,24 +106,11 @@
 			metadataSelections.set(new Map());
 		}}>
 		<div class="inline" style:height="44px">All instances</div>
-		<div>
+
+		<div class="inline">
 			<span>{#await res then r}{r && r[0] ? r[0].toFixed(2) : ""}{/await}</span>
 			<span class="size">({$table.size})</span>
-		</div>
-	</div>
-
-	{#if $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.WEAK_LABEL).length > 0}
-		<h4>Weak Labels</h4>
-		{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.WEAK_LABEL) as col}
-			<MetadataCell {col} {shouldColor} />
-		{/each}
-	{/if}
-
-	<div class="inline">
-		<h4>Slices</h4>
-		<div style:margin-right="13px" class="inline top-layer">
-			<NewFolderPopup />
-			<NewSlicePopup />
+			<div style:width="36px" />
 		</div>
 	</div>
 
@@ -114,10 +149,11 @@
 	}
 	.side-container {
 		margin-left: 10px;
-		height: calc(100vh - 82px);
+		height: calc(100vh - 165px);
 		overflow-y: auto;
 		min-width: 450px;
 		padding: 10px;
+		padding-top: 0px;
 	}
 	.cell {
 		border: 1px solid #e0e0e0;
@@ -139,11 +175,15 @@
 		display: flex;
 		align-items: center;
 		border: 0.5px solid #e0e0e0;
+		border-radius: 5px;
 		padding-left: 10px;
 		justify-content: space-between;
 		padding-right: 10px;
+		padding-top: 5px;
+		padding-bottom: 5px;
+		height: 36px;
 		margin-right: 10px;
-		margin-top: 10px;
+		cursor: pointer;
 	}
 	.selected {
 		background: #f9f5ff;
@@ -152,6 +192,7 @@
 		font-style: italic;
 		color: rgba(0, 0, 0, 0.4);
 		margin-right: 10px;
+		margin-left: 10px;
 	}
 	.top-layer {
 		z-index: 999;

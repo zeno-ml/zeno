@@ -1,33 +1,19 @@
 <script lang="ts">
-	import Select, { Option } from "@smui/select";
-
 	import {
-		currentColumns,
-		filteredTable,
-		sort,
-		metric,
 		metrics,
-		model,
 		models,
+		model,
+		metric,
 		transform,
 		transforms,
-	} from "../stores";
-	import { columnHash } from "../util/util";
-
-	import SelectionBar from "../metadata/SelectionBar.svelte";
-
-	sort.subscribe((s) => {
-		filteredTable.update((table) => {
-			if (table && s) {
-				return table.orderby(columnHash(s));
-			}
-			return table;
-		});
-	});
+		sort,
+		currentColumns,
+	} from "./stores";
+	import Select, { Option } from "@smui/select";
 </script>
 
-<div id="options-container">
-	<div class="container">
+<div id="container">
+	<div>
 		{#if $models && $models.length > 0}
 			<Select bind:value={$model} label="Model" style="margin-right: 20px;">
 				{#each $models as m}
@@ -64,15 +50,22 @@
 		</Select>
 	</div>
 </div>
-<SelectionBar />
 
 <style>
-	#options-container {
+	#container {
 		display: flex;
 		flex-direction: row;
 		justify-content: space-between;
 		align-items: center;
+		padding-left: 20px;
 		padding-bottom: 10px;
+		border-bottom: 1px solid #e0e0e0;
+	}
+	#selects {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
 		margin-bottom: 10px;
 		margin-right: 20px;
 	}

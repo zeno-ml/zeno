@@ -6,6 +6,7 @@ interface Settings {
 	labelColumn: ZenoColumn;
 	dataColumn: ZenoColumn;
 	metadataColumns: ZenoColumn[];
+	samples: number;
 }
 
 interface WSResponse {
@@ -23,7 +24,7 @@ interface MetricKey {
 
 interface MetadataSelection {
 	column: ZenoColumn;
-	type: string;
+	type: ChartType;
 	values: Array;
 }
 

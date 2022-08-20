@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from ..node import PipelineNode
+from zeno.pipeline.node import PipelineNode
 
 
 class HardFilterNode(PipelineNode):

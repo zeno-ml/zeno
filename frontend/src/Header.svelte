@@ -42,7 +42,7 @@
 			src="build/zeno.png"
 			alt="Square spiral logo next to 'Zeno'" />
 		<div id="tabs">
-			<div
+			<!-- <div
 				class="item {$tab === 'discovery' ? 'selected' : ''}"
 				on:click={() => updateTab("discovery")}>
 				<div class="icon">
@@ -53,7 +53,7 @@
 					</Icon>
 				</div>
 				<div class="tab-text">Discovery</div>
-			</div>
+			</div> -->
 			<div
 				class="item {$tab === 'exploration' ? 'selected' : ''}"
 				on:click={() => updateTab("exploration")}>
@@ -92,7 +92,7 @@
 
 	<div class="icons">
 		<Wrapper>
-			<IconButton href="https://dig.cmu.edu/zeno/intro.html">
+			<IconButton href="http://zenoml.com/docs/intro/">
 				<Icon component={Svg} viewBox="0 0 24 24">
 					<path fill="black" d={mdiApi} />
 				</Icon>
@@ -120,8 +120,8 @@
 		padding-bottom: 5px;
 		padding-right: 20px;
 		padding-left: 20px;
-		background: #fafafa;
-		border-bottom: 1px solid #e0e0e0;
+		background: #f8f8f8;
+		border-bottom: 1px solied #e0e0e0;
 	}
 
 	img {
@@ -156,8 +156,8 @@
 	}
 
 	.selected {
-		background-color: white;
 		color: #6a1b9a;
+		font-weight: 500;
 	}
 
 	#tabs {

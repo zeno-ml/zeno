@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { mdiPencilOutline } from "@mdi/js";
+	import { mdiPencilOutline, mdiDotsHorizontal } from "@mdi/js";
 	import Button, { Label } from "@smui/button";
-	import { Icon } from "@smui/common";
+	import IconButton, { Icon } from "@smui/icon-button";
 	import { Svg } from "@smui/common/elements";
 	import Dialog, { Actions, Content, Title, InitialFocus } from "@smui/dialog";
 	import SliceDetails from "../../SliceDetails.svelte";
@@ -24,6 +24,8 @@
 	let relatedReports = 0;
 
 	let showTooltip = false;
+	let hovering = false;
+	let showOptions = false;
 	$: selected = $sliceSelections.includes(slice.sliceName);
 
 	function deleteSlice() {
@@ -91,12 +93,18 @@
 			transform: $transform,
 		},
 	]);
+
+	$: console.log(hovering);
 </script>
 
 <div
 	class="{inFolder ? 'in-folder' : ''} cell parent {selected ? 'selected' : ''}"
 	on:click={(e) => setSelected(e)}
 	draggable="true"
+	on:mouseover={() => (hovering = true)}
+	on:focus={() => (hovering = true)}
+	on:mouseleave={() => (hovering = false)}
+	on:blur={() => (hovering = false)}
 	on:dragstart={(ev) => {
 		ev.dataTransfer.setData("text/plain", slice.sliceName);
 		ev.dataTransfer.dropEffect = "copy";
@@ -113,21 +121,23 @@
 	}}>
 	<div class="group" style:width="100%">
 		<div class="group" style:width="100%">
-			<div
-				class="group"
-				style:color="#9b51e0"
-				style:width="max-content"
-				on:mouseover={() => (showTooltip = true)}
-				on:mouseout={() => (showTooltip = false)}
-				on:focus={() => (showTooltip = true)}
-				on:blur={() => (showTooltip = false)}>
-				{slice.sliceName}
+			<div class="inline">
+				<div
+					class="group"
+					style:color="#6a1b9a"
+					style:width="max-content"
+					on:mouseover={() => (showTooltip = true)}
+					on:mouseout={() => (showTooltip = false)}
+					on:focus={() => (showTooltip = true)}
+					on:blur={() => (showTooltip = false)}>
+					{slice.sliceName}
+				</div>
 			</div>
 			<div class="group">
 				{#if result}
 					<span style:margin-right="10px">
 						{#await result then res}
-							{res ? res[0].toFixed(2) : ""}
+							{res && res[0] !== undefined ? res[0].toFixed(2) : ""}
 						{/await}
 					</span>
 					<span id="size">
@@ -135,40 +145,63 @@
 					</span>
 				{/if}
 				<div class="inline" style:cursor="pointer">
-					<div
-						style="width: 24px; height: 24px"
-						on:click={(e) => {
-							e.stopPropagation();
-							sliceToEdit.set(slice);
-							showNewSlice.set(true);
-						}}>
-						<Icon component={Svg} viewBox="0 0 24 24">
-							<path fill="black" d={mdiPencilOutline} />
-						</Icon>
+					<div style:width="36px">
+						{#if hovering}
+							<IconButton
+								size="button"
+								style="padding: 0px"
+								on:click={(e) => {
+									e.stopPropagation();
+									showOptions = !showOptions;
+								}}>
+								<Icon component={Svg} viewBox="0 0 24 24">
+									<path fill="black" d={mdiDotsHorizontal} />
+								</Icon>
+							</IconButton>
+						{/if}
 					</div>
-					<Icon
-						class="material-icons"
-						on:click={(e) => {
-							e.stopPropagation();
-							$reports.forEach((r) => {
-								let hasSlice = false;
-								r.reportPredicates.forEach((p) => {
-									if (p.sliceName === slice.sliceName) {
-										hasSlice = true;
+
+					{#if showOptions}
+						<div
+							id="options-container"
+							on:mouseleave={() => (showOptions = false)}
+							on:blur={() => (showOptions = false)}>
+							<IconButton
+								on:click={(e) => {
+									e.stopPropagation();
+									showOptions = false;
+									sliceToEdit.set(slice);
+									showNewSlice.set(true);
+								}}>
+								<Icon component={Svg} viewBox="0 0 24 24">
+									<path fill="black" d={mdiPencilOutline} />
+								</Icon>
+							</IconButton>
+							<IconButton
+								on:click={(e) => {
+									e.stopPropagation();
+									showOptions = false;
+									$reports.forEach((r) => {
+										let hasSlice = false;
+										r.reportPredicates.forEach((p) => {
+											if (p.sliceName === slice.sliceName) {
+												hasSlice = true;
+											}
+										});
+										if (hasSlice) {
+											relatedReports++;
+										}
+									});
+									if (relatedReports > 0) {
+										confirmDelete = true;
+									} else {
+										deleteSlice();
 									}
-								});
-								if (hasSlice) {
-									relatedReports++;
-								}
-							});
-							if (relatedReports > 0) {
-								confirmDelete = true;
-							} else {
-								deleteSlice();
-							}
-						}}>
-						delete_outline
-					</Icon>
+								}}>
+								<Icon class="material-icons">delete_outline</Icon>
+							</IconButton>
+						</div>
+					{/if}
 				</div>
 			</div>
 		</div>
@@ -207,7 +240,7 @@
 	.tooltip-container {
 		z-index: 5;
 		background: white;
-		margin-top: 10px;
+		margin-top: 36px;
 		position: absolute;
 		height: max-content;
 	}
@@ -225,7 +258,15 @@
 	.cell {
 		overflow: visible;
 		border: 1px solid #e0e0e0;
-		padding: 10px;
+		border-radius: 5px;
+		margin-top: 5px;
+		margin-bottom: 5px;
+		display: flex;
+		padding-top: 5px;
+		padding-bottom: 5px;
+		padding-left: 10px;
+		padding-right: 10px;
+		height: 36px;
 		margin-right: 10px;
 	}
 	.group {
@@ -244,5 +285,16 @@
 	}
 	.in-folder {
 		margin-left: 25px;
+		margin-top: 0px;
+		margin-bottom: 0px;
+	}
+	#options-container {
+		z-index: 5;
+		background: white;
+		margin-top: -7px;
+		border: 1px solid #e8e8e8;
+		position: absolute;
+		height: max-content;
+		display: flex;
 	}
 </style>

@@ -12,6 +12,7 @@
 		transform,
 		settings,
 	} from "../stores";
+	import { MetadataType } from "../globals";
 
 	async function updateResult(model, metric, transform, filteredTable) {
 		if (filteredTable.size === 0) {
@@ -43,7 +44,7 @@
 	<span id="metric">
 		{$metric ? $metric + ":" : ""}
 		{#await result then res}
-			{res && res[0] ? res[0].toFixed(2) : ""}
+			{res && res[0] !== undefined ? res[0].toFixed(2) : ""}
 		{/await}
 	</span>
 	<span id="size">
@@ -66,15 +67,23 @@
 	{#each [...$metadataSelections.entries()] as [hash, chip]}
 		<div class="meta-chip">
 			<span>
-				{#if chip.type === "range"}
+				{#if chip.type === MetadataType.HISTOGRAM}
 					{chip.values[0].toFixed(2)}
 					{"<"}
 					{chip.column.name}
 					{"<"}
 					{chip.values[1].toFixed(2)}
-				{:else if chip.type === "binary"}
+				{:else if chip.type === MetadataType.BINARY}
 					{chip.values[0]}
 					{chip.column.name}
+				{:else if chip.type === MetadataType.DATE}
+					{#if !chip.values[1]}
+						start {chip.values[0].toLocaleString()}
+					{:else if !chip.values[0]}
+						end {chip.values[0].toLocaleString()}
+					{:else}
+						from {chip.values[0].toLocaleString()} to {chip.values[1].toLocaleString()}
+					{/if}
 				{:else}
 					{chip.column.name}
 					{"=="}
@@ -110,7 +119,8 @@
 		height: fit-content;
 		align-items: center;
 		min-height: 40px;
-		border-top: 1px solid #e0e0e0;
+		padding-bottom: 5px;
+		padding-top: 5px;
 		border-bottom: 1px solid #e0e0e0;
 	}
 	#metric {
@@ -120,7 +130,8 @@
 	}
 	.meta-chip {
 		padding: 5px;
-		background: rgba(0, 0, 0, 0.07);
+		background: #f8f8f8;
+		border: 1px solid #e8e8e8;
 		margin-left: 5px;
 		margin-right: 5px;
 		margin-top: 2px;
@@ -132,7 +143,7 @@
 		padding: 5px;
 		margin-left: 10px;
 		cursor: pointer;
-		color: #6200ee;
+		color: #6a1b9a;
 	}
 	.clear:hover {
 		background: #ede1fd;

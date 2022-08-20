@@ -10077,21 +10077,1085 @@ var wavesurfer = {exports: {}};
 
 var WaveSurfer = /*@__PURE__*/getDefaultExportFromCjs(wavesurfer.exports);
 
+var wavesurfer_spectrogram = {exports: {}};
+
+/*!
+ * wavesurfer.js spectrogram plugin 6.2.0 (2022-05-16)
+ * https://wavesurfer-js.org
+ * @license BSD-3-Clause
+ */
+
+(function (module, exports) {
+	(function webpackUniversalModuleDefinition(root, factory) {
+		module.exports = factory();
+	})(self, () => {
+	return /******/ (() => { // webpackBootstrap
+	/******/ 	var __webpack_modules__ = ({
+
+	/***/ "./src/plugin/spectrogram/fft.js":
+	/*!***************************************!*\
+	  !*** ./src/plugin/spectrogram/fft.js ***!
+	  \***************************************/
+	/***/ ((module, exports) => {
+
+
+
+	Object.defineProperty(exports, "__esModule", ({
+	  value: true
+	}));
+	exports["default"] = FFT;
+
+	/* eslint-disable complexity, no-redeclare, no-var, one-var */
+
+	/**
+	 * Calculate FFT - Based on https://github.com/corbanbrook/dsp.js
+	 *
+	 * @param {Number} bufferSize Buffer size
+	 * @param {Number} sampleRate Sample rate
+	 * @param {Function} windowFunc Window function
+	 * @param {Number} alpha Alpha channel
+	 */
+	function FFT(bufferSize, sampleRate, windowFunc, alpha) {
+	  this.bufferSize = bufferSize;
+	  this.sampleRate = sampleRate;
+	  this.bandwidth = 2 / bufferSize * (sampleRate / 2);
+	  this.sinTable = new Float32Array(bufferSize);
+	  this.cosTable = new Float32Array(bufferSize);
+	  this.windowValues = new Float32Array(bufferSize);
+	  this.reverseTable = new Uint32Array(bufferSize);
+	  this.peakBand = 0;
+	  this.peak = 0;
+	  var i;
+
+	  switch (windowFunc) {
+	    case 'bartlett':
+	      for (i = 0; i < bufferSize; i++) {
+	        this.windowValues[i] = 2 / (bufferSize - 1) * ((bufferSize - 1) / 2 - Math.abs(i - (bufferSize - 1) / 2));
+	      }
+
+	      break;
+
+	    case 'bartlettHann':
+	      for (i = 0; i < bufferSize; i++) {
+	        this.windowValues[i] = 0.62 - 0.48 * Math.abs(i / (bufferSize - 1) - 0.5) - 0.38 * Math.cos(Math.PI * 2 * i / (bufferSize - 1));
+	      }
+
+	      break;
+
+	    case 'blackman':
+	      alpha = alpha || 0.16;
+
+	      for (i = 0; i < bufferSize; i++) {
+	        this.windowValues[i] = (1 - alpha) / 2 - 0.5 * Math.cos(Math.PI * 2 * i / (bufferSize - 1)) + alpha / 2 * Math.cos(4 * Math.PI * i / (bufferSize - 1));
+	      }
+
+	      break;
+
+	    case 'cosine':
+	      for (i = 0; i < bufferSize; i++) {
+	        this.windowValues[i] = Math.cos(Math.PI * i / (bufferSize - 1) - Math.PI / 2);
+	      }
+
+	      break;
+
+	    case 'gauss':
+	      alpha = alpha || 0.25;
+
+	      for (i = 0; i < bufferSize; i++) {
+	        this.windowValues[i] = Math.pow(Math.E, -0.5 * Math.pow((i - (bufferSize - 1) / 2) / (alpha * (bufferSize - 1) / 2), 2));
+	      }
+
+	      break;
+
+	    case 'hamming':
+	      for (i = 0; i < bufferSize; i++) {
+	        this.windowValues[i] = 0.54 - 0.46 * Math.cos(Math.PI * 2 * i / (bufferSize - 1));
+	      }
+
+	      break;
+
+	    case 'hann':
+	    case undefined:
+	      for (i = 0; i < bufferSize; i++) {
+	        this.windowValues[i] = 0.5 * (1 - Math.cos(Math.PI * 2 * i / (bufferSize - 1)));
+	      }
+
+	      break;
+
+	    case 'lanczoz':
+	      for (i = 0; i < bufferSize; i++) {
+	        this.windowValues[i] = Math.sin(Math.PI * (2 * i / (bufferSize - 1) - 1)) / (Math.PI * (2 * i / (bufferSize - 1) - 1));
+	      }
+
+	      break;
+
+	    case 'rectangular':
+	      for (i = 0; i < bufferSize; i++) {
+	        this.windowValues[i] = 1;
+	      }
+
+	      break;
+
+	    case 'triangular':
+	      for (i = 0; i < bufferSize; i++) {
+	        this.windowValues[i] = 2 / bufferSize * (bufferSize / 2 - Math.abs(i - (bufferSize - 1) / 2));
+	      }
+
+	      break;
+
+	    default:
+	      throw Error("No such window function '" + windowFunc + "'");
+	  }
+
+	  var limit = 1;
+	  var bit = bufferSize >> 1;
+	  var i;
+
+	  while (limit < bufferSize) {
+	    for (i = 0; i < limit; i++) {
+	      this.reverseTable[i + limit] = this.reverseTable[i] + bit;
+	    }
+
+	    limit = limit << 1;
+	    bit = bit >> 1;
+	  }
+
+	  for (i = 0; i < bufferSize; i++) {
+	    this.sinTable[i] = Math.sin(-Math.PI / i);
+	    this.cosTable[i] = Math.cos(-Math.PI / i);
+	  }
+
+	  this.calculateSpectrum = function (buffer) {
+	    // Locally scope variables for speed up
+	    var bufferSize = this.bufferSize,
+	        cosTable = this.cosTable,
+	        sinTable = this.sinTable,
+	        reverseTable = this.reverseTable,
+	        real = new Float32Array(bufferSize),
+	        imag = new Float32Array(bufferSize),
+	        bSi = 2 / this.bufferSize,
+	        sqrt = Math.sqrt,
+	        rval,
+	        ival,
+	        mag,
+	        spectrum = new Float32Array(bufferSize / 2);
+	    var k = Math.floor(Math.log(bufferSize) / Math.LN2);
+
+	    if (Math.pow(2, k) !== bufferSize) {
+	      throw 'Invalid buffer size, must be a power of 2.';
+	    }
+
+	    if (bufferSize !== buffer.length) {
+	      throw 'Supplied buffer is not the same size as defined FFT. FFT Size: ' + bufferSize + ' Buffer Size: ' + buffer.length;
+	    }
+
+	    var halfSize = 1,
+	        phaseShiftStepReal,
+	        phaseShiftStepImag,
+	        currentPhaseShiftReal,
+	        currentPhaseShiftImag,
+	        off,
+	        tr,
+	        ti,
+	        tmpReal;
+
+	    for (var i = 0; i < bufferSize; i++) {
+	      real[i] = buffer[reverseTable[i]] * this.windowValues[reverseTable[i]];
+	      imag[i] = 0;
+	    }
+
+	    while (halfSize < bufferSize) {
+	      phaseShiftStepReal = cosTable[halfSize];
+	      phaseShiftStepImag = sinTable[halfSize];
+	      currentPhaseShiftReal = 1;
+	      currentPhaseShiftImag = 0;
+
+	      for (var fftStep = 0; fftStep < halfSize; fftStep++) {
+	        var i = fftStep;
+
+	        while (i < bufferSize) {
+	          off = i + halfSize;
+	          tr = currentPhaseShiftReal * real[off] - currentPhaseShiftImag * imag[off];
+	          ti = currentPhaseShiftReal * imag[off] + currentPhaseShiftImag * real[off];
+	          real[off] = real[i] - tr;
+	          imag[off] = imag[i] - ti;
+	          real[i] += tr;
+	          imag[i] += ti;
+	          i += halfSize << 1;
+	        }
+
+	        tmpReal = currentPhaseShiftReal;
+	        currentPhaseShiftReal = tmpReal * phaseShiftStepReal - currentPhaseShiftImag * phaseShiftStepImag;
+	        currentPhaseShiftImag = tmpReal * phaseShiftStepImag + currentPhaseShiftImag * phaseShiftStepReal;
+	      }
+
+	      halfSize = halfSize << 1;
+	    }
+
+	    for (var i = 0, N = bufferSize / 2; i < N; i++) {
+	      rval = real[i];
+	      ival = imag[i];
+	      mag = bSi * sqrt(rval * rval + ival * ival);
+
+	      if (mag > this.peak) {
+	        this.peakBand = i;
+	        this.peak = mag;
+	      }
+
+	      spectrum[i] = mag;
+	    }
+
+	    return spectrum;
+	  };
+	}
+
+	module.exports = exports.default;
+
+	/***/ }),
+
+	/***/ "./src/plugin/spectrogram/index.js":
+	/*!*****************************************!*\
+	  !*** ./src/plugin/spectrogram/index.js ***!
+	  \*****************************************/
+	/***/ ((module, exports, __webpack_require__) => {
+
+
+
+	Object.defineProperty(exports, "__esModule", ({
+	  value: true
+	}));
+	exports["default"] = void 0;
+
+	var _fft = _interopRequireDefault(__webpack_require__(/*! ./fft */ "./src/plugin/spectrogram/fft.js"));
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+	function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+	/**
+	 * @typedef {Object} SpectrogramPluginParams
+	 * @property {string|HTMLElement} container Selector of element or element in
+	 * which to render
+	 * @property {number} fftSamples=512 Number of samples to fetch to FFT. Must be
+	 * a power of 2.
+	 * @property {boolean} splitChannels=false Render with separate spectrograms for
+	 * the channels of the audio
+	 * @property {number} height=fftSamples/2 Height of the spectrogram view in CSS
+	 * pixels
+	 * @property {boolean} labels Set to true to display frequency labels.
+	 * @property {number} noverlap Size of the overlapping window. Must be <
+	 * fftSamples. Auto deduced from canvas size by default.
+	 * @property {string} windowFunc='hann' The window function to be used. One of
+	 * these: `'bartlett'`, `'bartlettHann'`, `'blackman'`, `'cosine'`, `'gauss'`,
+	 * `'hamming'`, `'hann'`, `'lanczoz'`, `'rectangular'`, `'triangular'`
+	 * @property {?number} alpha Some window functions have this extra value.
+	 * (Between 0 and 1)
+	 * @property {number} pixelRatio=wavesurfer.params.pixelRatio to control the
+	 * size of the spectrogram in relation with its canvas. 1 = Draw on the whole
+	 * canvas. 2 = Draw on a quarter (1/2 the length and 1/2 the width)
+	 * @property {number} frequencyMin=0 Min frequency to scale spectrogram.
+	 * @property {number} frequencyMax=12000 Max frequency to scale spectrogram.
+	 * Set this to samplerate/2 to draw whole range of spectrogram.
+	 * @property {?boolean} deferInit Set to true to manually call
+	 * `initPlugin('spectrogram')`
+	 * @property {?number[][]} colorMap A 256 long array of 4-element arrays.
+	 * Each entry should contain a float between 0 and 1 and specify
+	 * r, g, b, and alpha.
+	 */
+
+	/**
+	 * Render a spectrogram visualisation of the audio.
+	 *
+	 * @implements {PluginClass}
+	 * @extends {Observer}
+	 * @example
+	 * // es6
+	 * import SpectrogramPlugin from 'wavesurfer.spectrogram.js';
+	 *
+	 * // commonjs
+	 * var SpectrogramPlugin = require('wavesurfer.spectrogram.js');
+	 *
+	 * // if you are using <script> tags
+	 * var SpectrogramPlugin = window.WaveSurfer.spectrogram;
+	 *
+	 * // ... initialising wavesurfer with the plugin
+	 * var wavesurfer = WaveSurfer.create({
+	 *   // wavesurfer options ...
+	 *   plugins: [
+	 *     SpectrogramPlugin.create({
+	 *       // plugin options ...
+	 *     })
+	 *   ]
+	 * });
+	 */
+	var SpectrogramPlugin = /*#__PURE__*/function () {
+	  function SpectrogramPlugin(params, ws) {
+	    var _this = this;
+
+	    _classCallCheck(this, SpectrogramPlugin);
+
+	    this.params = params;
+	    this.wavesurfer = ws;
+	    this.util = ws.util;
+	    this.frequenciesDataUrl = params.frequenciesDataUrl;
+
+	    this._onScroll = function (e) {
+	      _this.updateScroll(e);
+	    };
+
+	    this._onRender = function () {
+	      _this.render();
+	    };
+
+	    this._onWrapperClick = function (e) {
+	      _this._wrapperClickHandler(e);
+	    };
+
+	    this._onReady = function () {
+	      var drawer = _this.drawer = ws.drawer;
+	      _this.container = 'string' == typeof params.container ? document.querySelector(params.container) : params.container;
+
+	      if (!_this.container) {
+	        throw Error('No container for WaveSurfer spectrogram');
+	      }
+
+	      if (params.colorMap) {
+	        if (params.colorMap.length < 256) {
+	          throw new Error('Colormap must contain 256 elements');
+	        }
+
+	        for (var i = 0; i < params.colorMap.length; i++) {
+	          var cmEntry = params.colorMap[i];
+
+	          if (cmEntry.length !== 4) {
+	            throw new Error('ColorMap entries must contain 4 values');
+	          }
+	        }
+
+	        _this.colorMap = params.colorMap;
+	      } else {
+	        _this.colorMap = [];
+
+	        for (var _i = 0; _i < 256; _i++) {
+	          var val = (255 - _i) / 256;
+
+	          _this.colorMap.push([val, val, val, 1]);
+	        }
+	      }
+
+	      _this.width = drawer.width;
+	      _this.pixelRatio = _this.params.pixelRatio || ws.params.pixelRatio;
+	      _this.fftSamples = _this.params.fftSamples || ws.params.fftSamples || 512;
+	      _this.height = _this.params.height || _this.fftSamples / 2;
+	      _this.noverlap = params.noverlap;
+	      _this.windowFunc = params.windowFunc;
+	      _this.alpha = params.alpha;
+	      _this.splitChannels = params.splitChannels;
+	      _this.channels = _this.splitChannels ? ws.backend.buffer.numberOfChannels : 1; // Getting file's original samplerate is difficult(#1248).
+	      // So set 12kHz default to render like wavesurfer.js 5.x.
+
+	      _this.frequencyMin = params.frequencyMin || 0;
+	      _this.frequencyMax = params.frequencyMax || 12000;
+
+	      _this.createWrapper();
+
+	      _this.createCanvas();
+
+	      _this.render();
+
+	      drawer.wrapper.addEventListener('scroll', _this._onScroll);
+	      ws.on('redraw', _this._onRender);
+	    };
+	  }
+
+	  _createClass(SpectrogramPlugin, [{
+	    key: "init",
+	    value: function init() {
+	      // Check if wavesurfer is ready
+	      if (this.wavesurfer.isReady) {
+	        this._onReady();
+	      } else {
+	        this.wavesurfer.once('ready', this._onReady);
+	      }
+	    }
+	  }, {
+	    key: "destroy",
+	    value: function destroy() {
+	      this.unAll();
+	      this.wavesurfer.un('ready', this._onReady);
+	      this.wavesurfer.un('redraw', this._onRender);
+	      this.drawer && this.drawer.wrapper.removeEventListener('scroll', this._onScroll);
+	      this.wavesurfer = null;
+	      this.util = null;
+	      this.params = null;
+
+	      if (this.wrapper) {
+	        this.wrapper.removeEventListener('click', this._onWrapperClick);
+	        this.wrapper.parentNode.removeChild(this.wrapper);
+	        this.wrapper = null;
+	      }
+	    }
+	  }, {
+	    key: "createWrapper",
+	    value: function createWrapper() {
+	      var prevSpectrogram = this.container.querySelector('spectrogram');
+
+	      if (prevSpectrogram) {
+	        this.container.removeChild(prevSpectrogram);
+	      }
+
+	      var wsParams = this.wavesurfer.params;
+	      this.wrapper = document.createElement('spectrogram'); // if labels are active
+
+	      if (this.params.labels) {
+	        var labelsEl = this.labelsEl = document.createElement('canvas');
+	        labelsEl.classList.add('spec-labels');
+	        this.drawer.style(labelsEl, {
+	          position: 'fixed',
+	          zIndex: 9,
+	          height: "".concat(this.height * this.channels, "px"),
+	          width: "55px"
+	        });
+	        this.wrapper.appendChild(labelsEl);
+	        this.loadLabels('rgba(68,68,68,0.5)', '12px', '10px', '', '#fff', '#f7f7f7', 'center', '#specLabels');
+	      }
+
+	      this.drawer.style(this.wrapper, {
+	        display: 'block',
+	        position: 'relative',
+	        userSelect: 'none',
+	        webkitUserSelect: 'none',
+	        height: "".concat(this.height * this.channels, "px")
+	      });
+
+	      if (wsParams.fillParent || wsParams.scrollParent) {
+	        this.drawer.style(this.wrapper, {
+	          width: '100%',
+	          overflowX: 'hidden',
+	          overflowY: 'hidden'
+	        });
+	      }
+
+	      this.container.appendChild(this.wrapper);
+	      this.wrapper.addEventListener('click', this._onWrapperClick);
+	    }
+	  }, {
+	    key: "_wrapperClickHandler",
+	    value: function _wrapperClickHandler(event) {
+	      event.preventDefault();
+	      var relX = 'offsetX' in event ? event.offsetX : event.layerX;
+	      this.fireEvent('click', relX / this.width || 0);
+	    }
+	  }, {
+	    key: "createCanvas",
+	    value: function createCanvas() {
+	      var canvas = this.canvas = this.wrapper.appendChild(document.createElement('canvas'));
+	      this.spectrCc = canvas.getContext('2d');
+	      this.util.style(canvas, {
+	        position: 'absolute',
+	        zIndex: 4
+	      });
+	    }
+	  }, {
+	    key: "render",
+	    value: function render() {
+	      this.updateCanvasStyle();
+
+	      if (this.frequenciesDataUrl) {
+	        this.loadFrequenciesData(this.frequenciesDataUrl);
+	      } else {
+	        this.getFrequencies(this.drawSpectrogram);
+	      }
+	    }
+	  }, {
+	    key: "updateCanvasStyle",
+	    value: function updateCanvasStyle() {
+	      var width = Math.round(this.width / this.pixelRatio) + 'px';
+	      this.canvas.width = this.width;
+	      this.canvas.height = this.fftSamples / 2 * this.channels;
+	      this.canvas.style.width = width;
+	      this.canvas.style.height = this.height + 'px';
+	    }
+	  }, {
+	    key: "drawSpectrogram",
+	    value: function drawSpectrogram(frequenciesData, my) {
+	      if (!isNaN(frequenciesData[0][0])) {
+	        // data is 1ch [sample, freq] format
+	        // to [channel, sample, freq] format
+	        frequenciesData = [frequenciesData];
+	      }
+
+	      var spectrCc = my.spectrCc;
+	      var height = my.fftSamples / 2;
+	      var width = my.width;
+	      var freqFrom = my.buffer.sampleRate / 2;
+	      var freqMin = my.frequencyMin;
+	      var freqMax = my.frequencyMax;
+
+	      if (!spectrCc) {
+	        return;
+	      }
+
+	      var _loop = function _loop(c) {
+	        // for each channel
+	        var pixels = my.resample(frequenciesData[c]);
+	        var imageData = new ImageData(width, height);
+
+	        for (var i = 0; i < pixels.length; i++) {
+	          for (var j = 0; j < pixels[i].length; j++) {
+	            var colorMap = my.colorMap[pixels[i][j]];
+	            var redIndex = ((height - j) * width + i) * 4;
+	            imageData.data[redIndex] = colorMap[0] * 255;
+	            imageData.data[redIndex + 1] = colorMap[1] * 255;
+	            imageData.data[redIndex + 2] = colorMap[2] * 255;
+	            imageData.data[redIndex + 3] = colorMap[3] * 255;
+	          }
+	        } // scale and stack spectrograms
+
+
+	        createImageBitmap(imageData).then(function (renderer) {
+	          return spectrCc.drawImage(renderer, 0, height * (1 - freqMax / freqFrom), // source x, y
+	          width, height * (freqMax - freqMin) / freqFrom, // source width, height
+	          0, height * c, // destination x, y
+	          width, height // destination width, height
+	          );
+	        });
+	      };
+
+	      for (var c = 0; c < frequenciesData.length; c++) {
+	        _loop(c);
+	      }
+	    }
+	  }, {
+	    key: "getFrequencies",
+	    value: function getFrequencies(callback) {
+	      var fftSamples = this.fftSamples;
+	      var buffer = this.buffer = this.wavesurfer.backend.buffer;
+	      var channels = this.channels;
+
+	      if (!buffer) {
+	        this.fireEvent('error', 'Web Audio buffer is not available');
+	        return;
+	      } // This may differ from file samplerate. Browser resamples audio.
+
+
+	      var sampleRate = buffer.sampleRate;
+	      var frequencies = [];
+	      var noverlap = this.noverlap;
+
+	      if (!noverlap) {
+	        var uniqueSamplesPerPx = buffer.length / this.canvas.width;
+	        noverlap = Math.max(0, Math.round(fftSamples - uniqueSamplesPerPx));
+	      }
+
+	      var fft = new _fft.default(fftSamples, sampleRate, this.windowFunc, this.alpha);
+
+	      for (var c = 0; c < channels; c++) {
+	        // for each channel
+	        var channelData = buffer.getChannelData(c);
+	        var channelFreq = [];
+	        var currentOffset = 0;
+
+	        while (currentOffset + fftSamples < channelData.length) {
+	          var segment = channelData.slice(currentOffset, currentOffset + fftSamples);
+	          var spectrum = fft.calculateSpectrum(segment);
+	          var array = new Uint8Array(fftSamples / 2);
+	          var j = void 0;
+
+	          for (j = 0; j < fftSamples / 2; j++) {
+	            array[j] = Math.max(-255, Math.log10(spectrum[j]) * 45);
+	          }
+
+	          channelFreq.push(array); // channelFreq: [sample, freq]
+
+	          currentOffset += fftSamples - noverlap;
+	        }
+
+	        frequencies.push(channelFreq); // frequencies: [channel, sample, freq]
+	      }
+
+	      callback(frequencies, this);
+	    }
+	  }, {
+	    key: "loadFrequenciesData",
+	    value: function loadFrequenciesData(url) {
+	      var _this2 = this;
+
+	      var request = this.util.fetchFile({
+	        url: url
+	      });
+	      request.on('success', function (data) {
+	        return _this2.drawSpectrogram(JSON.parse(data), _this2);
+	      });
+	      request.on('error', function (e) {
+	        return _this2.fireEvent('error', e);
+	      });
+	      return request;
+	    }
+	  }, {
+	    key: "freqType",
+	    value: function freqType(freq) {
+	      return freq >= 1000 ? (freq / 1000).toFixed(1) : Math.round(freq);
+	    }
+	  }, {
+	    key: "unitType",
+	    value: function unitType(freq) {
+	      return freq >= 1000 ? 'KHz' : 'Hz';
+	    }
+	  }, {
+	    key: "loadLabels",
+	    value: function loadLabels(bgFill, fontSizeFreq, fontSizeUnit, fontType, textColorFreq, textColorUnit, textAlign, container) {
+	      var frequenciesHeight = this.height;
+	      bgFill = bgFill || 'rgba(68,68,68,0)';
+	      fontSizeFreq = fontSizeFreq || '12px';
+	      fontSizeUnit = fontSizeUnit || '10px';
+	      fontType = fontType || 'Helvetica';
+	      textColorFreq = textColorFreq || '#fff';
+	      textColorUnit = textColorUnit || '#fff';
+	      textAlign = textAlign || 'center';
+	      var bgWidth = 55;
+	      var getMaxY = frequenciesHeight || 512;
+	      var labelIndex = 5 * (getMaxY / 256);
+	      var freqStart = this.frequencyMin;
+	      var step = (this.frequencyMax - freqStart) / labelIndex; // prepare canvas element for labels
+
+	      var ctx = this.labelsEl.getContext('2d');
+	      var dispScale = window.devicePixelRatio;
+	      this.labelsEl.height = this.height * this.channels * dispScale;
+	      this.labelsEl.width = bgWidth * dispScale;
+	      ctx.scale(dispScale, dispScale);
+
+	      if (!ctx) {
+	        return;
+	      }
+
+	      for (var c = 0; c < this.channels; c++) {
+	        // for each channel
+	        // fill background
+	        ctx.fillStyle = bgFill;
+	        ctx.fillRect(0, c * getMaxY, bgWidth, (1 + c) * getMaxY);
+	        ctx.fill();
+	        var i = void 0; // render labels
+
+	        for (i = 0; i <= labelIndex; i++) {
+	          ctx.textAlign = textAlign;
+	          ctx.textBaseline = 'middle';
+	          var freq = freqStart + step * i;
+	          var label = this.freqType(freq);
+	          var units = this.unitType(freq);
+	          var yLabelOffset = 2;
+	          var x = 16;
+	          var y = void 0;
+
+	          if (i == 0) {
+	            y = (1 + c) * getMaxY + i - 10; // unit label
+
+	            ctx.fillStyle = textColorUnit;
+	            ctx.font = fontSizeUnit + ' ' + fontType;
+	            ctx.fillText(units, x + 24, y); // freq label
+
+	            ctx.fillStyle = textColorFreq;
+	            ctx.font = fontSizeFreq + ' ' + fontType;
+	            ctx.fillText(label, x, y);
+	          } else {
+	            y = (1 + c) * getMaxY - i * 50 + yLabelOffset; // unit label
+
+	            ctx.fillStyle = textColorUnit;
+	            ctx.font = fontSizeUnit + ' ' + fontType;
+	            ctx.fillText(units, x + 24, y); // freq label
+
+	            ctx.fillStyle = textColorFreq;
+	            ctx.font = fontSizeFreq + ' ' + fontType;
+	            ctx.fillText(label, x, y);
+	          }
+	        }
+	      }
+	    }
+	  }, {
+	    key: "updateScroll",
+	    value: function updateScroll(e) {
+	      if (this.wrapper) {
+	        this.wrapper.scrollLeft = e.target.scrollLeft;
+	      }
+	    }
+	  }, {
+	    key: "resample",
+	    value: function resample(oldMatrix) {
+	      var columnsNumber = this.width;
+	      var newMatrix = [];
+	      var oldPiece = 1 / oldMatrix.length;
+	      var newPiece = 1 / columnsNumber;
+	      var i;
+
+	      for (i = 0; i < columnsNumber; i++) {
+	        var column = new Array(oldMatrix[0].length);
+	        var j = void 0;
+
+	        for (j = 0; j < oldMatrix.length; j++) {
+	          var oldStart = j * oldPiece;
+	          var oldEnd = oldStart + oldPiece;
+	          var newStart = i * newPiece;
+	          var newEnd = newStart + newPiece;
+	          var overlap = oldEnd <= newStart || newEnd <= oldStart ? 0 : Math.min(Math.max(oldEnd, newStart), Math.max(newEnd, oldStart)) - Math.max(Math.min(oldEnd, newStart), Math.min(newEnd, oldStart));
+	          var k = void 0;
+	          /* eslint-disable max-depth */
+
+	          if (overlap > 0) {
+	            for (k = 0; k < oldMatrix[0].length; k++) {
+	              if (column[k] == null) {
+	                column[k] = 0;
+	              }
+
+	              column[k] += overlap / newPiece * oldMatrix[j][k];
+	            }
+	          }
+	          /* eslint-enable max-depth */
+
+	        }
+
+	        var intColumn = new Uint8Array(oldMatrix[0].length);
+	        var m = void 0;
+
+	        for (m = 0; m < oldMatrix[0].length; m++) {
+	          intColumn[m] = column[m];
+	        }
+
+	        newMatrix.push(intColumn);
+	      }
+
+	      return newMatrix;
+	    }
+	  }], [{
+	    key: "create",
+	    value:
+	    /**
+	     * Spectrogram plugin definition factory
+	     *
+	     * This function must be used to create a plugin definition which can be
+	     * used by wavesurfer to correctly instantiate the plugin.
+	     *
+	     * @param  {SpectrogramPluginParams} params Parameters used to initialise the plugin
+	     * @return {PluginDefinition} An object representing the plugin.
+	     */
+	    function create(params) {
+	      return {
+	        name: 'spectrogram',
+	        deferInit: params && params.deferInit ? params.deferInit : false,
+	        params: params,
+	        staticProps: {
+	          FFT: _fft.default
+	        },
+	        instance: SpectrogramPlugin
+	      };
+	    }
+	  }]);
+
+	  return SpectrogramPlugin;
+	}();
+
+	exports["default"] = SpectrogramPlugin;
+	module.exports = exports.default;
+
+	/***/ })
+
+	/******/ 	});
+	/************************************************************************/
+	/******/ 	// The module cache
+	/******/ 	var __webpack_module_cache__ = {};
+	/******/ 	
+	/******/ 	// The require function
+	/******/ 	function __webpack_require__(moduleId) {
+	/******/ 		// Check if module is in cache
+	/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+	/******/ 		if (cachedModule !== undefined) {
+	/******/ 			return cachedModule.exports;
+	/******/ 		}
+	/******/ 		// Create a new module (and put it into the cache)
+	/******/ 		var module = __webpack_module_cache__[moduleId] = {
+	/******/ 			// no module.id needed
+	/******/ 			// no module.loaded needed
+	/******/ 			exports: {}
+	/******/ 		};
+	/******/ 	
+	/******/ 		// Execute the module function
+	/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+	/******/ 	
+	/******/ 		// Return the exports of the module
+	/******/ 		return module.exports;
+	/******/ 	}
+	/******/ 	
+	/************************************************************************/
+	/******/ 	
+	/******/ 	// startup
+	/******/ 	// Load entry module and return exports
+	/******/ 	// This entry module is referenced by other modules so it can't be inlined
+	/******/ 	var __webpack_exports__ = __webpack_require__("./src/plugin/spectrogram/index.js");
+	/******/ 	
+	/******/ 	return __webpack_exports__;
+	/******/ })()
+	;
+	});
+	
+} (wavesurfer_spectrogram));
+
+var SpectrogramPlugin = /*@__PURE__*/getDefaultExportFromCjs(wavesurfer_spectrogram.exports);
+
+var colorScale$1={
+	"jet":[{"index":0,"rgb":[0,0,131]},{"index":0.125,"rgb":[0,60,170]},{"index":0.375,"rgb":[5,255,255]},{"index":0.625,"rgb":[255,255,0]},{"index":0.875,"rgb":[250,0,0]},{"index":1,"rgb":[128,0,0]}],
+
+	"hsv":[{"index":0,"rgb":[255,0,0]},{"index":0.169,"rgb":[253,255,2]},{"index":0.173,"rgb":[247,255,2]},{"index":0.337,"rgb":[0,252,4]},{"index":0.341,"rgb":[0,252,10]},{"index":0.506,"rgb":[1,249,255]},{"index":0.671,"rgb":[2,0,253]},{"index":0.675,"rgb":[8,0,253]},{"index":0.839,"rgb":[255,0,251]},{"index":0.843,"rgb":[255,0,245]},{"index":1,"rgb":[255,0,6]}],
+
+	"hot":[{"index":0,"rgb":[0,0,0]},{"index":0.3,"rgb":[230,0,0]},{"index":0.6,"rgb":[255,210,0]},{"index":1,"rgb":[255,255,255]}],
+
+	"spring":[{"index":0,"rgb":[255,0,255]},{"index":1,"rgb":[255,255,0]}],
+
+	"summer":[{"index":0,"rgb":[0,128,102]},{"index":1,"rgb":[255,255,102]}],
+
+	"autumn":[{"index":0,"rgb":[255,0,0]},{"index":1,"rgb":[255,255,0]}],
+
+	"winter":[{"index":0,"rgb":[0,0,255]},{"index":1,"rgb":[0,255,128]}],
+
+	"bone":[{"index":0,"rgb":[0,0,0]},{"index":0.376,"rgb":[84,84,116]},{"index":0.753,"rgb":[169,200,200]},{"index":1,"rgb":[255,255,255]}],
+
+	"copper":[{"index":0,"rgb":[0,0,0]},{"index":0.804,"rgb":[255,160,102]},{"index":1,"rgb":[255,199,127]}],
+
+	"greys":[{"index":0,"rgb":[0,0,0]},{"index":1,"rgb":[255,255,255]}],
+
+	"yignbu":[{"index":0,"rgb":[8,29,88]},{"index":0.125,"rgb":[37,52,148]},{"index":0.25,"rgb":[34,94,168]},{"index":0.375,"rgb":[29,145,192]},{"index":0.5,"rgb":[65,182,196]},{"index":0.625,"rgb":[127,205,187]},{"index":0.75,"rgb":[199,233,180]},{"index":0.875,"rgb":[237,248,217]},{"index":1,"rgb":[255,255,217]}],
+
+	"greens":[{"index":0,"rgb":[0,68,27]},{"index":0.125,"rgb":[0,109,44]},{"index":0.25,"rgb":[35,139,69]},{"index":0.375,"rgb":[65,171,93]},{"index":0.5,"rgb":[116,196,118]},{"index":0.625,"rgb":[161,217,155]},{"index":0.75,"rgb":[199,233,192]},{"index":0.875,"rgb":[229,245,224]},{"index":1,"rgb":[247,252,245]}],
+
+	"yiorrd":[{"index":0,"rgb":[128,0,38]},{"index":0.125,"rgb":[189,0,38]},{"index":0.25,"rgb":[227,26,28]},{"index":0.375,"rgb":[252,78,42]},{"index":0.5,"rgb":[253,141,60]},{"index":0.625,"rgb":[254,178,76]},{"index":0.75,"rgb":[254,217,118]},{"index":0.875,"rgb":[255,237,160]},{"index":1,"rgb":[255,255,204]}],
+
+	"bluered":[{"index":0,"rgb":[0,0,255]},{"index":1,"rgb":[255,0,0]}],
+
+	"rdbu":[{"index":0,"rgb":[5,10,172]},{"index":0.35,"rgb":[106,137,247]},{"index":0.5,"rgb":[190,190,190]},{"index":0.6,"rgb":[220,170,132]},{"index":0.7,"rgb":[230,145,90]},{"index":1,"rgb":[178,10,28]}],
+
+	"picnic":[{"index":0,"rgb":[0,0,255]},{"index":0.1,"rgb":[51,153,255]},{"index":0.2,"rgb":[102,204,255]},{"index":0.3,"rgb":[153,204,255]},{"index":0.4,"rgb":[204,204,255]},{"index":0.5,"rgb":[255,255,255]},{"index":0.6,"rgb":[255,204,255]},{"index":0.7,"rgb":[255,153,255]},{"index":0.8,"rgb":[255,102,204]},{"index":0.9,"rgb":[255,102,102]},{"index":1,"rgb":[255,0,0]}],
+
+	"rainbow":[{"index":0,"rgb":[150,0,90]},{"index":0.125,"rgb":[0,0,200]},{"index":0.25,"rgb":[0,25,255]},{"index":0.375,"rgb":[0,152,255]},{"index":0.5,"rgb":[44,255,150]},{"index":0.625,"rgb":[151,255,0]},{"index":0.75,"rgb":[255,234,0]},{"index":0.875,"rgb":[255,111,0]},{"index":1,"rgb":[255,0,0]}],
+
+	"portland":[{"index":0,"rgb":[12,51,131]},{"index":0.25,"rgb":[10,136,186]},{"index":0.5,"rgb":[242,211,56]},{"index":0.75,"rgb":[242,143,56]},{"index":1,"rgb":[217,30,30]}],
+
+	"blackbody":[{"index":0,"rgb":[0,0,0]},{"index":0.2,"rgb":[230,0,0]},{"index":0.4,"rgb":[230,210,0]},{"index":0.7,"rgb":[255,255,255]},{"index":1,"rgb":[160,200,255]}],
+
+	"earth":[{"index":0,"rgb":[0,0,130]},{"index":0.1,"rgb":[0,180,180]},{"index":0.2,"rgb":[40,210,40]},{"index":0.4,"rgb":[230,230,50]},{"index":0.6,"rgb":[120,70,20]},{"index":1,"rgb":[255,255,255]}],
+
+	"electric":[{"index":0,"rgb":[0,0,0]},{"index":0.15,"rgb":[30,0,100]},{"index":0.4,"rgb":[120,0,100]},{"index":0.6,"rgb":[160,90,0]},{"index":0.8,"rgb":[230,200,0]},{"index":1,"rgb":[255,250,220]}],
+
+	"alpha": [{"index":0, "rgb": [255,255,255,0]},{"index":1, "rgb": [255,255,255,1]}],
+
+	"viridis": [{"index":0,"rgb":[68,1,84]},{"index":0.13,"rgb":[71,44,122]},{"index":0.25,"rgb":[59,81,139]},{"index":0.38,"rgb":[44,113,142]},{"index":0.5,"rgb":[33,144,141]},{"index":0.63,"rgb":[39,173,129]},{"index":0.75,"rgb":[92,200,99]},{"index":0.88,"rgb":[170,220,50]},{"index":1,"rgb":[253,231,37]}],
+
+	"inferno": [{"index":0,"rgb":[0,0,4]},{"index":0.13,"rgb":[31,12,72]},{"index":0.25,"rgb":[85,15,109]},{"index":0.38,"rgb":[136,34,106]},{"index":0.5,"rgb":[186,54,85]},{"index":0.63,"rgb":[227,89,51]},{"index":0.75,"rgb":[249,140,10]},{"index":0.88,"rgb":[249,201,50]},{"index":1,"rgb":[252,255,164]}],
+
+	"magma": [{"index":0,"rgb":[0,0,4]},{"index":0.13,"rgb":[28,16,68]},{"index":0.25,"rgb":[79,18,123]},{"index":0.38,"rgb":[129,37,129]},{"index":0.5,"rgb":[181,54,122]},{"index":0.63,"rgb":[229,80,100]},{"index":0.75,"rgb":[251,135,97]},{"index":0.88,"rgb":[254,194,135]},{"index":1,"rgb":[252,253,191]}],
+
+	"plasma": [{"index":0,"rgb":[13,8,135]},{"index":0.13,"rgb":[75,3,161]},{"index":0.25,"rgb":[125,3,168]},{"index":0.38,"rgb":[168,34,150]},{"index":0.5,"rgb":[203,70,121]},{"index":0.63,"rgb":[229,107,93]},{"index":0.75,"rgb":[248,148,65]},{"index":0.88,"rgb":[253,195,40]},{"index":1,"rgb":[240,249,33]}],
+
+	"warm": [{"index":0,"rgb":[125,0,179]},{"index":0.13,"rgb":[172,0,187]},{"index":0.25,"rgb":[219,0,170]},{"index":0.38,"rgb":[255,0,130]},{"index":0.5,"rgb":[255,63,74]},{"index":0.63,"rgb":[255,123,0]},{"index":0.75,"rgb":[234,176,0]},{"index":0.88,"rgb":[190,228,0]},{"index":1,"rgb":[147,255,0]}],
+
+	"cool": [{"index":0,"rgb":[125,0,179]},{"index":0.13,"rgb":[116,0,218]},{"index":0.25,"rgb":[98,74,237]},{"index":0.38,"rgb":[68,146,231]},{"index":0.5,"rgb":[0,204,197]},{"index":0.63,"rgb":[0,247,146]},{"index":0.75,"rgb":[0,255,88]},{"index":0.88,"rgb":[40,255,8]},{"index":1,"rgb":[147,255,0]}],
+
+	"rainbow-soft": [{"index":0,"rgb":[125,0,179]},{"index":0.1,"rgb":[199,0,180]},{"index":0.2,"rgb":[255,0,121]},{"index":0.3,"rgb":[255,108,0]},{"index":0.4,"rgb":[222,194,0]},{"index":0.5,"rgb":[150,255,0]},{"index":0.6,"rgb":[0,255,55]},{"index":0.7,"rgb":[0,246,150]},{"index":0.8,"rgb":[50,167,222]},{"index":0.9,"rgb":[103,51,235]},{"index":1,"rgb":[124,0,186]}],
+
+	"bathymetry": [{"index":0,"rgb":[40,26,44]},{"index":0.13,"rgb":[59,49,90]},{"index":0.25,"rgb":[64,76,139]},{"index":0.38,"rgb":[63,110,151]},{"index":0.5,"rgb":[72,142,158]},{"index":0.63,"rgb":[85,174,163]},{"index":0.75,"rgb":[120,206,163]},{"index":0.88,"rgb":[187,230,172]},{"index":1,"rgb":[253,254,204]}],
+
+	"cdom": [{"index":0,"rgb":[47,15,62]},{"index":0.13,"rgb":[87,23,86]},{"index":0.25,"rgb":[130,28,99]},{"index":0.38,"rgb":[171,41,96]},{"index":0.5,"rgb":[206,67,86]},{"index":0.63,"rgb":[230,106,84]},{"index":0.75,"rgb":[242,149,103]},{"index":0.88,"rgb":[249,193,135]},{"index":1,"rgb":[254,237,176]}],
+
+	"chlorophyll": [{"index":0,"rgb":[18,36,20]},{"index":0.13,"rgb":[25,63,41]},{"index":0.25,"rgb":[24,91,59]},{"index":0.38,"rgb":[13,119,72]},{"index":0.5,"rgb":[18,148,80]},{"index":0.63,"rgb":[80,173,89]},{"index":0.75,"rgb":[132,196,122]},{"index":0.88,"rgb":[175,221,162]},{"index":1,"rgb":[215,249,208]}],
+
+	"density": [{"index":0,"rgb":[54,14,36]},{"index":0.13,"rgb":[89,23,80]},{"index":0.25,"rgb":[110,45,132]},{"index":0.38,"rgb":[120,77,178]},{"index":0.5,"rgb":[120,113,213]},{"index":0.63,"rgb":[115,151,228]},{"index":0.75,"rgb":[134,185,227]},{"index":0.88,"rgb":[177,214,227]},{"index":1,"rgb":[230,241,241]}],
+
+	"freesurface-blue": [{"index":0,"rgb":[30,4,110]},{"index":0.13,"rgb":[47,14,176]},{"index":0.25,"rgb":[41,45,236]},{"index":0.38,"rgb":[25,99,212]},{"index":0.5,"rgb":[68,131,200]},{"index":0.63,"rgb":[114,156,197]},{"index":0.75,"rgb":[157,181,203]},{"index":0.88,"rgb":[200,208,216]},{"index":1,"rgb":[241,237,236]}],
+
+	"freesurface-red": [{"index":0,"rgb":[60,9,18]},{"index":0.13,"rgb":[100,17,27]},{"index":0.25,"rgb":[142,20,29]},{"index":0.38,"rgb":[177,43,27]},{"index":0.5,"rgb":[192,87,63]},{"index":0.63,"rgb":[205,125,105]},{"index":0.75,"rgb":[216,162,148]},{"index":0.88,"rgb":[227,199,193]},{"index":1,"rgb":[241,237,236]}],
+
+	"oxygen": [{"index":0,"rgb":[64,5,5]},{"index":0.13,"rgb":[106,6,15]},{"index":0.25,"rgb":[144,26,7]},{"index":0.38,"rgb":[168,64,3]},{"index":0.5,"rgb":[188,100,4]},{"index":0.63,"rgb":[206,136,11]},{"index":0.75,"rgb":[220,174,25]},{"index":0.88,"rgb":[231,215,44]},{"index":1,"rgb":[248,254,105]}],
+
+	"par": [{"index":0,"rgb":[51,20,24]},{"index":0.13,"rgb":[90,32,35]},{"index":0.25,"rgb":[129,44,34]},{"index":0.38,"rgb":[159,68,25]},{"index":0.5,"rgb":[182,99,19]},{"index":0.63,"rgb":[199,134,22]},{"index":0.75,"rgb":[212,171,35]},{"index":0.88,"rgb":[221,210,54]},{"index":1,"rgb":[225,253,75]}],
+
+	"phase": [{"index":0,"rgb":[145,105,18]},{"index":0.13,"rgb":[184,71,38]},{"index":0.25,"rgb":[186,58,115]},{"index":0.38,"rgb":[160,71,185]},{"index":0.5,"rgb":[110,97,218]},{"index":0.63,"rgb":[50,123,164]},{"index":0.75,"rgb":[31,131,110]},{"index":0.88,"rgb":[77,129,34]},{"index":1,"rgb":[145,105,18]}],
+
+	"salinity": [{"index":0,"rgb":[42,24,108]},{"index":0.13,"rgb":[33,50,162]},{"index":0.25,"rgb":[15,90,145]},{"index":0.38,"rgb":[40,118,137]},{"index":0.5,"rgb":[59,146,135]},{"index":0.63,"rgb":[79,175,126]},{"index":0.75,"rgb":[120,203,104]},{"index":0.88,"rgb":[193,221,100]},{"index":1,"rgb":[253,239,154]}],
+
+	"temperature": [{"index":0,"rgb":[4,35,51]},{"index":0.13,"rgb":[23,51,122]},{"index":0.25,"rgb":[85,59,157]},{"index":0.38,"rgb":[129,79,143]},{"index":0.5,"rgb":[175,95,130]},{"index":0.63,"rgb":[222,112,101]},{"index":0.75,"rgb":[249,146,66]},{"index":0.88,"rgb":[249,196,65]},{"index":1,"rgb":[232,250,91]}],
+
+	"turbidity": [{"index":0,"rgb":[34,31,27]},{"index":0.13,"rgb":[65,50,41]},{"index":0.25,"rgb":[98,69,52]},{"index":0.38,"rgb":[131,89,57]},{"index":0.5,"rgb":[161,112,59]},{"index":0.63,"rgb":[185,140,66]},{"index":0.75,"rgb":[202,174,88]},{"index":0.88,"rgb":[216,209,126]},{"index":1,"rgb":[233,246,171]}],
+
+	"velocity-blue": [{"index":0,"rgb":[17,32,64]},{"index":0.13,"rgb":[35,52,116]},{"index":0.25,"rgb":[29,81,156]},{"index":0.38,"rgb":[31,113,162]},{"index":0.5,"rgb":[50,144,169]},{"index":0.63,"rgb":[87,173,176]},{"index":0.75,"rgb":[149,196,189]},{"index":0.88,"rgb":[203,221,211]},{"index":1,"rgb":[254,251,230]}],
+
+	"velocity-green": [{"index":0,"rgb":[23,35,19]},{"index":0.13,"rgb":[24,64,38]},{"index":0.25,"rgb":[11,95,45]},{"index":0.38,"rgb":[39,123,35]},{"index":0.5,"rgb":[95,146,12]},{"index":0.63,"rgb":[152,165,18]},{"index":0.75,"rgb":[201,186,69]},{"index":0.88,"rgb":[233,216,137]},{"index":1,"rgb":[255,253,205]}],
+
+	"cubehelix": [{"index":0,"rgb":[0,0,0]},{"index":0.07,"rgb":[22,5,59]},{"index":0.13,"rgb":[60,4,105]},{"index":0.2,"rgb":[109,1,135]},{"index":0.27,"rgb":[161,0,147]},{"index":0.33,"rgb":[210,2,142]},{"index":0.4,"rgb":[251,11,123]},{"index":0.47,"rgb":[255,29,97]},{"index":0.53,"rgb":[255,54,69]},{"index":0.6,"rgb":[255,85,46]},{"index":0.67,"rgb":[255,120,34]},{"index":0.73,"rgb":[255,157,37]},{"index":0.8,"rgb":[241,191,57]},{"index":0.87,"rgb":[224,220,93]},{"index":0.93,"rgb":[218,241,142]},{"index":1,"rgb":[227,253,198]}]
+};
+
+function lerp$1(v0, v1, t) {
+    return v0*(1-t)+v1*t
+}
+var lerp_1 = lerp$1;
+
+/*
+ * Ben Postlethwaite
+ * January 2013
+ * License MIT
+ */
+
+var colorScale = colorScale$1;
+var lerp = lerp_1;
+
+var colormap = createColormap;
+
+function createColormap (spec) {
+    /*
+     * Default Options
+     */
+    var indicies, fromrgba, torgba,
+        nsteps, cmap, colormap, format,
+        nshades, colors, alpha, i;
+
+    if ( !spec ) spec = {};
+
+    nshades = (spec.nshades || 72) - 1;
+    format = spec.format || 'hex';
+
+    colormap = spec.colormap;
+    if (!colormap) colormap = 'jet';
+
+    if (typeof colormap === 'string') {
+        colormap = colormap.toLowerCase();
+
+        if (!colorScale[colormap]) {
+            throw Error(colormap + ' not a supported colorscale');
+        }
+
+        cmap = colorScale[colormap];
+
+    } else if (Array.isArray(colormap)) {
+        cmap = colormap.slice();
+
+    } else {
+        throw Error('unsupported colormap option', colormap);
+    }
+
+    if (cmap.length > nshades + 1) {
+        throw new Error(
+            colormap+' map requires nshades to be at least size '+cmap.length
+        );
+    }
+
+    if (!Array.isArray(spec.alpha)) {
+
+        if (typeof spec.alpha === 'number') {
+            alpha = [spec.alpha, spec.alpha];
+
+        } else {
+            alpha = [1, 1];
+        }
+
+    } else if (spec.alpha.length !== 2) {
+        alpha = [1, 1];
+
+    } else {
+        alpha = spec.alpha.slice();
+    }
+
+    // map index points from 0..1 to 0..n-1
+    indicies = cmap.map(function(c) {
+        return Math.round(c.index * nshades);
+    });
+
+    // Add alpha channel to the map
+    alpha[0] = Math.min(Math.max(alpha[0], 0), 1);
+    alpha[1] = Math.min(Math.max(alpha[1], 0), 1);
+
+    var steps = cmap.map(function(c, i) {
+        var index = cmap[i].index;
+
+        var rgba = cmap[i].rgb.slice();
+
+        // if user supplies their own map use it
+        if (rgba.length === 4 && rgba[3] >= 0 && rgba[3] <= 1) {
+            return rgba
+        }
+        rgba[3] = alpha[0] + (alpha[1] - alpha[0])*index;
+
+        return rgba
+    });
+
+
+    /*
+     * map increasing linear values between indicies to
+     * linear steps in colorvalues
+     */
+    var colors = [];
+    for (i = 0; i < indicies.length-1; ++i) {
+        nsteps = indicies[i+1] - indicies[i];
+        fromrgba = steps[i];
+        torgba = steps[i+1];
+
+        for (var j = 0; j < nsteps; j++) {
+            var amt = j / nsteps;
+            colors.push([
+                Math.round(lerp(fromrgba[0], torgba[0], amt)),
+                Math.round(lerp(fromrgba[1], torgba[1], amt)),
+                Math.round(lerp(fromrgba[2], torgba[2], amt)),
+                lerp(fromrgba[3], torgba[3], amt)
+            ]);
+        }
+    }
+
+    //add 1 step as last value
+    colors.push(cmap[cmap.length - 1].rgb.concat(alpha[1]));
+
+    if (format === 'hex') colors = colors.map( rgb2hex );
+    else if (format === 'rgbaString') colors = colors.map( rgbaStr );
+    else if (format === 'float') colors = colors.map( rgb2float );
+
+    return colors;
+}
+function rgb2float (rgba) {
+    return [
+        rgba[0] / 255,
+        rgba[1] / 255,
+        rgba[2] / 255,
+        rgba[3]
+    ]
+}
+
+function rgb2hex (rgba) {
+    var dig, hex = '#';
+    for (var i = 0; i < 3; ++i) {
+        dig = rgba[i];
+        dig = dig.toString(16);
+        hex += ('00' + dig).substr( dig.length );
+    }
+    return hex;
+}
+
+function rgbaStr (rgba) {
+    return 'rgba(' + rgba.join(',') + ')';
+}
+
 /* src/Component.svelte generated by Svelte v3.49.0 */
 
 function add_css(target) {
-	append_styles(target, "svelte-147wpgz", ".label.svelte-147wpgz{font-size:10px;color:rgba(0, 0, 0, 0.5);font-variant:small-caps}.value.svelte-147wpgz{font-size:10px}.box.svelte-147wpgz{padding:10px;margin:10px;border:0.5px solid rgb(224, 224, 224)}#container.svelte-147wpgz{display:flex;flex-direction:row;flex-wrap:wrap}");
+	append_styles(target, "svelte-kesy9g", ".spec.svelte-kesy9g{height:75px;width:150px;margin-left:48px}.label.svelte-kesy9g{font-size:10px;color:rgba(0, 0, 0, 0.5);font-variant:small-caps}.value.svelte-kesy9g{font-size:10px}.box.svelte-kesy9g{padding:10px;margin:10px;border:0.5px solid rgb(224, 224, 224)}#container.svelte-kesy9g{display:flex;flex-direction:row;flex-wrap:wrap}");
 }
 
 function get_each_context(ctx, list, i) {
 	const child_ctx = ctx.slice();
-	child_ctx[10] = list[i];
-	child_ctx[11] = list;
-	child_ctx[12] = i;
+	child_ctx[13] = list[i];
+	child_ctx[14] = list;
+	child_ctx[15] = i;
 	return child_ctx;
 }
 
-// (51:10) <Icon component={Svg} viewBox="0 0 24 24">
+// (70:10) <Icon component={Svg} viewBox="0 0 24 24">
 function create_default_slot_1(ctx) {
 	let path;
 	let path_d_value;
@@ -10101,7 +11165,7 @@ function create_default_slot_1(ctx) {
 			path = svg_element("path");
 			attr(path, "fill", "currentColor");
 
-			attr(path, "d", path_d_value = /*waves*/ ctx[4][/*i*/ ctx[12]] && /*waves*/ ctx[4][/*i*/ ctx[12]].isPlaying()
+			attr(path, "d", path_d_value = /*waves*/ ctx[5][/*i*/ ctx[15]] && /*waves*/ ctx[5][/*i*/ ctx[15]].isPlaying()
 			? mdiPause
 			: mdiPlay);
 		},
@@ -10109,7 +11173,7 @@ function create_default_slot_1(ctx) {
 			insert(target, path, anchor);
 		},
 		p(ctx, dirty) {
-			if (dirty & /*waves*/ 16 && path_d_value !== (path_d_value = /*waves*/ ctx[4][/*i*/ ctx[12]] && /*waves*/ ctx[4][/*i*/ ctx[12]].isPlaying()
+			if (dirty & /*waves*/ 32 && path_d_value !== (path_d_value = /*waves*/ ctx[5][/*i*/ ctx[15]] && /*waves*/ ctx[5][/*i*/ ctx[15]].isPlaying()
 			? mdiPause
 			: mdiPlay)) {
 				attr(path, "d", path_d_value);
@@ -10121,7 +11185,7 @@ function create_default_slot_1(ctx) {
 	};
 }
 
-// (46:8) <IconButton           on:click={() => {             waves[i].isPlaying() ? waves[i].pause() : waves[i].play();           }}         >
+// (65:8) <IconButton           on:click={() => {             waves[i].isPlaying() ? waves[i].pause() : waves[i].play();           }}         >
 function create_default_slot(ctx) {
 	let icon;
 	let current;
@@ -10146,7 +11210,7 @@ function create_default_slot(ctx) {
 		p(ctx, dirty) {
 			const icon_changes = {};
 
-			if (dirty & /*$$scope, waves*/ 8208) {
+			if (dirty & /*$$scope, waves*/ 65568) {
 				icon_changes.$$scope = { dirty, ctx };
 			}
 
@@ -10167,14 +11231,14 @@ function create_default_slot(ctx) {
 	};
 }
 
-// (69:6) {#if modelColumn && row[modelColumn]}
+// (88:6) {#if modelColumn && row[modelColumn]}
 function create_if_block(ctx) {
 	let br;
 	let t0;
 	let span0;
 	let t2;
 	let span1;
-	let t3_value = /*row*/ ctx[10][/*modelColumn*/ ctx[1]] + "";
+	let t3_value = /*row*/ ctx[13][/*modelColumn*/ ctx[1]] + "";
 	let t3;
 
 	return {
@@ -10186,8 +11250,8 @@ function create_if_block(ctx) {
 			t2 = space();
 			span1 = element("span");
 			t3 = text(t3_value);
-			attr(span0, "class", "label svelte-147wpgz");
-			attr(span1, "class", "value svelte-147wpgz");
+			attr(span0, "class", "label svelte-kesy9g");
+			attr(span1, "class", "value svelte-kesy9g");
 		},
 		m(target, anchor) {
 			insert(target, br, anchor);
@@ -10198,7 +11262,7 @@ function create_if_block(ctx) {
 			append(span1, t3);
 		},
 		p(ctx, dirty) {
-			if (dirty & /*table, modelColumn*/ 3 && t3_value !== (t3_value = /*row*/ ctx[10][/*modelColumn*/ ctx[1]] + "")) set_data(t3, t3_value);
+			if (dirty & /*table, modelColumn*/ 3 && t3_value !== (t3_value = /*row*/ ctx[13][/*modelColumn*/ ctx[1]] + "")) set_data(t3, t3_value);
 		},
 		d(detaching) {
 			if (detaching) detach(br);
@@ -10210,28 +11274,28 @@ function create_if_block(ctx) {
 	};
 }
 
-// (43:2) {#each table as row, i}
+// (62:2) {#each table as row, i}
 function create_each_block(ctx) {
-	let div2;
+	let div3;
 	let div1;
 	let iconbutton;
 	let t0;
 	let div0;
 	let div0_id_value;
-	let i = /*i*/ ctx[12];
+	let i = /*i*/ ctx[15];
 	let t1;
-	let br;
+	let div2;
 	let t2;
 	let span0;
 	let span1;
-	let t4_value = /*row*/ ctx[10][/*idColumn*/ ctx[2]] + "";
+	let t4_value = /*row*/ ctx[13][/*idColumn*/ ctx[2]] + "";
 	let t4;
 	let t5;
 	let t6;
 	let current;
 
 	function click_handler() {
-		return /*click_handler*/ ctx[8](/*i*/ ctx[12]);
+		return /*click_handler*/ ctx[9](/*i*/ ctx[15]);
 	}
 
 	iconbutton = new IconButton({
@@ -10242,19 +11306,21 @@ function create_each_block(ctx) {
 		});
 
 	iconbutton.$on("click", click_handler);
-	const assign_div0 = () => /*div0_binding*/ ctx[9](div0, i);
-	const unassign_div0 = () => /*div0_binding*/ ctx[9](null, i);
-	let if_block = /*modelColumn*/ ctx[1] && /*row*/ ctx[10][/*modelColumn*/ ctx[1]] && create_if_block(ctx);
+	const assign_div0 = () => /*div0_binding*/ ctx[10](div0, i);
+	const unassign_div0 = () => /*div0_binding*/ ctx[10](null, i);
+	const assign_div2 = () => /*div2_binding*/ ctx[11](div2, i);
+	const unassign_div2 = () => /*div2_binding*/ ctx[11](null, i);
+	let if_block = /*modelColumn*/ ctx[1] && /*row*/ ctx[13][/*modelColumn*/ ctx[1]] && create_if_block(ctx);
 
 	return {
 		c() {
-			div2 = element("div");
+			div3 = element("div");
 			div1 = element("div");
 			create_component(iconbutton.$$.fragment);
 			t0 = space();
 			div0 = element("div");
 			t1 = space();
-			br = element("br");
+			div2 = element("div");
 			t2 = space();
 			span0 = element("span");
 			span0.textContent = "label: ";
@@ -10263,62 +11329,70 @@ function create_each_block(ctx) {
 			t5 = space();
 			if (if_block) if_block.c();
 			t6 = space();
-			attr(div0, "id", div0_id_value = "wave_" + /*row*/ ctx[10][/*idColumn*/ ctx[2]]);
-			attr(div0, "class", "svelte-147wpgz");
+			attr(div0, "id", div0_id_value = "wave_" + /*row*/ ctx[13][/*idColumn*/ ctx[2]]);
+			attr(div0, "class", "svelte-kesy9g");
 			set_style(div0, "width", `150px`, false);
 			set_style(div0, "height", `50px`, false);
 			set_style(div1, "display", `flex`, false);
-			attr(span0, "class", "label svelte-147wpgz");
-			attr(span1, "class", "value svelte-147wpgz");
-			attr(div2, "class", "box svelte-147wpgz");
+			attr(div2, "class", "spec svelte-kesy9g");
+			attr(span0, "class", "label svelte-kesy9g");
+			attr(span1, "class", "value svelte-kesy9g");
+			attr(div3, "class", "box svelte-kesy9g");
 		},
 		m(target, anchor) {
-			insert(target, div2, anchor);
-			append(div2, div1);
+			insert(target, div3, anchor);
+			append(div3, div1);
 			mount_component(iconbutton, div1, null);
 			append(div1, t0);
 			append(div1, div0);
 			assign_div0();
-			append(div2, t1);
-			append(div2, br);
-			append(div2, t2);
-			append(div2, span0);
-			append(div2, span1);
+			append(div3, t1);
+			append(div3, div2);
+			assign_div2();
+			append(div3, t2);
+			append(div3, span0);
+			append(div3, span1);
 			append(span1, t4);
-			append(div2, t5);
-			if (if_block) if_block.m(div2, null);
-			append(div2, t6);
+			append(div3, t5);
+			if (if_block) if_block.m(div3, null);
+			append(div3, t6);
 			current = true;
 		},
 		p(new_ctx, dirty) {
 			ctx = new_ctx;
 			const iconbutton_changes = {};
 
-			if (dirty & /*$$scope, waves*/ 8208) {
+			if (dirty & /*$$scope, waves*/ 65568) {
 				iconbutton_changes.$$scope = { dirty, ctx };
 			}
 
 			iconbutton.$set(iconbutton_changes);
 
-			if (!current || dirty & /*table, idColumn*/ 5 && div0_id_value !== (div0_id_value = "wave_" + /*row*/ ctx[10][/*idColumn*/ ctx[2]])) {
+			if (!current || dirty & /*table, idColumn*/ 5 && div0_id_value !== (div0_id_value = "wave_" + /*row*/ ctx[13][/*idColumn*/ ctx[2]])) {
 				attr(div0, "id", div0_id_value);
 			}
 
-			if (i !== /*i*/ ctx[12]) {
+			if (i !== /*i*/ ctx[15]) {
 				unassign_div0();
-				i = /*i*/ ctx[12];
+				i = /*i*/ ctx[15];
 				assign_div0();
 			}
 
-			if ((!current || dirty & /*table, idColumn*/ 5) && t4_value !== (t4_value = /*row*/ ctx[10][/*idColumn*/ ctx[2]] + "")) set_data(t4, t4_value);
+			if (i !== /*i*/ ctx[15]) {
+				unassign_div2();
+				i = /*i*/ ctx[15];
+				assign_div2();
+			}
 
-			if (/*modelColumn*/ ctx[1] && /*row*/ ctx[10][/*modelColumn*/ ctx[1]]) {
+			if ((!current || dirty & /*table, idColumn*/ 5) && t4_value !== (t4_value = /*row*/ ctx[13][/*idColumn*/ ctx[2]] + "")) set_data(t4, t4_value);
+
+			if (/*modelColumn*/ ctx[1] && /*row*/ ctx[13][/*modelColumn*/ ctx[1]]) {
 				if (if_block) {
 					if_block.p(ctx, dirty);
 				} else {
 					if_block = create_if_block(ctx);
 					if_block.c();
-					if_block.m(div2, t6);
+					if_block.m(div3, t6);
 				}
 			} else if (if_block) {
 				if_block.d(1);
@@ -10335,9 +11409,10 @@ function create_each_block(ctx) {
 			current = false;
 		},
 		d(detaching) {
-			if (detaching) detach(div2);
+			if (detaching) detach(div3);
 			destroy_component(iconbutton);
 			unassign_div0();
+			unassign_div2();
 			if (if_block) if_block.d();
 		}
 	};
@@ -10366,7 +11441,7 @@ function create_fragment(ctx) {
 			}
 
 			attr(div, "id", "container");
-			attr(div, "class", "svelte-147wpgz");
+			attr(div, "class", "svelte-kesy9g");
 		},
 		m(target, anchor) {
 			insert(target, div, anchor);
@@ -10378,7 +11453,7 @@ function create_fragment(ctx) {
 			current = true;
 		},
 		p(ctx, [dirty]) {
-			if (dirty & /*table, modelColumn, idColumn, divs, waves, Svg, mdiPause, mdiPlay*/ 31) {
+			if (dirty & /*table, modelColumn, idColumn, specDivs, divs, waves, Svg, mdiPause, mdiPlay*/ 63) {
 				each_value = /*table*/ ctx[0];
 				let i;
 
@@ -10438,7 +11513,15 @@ function instance($$self, $$props, $$invalidate) {
 	let { dataColumn } = $$props;
 	let { transformColumn } = $$props;
 	let { idColumn } = $$props;
+
+	const colors = colormap({
+		colormap: "hot",
+		nshades: 256,
+		format: "float"
+	});
+
 	let divs = [];
+	let specDivs = [];
 
 	const click_handler = i => {
 		waves[i].isPlaying()
@@ -10453,27 +11536,44 @@ function instance($$self, $$props, $$invalidate) {
 		});
 	}
 
+	function div2_binding($$value, i) {
+		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
+			specDivs[i] = $$value;
+			$$invalidate(4, specDivs);
+		});
+	}
+
 	$$self.$$set = $$props => {
 		if ('table' in $$props) $$invalidate(0, table = $$props.table);
 		if ('modelColumn' in $$props) $$invalidate(1, modelColumn = $$props.modelColumn);
-		if ('labelColumn' in $$props) $$invalidate(5, labelColumn = $$props.labelColumn);
-		if ('dataColumn' in $$props) $$invalidate(6, dataColumn = $$props.dataColumn);
-		if ('transformColumn' in $$props) $$invalidate(7, transformColumn = $$props.transformColumn);
+		if ('labelColumn' in $$props) $$invalidate(6, labelColumn = $$props.labelColumn);
+		if ('dataColumn' in $$props) $$invalidate(7, dataColumn = $$props.dataColumn);
+		if ('transformColumn' in $$props) $$invalidate(8, transformColumn = $$props.transformColumn);
 		if ('idColumn' in $$props) $$invalidate(2, idColumn = $$props.idColumn);
 	};
 
 	$$self.$$.update = () => {
-		if ($$self.$$.dirty & /*divs, transformColumn, table, idColumn*/ 141) {
-			$$invalidate(4, waves = divs.map((d, i) => {
+		if ($$self.$$.dirty & /*divs, specDivs, transformColumn, table, idColumn*/ 285) {
+			$$invalidate(5, waves = divs.map((d, i) => {
 				if (d) {
 					d.innerHTML = "";
+					let w;
 
-					let w = WaveSurfer.create({
+					w = WaveSurfer.create({
 						container: d,
 						waveColor: "violet",
 						progressColor: "purple",
 						mediaControls: true,
-						height: 50
+						height: 50,
+						plugins: [
+							SpectrogramPlugin.create({
+								container: specDivs[i],
+								labels: false,
+								height: 50,
+								frequencyMax: 4410,
+								colorMap: colors
+							})
+						]
 					});
 
 					if (!transformColumn) {
@@ -10493,12 +11593,14 @@ function instance($$self, $$props, $$invalidate) {
 		modelColumn,
 		idColumn,
 		divs,
+		specDivs,
 		waves,
 		labelColumn,
 		dataColumn,
 		transformColumn,
 		click_handler,
-		div0_binding
+		div0_binding,
+		div2_binding
 	];
 }
 
@@ -10515,9 +11617,9 @@ class Component extends SvelteComponent {
 			{
 				table: 0,
 				modelColumn: 1,
-				labelColumn: 5,
-				dataColumn: 6,
-				transformColumn: 7,
+				labelColumn: 6,
+				dataColumn: 7,
+				transformColumn: 8,
 				idColumn: 2
 			},
 			add_css

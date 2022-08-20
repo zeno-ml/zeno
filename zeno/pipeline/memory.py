@@ -2,7 +2,7 @@ from typing import List, Union
 
 from pandas import DataFrame
 
-from ..classes import ZenoColumn
+from zeno.classes import ZenoColumn
 
 
 class PipelineMemory:

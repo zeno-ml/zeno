@@ -1,8 +1,6 @@
 <script lang="ts">
 	import type ColumnTable from "arquero/dist/types/table/column-table";
-	import type { View } from "svelte-vega";
 
-	import { VegaLite } from "svelte-vega";
 	import { onMount } from "svelte";
 
 	import Button from "@smui/button";
@@ -11,6 +9,7 @@
 	import ConstScope from "../../cursed/ConstScope.svelte";
 
 	import { columnHash } from "../../util/util";
+	import { MetadataType } from "../../globals";
 	import { generateCountSpec, generateHistogramSpec } from "./vegaSpecs";
 	import {
 		metadataSelections,
@@ -26,19 +25,37 @@
 		computeDomain,
 		assignColorsFromDomain,
 		colorDomain,
-		ChartType,
 	} from "../metadata";
 
+	import DateMetadataCell from "./DateMetadataCell.svelte";
+	import BinaryMetadataCell from "./BinaryMetadataCell.svelte";
+	import ChartMetadataCell from "./ChartMetadataCell.svelte";
+	import TextMetadataCell from "./TextMetadataCell.svelte";
+
+	interface IColorAssignments {
+		colors: string[];
+		labels: { id: string; colorIndex: number }[];
+		hash: string;
+	}
+
 	export let col: ZenoColumn;
-	export let shouldColor: boolean = false;
+	export let shouldColor = false;
 	export let assignColors: boolean = shouldColor;
 
-	let chartType: ChartType;
+	let chartType: MetadataType;
+	let selection: MetadataSelection = {
+		type: MetadataType.OTHER,
+		column: col,
+		values: [],
+	};
+	// TODO: make interface.
 	let domain: object[];
-	let selection = undefined;
-	let finalSelection = undefined;
-	let view: View;
 	let histogramData = { table: [] };
+	let colorAssignments: IColorAssignments = {
+		colors: [],
+		labels: [],
+		hash: "",
+	};
 	let hoveringCell = false;
 
 	$: hash = columnHash(col);
@@ -54,21 +71,22 @@
 		updateData($table, $filteredTable);
 	}
 	$: dynamicSpec =
-		chartType === ChartType.Histogram
+		chartType === MetadataType.HISTOGRAM
 			? generateHistogramSpec
 			: generateCountSpec;
 
 	table.subscribe((t) => drawChart(t));
+
 	onMount(() => {
+		selection.column = col;
 		drawChart($table);
 		updateData($table, $filteredTable);
 	});
 
 	function updateData(table: ColumnTable, filteredTable: ColumnTable) {
 		if (
-			(chartType === ChartType.Count ||
-				chartType === ChartType.Histogram ||
-				chartType === ChartType.Binary) &&
+			(chartType === MetadataType.COUNT ||
+				chartType === MetadataType.HISTOGRAM) &&
 			table.column(hash)
 		) {
 			const counts = computeCountsFromDomain({
@@ -77,14 +95,14 @@
 				column: hash,
 				type: chartType,
 			});
-			if (chartType === ChartType.Count || chartType === ChartType.Binary) {
+			if (chartType === MetadataType.COUNT) {
 				domain = domain.map((d, i) => ({
 					filteredCount: counts[i].count,
 					count: d["count"],
 					category: d["category"],
 					color: d["color"],
 				}));
-			} else if (chartType === ChartType.Histogram) {
+			} else if (chartType === MetadataType.HISTOGRAM) {
 				domain = domain.map((d, i) => ({
 					filteredCount: counts[i].count,
 					count: d["count"],
@@ -104,25 +122,27 @@
 				.rollup({ unique: `d => op.distinct(d["${hash}"])` })
 				.object()["unique"];
 
-			if (!isOrdinal && unique === 2) {
-				let vals = t
-					.orderby(hash)
-					.rollup({ a: `d => op.array_agg_distinct(d["${hash}"])` })
-					.object()["a"];
-				if (Number(vals[0]) === 0 && Number(vals[1]) === 1) {
-					chartType = ChartType.Binary;
-				}
-			} else if (isOrdinal) {
+			if (isOrdinal) {
 				if (unique <= 20) {
-					chartType = ChartType.Count;
+					chartType = MetadataType.COUNT;
+				} else if (!isNaN(Date.parse(t.column(hash).get(0)))) {
+					chartType = MetadataType.DATE;
 				} else {
-					chartType = ChartType.Other;
+					chartType = MetadataType.OTHER;
 				}
 			} else {
-				if (unique < 20) {
-					chartType = ChartType.Count;
+				if (unique === 2) {
+					let vals = t
+						.orderby(hash)
+						.rollup({ a: `d => op.array_agg_distinct(d["${hash}"])` })
+						.object()["a"];
+					if (Number(vals[0]) === 0 && Number(vals[1]) === 1) {
+						chartType = MetadataType.BINARY;
+					}
+				} else if (unique < 20) {
+					chartType = MetadataType.COUNT;
 				} else {
-					chartType = ChartType.Histogram;
+					chartType = MetadataType.HISTOGRAM;
 				}
 			}
 
@@ -133,6 +153,8 @@
 			});
 			domain = localDomain;
 			domain.forEach((d) => (d["filteredCount"] = d["count"]));
+
+			selection.type = chartType;
 
 			colorDomain({ domain, type: chartType });
 
@@ -152,62 +174,13 @@
 		}
 	}
 
-	metadataSelections.subscribe((m) => {
-		if (!m.has(hash) && view) {
-			if (view.getState().signals["brush_x"]) {
-				view.signal("brush", {});
-				if (view.getState().signals["brush_data"]) {
-					view.signal("brush_data", {});
-				}
-				view.signal("brush_x", []);
-				view.runAsync();
-			}
-			if (view.getState().signals["select_tuple"]) {
-				view.signal("select", {});
-				view.signal("select_modify", undefined);
-				view.signal("select_toggle", false);
-				view.signal("select_tuple", undefined);
-				view.signal("highlight", {});
-				view.signal("highlight_modify", undefined);
-				view.signal("highlight_toggle", false);
-				view.signal("highlight_tuple", undefined);
-				view.runAsync();
-			}
-		}
-	});
-
-	$: if (view) {
-		if (chartType === ChartType.Histogram) {
-			view.addSignalListener("brush", (...s) => {
-				return (selection = s[1].binStart
-					? ["range", ...s[1].binStart]
-					: undefined);
-			});
-		} else if (chartType === ChartType.Count) {
-			view.addSignalListener(
-				"select",
-				(...s) =>
-					(selection = s[1].category ? ["points", ...s[1].category] : undefined)
-			);
-		}
-	}
-
 	function setSelection() {
-		if (selection === finalSelection) {
-			return;
-		}
-
-		finalSelection = selection;
 		metadataSelections.update((m) => {
-			if (!finalSelection) {
+			if (selection.values.length === 0) {
 				m.delete(hash);
 				return m;
 			}
-			m.set(hash, {
-				column: col,
-				type: finalSelection[0],
-				values: finalSelection.slice(1),
-			});
+			m.set(hash, selection);
 			return m;
 		});
 	}
@@ -238,66 +211,29 @@
 		</div>
 
 		<div class="top-right-cell">
-			{#if chartType === ChartType.Binary}
-				<div style:display="flex">
-					<ConstScope>
-						{@const IS = findTableCategory({
-							category: 1,
-							table: histogramData.table,
-						})}
-
-						<div class="binary-button">
-							<Button
-								variant="outlined"
-								style="color: {selectedHash ? IS.color : ''};"
-								on:click={() => {
-									selection =
-										selection && selection[1] === "is"
-											? undefined
-											: ["binary", "is"];
-									setSelection();
-								}}>
-								<Label>Is</Label>
-							</Button>
-							{IS.filteredCount}
-						</div>
-					</ConstScope>
-
-					<ConstScope>
-						{@const NOT = findTableCategory({
-							category: 0,
-							table: histogramData.table,
-						})}
-
-						<div class="binary-button">
-							<Button
-								variant="outlined"
-								style="color: {selectedHash ? NOT.color : ''};"
-								on:click={() => {
-									selection =
-										selection && selection[1] === "is not"
-											? undefined
-											: ["binary", "is not"];
-									setSelection();
-								}}>
-								<Label>Is Not</Label>
-							</Button>
-							{NOT.filteredCount}
-						</div>
-					</ConstScope>
-				</div>
+			{#if chartType === MetadataType.BINARY}
+				<BinaryMetadataCell
+					bind:selection
+					{setSelection}
+					{hash}
+					{selectedHash}
+					{colorAssignments} />
 			{/if}
 
-			{#if selection && selection[0] === "range"}
-				<div class="top-text">
+			{#if chartType === MetadataType.OTHER}
+				<TextMetadataCell bind:selection {setSelection} {hash} />
+			{/if}
+
+			{#if selection.values && selection.type === MetadataType.HISTOGRAM}
+				<div>
 					<span>
-						{selection ? selection[1].toFixed(2) + " - " : ""}
-						{selection ? selection[2].toFixed(2) : ""}
+						{selection.values[0] ? selection.values[0].toFixed(2) + " - " : ""}
+						{selection.values[1] ? selection.values[1].toFixed(2) : ""}
 					</span>
 				</div>
 			{/if}
 
-			{#if chartType !== ChartType.Other && shouldColor && (hoveringCell || selectedHash)}
+			{#if chartType !== MetadataType.OTHER && shouldColor && (hoveringCell || selectedHash)}
 				<div class="top-text">
 					<IconButton
 						size="mini"
@@ -305,35 +241,47 @@
 						style="color: {selectedHashColor}; margin-top: -10px;"
 						on:click={() => {
 							colorByHash.set(hash);
-						}}>brush</IconButton>
+						}}>format_paint</IconButton>
 				</div>
 			{/if}
 		</div>
-
-		{#if $table.column(hash) && chartType === ChartType.Other}
-			<span style:margin-right="5px">
-				unique values: {$table
-					.rollup({ unique: `d => op.distinct(d["${hash}"])` })
-					.object()["unique"]}
-			</span>
-		{/if}
 	</div>
-	{#if histogramData.table.length > 0 && (chartType === ChartType.Histogram || chartType === ChartType.Count)}
-		<div
-			id="histogram"
-			on:mouseup={setSelection}
-			on:mouseout={setSelection}
-			on:click={setSelection}
-			on:blur={setSelection}>
-			<VegaLite
-				spec={dynamicSpec({
-					colors:
-						shouldColor && selectedHash ? domain.map((d) => d["color"]) : [],
-				})}
-				data={histogramData}
-				bind:view
-				options={{ tooltip: true, actions: false, theme: "vox" }} />
+
+	{#if chartType === MetadataType.DATE && domain}
+		<DateMetadataCell bind:selection bind:domain {hash} {setSelection} />
+	{/if}
+
+	{#if histogramData.table.length > 0 && (chartType === MetadataType.HISTOGRAM || chartType === MetadataType.COUNT)}
+		<ChartMetadataCell
+			bind:selection
+			{setSelection}
+			{dynamicSpec}
+			{shouldColor}
+			{selectedHash}
+			{domain}
+			{histogramData}
+			{hash}
+			{chartType} />
+	{/if}
+>>>>>>> main
 		</div>
+	</div>
+
+	{#if chartType === MetadataType.DATE && domain}
+		<DateMetadataCell bind:selection bind:domain {hash} {setSelection} />
+	{/if}
+
+	{#if histogramData.table.length > 0 && (chartType === MetadataType.HISTOGRAM || chartType === MetadataType.COUNT)}
+		<ChartMetadataCell
+			bind:selection
+			{setSelection}
+			{dynamicSpec}
+			{shouldColor}
+			{selectedHash}
+			{domain}
+			{histogramData}
+			{hash}
+			{chartType} />
 	{/if}
 </div>
 
@@ -356,10 +304,13 @@
 		margin-bottom: 5px;
 		color: #666;
 	}
-	.binary-button {
+	.top-right-cell {
 		display: flex;
-		flex-direction: column;
 		align-items: center;
+		gap: 2px;
+	}
+	.top-text {
+		height: 18px;
 	}
 	.top-right-cell {
 		display: flex;
