@@ -53,6 +53,8 @@
 			transform: $transform,
 		},
 	]);
+
+	$: completedColumnHashes = $status.completeColumns.map((c) => columnHash(c));
 </script>
 
 <div class="side-container">
@@ -132,7 +134,12 @@
 	{/if}
 
 	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL) as col}
-		<MetadataCell {col} {shouldColor} />
+		{@const idx = completedColumnHashes.indexOf(columnHash(col))}
+		{#if idx > -1}
+			<MetadataCell col={$status.completeColumns[idx]} {shouldColor} />
+		{:else}
+			<MetadataCell {col} {shouldColor} />
+		{/if}
 	{/each}
 
 	{#if $model}

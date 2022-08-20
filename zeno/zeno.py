@@ -29,6 +29,7 @@ from zeno.util import (
     add_to_path,
     get_arrow_bytes,
     get_function,
+    getMetadataType,
     load_series,
     postdistill_data,
     predistill_data,
@@ -54,19 +55,41 @@ class Zeno(object):
     ):
         logging.basicConfig(level=logging.INFO)
 
-        self.pipeline = Pipeline()
+        self.__load_metadata_file(metadata_path, id_column, data_column, label_column)
 
         self.tests = tests
         self.batch_size = batch_size
-        self.id_column = ZenoColumn(column_type=ZenoColumnType.METADATA, name=id_column)
-        self.data_column = ZenoColumn(
-            column_type=ZenoColumnType.METADATA, name=data_column
-        )
-        self.label_column = ZenoColumn(
-            column_type=ZenoColumnType.METADATA, name=label_column
-        )
         self.data_path = data_path
         self.label_path = label_path
+        self.status: str = "Initializing"
+        self.done_processing = False
+
+        self.distill_functions: Dict[str, ZenoFunction] = {}
+        self.metric_functions: Dict[str, ZenoFunction] = {}
+        self.transform_functions: Dict[str, ZenoFunction] = {}
+        self.predict_function: ZenoFunction = ZenoFunction(
+            name="", file_name=Path(""), fn_type=ZenoFunctionType.PREDICTION
+        )
+
+        self.metadata_name = os.path.basename(metadata_path).split(".")[0]
+        self.cache_path = cache_path
+        os.makedirs(self.cache_path, exist_ok=True)
+
+        self.folders: List[str] = read_pickle("folders.pickle", self.cache_path, [])
+        self.reports: List[Report] = read_pickle("reports.pickle", self.cache_path, [])
+        self.slices: Dict[str, Slice] = read_pickle(
+            "slices.pickle", self.cache_path, {}
+        )
+
+        if models and os.path.isdir(models[0]):
+            self.model_paths = [
+                os.path.join(models[0], m) for m in os.listdir(models[0])
+            ]
+        else:
+            self.model_paths = models  # type: ignore
+        self.model_names = [os.path.basename(p).split(".")[0] for p in self.model_paths]
+
+        self.pipeline = Pipeline()
 
         # Options passed to Zeno functions.
         self.zeno_options = ZenoOptions(
@@ -80,23 +103,9 @@ class Zeno(object):
             output_path="",
         )
 
-        if models and os.path.isdir(models[0]):
-            self.model_paths = [
-                os.path.join(models[0], m) for m in os.listdir(models[0])
-            ]
-        else:
-            self.model_paths = models  # type: ignore
-        self.model_names = [os.path.basename(p).split(".")[0] for p in self.model_paths]
-
-        self.status: str = "Initializing"
-
-        self.predict_function: ZenoFunction = ZenoFunction(
-            name="", file_name=Path(""), fn_type=ZenoFunctionType.PREDICTION
-        )
-        self.distill_functions: Dict[str, ZenoFunction] = {}
-        self.metric_functions: Dict[str, ZenoFunction] = {}
-        self.transform_functions: Dict[str, ZenoFunction] = {}
-
+    def __load_metadata_file(
+        self, metadata_path: Path, id_column: str, data_column: str, label_column: str
+    ):
         # Read metadata as Pandas for slicing
         if metadata_path.suffix == ".csv":
             self.df = pd.read_csv(metadata_path)
@@ -108,6 +117,38 @@ class Zeno(object):
             )
             sys.exit(1)
 
+        self.id_column = ZenoColumn(
+            column_type=ZenoColumnType.METADATA,
+            metadata_type=getMetadataType(self.df[id_column]),
+            name=id_column,
+        )
+        self.data_column = ZenoColumn(
+            column_type=ZenoColumnType.METADATA,
+            metadata_type=getMetadataType(self.df[data_column]),
+            name=data_column,
+        )
+        self.label_column = ZenoColumn(
+            column_type=ZenoColumnType.METADATA,
+            metadata_type=getMetadataType(self.df[label_column]),
+            name=label_column,
+        )
+        self.df = self.df.rename(columns=lambda x: "0" + str(x))
+
+        self.df[str(self.id_column)].astype(str)
+        self.df.set_index(str(self.id_column), inplace=True)
+        self.df[str(self.id_column)] = self.df.index
+
+        self.columns: List[ZenoColumn] = []
+        self.complete_columns: List[ZenoColumn] = []
+        for metadata_col in self.df.columns:
+            col = ZenoColumn(
+                column_type=ZenoColumnType.METADATA,
+                metadata_type=getMetadataType(self.df[metadata_col]),
+                name=metadata_col[1:],
+            )
+            self.columns.append(col)
+            self.complete_columns.append(col)
+
         # TODO: figure out if this breaks for big integers. Need to do this for
         # frontend bigint issues.
         d = dict.fromkeys(
@@ -115,39 +156,10 @@ class Zeno(object):
         )
         self.df = self.df.astype(d)  # type: ignore
 
-        self.metadata_name = os.path.basename(metadata_path).split(".")[0]
-        self.cache_path = cache_path
-        os.makedirs(self.cache_path, exist_ok=True)
-
-        self.folders: List[str] = read_pickle("folders.pickle", self.cache_path, [])
-        self.reports: List[Report] = read_pickle("reports.pickle", self.cache_path, [])
-        self.slices: Dict[str, Slice] = read_pickle(
-            "slices.pickle", self.cache_path, {}
-        )
-
-        self.df = self.df.rename(columns=lambda x: "0" + str(x))
-        self.df[str(self.id_column)].astype(str)
-        self.df.set_index(str(self.id_column), inplace=True)
-        self.df[str(self.id_column)] = self.df.index
-
-        self.columns: List[ZenoColumn] = []
-        self.complete_columns: List[ZenoColumn] = []
-
-        self.done_processing = False
-
     def start_processing(self):
         """Parse testing files, distill, and run inference."""
 
-        # Get all Zeno core columns before processing.
-        zeno_cols: List[ZenoColumn] = []
-        for metadata_col in self.df.columns:
-            col = ZenoColumn(column_type=ZenoColumnType.METADATA, name=metadata_col[1:])
-            zeno_cols.append(col)
-            self.complete_columns.append(col)
-
-        # Get Zeno test functions.
         if not self.tests:
-            self.columns = zeno_cols
             self.done_processing = True
             self.status = "Done processing"
             return
@@ -158,20 +170,18 @@ class Zeno(object):
 
         for fn in self.distill_functions.values():
             if fn.fn_type == ZenoFunctionType.PREDISTILL:
-                zeno_cols.append(
+                self.columns.append(
                     ZenoColumn(column_type=ZenoColumnType.PREDISTILL, name=fn.name)
                 )
             else:
                 for m in self.model_names:
-                    zeno_cols.append(
+                    self.columns.append(
                         ZenoColumn(
                             column_type=ZenoColumnType.POSTDISTILL,
                             name=fn.name,
                             model=m,
                         )
                     )
-
-        self.columns = zeno_cols
 
         self.__thread = threading.Thread(target=asyncio.run, args=(self.__process(),))
         self.__thread.start()
@@ -288,6 +298,9 @@ class Zeno(object):
             if self.df[str(predistill_column)].isnull().any():
                 predistill_to_run.append(predistill_column)
             else:
+                predistill_column.metadata_type = getMetadataType(
+                    self.df[str(predistill_column)]
+                )
                 self.complete_columns.append(predistill_column)
 
         if len(predistill_to_run) > 0:
@@ -309,6 +322,7 @@ class Zeno(object):
                 )
                 for out in predistill_outputs:
                     self.df.loc[:, str(out[0])] = out[1]
+                    out[0].metadata_type = getMetadataType(self.df[str(out[0])])
                     self.complete_columns.append(out[0])
 
     def __inference_and_postdistill(self, transform: ZenoFunction):
@@ -385,6 +399,7 @@ class Zeno(object):
             if self.df[col_hash].isnull().any():
                 postdistill_to_run.append(col_name)
             else:
+                col_name.metadata_type = getMetadataType(self.df[col_hash])
                 self.complete_columns.append(col_name)
 
         self.status = "Running postprocessing"
@@ -408,6 +423,7 @@ class Zeno(object):
                 )
                 for out in post_outputs:
                     self.df.loc[:, str(out[0])] = out[1]  # type: ignore
+                    out[0].metadata_type = getMetadataType(self.df[str(out[0])])
                     self.complete_columns.append(out[0])
 
         self.status = "Done running postprocessing"

@@ -24,7 +24,6 @@ interface MetricKey {
 
 interface MetadataSelection {
 	column: ZenoColumn;
-	type: ChartType;
 	values: Array;
 }
 
@@ -68,6 +67,7 @@ interface Report {
 interface ZenoColumn {
 	columnType: ZenoColumnType;
 	name: string;
+	metadataType?: MetadataType;
 	// model and transform are only set for OUTPUT columnTypes.
 	model?: string;
 	transform?: string;

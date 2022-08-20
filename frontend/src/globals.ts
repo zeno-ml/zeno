@@ -9,9 +9,9 @@ export enum ZenoColumnType {
 }
 
 export enum MetadataType {
-	COUNT,
-	HISTOGRAM,
-	BINARY,
-	DATE,
+	NOMINAL,
+	CONTINUOUS,
+	BOOLEAN,
+	DATETIME,
 	OTHER,
 }

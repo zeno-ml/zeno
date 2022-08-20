@@ -31,16 +31,16 @@ export function computeDomain({ type, table, column }: IComputeDomain) {
 	};
 
 	switch (type) {
-		case MetadataType.COUNT:
+		case MetadataType.NOMINAL:
 			specificDomainFunc = computeCountDomain;
 			break;
-		case MetadataType.HISTOGRAM:
+		case MetadataType.CONTINUOUS:
 			specificDomainFunc = computeHistogramDomain;
 			break;
-		case MetadataType.BINARY:
+		case MetadataType.BOOLEAN:
 			specificDomainFunc = computeBinaryDomain;
 			break;
-		case MetadataType.DATE:
+		case MetadataType.DATETIME:
 			specificDomainFunc = computeDateDomain;
 			break;
 		case MetadataType.OTHER:
@@ -284,9 +284,9 @@ export function computeCountsFromDomain({
 		return [];
 	}
 
-	if (type === MetadataType.COUNT || type === MetadataType.BINARY) {
+	if (type === MetadataType.NOMINAL || type === MetadataType.BOOLEAN) {
 		return countDomainCategorical({ table, domain, column: hash });
-	} else if (type === MetadataType.HISTOGRAM) {
+	} else if (type === MetadataType.CONTINUOUS) {
 		return countDomainContinuousBins({ table, domain, column: hash });
 	} else {
 		return [];
@@ -301,14 +301,14 @@ export function colorDomain({
 	type: MetadataType;
 }) {
 	if (domain.length > 0) {
-		if (type === MetadataType.COUNT || type === MetadataType.BINARY) {
+		if (type === MetadataType.NOMINAL || type === MetadataType.BOOLEAN) {
 			const colors20 = [...schemeTableau10, ...schemeCategory10];
 			let colors = colors20.slice(0, domain.length);
 			if (domain.length === 2) {
 				colors = [schemeTableau10[2], schemeTableau10[0]];
 			}
 			domain.forEach((d, i) => (d["color"] = colors[i]));
-		} else if (type === MetadataType.HISTOGRAM) {
+		} else if (type === MetadataType.CONTINUOUS) {
 			const numBins = domain.length;
 			const colors = interpolateColorToArray({
 				colorer: interpolatePurples,

@@ -180,7 +180,6 @@ def run_zeno(args):
         label_path=args["label_path"],
         cache_path=args["cache_path"],
     )
-
     zeno.start_processing()
 
     app = FastAPI(title="Frontend API")

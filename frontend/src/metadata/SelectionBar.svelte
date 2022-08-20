@@ -44,7 +44,7 @@
 	<span id="metric">
 		{$metric ? $metric + ":" : ""}
 		{#await result then res}
-			{res && res[0] !== undefined ? res[0].toFixed(2) : ""}
+			{res && res[0] !== undefined && res[0] !== null ? res[0].toFixed(2) : ""}
 		{/await}
 	</span>
 	<span id="size">
@@ -67,16 +67,16 @@
 	{#each [...$metadataSelections.entries()] as [hash, chip]}
 		<div class="meta-chip">
 			<span>
-				{#if chip.type === MetadataType.HISTOGRAM}
+				{#if chip.column.metadataType === MetadataType.CONTINUOUS}
 					{chip.values[0].toFixed(2)}
 					{"<"}
 					{chip.column.name}
 					{"<"}
 					{chip.values[1].toFixed(2)}
-				{:else if chip.type === MetadataType.BINARY}
+				{:else if chip.column.metadataType === MetadataType.BOOLEAN}
 					{chip.values[0]}
 					{chip.column.name}
-				{:else if chip.type === MetadataType.DATE}
+				{:else if chip.column.metadataType === MetadataType.DATETIME}
 					{#if !chip.values[1]}
 						start {chip.values[0].toLocaleString()}
 					{:else if !chip.values[0]}

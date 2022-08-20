@@ -14,7 +14,7 @@
 	export let domain;
 	export let histogramData;
 	export let hash;
-	export let chartType;
+	export let metadataType;
 
 	let view: View;
 
@@ -43,12 +43,12 @@
 	});
 
 	$: if (view) {
-		if (chartType === MetadataType.HISTOGRAM) {
+		if (metadataType === MetadataType.CONTINUOUS) {
 			view.addSignalListener(
 				"brush",
 				(...s) => (selection.values = s[1].binStart ? s[1].binStart : [])
 			);
-		} else if (chartType === MetadataType.COUNT) {
+		} else if (metadataType === MetadataType.NOMINAL) {
 			view.addSignalListener(
 				"select",
 				(...s) => (selection.values = s[1].category ? s[1].category : [])

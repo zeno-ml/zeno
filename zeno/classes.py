@@ -23,6 +23,14 @@ class ZenoFunctionType(IntEnum):
     METRIC = 4
 
 
+class MetadataType(IntEnum):
+    NOMINAL = 0
+    CONTINUOUS = 1
+    BOOLEAN = 2
+    DATETIME = 3
+    OTHER = 4
+
+
 def to_camel(string):
     components = string.split("_")
     return components[0] + "".join(x.title() for x in components[1:])
@@ -57,6 +65,7 @@ class ZenoFunction(CamelModel):
 class ZenoColumn(CamelModel):
     column_type: ZenoColumnType
     name: str
+    metadata_type: Optional[MetadataType] = MetadataType.OTHER
     model: Optional[str] = ""
     transform: Optional[str] = ""
 

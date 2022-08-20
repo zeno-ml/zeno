@@ -29,19 +29,17 @@
 	import ChartMetadataCell from "./ChartMetadataCell.svelte";
 	import TextMetadataCell from "./TextMetadataCell.svelte";
 
+	export let col: ZenoColumn;
+	export let shouldColor = false;
+	export let assignColors: boolean = shouldColor;
+
 	interface IColorAssignments {
 		colors: string[];
 		labels: { id: string; colorIndex: number }[];
 		hash: string;
 	}
 
-	export let col: ZenoColumn;
-	export let shouldColor = false;
-	export let assignColors: boolean = shouldColor;
-
-	let chartType: MetadataType;
 	let selection: MetadataSelection = {
-		type: MetadataType.OTHER,
 		column: col,
 		values: [],
 	};
@@ -68,7 +66,7 @@
 		updateData($table, $filteredTable);
 	}
 	$: dynamicSpec =
-		chartType === MetadataType.HISTOGRAM
+		col.metadataType === MetadataType.CONTINUOUS
 			? generateHistogramSpec
 			: generateCountSpec;
 
@@ -82,24 +80,25 @@
 
 	function updateData(table: ColumnTable, filteredTable: ColumnTable) {
 		if (
-			(chartType === MetadataType.COUNT ||
-				chartType === MetadataType.HISTOGRAM) &&
-			table.column(hash)
+			(col.metadataType === MetadataType.NOMINAL ||
+				col.metadataType === MetadataType.CONTINUOUS) &&
+			table.column(hash) &&
+			domain
 		) {
 			const counts = computeCountsFromDomain({
 				table: filteredTable,
 				domain,
 				column: hash,
-				type: chartType,
+				type: col.metadataType,
 			});
-			if (chartType === MetadataType.COUNT) {
+			if (col.metadataType === MetadataType.NOMINAL) {
 				domain = domain.map((d, i) => ({
 					filteredCount: counts[i].count,
 					count: d["count"],
 					category: d["category"],
 					color: d["color"],
 				}));
-			} else if (chartType === MetadataType.HISTOGRAM) {
+			} else if (col.metadataType === MetadataType.CONTINUOUS) {
 				domain = domain.map((d, i) => ({
 					filteredCount: counts[i].count,
 					count: d["count"],
@@ -113,60 +112,31 @@
 	}
 
 	function drawChart(t: ColumnTable) {
-		if (t.column(hash)) {
-			let isOrdinal = isNaN(Number(t.column(hash).get(0)));
-			let unique = t
-				.rollup({ unique: `d => op.distinct(d["${hash}"])` })
-				.object()["unique"];
+		if (!t.column(hash)) {
+			return;
+		}
 
-			if (isOrdinal) {
-				if (unique <= 20) {
-					chartType = MetadataType.COUNT;
-				} else if (!isNaN(Date.parse(t.column(hash).get(0)))) {
-					chartType = MetadataType.DATE;
-				} else {
-					chartType = MetadataType.OTHER;
-				}
-			} else {
-				if (unique === 2) {
-					let vals = t
-						.orderby(hash)
-						.rollup({ a: `d => op.array_agg_distinct(d["${hash}"])` })
-						.object()["a"];
-					if (Number(vals[0]) === 0 && Number(vals[1]) === 1) {
-						chartType = MetadataType.BINARY;
-					}
-				} else if (unique < 20) {
-					chartType = MetadataType.COUNT;
-				} else {
-					chartType = MetadataType.HISTOGRAM;
-				}
-			}
+		const { assignments, domain: localDomain } = computeDomain({
+			type: col.metadataType,
+			table: $table,
+			column: hash,
+		});
+		domain = localDomain;
+		domain.forEach((d) => (d["filteredCount"] = d["count"]));
 
-			const { assignments, domain: localDomain } = computeDomain({
-				type: chartType,
-				table: $table,
+		colorDomain({ domain, type: col.metadataType });
+
+		if (assignColors) {
+			const colors = assignColorsFromDomain({
+				assignments,
+				domain,
 				column: hash,
+				idColumn: $settings.idColumn,
+				table: $table,
+				type: col.metadataType,
 			});
-			domain = localDomain;
-			domain.forEach((d) => (d["filteredCount"] = d["count"]));
-
-			selection.type = chartType;
-
-			colorDomain({ domain, type: chartType });
-
-			if (assignColors) {
-				const colors = assignColorsFromDomain({
-					assignments,
-					domain,
-					column: hash,
-					idColumn: $settings.idColumn,
-					table: $table,
-					type: chartType,
-				});
-				if (colors) {
-					availableColors.set({ ...$availableColors, [hash]: colors });
-				}
+			if (colors) {
+				availableColors.set({ ...$availableColors, [hash]: colors });
 			}
 		}
 	}
@@ -193,7 +163,7 @@
 		</div>
 
 		<div class="top-right-cell">
-			{#if chartType === MetadataType.BINARY}
+			{#if col.metadataType === MetadataType.BOOLEAN}
 				<BinaryMetadataCell
 					bind:selection
 					{setSelection}
@@ -202,11 +172,11 @@
 					{colorAssignments} />
 			{/if}
 
-			{#if chartType === MetadataType.OTHER}
+			{#if col.metadataType === MetadataType.OTHER}
 				<TextMetadataCell bind:selection {setSelection} {hash} />
 			{/if}
 
-			{#if selection.values && selection.type === MetadataType.HISTOGRAM}
+			{#if selection.values && col.metadataType === MetadataType.CONTINUOUS}
 				<div>
 					<span>
 						{selection.values[0] ? selection.values[0].toFixed(2) + " - " : ""}
@@ -215,7 +185,7 @@
 				</div>
 			{/if}
 
-			{#if chartType !== MetadataType.OTHER && shouldColor && (hoveringCell || selectedHash)}
+			{#if col.metadataType !== MetadataType.OTHER && shouldColor && (hoveringCell || selectedHash)}
 				<div class="top-text">
 					<IconButton
 						size="mini"
@@ -229,11 +199,11 @@
 		</div>
 	</div>
 
-	{#if chartType === MetadataType.DATE && domain}
+	{#if col.metadataType === MetadataType.DATETIME && domain}
 		<DateMetadataCell bind:selection bind:domain {hash} {setSelection} />
 	{/if}
 
-	{#if histogramData.table.length > 0 && (chartType === MetadataType.HISTOGRAM || chartType === MetadataType.COUNT)}
+	{#if histogramData.table.length > 0 && (col.metadataType === MetadataType.CONTINUOUS || col.metadataType === MetadataType.NOMINAL)}
 		<ChartMetadataCell
 			bind:selection
 			{setSelection}
@@ -243,7 +213,7 @@
 			{domain}
 			{histogramData}
 			{hash}
-			{chartType} />
+			metadataType={col.metadataType} />
 	{/if}
 </div>
 

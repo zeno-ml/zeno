@@ -1,3 +1,6 @@
+from typing import List
+
+
 labels = [
     "tench",
     "goldfish",
@@ -1002,8 +1005,8 @@ labels = [
 ]
 
 
-def label_map_generator(labels: list[str]):
-    def _mapper(idx: list[int]):
+def label_map_generator(labels: List[str]):
+    def _mapper(idx: List[int]):
         mapping = [labels[i] for i in idx]
         return mapping
 

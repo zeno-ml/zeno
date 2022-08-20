@@ -40,7 +40,7 @@
 			predicateGroup.predicates = [];
 			[...$metadataSelections.values()].forEach((entry) => {
 				// TODO: support slice selections
-				if (entry.type === MetadataType.HISTOGRAM) {
+				if (entry.column.metadataType === MetadataType.CONTINUOUS) {
 					predicateGroup.predicates.push({
 						column: entry.column,
 						operation: ">=",
@@ -53,7 +53,7 @@
 						value: "" + entry.values[1],
 						join: "AND",
 					});
-				} else if (entry.type === MetadataType.BINARY) {
+				} else if (entry.column.metadataType === MetadataType.BOOLEAN) {
 					let val = entry.values[0] === "is" ? "1" : "0";
 					predicateGroup.predicates.push({
 						column: entry.column,
@@ -61,7 +61,7 @@
 						value: val,
 						join: "AND",
 					});
-				} else if (entry.type === MetadataType.COUNT) {
+				} else if (entry.column.metadataType === MetadataType.NOMINAL) {
 					if (entry.values.length === 1) {
 						predicateGroup.predicates.push({
 							column: entry.column,

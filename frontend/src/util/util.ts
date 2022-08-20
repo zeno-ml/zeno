@@ -82,7 +82,7 @@ export function updateTab(t: string) {
 
 export async function getMetricsForSlices(metricKeys: MetricKey[]) {
 	if (metricKeys[0].metric === undefined) {
-		return new Array(metricKeys.length).fill("");
+		return null;
 	}
 	const returnValues = metricKeys.map((k) => {
 		if (k.sli.sliceName === "overall" || k.sli.sliceName === "") {
@@ -236,17 +236,18 @@ export function updateFilteredTable(t: ColumnTable) {
 	// Filter with metadata selections.
 	[...get(metadataSelections).entries()].forEach((e) => {
 		const [hash, entry] = e;
-		if (entry.type === MetadataType.HISTOGRAM) {
+		const metadataType = entry.column.metadataType;
+		if (metadataType === MetadataType.CONTINUOUS) {
 			tempTable = tempTable.filter(
 				`(r) => r["${hash}"] > ${entry.values[0]} && r["${hash}"] < ${entry.values[1]}`
 			);
-		} else if (entry.type === MetadataType.BINARY) {
+		} else if (metadataType === MetadataType.BOOLEAN) {
 			if (entry.values[0] === "is") {
 				tempTable = tempTable.filter(`(r) => r["${hash}"] == 1`);
 			} else {
 				tempTable = tempTable.filter(`(r) => r["${hash}"] == 0`);
 			}
-		} else if (entry.type === MetadataType.DATE) {
+		} else if (metadataType === MetadataType.DATETIME) {
 			tempTable = tempTable.filter(
 				aq.escape(
 					(r) =>
@@ -254,7 +255,7 @@ export function updateFilteredTable(t: ColumnTable) {
 						(entry.values[1] ? new Date(r[hash]) < entry.values[1] : true)
 				)
 			);
-		} else if (entry.type === MetadataType.COUNT) {
+		} else if (metadataType === MetadataType.NOMINAL) {
 			tempTable = tempTable.filter(
 				aq.escape((r) => aq.op.includes(entry.values, r[hash], 0))
 			);

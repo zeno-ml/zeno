@@ -1,4 +1,5 @@
 import dataclasses
+import datetime
 import os
 import pickle
 from contextlib import contextmanager
@@ -13,7 +14,7 @@ import pyarrow as pa  # type: ignore
 from tqdm import trange  # type: ignore
 
 from zeno.api import ZenoOptions
-from zeno.classes import ZenoColumn, ZenoColumnType, ZenoFunction
+from zeno.classes import MetadataType, ZenoColumn, ZenoColumnType, ZenoFunction
 
 
 @contextmanager
@@ -48,6 +49,28 @@ def read_pickle(file_name: str, cache_path: Path, default):
             return pickle.load(f)
     except FileNotFoundError:
         return default
+
+
+def getMetadataType(col: pd.Series) -> MetadataType:
+    col = col.infer_objects()
+
+    try:
+        datetime.datetime.fromisoformat(str(col[0]))
+        return MetadataType.DATETIME
+    except ValueError:
+        pass
+
+    if col.dtype == "bool":
+        return MetadataType.BOOLEAN
+
+    unique = col.unique().tolist()
+    if len(unique) < 21:
+        return MetadataType.NOMINAL
+
+    if col.dtype == "int64" or col.dtype == "float64":
+        return MetadataType.CONTINUOUS
+
+    return MetadataType.OTHER
 
 
 def load_series(df, col_name, save_path):
