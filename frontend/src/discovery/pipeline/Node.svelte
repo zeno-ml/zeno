@@ -3,8 +3,8 @@
 	import IconButton from "@smui/icon-button";
 
 	export let node: Pipeline.Node;
-	export let selectedId: string = "";
-	export let lastNode: boolean = false;
+	export let selectedId = "";
+	export let lastNode = false;
 	export let maxCount = 10_000;
 
 	const dispatch = createEventDispatcher();

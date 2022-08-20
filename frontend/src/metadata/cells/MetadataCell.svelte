@@ -181,21 +181,6 @@
 			return m;
 		});
 	}
-
-	function findTableCategory({
-		category,
-		table = histogramData.table,
-	}: {
-		category: number | string;
-		table?: {
-			category: number | string;
-			color: string;
-			count: number;
-			filteredCount: number;
-		}[];
-	}) {
-		return table.find((d) => d.category === category);
-	}
 </script>
 
 <div
