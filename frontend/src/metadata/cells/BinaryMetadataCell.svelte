@@ -31,7 +31,7 @@
 				setSelection();
 			}}>
 			<Label style="color: {selectedHash ? colorAssignments.colors[1] : ''}; ">
-				Is
+				True
 			</Label>
 		</Button>
 		{$filteredTable.filter(`d => d["${hash}"] == 1`).count().object()["count"]}
@@ -46,7 +46,7 @@
 				setSelection();
 			}}>
 			<Label style="color: {selectedHash ? colorAssignments.colors[0] : ''};">
-				Is Not
+				False
 			</Label>
 		</Button>
 		{$filteredTable.filter(`d => d["${hash}"] == 0`).count().object()["count"]}

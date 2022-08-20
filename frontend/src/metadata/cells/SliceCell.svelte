@@ -93,8 +93,6 @@
 			transform: $transform,
 		},
 	]);
-
-	$: console.log(hovering);
 </script>
 
 <div
