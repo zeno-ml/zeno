@@ -3,7 +3,7 @@ import pandas as pd
 
 # executed inside of examples/imagenette
 CSV = "./imagenette.csv"
-OUT_CSV = "./imagenette_split.csv"
+OUT_CSV = "./imagenette_formatted.csv"
 SPLIT = "valid"  # "all" | "valid" | "train"
 
 
