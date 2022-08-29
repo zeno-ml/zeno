@@ -33,7 +33,7 @@ pytest-cov = "^3.0"
 black = "^22.6.0"
 flake8 = "^5.0.0"
 mypy = "^0.971"
-pyright = "^1.1.261"
+pyright = "^1.1.268"
 usort = "^1.0.1"
 zenoml-audio-transcription = {path = "views/audio-transcription", develop = true}
 zenoml-image-classification = {path = "views/image-classification", develop = true}
