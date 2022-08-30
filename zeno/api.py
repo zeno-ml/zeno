@@ -30,7 +30,7 @@ class ZenoOptions:
     output_path: str
 
 
-def predict_function(func):
+def model(func):
     @functools.wraps(func)
     def _wrapper(*args, **kwargs):
         return func(*args, **kwargs)
@@ -39,7 +39,7 @@ def predict_function(func):
     return _wrapper
 
 
-def distill_function(func):
+def distill(func):
     @functools.wraps(func)
     def _wrapper(*args, **kwargs):
         return func(*args, **kwargs)
@@ -48,7 +48,7 @@ def distill_function(func):
     return _wrapper
 
 
-def transform_function(func):
+def transform(func):
     @functools.wraps(func)
     def _wrapper(*args, **kwargs):
         return func(*args, **kwargs)
@@ -57,7 +57,7 @@ def transform_function(func):
     return _wrapper
 
 
-def metric_function(func):
+def metric(func):
     @functools.wraps(func)
     def _wrapper(*args, **kwargs):
         return func(*args, **kwargs)

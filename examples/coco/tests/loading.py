@@ -1,10 +1,10 @@
-from zeno import predict_function, metric_function, ZenoOptions
+from zeno import model, metric, ZenoOptions
 from PIL import Image
 import os
 import torch
 
 
-@predict_function
+@model
 def torchhub(model_path):
     # Model
     if model_path == "yolov3":
@@ -31,6 +31,6 @@ def torchhub(model_path):
     return pred
 
 
-@metric_function
+@metric
 def accuracy(df, ops):
     return [1] * len(df)

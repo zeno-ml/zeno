@@ -1,6 +1,6 @@
 import os
 from PIL import Image
-from zeno import distill_function
+from zeno import distill
 
 
 def get_brightness(im: Image):
@@ -16,7 +16,7 @@ def get_brightness(im: Image):
     return total / (width * height)
 
 
-@distill_function
+@distill
 def brightness(df, ops):
     imgs = [Image.open(os.path.join(ops.data_path, img)) for img in df[ops.data_column]]
     return [get_brightness(im) for im in imgs]

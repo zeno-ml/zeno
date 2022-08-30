@@ -1,10 +1,10 @@
 import os
 
 from PIL import Image, ImageFilter
-from zeno import ZenoOptions, transform_function
+from zeno import ZenoOptions, transform
 
 
-@transform_function
+@transform
 def blur(df, ops: ZenoOptions):
     for img_path in df[ops.data_column]:
         img = Image.open(os.path.join(ops.data_path, img_path))
@@ -13,7 +13,7 @@ def blur(df, ops: ZenoOptions):
     return ["".join(x.split("/")) for x in list(df[ops.data_column])]
 
 
-@transform_function
+@transform
 def rotate(df, ops: ZenoOptions):
     for img_path in df[ops.data_column]:
         img = Image.open(os.path.join(ops.data_path, img_path))

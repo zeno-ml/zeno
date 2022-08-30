@@ -1,10 +1,10 @@
-from zeno import transform_function, ZenoOptions
+from zeno import transform, ZenoOptions
 import os
 import librosa
 import soundfile as sf
 
 
-@transform_function
+@transform
 def lower_amplitude(df, ops: ZenoOptions):
     files = [os.path.join(ops.data_path, f) for f in df[ops.data_column]]
     amps = []
