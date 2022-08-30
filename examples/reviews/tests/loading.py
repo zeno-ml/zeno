@@ -1,9 +1,9 @@
 from sklearn.metrics import f1_score, recall_score
-from zeno import ZenoOptions, predict_function, distill_function, metric_function
+from zeno import ZenoOptions, model, distill, metric
 from transformers import pipeline
 
 
-@predict_function
+@model
 def load_model(model_name):
     mod = pipeline("sentiment-analysis", model=model_name)
 
@@ -15,17 +15,17 @@ def load_model(model_name):
     return pred
 
 
-@distill_function
+@distill
 def length(df, ops: ZenoOptions):
     return [len(i) for i in df[ops.data_column]]
 
 
-@distill_function
+@distill
 def unique_words(df, ops: ZenoOptions):
     return [len(set(i.split(" "))) for i in df[ops.data_column]]
 
 
-@metric_function
+@metric
 def accuracy(df, ops: ZenoOptions):
     if len(df) == 0:
         return 0

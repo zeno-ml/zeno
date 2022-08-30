@@ -1,5 +1,5 @@
 import { render } from "@testing-library/svelte";
-import SliceDetails from "../src/SliceDetails.svelte";
+import SliceDetails from "../src/general/SliceDetails.svelte";
 
 test("renders details", () => {
 	const { container } = render(SliceDetails, {

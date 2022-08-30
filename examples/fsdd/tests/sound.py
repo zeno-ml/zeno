@@ -2,10 +2,10 @@ import os
 
 import librosa
 import numpy as np
-from zeno import ZenoOptions, distill_function
+from zeno import ZenoOptions, distill
 
 
-@distill_function
+@distill
 def amplitude(df, ops: ZenoOptions):
     files = [os.path.join(ops.data_path, f) for f in df[ops.data_column]]
     amps = []
@@ -15,7 +15,7 @@ def amplitude(df, ops: ZenoOptions):
     return amps
 
 
-@distill_function
+@distill
 def length(df, ops: ZenoOptions):
     files = [os.path.join(ops.data_path, f) for f in df[ops.data_column]]
     amps = []
