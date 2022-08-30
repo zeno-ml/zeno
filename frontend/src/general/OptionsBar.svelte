@@ -8,7 +8,7 @@
 		transforms,
 		sort,
 		currentColumns,
-	} from "./stores";
+	} from "../stores";
 	import Select, { Option } from "@smui/select";
 </script>
 

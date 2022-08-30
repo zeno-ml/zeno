@@ -10,7 +10,7 @@
 	import { getMetricsForSlices } from "../../util/util";
 	import { models, slices, reports, report } from "../../stores";
 
-	import SliceCell from "../SliceCell.svelte";
+	import SliceDetailsContainer from "../SliceDetailsContainer.svelte";
 	import SparkLine from "../SparkLine.svelte";
 
 	export let predicateIndex: number;
@@ -89,7 +89,7 @@
 				</Icon>
 			</div>
 			{#if sli}
-				<SliceCell {sli} />
+				<SliceDetailsContainer {sli} />
 			{/if}
 		</div>
 	</Cell>

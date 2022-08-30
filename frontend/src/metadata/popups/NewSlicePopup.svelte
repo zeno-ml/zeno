@@ -112,7 +112,6 @@
 				sliceName: sliceName,
 				folder: "",
 				filterPredicates: predicateGroup,
-				transform: "",
 				idxs: tempTable.array(columnHash($settings.idColumn)) as string[],
 			});
 			return s;

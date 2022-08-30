@@ -13,7 +13,7 @@
 	let table: HTMLDivElement;
 </script>
 
-<div style:overflow-y="scroll">
+<div id="container">
 	<div class="inline">
 		<h4 style:margin-right="20px">{report.name}</h4>
 		<div class="export">
@@ -68,5 +68,8 @@
 		display: flex;
 		flex-direction: inline;
 		align-items: center;
+	}
+	#container {
+		margin-left: 10px;
 	}
 </style>

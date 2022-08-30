@@ -8,7 +8,7 @@
 	import Analysis from "./analysis/Analysis.svelte";
 	import Discovery from "./discovery/Discovery.svelte";
 	import Exploration from "./Exploration.svelte";
-	import Header from "./Header.svelte";
+	import Header from "./general/Header.svelte";
 
 	const routes = {
 		"/": Exploration,

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import SliceDetails from "../SliceDetails.svelte";
+	import SliceDetails from "../general/SliceDetails.svelte";
 
 	import { metadataSelections, sliceSelections } from "../stores";
 	import { updateTab } from "../util/util";

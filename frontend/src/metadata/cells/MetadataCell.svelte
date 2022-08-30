@@ -243,14 +243,6 @@
 	}
 	.top-text {
 		height: 18px;
-	}
-	.top-right-cell {
-		display: flex;
-		align-items: center;
-		gap: 2px;
-	}
-	.top-text {
-		height: 18px;
-		z-index: 998;
+		z-index: 2;
 	}
 </style>

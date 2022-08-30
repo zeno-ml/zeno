@@ -7,7 +7,7 @@
 	import { metric, models, report, reports, transform } from "../../stores";
 	import { getMetricsForSlices } from "../../util/util";
 
-	import SliceCell from "../SliceCell.svelte";
+	import SliceDetailsContainer from "../SliceDetailsContainer.svelte";
 	import SparkLine from "../SparkLine.svelte";
 
 	export let sli: Slice;
@@ -55,7 +55,7 @@
 					</Icon>
 				</div>
 			{/if}
-			<SliceCell {sli} />
+			<SliceDetailsContainer {sli} />
 		</div>
 	</Cell>
 	{#await modelResults then res}

@@ -4,7 +4,7 @@
 	import IconButton, { Icon } from "@smui/icon-button";
 	import { Svg } from "@smui/common/elements";
 	import Dialog, { Actions, Content, Title, InitialFocus } from "@smui/dialog";
-	import SliceDetails from "../../SliceDetails.svelte";
+	import SliceDetails from "../../general/SliceDetails.svelte";
 	import {
 		metric,
 		model,

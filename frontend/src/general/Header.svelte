@@ -11,9 +11,9 @@
 		mdiGithub,
 	} from "@mdi/js";
 
-	import { updateTab } from "./util/util";
+	import { updateTab } from "../util/util";
 	import { location } from "svelte-spa-router";
-	import { status, tab } from "./stores";
+	import { status, tab } from "../stores";
 
 	let runningAnalysis = true;
 

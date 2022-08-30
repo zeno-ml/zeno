@@ -2,8 +2,8 @@
 	import { filteredTable, ready, table } from "./stores";
 
 	import MetadataPanel from "./metadata/MetadataPanel.svelte";
-	import Samples from "./samples/Samples.svelte";
-	import OptionsBar from "./OptionsBar.svelte";
+	import Samples from "./general/Samples.svelte";
+	import OptionsBar from "./general/OptionsBar.svelte";
 </script>
 
 {#if $ready && $table.size > 0}

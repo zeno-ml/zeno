@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type ColumnTable from "arquero/dist/types/table/column-table";
 
+	import { desc } from "arquero";
+
 	import { Label } from "@smui/button";
 	import { Pagination } from "@smui/data-table";
 	import IconButton from "@smui/icon-button";
@@ -17,7 +19,6 @@
 		rowsPerPage,
 	} from "../stores";
 	import SelectionBar from "../metadata/SelectionBar.svelte";
-	import { desc } from "arquero";
 
 	export let table: ColumnTable;
 

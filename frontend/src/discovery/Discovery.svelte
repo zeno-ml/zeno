@@ -9,8 +9,8 @@
 
 	import MetadataBar from "../metadata/MetadataPanel.svelte";
 	import Scatter from "./scatterplot/LegendaryScatter.svelte";
-	import Samples from "../samples/Samples.svelte";
-	import OptionsBar from "../OptionsBar.svelte";
+	import Samples from "../general/Samples.svelte";
+	import OptionsBar from "../general/OptionsBar.svelte";
 	import PipelineLogo from "./pipeline/Logo.svelte";
 	import PipelineNode from "./pipeline/Node.svelte";
 
