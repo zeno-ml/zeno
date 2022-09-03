@@ -4,9 +4,9 @@ sidebar_position: 2
 
 # Python API
 
-Zeno has 4 primary decorator functions: `predict_function`, `distill_function`, `metric_function`, and `transform_function`.
+Zeno has 4 primary decorator functions: `model`, `distill`, `metric`, and `transform`.
 
-You can pass any number of files with decorated functions to Zeno, but you **must have one and only one `predict_function`**.
+You can pass any number of files with decorated functions to Zeno, but you **must have one and only one `model`**.
 
 ## ZenoOptions
 
@@ -43,20 +43,20 @@ class ZenoOptions:
 
 ## Predict
 
-`predict_function` functions should return a function that returns a list of model outputs for a given model name.
+`model` functions should return a function that returns a list of model outputs for a given model name.
 
-The function returned by `predict_function` should take two parameters: a Pandas DataFrame and a ZenoOptions object.
+The function returned by `model` should take two parameters: a Pandas DataFrame and a ZenoOptions object.
 
 ```python
-@predict_function
-def predict_function(model_path: Path) -> Callable[[df: DataFrame, ops: ZenoOptions], Any[]]
+@model
+def model(model_path: Path) -> Callable[[df: DataFrame, ops: ZenoOptions], Any[]]
 ```
 
 Example:
 
 ```python title="Load mock model and return outputs"
-@predict_function
-def predict_function(model_path):
+@model
+def model(model_path):
     model = load_model(model_path)
     def pred(df: DataFrame, ops: ZenoOptions):
         outputs = model(instances)
@@ -69,14 +69,14 @@ def predict_function(model_path):
 `distill` functions return a derived metadata column from input data and/or model outputs.
 
 ```python
-@distill_function
+@distill
 def distill(df: pd.DataFrame, ops: ZenoOptions) -> Union[pd.Series, List]:
 ```
 
 Example:
 
 ```python title="Get amplitude of sound file"
-@distill_function
+@distill
 def amplitude(df, ops: ZenoOptions):
     files = [os.path.join(ops.data_path, f) for f in df[ops.data_column]]
     amps = []
@@ -92,7 +92,7 @@ Functions with the `metric` decorator return a continuous number given a subset 
 Metrics can be classic functions such as accuracy, or specific measures such as word prevalence.
 
 ```python
-@metric_function
+@metric
 def metric_func(df: pd.DataFrame, ops: ZenoOptions) -> float:
 ```
 
@@ -109,14 +109,14 @@ def accuracy(df, ops):
 Functions with the `transform` decorator return a new, transformed instance.
 
 ```python
-@transform_function
+@transform
 def metric_func(df: pd.DataFrame, ops: ZenoOptions) -> any:
 ```
 
 Example:
 
 ```python title="Rotate images 90 degrees"
-@transform_function
+@transform
 def rotate(df, ops):
     for img_path in df[ops.data_column]:
         img = Image.open(os.path.join(ops.data_path, img_path))

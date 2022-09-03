@@ -1,7 +1,7 @@
 import os
 import cv2
 from PIL import Image
-from zeno import ZenoOptions, distill_function
+from zeno import ZenoOptions, distill
 import numpy as np
 
 
@@ -15,7 +15,7 @@ def get_imgs(df, ops: ZenoOptions):
     return ret
 
 
-@distill_function
+@distill
 def area(df, ops: ZenoOptions):
     ret = []
     for _, row in df.iterrows():
@@ -27,7 +27,7 @@ def area(df, ops: ZenoOptions):
     return ret
 
 
-@distill_function
+@distill
 def output_area(df, ops: ZenoOptions):
     ret = []
     for _, row in df.iterrows():
@@ -39,7 +39,7 @@ def output_area(df, ops: ZenoOptions):
     return ret
 
 
-@distill_function
+@distill
 def black_box(df, ops):
     """
     Detect if there is a black box at the bottom left
@@ -75,7 +75,7 @@ def get_brightness(im):
     return total / (width * height)
 
 
-@distill_function
+@distill
 def brightness(df, ops):
     imgs = [Image.open(os.path.join(ops.data_path, img)) for img in df[ops.data_column]]
     return [get_brightness(im) for im in imgs]

@@ -1,4 +1,4 @@
-from zeno import transform_function, ZenoOptions
+from zeno import transform, ZenoOptions
 import os
 import librosa
 import soundfile as sf

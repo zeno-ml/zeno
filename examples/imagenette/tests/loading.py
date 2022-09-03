@@ -6,7 +6,7 @@ import os
 import torch
 
 
-from zeno import predict_function
+from zeno import model
 
 DEVICE = "cpu"
 
@@ -67,7 +67,7 @@ def load_clip(variant="ViT-B/32"):
     return clip_model, preprocess
 
 
-@predict_function
+@model
 def load_model(model_path):
     model = Resnet50Model()
     transform = image_transform()

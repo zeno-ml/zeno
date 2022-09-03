@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 import segmentation_models as sm
 from sklearn.metrics import jaccard_score
-from zeno import ZenoOptions, distill_function, metric_function, predict_function
+from zeno import ZenoOptions, distill, metric, model
 
 BACKBONE = "efficientnetb3"
 preprocess = sm.get_preprocessing(BACKBONE)
@@ -27,7 +27,7 @@ def get_img(row, ops: ZenoOptions):
     return im
 
 
-@predict_function
+@model
 def load_model(model_path):
     loaded_model = sm.Unet(BACKBONE)
     loaded_model.load_weights(model_path)
@@ -51,7 +51,7 @@ def load_model(model_path):
     return pred
 
 
-@distill_function
+@distill
 def iou(df, ops: ZenoOptions):
     outs = []
     for _, row in df.iterrows():
@@ -70,6 +70,6 @@ def iou(df, ops: ZenoOptions):
     return outs
 
 
-@metric_function
+@metric
 def average_iou(df, ops: ZenoOptions):
     return df[ops.distill_columns["iou"]].mean()

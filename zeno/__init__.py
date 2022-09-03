@@ -1,15 +1,9 @@
-from zeno.api import (
-    distill_function,
-    metric_function,
-    predict_function,
-    transform_function,
-    ZenoOptions,
-)
+from zeno.api import distill, metric, model, transform, ZenoOptions
 
 __all__ = [
-    "predict_function",
-    "distill_function",
-    "metric_function",
-    "transform_function",
+    "model",
+    "distill",
+    "metric",
+    "transform",
     "ZenoOptions",
 ]

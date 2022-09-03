@@ -3,7 +3,7 @@ import os
 import torch
 import torchvision.transforms as transforms
 from PIL import Image
-from zeno import predict_function
+from zeno import model 
 
 from cifar_model import *
 
@@ -25,7 +25,7 @@ classes = (
 )
 
 
-@predict_function
+@model
 def load_model(model_path):
     net = Net()
     net.load_state_dict(torch.load(model_path))

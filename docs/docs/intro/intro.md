@@ -15,11 +15,11 @@ Zeno can be used for any data type or task with [modular views](/docs/views/) fo
 <p style={{fontStyle: 'italic', marginBottom: '30px'}}>Exploring a CIFAR-10 model using Zeno.</p>
 
 ```python title="Example Zeno functions for an image classification task"
-@distill_function
+@distill
 def brightness(df, ops):
     return lum(df[ops.data_column]))
 
-@metric_function
+@metric
 def accuracy(df, ops):
     return df[ops.label_column]
            == df[ops.output_column]

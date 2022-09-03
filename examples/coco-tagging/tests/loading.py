@@ -7,7 +7,7 @@ import sys
 
 from PIL import Image
 import numpy as np
-from zeno import predict_function
+from zeno import model
 
 preprocess = transforms.Compose(
     [
@@ -132,7 +132,7 @@ classes = [
 ]
 
 
-# @predict_function
+# @model
 # def load_model(model_path):
 #     net = get_model(
 #         out_features=80,

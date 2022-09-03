@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 from PIL import Image
-from zeno import distill_function
+from zeno import distill
 from zeno.api import ZenoOptions
 
 
@@ -33,7 +33,7 @@ def blue_border_pixels(im):
     return count_blue
 
 
-@distill_function
+@distill
 def red_count(df, ops: ZenoOptions):
     imgs = [
         Image.open(os.path.join(ops.data_path, img)).convert("RGB")
@@ -42,7 +42,7 @@ def red_count(df, ops: ZenoOptions):
     return [red_pixels(im) for im in imgs]
 
 
-@distill_function
+@distill
 def blue_border_count(df, ops):
     imgs = [
         Image.open(os.path.join(ops.data_path, img)).convert("RGB")
