@@ -221,6 +221,15 @@ export function columnHash(col: ZenoColumn) {
 	);
 }
 
+function arrayEquals(a, b) {
+	return (
+		Array.isArray(a) &&
+		Array.isArray(b) &&
+		a.length === b.length &&
+		a.every((val, index) => val === b[index])
+	);
+}
+
 export function updateFilteredTable(t: ColumnTable) {
 	if (!get(ready) || t.size === 0) {
 		return;
@@ -266,7 +275,13 @@ export function updateFilteredTable(t: ColumnTable) {
 		}
 	});
 
-	filteredTable.set(tempTable);
+	const idCol = columnHash(get(settings).idColumn);
+	if (
+		get(filteredTable).size === 0 ||
+		!arrayEquals(t.array(idCol), tempTable.array(idCol))
+	) {
+		filteredTable.set(tempTable);
+	}
 }
 
 export function enforce({ rule, name }: { rule: boolean; name: string }) {

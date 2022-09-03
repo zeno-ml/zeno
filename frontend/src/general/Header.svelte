@@ -42,7 +42,7 @@
 			src="build/zeno.png"
 			alt="Square spiral logo next to 'Zeno'" />
 		<div id="tabs">
-			<div
+			<!-- <div
 				class="item {$tab === 'discovery' ? 'selected' : ''}"
 				on:click={() => updateTab("discovery")}>
 				<div class="icon">
@@ -53,7 +53,7 @@
 					</Icon>
 				</div>
 				<div class="tab-text">Discovery</div>
-			</div>
+			</div> -->
 			<div
 				class="item {$tab === 'exploration' ? 'selected' : ''}"
 				on:click={() => updateTab("exploration")}>

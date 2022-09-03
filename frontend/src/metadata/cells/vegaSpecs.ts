@@ -44,7 +44,7 @@ export function generateCountSpec({
 				},
 			},
 			{
-				mark: { type: "bar", opacity: opacity },
+				mark: { type: "bar" },
 				encoding: {
 					x: {
 						field: "category",
@@ -87,7 +87,7 @@ export function generateCountSpec({
 			legend: null,
 		};
 	} else {
-		topLayerBars.mark.fill = "#6A1B99";
+		topLayerBars.mark.fill = "#6a1b9a";
 	}
 
 	return countSpec;
@@ -132,7 +132,7 @@ export function generateHistogramSpec({
 				},
 			},
 			{
-				mark: { type: "bar", opacity: opacity },
+				mark: { type: "bar" },
 				encoding: {
 					size: {
 						legend: null,
@@ -165,7 +165,7 @@ export function generateHistogramSpec({
 			legend: null,
 		};
 	} else {
-		topLayerBars.mark.fill = "#6A1B99";
+		topLayerBars.mark.fill = "#6a1b9a";
 	}
 
 	return histogramSpec;

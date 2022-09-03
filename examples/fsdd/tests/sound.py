@@ -11,7 +11,7 @@ def amplitude(df, ops: ZenoOptions):
     amps = []
     for audio in files:
         y, _ = librosa.load(audio)
-        amps.append(np.abs(y).mean())
+        amps.append(float(np.abs(y).mean()))
     return amps
 
 
