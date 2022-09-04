@@ -63,7 +63,11 @@ def getMetadataType(col: pd.Series) -> MetadataType:
     if col.dtype == "bool":
         return MetadataType.BOOLEAN
 
-    unique = col.unique().tolist()
+    try:
+        unique = col.unique().tolist()
+    except TypeError:
+        return MetadataType.OTHER
+
     if len(unique) < 21:
         return MetadataType.NOMINAL
 

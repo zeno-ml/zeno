@@ -1,10 +1,10 @@
-tests = "./"
+# tests = "./"
 view = "zenoml_image_object_detection"
 metadata = "../coco.parquet"
-models = [
-        "yolov3",
-        "yolov5",
-]
+# models = [
+#         "yolov3",
+#         "yolov5",
+# ]
 data_path = "/Users/acabrera/dev/data/coco-2014/val2014"
 id_column = "file_name"
 data_column = "file_name"

@@ -75,7 +75,6 @@
 	onMount(() => {
 		selection.column = col;
 		drawChart($table);
-		updateData($table, $filteredTable);
 	});
 
 	function updateData(table: ColumnTable, filteredTable: ColumnTable) {

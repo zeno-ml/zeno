@@ -276,12 +276,17 @@ export function updateFilteredTable(t: ColumnTable) {
 	});
 
 	const idCol = columnHash(get(settings).idColumn);
-	if (
-		get(filteredTable).size === 0 ||
-		!arrayEquals(t.array(idCol), tempTable.array(idCol))
-	) {
-		filteredTable.set(tempTable);
+	if (arrayEquals(tempTable.array(idCol), get(filteredTable).array(idCol))) {
+		return;
 	}
+	if (
+		arrayEquals(tempTable.array(idCol), t.array(idCol)) &&
+		arrayEquals(tempTable.array(idCol), get(filteredTable).array(idCol))
+	) {
+		return;
+	}
+
+	filteredTable.set(tempTable);
 }
 
 export function enforce({ rule, name }: { rule: boolean; name: string }) {
