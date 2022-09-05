@@ -6,7 +6,6 @@
 	import {
 		mdiCheckboxMarkedCircleOutline,
 		mdiCircleOutline,
-		mdiDotsCircle,
 		mdiApi,
 		mdiGithub,
 	} from "@mdi/js";

@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Tuple
 
 import numpy as np
-import pandas as pd
+import pandas as pd  # type: ignore
 import pyarrow as pa  # type: ignore
 from tqdm import trange  # type: ignore
 
