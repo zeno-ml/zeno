@@ -308,7 +308,7 @@ function get_each_context(ctx, list, i) {
 	return child_ctx;
 }
 
-// (26:6) {#if modelColumn && row[modelColumn] !== undefined}
+// (24:6) {#if modelColumn && row[modelColumn] !== undefined}
 function create_if_block(ctx) {
 	let br;
 	let t0;
@@ -351,7 +351,7 @@ function create_if_block(ctx) {
 	};
 }
 
-// (19:2) {#each table as row}
+// (17:2) {#each table as row}
 function create_each_block(ctx) {
 	let div;
 	let span0;
@@ -492,7 +492,6 @@ function instance($$self, $$props, $$invalidate) {
 	let { dataColumn } = $$props;
 	let { transformColumn } = $$props;
 	let { idColumn } = $$props;
-	console.log(modelColumn, table);
 
 	$$self.$$set = $$props => {
 		if ('table' in $$props) $$invalidate(0, table = $$props.table);
