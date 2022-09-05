@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Dict, List
 
 import numpy as np
-import pandas as pd
+import pandas as pd  # type: ignore
 
 from zeno.api import ZenoOptions
 from zeno.classes import (

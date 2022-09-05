@@ -46,7 +46,7 @@
 	}
 
 	.slice-link {
-		color: #9b51e0;
+		color: #6a1b9a;
 		cursor: pointer;
 	}
 </style>

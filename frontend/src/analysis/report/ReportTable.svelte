@@ -14,7 +14,7 @@
 </script>
 
 <div id="container">
-	<div class="inline">
+	<div class="inline" style:max-width="calc(100vw - 450px)">
 		<h4 style:margin-right="20px">{report.name}</h4>
 		<div class="export">
 			<Button
@@ -39,7 +39,8 @@
 	</div>
 
 	<div bind:this={table}>
-		<DataTable style="max-width: calc(100vw - 500px)">
+		<DataTable
+			style="max-width: calc(100vw - 450px); width: calc(100vw - 450px);">
 			<Head>
 				<Row>
 					<Cell class="sticky" style="border-right: 1px solid #e8e8e8">
@@ -68,6 +69,7 @@
 		display: flex;
 		flex-direction: inline;
 		align-items: center;
+		justify-content: space-between;
 	}
 	#container {
 		margin-left: 10px;

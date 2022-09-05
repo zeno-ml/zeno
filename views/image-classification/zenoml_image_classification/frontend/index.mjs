@@ -370,7 +370,7 @@ function create_if_block(ctx) {
 			br = element("br");
 			t0 = space();
 			span0 = element("span");
-			span0.textContent = "pred:";
+			span0.textContent = "output:";
 			t2 = space();
 			span1 = element("span");
 			t3 = text(t3_value);

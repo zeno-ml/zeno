@@ -20,7 +20,7 @@
   export let idColumn;
 
   const colors = colormap({
-    colormap: "hot",
+    colormap: "density",
     nshades: 256,
     format: "float",
   });
@@ -34,8 +34,8 @@
       let w;
       w = WaveSurfer.create({
         container: d,
-        waveColor: "violet",
-        progressColor: "purple",
+        waveColor: "#6a1b9a",
+        progressColor: "#6a1b9a",
         mediaControls: true,
         height: 50,
         plugins: [
@@ -83,11 +83,11 @@
       </div>
       <div class="spec" bind:this={specDivs[i]} />
       <span class="label">label: </span><span class="value">
-        {row[idColumn]}
+        {row[labelColumn]}
       </span>
       {#if modelColumn && row[modelColumn]}
         <br />
-        <span class="label">pred: </span>
+        <span class="label">output: </span>
         <span class="value">{row[modelColumn]} </span>
       {/if}
     </div>
@@ -101,12 +101,12 @@
     margin-left: 48px;
   }
   .label {
-    font-size: 10px;
+    font-size: 12px;
     color: rgba(0, 0, 0, 0.5);
     font-variant: small-caps;
   }
   .value {
-    font-size: 10px;
+    font-size: 12px;
   }
   .box {
     padding: 10px;

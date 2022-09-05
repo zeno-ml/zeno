@@ -1,70 +1,78 @@
 {
-	"version": "2.0.0",
-	"configurations": [
-		{
-			"name": "zenoimagenette",
-			"type": "python",
-			"request": "launch",
-			"cwd": "${workspaceFolder}",
-			"module": "zeno",
-			"args": ["./examples/imagenette/tests/zeno.toml"]
-		},
+  "version": "2.0.0",
+  "configurations": [
+    {
+      "name": "zenoimagenette",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": ["./examples/imagenette/tests/zeno.toml"]
+    },
 
-		{
-			"name": "zenocifar",
-			"type": "python",
-			"request": "launch",
-			"cwd": "${workspaceFolder}",
-			"module": "zeno",
-			"args": ["./examples/cifar/tests/zeno.toml"]
-		},
-		{
-			"name": "zenocifarnomodel",
-			"type": "python",
-			"request": "launch",
-			"cwd": "${workspaceFolder}",
-			"module": "zeno",
-			"args": ["./examples/cifar/zeno_no_model.toml"]
-		},
-		{
-			"name": "zenococotagging",
-			"type": "python",
-			"request": "launch",
-			"cwd": "${workspaceFolder}",
-			"module": "zeno",
-			"args": ["examples/coco-tagging/tests/zeno.toml"]
-		},
-		{
-			"name": "zenococo",
-			"type": "python",
-			"request": "launch",
-			"cwd": "${workspaceFolder}",
-			"module": "zeno",
-			"args": ["examples/coco/tests/zeno.toml"]
-		},
-		{
-			"name": "zenoreviews",
-			"type": "python",
-			"request": "launch",
-			"cwd": "${workspaceFolder}",
-			"module": "zeno",
-			"args": ["./examples/reviews/tests/zeno.toml"]
-		},
-		{
-			"name": "zenofsdd",
-			"type": "python",
-			"request": "launch",
-			"cwd": "${workspaceFolder}",
-			"module": "zeno",
-			"args": ["./examples/fsdd/tests/zeno.toml"]
-		},
-		{
-			"name": "zenosegment",
-			"type": "python",
-			"request": "launch",
-			"cwd": "${workspaceFolder}",
-			"module": "zeno",
-			"args": ["./examples/segmentation/tests/zeno.toml"]
-		}
-	]
+    {
+      "name": "zenocifar",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": ["./examples/cifar/tests/zeno.toml"]
+    },
+    {
+      "name": "zenocifarnomodel",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": ["./examples/cifar/zeno_no_model.toml"]
+    },
+    {
+      "name": "zenococotagging",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": ["examples/coco-tagging/tests/zeno.toml"]
+    },
+    {
+      "name": "zenomotionsense",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": ["examples/motionsense/zeno.toml"]
+    },
+    {
+      "name": "zenococo",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": ["examples/coco/tests/zeno.toml"]
+    },
+    {
+      "name": "zenoreviews",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": ["./examples/reviews/tests/zeno.toml"]
+    },
+    {
+      "name": "zenofsdd",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": ["./examples/fsdd/tests/zeno.toml"]
+    },
+    {
+      "name": "zenosegment",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": ["./examples/segmentation/tests/zeno.toml"]
+    }
+  ]
 }

@@ -21,9 +21,9 @@
       <span class="label">label: </span><span class="value">
         {row[labelColumn]}
       </span>
-      {#if modelColumn && row[modelColumn]}
+      {#if modelColumn && row[modelColumn] !== undefined}
         <br />
-        <span class="label">pred: </span>
+        <span class="label">output: </span>
         <span class="value">{row[modelColumn]} </span>
       {/if}
     </div>
@@ -37,12 +37,12 @@
     flex-wrap: wrap;
   }
   .label {
-    font-size: 10px;
+    font-size: 12px;
     color: rgba(0, 0, 0, 0.5);
     font-variant: small-caps;
   }
   .value {
-    font-size: 10px;
+    font-size: 12px;
   }
   .box {
     padding: 10px;

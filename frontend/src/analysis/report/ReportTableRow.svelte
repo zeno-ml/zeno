@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { mdiPencilOutline } from "@mdi/js";
 	import { Cell, Row } from "@smui/data-table";
 	import { Svg } from "@smui/common/elements";
 	import { Icon } from "@smui/button";
 	import Select, { Option } from "@smui/select";
 	import Textfield from "@smui/textfield";
 	import HelperText from "@smui/textfield/helper-text";
+	import IconButton from "@smui/icon-button";
+	import { mdiPencilOutline, mdiDotsHorizontal } from "@mdi/js";
 
 	import { getMetricsForSlices } from "../../util/util";
 	import { models, slices, reports, report } from "../../stores";
@@ -17,6 +18,8 @@
 	export let predicate: ReportPredicate;
 
 	let editMode = false;
+	let hovering = false;
+	let showOptions = false;
 
 	$: sli = $slices.get(predicate.sliceName);
 
@@ -51,46 +54,68 @@
 	}
 </script>
 
-<Row style="overflow: visible">
+<Row
+	style="overflow: visible"
+	on:mouseover={() => (hovering = true)}
+	on:focus={() => (hovering = true)}
+	on:mouseleave={() => (hovering = false)}
+	on:blur={() => (hovering = false)}>
 	<Cell class="sticky" style="left: 0px; border-right: 1px solid #e8e8e8">
 		<div class="inline">
-			<div style:width="24px" style:height="24" style:cursor="pointer">
-				<Icon
-					component={Svg}
-					viewBox="0 0 24 24"
-					on:click={(e) => {
-						e.stopPropagation();
-						if (editMode) {
-							savePredicates();
-						}
-						editMode = !editMode;
-					}}>
-					<path fill="black" d={mdiPencilOutline} />
-				</Icon>
-			</div>
-			<div
-				style:width="24px"
-				style:height="24px"
-				style:cursor="pointer"
-				style:margin-right="10px">
-				<Icon
-					viewBox="0 0 24 24"
-					class="material-icons"
-					on:click={(e) => {
-						e.stopPropagation();
-						let rep = $reports[$report];
-						rep.reportPredicates.splice(predicateIndex, 1);
-						reports.update((reps) => {
-							reps[$report] = rep;
-							return reps;
-						});
-					}}>
-					delete_outline
-				</Icon>
-			</div>
 			{#if sli}
 				<SliceDetailsContainer {sli} />
 			{/if}
+			<div class="group">
+				<div style:width="36px">
+					{#if hovering}
+						<IconButton
+							size="button"
+							style="padding: 0px"
+							on:click={(e) => {
+								e.stopPropagation();
+								showOptions = !showOptions;
+							}}>
+							<Icon component={Svg} viewBox="0 0 24 24">
+								<path fill="black" d={mdiDotsHorizontal} />
+							</Icon>
+						</IconButton>
+					{/if}
+				</div>
+
+				{#if showOptions}
+					<div
+						id="options-container"
+						on:mouseleave={() => (showOptions = false)}
+						on:blur={() => (showOptions = false)}>
+						<IconButton
+							on:click={(e) => {
+								e.stopPropagation();
+								showOptions = false;
+								if (editMode) {
+									savePredicates();
+								}
+								editMode = !editMode;
+							}}>
+							<Icon component={Svg} viewBox="0 0 24 24">
+								<path fill="black" d={mdiPencilOutline} />
+							</Icon>
+						</IconButton>
+						<IconButton
+							on:click={(e) => {
+								e.stopPropagation();
+								showOptions = false;
+								let rep = $reports[$report];
+								rep.reportPredicates.splice(predicateIndex, 1);
+								reports.update((reps) => {
+									reps[$report] = rep;
+									return reps;
+								});
+							}}>
+							<Icon class="material-icons">delete_outline</Icon>
+						</IconButton>
+					</div>
+				{/if}
+			</div>
 		</div>
 	</Cell>
 	<Cell style="overflow: visible">
@@ -137,5 +162,22 @@
 		left: 0px;
 		background: white;
 		z-index: 0;
+	}
+	#options-container {
+		z-index: 5;
+		background: white;
+		margin-top: -1px;
+		border: 1px solid #e8e8e8;
+		position: absolute;
+		height: max-content;
+		display: flex;
+	}
+	.group {
+		margin-left: 10px;
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+		cursor: pointer;
 	}
 </style>

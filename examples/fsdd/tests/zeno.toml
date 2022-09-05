@@ -2,11 +2,12 @@ tests = "./"
 view = "zenoml_audio_transcription"
 metadata = "../fsdd.csv"
 models = [
-    "a",
+    "silero-transcription",
 ]
 data_path = "/Users/acabrera/dev/data/free-spoken-digit-dataset/recordings"
 batch_size = 16
 data_column = "id"
+label_column = "label"
 data_type = "path"
 port = 8003
 samples = 10

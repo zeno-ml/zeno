@@ -30,7 +30,7 @@
       </span>
       {#if modelColumn && row[modelColumn]}
         <br />
-        <span class="label">pred: </span>
+        <span class="label">output: </span>
         <span class="value">{row[modelColumn]} </span>
       {/if}
     </div>

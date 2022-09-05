@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { Icon } from "@smui/button";
-	import Ripple from "@smui/ripple";
 	import Textfield from "@smui/textfield";
+	import IconButton from "@smui/icon-button";
 	import { Svg } from "@smui/common/elements";
-	import { mdiPencilOutline } from "@mdi/js";
+	import { mdiPencilOutline, mdiDotsHorizontal } from "@mdi/js";
 
 	import { clickOutside } from "../util/clickOutside";
 	import { report as selectedReport, reports } from "../stores";
@@ -11,10 +11,16 @@
 	export let report;
 	export let reportIndex;
 
+	let hovering = false;
+	let showOptions = false;
 	let editMode = false;
 </script>
 
 <div
+	on:mouseover={() => (hovering = true)}
+	on:focus={() => (hovering = true)}
+	on:mouseleave={() => (hovering = false)}
+	on:blur={() => (hovering = false)}
 	use:clickOutside
 	on:click_outside={() => {
 		if (editMode) {
@@ -26,7 +32,6 @@
 		}
 	}}>
 	<div
-		use:Ripple={{ surface: true, color: "primary" }}
 		class="report {$selectedReport === reportIndex ? 'selected' : ''}"
 		on:click={() => selectedReport.set(reportIndex)}>
 		{#if !editMode}
@@ -44,29 +49,51 @@
 					(r) => r.results[r.results.length - 1] > -1
 				).length} passing
 			</p>
-			<div style:width="24px" style:height="24" style:cursor="pointer">
-				<Icon
-					component={Svg}
-					viewBox="0 0 24 24"
-					on:click={(e) => {
-						e.stopPropagation();
-						editMode = !editMode;
-					}}>
-					<path fill="black" d={mdiPencilOutline} />
-				</Icon>
-			</div>
-			<div style:cursor="pointer">
-				<Icon
-					class="material-icons"
-					on:click={(e) => {
-						e.stopPropagation();
-						reports.update((reps) => {
-							reps.splice(reportIndex, 1);
-							return reps;
-						});
-					}}>
-					delete_outline
-				</Icon>
+			<div class="group">
+				<div style:width="36px">
+					{#if hovering}
+						<IconButton
+							size="button"
+							style="padding: 0px"
+							on:click={(e) => {
+								e.stopPropagation();
+								showOptions = !showOptions;
+							}}>
+							<Icon component={Svg} viewBox="0 0 24 24">
+								<path fill="black" d={mdiDotsHorizontal} />
+							</Icon>
+						</IconButton>
+					{/if}
+				</div>
+
+				{#if showOptions}
+					<div
+						id="options-container"
+						on:mouseleave={() => (showOptions = false)}
+						on:blur={() => (showOptions = false)}>
+						<IconButton
+							on:click={(e) => {
+								e.stopPropagation();
+								showOptions = false;
+								editMode = !editMode;
+							}}>
+							<Icon component={Svg} viewBox="0 0 24 24">
+								<path fill="black" d={mdiPencilOutline} />
+							</Icon>
+						</IconButton>
+						<IconButton
+							on:click={(e) => {
+								e.stopPropagation();
+								showOptions = false;
+								reports.update((reps) => {
+									reps.splice(reportIndex, 1);
+									return reps;
+								});
+							}}>
+							<Icon class="material-icons">delete_outline</Icon>
+						</IconButton>
+					</div>
+				{/if}
 			</div>
 		</div>
 	</div>
@@ -77,10 +104,14 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		border-bottom: 0.5px solid rgb(224, 224, 224);
-		border-top: 0.5px solid rgb(224, 224, 224);
+		border: 1px solid #e0e0e0;
+		border-radius: 5px;
+		margin-top: 5px;
+		margin-bottom: 5px;
 		padding-left: 10px;
 		padding-right: 10px;
+		overflow: visible;
+		cursor: pointer;
 	}
 	.selected {
 		background: #f9f5ff;
@@ -89,5 +120,21 @@
 		display: flex;
 		flex-direction: inline;
 		align-items: center;
+	}
+	#options-container {
+		z-index: 5;
+		background: white;
+		margin-top: -1px;
+		border: 1px solid #e8e8e8;
+		position: absolute;
+		height: max-content;
+		display: flex;
+	}
+	.group {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+		cursor: pointer;
 	}
 </style>
