@@ -51,7 +51,7 @@
 								return reps;
 							});
 						}}>
-						<path fill="#9b51e0" d={mdiPlusCircleOutline} />
+						<path fill="#6a1b9a" d={mdiPlusCircleOutline} />
 					</Icon>
 				</div>
 			{/if}

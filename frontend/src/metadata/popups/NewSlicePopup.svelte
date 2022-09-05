@@ -111,7 +111,7 @@
 			s.set(sliceName, <Slice>{
 				sliceName: sliceName,
 				folder: "",
-				filterPredicates: predicateGroup,
+				filterPredicates: Object.assign({}, predicateGroup),
 				idxs: tempTable.array(columnHash($settings.idColumn)) as string[],
 			});
 			return s;

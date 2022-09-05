@@ -51,13 +51,10 @@
 		padding: 10px;
 		margin-left: 10px;
 		overflow-y: auto;
-		min-width: 450px;
-		width: 450px;
+		min-width: 400px;
+		width: 400px;
 		height: calc(100vh - 80px);
 		border-right: 1px solid #e8e8e8;
-	}
-	#reports {
-		margin-bottom: 10px;
 	}
 	.report {
 		display: flex;
@@ -71,10 +68,13 @@
 	.overview {
 		display: flex;
 		align-items: center;
-		border-bottom: 0.5px solid rgb(224, 224, 224);
-		border-top: 0.5px solid rgb(224, 224, 224);
+		border: 1px solid #e0e0e0;
+		border-radius: 5px;
+		margin-top: 5px;
+		margin-bottom: 5px;
 		padding-left: 10px;
 		padding-right: 10px;
+		cursor: pointer;
 	}
 	.selected {
 		background: #f9f5ff;
