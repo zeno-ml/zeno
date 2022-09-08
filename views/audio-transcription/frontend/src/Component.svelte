@@ -85,7 +85,7 @@
       <span class="label">label: </span><span class="value">
         {row[labelColumn]}
       </span>
-      {#if modelColumn && row[modelColumn]}
+      {#if modelColumn && row[modelColumn] !== undefined}
         <br />
         <span class="label">output: </span>
         <span class="value">{row[modelColumn]} </span>
@@ -117,5 +117,15 @@
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+  }
+
+  :global(spectrogram canvas) {
+    z-index: 0 !important;
+  }
+  :global(wave canvas) {
+    z-index: 0 !important;
+  }
+  :global(wave) {
+    z-index: 0 !important;
   }
 </style>

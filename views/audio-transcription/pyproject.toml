@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "zenoml-audio-transcription"
-version = "0.0.2"
+version = "0.0.4"
 description = "Audio Transcription for Zeno"
 license = "MIT"
 authors = ["Ángel Alexander Cabrera <alex.cabrera@gmail.com>"]

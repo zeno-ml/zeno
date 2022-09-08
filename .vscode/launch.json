@@ -35,6 +35,14 @@
       "args": ["examples/coco-tagging/tests/zeno.toml"]
     },
     {
+      "name": "zenodov",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": ["../direction-of-voice/zeno/zeno.toml"]
+    },
+    {
       "name": "zenomotionsense",
       "type": "python",
       "request": "launch",

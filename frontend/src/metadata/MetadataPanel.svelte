@@ -202,6 +202,6 @@
 		margin-left: 10px;
 	}
 	.top-layer {
-		z-index: 999;
+		z-index: 1;
 	}
 </style>
