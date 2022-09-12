@@ -27,7 +27,7 @@
     "@smui/paper": "^6.1.0",
     "@smui/ripple": "^6.1.0",
     "@smui/segmented-button": "^6.0.0",
-    "@smui/select": "^6.0.0",
+    "@smui/select": "^6.1.0",
     "@smui/textfield": "^6.0.0",
     "@smui/tooltip": "^6.1.0",
     "@sveltejs/vite-plugin-svelte": "1.0.0-next.49",
