@@ -253,7 +253,7 @@ test = ["hypothesis (>=5.5.3)", "pytest (>=6.0)", "pytest-xdist (>=1.31)"]
 
 [[package]]
 name = "pandas-stubs"
-version = "1.4.3.220829"
+version = "1.4.4.220912"
 description = "Type annotations for pandas"
 category = "dev"
 optional = false
@@ -677,7 +677,7 @@ url = "views/timeseries"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "94d2794c0787d3ee9c3a24f25d50e9199919e794fe4dfd0d36e6016922422562"
+content-hash = "186a07b96cbda4fc695db75343f11744e968c1c0c7af61c11e7685a39c4b3647"
 
 [metadata.files]
 anyio = [
@@ -918,8 +918,8 @@ pandas = [
     {file = "pandas-1.4.4.tar.gz", hash = "sha256:ab6c0d738617b675183e5f28db32b5148b694ad9bba0a40c3ea26d96b431db67"},
 ]
 pandas-stubs = [
-    {file = "pandas-stubs-1.4.3.220829.tar.gz", hash = "sha256:f49f74f496e1b10c42218799067c23603c37e6e1cc55ca24f6ea23c46d0119f9"},
-    {file = "pandas_stubs-1.4.3.220829-py3-none-any.whl", hash = "sha256:7a1262c20c747515e2ed15a6cefce292ddce23c140828dfdcbcf97f1f3e4bd03"},
+    {file = "pandas-stubs-1.4.4.220912.tar.gz", hash = "sha256:5920ffd5a09e49bfc987c4400056ffe6d9e9448c821e64c2c47a18345f8b00d7"},
+    {file = "pandas_stubs-1.4.4.220912-py3-none-any.whl", hash = "sha256:7f5569bdeb57d07a8c4c6c8ccabb438155ec0c4c346bc6cf562c2fab7085e3f6"},
 ]
 pathspec = [
     {file = "pathspec-0.10.1-py3-none-any.whl", hash = "sha256:46846318467efc4556ccfd27816e004270a9eeeeb4d062ce5e6fc7a87c573f93"},
