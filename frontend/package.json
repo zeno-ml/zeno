@@ -44,7 +44,7 @@
     "jest-transform-stub": "^2.0.0",
     "prettier": "^2.7.1",
     "prettier-plugin-svelte": "^2.7.0",
-    "smui-theme": "^6.0.0",
+    "smui-theme": "^6.1.3",
     "svelte": "^3.50.1",
     "svelte-check": "^2.8.0",
     "svelte-jester": "^2.3.2",
