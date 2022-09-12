@@ -45,7 +45,7 @@
     "prettier": "^2.7.1",
     "prettier-plugin-svelte": "^2.7.0",
     "smui-theme": "^6.0.0",
-    "svelte": "^3.49.0",
+    "svelte": "^3.50.1",
     "svelte-check": "^2.8.0",
     "svelte-jester": "^2.3.2",
     "svelte-preprocess": "^4.10.7",
