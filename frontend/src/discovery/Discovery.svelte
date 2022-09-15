@@ -185,7 +185,9 @@
 
 <div id="main">
 	<div id="metadata-bar-view">
-		<MetadataBar shouldColor />
+		{#if $table.size > 0}
+			<MetadataBar shouldColor />
+		{/if}
 	</div>
 	<div>
 		<div id="scatter-view" style:height="{scatterHeight}px">
