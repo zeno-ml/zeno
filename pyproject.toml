@@ -34,7 +34,7 @@ black = "^22.6.0"
 flake8 = "^5.0.0"
 mypy = "^0.971"
 pyright = "^1.1.270"
-usort = "^1.0.1"
+usort = "^1.0.5"
 zenoml-audio-transcription = {path = "views/audio-transcription", develop = true}
 zenoml-image-classification = {path = "views/image-classification", develop = true}
 zenoml-image-object-detection = {path = "views/image-object-detection", develop = true}
