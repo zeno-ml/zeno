@@ -357,7 +357,7 @@ diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pyright"
-version = "1.1.270"
+version = "1.1.271"
 description = "Command line wrapper for pyright"
 category = "dev"
 optional = false
@@ -598,7 +598,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "zenoml-audio-transcription"
-version = "0.0.2"
+version = "0.0.4"
 description = "Audio Transcription for Zeno"
 category = "dev"
 optional = false
@@ -677,7 +677,7 @@ url = "views/timeseries"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "d7c30331b73f10d5d29bf6449457aeeda0d13102243158698ff96790e35e1a96"
+content-hash = "5d663ac1827f281dfbe41892e5300a97852ed2ec0f3b21abdc4b1e12c2bd7459"
 
 [metadata.files]
 anyio = [
@@ -1016,8 +1016,8 @@ pyparsing = [
     {file = "pyparsing-3.0.9.tar.gz", hash = "sha256:2b020ecf7d21b687f219b71ecad3631f644a47f01403fa1d1036b0c6416d70fb"},
 ]
 pyright = [
-    {file = "pyright-1.1.270-py3-none-any.whl", hash = "sha256:f2936dd26a732177f0ed8038bb52e423760816d6ee2d86cc6c01b8e9c01c63bd"},
-    {file = "pyright-1.1.270.tar.gz", hash = "sha256:83ed7ebc04a4b63a43bc42be158733b3e38612eef0774412113b500cd805765d"},
+    {file = "pyright-1.1.271-py3-none-any.whl", hash = "sha256:1d8da0eca3eade0500cf19da90aaf029263b6e339c6210c158c863758fe21de1"},
+    {file = "pyright-1.1.271.tar.gz", hash = "sha256:67b18ae5e6a5e291120bda19880d0e78c9c05e3cb10bd4439921bacc0bfd780f"},
 ]
 pytest = [
     {file = "pytest-7.1.3-py3-none-any.whl", hash = "sha256:1377bda3466d70b55e3f5cecfa55bb7cfcf219c7964629b967c37cf0bda818b7"},
