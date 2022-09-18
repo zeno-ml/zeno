@@ -2,7 +2,7 @@
 
 [![PyPI version](https://badge.fury.io/py/zenoml.svg)](https://badge.fury.io/py/zenoml)
 ![Github Actions CI tests](https://github.com/zeno-ml/zeno/actions/workflows/test.yml/badge.svg)
-![Github Actions Docs build](https://github.com/zeno-ml/zeno/actions/workflows/docs.yml/badge.svg)
+![Github Actions Docs build](https://github.com/zeno-ml/zenoml.com/actions/workflows/docs.yml/badge.svg)
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
 
 Zeno is a general-purpose framework for evaluating machine learning models.

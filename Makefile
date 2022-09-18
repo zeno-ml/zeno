@@ -1,4 +1,4 @@
-all: check lint typecheck test docs 
+all: check lint typecheck test 
 
 .PHONY: install
 install:
@@ -44,11 +44,6 @@ profile-import:
 	@echo "==> 🧪 Profile Imports"
 	@poetry run python -X importtime -m zeno 2> p.profile      
 	@tuna p.profile
-
-.PHONY: docs
-docs:
-	@echo "==> 📕 Docs"
-	@cd docs; npm i; npm run build;
 
 .PHONY: build
 build:
