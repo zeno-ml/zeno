@@ -7,8 +7,7 @@ from pandas import DataFrame
 
 def umap(*args, **kwargs):
     umap_module = import_module("umap")
-    UMAP = umap_module.parametric_umap.UMAP
-    return UMAP(*args, **kwargs)
+    return umap_module.UMAP(*args, **kwargs)
 
 
 class Mirror:
