@@ -6,7 +6,7 @@
 	import { initialFetch, updateTableColumns } from "./util/util";
 
 	import Analysis from "./analysis/Analysis.svelte";
-	import DiscoveryV2 from "./discovery/v2/Discovery.svelte";
+	import DiscoveryV2 from "./discovery/Discovery.svelte";
 	import Exploration from "./Exploration.svelte";
 	import Header from "./general/Header.svelte";
 

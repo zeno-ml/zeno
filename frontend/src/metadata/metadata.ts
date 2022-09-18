@@ -9,7 +9,14 @@ import {
 import { MetadataType } from "../globals";
 
 import { columnHash } from "../util/util";
-import { interpolateColorToArray } from "../discovery/discovery";
+import { color } from "d3-color";
+import { scaleLinear } from "d3-scale";
+
+interface IInterpolateColor {
+	colorer: (normalized: number) => string;
+	length: number;
+	range?: [number, number];
+}
 
 interface IComputeDomain {
 	type: MetadataType;
@@ -20,6 +27,20 @@ interface IComputeDomain {
 interface ISpecificDomain {
 	table: ColumnTable;
 	column: string;
+}
+
+function interpolateColorToArray({
+	colorer,
+	length,
+	range = [0.0, 1.0],
+}: IInterpolateColor) {
+	const scale = scaleLinear().domain([0.0, 1.0]).range(range);
+	const increment = 1.0 / length;
+	const colorArray = new Array(length);
+	for (let i = 0, t = 0; i < colorArray.length; i++, t += increment) {
+		colorArray[i] = color(colorer(scale(t))).hex();
+	}
+	return colorArray;
 }
 
 export function computeDomain({ type, table, column }: IComputeDomain) {

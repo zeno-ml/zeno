@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { model } from "../../stores";
-	import request from "../../util/request";
+	import { model } from "../stores";
+	import request from "../util/request";
 
 	type point2D = [number, number];
 	interface I2D {
