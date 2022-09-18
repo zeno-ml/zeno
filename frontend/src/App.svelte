@@ -6,13 +6,13 @@
 	import { initialFetch, updateTableColumns } from "./util/util";
 
 	import Analysis from "./analysis/Analysis.svelte";
-	import DiscoveryV2 from "./discovery/Discovery.svelte";
+	import Discovery from "./discovery/Discovery.svelte";
 	import Exploration from "./Exploration.svelte";
 	import Header from "./general/Header.svelte";
 
 	const routes = {
 		"/": Exploration,
-		"/discovery/": DiscoveryV2,
+		"/discovery/": Discovery,
 		"/exploration/": Exploration,
 		"/analysis/": Analysis,
 		"*": Exploration,
