@@ -24,7 +24,7 @@ from zeno.classes import (
     ZenoFunction,
     ZenoFunctionType,
 )
-from zeno.pipeline.pipeline import Pipeline
+from zeno.mirror import Mirror
 from zeno.util import (
     add_to_path,
     get_arrow_bytes,
@@ -89,7 +89,7 @@ class Zeno(object):
             self.model_paths = models  # type: ignore
         self.model_names = [os.path.basename(p).split(".")[0] for p in self.model_paths]
 
-        self.pipeline = Pipeline()
+        self.mirror = Mirror(self.df, self.cache_path)
 
         # Options passed to Zeno functions.
         self.zeno_options = ZenoOptions(
@@ -475,88 +475,6 @@ class Zeno(object):
             result_metric = None
 
         return result_metric
-
-    def reset_pipeline(self, up_to_id=""):
-        self.pipeline.reset_memory()
-        self.pipeline.reset_pipeline(up_to_id)
-        self.pipeline.reset_labeler()
-
-    def init_pipeline(self, model: str, uid: str = "0"):
-        self.pipeline.set_uid(uid)
-        self.pipeline.set_model(model)
-        self.pipeline.set_id_column(self.id_column)
-        self.pipeline.set_table(self.df)
-
-    def add_id_filter_pipeline(self, ids: List[str]):
-        self.pipeline.add_filter(ids)
-        output, js_export = self.pipeline.run()
-        return js_export
-
-    def add_umap_pipeline(self, user_specified_args: dict):
-        self.pipeline.add_umap(**user_specified_args)
-        output, js_export = self.pipeline.run()
-        return js_export
-
-    def get_json_pipeline(self):
-        return self.pipeline.json()
-
-    def load_pipeline(self, model: str, uid: str = "0"):
-        if self.pipeline.populated() and self.pipeline.same(model, uid):
-            return self.pipeline.json(state=True)
-        else:
-            # within the init I can do cache stuff
-            self.init_pipeline(model, uid)
-            self.reset_pipeline()
-            return None
-
-    def add_region_labeler_pipeline(self, polygon, name, up_to_id=""):
-        self.pipeline.set_name(name)
-        self.pipeline.add_region_labeler(polygon)
-        output, js_export = self.pipeline.run_labeler(up_to_id)
-        col_name = self.table_weak_labels(js_export["state"])
-        return {"export": js_export["state"], "col_name": col_name}
-
-    def __check_column_duplicates(self, df: pd.DataFrame, column_name: str):
-        duplicates = 0
-        for key in df.keys():
-            if key == column_name:
-                duplicates += 1
-        return duplicates
-
-    def __check_zeno_column_duplicates(self, column: ZenoColumn):
-        return self.__check_column_duplicates(self.df, str(column))
-
-    def __handle_duplicate_zeno_columns(self, new_column: ZenoColumn):
-        num_duplicates = self.__check_zeno_column_duplicates(new_column)
-        modified_column = new_column
-
-        if num_duplicates > 0:
-            duplicate_name = new_column.name + str(num_duplicates)
-            modified_column.name = duplicate_name
-
-        return modified_column
-
-    def table_weak_labels(self, js_export):
-        new_column = ZenoColumn(
-            column_type=ZenoColumnType.WEAK_LABEL,
-            name=self.pipeline.name,
-            model=self.pipeline.model,
-            transform="",
-        )
-        new_column = self.__handle_duplicate_zeno_columns(new_column)
-        new_column_hash = str(new_column)
-
-        ids = js_export["ids"]
-        labels = js_export["labels"]
-        assert len(ids) == len(labels), "Yo your're algo is wrong buddy"
-        self.df.loc[:, new_column_hash] = 0
-        self.df.loc[ids, new_column_hash] = labels
-
-        self.complete_columns.append(new_column)
-        self.columns.append(new_column)
-        self.status = f"Done running weak labeler {new_column_hash}"
-
-        return new_column.dict()
 
     def get_table(self, columns):
         """Get the metadata DataFrame for a given slice.
