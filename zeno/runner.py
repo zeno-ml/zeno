@@ -16,13 +16,13 @@ from fastapi.staticfiles import StaticFiles
 
 from zeno.classes import (
     MetricKey,
+    MirrorProject,
     Report,
     Slice,
     StatusResponse,
     ZenoColumn,
     ZenoSettings,
     ZenoVariables,
-    MirrorProject,
 )
 from zeno.zeno import Zeno
 

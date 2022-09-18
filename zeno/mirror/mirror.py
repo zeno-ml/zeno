@@ -1,8 +1,9 @@
 from importlib import import_module
-from typing import List
+
+from pandas import DataFrame
+
 from zeno.classes import ZenoColumn, ZenoColumnType
 from zeno.mirror.cache import ValueCache
-from pandas import DataFrame
 
 
 def umap(*args, **kwargs):
@@ -15,7 +16,7 @@ class Mirror:
         self.df = df
         self.cache = ValueCache(cache_path, name="projection")
 
-    def project(self, model: str) -> List[List[float]]:
+    def project(self, model: str):
         def _umap():
             # extract data
             embed_col = ZenoColumn(column_type=ZenoColumnType.EMBEDDING, name=model)

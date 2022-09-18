@@ -1,6 +1,6 @@
-from typing import Callable
-import pickle
 import os
+import pickle
+from typing import Callable
 
 
 def blank_func():
