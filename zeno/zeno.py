@@ -25,6 +25,7 @@ from zeno.classes import (
     ZenoFunctionType,
 )
 from zeno.pipeline.pipeline import Pipeline
+from zeno.mirror import Mirror
 from zeno.util import (
     add_to_path,
     get_arrow_bytes,
@@ -90,6 +91,7 @@ class Zeno(object):
         self.model_names = [os.path.basename(p).split(".")[0] for p in self.model_paths]
 
         self.pipeline = Pipeline()
+        self.mirror = Mirror(self.df, self.cache_path)
 
         # Options passed to Zeno functions.
         self.zeno_options = ZenoOptions(

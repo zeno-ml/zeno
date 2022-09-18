@@ -27,6 +27,7 @@ from zeno.classes import (
     ZenoColumn,
     ZenoSettings,
     ZenoVariables,
+    MirrorProject,
 )
 from zeno.zeno import Zeno
 
@@ -294,6 +295,11 @@ def run_zeno(args):
     def get_pipeline_json():
         js_export = zeno.get_json_pipeline()
         return json.dumps({"status": True, "data": js_export})
+
+    @api_app.post("/mirror/project")
+    def mirror_project(req: MirrorProject):
+        proj = zeno.mirror.project(req.model)
+        return json.dumps({"model": req.model, "data": proj})
 
     @api_app.websocket("/status")
     async def results_websocket(websocket: WebSocket):

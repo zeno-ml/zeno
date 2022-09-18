@@ -149,3 +149,7 @@ class PipelineRegionLabeler(BaseModel):
 
 class PipelineProjection(BaseModel):
     args: dict
+
+
+class MirrorProject(BaseModel):
+    model: str
