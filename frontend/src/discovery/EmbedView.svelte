@@ -1,4 +1,6 @@
 <script lang="ts">
+	import Scatter from "./scatter/Scatter.svelte";
+
 	import { onMount } from "svelte";
 	import { model } from "../stores";
 	import request from "../util/request";
@@ -35,6 +37,7 @@
 <div>
 	<div>Embedding View</div>
 	<div>{initialProj.length}</div>
+	<Scatter width={500} height={500} />
 </div>
 
 <style>
