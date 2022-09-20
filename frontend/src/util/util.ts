@@ -24,15 +24,6 @@ import {
 } from "../stores";
 import { ZenoColumnType } from "../globals";
 
-export interface Extent {
-	min: number;
-	max: number;
-}
-export interface XYExtent {
-	xExtent: Extent;
-	yExtent: Extent;
-}
-
 const PREDICATE_MAP = {
 	"": "",
 	AND: "&&",

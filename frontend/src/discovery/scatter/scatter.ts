@@ -21,18 +21,6 @@ export interface ReglScatterColumns {
 export type ReglConfig = Partial<Properties>;
 export type ColorRange = string[];
 
-export interface LegendaryScatterPoint {
-	x: number;
-	y: number;
-	color: number;
-	opacity: number;
-	id?: unknown;
-}
-export interface LegendaryLegendEntry {
-	color: string;
-	value: string;
-}
-
 export function opacify(colorObj: RGBColor | HSLColor, opacity: number) {
 	const colorCopy = colorObj.copy();
 	colorCopy.opacity = opacity;

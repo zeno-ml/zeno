@@ -2,7 +2,6 @@
 	import LowLevelRegl from "./LowLevelRegl.svelte";
 	import { scaleLinear } from "d3-scale";
 	import { extentXY } from "../../util/util";
-	import type { Extent, XYExtent } from "../../util/util";
 	import type { ScatterRows, ReglConfig, ColorRange } from "./scatter";
 
 	export let width: number;
