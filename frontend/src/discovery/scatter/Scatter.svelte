@@ -1,24 +1,30 @@
 <script lang="ts">
-	import LowLevelRegl from "./v2/LowLevelRegl.svelte";
+	import { createEventDispatcher } from "svelte";
+	import AutoScaleRegl from "./AutoScaleRegl.svelte";
+	import type { ScatterRowsWithIds, ReglConfig, ColorRange } from "./scatter";
 
-	interface ScatterPoint {
-		x: number;
-		y: number;
-		color?: string;
-		opacity?: number;
-		size?: number;
-		id?: string;
-	}
-	export let points: ScatterPoint[] = [];
+	const dispatch = createEventDispatcher();
+
+	export let data: ScatterRowsWithIds<string> = [];
 	export let width = 500;
 	export let height = 500;
+	export let colorRange: ColorRange = [];
+	export let config: ReglConfig = {};
 </script>
 
-<LowLevelRegl
+<AutoScaleRegl
+	{data}
+	downScale="maxDim"
 	on:lassoIndex={({ detail }) => {
-		console.log(detail);
+		if (detail !== null) {
+			const indexToInstanceMapping = detail.map((index) => data[index]);
+			dispatch("lasso", indexToInstanceMapping);
+		} else {
+			dispatch("lasso", null);
+		}
 	}}
-	colorRange={["#ff0000", "#00ff00", "#0000ff"]}
+	{colorRange}
+	{config}
 	{width}
 	{height} />
 

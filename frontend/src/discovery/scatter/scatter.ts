@@ -9,6 +9,7 @@ export interface ScatterPoint {
 	opacity: number;
 }
 export type ScatterRows = ScatterPoint[];
+export type ScatterRowsWithIds<T> = ScatterRows & { id?: T };
 
 //column format
 export interface ReglScatterColumns {
