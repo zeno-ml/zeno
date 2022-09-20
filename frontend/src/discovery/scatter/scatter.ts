@@ -1,3 +1,4 @@
+import type { Properties } from "regl-scatterplot/dist/types";
 import type { HSLColor, RGBColor } from "d3-color";
 
 // row format
@@ -16,6 +17,8 @@ export interface ReglScatterColumns {
 	category: number[]; //notice color is now category
 	value: number[]; // notice opacity is now value
 }
+export type ReglConfig = Partial<Properties>;
+export type ColorRange = string[];
 
 export interface LegendaryScatterPoint {
 	x: number;
