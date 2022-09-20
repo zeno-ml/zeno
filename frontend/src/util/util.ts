@@ -322,10 +322,9 @@ export function extentXY<T>(
  * extent is a general implementation over n dimensions to get min and max values
  */
 export function extent<T>(data: T[], getters: ((d: T) => number)[]): Extent[] {
-	const firstPoint = data[0];
-	const extents: Extent[] = getters.map((getter) => ({
-		min: getter(firstPoint),
-		max: getter(firstPoint),
+	const extents: Extent[] = getters.map(() => ({
+		min: Infinity,
+		max: -Infinity,
 	}));
 
 	data.forEach((d) => {
