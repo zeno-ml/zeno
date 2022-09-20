@@ -295,32 +295,40 @@ export function enforce({ rule, name }: { rule: boolean; name: string }) {
 	}
 }
 
+/**
+ * extentXY returns the minimum and maximum values for each dimension X and Y
+ */
 export function extentXY<T>(
 	data: T[],
 	xGetter = (d: T) => d[0],
 	yGetter = (d: T) => d[1]
-) {
-	const firstPoint = data[0];
-	const xExtent = { min: xGetter(firstPoint), max: xGetter(firstPoint) };
-	const yExtent = { min: yGetter(firstPoint), max: yGetter(firstPoint) };
-	for (let i = 1; i < data.length; i++) {
-		const value = data[i];
-		const xValue = xGetter(value),
-			yValue = yGetter(value);
-		// mins
-		if (xValue < xExtent.min) {
-			xExtent.min = xValue;
-		}
-		if (yValue < yExtent.min) {
-			yExtent.min = yValue;
-		}
-		// maxs
-		if (xValue > xExtent.max) {
-			xExtent.max = xValue;
-		}
-		if (yValue > yExtent.max) {
-			yExtent.max = yValue;
-		}
-	}
+): XYExtent {
+	const getters = [xGetter, yGetter];
+	const extents: Extent[] = extent(data, getters);
+	const [xExtent, yExtent] = extents;
 	return { xExtent, yExtent };
+}
+
+/**
+ * extent is a general implementation over n dimensions to get min and max values
+ */
+export function extent<T>(data: T[], getters: ((d: T) => number)[]): Extent[] {
+	const extents: Extent[] = getters.map(() => ({
+		min: Infinity,
+		max: -Infinity,
+	}));
+
+	data.forEach((d) => {
+		getters.forEach((getter, i) => {
+			const value = getter(d);
+			const extent = extents[i];
+			if (value < extent.min) {
+				extent.min = value;
+			}
+			if (value > extent.max) {
+				extent.max = value;
+			}
+		});
+	});
+	return extents;
 }

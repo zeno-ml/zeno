@@ -73,17 +73,13 @@ interface ZenoColumn {
 	transform?: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-namespace Pipeline {
-	export type Projection = { proj: [number, number]; id: string };
-	export interface State {
-		projection: Projection[];
-	}
-	export interface Node {
-		state: Partial<State>;
-		type: string;
-		id: string;
-	}
+interface Extent {
+	min: number;
+	max: number;
+}
+interface XYExtent {
+	xExtent: Extent;
+	yExtent: Extent;
 }
 
 declare namespace svelte.JSX {

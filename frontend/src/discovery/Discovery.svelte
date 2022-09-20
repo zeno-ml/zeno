@@ -16,7 +16,7 @@
 <main>
 	{#if !tableEmpty}
 		<div id="sidebar-view">
-			<MetadataPanel />
+			<MetadataPanel shouldColor />
 		</div>
 
 		<div id="main-view">
