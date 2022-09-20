@@ -25,6 +25,12 @@
 	$: fixedPoints = minorToMajorRegl(data, colorIndexShift);
 	$: fudgeColorShift = new Array(colorIndexShift).fill("#cccccc");
 	$: fixedColorRange = [...fudgeColorShift, ...colorRange];
+	$: {
+		// make sure this is not called before we actually create the scatterPtr
+		if (scatterPtr && data.length > 0) {
+			draw(fixedPoints);
+		}
+	}
 
 	let scatterPtr: ReglScatterReference;
 	let canvasEl: HTMLCanvasElement;
@@ -36,22 +42,15 @@
 			height,
 			...config,
 		});
-
-		// point[0] is x and point [1] is y
-		// then...
-		// set point[2] as the color
 		scatterPtr.set({
 			colorBy: "category",
 			pointColor: fixedColorRange,
 		});
-		// set point[3] as the opacity
 		scatterPtr.set({
 			opacityBy: "value",
 			opacity: opacityRange(10),
 		});
-
 		dispatchLasso();
-		draw(fixedPoints);
 	});
 	onDestroy(() => {
 		scatterPtr.destroy();
@@ -112,7 +111,3 @@
 </script>
 
 <canvas bind:this={canvasEl} {width} {height} />
-
-<style>
-	/*  put stuff here */
-</style>
