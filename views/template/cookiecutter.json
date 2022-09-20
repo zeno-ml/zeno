@@ -1,8 +1,0 @@
-{
-	"author": "Audrey Roy Greenfeld",
-	"email": "audreyr@gmail.com",
-	"view_name": "Image Classification",
-	"folder_name": "{{cookiecutter.view_name|lower|replace(' ', '-')}}",
-	"project_name": "zenoml_{{cookiecutter.folder_name}}",
-	"package_name": "zenoml_{{cookiecutter.folder_name|replace('-','_')}}"
-}
