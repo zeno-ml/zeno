@@ -1,8 +1,12 @@
 <script lang="ts">
 	import { onDestroy, onMount, createEventDispatcher } from "svelte";
 	import createScatterPlot from "regl-scatterplot";
-	import type { ScatterRows, ReglScatterColumns } from "../scatter";
-	import type { Properties } from "regl-scatterplot/dist/types";
+	import type {
+		ScatterRows,
+		ReglScatterColumns,
+		ReglConfig,
+		ColorRange,
+	} from "./scatter";
 
 	type ReglScatterReference = ReturnType<typeof createScatterPlot>;
 
@@ -11,8 +15,8 @@
 	export let width: number;
 	export let height: number;
 	export let data: ScatterRows = [];
-	export let colorRange: string[] = [];
-	export let config: Partial<Properties> = {};
+	export let colorRange: ColorRange = [];
+	export let config: ReglConfig = {};
 
 	// format data that regl-scatterplot expects
 	// change the {}[] to {} with arrays inside
