@@ -25,10 +25,22 @@
 	$: fixedPoints = minorToMajorRegl(data, colorIndexShift);
 	$: fudgeColorShift = new Array(colorIndexShift).fill("#cccccc");
 	$: fixedColorRange = [...fudgeColorShift, ...colorRange];
+
 	$: {
 		// make sure this is not called before we actually create the scatterPtr
 		if (scatterPtr && data.length > 0) {
 			draw(fixedPoints);
+		}
+	}
+
+	// update when the colorRange changes, but now when the scatter changes
+	$: updateColorRange(colorRange);
+	function updateColorRange(colorRange: ColorRange) {
+		if (scatterPtr && colorRange) {
+			scatterPtr.set({
+				colorBy: "category",
+				pointColor: fixedColorRange,
+			});
 		}
 	}
 
