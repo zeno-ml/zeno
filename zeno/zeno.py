@@ -89,7 +89,7 @@ class Zeno(object):
             self.model_paths = models  # type: ignore
         self.model_names = [os.path.basename(p).split(".")[0] for p in self.model_paths]
 
-        self.mirror = Mirror(self.df, self.cache_path)
+        self.mirror = Mirror(self.df, self.cache_path, self.id_column)
 
         # Options passed to Zeno functions.
         self.zeno_options = ZenoOptions(
