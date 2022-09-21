@@ -19,6 +19,7 @@
 	}
 	interface IProject {
 		model: string;
+		ids?: string[];
 	}
 
 	const endpoint = "api/mirror";
@@ -43,13 +44,20 @@
 	$: colorRange = [...$colorSpec.colors];
 
 	onMount(async () => {
-		const projRequest = await project({ model: $model });
+		const projRequest = await initProject({
+			model: $model,
+		});
 		if (projRequest !== undefined) {
 			initialProj = projRequest["data"];
 		}
 	});
 
-	async function project(config: IProject): Promise<I2D[]> {
+	async function filterProject(config: IProject): Promise<I2D[]> {
+		const req = await mirror.post({ url: "project", payload: config });
+		return req;
+	}
+
+	async function initProject(config: IProject): Promise<I2D[]> {
 		const req = await mirror.post({ url: "project", payload: config });
 		return req;
 	}
@@ -88,7 +96,10 @@
 	<!-- whenever I'm filtering I can click visualize to reproject -->
 	<Button
 		variant="outlined"
-		on:click={() => {
+		on:click={async () => {
+			const ids = curFilteredIds();
+			const projections = await filterProject({ model: $model, ids });
+			console.log(projections);
 			console.log("visualized pressed");
 		}}>
 		Visualize

@@ -256,7 +256,11 @@ def run_zeno(args):
 
     @api_app.post("/mirror/project")
     def mirror_project(req: MirrorProject):
-        proj = zeno.mirror.project(req.model, req.ids)
+        if req.ids is None:
+            proj = zeno.mirror.initProject(req.model)
+        else:
+            proj = zeno.mirror.filterProject(req.model, req.ids)
+
         return json.dumps({"model": req.model, "data": proj})
 
     @api_app.websocket("/status")
