@@ -3,7 +3,13 @@
 	import Button from "@smui/button";
 	import UMAPParams from "./UMAPParams.svelte";
 
-	import { colorSpec, filteredTable, settings } from "../stores";
+	import {
+		colorSpec,
+		filteredTable,
+		settings,
+		sliceSelections,
+		metadataSelections,
+	} from "../stores";
 	import { columnHash } from "../util/util";
 	import { onMount } from "svelte";
 	import { model } from "../stores";
@@ -13,10 +19,6 @@
 	import type { ScatterRowsWithIds } from "./scatter/scatter";
 
 	type point2D = [number, number];
-	interface I2D {
-		id: string;
-		point: point2D;
-	}
 	interface IProject {
 		model: string;
 		ids?: string[];
@@ -30,34 +32,46 @@
 
 	let minDistUMAP: number;
 	let numNeighborsUMAP: number;
-	let initialProj: I2D[] = [];
+	let curProj: point2D[] = [];
+	let initProj: point2D[] = [];
 
-	$: data = initialProj.map((d, i) => {
+	$: idToColorIndexMapping = new Map(
+		$colorSpec.labels.map((d) => [d.id, d.colorIndex])
+	);
+	$: currentIds = getIdsFromTable($filteredTable);
+	$: data = curProj.map((d, i) => {
+		const id = currentIds[i];
 		return {
-			id: i.toString(),
+			id,
 			x: d[0],
 			y: d[1],
-			colorIndex: $colorSpec.labels[i].colorIndex,
+			colorIndex: idToColorIndexMapping.get(id),
 			opacity: 0.65,
 		};
 	}) as ScatterRowsWithIds<string>;
 	$: colorRange = [...$colorSpec.colors];
+	$: {
+		if ($sliceSelections.length === 0 && $metadataSelections.size === 0) {
+			curProj = initProj;
+		}
+	}
 
 	onMount(async () => {
 		const projRequest = await initProject({
 			model: $model,
 		});
 		if (projRequest !== undefined) {
-			initialProj = projRequest["data"];
+			curProj = projRequest["data"];
+			initProj = [...curProj];
 		}
 	});
 
-	async function filterProject(config: IProject): Promise<I2D[]> {
+	async function filterProject(config: IProject): Promise<point2D[]> {
 		const req = await mirror.post({ url: "project", payload: config });
 		return req;
 	}
 
-	async function initProject(config: IProject): Promise<I2D[]> {
+	async function initProject(config: IProject): Promise<point2D[]> {
 		const req = await mirror.post({ url: "project", payload: config });
 		return req;
 	}
@@ -82,7 +96,7 @@
 
 <div>
 	<div>Embedding View</div>
-	<div>{initialProj.length}</div>
+	<div>{curProj.length}</div>
 	<Scatter
 		{data}
 		{colorRange}
@@ -99,8 +113,7 @@
 		on:click={async () => {
 			const ids = curFilteredIds();
 			const projections = await filterProject({ model: $model, ids });
-			console.log(projections);
-			console.log("visualized pressed");
+			curProj = projections["data"];
 		}}>
 		Visualize
 	</Button>
