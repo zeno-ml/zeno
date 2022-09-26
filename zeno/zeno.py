@@ -504,3 +504,7 @@ class Zeno(object):
         self.slices = dict(zip([s.slice_name for s in slices], slices))
         with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
             pickle.dump(self.slices, f)
+
+    def embedding_exists(self, model_name: str):
+        col = ZenoColumn(name=model_name, column_type=ZenoColumnType.EMBEDDING)
+        return str(col) in self.df.columns

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Scatter from "./scatter/Scatter.svelte";
 	import Button from "@smui/button";
-	import UMAPParams from "./UMAPParams.svelte";
 
 	import {
 		colorSpec,
@@ -27,11 +26,9 @@
 	const endpoint = "api/mirror";
 	const mirror = {
 		post: request.generator.post(endpoint),
-		get: request.generator.post(endpoint),
+		get: request.generator.get(endpoint),
 	};
 
-	let minDistUMAP: number;
-	let numNeighborsUMAP: number;
 	let curProj: point2D[] = [];
 	let initProj: point2D[] = [];
 
@@ -56,24 +53,55 @@
 		}
 	}
 
+	let canProject = false;
+	let isProjecting = false;
 	onMount(async () => {
-		const projRequest = await initProject({
-			model: $model,
-		});
-		if (projRequest !== undefined) {
-			curProj = projRequest["data"];
-			initProj = [...curProj];
+		// project if the embeddings exist and show the user a loader
+		canProject = await embeddingsExist($model);
+		if (canProject) {
+			isProjecting = await true;
+			const projRequest = await initProject({
+				model: $model,
+			});
+			if (projRequest !== undefined) {
+				curProj = projRequest;
+				initProj = [...curProj];
+			}
+			isProjecting = await false;
+		} else {
+			// otherwise, if the embeddings do not exist,
+			// tell the user!
 		}
 	});
 
-	async function filterProject(config: IProject): Promise<point2D[]> {
-		const req = await mirror.post({ url: "project", payload: config });
-		return req;
+	interface ExistsResponse {
+		exists: boolean;
+		model: string;
+	}
+	async function embeddingsExist(model: string) {
+		const embeddingsCheck = (await mirror.get({
+			url: `exists/${model}`,
+		})) as ExistsResponse;
+		return embeddingsCheck?.exists;
 	}
 
+	interface ProjectResponse {
+		data: point2D[];
+		model: string;
+	}
+	async function filterProject(config: IProject): Promise<point2D[]> {
+		const req = (await mirror.post({
+			url: "project",
+			payload: config,
+		})) as ProjectResponse;
+		return req?.data;
+	}
 	async function initProject(config: IProject): Promise<point2D[]> {
-		const req = await mirror.post({ url: "project", payload: config });
-		return req;
+		const req = (await mirror.post({
+			url: "project",
+			payload: config,
+		})) as ProjectResponse;
+		return req?.data;
 	}
 
 	/**
@@ -95,28 +123,33 @@
 </script>
 
 <div>
-	<div>Embedding View</div>
-	<div>{curProj.length}</div>
-	<Scatter
-		{data}
-		{colorRange}
-		width={500}
-		height={500}
-		on:lasso={({ detail }) => {
-			console.log(detail);
-		}} />
+	{#if canProject}
+		<Scatter
+			{data}
+			{colorRange}
+			width={500}
+			height={500}
+			on:lasso={({ detail }) => {
+				console.log(detail);
+			}} />
 
-	<!-- Whenever I'm not filtering, go back to default view -->
-	<!-- whenever I'm filtering I can click visualize to reproject -->
-	<Button
-		variant="outlined"
-		on:click={async () => {
-			const ids = curFilteredIds();
-			const projections = await filterProject({ model: $model, ids });
-			curProj = projections["data"];
-		}}>
-		Visualize
-	</Button>
+		{#if isProjecting}
+			<div>Loading...</div>
+		{/if}
 
-	<UMAPParams bind:minDistUMAP bind:numNeighborsUMAP />
+		{@const filterApplied =
+			$metadataSelections.size > 0 || $sliceSelections.length > 0}
+		{#if filterApplied}
+			<Button
+				variant="outlined"
+				on:click={async () => {
+					const ids = curFilteredIds();
+					curProj = await filterProject({ model: $model, ids });
+				}}>
+				Visualize
+			</Button>
+		{/if}
+	{:else}
+		<div>Embeddings do not exist for this model.</div>
+	{/if}
 </div>
