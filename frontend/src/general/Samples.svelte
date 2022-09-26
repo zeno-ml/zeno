@@ -17,6 +17,7 @@
 		status,
 		transform,
 		rowsPerPage,
+		metadataSelections,
 	} from "../stores";
 	import SelectionBar from "../metadata/SelectionBar.svelte";
 
@@ -69,6 +70,7 @@
 		} else {
 			transformColumn = "";
 		}
+		metadataSelections.set(new Map());
 	});
 
 	$: if (sampleDiv && divFunction) {
