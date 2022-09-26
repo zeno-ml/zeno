@@ -326,7 +326,7 @@ export function colorDomain({
 			const colors20 = [...schemeTableau10, ...schemeCategory10];
 			let colors = colors20.slice(0, domain.length);
 			if (domain.length === 2) {
-				colors = [schemeTableau10[2], schemeTableau10[0]];
+				colors = [schemeTableau10[0], schemeTableau10[2]];
 			}
 			domain.forEach((d, i) => (d["color"] = colors[i]));
 		} else if (type === MetadataType.CONTINUOUS) {
