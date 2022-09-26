@@ -36,16 +36,7 @@
 		$colorSpec.labels.map((d) => [d.id, d.colorIndex])
 	);
 	$: currentIds = getIdsFromTable($filteredTable);
-	$: data = curProj.map((d, i) => {
-		const id = currentIds[i];
-		return {
-			id,
-			x: d[0],
-			y: d[1],
-			colorIndex: idToColorIndexMapping.get(id),
-			opacity: 0.65,
-		};
-	}) as ScatterRowsWithIds<string>;
+	$: data = packageScatterData(curProj);
 	$: colorRange = [...$colorSpec.colors];
 	$: {
 		if ($sliceSelections.length === 0 && $metadataSelections.size === 0) {
@@ -119,6 +110,23 @@
 		} else {
 			return [];
 		}
+	}
+
+	/**
+	 * Take a 2d array of points and return an object that my scatterplot can read
+	 */
+	function packageScatterData(curProj: point2D[]): ScatterRowsWithIds<string> {
+		const data = curProj.map((d, i) => {
+			const id = currentIds[i];
+			return {
+				id,
+				x: d[0],
+				y: d[1],
+				colorIndex: idToColorIndexMapping.get(id),
+				opacity: 0.65,
+			};
+		}) as ScatterRowsWithIds<string>;
+		return data;
 	}
 </script>
 
