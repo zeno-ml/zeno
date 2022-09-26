@@ -48,13 +48,9 @@
 </script>
 
 <div>
-	<div>Embedding View</div>
-	<div>{initialProj.length}</div>
 	<Scatter
 		{data}
 		{colorRange}
-		width={500}
-		height={500}
 		on:lasso={({ detail }) => {
 			console.log(detail);
 		}} />
