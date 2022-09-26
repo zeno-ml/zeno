@@ -6,27 +6,34 @@
 	const dispatch = createEventDispatcher();
 
 	export let data: ScatterRowsWithIds<string> = [];
-	export let width = 500;
-	export let height = 500;
 	export let colorRange: ColorRange = [];
 	export let config: ReglConfig = {};
+
+	let innerWidth, innerHeight;
+	let width;
+	let height = 500;
+	$: width = innerWidth - 470;
 </script>
 
-<AutoScaleRegl
-	{data}
-	downScale="maxDim"
-	on:lassoIndex={({ detail }) => {
-		if (detail !== null) {
-			const indexToInstanceMapping = detail.map((index) => data[index]);
-			dispatch("lasso", indexToInstanceMapping);
-		} else {
-			dispatch("lasso", null);
-		}
-	}}
-	{colorRange}
-	{config}
-	{width}
-	{height} />
+<svelte:window bind:innerWidth bind:innerHeight />
+
+{#if width && height}
+	<AutoScaleRegl
+		{data}
+		downScale="maxDim"
+		on:lassoIndex={({ detail }) => {
+			if (detail !== null) {
+				const indexToInstanceMapping = detail.map((index) => data[index]);
+				dispatch("lasso", indexToInstanceMapping);
+			} else {
+				dispatch("lasso", null);
+			}
+		}}
+		{colorRange}
+		{config}
+		{width}
+		{height} />
+{/if}
 
 <style>
 </style>
