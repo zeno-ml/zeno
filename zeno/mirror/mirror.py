@@ -1,16 +1,11 @@
 from enum import Enum
-from importlib import import_module
 
 import numpy as np
 from pandas import DataFrame
-from sklearn.manifold import TSNE
+from sklearn.manifold import TSNE  # type: ignore
+
 from zeno.classes import ZenoColumn, ZenoColumnType
 from zeno.mirror.cache import ValueCache
-
-
-def umap(*args, **kwargs):
-    umap_module = import_module("umap")
-    return umap_module.UMAP(*args, **kwargs)
 
 
 class Status(Enum):
@@ -33,10 +28,9 @@ class Mirror:
 
             # extract data
             embed_col = ZenoColumn(column_type=ZenoColumnType.EMBEDDING, name=model)
-            embed = np.stack(self.df[str(embed_col)].to_numpy(), axis=0)
+            embed = np.stack(self.df[str(embed_col)].to_numpy(), axis=0)  # type: ignore
 
             # reduce high dim -> low dim
-            # reducer = umap()
             reducer = TSNE()
             projection = reducer.fit_transform(embed).tolist()
 
