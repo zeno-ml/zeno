@@ -34,12 +34,4 @@
 	main {
 		display: flex;
 	}
-
-	#sidebar-view {
-		outline: 1px solid salmon;
-	}
-
-	#main-view {
-		outline: 1px solid cyan;
-	}
 </style>
