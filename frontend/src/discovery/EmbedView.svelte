@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Scatter from "./scatter/Scatter.svelte";
 	import Button from "@smui/button";
+	import { Shadow as LoadingAnimation } from "svelte-loading-spinners";
 
 	import {
 		colorSpec,
@@ -31,34 +32,34 @@
 
 	let curProj: point2D[] = [];
 	let initProj: point2D[] = [];
+	let canProject = false;
+	let isProjecting = false;
 
 	$: idToColorIndexMapping = new Map(
 		$colorSpec.labels.map((d) => [d.id, d.colorIndex])
 	);
-	$: currentIds = getIdsFromTable($filteredTable);
 	$: data = packageScatterData(curProj);
 	$: colorRange = [...$colorSpec.colors];
-	$: {
-		if ($sliceSelections.length === 0 && $metadataSelections.size === 0) {
-			curProj = initProj;
-		}
+	$: filtersApplied =
+		$metadataSelections.size > 0 || $sliceSelections.length > 0;
+	// if we remove filters, just reset to our cached version
+	$: if (!filtersApplied) {
+		curProj = initProj;
 	}
 
-	let canProject = false;
-	let isProjecting = false;
 	onMount(async () => {
 		// project if the embeddings exist and show the user a loader
 		canProject = await embeddingsExist($model);
 		if (canProject) {
-			isProjecting = await true;
-			const projRequest = await initProject({
-				model: $model,
+			loadingIndicator(async () => {
+				const projRequest = await initProject({
+					model: $model,
+				});
+				if (projRequest !== undefined) {
+					curProj = projRequest;
+					initProj = [...curProj];
+				}
 			});
-			if (projRequest !== undefined) {
-				curProj = projRequest;
-				initProj = [...curProj];
-			}
-			isProjecting = await false;
 		} else {
 			// otherwise, if the embeddings do not exist,
 			// tell the user!
@@ -116,8 +117,9 @@
 	 * Take a 2d array of points and return an object that my scatterplot can read
 	 */
 	function packageScatterData(curProj: point2D[]): ScatterRowsWithIds<string> {
+		const ids = getIdsFromTable($filteredTable);
 		const data = curProj.map((d, i) => {
-			const id = currentIds[i];
+			const id = ids[i];
 			return {
 				id,
 				x: d[0],
@@ -128,9 +130,19 @@
 		}) as ScatterRowsWithIds<string>;
 		return data;
 	}
+
+	/**
+	 * wrapper that connects to the loading bar thingy
+	 */
+	async function loadingIndicator(func: () => Promise<void>) {
+		// throw a ton of awaits and hope something happens
+		isProjecting = true;
+		await func();
+		isProjecting = false;
+	}
 </script>
 
-<div>
+<div id="scatter-container" style:width="500px" style:height="500px">
 	{#if canProject}
 		<Scatter
 			{data}
@@ -140,24 +152,58 @@
 			on:lasso={({ detail }) => {
 				console.log(detail);
 			}} />
-
-		{#if isProjecting}
-			<div>Loading...</div>
-		{/if}
-
-		{@const filterApplied =
-			$metadataSelections.size > 0 || $sliceSelections.length > 0}
-		{#if filterApplied}
-			<Button
-				variant="outlined"
-				on:click={async () => {
-					const ids = curFilteredIds();
-					curProj = await filterProject({ model: $model, ids });
-				}}>
-				Visualize
-			</Button>
-		{/if}
 	{:else}
 		<div>Embeddings do not exist for this model.</div>
 	{/if}
+	{#if isProjecting}
+		<div id="loading-container">
+			<div id="loading-indicator">
+				<div id="loading-content">
+					<h1>Running UMAP</h1>
+					<div>
+						<LoadingAnimation size={50} color="slateblue" />
+					</div>
+				</div>
+			</div>
+		</div>
+	{/if}
 </div>
+{#if filtersApplied && canProject}
+	<Button
+		variant="outlined"
+		on:click={async () => {
+			loadingIndicator(async () => {
+				const ids = curFilteredIds();
+				curProj = await filterProject({ model: $model, ids });
+			});
+		}}>
+		Visualize
+	</Button>
+{/if}
+
+<style>
+	#scatter-container {
+		position: relative;
+	}
+	#loading-container {
+		position: absolute;
+		backdrop-filter: blur(5px);
+		transition: backdrop-filter 1s ease-in-out;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+	}
+	#loading-indicator {
+		position: absolute;
+		left: 30%;
+		top: 30%;
+	}
+	#loading-content {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 20px;
+		color: slateblue;
+	}
+</style>
