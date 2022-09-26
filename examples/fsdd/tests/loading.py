@@ -21,21 +21,14 @@ number_to_text = {
 
 @model
 def load_model(model_path):
-    device = torch.device(
-        "cpu"
-    )  # gpu also works, but our models are fast enough for CPU
+    device = torch.device("cpu")
     model, decoder, utils = torch.hub.load(
         repo_or_dir="snakers4/silero-models",
         model="silero_stt",
         language="en",  # also available 'de', 'es'
         device=device,
     )
-    (
-        read_batch,
-        split_into_batches,
-        read_audio,
-        prepare_model_input,
-    ) = utils  # see function signature for details
+    (read_batch, _, _, prepare_model_input) = utils
 
     def pred(df, ops: ZenoOptions):
         files = [os.path.join(ops.data_path, f) for f in df[ops.data_column]]
