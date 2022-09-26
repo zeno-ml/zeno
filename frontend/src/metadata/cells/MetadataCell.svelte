@@ -54,28 +54,29 @@
 	let hoveringCell = false;
 
 	$: hash = columnHash(col);
-	$: {
-		if (assignColors === true && $model) {
-			drawChart($table);
-		}
-	}
 	$: selectedHash = $colorByHash === hash;
 	$: selectedHashColor = shouldColor ? (selectedHash ? "#9B52DF" : "") : "";
-	$: {
-		col;
-		updateData($table, $filteredTable);
-	}
 	$: dynamicSpec =
 		col.metadataType === MetadataType.CONTINUOUS
 			? generateHistogramSpec
 			: generateCountSpec;
 
+	$: {
+		if (assignColors === true && $model) {
+			drawChart($table);
+		}
+	}
+	$: {
+		col;
+		drawChart($table);
+		updateData($table, $filteredTable);
+	}
 	table.subscribe((t) => drawChart(t));
 
 	onMount(() => {
 		selection.column = col;
 		drawChart($table);
-		updateData($table, $table);
+		updateData($table, $filteredTable);
 	});
 
 	function updateData(table: ColumnTable, filteredTable: ColumnTable) {
@@ -115,7 +116,6 @@
 		if (!t.column(hash)) {
 			return;
 		}
-
 		const { assignments, domain: localDomain } = computeDomain({
 			type: col.metadataType,
 			table: $table,

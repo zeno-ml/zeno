@@ -1,11 +1,13 @@
+from enum import Enum
 from importlib import import_module
 
+import numpy as np
 from pandas import DataFrame
 from typing import List
 
+from sklearn.manifold import TSNE
 from zeno.classes import ZenoColumn, ZenoColumnType
 from zeno.mirror.cache import ValueCache
-from enum import Enum
 
 
 def umap(*args, **kwargs):
@@ -52,17 +54,18 @@ class Mirror:
         # if the ids were given, then use them!
         ids_given = ids is not None
         if ids_given:
-            df_umap_input = df_rows_given_ids(self.df, self.id_column, ids)
+            df_input = df_rows_given_ids(self.df, self.id_column, ids)
         # otherwise, use the whole dataframe
         else:
-            df_umap_input = self.df
+            df_input = self.df
 
-        # extract embedding from df
+        # extract data
         embed_col = ZenoColumn(column_type=ZenoColumnType.EMBEDDING, name=model)
-        embed = df_umap_input[str(embed_col)].tolist()
+        embed = np.stack(df_input[str(embed_col)].to_numpy(), axis=0)
 
         # reduce high dim -> low dim
-        reducer = umap()
+        # reducer = umap()
+        reducer = TSNE()
         projection = reducer.fit_transform(embed).tolist()
 
         self.status = Status.IDLE

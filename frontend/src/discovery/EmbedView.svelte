@@ -142,13 +142,11 @@
 	}
 </script>
 
-<div id="scatter-container" style:width="500px" style:height="500px">
+<div id="scatter-container">
 	{#if canProject}
 		<Scatter
 			{data}
 			{colorRange}
-			width={500}
-			height={500}
 			on:lasso={({ detail }) => {
 				console.log(detail);
 			}} />
@@ -159,9 +157,9 @@
 		<div id="loading-container">
 			<div id="loading-indicator">
 				<div id="loading-content">
-					<h1>Running UMAP</h1>
+					<h1>Projecting Current Selection</h1>
 					<div>
-						<LoadingAnimation size={50} color="slateblue" />
+						<LoadingAnimation size={50} color="black" />
 					</div>
 				</div>
 			</div>
@@ -204,6 +202,5 @@
 		flex-direction: column;
 		align-items: center;
 		gap: 20px;
-		color: slateblue;
 	}
 </style>

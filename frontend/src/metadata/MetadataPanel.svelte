@@ -39,7 +39,10 @@
 	metadataSelections.subscribe(() => updateFilteredTable($table));
 	sliceSelections.subscribe(() => updateFilteredTable($table));
 
-	model.subscribe(() => updateSliceIdxs());
+	model.subscribe(() => {
+		updateSliceIdxs();
+		metadataSelections.set(new Map());
+	});
 
 	$: res = getMetricsForSlices([
 		<MetricKey>{
