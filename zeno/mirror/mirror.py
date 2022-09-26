@@ -1,10 +1,10 @@
+from enum import Enum
 from importlib import import_module
 
 from pandas import DataFrame
 
 from zeno.classes import ZenoColumn, ZenoColumnType
 from zeno.mirror.cache import ValueCache
-from enum import Enum
 
 
 def umap(*args, **kwargs):

@@ -25,7 +25,12 @@ export function generateCountSpec({
 					},
 					{ name: "select", select: { type: "point", encodings: ["x"] } },
 				],
-				mark: { type: "bar", opacity: opacity, fill: "#ddd" },
+				mark: {
+					type: "bar",
+					opacity: opacity,
+					fill: "#ddd",
+					cursor: "pointer",
+				},
 				encoding: {
 					x: {
 						field: "category",
@@ -117,7 +122,7 @@ export function generateHistogramSpec({
 						select: { type: "interval", encodings: ["x"] },
 					},
 				],
-				mark: { type: "bar", opacity: opacity },
+				mark: { type: "bar", opacity: opacity, cursor: "col-resize" },
 				encoding: {
 					x: {
 						field: "binStart",
