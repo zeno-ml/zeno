@@ -197,6 +197,7 @@
 		position: relative;
 	}
 	#overlay {
+		backdrop-filter: blur(5px);
 		position: absolute;
 		top: 10px;
 		left: 10px;
