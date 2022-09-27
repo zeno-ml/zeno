@@ -29,6 +29,7 @@ class Mirror:
     def __init__(self, df: DataFrame, cache_path, id_column: ZenoColumn):
         self.df = df
         self.id_column = id_column
+        self.cache_path = cache_path
         self.initialProjCache = ValueCache(path=cache_path, name="mirror_projection")
         self.status: Status = Status.IDLE
 
@@ -37,6 +38,7 @@ class Mirror:
         return projection
 
     def initProject(self, model: str):
+        self.initialProjCache = ValueCache(path=self.cache_path, name=f"mirror_{model}")
         if not self.initialProjCache.exists():
             all = None  # nerf or nothin :P
             projection = self._project(model, ids=all)
