@@ -142,44 +142,55 @@
 	}
 </script>
 
-<div id="scatter-container">
-	{#if canProject}
-		<Scatter
-			{data}
-			{colorRange}
-			on:lasso={({ detail }) => {
-				console.log(detail);
-			}} />
-	{:else}
-		<div>Embeddings do not exist for this model.</div>
-	{/if}
-	{#if isProjecting}
-		<div id="loading-container">
-			<div id="loading-indicator">
-				<div id="loading-content">
-					<h1>Projecting Current Selection</h1>
-					<div>
-						<LoadingAnimation size={50} color="black" />
+<div id="container">
+	<div id="scatter-container">
+		{#if canProject}
+			<Scatter
+				{data}
+				{colorRange}
+				on:lasso={({ detail }) => {
+					console.log(detail);
+				}} />
+		{:else}
+			<div>Embeddings do not exist for this model.</div>
+		{/if}
+		{#if isProjecting}
+			<div id="loading-container">
+				<div id="loading-indicator">
+					<div id="loading-content">
+						<h1>Running Projection</h1>
+						<div>
+							<LoadingAnimation size={50} color="black" />
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-	{/if}
+		{/if}
+	</div>
+	<div id="overlay">
+		<Button
+			variant="outlined"
+			disabled={!(filtersApplied && canProject)}
+			on:click={async () => {
+				loadingIndicator(async () => {
+					const ids = curFilteredIds();
+					curProj = await filterProject({ model: $model, ids });
+				});
+			}}>
+			Rerun projection on selection
+		</Button>
+	</div>
 </div>
-{#if filtersApplied && canProject}
-	<Button
-		variant="outlined"
-		on:click={async () => {
-			loadingIndicator(async () => {
-				const ids = curFilteredIds();
-				curProj = await filterProject({ model: $model, ids });
-			});
-		}}>
-		Visualize
-	</Button>
-{/if}
 
 <style>
+	#container {
+		position: relative;
+	}
+	#overlay {
+		position: absolute;
+		top: 10px;
+		left: 10px;
+	}
 	#scatter-container {
 		position: relative;
 	}
