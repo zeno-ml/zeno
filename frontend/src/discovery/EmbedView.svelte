@@ -9,6 +9,7 @@
 		settings,
 		sliceSelections,
 		metadataSelections,
+		lassoSelection,
 	} from "../stores";
 	import { columnHash } from "../util/util";
 	import { onMount } from "svelte";
@@ -140,17 +141,26 @@
 		await func();
 		isProjecting = false;
 	}
+
+	/**
+	 * select the ids out of the lasso select from the scatterplot
+	 * and store globally
+	 */
+	function lassoSelect(e) {
+		const selection = e.detail as ScatterRowsWithIds<string>[] | null;
+		if (selection !== null) {
+			const ids = selection.map((d) => d.id.toString());
+			lassoSelection.set(ids);
+		} else {
+			lassoSelection.set(null);
+		}
+	}
 </script>
 
 <div id="container">
 	<div id="scatter-container">
 		{#if canProject}
-			<Scatter
-				{data}
-				{colorRange}
-				on:lasso={({ detail }) => {
-					console.log(detail);
-				}} />
+			<Scatter {data} {colorRange} on:lasso={lassoSelect} />
 		{:else}
 			<div>Embeddings do not exist for this model.</div>
 		{/if}
