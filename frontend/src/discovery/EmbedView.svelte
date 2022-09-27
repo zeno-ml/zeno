@@ -9,9 +9,10 @@
 		settings,
 		sliceSelections,
 		metadataSelections,
+		table,
 		lassoSelection,
 	} from "../stores";
-	import { columnHash } from "../util/util";
+	import { columnHash, updateFilteredTable } from "../util/util";
 	import { onMount } from "svelte";
 	import { model } from "../stores";
 	import request from "../util/request";
@@ -36,13 +37,17 @@
 	let canProject = false;
 	let isProjecting = false;
 
+	lassoSelection.subscribe(() => updateFilteredTable($table));
+
 	$: idToColorIndexMapping = new Map(
 		$colorSpec.labels.map((d) => [d.id, d.colorIndex])
 	);
 	$: data = packageScatterData(curProj);
 	$: colorRange = [...$colorSpec.colors];
 	$: filtersApplied =
-		$metadataSelections.size > 0 || $sliceSelections.length > 0;
+		$lassoSelection !== null ||
+		$metadataSelections.size > 0 ||
+		$sliceSelections.length > 0;
 	// if we remove filters, just reset to our cached version
 	$: if (!filtersApplied) {
 		curProj = initProj;
@@ -152,7 +157,7 @@
 			const ids = selection.map((d) => d.id.toString());
 			lassoSelection.set(ids);
 		} else {
-			lassoSelection.set(null);
+			// lassoSelection.set(null);
 		}
 	}
 </script>

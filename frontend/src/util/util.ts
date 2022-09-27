@@ -21,6 +21,7 @@ import {
 	metric,
 	reports,
 	rowsPerPage,
+	lassoSelection,
 } from "../stores";
 import { ZenoColumnType } from "../globals";
 
@@ -276,6 +277,15 @@ export function updateFilteredTable(t: ColumnTable) {
 	});
 
 	const idCol = columnHash(get(settings).idColumn);
+
+	// filter with lasso from discovery mirror
+	const lassoSelectionValues = get(lassoSelection);
+	if (lassoSelectionValues !== null) {
+		tempTable = tempTable.filter(
+			aq.escape((r) => aq.op.includes(lassoSelectionValues, r[idCol], 0))
+		);
+	}
+
 	if (arrayEquals(tempTable.array(idCol), get(filteredTable).array(idCol))) {
 		return;
 	}
