@@ -173,13 +173,15 @@
 		{#if canProject}
 			<Scatter {data} {colorRange} on:lasso={lassoSelect} />
 		{:else}
-			<div>Embeddings do not exist for this model.</div>
+			<div id="loading-content">
+				<h3 id="no-embed">No embeddings for this model.</h3>
+			</div>
 		{/if}
 		{#if isProjecting}
 			<div id="loading-container">
 				<div id="loading-indicator">
 					<div id="loading-content">
-						<h1>Running Projection</h1>
+						<h3>Running Projection</h3>
 						<div>
 							<LoadingAnimation size={50} color="black" />
 						</div>
@@ -210,6 +212,10 @@
 <style>
 	#container {
 		position: relative;
+		min-height: 200px;
+	}
+	#no-embed {
+		margin-top: 100px;
 	}
 	#overlay {
 		backdrop-filter: blur(5px);

@@ -346,15 +346,23 @@ class Zeno(object):
             model_save_path = Path(self.cache_path, model_hash + ".pickle")
             embedding_save_path = Path(self.cache_path, embedding_hash + ".pickle")
 
-            load_series(self.df, model_hash, model_save_path)
-            load_series(self.df, embedding_hash, embedding_save_path)
+            # Try reading model output hash
+            try:
+                self.df.loc[:, model_hash] = pd.read_pickle(model_save_path)
+            except FileNotFoundError:
+                self.df.loc[:, model_hash] = pd.Series(
+                    [pd.NA] * self.df.shape[0], index=self.df.index
+                )
 
-            if (
-                self.df[model_hash].isnull().any()
-                or self.df[embedding_hash].isnull().any()
-            ):
+            # If missing values, add to list to run inference.
+            if self.df[model_hash].isnull().any():
                 models_to_run.append(model_path)
             else:
+                # Else, try to load embeddings and add to complete.
+                try:
+                    self.df.loc[:, embedding_hash] = pd.read_pickle(embedding_save_path)
+                except FileNotFoundError:
+                    pass
                 self.complete_columns.append(model_column)
 
         self.status = "Running inference"
@@ -378,7 +386,8 @@ class Zeno(object):
                 )
                 for out in inference_outputs:
                     self.df.loc[:, str(out[0])] = out[2]
-                    self.df.loc[:, str(out[1])] = out[3]
+                    if out[1] in self.df.columns:
+                        self.df.loc[:, str(out[1])] = out[3]
                     self.complete_columns.append(out[0])
 
         self.status = "Done running inference"
