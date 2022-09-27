@@ -1,6 +1,7 @@
 import os
 import pandas as pd
-base_path = './cif/test/'
+
+base_path = "../../data/CIFAR-10-images/test/"
 files = os.listdir(base_path)
 out = []
 for folder in files:
@@ -9,8 +10,12 @@ for folder in files:
             (
                 os.path.join(folder, image),
                 folder,
-            ))
-df = pd.DataFrame(out, columns=['id', 'label'])
+            )
+        )
+df = pd.DataFrame(out, columns=["id", "label"])
 
 print(df.head())
-df.to_csv('cifar_pred.csv')
+df.to_csv("cifar_pred.csv", index=False)
+
+df_mini = df.sample(1000)
+df_mini.to_csv("cifar_mini.csv", index=False)

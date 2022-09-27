@@ -12,6 +12,7 @@
 		table,
 		lassoSelection,
 		model,
+		status,
 		transform,
 	} from "../stores";
 	import { columnHash, updateFilteredTable } from "../util/util";
@@ -55,7 +56,7 @@
 	}
 	// when I change the embeddings, I want to rerun the projection on those embeddings instead
 	$: {
-		if ($model) {
+		if ($model && $status.doneProcessing) {
 			initProjFromModel($model, $transform);
 		}
 	}
@@ -172,9 +173,13 @@
 	<div id="scatter-container">
 		{#if canProject}
 			<Scatter {data} {colorRange} on:lasso={lassoSelect} />
+		{:else if !$status.doneProcessing}
+			<div id="loading-content">
+				<h3 class="embed-status">Awaiting processing.</h3>
+			</div>
 		{:else}
 			<div id="loading-content">
-				<h3 id="no-embed">No embeddings for this model.</h3>
+				<h3 class="embed-status">No embeddings for this model.</h3>
 			</div>
 		{/if}
 		{#if isProjecting}
@@ -214,7 +219,7 @@
 		position: relative;
 		min-height: 200px;
 	}
-	#no-embed {
+	.embed-status {
 		margin-top: 100px;
 	}
 	#overlay {
