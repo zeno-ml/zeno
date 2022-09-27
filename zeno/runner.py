@@ -259,7 +259,7 @@ def run_zeno(args):
         if req.ids is None:
             proj = zeno.mirror.initProject(req.model, req.transform)
         else:
-            proj = zeno.mirror.filterProject(req.model, req.ids)
+            proj = zeno.mirror.filterProject(req.model, req.ids, req.transform)
 
         return json.dumps({"model": req.model, "data": proj})
 

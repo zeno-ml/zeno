@@ -131,4 +131,4 @@ class StatusResponse(CamelModel):
 class MirrorProject(BaseModel):
     model: str
     transform: str = ""
-    ids: List[str] = None
+    ids: Optional[List[str]] = None

@@ -1,11 +1,12 @@
 from enum import Enum
 from importlib import import_module
+from typing import List, Optional
 
 import numpy as np
 from pandas import DataFrame
-from typing import List
 
 from sklearn.manifold import TSNE
+
 from zeno.classes import ZenoColumn, ZenoColumnType
 from zeno.mirror.cache import ValueCache
 
@@ -15,7 +16,9 @@ def umap(*args, **kwargs):
     return umap_module.UMAP(*args, **kwargs)
 
 
-def df_rows_given_ids(df: DataFrame, idColumnPtr: ZenoColumn, ids: List[str]):
+def df_rows_given_ids(df: DataFrame, idColumnPtr: ZenoColumn, ids: Optional[List[str]]):
+    if ids is None:
+        return df
     found = df[str(idColumnPtr)].isin(ids)
     return df[found]
 
@@ -33,8 +36,8 @@ class Mirror:
         self.initialProjCache = ValueCache(path=cache_path, name="mirror_projection")
         self.status: Status = Status.IDLE
 
-    def filterProject(self, model: str, ids: List[str]):
-        projection = self._project(model, ids)
+    def filterProject(self, model: str, ids: List[str], transform: str = ""):
+        projection = self._project(model, ids, transform=transform)
         return projection
 
     def initProject(self, model: str, transform: str = ""):
@@ -43,13 +46,15 @@ class Mirror:
         )
         if not self.initialProjCache.exists():
             all = None  # nerf or nothin :P
-            projection = self._project(model, ids=all)
+            projection = self._project(model, ids=all, transform=transform)
             self.initialProjCache.set(projection)
             return projection
         else:
             return self.initialProjCache.get()
 
-    def _project(self, model: str, ids: List[str], transform: str = ""):
+    def _project(self, model: str, ids: List[str] = None, transform: str = ""):
+        """note that if ids is left set to None, the all embeddings are used"""
+
         if self.status == Status.RUNNING:
             raise RuntimeError("Projection already running")
 
