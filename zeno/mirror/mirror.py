@@ -37,8 +37,10 @@ class Mirror:
         projection = self._project(model, ids)
         return projection
 
-    def initProject(self, model: str):
-        self.initialProjCache = ValueCache(path=self.cache_path, name=f"mirror_{model}")
+    def initProject(self, model: str, transform: str = ""):
+        self.initialProjCache = ValueCache(
+            path=self.cache_path, name=f"mirror_{model}{transform}"
+        )
         if not self.initialProjCache.exists():
             all = None  # nerf or nothin :P
             projection = self._project(model, ids=all)
@@ -47,7 +49,7 @@ class Mirror:
         else:
             return self.initialProjCache.get()
 
-    def _project(self, model: str, ids: List[str]):
+    def _project(self, model: str, ids: List[str], transform: str = ""):
         if self.status == Status.RUNNING:
             raise RuntimeError("Projection already running")
 
@@ -62,7 +64,9 @@ class Mirror:
             df_input = self.df
 
         # extract data
-        embed_col = ZenoColumn(column_type=ZenoColumnType.EMBEDDING, name=model)
+        embed_col = ZenoColumn(
+            column_type=ZenoColumnType.EMBEDDING, name=model, transform=transform
+        )
         embed = np.stack(df_input[str(embed_col)].to_numpy(), axis=0)
 
         # reduce high dim -> low dim

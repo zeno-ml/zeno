@@ -11,10 +11,10 @@
 		metadataSelections,
 		table,
 		lassoSelection,
+		model,
+		transform,
 	} from "../stores";
 	import { columnHash, updateFilteredTable } from "../util/util";
-	import { onMount } from "svelte";
-	import { model } from "../stores";
 	import request from "../util/request";
 
 	import type ColumnTable from "arquero/dist/types/table/column-table";
@@ -23,6 +23,7 @@
 	type point2D = [number, number];
 	interface IProject {
 		model: string;
+		transform?: string;
 		ids?: string[];
 	}
 
@@ -52,20 +53,21 @@
 	$: if (!filtersApplied) {
 		curProj = initProj;
 	}
-	// when I change the model, I want to rerun the projection on those embeddings instead
+	// when I change the embeddings, I want to rerun the projection on those embeddings instead
 	$: {
 		if ($model) {
-			initProjFromModel($model);
+			initProjFromModel($model, $transform);
 		}
 	}
 
-	async function initProjFromModel(model: string) {
+	async function initProjFromModel(model: string, transform = "") {
 		// project if the embeddings exist and show the user a loader
-		canProject = await embeddingsExist(model);
+		canProject = await embeddingsExist(model, transform);
 		if (canProject) {
 			loadingIndicator(async () => {
-				const projRequest = await initProject({
+				const projRequest = await project({
 					model,
+					transform,
 				});
 				if (projRequest !== undefined) {
 					curProj = projRequest;
@@ -83,9 +85,9 @@
 		exists: boolean;
 		model: string;
 	}
-	async function embeddingsExist(model: string) {
+	async function embeddingsExist(model: string, transform = "") {
 		const embeddingsCheck = (await mirror.get({
-			url: `exists/${model}`,
+			url: `exists/?model=${model}&transform=${transform}`,
 		})) as ExistsResponse;
 		return embeddingsCheck?.exists;
 	}
@@ -94,17 +96,14 @@
 		data: point2D[];
 		model: string;
 	}
-	async function filterProject(config: IProject): Promise<point2D[]> {
+	async function project({
+		model,
+		transform = "",
+		ids,
+	}: IProject): Promise<point2D[]> {
 		const req = (await mirror.post({
 			url: "project",
-			payload: config,
-		})) as ProjectResponse;
-		return req?.data;
-	}
-	async function initProject(config: IProject): Promise<point2D[]> {
-		const req = (await mirror.post({
-			url: "project",
-			payload: config,
+			payload: { model, transform, ids },
 		})) as ProjectResponse;
 		return req?.data;
 	}
@@ -196,7 +195,11 @@
 			on:click={async () => {
 				loadingIndicator(async () => {
 					const ids = curFilteredIds();
-					curProj = await filterProject({ model: $model, ids });
+					curProj = await project({
+						model: $model,
+						ids,
+						transform: $transform,
+					});
 				});
 			}}>
 			Rerun projection on selection
