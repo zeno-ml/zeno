@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional
+from typing import List, Union
 
 import numpy as np
 from pandas import DataFrame
@@ -9,7 +9,9 @@ from zeno.classes import ZenoColumn, ZenoColumnType
 from zeno.mirror.cache import ValueCache
 
 
-def df_rows_given_ids(df: DataFrame, idColumnPtr: ZenoColumn, ids: Optional[List[str]]):
+def df_rows_given_ids(
+    df: DataFrame, idColumnPtr: ZenoColumn, ids: Union[List[str], None]
+):
     if ids is None:
         return df
     found = df[str(idColumnPtr)].isin(ids)
@@ -45,7 +47,9 @@ class Mirror:
         else:
             return self.initialProjCache.get()
 
-    def _project(self, model: str, ids: List[str] = None, transform: str = ""):
+    def _project(
+        self, model: str, ids: Union[List[str], None] = None, transform: str = ""
+    ):
         """note that if ids is left set to None, the all embeddings are used"""
 
         if self.status == Status.RUNNING:
@@ -65,7 +69,8 @@ class Mirror:
         embed_col = ZenoColumn(
             column_type=ZenoColumnType.EMBEDDING, name=model, transform=transform
         )
-        embed = np.stack(df_input[str(embed_col)].to_numpy(), axis=0)
+        embed_expanded = df_input[str(embed_col)].to_numpy()
+        embed = np.stack(embed_expanded, axis=0)  # type: ignore
 
         # reduce high dim -> low dim
         # reducer = umap()
