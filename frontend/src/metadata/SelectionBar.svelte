@@ -11,6 +11,7 @@
 		sliceSelections,
 		transform,
 		settings,
+		lassoSelection,
 	} from "../stores";
 	import { MetadataType } from "../globals";
 
@@ -99,12 +100,25 @@
 					})}>cancel</TrailingIcon>
 		</div>
 	{/each}
-	{#if $metadataSelections.size + $sliceSelections.length > 0}
+	{#if $lassoSelection !== null}
+		<div class="meta-chip lasso">
+			Lasso Selection
+			<TrailingIcon
+				class="remove material-icons"
+				on:click={() => {
+					lassoSelection.set(null);
+				}}>
+				cancel
+			</TrailingIcon>
+		</div>
+	{/if}
+	{#if $metadataSelections.size + $sliceSelections.length > 0 || $lassoSelection !== null}
 		<span
 			class="clear"
 			on:click={() => {
 				metadataSelections.set(new Map());
 				sliceSelections.set([]);
+				lassoSelection.set(null);
 			}}>
 			clear all
 		</span>
@@ -153,5 +167,10 @@
 		font-style: italic;
 		color: rgba(0, 0, 0, 0.4);
 		margin-right: 10px;
+	}
+	.lasso {
+		--color: 277, 70%, 35%;
+		background: hsla(var(--color), 0.1);
+		border: 1px solid hsl(var(--color));
 	}
 </style>

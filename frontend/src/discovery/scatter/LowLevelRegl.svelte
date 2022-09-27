@@ -62,6 +62,9 @@
 			opacityBy: "value",
 			opacity: opacityRange(10),
 		});
+		scatterPtr.set({
+			lassoColor: "#6a1b9a",
+		});
 		dispatchLasso();
 	});
 	onDestroy(() => {

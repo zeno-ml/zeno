@@ -256,8 +256,17 @@ def run_zeno(args):
 
     @api_app.post("/mirror/project")
     def mirror_project(req: MirrorProject):
-        proj = zeno.mirror.project(req.model)
+        if req.ids is None:
+            proj = zeno.mirror.initProject(req.model, req.transform)
+        else:
+            proj = zeno.mirror.filterProject(req.model, req.ids, req.transform)
+
         return json.dumps({"model": req.model, "data": proj})
+
+    @api_app.get("/mirror/exists")
+    def embedding_exists(model: str, transform: str = ""):
+        exists = zeno.embedding_exists(model, transform)
+        return json.dumps({"model": model, "exists": exists})
 
     @api_app.websocket("/status")
     async def results_websocket(websocket: WebSocket):

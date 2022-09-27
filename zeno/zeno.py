@@ -89,7 +89,7 @@ class Zeno(object):
             self.model_paths = models  # type: ignore
         self.model_names = [os.path.basename(p).split(".")[0] for p in self.model_paths]
 
-        self.mirror = Mirror(self.df, self.cache_path)
+        self.mirror = Mirror(self.df, self.cache_path, self.id_column)
 
         # Options passed to Zeno functions.
         self.zeno_options = ZenoOptions(
@@ -504,3 +504,11 @@ class Zeno(object):
         self.slices = dict(zip([s.slice_name for s in slices], slices))
         with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
             pickle.dump(self.slices, f)
+
+    def embedding_exists(self, model_name: str, transform_name: str = ""):
+        col = ZenoColumn(
+            name=model_name,
+            column_type=ZenoColumnType.EMBEDDING,
+            transform=transform_name,
+        )
+        return str(col) in self.df.columns
