@@ -149,7 +149,7 @@
 				bind:predicateGroup />
 			<div id="submit">
 				<Button variant="outlined" on:click={createSlice}>
-					{$sliceToEdit ? "Edit Slice" : "Create Slice"}
+					{$sliceToEdit ? "Update Slice" : "Create Slice"}
 				</Button>
 				{#if $slices.has(sliceName) && $sliceToEdit === null}
 					<p style:margin-right="10px" style:color="red">
@@ -164,7 +164,6 @@
 <style>
 	#paper-container {
 		position: absolute;
-		z-index: 1;
 		margin-top: 10px;
 	}
 	#submit {

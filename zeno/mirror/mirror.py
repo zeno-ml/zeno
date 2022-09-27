@@ -1,19 +1,12 @@
 from enum import Enum
-from importlib import import_module
 from typing import List, Optional
 
 import numpy as np
 from pandas import DataFrame
-
-from sklearn.manifold import TSNE
+from sklearn.manifold import TSNE  # type: ignore
 
 from zeno.classes import ZenoColumn, ZenoColumnType
 from zeno.mirror.cache import ValueCache
-
-
-def umap(*args, **kwargs):
-    umap_module = import_module("umap")
-    return umap_module.UMAP(*args, **kwargs)
 
 
 def df_rows_given_ids(df: DataFrame, idColumnPtr: ZenoColumn, ids: Optional[List[str]]):

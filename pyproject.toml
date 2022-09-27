@@ -25,7 +25,7 @@ fastapi = ">=0.75,<0.86"
 websockets = "^10.2"
 tqdm = "^4.64.0"
 tomli = "^2.0.1"
-setuptools = "^65.4.0"
+scikit-learn = "^1.1.2"
 
 [tool.poetry.dev-dependencies]
 pandas-stubs = "^1.5.0"

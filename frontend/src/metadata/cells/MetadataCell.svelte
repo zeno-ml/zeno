@@ -243,6 +243,5 @@
 	}
 	.top-text {
 		height: 18px;
-		z-index: 2;
 	}
 </style>
