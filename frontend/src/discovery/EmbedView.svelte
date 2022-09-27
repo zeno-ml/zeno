@@ -52,14 +52,20 @@
 	$: if (!filtersApplied) {
 		curProj = initProj;
 	}
+	// when I change the model, I want to rerun the projection on those embeddings instead
+	$: {
+		if ($model) {
+			initProjFromModel($model);
+		}
+	}
 
-	onMount(async () => {
+	async function initProjFromModel(model: string) {
 		// project if the embeddings exist and show the user a loader
-		canProject = await embeddingsExist($model);
+		canProject = await embeddingsExist(model);
 		if (canProject) {
 			loadingIndicator(async () => {
 				const projRequest = await initProject({
-					model: $model,
+					model,
 				});
 				if (projRequest !== undefined) {
 					curProj = projRequest;
@@ -69,8 +75,9 @@
 		} else {
 			// otherwise, if the embeddings do not exist,
 			// tell the user!
+			canProject = false;
 		}
-	});
+	}
 
 	interface ExistsResponse {
 		exists: boolean;
