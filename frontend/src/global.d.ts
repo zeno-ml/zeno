@@ -82,17 +82,20 @@ interface XYExtent {
 	yExtent: Extent;
 }
 
+interface MetadataCellDomain {
+	// If nominal, binStart is the bucket/category.
+	binStart: string | number;
+	// Only present if continuous.
+	binEnd?: number;
+	color: string;
+	metricColor?: string;
+	count: number;
+	filteredCount: number;
+}
+
 declare namespace svelte.JSX {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	interface DOMAttributes<T> {
 		onclick_outside?: CompositionEventHandler<T>;
 	}
-}
-
-interface MetadataCellDomain {
-	binStart: string | number;
-	binEnd?: number;
-	color: string;
-	count: number;
-	filteredCount: number;
 }

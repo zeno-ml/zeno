@@ -120,7 +120,7 @@
 		const idColumnHash = columnHash($settings.idColumn);
 		const idColumnExists = table.size > 0 && table.column;
 		if (idColumnExists) {
-			return table.columnArray(idColumnHash) as string[];
+			return table.array(idColumnHash) as string[];
 		} else {
 			return [];
 		}

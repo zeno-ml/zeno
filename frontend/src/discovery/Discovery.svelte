@@ -10,6 +10,7 @@
 	import EmbedView from "./EmbedView.svelte";
 	import { table, filteredTable } from "../stores";
 	import Samples from "../general/Samples.svelte";
+	import { colorSpec } from "../stores";
 
 	$: tableEmpty = $table.size === 0;
 </script>
@@ -23,7 +24,9 @@
 
 		<div id="main-view">
 			<div id="embed-view">
-				<EmbedView />
+				{#if $colorSpec}
+					<EmbedView />
+				{/if}
 			</div>
 			<div id="samples-view">
 				<Samples table={$filteredTable} />

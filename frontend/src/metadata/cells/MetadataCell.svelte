@@ -21,6 +21,7 @@
 		computeDomain,
 		assignColorsFromDomain,
 		colorDomain,
+		getColorsByMetric,
 	} from "../metadata";
 
 	import DateMetadataCell from "./DateMetadataCell.svelte";
@@ -63,7 +64,7 @@
 		updateData($filteredTable);
 	});
 
-	function drawChart(t: ColumnTable) {
+	async function drawChart(t: ColumnTable) {
 		if (!t.column(hash)) {
 			return;
 		}
@@ -77,6 +78,14 @@
 		domain = lDomain;
 
 		colorDomain(domain, col.metadataType);
+		let metricColors = await getColorsByMetric(
+			$filteredTable,
+			hash,
+			columnHash($settings.idColumn),
+			domain,
+			col.metadataType
+		);
+		domain.forEach((d, i) => (d.metricColor = metricColors[i]));
 
 		if (shouldColor) {
 			const colors = assignColorsFromDomain(
@@ -93,7 +102,7 @@
 		}
 	}
 
-	function updateData(filteredTable) {
+	async function updateData(filteredTable) {
 		if ($table.column(hash) && domain) {
 			const counts = computeCountsFromDomain(
 				filteredTable,
@@ -117,6 +126,14 @@
 					color: d["color"],
 				}));
 			}
+			let metricColors = await getColorsByMetric(
+				filteredTable,
+				hash,
+				columnHash($settings.idColumn),
+				domain,
+				col.metadataType
+			);
+			domain.forEach((d, i) => (d.metricColor = metricColors[i]));
 			histogramData = { table: domain };
 		}
 	}
