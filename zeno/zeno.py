@@ -380,8 +380,8 @@ class Zeno(object):
                     self.df.loc[:, str(out[0])] = out[2]
                     if not out[3].isnull().values.any():
                         self.df.loc[:, str(out[1])] = out[3]
-                    else:
-                        self.df = self.drop(str(out[1]), index=1)
+                    # else:
+                    #     self.df = self.df.drop(str(out[1]), index=1)
                     self.complete_columns.append(out[0])
 
         self.status = "Done running inference"
