@@ -378,10 +378,8 @@ class Zeno(object):
                 )
                 for out in inference_outputs:
                     self.df.loc[:, str(out[0])] = out[2]
-                    if not out[3].isnull().values.any():
+                    if not out[3].isnull().values.any():  # type: ignore
                         self.df.loc[:, str(out[1])] = out[3]
-                    # else:
-                    #     self.df = self.df.drop(str(out[1]), index=1)
                     self.complete_columns.append(out[0])
 
         self.status = "Done running inference"

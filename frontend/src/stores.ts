@@ -85,6 +85,7 @@ export const currentColumns: Readable<ZenoColumn[]> = derived(
 export const showNewSlice: Writable<boolean> = writable(false);
 export const sliceToEdit: Writable<Slice> = writable(null);
 
+// Which metadata column to color projection by.
 export const colorByHash = writable("0label");
 export const availableColors = writable({});
 export const colorSpec = derived(

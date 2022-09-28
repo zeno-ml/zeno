@@ -51,7 +51,7 @@
 		} else if (metadataType === MetadataType.NOMINAL) {
 			view.addSignalListener(
 				"select",
-				(...s) => (selection.values = s[1].category ? s[1].category : [])
+				(...s) => (selection.values = s[1].binStart ? s[1].binStart : [])
 			);
 		}
 	}

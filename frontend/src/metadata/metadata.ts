@@ -6,77 +6,49 @@ import {
 	schemeCategory10,
 	schemeTableau10,
 } from "d3-scale-chromatic";
+
 import { MetadataType } from "../globals";
+import {
+	binStartEndFormat,
+	combineOutputOneArray,
+	interpolateColorToArray,
+} from "../util/metadataUtil";
 
-import { columnHash } from "../util/util";
-import { color } from "d3-color";
-import { scaleLinear } from "d3-scale";
-
-interface IInterpolateColor {
-	colorer: (normalized: number) => string;
-	length: number;
-	range?: [number, number];
-}
-
-interface IComputeDomain {
-	type: MetadataType;
-	table: ColumnTable;
-	column: string | ZenoColumn;
-}
-
-interface ISpecificDomain {
-	table: ColumnTable;
-	column: string;
-}
-
-function interpolateColorToArray({
-	colorer,
-	length,
-	range = [0.0, 1.0],
-}: IInterpolateColor) {
-	const scale = scaleLinear().domain([0.0, 1.0]).range(range);
-	const increment = 1.0 / length;
-	const colorArray = new Array(length);
-	for (let i = 0, t = 0; i < colorArray.length; i++, t += increment) {
-		colorArray[i] = color(colorer(scale(t))).hex();
-	}
-	return colorArray;
-}
-
-export function computeDomain({ type, table, column }: IComputeDomain) {
-	const hash = typeof column === "string" ? column : columnHash(column);
-
-	let specificDomainFunc: (input: ISpecificDomain) => {
-		domain: object[];
-		assignments: number[];
-	};
-
+export function computeDomain(
+	type: MetadataType,
+	table: ColumnTable,
+	column: string
+) {
 	switch (type) {
 		case MetadataType.NOMINAL:
-			specificDomainFunc = computeCountDomain;
-			break;
-		case MetadataType.CONTINUOUS:
-			specificDomainFunc = computeHistogramDomain;
-			break;
-		case MetadataType.BOOLEAN:
-			specificDomainFunc = computeBinaryDomain;
-			break;
-		case MetadataType.DATETIME:
-			specificDomainFunc = computeDateDomain;
-			break;
-		case MetadataType.OTHER:
-			specificDomainFunc = computeOtherDomain;
-			break;
-		default:
-			specificDomainFunc = computeOtherDomain;
-			break;
-	}
+			return computeCategoricalDomain(table, column);
 
-	const result = specificDomainFunc({ table, column: hash });
-	return result;
+		case MetadataType.CONTINUOUS:
+			const bins = binTable(table, column);
+			return {
+				domain: combineOutputOneArray(bins.output),
+				assignments: bins.assignments,
+			};
+
+		case MetadataType.BOOLEAN:
+			return computeCategoricalDomain(table, column);
+
+		case MetadataType.DATETIME:
+			const dates = table
+				.array(column)
+				.map((date) => new Date(date))
+				.sort((a, b) => a - b);
+			return { domain: [dates[0], dates[dates.length - 1]], assignments: [] };
+
+		case MetadataType.OTHER:
+			return { domain: [], assignments: [] };
+
+		default:
+			return { domain: [], assignments: [] };
+	}
 }
 
-function computeCategoricalDomain({ table, column }: ISpecificDomain) {
+function computeCategoricalDomain(table: ColumnTable, column: string) {
 	const categoryGroups = table.groupby(column);
 	const categoryKeys = categoryGroups.groups().keys;
 	const categoryData = categoryGroups.count();
@@ -86,9 +58,7 @@ function computeCategoricalDomain({ table, column }: ISpecificDomain) {
 
 	// only necessary because the categoryKeys (assignments) need to match the newCategories
 	// since those are always ordered the same way (alphabetical)
-	/**
-	 * @todo: remove this hack in the future
-	 */
+	// TODO: remove this hack in the future
 	const indexToOriginal = new Map();
 	const newToIndex = new Map();
 	for (let i = 0; i < originalCategories.length; i++) {
@@ -106,84 +76,11 @@ function computeCategoricalDomain({ table, column }: ISpecificDomain) {
 	}
 
 	const output = {
-		category: newCategories,
+		binStart: newCategories,
 		count: orderedCategoryData.columnArray("count"),
 	};
 
 	return { domain: combineOutputOneArray(output), assignments };
-}
-
-function computeCountDomain({ table, column }: ISpecificDomain) {
-	const output = computeCategoricalDomain({ table, column });
-	return output;
-}
-
-function computeBinaryDomain({ table, column }: ISpecificDomain) {
-	const output = computeCategoricalDomain({ table, column });
-	return output;
-}
-
-function computeDateDomain({ table, column }: ISpecificDomain) {
-	const dates = table
-		.array(column)
-		.map((date) => new Date(date))
-		.sort((a, b) => a - b);
-	return { domain: [dates[0], dates[dates.length - 1]], assignments: [] };
-}
-
-function computeContinuousBinnedDomain({ table, column }: ISpecificDomain) {
-	const bins = binTable(table, column);
-	return {
-		domain: combineOutputOneArray(bins.output),
-		assignments: bins.assignments,
-	};
-}
-
-function computeHistogramDomain({ table, column }: ISpecificDomain) {
-	const output = computeContinuousBinnedDomain({ table, column });
-	return output;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function computeOtherDomain({ table, column }: ISpecificDomain) {
-	return { domain: [], assignments: [] };
-}
-
-function combineOutputOneArray(obj: object) {
-	const key = 0,
-		array = 1;
-	const entries = Object.entries(obj);
-	const length = entries[0][array].length;
-
-	const combinedArray = [];
-	for (let i = 0; i < length; i++) {
-		const combinedObject = {};
-		for (let j = 0; j < entries.length; j++) {
-			const entry = entries[j];
-			combinedObject[entry[key]] = entry[array][i];
-		}
-		combinedArray.push(combinedObject);
-	}
-
-	return combinedArray;
-}
-
-function binStartEndFormat(binsUgly: number[]) {
-	const inc = binsUgly[1];
-	const formatted = [];
-	let i = 0,
-		k = 1;
-	while (k < binsUgly.length) {
-		const binStart = binsUgly[i];
-		const binEnd = binsUgly[k];
-		formatted.push({ binStart, binEnd });
-		i++;
-		k++;
-	}
-	const binStart = binsUgly[i];
-	const binEnd = binStart + inc;
-	formatted.push({ binStart, binEnd });
-	return formatted;
 }
 
 function binTable(table: ColumnTable, column: string) {
@@ -211,170 +108,87 @@ function binTable(table: ColumnTable, column: string) {
 	return { output, assignments: binKeys };
 }
 
-function countColumn({ table, filterQuery }) {
-	const count = table.filter(filterQuery).count().object()["count"];
-	return count;
+function countColumn(table, filterQuery) {
+	return table.filter(filterQuery).count().object()["count"];
 }
 
-function countColumnByBin({
-	table,
-	column,
-	binStart,
-	binEnd,
-}: {
-	table: ColumnTable;
-	column: string;
-	binStart: number;
-	binEnd: number;
-}) {
-	const count = countColumn({
-		table,
-		filterQuery: `(d) => d['${column}'] >= ${binStart} && d['${column}'] < ${binEnd}`,
-	});
-	return count;
-}
-
-function countColumnByCategory({
-	table,
-	column,
-	category,
-}: {
-	table: ColumnTable;
-	column: string;
-	category: string | number;
-}) {
-	const count = countColumn({
-		table,
-		filterQuery: `(d) => d['${column}'] == '${category}'`,
-	});
-	return count;
-}
-
-export function countDomainCategorical({
-	table,
-	domain,
-	column,
-}: {
-	table: ColumnTable;
-	domain: object[];
-	column: string;
-}) {
-	const counts = domain.map((d) => {
-		return {
-			count: countColumnByCategory({ table, column, category: d["category"] }),
-		};
-	});
-	return counts;
-}
-
-export function countDomainContinuousBins({
-	table,
-	domain,
-	column,
-}: {
-	table: ColumnTable;
-	domain: object[];
-	column: string;
-}) {
-	const counts = domain.map((d) => {
-		return {
-			count: countColumnByBin({
-				table,
-				column,
-				binStart: d["binStart"],
-				binEnd: d["binEnd"],
-			}),
-		};
-	});
-	return counts;
-}
-
-export function computeCountsFromDomain({
-	table,
-	column,
-	domain,
-	type,
-}: {
-	table: ColumnTable;
-	column: string;
-	domain: object[];
-	type: MetadataType;
-}) {
-	const hash = typeof column === "string" ? column : columnHash(column);
+export function computeCountsFromDomain(
+	table: ColumnTable,
+	column: string,
+	domain: object[],
+	type: MetadataType
+) {
 	if (domain.length === 0) {
 		return [];
 	}
 
 	if (type === MetadataType.NOMINAL || type === MetadataType.BOOLEAN) {
-		return countDomainCategorical({ table, domain, column: hash });
+		return domain.map((d) =>
+			countColumn(table, `(d) => d['${column}'] == '${d["binStart"]}'`)
+		);
 	} else if (type === MetadataType.CONTINUOUS) {
-		return countDomainContinuousBins({ table, domain, column: hash });
+		return domain.map((d) =>
+			countColumn(
+				table,
+				`(d) => d['${column}'] >= ${d["binStart"]} && d['${column}'] < ${d["binEnd"]}`
+			)
+		);
 	} else {
 		return [];
 	}
 }
 
-export function colorDomain({
-	domain,
-	type,
-}: {
-	domain: object[];
-	type: MetadataType;
-}) {
-	if (domain.length > 0) {
-		if (type === MetadataType.NOMINAL || type === MetadataType.BOOLEAN) {
-			const colors20 = [...schemeTableau10, ...schemeCategory10];
-			let colors = colors20.slice(0, domain.length);
-			if (domain.length === 2) {
-				colors = [schemeTableau10[0], schemeTableau10[2]];
-			}
-			domain.forEach((d, i) => (d["color"] = colors[i]));
-		} else if (type === MetadataType.CONTINUOUS) {
-			const numBins = domain.length;
-			const colors = interpolateColorToArray({
-				colorer: interpolatePurples,
-				length: numBins,
-				range: [0.15, 1.0],
-			});
-			domain.forEach((d, i) => (d["color"] = colors[i]));
+export function colorDomain(domain: object[], type: MetadataType) {
+	if (domain.length === 0) {
+		return;
+	}
+
+	if (type === MetadataType.NOMINAL || type === MetadataType.BOOLEAN) {
+		const colors20 = [...schemeTableau10, ...schemeCategory10];
+		let colors = colors20.slice(0, domain.length);
+		if (domain.length === 2) {
+			colors = [schemeTableau10[0], schemeTableau10[2]];
 		}
+		domain.forEach((d, i) => (d["color"] = colors[i]));
+	} else if (type === MetadataType.CONTINUOUS) {
+		const numBins = domain.length;
+		const colors = interpolateColorToArray(
+			interpolatePurples,
+			numBins,
+			[0.15, 1.0]
+		);
+		domain.forEach((d, i) => (d["color"] = colors[i]));
 	}
 }
-export function assignColorsFromDomain({
-	table,
-	domain,
-	assignments,
-	idColumn,
-	column,
-	type,
-}: {
-	table: ColumnTable;
-	domain: object[];
-	assignments: number[];
-	idColumn: ZenoColumn | string;
-	column: ZenoColumn | string;
-	type: MetadataType;
-}) {
-	if (domain.length > 0) {
-		if (!("color" in domain[0])) {
-			colorDomain({ domain, type });
-		}
-		const hash = typeof column === "string" ? column : columnHash(column);
-		const idHash =
-			typeof idColumn === "string" ? idColumn : columnHash(idColumn);
-		const ids = table.columnArray(idHash);
-		const colorLabels = new Array(assignments.length);
-		for (let i = 0; i < assignments.length; i++) {
-			colorLabels[i] = {
-				id: ids[i],
-				colorIndex: assignments[i],
-			};
-		}
-		const output = {
-			labels: colorLabels,
-			colors: domain.map((d) => d["color"]),
-			hash,
-		};
-		return output;
+
+export function assignColorsFromDomain(
+	table: ColumnTable,
+	domain: object[],
+	assignments: number[],
+	idHash: string,
+	hash: string,
+	type: MetadataType
+) {
+	if (domain.length === 0) {
+		return;
 	}
+
+	if (!("color" in domain[0])) {
+		colorDomain(domain, type);
+	}
+
+	const ids = table.columnArray(idHash);
+	const colorLabels = new Array(assignments.length);
+	for (let i = 0; i < assignments.length; i++) {
+		colorLabels[i] = {
+			id: ids[i],
+			colorIndex: assignments[i],
+		};
+	}
+
+	return {
+		labels: colorLabels,
+		colors: domain.map((d) => d["color"]),
+		hash,
+	};
 }

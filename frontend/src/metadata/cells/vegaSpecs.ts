@@ -33,7 +33,7 @@ export function generateCountSpec({
 				},
 				encoding: {
 					x: {
-						field: "category",
+						field: "binStart",
 						axis: {
 							title: "",
 							grid: false,
@@ -52,7 +52,7 @@ export function generateCountSpec({
 				mark: { type: "bar" },
 				encoding: {
 					x: {
-						field: "category",
+						field: "binStart",
 					},
 					y: {
 						field: "filteredCount",

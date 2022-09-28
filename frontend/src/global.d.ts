@@ -88,3 +88,11 @@ declare namespace svelte.JSX {
 		onclick_outside?: CompositionEventHandler<T>;
 	}
 }
+
+interface IColorDomain {
+	binStart: string | number;
+	binEnd?: number;
+	color: string;
+	count: number;
+	filteredCount: number;
+}

@@ -43,8 +43,7 @@
 		column: col,
 		values: [],
 	};
-	// TODO: make interface.
-	let domain: object[];
+	let domain: IColorDomain[];
 	let histogramData = { table: [] };
 	let colorAssignments: IColorAssignments = {
 		colors: [],
@@ -80,28 +79,23 @@
 	});
 
 	function updateData(table: ColumnTable, filteredTable: ColumnTable) {
-		if (
-			(col.metadataType === MetadataType.NOMINAL ||
-				col.metadataType === MetadataType.CONTINUOUS) &&
-			table.column(hash) &&
-			domain
-		) {
-			const counts = computeCountsFromDomain({
-				table: filteredTable,
+		if (table.column(hash) && domain) {
+			const counts = computeCountsFromDomain(
+				filteredTable,
+				hash,
 				domain,
-				column: hash,
-				type: col.metadataType,
-			});
+				col.metadataType
+			);
 			if (col.metadataType === MetadataType.NOMINAL) {
 				domain = domain.map((d, i) => ({
-					filteredCount: counts[i].count,
+					filteredCount: counts[i],
 					count: d["count"],
-					category: d["category"],
+					binStart: d["binStart"],
 					color: d["color"],
 				}));
 			} else if (col.metadataType === MetadataType.CONTINUOUS) {
 				domain = domain.map((d, i) => ({
-					filteredCount: counts[i].count,
+					filteredCount: counts[i],
 					count: d["count"],
 					binStart: d["binStart"],
 					binEnd: d["binEnd"],
@@ -116,25 +110,25 @@
 		if (!t.column(hash)) {
 			return;
 		}
-		const { assignments, domain: localDomain } = computeDomain({
-			type: col.metadataType,
-			table: $table,
-			column: hash,
-		});
+		const { assignments, domain: localDomain } = computeDomain(
+			col.metadataType,
+			$table,
+			hash
+		);
 		domain = localDomain;
 		domain.forEach((d) => (d["filteredCount"] = d["count"]));
 
-		colorDomain({ domain, type: col.metadataType });
+		colorDomain(domain, col.metadataType);
 
 		if (assignColors) {
-			const colors = assignColorsFromDomain({
-				assignments,
+			const colors = assignColorsFromDomain(
+				$table,
 				domain,
-				column: hash,
-				idColumn: $settings.idColumn,
-				table: $table,
-				type: col.metadataType,
-			});
+				assignments,
+				columnHash($settings.idColumn),
+				hash,
+				col.metadataType
+			);
 			if (colors) {
 				availableColors.set({ ...$availableColors, [hash]: colors });
 			}
