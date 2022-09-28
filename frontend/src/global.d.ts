@@ -89,7 +89,7 @@ declare namespace svelte.JSX {
 	}
 }
 
-interface IColorDomain {
+interface MetadataCellDomain {
 	binStart: string | number;
 	binEnd?: number;
 	color: string;

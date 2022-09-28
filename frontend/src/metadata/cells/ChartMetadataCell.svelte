@@ -55,6 +55,8 @@
 			);
 		}
 	}
+
+	$: console.log(histogramData, hash);
 </script>
 
 <div

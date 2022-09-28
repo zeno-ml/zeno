@@ -97,7 +97,9 @@
 					metadataSelections.update((m) => {
 						m.delete(hash);
 						return m;
-					})}>cancel</TrailingIcon>
+					})}>
+				cancel
+			</TrailingIcon>
 		</div>
 	{/each}
 	{#if $lassoSelection !== null}

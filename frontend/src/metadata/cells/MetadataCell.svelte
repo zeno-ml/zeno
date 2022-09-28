@@ -15,7 +15,6 @@
 		availableColors,
 		colorByHash,
 		filteredTable,
-		model,
 	} from "../../stores";
 	import {
 		computeCountsFromDomain,
@@ -31,55 +30,71 @@
 
 	export let col: ZenoColumn;
 	export let shouldColor = false;
-	export let assignColors: boolean = shouldColor;
 
-	interface IColorAssignments {
-		colors: string[];
-		labels: { id: string; colorIndex: number }[];
-		hash: string;
-	}
-
+	let hoveringCell = false;
+	let domain: MetadataCellDomain[];
+	let histogramData = { table: [] };
 	let selection: MetadataSelection = {
 		column: col,
 		values: [],
 	};
-	let domain: IColorDomain[];
-	let histogramData = { table: [] };
-	let colorAssignments: IColorAssignments = {
+	let colorAssignments: {
+		colors: string[];
+		labels: { id: string; colorIndex: number }[];
+		hash: string;
+	} = {
 		colors: [],
 		labels: [],
 		hash: "",
 	};
-	let hoveringCell = false;
 
 	$: hash = columnHash(col);
 	$: selectedHash = $colorByHash === hash;
-	$: selectedHashColor = shouldColor ? (selectedHash ? "#9B52DF" : "") : "";
-	$: dynamicSpec =
-		col.metadataType === MetadataType.CONTINUOUS
-			? generateHistogramSpec
-			: generateCountSpec;
-
 	$: {
-		if (assignColors === true && $model) {
-			drawChart($table);
-		}
+		shouldColor;
+		updateData($filteredTable);
 	}
 	$: {
 		col;
 		drawChart($table);
-		updateData($table, $filteredTable);
 	}
-	table.subscribe((t) => drawChart(t));
-
 	onMount(() => {
 		selection.column = col;
-		drawChart($table);
-		updateData($table, $filteredTable);
+		updateData($filteredTable);
 	});
 
-	function updateData(table: ColumnTable, filteredTable: ColumnTable) {
-		if (table.column(hash) && domain) {
+	function drawChart(t: ColumnTable) {
+		if (!t.column(hash)) {
+			return;
+		}
+
+		const { domain: lDomain, assignments } = computeDomain(
+			col.metadataType,
+			$table,
+			hash
+		);
+		lDomain.forEach((d) => (d["filteredCount"] = d["count"]));
+		domain = lDomain;
+
+		colorDomain(domain, col.metadataType);
+
+		if (shouldColor) {
+			const colors = assignColorsFromDomain(
+				$table,
+				domain,
+				assignments,
+				columnHash($settings.idColumn),
+				hash,
+				col.metadataType
+			);
+			if (colors) {
+				availableColors.set({ ...$availableColors, [hash]: colors });
+			}
+		}
+	}
+
+	function updateData(filteredTable) {
+		if ($table.column(hash) && domain) {
 			const counts = computeCountsFromDomain(
 				filteredTable,
 				hash,
@@ -106,35 +121,6 @@
 		}
 	}
 
-	function drawChart(t: ColumnTable) {
-		if (!t.column(hash)) {
-			return;
-		}
-		const { assignments, domain: localDomain } = computeDomain(
-			col.metadataType,
-			$table,
-			hash
-		);
-		domain = localDomain;
-		domain.forEach((d) => (d["filteredCount"] = d["count"]));
-
-		colorDomain(domain, col.metadataType);
-
-		if (assignColors) {
-			const colors = assignColorsFromDomain(
-				$table,
-				domain,
-				assignments,
-				columnHash($settings.idColumn),
-				hash,
-				col.metadataType
-			);
-			if (colors) {
-				availableColors.set({ ...$availableColors, [hash]: colors });
-			}
-		}
-	}
-
 	function setSelection() {
 		metadataSelections.update((m) => {
 			if (selection.values.length === 0) {
@@ -153,7 +139,9 @@
 	on:mouseleave={() => (hoveringCell = false)}>
 	<div id="info">
 		<div id="label" class="top-text">
-			<span style:color={selectedHashColor}>{col.name}</span>
+			<span style:color={shouldColor && selectedHash ? "#9B52DF" : ""}>
+				{col.name}
+			</span>
 		</div>
 
 		<div class="top-right-cell">
@@ -184,7 +172,9 @@
 					<IconButton
 						size="mini"
 						class="material-icons"
-						style="color: {selectedHashColor}; margin-top: -10px;"
+						style="color: {shouldColor && selectedHash
+							? '#9B52DF'
+							: ''}; margin-top: -10px;"
 						on:click={() => {
 							colorByHash.set(hash);
 						}}>brush</IconButton>
@@ -201,7 +191,9 @@
 		<ChartMetadataCell
 			bind:selection
 			{setSelection}
-			{dynamicSpec}
+			dynamicSpec={col.metadataType === MetadataType.CONTINUOUS
+				? generateHistogramSpec
+				: generateCountSpec}
 			{shouldColor}
 			{selectedHash}
 			{domain}

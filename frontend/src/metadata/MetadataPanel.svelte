@@ -38,9 +38,10 @@
 	table.subscribe((t) => updateFilteredTable(t));
 	metadataSelections.subscribe(() => updateFilteredTable($table));
 	sliceSelections.subscribe(() => updateFilteredTable($table));
-
 	model.subscribe(() => {
+		// When model changes, update slice items (may change with postdistill values).
 		updateSliceIdxs();
+		// Also clear the metadata selection, can't dynamicallly update currently.
 		metadataSelections.set(new Map());
 	});
 
@@ -61,16 +62,9 @@
 </script>
 
 <div class="side-container">
-	{#if $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.WEAK_LABEL).length > 0}
-		<h4>Weak Labels</h4>
-		{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.WEAK_LABEL) as col}
-			<MetadataCell {col} {shouldColor} />
-		{/each}
-	{/if}
-
 	<div class="inline">
 		<h4>Slices</h4>
-		<div style:margin-right="13px" class="inline top-layer">
+		<div class="inline">
 			<div>
 				<div on:click={() => (showNewFolder = true)}>
 					<IconButton>
@@ -113,7 +107,11 @@
 		<div class="inline" style:height="44px">All instances</div>
 
 		<div class="inline">
-			<span>{#await res then r}{r && r[0] ? r[0].toFixed(2) : ""}{/await}</span>
+			<span>
+				{#await res then r}
+					{r && r[0] !== undefined ? r[0].toFixed(2) : ""}
+				{/await}
+			</span>
 			<span class="size">({$table.size})</span>
 			<div style:width="36px" />
 		</div>
@@ -127,15 +125,14 @@
 		<SliceCell slice={s} />
 	{/each}
 
-	<h4 style:margin-top="40px">Metadata</h4>
+	<h4 style:margin-top="30px">Metadata</h4>
 	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.METADATA) as col}
 		<MetadataCell {col} {shouldColor} />
 	{/each}
 
 	{#if $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL).length > 0}
-		<h4 style:margin-top="40px">Distilled Metadata</h4>
+		<h4 style:margin-top="30px">Distilled Metadata</h4>
 	{/if}
-
 	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL) as col}
 		{@const idx = completedColumnHashes.indexOf(columnHash(col))}
 		{#if idx > -1}
@@ -203,8 +200,5 @@
 		color: rgba(0, 0, 0, 0.4);
 		margin-right: 10px;
 		margin-left: 10px;
-	}
-	.top-layer {
-		z-index: 1;
 	}
 </style>
