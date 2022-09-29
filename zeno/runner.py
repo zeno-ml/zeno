@@ -263,9 +263,9 @@ def run_zeno(args):
 
         return json.dumps({"model": req.model, "data": proj})
 
-    @api_app.get("/mirror/exists")
-    def embedding_exists(model: str, transform: str = ""):
-        exists = zeno.embedding_exists(model, transform)
+    @api_app.get("/mirror/exists/{model}")
+    def embedding_exists(model: str):
+        exists = zeno.embedding_exists(model)
         return json.dumps({"model": model, "exists": exists})
 
     @api_app.websocket("/status")

@@ -63,7 +63,7 @@
 
 	async function initProjFromModel(model: string, transform = "") {
 		// project if the embeddings exist and show the user a loader
-		canProject = await embeddingsExist(model, transform);
+		canProject = await embeddingsExist(model);
 		if (canProject) {
 			loadingIndicator(async () => {
 				const projRequest = await project({
@@ -86,9 +86,9 @@
 		exists: boolean;
 		model: string;
 	}
-	async function embeddingsExist(model: string, transform = "") {
+	async function embeddingsExist(model: string) {
 		const embeddingsCheck = (await mirror.get({
-			url: `exists/?model=${model}&transform=${transform}`,
+			url: `exists/${model}`,
 		})) as ExistsResponse;
 		return embeddingsCheck?.exists;
 	}
