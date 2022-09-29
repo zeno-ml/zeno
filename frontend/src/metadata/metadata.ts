@@ -1,3 +1,6 @@
+import { color } from "d3-color";
+import { scaleLinear } from "d3-scale";
+import { metric, model, transform } from "./../stores";
 import type ColumnTable from "arquero/dist/types/table/column-table";
 
 import * as aq from "arquero";
@@ -6,6 +9,7 @@ import {
 	schemeCategory10,
 	schemeTableau10,
 } from "d3-scale-chromatic";
+import { extent } from "d3-array";
 
 import { MetadataType } from "../globals";
 import {
@@ -13,6 +17,8 @@ import {
 	combineOutputOneArray,
 	interpolateColorToArray,
 } from "../util/metadataUtil";
+import { getMetricsForSlices } from "../util/util";
+import { get } from "svelte/store";
 
 export function computeDomain(
 	type: MetadataType,
@@ -53,8 +59,8 @@ function computeCategoricalDomain(table: ColumnTable, column: string) {
 	const categoryKeys = categoryGroups.groups().keys;
 	const categoryData = categoryGroups.count();
 	const orderedCategoryData = categoryData.orderby(column);
-	const originalCategories = categoryData.columnArray(column);
-	const newCategories = orderedCategoryData.columnArray(column);
+	const originalCategories = categoryData.array(column);
+	const newCategories = orderedCategoryData.array(column);
 
 	// only necessary because the categoryKeys (assignments) need to match the newCategories
 	// since those are always ordered the same way (alphabetical)
@@ -77,7 +83,7 @@ function computeCategoricalDomain(table: ColumnTable, column: string) {
 
 	const output = {
 		binStart: newCategories,
-		count: orderedCategoryData.columnArray("count"),
+		count: orderedCategoryData.array("count"),
 	};
 
 	return { domain: combineOutputOneArray(output), assignments };
@@ -96,13 +102,11 @@ function binTable(table: ColumnTable, column: string) {
 		.impute({ count: () => 0 })
 		.orderby(binName);
 
-	const binsNice = binStartEndFormat(
-		binnedOutput.columnArray(binName) as number[]
-	);
+	const binsNice = binStartEndFormat(binnedOutput.array(binName) as number[]);
 	const output = {
 		binStart: binsNice.map((bin) => bin.binStart),
 		binEnd: binsNice.map((bin) => bin.binEnd),
-		count: binnedOutput.columnArray(countName),
+		count: binnedOutput.array(countName),
 	};
 
 	return { output, assignments: binKeys };
@@ -115,7 +119,7 @@ function countColumn(table, filterQuery) {
 export function computeCountsFromDomain(
 	table: ColumnTable,
 	column: string,
-	domain: object[],
+	domain: MetadataCellDomain[],
 	type: MetadataType
 ) {
 	if (domain.length === 0) {
@@ -138,7 +142,7 @@ export function computeCountsFromDomain(
 	}
 }
 
-export function colorDomain(domain: object[], type: MetadataType) {
+export function colorDomain(domain: MetadataCellDomain[], type: MetadataType) {
 	if (domain.length === 0) {
 		return;
 	}
@@ -161,9 +165,44 @@ export function colorDomain(domain: object[], type: MetadataType) {
 	}
 }
 
+export async function getColorsByMetric(
+	table: ColumnTable,
+	hash: string,
+	idHash: string,
+	domain: MetadataCellDomain[],
+	type: MetadataType
+) {
+	if (domain.length === 0) {
+		return;
+	}
+	const keys = domain.map((d) => {
+		let filt = "";
+		if (type === MetadataType.NOMINAL || type === MetadataType.BOOLEAN) {
+			filt = `(row) => row['${hash}'] == '${d.binStart}'`;
+		} else if (type === MetadataType.CONTINUOUS) {
+			filt = `(row) => row['${hash}'] >= ${d.binStart} && row['${hash}'] <= ${d.binEnd}`;
+		}
+		const slice = {
+			sliceName: "",
+			folder: "",
+			idxs: table.filter(filt).array(idHash),
+		} as Slice;
+
+		return {
+			sli: slice,
+			metric: get(metric),
+			model: get(model),
+			transform: get(transform),
+		} as MetricKey;
+	});
+	const mets = await getMetricsForSlices(keys);
+	const scale = scaleLinear().domain(extent(mets)).range([0.25, 1]);
+	return mets.map((m) => color(interpolatePurples(scale(m))).hex());
+}
+
 export function assignColorsFromDomain(
 	table: ColumnTable,
-	domain: object[],
+	domain: MetadataCellDomain[],
 	assignments: number[],
 	idHash: string,
 	hash: string,
@@ -177,7 +216,7 @@ export function assignColorsFromDomain(
 		colorDomain(domain, type);
 	}
 
-	const ids = table.columnArray(idHash);
+	const ids = table.array(idHash);
 	const colorLabels = new Array(assignments.length);
 	for (let i = 0; i < assignments.length; i++) {
 		colorLabels[i] = {
