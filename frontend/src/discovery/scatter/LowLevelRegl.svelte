@@ -2,19 +2,19 @@
 	import { onDestroy, onMount, createEventDispatcher } from "svelte";
 	import createScatterPlot from "regl-scatterplot";
 	import type {
-		ScatterRows,
-		ReglScatterColumns,
+		ScatterRowsFormat,
+		ScatterColumnsFormat,
 		ReglConfig,
 		ColorRange,
 	} from "./scatter";
 
 	type ReglScatterReference = ReturnType<typeof createScatterPlot>;
 
-	const dispatch = createEventDispatcher();
+	const dispatch = createEventDispatcher<{ lassoIndex: number[] }>();
 
 	export let width: number;
 	export let height: number;
-	export let data: ScatterRows = [];
+	export let data: ScatterRowsFormat = [];
 	export let colorRange: ColorRange = [];
 	export let config: ReglConfig = {};
 
@@ -71,7 +71,7 @@
 		scatterPtr.destroy();
 	});
 
-	function draw(points: ReglScatterColumns) {
+	function draw(points: ScatterColumnsFormat) {
 		if (scatterPtr) {
 			scatterPtr.draw(points, {
 				transition: true,
@@ -84,7 +84,7 @@
 			scatterPtr.subscribe(
 				"deselect",
 				() => {
-					dispatch("lassoIndex", null);
+					dispatch("lassoIndex", []);
 				},
 				null
 			);
@@ -100,9 +100,9 @@
 		}
 	}
 	function minorToMajorRegl(
-		data: ScatterRows,
+		data: ScatterRowsFormat,
 		colorShift = 2
-	): ReglScatterColumns {
+	): ScatterColumnsFormat {
 		const major = {
 			x: [],
 			y: [],

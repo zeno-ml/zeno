@@ -280,7 +280,7 @@ export function updateFilteredTable(t: ColumnTable) {
 
 	// filter with lasso from discovery mirror
 	const lassoSelectionValues = get(lassoSelection);
-	if (lassoSelectionValues !== null) {
+	if (lassoSelectionValues.length > 0) {
 		tempTable = tempTable.filter(
 			aq.escape((r) => aq.op.includes(lassoSelectionValues, r[idCol], 0))
 		);

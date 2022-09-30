@@ -102,13 +102,13 @@
 			</TrailingIcon>
 		</div>
 	{/each}
-	{#if $lassoSelection !== null}
+	{#if $lassoSelection.length > 0}
 		<div class="meta-chip lasso">
 			Lasso Selection
 			<TrailingIcon
 				class="remove material-icons"
 				on:click={() => {
-					lassoSelection.set(null);
+					lassoSelection.set([]);
 				}}>
 				cancel
 			</TrailingIcon>
@@ -120,7 +120,7 @@
 			on:click={() => {
 				metadataSelections.set(new Map());
 				sliceSelections.set([]);
-				lassoSelection.set(null);
+				lassoSelection.set([]);
 			}}>
 			clear all
 		</span>
