@@ -114,7 +114,7 @@
 			</TrailingIcon>
 		</div>
 	{/if}
-	{#if $metadataSelections.size + $sliceSelections.length > 0 || $lassoSelection !== null}
+	{#if $metadataSelections.size + $sliceSelections.length > 0 || $lassoSelection.length > 0}
 		<span
 			class="clear"
 			on:click={() => {

@@ -30,6 +30,7 @@
 		{resetSelection}
 		downScale="maxDim"
 		on:lassoIndex={lassoPoints}
+		on:mount
 		{colorRange}
 		{config}
 		{width}

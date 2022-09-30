@@ -6,22 +6,19 @@
 		ScatterColumnsFormat,
 		ReglConfig,
 		ColorRange,
+		ReglScatterplot,
 	} from "./scatter";
 
-	type ReglScatterReference = ReturnType<typeof createScatterPlot>;
-
-	const dispatch = createEventDispatcher<{ lassoIndex: number[] }>();
+	const dispatch = createEventDispatcher<{
+		lassoIndex: number[];
+		mount: ReglScatterplot;
+	}>();
 
 	export let width: number;
 	export let height: number;
 	export let data: ScatterRowsFormat = [];
 	export let colorRange: ColorRange = [];
 	export let config: ReglConfig = {};
-	export let resetSelection = true;
-
-	$: if (!resetSelection && scatterPtr) {
-		scatterPtr.select([]);
-	}
 
 	// format data that regl-scatterplot expects
 	// change the {}[] to {} with arrays inside
@@ -49,7 +46,7 @@
 		}
 	}
 
-	let scatterPtr: ReglScatterReference;
+	let scatterPtr: ReglScatterplot;
 	let canvasEl: HTMLCanvasElement;
 
 	onMount(() => {
@@ -70,6 +67,7 @@
 		scatterPtr.set({
 			lassoColor: "#6a1b9a",
 		});
+		dispatch("mount", scatterPtr);
 		dispatchLasso();
 	});
 	onDestroy(() => {

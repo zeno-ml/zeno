@@ -19,7 +19,11 @@
 	import request from "../util/request";
 
 	import type ColumnTable from "arquero/dist/types/table/column-table";
-	import type { ScatterRow, ScatterRowsFormat } from "./scatter/scatter";
+	import type {
+		ReglScatterplot,
+		ScatterRow,
+		ScatterRowsFormat,
+	} from "./scatter/scatter";
 
 	type point2D = [number, number];
 	interface IProject {
@@ -38,6 +42,7 @@
 	let initProj: point2D[] = [];
 	let canProject = false;
 	let isProjecting = false;
+	let reglScatterplot: ReglScatterplot;
 
 	lassoSelection.subscribe(() => updateFilteredTable($table));
 
@@ -200,6 +205,9 @@
 				data={dataOpaque}
 				{colorRange}
 				on:lasso={lassoSelect}
+				on:mount={(e) => {
+					reglScatterplot = e.detail;
+				}}
 				resetSelection={isProjecting} />
 		{:else if !$status.doneProcessing}
 			<div id="loading-content">
@@ -238,6 +246,7 @@
 							ids,
 							transform: $transform,
 						});
+						reglScatterplot.deselect();
 					}
 				});
 			}}>

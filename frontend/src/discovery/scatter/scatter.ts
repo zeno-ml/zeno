@@ -1,5 +1,8 @@
+import type createScatterPlot from "regl-scatterplot";
 import type { Properties } from "regl-scatterplot/dist/types";
 import type { HSLColor, RGBColor } from "d3-color";
+
+export type ReglScatterplot = ReturnType<typeof createScatterPlot>;
 
 export interface ScatterRow {
 	x: number;

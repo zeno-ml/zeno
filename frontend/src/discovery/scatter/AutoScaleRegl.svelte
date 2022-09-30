@@ -71,7 +71,7 @@
 
 <LowLevelRegl
 	on:lassoIndex
-	{resetSelection}
+	on:mount
 	data={fitPoints}
 	{height}
 	{width}
