@@ -231,11 +231,31 @@ function arrayEquals(a, b) {
 	);
 }
 
+/**
+ * Returns another arquero table with with only the ids specified
+ */
+function filterTableForIds(t: ColumnTable, ids: string[], idColumn: string) {
+	return t.filter(aq.escape((r) => aq.op.includes(ids, r[idColumn], 0)));
+}
+
 export function updateFilteredTable(t: ColumnTable) {
 	if (!get(ready) || t.size === 0) {
 		return;
 	}
 	let tempTable = t;
+
+	const idCol = columnHash(get(settings).idColumn);
+
+	// override the filter and slices if we have a lasso
+	// this is for zeno discovery
+	const lassoSelectionValues = get(lassoSelection);
+	const onlyLassoNoFilter = lassoSelectionValues.length > 0;
+	if (onlyLassoNoFilter) {
+		tempTable = filterTableForIds(t, lassoSelectionValues, idCol);
+		filteredTable.set(tempTable);
+
+		return; // don't do the other filters so end early
+	}
 
 	// Filter with slices.
 	get(sliceSelections).forEach((s) => {
@@ -275,16 +295,6 @@ export function updateFilteredTable(t: ColumnTable) {
 			);
 		}
 	});
-
-	const idCol = columnHash(get(settings).idColumn);
-
-	// filter with lasso from discovery mirror
-	const lassoSelectionValues = get(lassoSelection);
-	if (lassoSelectionValues.length > 0) {
-		tempTable = tempTable.filter(
-			aq.escape((r) => aq.op.includes(lassoSelectionValues, r[idCol], 0))
-		);
-	}
 
 	if (arrayEquals(tempTable.array(idCol), get(filteredTable).array(idCol))) {
 		return;
