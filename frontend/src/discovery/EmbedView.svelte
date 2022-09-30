@@ -47,6 +47,7 @@
 	);
 	$: colorRange = [...$colorSpec.colors];
 	$: data = packageScatterData(curProj, idToColorIndexMapping);
+	$: dataOpaque = makeFilteredOpaque(data, $filteredTable);
 
 	$: filtersApplied =
 		$lassoSelection !== null ||
@@ -143,7 +144,7 @@
 				x: d[0],
 				y: d[1],
 				colorIndex: idToColor.get(id),
-				opacity: 0.65,
+				opacity: 1.0,
 			};
 		}) as ScatterRowsFormat;
 		return data;
@@ -168,12 +169,37 @@
 		const ids = selection.map((d) => d.id?.toString());
 		lassoSelection.set(ids);
 	}
+
+	/**
+	 * Update the opacities based on if the data is
+	 * currently being filtered in or out
+	 */
+	function makeFilteredOpaque(
+		scatterData: ScatterRowsFormat,
+		filteredTable: ColumnTable,
+		{ reducedOpacity = 0.1, fullOpacity = 0.75 } = {}
+	) {
+		// make the points no longer in the table less opacity
+		const curFilterIds = getIdsFromTable(filteredTable);
+		const containsFiltered = new Map(curFilterIds.map((d) => [d, true]));
+
+		// go over the points and update
+		scatterData.forEach((d) => {
+			if (containsFiltered.get(d.id)) {
+				d.opacity = fullOpacity;
+			} else {
+				d.opacity = reducedOpacity;
+			}
+		});
+
+		return scatterData;
+	}
 </script>
 
 <div id="container">
 	<div id="scatter-container">
 		{#if canProject}
-			<Scatter {data} {colorRange} on:lasso={lassoSelect} />
+			<Scatter data={dataOpaque} {colorRange} on:lasso={lassoSelect} />
 		{:else if !$status.doneProcessing}
 			<div id="loading-content">
 				<h3 class="embed-status">Awaiting processing.</h3>
