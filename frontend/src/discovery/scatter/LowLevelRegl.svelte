@@ -17,6 +17,11 @@
 	export let data: ScatterRowsFormat = [];
 	export let colorRange: ColorRange = [];
 	export let config: ReglConfig = {};
+	export let resetSelection = true;
+
+	$: if (!resetSelection && scatterPtr) {
+		scatterPtr.select([]);
+	}
 
 	// format data that regl-scatterplot expects
 	// change the {}[] to {} with arrays inside

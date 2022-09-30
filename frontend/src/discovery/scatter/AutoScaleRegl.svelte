@@ -9,6 +9,7 @@
 	export let data: ScatterRowsFormat = [];
 	export let colorRange: ColorRange = [];
 	export let config: ReglConfig = {};
+	export let resetSelection = true;
 
 	// eachDim will do a separate scale based on min and max of each x and y independently
 	// maxDim will scale by the larger min max of the x and y min maxs
@@ -70,6 +71,7 @@
 
 <LowLevelRegl
 	on:lassoIndex
+	{resetSelection}
 	data={fitPoints}
 	{height}
 	{width}

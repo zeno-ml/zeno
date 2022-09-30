@@ -8,6 +8,7 @@
 	export let data: ScatterRowsFormat = [];
 	export let colorRange: ColorRange = [];
 	export let config: ReglConfig = {};
+	export let resetSelection = true;
 
 	let innerWidth: number, innerHeight: number;
 	let width: number;
@@ -26,6 +27,7 @@
 {#if width && height}
 	<AutoScaleRegl
 		{data}
+		{resetSelection}
 		downScale="maxDim"
 		on:lassoIndex={lassoPoints}
 		{colorRange}

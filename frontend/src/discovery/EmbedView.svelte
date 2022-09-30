@@ -53,10 +53,7 @@
 		$lassoSelection.length > 0 ||
 		$metadataSelections.size > 0 ||
 		$sliceSelections.length > 0;
-	// if we remove filters, just reset to our cached version
-	$: if (!filtersApplied) {
-		curProj = initProj;
-	}
+
 	// when I change the embeddings, I want to rerun the projection on those embeddings instead
 	$: {
 		if ($model && $status.doneProcessing) {
@@ -199,7 +196,11 @@
 <div id="container">
 	<div id="scatter-container">
 		{#if canProject}
-			<Scatter data={dataOpaque} {colorRange} on:lasso={lassoSelect} />
+			<Scatter
+				data={dataOpaque}
+				{colorRange}
+				on:lasso={lassoSelect}
+				resetSelection={isProjecting} />
 		{:else if !$status.doneProcessing}
 			<div id="loading-content">
 				<h3 class="embed-status">Awaiting processing.</h3>
@@ -225,18 +226,22 @@
 	<div id="overlay">
 		<Button
 			variant="outlined"
-			disabled={!(filtersApplied && canProject)}
+			disabled={!canProject}
 			on:click={async () => {
 				loadingIndicator(async () => {
-					const ids = curFilteredIds();
-					curProj = await project({
-						model: $model,
-						ids,
-						transform: $transform,
-					});
+					if ($filteredTable.size === initProj.length) {
+						curProj = initProj;
+					} else {
+						const ids = curFilteredIds();
+						curProj = await project({
+							model: $model,
+							ids,
+							transform: $transform,
+						});
+					}
 				});
 			}}>
-			Rerun projection on selection
+			Visualize Selection
 		</Button>
 	</div>
 </div>
