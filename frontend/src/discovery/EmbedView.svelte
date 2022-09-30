@@ -19,7 +19,7 @@
 	import request from "../util/request";
 
 	import type ColumnTable from "arquero/dist/types/table/column-table";
-	import type { ScatterRowsWithIds } from "./scatter/scatter";
+	import type { ScatterRow, ScatterRowsFormat } from "./scatter/scatter";
 
 	type point2D = [number, number];
 	interface IProject {
@@ -41,11 +41,13 @@
 
 	lassoSelection.subscribe(() => updateFilteredTable($table));
 
-	$: idToColorIndexMapping = new Map(
-		$colorSpec.labels.map((d) => [d.id, d.colorIndex])
+	// SCATTER PLOTTING AND COLORING DATA
+	$: idToColorIndexMapping = new Map<string, number>(
+		$colorSpec.labels.map((d: ScatterRow) => [d.id, d.colorIndex])
 	);
-	$: data = packageScatterData(curProj);
 	$: colorRange = [...$colorSpec.colors];
+	$: data = packageScatterData(curProj, idToColorIndexMapping);
+
 	$: filtersApplied =
 		$lassoSelection !== null ||
 		$metadataSelections.size > 0 ||
@@ -129,7 +131,10 @@
 	/**
 	 * Take a 2d array of points and return an object that my scatterplot can read
 	 */
-	function packageScatterData(curProj: point2D[]): ScatterRowsWithIds<string> {
+	function packageScatterData(
+		curProj: point2D[],
+		idToColor: Map<string, number>
+	): ScatterRowsFormat {
 		const ids = getIdsFromTable($filteredTable);
 		const data = curProj.map((d, i) => {
 			const id = ids[i];
@@ -137,10 +142,10 @@
 				id,
 				x: d[0],
 				y: d[1],
-				colorIndex: idToColorIndexMapping.get(id),
+				colorIndex: idToColor.get(id),
 				opacity: 0.65,
 			};
-		}) as ScatterRowsWithIds<string>;
+		}) as ScatterRowsFormat;
 		return data;
 	}
 
@@ -158,14 +163,10 @@
 	 * select the ids out of the lasso select from the scatterplot
 	 * and store globally
 	 */
-	function lassoSelect(e) {
-		const selection = e.detail as ScatterRowsWithIds<string>[] | null;
-		if (selection !== null) {
-			const ids = selection.map((d) => d.id.toString());
-			lassoSelection.set(ids);
-		} else {
-			// lassoSelection.set(null);
-		}
+	function lassoSelect(e: CustomEvent<ScatterRowsFormat>) {
+		const selection = e.detail;
+		const ids = selection.map((d) => d.id?.toString());
+		lassoSelection.set(ids);
 	}
 </script>
 
