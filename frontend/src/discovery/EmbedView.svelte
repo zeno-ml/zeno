@@ -50,7 +50,7 @@
 	$: dataOpaque = makeFilteredOpaque(data, $filteredTable);
 
 	$: filtersApplied =
-		$lassoSelection !== null ||
+		$lassoSelection.length > 0 ||
 		$metadataSelections.size > 0 ||
 		$sliceSelections.length > 0;
 	// if we remove filters, just reset to our cached version
