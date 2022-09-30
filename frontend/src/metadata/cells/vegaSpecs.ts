@@ -92,7 +92,12 @@ export function generateCountSpec({
 			legend: null,
 		};
 	} else {
-		topLayerBars.mark.fill = "#6a1b9a";
+		topLayerBars.encoding.color = {
+			field: "metricColor",
+			type: "nominal",
+			scale: null,
+			legend: null,
+		};
 	}
 
 	return countSpec;
@@ -170,7 +175,12 @@ export function generateHistogramSpec({
 			legend: null,
 		};
 	} else {
-		topLayerBars.mark.fill = "#6a1b9a";
+		topLayerBars.encoding.color = {
+			field: "metricColor",
+			type: "nominal",
+			scale: null,
+			legend: null,
+		};
 	}
 
 	return histogramSpec;
