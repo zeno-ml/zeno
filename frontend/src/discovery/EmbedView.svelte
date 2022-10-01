@@ -51,6 +51,8 @@
 		$colorSpec.labels.map((d: ScatterRow) => [d.id, d.colorIndex])
 	);
 	$: colorRange = [...$colorSpec.colors];
+	$: dataInit = packageScatterData(initProj, idToColorIndexMapping);
+	$: dataOpaqueInit = makeFilteredOpaque(dataInit, $filteredTable);
 	$: data = packageScatterData(curProj, idToColorIndexMapping);
 	$: dataOpaque = makeFilteredOpaque(data, $filteredTable);
 
@@ -201,14 +203,73 @@
 <div id="container">
 	<div id="scatter-container">
 		{#if canProject}
-			<Scatter
-				data={dataOpaque}
-				{colorRange}
-				on:lasso={lassoSelect}
-				on:mount={(e) => {
-					reglScatterplot = e.detail;
-				}}
-				resetSelection={isProjecting} />
+			<div id="global-view">
+				<fieldset>
+					<legend><h3>Global Filter Preview</h3></legend>
+					<div class="no-interact">
+						<Scatter
+							width={250}
+							height={250}
+							data={dataOpaqueInit}
+							config={{ pointSize: 2 }}
+							{colorRange}
+							on:lasso={lassoSelect}
+							on:mount={(e) => {
+								reglScatterplot = e.detail;
+							}} />
+					</div>
+				</fieldset>
+				<Button
+					variant="outlined"
+					disabled={!canProject}
+					on:click={() => {
+						metadataSelections.set(new Map());
+						sliceSelections.set([]);
+						curProj = initProj;
+					}}>
+					Reset Back to All
+				</Button>
+				<Button
+					variant="outlined"
+					disabled={!(canProject && filtersApplied) ||
+						$lassoSelection.length > 0}
+					on:click={async () => {
+						loadingIndicator(async () => {
+							if ($filteredTable.size === initProj.length) {
+								curProj = initProj;
+							} else {
+								const ids = curFilteredIds();
+								curProj = await project({
+									model: $model,
+									ids,
+									transform: $transform,
+								});
+								reglScatterplot.deselect();
+							}
+						});
+					}}>
+					Reproject on Current Filter
+				</Button>
+				<Button
+					variant="outlined"
+					disabled={$lassoSelection.length <= 0}
+					on:click={() => {
+						//
+					}}>Reproject on Lasso</Button>
+			</div>
+			<div id="main-view">
+				<fieldset>
+					<legend><h3>Filtered and Reprojection</h3></legend>
+					<Scatter
+						data={dataOpaque}
+						config={{ pointSize: 4 }}
+						{colorRange}
+						on:lasso={lassoSelect}
+						on:mount={(e) => {
+							reglScatterplot = e.detail;
+						}} />
+				</fieldset>
+			</div>
 		{:else if !$status.doneProcessing}
 			<div id="loading-content">
 				<h3 class="embed-status">Awaiting processing.</h3>
@@ -231,7 +292,7 @@
 			</div>
 		{/if}
 	</div>
-	<div id="overlay">
+	<!-- <div id="overlay">
 		<Button
 			variant="outlined"
 			disabled={!canProject}
@@ -252,7 +313,7 @@
 			}}>
 			Visualize Selection
 		</Button>
-	</div>
+	</div> -->
 </div>
 
 <style>
@@ -271,6 +332,8 @@
 	}
 	#scatter-container {
 		position: relative;
+		display: flex;
+		gap: 15px;
 	}
 	#loading-container {
 		position: absolute;
@@ -291,5 +354,25 @@
 		flex-direction: column;
 		align-items: center;
 		gap: 20px;
+	}
+	#main-view {
+		outline: 1px solid lightgrey;
+	}
+	#global-view {
+		outline: 1px solid lightgrey;
+	}
+	h3 {
+		margin: 0;
+		padding: 0;
+	}
+	fieldset {
+		border-radius: 5px;
+	}
+	fieldset legend {
+		padding: 0 10px;
+	}
+	.no-interact {
+		pointer-events: none;
+		display: inline;
 	}
 </style>

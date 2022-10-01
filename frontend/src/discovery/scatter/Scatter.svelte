@@ -11,9 +11,9 @@
 	export let resetSelection = true;
 
 	let innerWidth: number, innerHeight: number;
-	let width: number;
-	let height = 500;
-	$: width = innerWidth - 470;
+	export let width = 500;
+	export let height = 500;
+	// $: width = innerWidth - 470;
 
 	function lassoPoints(e: CustomEvent<number[]>) {
 		const selection = e.detail;
