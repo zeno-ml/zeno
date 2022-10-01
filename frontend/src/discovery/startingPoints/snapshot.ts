@@ -16,11 +16,33 @@ export class Snapshot implements SnapshotStructure<string> {
 	name: string;
 	ids: string[];
 	start2D: Point2D[];
-	constructor(snapshot: Partial<SnapshotStructure<string>>) {
-		this.name = snapshot.name;
-		this.ids = snapshot.ids;
-		this.start2D = snapshot.start2D;
+	constructor({
+		name,
+		ids,
+		start2D = [],
+	}: Partial<SnapshotStructure<string>> = {}) {
+		this.name = name;
+		this.ids = ids;
+		this.start2D = start2D;
 	}
+
+	protected copyIds() {
+		return this.ids;
+	}
+	protected copy2D() {
+		return this.start2D;
+	}
+	protected copyName() {
+		return this.name;
+	}
+	copy() {
+		return new Snapshot({
+			ids: this.copyIds(),
+			start2D: this.copy2D(),
+			name: this.copyName(),
+		});
+	}
+
 	overrideFilter(ids: string[]) {
 		const filtered = this.deriveFilter(ids);
 		filtered.name = this.name;
@@ -31,18 +53,18 @@ export class Snapshot implements SnapshotStructure<string> {
 		projection.name = this.name;
 		this.overrideThisSnapshot(projection);
 	}
-	deriveFilter(ids: string[]) {
+	deriveFilter(ids: string[], newName?: string) {
 		const filtered2D = this.start2D.filter((_, i) => ids.includes(this.ids[i]));
 		return new Snapshot({
-			name: `filter(${this.name} -> ${ids.length})`,
+			name: newName ?? this.name,
 			ids,
 			start2D: filtered2D,
 		});
 	}
-	async deriveProjection(model: string, transform: string) {
+	async deriveProjection(model: string, transform: string, newName?: string) {
 		const projection2D = await project(model, transform, this.ids);
 		return new Snapshot({
-			name: `project(${this.name})`,
+			name: newName ?? this.name,
 			ids: this.ids,
 			start2D: projection2D,
 		});

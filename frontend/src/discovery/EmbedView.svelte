@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from "svelte";
 	import Scatter from "./scatter/Scatter.svelte";
 	import Button from "@smui/button";
 	import { Shadow as LoadingAnimation } from "svelte-loading-spinners";
@@ -15,7 +16,7 @@
 		status,
 		transform,
 	} from "../stores";
-	import { columnHash, updateFilteredTable } from "../util/util";
+	import { columnHash, enforce, updateFilteredTable } from "../util/util";
 	import request from "../util/request";
 
 	import type ColumnTable from "arquero/dist/types/table/column-table";
@@ -24,8 +25,9 @@
 		ScatterRow,
 		ScatterRowsFormat,
 	} from "./scatter/scatter";
+	import { Snapshot } from "./startingPoints/snapshot";
 
-	type point2D = [number, number];
+	type Point2D = [number, number];
 	interface IProject {
 		model: string;
 		transform?: string;
@@ -38,56 +40,82 @@
 		get: request.generator.get(endpoint),
 	};
 
-	let curProj: point2D[] = [];
-	let initProj: point2D[] = [];
+	let snapshots = new Map<string, Snapshot>();
+	let startingPoint: Snapshot = new Snapshot(); // only within these points
+	let reprojection: Snapshot = new Snapshot(); // reproject and filter
+
+	let curProj: Point2D[] = [];
+	let initProj: Point2D[] = [];
 	let canProject = false;
 	let isProjecting = false;
 	let reglScatterplot: ReglScatterplot;
 
+	$: {
+		if (mounted && $table.size > 0) {
+			initStartingAll($model, $transform);
+		}
+	}
+
+	async function initStartingAll(model: string, transform = "") {
+		canProject = await embeddingsExist(model);
+		if (canProject) {
+			loadingIndicator(async () => {
+				startingPoint = new Snapshot({
+					name: `ALL`,
+					ids: getIdsFromTable($table),
+				});
+
+				// set the starting point with the initial projection
+				startingPoint = await startingPoint.deriveProjection(model, transform);
+				console.log(startingPoint);
+
+				// at the start the reprojection can be the same as the
+				// starting point
+				reprojection = startingPoint.copy();
+				reprojection.name = "reproject";
+
+				// globally store the options
+				snapshots.set(startingPoint.name, startingPoint);
+				snapshots.set(reprojection.name, reprojection);
+			});
+		} else {
+			canProject = false;
+		}
+	}
+
+	let mounted = false;
+	onMount(() => {
+		mounted = true;
+	});
+
 	lassoSelection.subscribe(() => updateFilteredTable($table));
 
-	// SCATTER PLOTTING AND COLORING DATA
+	// // SCATTER PLOTTING AND COLORING DATA
 	$: idToColorIndexMapping = new Map<string, number>(
 		$colorSpec.labels.map((d: ScatterRow) => [d.id, d.colorIndex])
 	);
 	$: colorRange = [...$colorSpec.colors];
-	$: dataInit = packageScatterData(initProj, idToColorIndexMapping);
-	$: dataOpaqueInit = makeFilteredOpaque(dataInit, $filteredTable);
-	$: data = packageScatterData(curProj, idToColorIndexMapping);
-	$: dataOpaque = makeFilteredOpaque(data, $filteredTable);
-
+	$: startingPointScatter = snapshotToScatter(
+		startingPoint,
+		idToColorIndexMapping
+	);
+	$: opaqueStartingPointScatter = makeFilteredOpaque(
+		startingPointScatter,
+		$filteredTable
+	);
+	$: reprojectionScatter = snapshotToScatter(
+		reprojection,
+		idToColorIndexMapping
+	);
+	$: opaqueReprojectionScatter = makeFilteredOpaque(
+		reprojectionScatter,
+		$filteredTable
+	);
+	$: console.log(opaqueReprojectionScatter);
 	$: filtersApplied =
 		$lassoSelection.length > 0 ||
 		$metadataSelections.size > 0 ||
 		$sliceSelections.length > 0;
-
-	// when I change the embeddings, I want to rerun the projection on those embeddings instead
-	$: {
-		if ($model && $status.doneProcessing) {
-			initProjFromModel($model, $transform);
-		}
-	}
-
-	async function initProjFromModel(model: string, transform = "") {
-		// project if the embeddings exist and show the user a loader
-		canProject = await embeddingsExist(model);
-		if (canProject) {
-			loadingIndicator(async () => {
-				const projRequest = await project({
-					model,
-					transform,
-				});
-				if (projRequest !== undefined) {
-					curProj = projRequest;
-					initProj = [...curProj];
-				}
-			});
-		} else {
-			// otherwise, if the embeddings do not exist,
-			// tell the user!
-			canProject = false;
-		}
-	}
 
 	interface ExistsResponse {
 		exists: boolean;
@@ -98,22 +126,6 @@
 			url: `exists/${model}`,
 		})) as ExistsResponse;
 		return embeddingsCheck?.exists;
-	}
-
-	interface ProjectResponse {
-		data: point2D[];
-		model: string;
-	}
-	async function project({
-		model,
-		transform = "",
-		ids,
-	}: IProject): Promise<point2D[]> {
-		const req = (await mirror.post({
-			url: "project",
-			payload: { model, transform, ids },
-		})) as ProjectResponse;
-		return req?.data;
 	}
 
 	/**
@@ -136,12 +148,14 @@
 	/**
 	 * Take a 2d array of points and return an object that my scatterplot can read
 	 */
-	function packageScatterData(
-		curProj: point2D[],
+	function snapshotToScatter(
+		snapshot: Snapshot,
 		idToColor: Map<string, number>
 	): ScatterRowsFormat {
-		const ids = getIdsFromTable($filteredTable);
-		const data = curProj.map((d, i) => {
+		enforce({ rule: idToColor.size > 0, name: "color mappings exist" });
+
+		const ids = snapshot.ids;
+		const data = snapshot.start2D.map((d, i) => {
 			const id = ids[i];
 			return {
 				id,
@@ -205,69 +219,79 @@
 		{#if canProject}
 			<div id="global-view">
 				<fieldset>
-					<legend><h3>Global Filter Preview</h3></legend>
+					<legend><h3>All</h3></legend>
 					<div class="no-interact">
 						<Scatter
 							width={250}
 							height={250}
-							data={dataOpaqueInit}
+							data={opaqueStartingPointScatter}
 							config={{ pointSize: 2 }}
-							{colorRange}
-							on:lasso={lassoSelect}
-							on:mount={(e) => {
-								reglScatterplot = e.detail;
-							}} />
+							{colorRange} />
 					</div>
 				</fieldset>
-				<Button
-					variant="outlined"
-					disabled={!canProject}
-					on:click={() => {
-						metadataSelections.set(new Map());
-						sliceSelections.set([]);
-						curProj = initProj;
-					}}>
-					Reset Back to All
-				</Button>
-				<Button
-					variant="outlined"
-					disabled={!(canProject && filtersApplied) ||
-						$lassoSelection.length > 0}
-					on:click={async () => {
-						loadingIndicator(async () => {
-							if ($filteredTable.size === initProj.length) {
-								curProj = initProj;
-							} else {
-								const ids = curFilteredIds();
-								curProj = await project({
-									model: $model,
-									ids,
-									transform: $transform,
-								});
+				<div>
+					<div>
+						<Button
+							variant="outlined"
+							disabled={!canProject}
+							on:click={() => {
+								metadataSelections.set(new Map());
+								sliceSelections.set([]);
+								lassoSelection.set([]);
 								reglScatterplot.deselect();
-							}
-						});
-					}}>
-					Reproject on Current Filter
-				</Button>
-				<Button
-					variant="outlined"
-					disabled={$lassoSelection.length <= 0}
-					on:click={() => {
-						//
-					}}>Reproject on Lasso</Button>
+								reprojection = startingPoint.copy();
+							}}>
+							Reset Back to All
+						</Button>
+					</div>
+					<div />
+					<!-- <div>
+						<Button
+							variant="outlined"
+							disabled={$lassoSelection.length <= 0}
+							on:click={() => {
+								loadingIndicator(async () => {
+									if ($filteredTable.size === initProj.length) {
+										curProj = initProj;
+									} else {
+										const ids = curFilteredIds();
+										curProj = await project({
+											model: $model,
+											ids,
+											transform: $transform,
+										});
+									}
+								});
+							}}>Reproject on Lasso</Button>
+					</div> -->
+				</div>
 			</div>
 			<div id="main-view">
 				<fieldset>
 					<legend><h3>Filtered and Reprojection</h3></legend>
 					<Scatter
-						data={dataOpaque}
+						width={800}
+						data={opaqueReprojectionScatter}
 						config={{ pointSize: 4 }}
 						{colorRange}
 						on:lasso={lassoSelect}
 						on:mount={(e) => {
 							reglScatterplot = e.detail;
 						}} />
+					<Button
+						variant="outlined"
+						on:click={async () => {
+							loadingIndicator(async () => {
+								// from the starting point
+								const ids = getIdsFromTable($filteredTable);
+								// snapshot the filtered and projected space and reassign
+								reprojection = await startingPoint
+									.deriveFilter(ids)
+									.deriveProjection($model, $transform, "reprojection");
+							});
+						}}>
+						Filter and Reproject from &nbsp<i><b>Selected</b></i>
+					</Button>
 				</fieldset>
 			</div>
 		{:else if !$status.doneProcessing}
@@ -292,28 +316,6 @@
 			</div>
 		{/if}
 	</div>
-	<!-- <div id="overlay">
-		<Button
-			variant="outlined"
-			disabled={!canProject}
-			on:click={async () => {
-				loadingIndicator(async () => {
-					if ($filteredTable.size === initProj.length) {
-						curProj = initProj;
-					} else {
-						const ids = curFilteredIds();
-						curProj = await project({
-							model: $model,
-							ids,
-							transform: $transform,
-						});
-						reglScatterplot.deselect();
-					}
-				});
-			}}>
-			Visualize Selection
-		</Button>
-	</div> -->
 </div>
 
 <style>
