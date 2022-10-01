@@ -57,6 +57,13 @@ class Mirror:
 
         self.status = Status.RUNNING
 
+        # cannot project 0 data samples
+        # projecting nothing to nothing makes sense
+        if ids is not None and len(ids) == 0:
+            nada = []
+            self.status = Status.IDLE
+            return nada
+
         # if the ids were given, then use them!
         ids_given = ids is not None
         if ids_given:
@@ -72,9 +79,14 @@ class Mirror:
         embed_expanded = df_input[str(embed_col)].to_numpy()
         embed = np.stack(embed_expanded, axis=0)  # type: ignore
 
+        # get past the issue of num embeddings < perplexity errors out
+        # todo make this not tsne specific
+        num_embed = embed.shape[0]
+        default_perp = 30
+        perplexity = num_embed - 1 if num_embed < default_perp else default_perp
+
         # reduce high dim -> low dim
-        # reducer = umap()
-        reducer = TSNE()
+        reducer = TSNE(perplexity=perplexity)
         projection = reducer.fit_transform(embed).tolist()
 
         self.status = Status.IDLE
