@@ -40,12 +40,17 @@
 		get: request.generator.get(endpoint),
 	};
 
-	let snapshots = new Map<string, Snapshot>();
+	interface StartingPoints {
+		my: Snapshot[];
+		recommended: Snapshot[];
+	}
+	let availableStartingPoints: StartingPoints = {
+		recommended: [],
+		my: [],
+	};
 	let startingPoint: Snapshot = new Snapshot(); // only within these points
 	let reprojection: Snapshot = new Snapshot(); // reproject and filter
 
-	let curProj: Point2D[] = [];
-	let initProj: Point2D[] = [];
 	let canProject = false;
 	let isProjecting = false;
 	let reglScatterplot: ReglScatterplot;
@@ -74,9 +79,8 @@
 				reprojection = startingPoint.copy();
 				reprojection.name = "reproject";
 
-				// globally store the options
-				snapshots.set(startingPoint.name, startingPoint);
-				snapshots.set(reprojection.name, reprojection);
+				// show the available options for starting points
+				availableStartingPoints.recommended = [startingPoint.copy()];
 			});
 		} else {
 			canProject = false;
@@ -218,81 +222,50 @@
 	<div id="scatter-container">
 		{#if canProject}
 			<div id="global-view">
-				<fieldset>
-					<legend><h3>All</h3></legend>
-					<div class="no-interact">
-						<Scatter
-							width={250}
-							height={250}
-							data={opaqueStartingPointScatter}
-							config={{ pointSize: 2 }}
-							{colorRange} />
-					</div>
-				</fieldset>
-				<div>
-					<div>
-						<Button
-							variant="outlined"
-							disabled={!canProject}
-							on:click={() => {
-								metadataSelections.set(new Map());
-								sliceSelections.set([]);
-								lassoSelection.set([]);
-								reglScatterplot.deselect();
-								reprojection = startingPoint.copy();
-							}}>
-							Reset Back to All
-						</Button>
-					</div>
-					<div />
-					<!-- <div>
-						<Button
-							variant="outlined"
-							disabled={$lassoSelection.length <= 0}
-							on:click={() => {
-								loadingIndicator(async () => {
-									if ($filteredTable.size === initProj.length) {
-										curProj = initProj;
-									} else {
-										const ids = curFilteredIds();
-										curProj = await project({
-											model: $model,
-											ids,
-											transform: $transform,
-										});
-									}
-								});
-							}}>Reproject on Lasso</Button>
-					</div> -->
+				<h2>Starting Points</h2>
+				<div class="starting-list">
+					{#each Object.entries(availableStartingPoints) as asp}
+						{@const [category, snapshots] = asp}
+						<h3 style:text-transform="capitalize">{category}</h3>
+						{#each snapshots as snapshot}
+							{@const isCurStartingPoint = snapshot.name === startingPoint.name}
+							<div
+								class="starting-container"
+								class:starting-open={isCurStartingPoint}
+								class:starting-selected={isCurStartingPoint}
+								on:click={() => {
+									console.log(snapshot);
+								}}>
+								<div class="starting-label">
+									{snapshot.name}
+								</div>
+								{#if isCurStartingPoint}
+									<div class="starting-preview no-interact">
+										<Scatter
+											width={200}
+											height={150}
+											data={opaqueStartingPointScatter}
+											config={{ pointSize: 2 }}
+											{colorRange} />
+									</div>
+								{/if}
+							</div>
+						{:else}
+							EMPTY
+						{/each}
+					{/each}
 				</div>
 			</div>
 			<div id="main-view">
-				<fieldset>
-					<legend><h3>Filtered and Reprojection</h3></legend>
-					<Scatter
-						width={800}
-						data={opaqueReprojectionScatter}
-						config={{ pointSize: 4 }}
-						{colorRange}
-						on:lasso={lassoSelect}
-						on:mount={(e) => {
-							reglScatterplot = e.detail;
-						}} />
-					<Button
-						variant="outlined"
-						on:click={async () => {
-							loadingIndicator(async () => {
-								// from the starting point
-								const ids = getIdsFromTable($filteredTable);
-								// snapshot the filtered and projected space and reassign
-								reprojection = await startingPoint
-									.deriveFilter(ids)
-									.deriveProjection($model, $transform, "reprojection");
-							});
-						}}>
-						Filter and Reproject from &nbsp<i><b>Selected</b></i>
-					</Button>
-				</fieldset>
+				<Scatter
+					width={500}
+					data={opaqueReprojectionScatter}
+					config={{ pointSize: 4 }}
+					{colorRange}
+					on:lasso={lassoSelect}
+					on:mount={(e) => {
+						reglScatterplot = e.detail;
+					}} />
 			</div>
 		{:else if !$status.doneProcessing}
 			<div id="loading-content">
@@ -316,6 +289,33 @@
 			</div>
 		{/if}
 	</div>
+
+	<Button
+		variant="outlined"
+		disabled={!canProject}
+		on:click={() => {
+			metadataSelections.set(new Map());
+			sliceSelections.set([]);
+			lassoSelection.set([]);
+			reglScatterplot.deselect();
+			reprojection = startingPoint.copy();
+		}}>
+		Reset Back to All
+	</Button>
+	<Button
+		variant="outlined"
+		on:click={async () => {
+			loadingIndicator(async () => {
+				// from the starting point
+				const ids = getIdsFromTable($filteredTable);
+				// snapshot the filtered and projected space and reassign
+				reprojection = await startingPoint
+					.deriveFilter(ids)
+					.deriveProjection($model, $transform, "reprojection");
+			});
+		}}>
+		Filter and Reproject from &nbsp<i><b>Selected</b></i>
+	</Button>
 </div>
 
 <style>
@@ -358,14 +358,24 @@
 		gap: 20px;
 	}
 	#main-view {
-		outline: 1px solid lightgrey;
+		/* outline: 1px solid lightgrey; */
 	}
 	#global-view {
 		outline: 1px solid lightgrey;
+		width: 300px;
+		padding-left: 30px;
+	}
+	h2 {
+		font-size: 20px;
+		font-weight: 500;
+		margin: 5px 0;
+		padding: 0;
 	}
 	h3 {
+		font-weight: 400;
 		margin: 0;
 		padding: 0;
+		color: lightgrey;
 	}
 	fieldset {
 		border-radius: 5px;
@@ -376,5 +386,31 @@
 	.no-interact {
 		pointer-events: none;
 		display: inline;
+	}
+	.starting-label {
+	}
+	.starting-container {
+		position: relative;
+		width: 250px;
+		height: 30px;
+		cursor: pointer;
+		background-color: rgba(0, 0, 0, 0.025);
+		border-radius: 5px;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 10px;
+	}
+	.starting-list {
+		display: flex;
+		flex-direction: column;
+		gap: 15px;
+	}
+	.starting-open {
+		height: 150px;
+	}
+	.starting-selected {
+		border: hsla(329, 81%, 71%, 1) 2px solid;
+		color: hsla(329, 81%, 71%, 1);
 	}
 </style>
