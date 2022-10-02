@@ -131,7 +131,7 @@
 				const globalFilter = getIdsFromTable($filteredTable);
 				currentState = await startingPoint
 					.filter(globalFilter)
-					.project($model, $transform, perplexity);
+					.project($model, $transform, Number(perplexity));
 				currentState.name = "reproject";
 			});
 		}
