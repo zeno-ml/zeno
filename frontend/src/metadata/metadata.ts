@@ -5,6 +5,7 @@ import type ColumnTable from "arquero/dist/types/table/column-table";
 
 import * as aq from "arquero";
 import {
+	interpolateYlGnBu,
 	interpolatePurples,
 	schemeCategory10,
 	schemeTableau10,
@@ -157,7 +158,7 @@ export function colorDomain(domain: MetadataCellDomain[], type: MetadataType) {
 	} else if (type === MetadataType.CONTINUOUS) {
 		const numBins = domain.length;
 		const colors = interpolateColorToArray(
-			interpolatePurples,
+			interpolateYlGnBu,
 			numBins,
 			[0.15, 1.0]
 		);
