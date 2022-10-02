@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createEventDispatcher } from "svelte";
+	import { createEventDispatcher, onMount } from "svelte";
 	import AutoScaleRegl from "./AutoScaleRegl.svelte";
 	import type { ScatterRowsFormat, ReglConfig, ColorRange } from "./scatter";
 
@@ -9,11 +9,25 @@
 	export let colorRange: ColorRange = [];
 	export let config: ReglConfig = {};
 	export let resetSelection = true;
+	export let inferDimensions = false;
 
 	let innerWidth: number, innerHeight: number;
 	export let width = 500;
 	export let height = 500;
-	// $: width = innerWidth - 470;
+
+	let calculatedWidth: number = width;
+	let calculatedHeight: number = height;
+
+	$: {
+		if (inferDimensions && mounted) {
+			calculatedWidth = innerWidth ? innerWidth - 470 : width;
+		}
+	}
+
+	let mounted = false;
+	onMount(() => {
+		mounted = true;
+	});
 
 	function lassoPoints(e: CustomEvent<number[]>) {
 		const selection = e.detail;
@@ -33,8 +47,8 @@
 		on:mount
 		{colorRange}
 		{config}
-		{width}
-		{height} />
+		width={inferDimensions ? calculatedWidth : width}
+		height={inferDimensions ? calculatedHeight : height} />
 {/if}
 
 <style>

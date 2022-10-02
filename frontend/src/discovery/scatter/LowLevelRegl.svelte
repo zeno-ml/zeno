@@ -20,6 +20,15 @@
 	export let colorRange: ColorRange = [];
 	export let config: ReglConfig = {};
 
+	// when I change the height or width
+	// destroy the canvas, regl-scatterplot
+	// then re initialize
+	$: {
+		if (width && height && mounted) {
+			init();
+		}
+	}
+
 	// format data that regl-scatterplot expects
 	// change the {}[] to {} with arrays inside
 	// shift colors down to regl-scatterplot reads as categorical color
@@ -49,7 +58,7 @@
 	let scatterPtr: ReglScatterplot;
 	let canvasEl: HTMLCanvasElement;
 
-	onMount(() => {
+	function init() {
 		scatterPtr = createScatterPlot({
 			canvas: canvasEl,
 			width,
@@ -69,6 +78,10 @@
 		});
 		dispatch("mount", scatterPtr);
 		dispatchLasso();
+	}
+	let mounted = false;
+	onMount(() => {
+		mounted = true;
 	});
 	onDestroy(() => {
 		scatterPtr.destroy();
@@ -128,4 +141,4 @@
 	}
 </script>
 
-<canvas bind:this={canvasEl} {width} {height} />
+<canvas bind:this={canvasEl} />

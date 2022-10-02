@@ -264,27 +264,9 @@
 <div id="container">
 	<div id="scatter-container">
 		{#if canProject}
-			<div id="global-view">
-				<h2>Starting Points</h2>
-				{#each Object.values(availableStartingPoints) as snapshots}
-					<SnapshotButtons
-						{snapshots}
-						{startingPoint}
-						on:click={({ detail }) => {
-							selectStartingPoint(detail);
-						}}>
-						<Scatter
-							width={200}
-							height={150}
-							data={opaqueStartingPointScatter}
-							config={{ pointSize: 2 }}
-							{colorRange} />
-					</SnapshotButtons>
-				{/each}
-			</div>
 			<div id="main-view">
 				<Scatter
-					width={700}
+					inferDimensions
 					height={600}
 					data={opaqueReprojectionScatter}
 					config={{ pointSize: 5 }}
@@ -319,6 +301,26 @@
 					</div>
 				{/if}
 			</div>
+			<div id="global-view" class="glass">
+				<h2>Starting Points</h2>
+				<div id="starting-list">
+					{#each Object.values(availableStartingPoints) as snapshots}
+						<SnapshotButtons
+							{snapshots}
+							{startingPoint}
+							on:click={({ detail }) => {
+								selectStartingPoint(detail);
+							}}>
+							<Scatter
+								width={200}
+								height={150}
+								data={opaqueStartingPointScatter}
+								config={{ pointSize: 2 }}
+								{colorRange} />
+						</SnapshotButtons>
+					{/each}
+				</div>
+			</div>
 		{:else if !$status.doneProcessing}
 			<div id="loading-content">
 				<h3 class="embed-status">Awaiting processing.</h3>
@@ -347,7 +349,7 @@
 	#container {
 		position: relative;
 		min-height: 200px;
-		height: 600px;
+		height: 630px;
 	}
 	.embed-status {
 		margin-top: 100px;
@@ -389,10 +391,14 @@
 		/* outline: 1px solid lightgrey; */
 	}
 	#global-view {
-		outline: 1px solid lightgrey;
 		min-width: 300px;
 		width: 300px;
 		padding-left: 30px;
+		height: 500px;
+		left: 10px;
+		top: 10px;
+		position: absolute;
+		background-color: rgba(255, 255, 255, 0.583);
 	}
 	h2 {
 		font-size: 20px;
@@ -422,5 +428,10 @@
 		bottom: 10px;
 		left: 10px;
 		padding: 10px;
+	}
+	#starting-list {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
 	}
 </style>
