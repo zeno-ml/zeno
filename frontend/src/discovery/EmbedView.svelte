@@ -48,69 +48,25 @@
 		recommended: [],
 		my: [],
 	};
-	let startingPoint: Snapshot = new Snapshot(); // only within these points
-	let reprojection: Snapshot = new Snapshot(); // reproject and filter
+	let startSnapshot: Snapshot = new Snapshot(); // only within these points
+	let currentSnapshot: Snapshot = new Snapshot(); // reproject and filter
 
 	let canProject = false;
 	let isProjecting = false;
 	let reglScatterplot: ReglScatterplot;
 
+	lassoSelection.subscribe(() => updateFilteredTable($table));
 	$: {
 		if (mounted && $table.size > 0) {
-			initStartingAll($model, $transform);
+			initSnapshots($model, $transform);
 		}
 	}
-
-	async function initStartingAll(model: string, transform = "") {
-		canProject = await embeddingsExist(model);
-		if (canProject) {
-			loadingIndicator(async () => {
-				startingPoint = new Snapshot({
-					name: `ALL`,
-					ids: getIdsFromTable($table),
-				});
-
-				// set the starting point with the initial projection
-				startingPoint = await startingPoint.project(model, transform);
-
-				// at the start the reprojection can be the same as the
-				// starting point
-				reprojection = startingPoint.copy();
-				reprojection.name = "reproject";
-
-				// show the available options for starting points
-				availableStartingPoints.recommended = [startingPoint.copy()];
-			});
-		} else {
-			canProject = false;
-		}
-	}
-
-	async function filterReproject() {
-		if (canProject) {
-			loadingIndicator(async () => {
-				const globalFilter = getIdsFromTable($filteredTable);
-				reprojection = await startingPoint
-					.filter(globalFilter)
-					.project($model, $transform, "reproject");
-			});
-		}
-	}
-
-	let mounted = false;
-	onMount(() => {
-		mounted = true;
-	});
-
-	lassoSelection.subscribe(() => updateFilteredTable($table));
-
-	// // SCATTER PLOTTING AND COLORING DATA
 	$: idToColorIndexMapping = new Map<string, number>(
 		$colorSpec.labels.map((d: ScatterRow) => [d.id, d.colorIndex])
 	);
 	$: colorRange = [...$colorSpec.colors];
 	$: startingPointScatter = snapshotToScatter(
-		startingPoint,
+		startSnapshot,
 		idToColorIndexMapping
 	);
 	$: opaqueStartingPointScatter = makeFilteredOpaque(
@@ -118,7 +74,7 @@
 		$filteredTable
 	);
 	$: reprojectionScatter = snapshotToScatter(
-		reprojection,
+		currentSnapshot,
 		idToColorIndexMapping
 	);
 	$: opaqueReprojectionScatter = makeFilteredOpaque(
@@ -129,6 +85,59 @@
 		$lassoSelection.length > 0 ||
 		$metadataSelections.size > 0 ||
 		$sliceSelections.length > 0;
+
+	let mounted = false;
+	onMount(() => {
+		mounted = true;
+	});
+
+	async function initSnapshots(model: string, transform = "") {
+		canProject = await embeddingsExist(model);
+		if (canProject) {
+			loadingIndicator(async () => {
+				startSnapshot = new Snapshot({
+					name: `ALL`,
+					ids: getIdsFromTable($table),
+				});
+
+				// set the starting point with the initial projection
+				startSnapshot = await startSnapshot.project(model, transform);
+
+				// at the start the reprojection can be the same as the
+				// starting point
+				currentSnapshot = startSnapshot.copy();
+				currentSnapshot.name = "reproject";
+
+				// show the available options for starting points
+				availableStartingPoints.recommended = [startSnapshot.copy()];
+			});
+		} else {
+			canProject = false;
+		}
+	}
+
+	/**
+	 * Takes the filter and reprojects with tsne
+	 * Note that this updates currentSnapshot
+	 */
+	async function filterReproject() {
+		if (canProject) {
+			loadingIndicator(async () => {
+				const globalFilter = getIdsFromTable($filteredTable);
+				currentSnapshot = await startSnapshot
+					.filter(globalFilter)
+					.project($model, $transform, "reproject");
+			});
+		}
+	}
+	/**
+	 * Take the current snapshot (scatter state)
+	 * and save to available starting points
+	 */
+	function addNewStartingPoint() {
+		availableStartingPoints.my.push(currentSnapshot.copy());
+		availableStartingPoints = availableStartingPoints; // so svelte reacts on reassignment
+	}
 
 	interface ExistsResponse {
 		exists: boolean;
@@ -141,13 +150,6 @@
 		return embeddingsCheck?.exists;
 	}
 
-	/**
-	 * Get the column for id as an array of strings from
-	 * the arquero table.
-	 */
-	function curFilteredIds(): string[] {
-		return getIdsFromTable($filteredTable);
-	}
 	function getIdsFromTable(table: ColumnTable) {
 		const idColumnHash = columnHash($settings.idColumn);
 		const idColumnExists = table.size > 0 && table.column;
@@ -237,7 +239,7 @@
 						{@const [category, snapshots] = asp}
 						<h3 style:text-transform="capitalize">{category}</h3>
 						{#each snapshots as snapshot}
-							{@const isCurStartingPoint = snapshot.name === startingPoint.name}
+							{@const isCurStartingPoint = snapshot.name === startSnapshot.name}
 							<div
 								class="starting-container"
 								class:starting-open={isCurStartingPoint}
@@ -275,6 +277,10 @@
 					on:mount={(e) => {
 						reglScatterplot = e.detail;
 					}} />
+				<div id="add-snapshot">
+					<Button on:click={addNewStartingPoint} variant="outlined"
+						>Snapshot</Button>
+				</div>
 			</div>
 		{:else if !$status.doneProcessing}
 			<div id="loading-content">
@@ -307,7 +313,7 @@
 			sliceSelections.set([]);
 			lassoSelection.set([]);
 			reglScatterplot.deselect();
-			reprojection = startingPoint.copy();
+			currentSnapshot = startSnapshot.copy();
 		}}>
 		Reset Back to All
 	</Button>
