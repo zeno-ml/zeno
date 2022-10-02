@@ -26,6 +26,7 @@
 		ScatterRow,
 		ScatterRowsFormat,
 	} from "./scatter/scatter";
+	import SnapshotButtons from "./startingPoints/SnapshotButtons.svelte";
 	import { Snapshot } from "./startingPoints/snapshot";
 	import Textfield from "@smui/textfield";
 
@@ -265,36 +266,21 @@
 		{#if canProject}
 			<div id="global-view">
 				<h2>Starting Points</h2>
-				<div class="starting-list">
-					{#each Object.entries(availableStartingPoints) as asp}
-						{@const [category, snapshots] = asp}
-						<h3 style:text-transform="capitalize">{category}</h3>
-						{#each snapshots as snapshot}
-							{@const isCurStartingPoint = snapshot.name === startingPoint.name}
-							<div
-								class="starting-container"
-								class:starting-open={isCurStartingPoint}
-								class:starting-selected={isCurStartingPoint}
-								on:click={() => selectStartingPoint(snapshot)}>
-								<div class="starting-label">
-									{snapshot.name}
-								</div>
-								{#if isCurStartingPoint}
-									<div class="starting-preview no-interact">
-										<Scatter
-											width={200}
-											height={150}
-											data={opaqueStartingPointScatter}
-											config={{ pointSize: 2 }}
-											{colorRange} />
-									</div>
-								{/if}
-							</div>
-						{:else}
-							EMPTY
-						{/each}
-					{/each}
-				</div>
+				{#each Object.values(availableStartingPoints) as snapshots}
+					<SnapshotButtons
+						{snapshots}
+						{startingPoint}
+						on:click={({ detail }) => {
+							selectStartingPoint(detail);
+						}}>
+						<Scatter
+							width={200}
+							height={150}
+							data={opaqueStartingPointScatter}
+							config={{ pointSize: 2 }}
+							{colorRange} />
+					</SnapshotButtons>
+				{/each}
 			</div>
 			<div id="main-view">
 				<Scatter
@@ -419,48 +405,6 @@
 		margin: 0;
 		padding: 0;
 		color: lightgrey;
-	}
-	fieldset {
-		border-radius: 5px;
-	}
-	fieldset legend {
-		padding: 0 10px;
-	}
-	.no-interact {
-		pointer-events: none;
-		display: inline;
-	}
-	.starting-label {
-		height: 100%;
-	}
-	.starting-container {
-		position: relative;
-		width: 250px;
-		height: 30px;
-		cursor: pointer;
-		background-color: rgba(0, 0, 0, 0.025);
-		border-radius: 5px;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 10px;
-		transition: height 1s ease-in-out;
-		overflow: hidden;
-	}
-	.starting-container:hover {
-		background-color: #71319a10;
-	}
-	.starting-list {
-		display: flex;
-		flex-direction: column;
-		gap: 15px;
-	}
-	.starting-open {
-		height: 150px;
-	}
-	.starting-selected {
-		border: #71319a 2px solid;
-		color: #71319a;
 	}
 	.glass {
 		backdrop-filter: blur(5px);
