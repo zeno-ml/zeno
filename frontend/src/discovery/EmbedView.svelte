@@ -309,7 +309,9 @@
 							<Option value={"100"}>100</Option>
 						</Select>
 						<Button variant="outlined" on:click={filterReproject}>
-							{!filtersApplied ? "Reproject" : "Reproject with Filter"}
+							{!filtersApplied
+								? "Reproject (hint: you can add a filter)"
+								: "Reproject with Filter"}
 						</Button>
 						{#if filtersApplied}
 							<Button
