@@ -22,5 +22,5 @@
 		{/if}
 	</SnapshotButton>
 {:else}
-	EMPTY
+	<!-- empty list -->
 {/each}

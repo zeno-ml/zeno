@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 	import Scatter from "./scatter/Scatter.svelte";
+	import Select, { Option } from "@smui/select";
 	import Button from "@smui/button";
 	import { Shadow as LoadingAnimation } from "svelte-loading-spinners";
 
@@ -259,6 +260,8 @@
 		reglScatterplot?.deselect();
 		lassoSelection.set([]);
 	}
+
+	let perplexity = "30";
 </script>
 
 <div id="container">
@@ -267,7 +270,7 @@
 			<div id="main-view">
 				<Scatter
 					inferDimensions
-					height={600}
+					height={620}
 					data={opaqueReprojectionScatter}
 					config={{ pointSize: 5 }}
 					{colorRange}
@@ -290,14 +293,31 @@
 							disabled={nameValid}
 							>Save
 						</Button>
-						<Button on:click={cancelLasso}>Cancel</Button>
+						<Button on:click={cancelLasso}>Cancel (Back to Filtering)</Button>
 					</div>
 				{/if}
 
-				{#if filtersApplied && $lassoSelection.length === 0}
+				{#if $lassoSelection.length === 0}
 					<div id="apply-filter" class="glass">
-						<Button variant="outlined" on:click={filterReproject}
-							>Visualize Filter</Button>
+						<Select
+							label="Perplexity"
+							style="width: 120px;"
+							bind:value={perplexity}>
+							<Option value={"5"}>5</Option>
+							<Option value={"30"}>30</Option>
+							<Option value={"50"}>50</Option>
+							<Option value={"100"}>100</Option>
+						</Select>
+						<Button variant="outlined" on:click={filterReproject}>
+							{!filtersApplied ? "Reproject" : "Reproject with Filter"}
+						</Button>
+						{#if filtersApplied}
+							<Button
+								on:click={() => {
+									clearAllFilters();
+									selectStartingPoint(startingPoint);
+								}}>Reset to starting point</Button>
+						{/if}
 					</div>
 				{/if}
 			</div>
@@ -349,7 +369,8 @@
 	#container {
 		position: relative;
 		min-height: 200px;
-		height: 630px;
+		height: 610px;
+		box-sizing: border-box;
 	}
 	.embed-status {
 		margin-top: 100px;
@@ -398,12 +419,12 @@
 		left: 10px;
 		top: 10px;
 		position: absolute;
-		background-color: rgba(255, 255, 255, 0.583);
 	}
 	h2 {
-		font-size: 20px;
+		color: rgba(0, 0, 0, 0.7);
+		font-size: 18px;
 		font-weight: 500;
-		margin: 5px 0;
+		margin-bottom: 15px;
 		padding: 0;
 	}
 	h3 {
@@ -415,12 +436,13 @@
 	.glass {
 		backdrop-filter: blur(5px);
 		box-shadow: 0 0 3px 3px rgba(0, 0, 0, 0.069);
+		background-color: rgba(255, 255, 255, 0.776);
 		border-radius: 5px;
 	}
 	#add-snapshot {
 		position: absolute;
-		bottom: 10px;
-		left: 10px;
+		top: 10px;
+		left: calc(350px + 10px);
 		padding: 10px;
 	}
 	#apply-filter {
