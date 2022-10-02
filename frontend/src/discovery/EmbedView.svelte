@@ -422,6 +422,20 @@
 		left: 10px;
 		top: 10px;
 		position: absolute;
+		overflow-y: scroll;
+		overflow-x: hidden;
+	}
+	#global-view::-webkit-scrollbar {
+		width: 0px;
+	}
+	#global-view::-webkit-scrollbar-track {
+		background: #f1f1f1;
+	}
+	#global-view::-webkit-scrollbar-thumb {
+		background: #888;
+	}
+	#global-view::-webkit-scrollbar-thumb:hover {
+		background: #555;
 	}
 	h2 {
 		color: rgba(0, 0, 0, 0.7);
