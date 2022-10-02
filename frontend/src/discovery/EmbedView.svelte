@@ -106,11 +106,11 @@
 			loadingIndicator(async () => {
 				startingPoint = new Snapshot({
 					name: `ALL`,
-					ids: getIdsFromTable($table),
 				});
 
 				// set the starting point with the initial projection
 				startingPoint = await startingPoint.project(model, transform);
+				startingPoint.ids = getIdsFromTable($table);
 				selectStartingPoint(startingPoint);
 
 				// show the available options for starting points
@@ -131,7 +131,8 @@
 				const globalFilter = getIdsFromTable($filteredTable);
 				currentState = await startingPoint
 					.filter(globalFilter)
-					.project($model, $transform, "reproject");
+					.project($model, $transform, perplexity);
+				currentState.name = "reproject";
 			});
 		}
 	}
@@ -431,9 +432,9 @@
 	}
 	h3 {
 		font-weight: 400;
-		margin: 0;
+		margin: 10px;
 		padding: 0;
-		color: lightgrey;
+		color: rgba(0, 0, 0, 0.7);
 	}
 	.glass {
 		backdrop-filter: blur(5px);

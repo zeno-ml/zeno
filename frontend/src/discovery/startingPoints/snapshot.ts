@@ -25,7 +25,7 @@ function setIntersect<T>(a: Set<T>, b: Set<T>) {
  */
 export class Snapshot implements SnapshotStructure<string> {
 	name: string;
-	readonly ids: string[];
+	ids: string[];
 	readonly start2D: Point2D[];
 	constructor({
 		name,
@@ -54,7 +54,7 @@ export class Snapshot implements SnapshotStructure<string> {
 		});
 	}
 
-	filter(ids: string[], newName?: string) {
+	filter(ids: string[]) {
 		// filters from the totalIds corresponds to an intersect
 		const totalIds = new Set(this.ids);
 		const constraint = new Set(ids);
@@ -69,15 +69,20 @@ export class Snapshot implements SnapshotStructure<string> {
 		const filteredIds = this.ids.filter((id) => withinTotalIds.has(id));
 
 		return new Snapshot({
-			name: newName ?? this.name,
+			name: this.name,
 			ids: filteredIds,
 			start2D: filtered2D,
 		});
 	}
-	async project(model: string, transform: string, newName?: string) {
-		const projection2D = await project(model, transform, this.ids);
+	async project(model: string, transform: string, perplexity = 30) {
+		const projection2D = await project({
+			model,
+			transform,
+			ids: this.ids,
+			perplexity,
+		});
 		return new Snapshot({
-			name: newName ?? this.name,
+			name: this.name,
 			ids: this.ids,
 			start2D: projection2D,
 		});
@@ -88,14 +93,15 @@ interface ProjectResponse {
 	data: Point2D[];
 	model: string;
 }
-async function project(
-	model: string,
-	transform: string,
-	ids?: string[]
-): Promise<Point2D[]> {
+async function project(payload: {
+	model: string;
+	transform: string;
+	ids?: string[];
+	perplexity?: number;
+}): Promise<Point2D[]> {
 	const req = (await postRequest({
 		url: "api/mirror/project",
-		payload: { model, transform, ids },
+		payload,
 	})) as ProjectResponse;
 	return req?.data;
 }

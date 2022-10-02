@@ -31,8 +31,12 @@ class Mirror:
         self.initialProjCache = ValueCache(path=cache_path, name="mirror_projection")
         self.status: Status = Status.IDLE
 
-    def filterProject(self, model: str, ids: List[str], transform: str = ""):
-        projection = self._project(model, ids, transform=transform)
+    def filterProject(
+        self, model: str, ids: List[str], transform: str = "", perplexity: int = 30
+    ):
+        projection = self._project(
+            model, ids, transform=transform, perplexity=perplexity
+        )
         return projection
 
     def initProject(self, model: str, transform: str = ""):
@@ -48,7 +52,11 @@ class Mirror:
             return self.initialProjCache.get()
 
     def _project(
-        self, model: str, ids: Union[List[str], None] = None, transform: str = ""
+        self,
+        model: str,
+        ids: Union[List[str], None] = None,
+        transform: str = "",
+        perplexity: int = 30,
     ):
         """note that if ids is left set to None, the all embeddings are used"""
 
@@ -82,8 +90,7 @@ class Mirror:
         # get past the issue of num embeddings < perplexity errors out
         # todo make this not tsne specific
         num_embed = embed.shape[0]
-        default_perp = 30
-        perplexity = num_embed - 1 if num_embed < default_perp else default_perp
+        perplexity = num_embed - 1 if num_embed < perplexity else perplexity
 
         # reduce high dim -> low dim
         reducer = TSNE(perplexity=perplexity)
