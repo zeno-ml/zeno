@@ -48,8 +48,8 @@
 		recommended: [],
 		my: [],
 	};
-	let startSnapshot: Snapshot = new Snapshot(); // only within these points
-	let currentSnapshot: Snapshot = new Snapshot(); // reproject and filter
+	let startingPoint: Snapshot = new Snapshot(); // only within these points
+	let currentState: Snapshot = new Snapshot(); // reproject and filter
 
 	let canProject = false;
 	let isProjecting = false;
@@ -66,7 +66,7 @@
 	);
 	$: colorRange = [...$colorSpec.colors];
 	$: startingPointScatter = snapshotToScatter(
-		startSnapshot,
+		startingPoint,
 		idToColorIndexMapping
 	);
 	$: opaqueStartingPointScatter = makeFilteredOpaque(
@@ -74,7 +74,7 @@
 		$filteredTable
 	);
 	$: reprojectionScatter = snapshotToScatter(
-		currentSnapshot,
+		currentState,
 		idToColorIndexMapping
 	);
 	$: opaqueReprojectionScatter = makeFilteredOpaque(
@@ -95,21 +95,21 @@
 		canProject = await embeddingsExist(model);
 		if (canProject) {
 			loadingIndicator(async () => {
-				startSnapshot = new Snapshot({
+				startingPoint = new Snapshot({
 					name: `ALL`,
 					ids: getIdsFromTable($table),
 				});
 
 				// set the starting point with the initial projection
-				startSnapshot = await startSnapshot.project(model, transform);
+				startingPoint = await startingPoint.project(model, transform);
 
 				// at the start the reprojection can be the same as the
 				// starting point
-				currentSnapshot = startSnapshot.copy();
-				currentSnapshot.name = "reproject";
+				currentState = startingPoint.copy();
+				currentState.name = "reproject";
 
 				// show the available options for starting points
-				availableStartingPoints.recommended = [startSnapshot.copy()];
+				availableStartingPoints.recommended = [startingPoint.copy()];
 			});
 		} else {
 			canProject = false;
@@ -124,19 +124,38 @@
 		if (canProject) {
 			loadingIndicator(async () => {
 				const globalFilter = getIdsFromTable($filteredTable);
-				currentSnapshot = await startSnapshot
+				currentState = await startingPoint
 					.filter(globalFilter)
 					.project($model, $transform, "reproject");
 			});
 		}
 	}
+
 	/**
 	 * Take the current snapshot (scatter state)
 	 * and save to available starting points
 	 */
 	function addNewStartingPoint() {
-		availableStartingPoints.my.push(currentSnapshot.copy());
+		availableStartingPoints.my.push(currentState.copy());
 		availableStartingPoints = availableStartingPoints; // so svelte reacts on reassignment
+	}
+
+	/**
+	 * Overrides the current starting point
+	 * and simply copies the currentSnapshot as the start
+	 * Filters and everything are cleared
+	 */
+	function selectStartingPoint(snapshot: Snapshot) {
+		startingPoint = snapshot.copy();
+		currentState = startingPoint.copy();
+		currentState.name = "reproject";
+		clearAllFilters();
+	}
+
+	function clearAllFilters() {
+		metadataSelections.set(new Map());
+		sliceSelections.set([]);
+		lassoSelection.set([]);
 	}
 
 	interface ExistsResponse {
@@ -239,14 +258,12 @@
 						{@const [category, snapshots] = asp}
 						<h3 style:text-transform="capitalize">{category}</h3>
 						{#each snapshots as snapshot}
-							{@const isCurStartingPoint = snapshot.name === startSnapshot.name}
+							{@const isCurStartingPoint = snapshot.name === startingPoint.name}
 							<div
 								class="starting-container"
 								class:starting-open={isCurStartingPoint}
 								class:starting-selected={isCurStartingPoint}
-								on:click={() => {
-									console.log(snapshot);
-								}}>
+								on:click={() => selectStartingPoint(snapshot)}>
 								<div class="starting-label">
 									{snapshot.name}
 								</div>
@@ -313,7 +330,7 @@
 			sliceSelections.set([]);
 			lassoSelection.set([]);
 			reglScatterplot.deselect();
-			currentSnapshot = startSnapshot.copy();
+			currentState = startingPoint.copy();
 		}}>
 		Reset Back to All
 	</Button>
@@ -406,6 +423,11 @@
 		justify-content: space-between;
 		align-items: center;
 		padding: 10px;
+		transition: height 1s ease-in-out;
+		overflow: hidden;
+	}
+	.starting-container:hover {
+		background-color: hsla(329, 81%, 71%, 0.1);
 	}
 	.starting-list {
 		display: flex;
