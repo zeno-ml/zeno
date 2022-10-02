@@ -234,11 +234,8 @@ function arrayEquals(a, b) {
 /**
  * Returns another arquero table with with only the ids specified
  */
-export function filterTableForIds(
-	t: ColumnTable,
-	ids: string[],
-	idColumn: string
-) {
+export function filterTableForIds(t: ColumnTable, ids: string[]) {
+	const idColumn = columnHash(get(settings).idColumn);
 	return t.filter(aq.escape((r) => aq.op.includes(ids, r[idColumn], 0)));
 }
 
@@ -298,7 +295,7 @@ export function updateFilteredTable(t: ColumnTable) {
 	const lassoSelectionValues = get(lassoSelection);
 	const onlyLassoNoFilter = lassoSelectionValues.length > 0;
 	if (onlyLassoNoFilter) {
-		filteredTable.set(filterTableForIds(t, lassoSelectionValues, idCol));
+		filteredTable.set(filterTableForIds(t, lassoSelectionValues));
 		return; // don't do the other filters so end early
 	}
 
