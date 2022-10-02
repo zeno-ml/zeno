@@ -32,7 +32,7 @@ export class Snapshot implements SnapshotStructure<string> {
 		ids,
 		start2D = [],
 	}: Partial<SnapshotStructure<string>> = {}) {
-		this.name = name;
+		this.name = name ?? "";
 		this.ids = ids;
 		this.start2D = start2D;
 	}

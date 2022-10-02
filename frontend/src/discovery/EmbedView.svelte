@@ -26,13 +26,7 @@
 		ScatterRowsFormat,
 	} from "./scatter/scatter";
 	import { Snapshot } from "./startingPoints/snapshot";
-
-	type Point2D = [number, number];
-	interface IProject {
-		model: string;
-		transform?: string;
-		ids?: string[];
-	}
+	import Textfield from "@smui/textfield";
 
 	const endpoint = "api/mirror";
 	const mirror = {
@@ -91,6 +85,17 @@
 		mounted = true;
 	});
 
+	function nameExistsInAvailableStartingPoints(name: string) {
+		for (const snapshots of Object.values(availableStartingPoints)) {
+			for (const snapshot of snapshots) {
+				if (snapshot.name.toLowerCase() === name.toLowerCase()) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	async function initSnapshots(model: string, transform = "") {
 		canProject = await embeddingsExist(model);
 		if (canProject) {
@@ -135,9 +140,11 @@
 	 * Take the current snapshot (scatter state)
 	 * and save to available starting points
 	 */
-	function addNewStartingPoint() {
-		availableStartingPoints.my.push(currentState.copy());
+	function lassoAddNewStartingPoint() {
+		const lassoedSnapshot = currentState.filter($lassoSelection);
+		availableStartingPoints.my.push(lassoedSnapshot);
 		availableStartingPoints = availableStartingPoints; // so svelte reacts on reassignment
+		selectStartingPoint(lassoedSnapshot); // then select
 	}
 
 	/**
@@ -156,6 +163,7 @@
 		metadataSelections.set(new Map());
 		sliceSelections.set([]);
 		lassoSelection.set([]);
+		reglScatterplot.deselect();
 	}
 
 	interface ExistsResponse {
@@ -294,10 +302,23 @@
 					on:mount={(e) => {
 						reglScatterplot = e.detail;
 					}} />
-				<div id="add-snapshot">
-					<Button on:click={addNewStartingPoint} variant="outlined"
-						>Snapshot</Button>
-				</div>
+				{#if $lassoSelection.length > 0}
+					{@const nameValid = nameExistsInAvailableStartingPoints(
+						currentState.name
+					)}
+					<div id="add-snapshot">
+						<Textfield
+							bind:value={currentState.name}
+							label="Name"
+							invalid={nameValid} />
+						<Button
+							on:click={lassoAddNewStartingPoint}
+							variant="outlined"
+							disabled={nameValid}
+							>Save as New Starting Point
+						</Button>
+					</div>
+				{/if}
 			</div>
 		{:else if !$status.doneProcessing}
 			<div id="loading-content">
@@ -322,21 +343,10 @@
 		{/if}
 	</div>
 
-	<Button
-		variant="outlined"
-		disabled={!canProject}
-		on:click={() => {
-			metadataSelections.set(new Map());
-			sliceSelections.set([]);
-			lassoSelection.set([]);
-			reglScatterplot.deselect();
-			currentState = startingPoint.copy();
-		}}>
-		Reset Back to All
-	</Button>
-	<Button variant="outlined" on:click={filterReproject}>
-		Filter and Reproject from &nbsp<i><b>Selected</b></i>
-	</Button>
+	{#if filtersApplied}
+		<Button variant="outlined" on:click={filterReproject}
+			>Visualize Filter</Button>
+	{/if}
 </div>
 
 <style>
@@ -380,6 +390,7 @@
 		gap: 20px;
 	}
 	#main-view {
+		position: relative;
 		/* outline: 1px solid lightgrey; */
 	}
 	#global-view {
@@ -440,5 +451,14 @@
 	.starting-selected {
 		border: hsla(329, 81%, 71%, 1) 2px solid;
 		color: hsla(329, 81%, 71%, 1);
+	}
+	#add-snapshot {
+		position: absolute;
+		top: 10px;
+		left: 10px;
+		backdrop-filter: blur(5px);
+		box-shadow: 0 0 3px 3px rgba(0, 0, 0, 0.069);
+		padding: 10px;
+		border-radius: 5px;
 	}
 </style>
