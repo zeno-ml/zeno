@@ -76,9 +76,7 @@
 		$filteredTable
 	);
 	$: filtersApplied =
-		$lassoSelection.length > 0 ||
-		$metadataSelections.size > 0 ||
-		$sliceSelections.length > 0;
+		$metadataSelections.size > 0 || $sliceSelections.length > 0;
 
 	let mounted = false;
 	onMount(() => {
@@ -86,6 +84,9 @@
 	});
 
 	function nameExistsInAvailableStartingPoints(name: string) {
+		if (name.length === 0) {
+			return true;
+		}
 		for (const snapshots of Object.values(availableStartingPoints)) {
 			for (const snapshot of snapshots) {
 				if (snapshot.name.toLowerCase() === name.toLowerCase()) {
@@ -254,6 +255,11 @@
 
 		return scatterData;
 	}
+
+	function cancelLasso() {
+		reglScatterplot?.deselect();
+		lassoSelection.set([]);
+	}
 </script>
 
 <div id="container">
@@ -294,9 +300,10 @@
 			</div>
 			<div id="main-view">
 				<Scatter
-					width={500}
+					width={700}
+					height={600}
 					data={opaqueReprojectionScatter}
-					config={{ pointSize: 4 }}
+					config={{ pointSize: 5 }}
 					{colorRange}
 					on:lasso={lassoSelect}
 					on:mount={(e) => {
@@ -306,17 +313,25 @@
 					{@const nameValid = nameExistsInAvailableStartingPoints(
 						currentState.name
 					)}
-					<div id="add-snapshot">
+					<div id="add-snapshot" class="glass">
 						<Textfield
 							bind:value={currentState.name}
-							label="Name"
+							label="Starting Point"
 							invalid={nameValid} />
 						<Button
 							on:click={lassoAddNewStartingPoint}
 							variant="outlined"
 							disabled={nameValid}
-							>Save as New Starting Point
+							>Save
 						</Button>
+						<Button on:click={cancelLasso}>Cancel</Button>
+					</div>
+				{/if}
+
+				{#if filtersApplied && $lassoSelection.length === 0}
+					<div id="apply-filter" class="glass">
+						<Button variant="outlined" on:click={filterReproject}
+							>Visualize Filter</Button>
 					</div>
 				{/if}
 			</div>
@@ -342,11 +357,6 @@
 			</div>
 		{/if}
 	</div>
-
-	{#if filtersApplied}
-		<Button variant="outlined" on:click={filterReproject}
-			>Visualize Filter</Button>
-	{/if}
 </div>
 
 <style>
@@ -368,6 +378,7 @@
 		position: relative;
 		display: flex;
 		gap: 15px;
+		height: 100%;
 	}
 	#loading-container {
 		position: absolute;
@@ -395,6 +406,7 @@
 	}
 	#global-view {
 		outline: 1px solid lightgrey;
+		min-width: 300px;
 		width: 300px;
 		padding-left: 30px;
 	}
@@ -438,7 +450,7 @@
 		overflow: hidden;
 	}
 	.starting-container:hover {
-		background-color: hsla(329, 81%, 71%, 0.1);
+		background-color: #71319a10;
 	}
 	.starting-list {
 		display: flex;
@@ -449,16 +461,24 @@
 		height: 150px;
 	}
 	.starting-selected {
-		border: hsla(329, 81%, 71%, 1) 2px solid;
-		color: hsla(329, 81%, 71%, 1);
+		border: #71319a 2px solid;
+		color: #71319a;
+	}
+	.glass {
+		backdrop-filter: blur(5px);
+		box-shadow: 0 0 3px 3px rgba(0, 0, 0, 0.069);
+		border-radius: 5px;
 	}
 	#add-snapshot {
 		position: absolute;
-		top: 10px;
+		bottom: 10px;
 		left: 10px;
-		backdrop-filter: blur(5px);
-		box-shadow: 0 0 3px 3px rgba(0, 0, 0, 0.069);
 		padding: 10px;
-		border-radius: 5px;
+	}
+	#apply-filter {
+		position: absolute;
+		bottom: 10px;
+		left: 10px;
+		padding: 10px;
 	}
 </style>
