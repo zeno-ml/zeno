@@ -97,3 +97,4 @@ export const colorSpec = derived(
 );
 // null when not selected and string[] when we have stuff
 export const lassoSelection = writable<string[]>([]);
+export const startingPointIds = writable<string[]>([]);

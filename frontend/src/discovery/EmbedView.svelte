@@ -15,6 +15,7 @@
 		model,
 		status,
 		transform,
+		startingPointIds,
 	} from "../stores";
 	import { columnHash, enforce, updateFilteredTable } from "../util/util";
 	import request from "../util/request";
@@ -108,11 +109,7 @@
 
 				// set the starting point with the initial projection
 				startingPoint = await startingPoint.project(model, transform);
-
-				// at the start the reprojection can be the same as the
-				// starting point
-				currentState = startingPoint.copy();
-				currentState.name = "reproject";
+				selectStartingPoint(startingPoint);
 
 				// show the available options for starting points
 				availableStartingPoints.recommended = [startingPoint.copy()];
@@ -154,6 +151,7 @@
 	 * Filters and everything are cleared
 	 */
 	function selectStartingPoint(snapshot: Snapshot) {
+		startingPointIds.set(snapshot.ids); // global store
 		startingPoint = snapshot.copy();
 		currentState = startingPoint.copy();
 		currentState.name = "reproject";

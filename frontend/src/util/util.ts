@@ -22,6 +22,7 @@ import {
 	reports,
 	rowsPerPage,
 	lassoSelection,
+	startingPointIds,
 } from "../stores";
 import { ZenoColumnType } from "../globals";
 
@@ -289,9 +290,9 @@ export function updateFilteredTable(t: ColumnTable) {
 		return;
 	}
 
-	const idCol = columnHash(get(settings).idColumn);
-	// override the filter and slices if we have a lasso
-	// this is for zeno discovery
+	let tempTable = t;
+
+	// override filter with lasso and stop early
 	const lassoSelectionValues = get(lassoSelection);
 	const onlyLassoNoFilter = lassoSelectionValues.length > 0;
 	if (onlyLassoNoFilter) {
@@ -299,7 +300,16 @@ export function updateFilteredTable(t: ColumnTable) {
 		return; // don't do the other filters so end early
 	}
 
-	const tempTable = filterTable(t);
+	// in mirror, we start from the starting point and filter down
+	const startIdsMirror = get(startingPointIds);
+	if (startIdsMirror.length < t.size && startIdsMirror.length !== 0) {
+		tempTable = filterTableForIds(tempTable, startIdsMirror);
+	}
+
+	// filter down step of metadata or slices
+	tempTable = filterTable(tempTable);
+
+	const idCol = columnHash(get(settings).idColumn);
 	if (arrayEquals(tempTable.array(idCol), get(filteredTable).array(idCol))) {
 		return;
 	}
