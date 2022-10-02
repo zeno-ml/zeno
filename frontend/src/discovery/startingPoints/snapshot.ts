@@ -7,6 +7,17 @@ interface SnapshotStructure<T> {
 	start2D: Point2D[];
 }
 
+function setIntersect<T>(a: Set<T>, b: Set<T>) {
+	const outputSet = new Set<T>();
+	for (const element of a) {
+		const commonElement = b.has(element);
+		if (commonElement) {
+			outputSet.add(element);
+		}
+	}
+	return outputSet;
+}
+
 /**
  * A snapshot of the current state of the scatter plot.
  * conceptually, another starting point to start from
@@ -14,8 +25,8 @@ interface SnapshotStructure<T> {
  */
 export class Snapshot implements SnapshotStructure<string> {
 	name: string;
-	ids: string[];
-	start2D: Point2D[];
+	readonly ids: string[];
+	readonly start2D: Point2D[];
 	constructor({
 		name,
 		ids,
@@ -43,36 +54,33 @@ export class Snapshot implements SnapshotStructure<string> {
 		});
 	}
 
-	overrideFilter(ids: string[]) {
-		const filtered = this.deriveFilter(ids);
-		filtered.name = this.name;
-		this.overrideThisSnapshot(filtered);
-	}
-	async overrideProjection(model: string, transform: string) {
-		const projection = await this.deriveProjection(model, transform);
-		projection.name = this.name;
-		this.overrideThisSnapshot(projection);
-	}
-	deriveFilter(ids: string[], newName?: string) {
-		const filtered2D = this.start2D.filter((_, i) => ids.includes(this.ids[i]));
+	filter(ids: string[], newName?: string) {
+		// filters from the totalIds corresponds to an intersect
+		const totalIds = new Set(this.ids);
+		const constraint = new Set(ids);
+
+		// The result if we only filter within the starting ids
+		const withinTotalIds = setIntersect(totalIds, constraint);
+
+		// based on the intersect, take those points and only use them
+		const filtered2D = this.start2D.filter((_, i) =>
+			withinTotalIds.has(this.ids[i])
+		);
+		const filteredIds = this.ids.filter((id) => withinTotalIds.has(id));
+
 		return new Snapshot({
 			name: newName ?? this.name,
-			ids,
+			ids: filteredIds,
 			start2D: filtered2D,
 		});
 	}
-	async deriveProjection(model: string, transform: string, newName?: string) {
+	async project(model: string, transform: string, newName?: string) {
 		const projection2D = await project(model, transform, this.ids);
 		return new Snapshot({
 			name: newName ?? this.name,
 			ids: this.ids,
 			start2D: projection2D,
 		});
-	}
-	protected overrideThisSnapshot(sh: Snapshot) {
-		this.ids = sh.ids;
-		this.start2D = sh.start2D;
-		this.name = sh.name;
 	}
 }
 

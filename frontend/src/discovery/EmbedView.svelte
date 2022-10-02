@@ -71,8 +71,7 @@
 				});
 
 				// set the starting point with the initial projection
-				startingPoint = await startingPoint.deriveProjection(model, transform);
-				console.log(startingPoint);
+				startingPoint = await startingPoint.project(model, transform);
 
 				// at the start the reprojection can be the same as the
 				// starting point
@@ -84,6 +83,17 @@
 			});
 		} else {
 			canProject = false;
+		}
+	}
+
+	async function filterReproject() {
+		if (canProject) {
+			loadingIndicator(async () => {
+				const globalFilter = getIdsFromTable($filteredTable);
+				reprojection = await startingPoint
+					.filter(globalFilter)
+					.project($model, $transform, "reproject");
+			});
 		}
 	}
 
@@ -115,7 +125,6 @@
 		reprojectionScatter,
 		$filteredTable
 	);
-	$: console.log(opaqueReprojectionScatter);
 	$: filtersApplied =
 		$lassoSelection.length > 0 ||
 		$metadataSelections.size > 0 ||
@@ -302,18 +311,7 @@
 		}}>
 		Reset Back to All
 	</Button>
-	<Button
-		variant="outlined"
-		on:click={async () => {
-			loadingIndicator(async () => {
-				// from the starting point
-				const ids = getIdsFromTable($filteredTable);
-				// snapshot the filtered and projected space and reassign
-				reprojection = await startingPoint
-					.deriveFilter(ids)
-					.deriveProjection($model, $transform, "reprojection");
-			});
-		}}>
+	<Button variant="outlined" on:click={filterReproject}>
 		Filter and Reproject from &nbsp<i><b>Selected</b></i>
 	</Button>
 </div>
@@ -322,6 +320,7 @@
 	#container {
 		position: relative;
 		min-height: 200px;
+		height: 600px;
 	}
 	.embed-status {
 		margin-top: 100px;
@@ -388,6 +387,7 @@
 		display: inline;
 	}
 	.starting-label {
+		height: 100%;
 	}
 	.starting-container {
 		position: relative;
