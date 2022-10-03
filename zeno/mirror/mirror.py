@@ -7,6 +7,7 @@ from sklearn.manifold import TSNE  # type: ignore
 
 from zeno.classes import ZenoColumn, ZenoColumnType
 from zeno.mirror.cache import ValueCache
+from zeno.mirror.sdm import domino
 
 
 def df_rows_given_ids(
@@ -30,6 +31,10 @@ class Mirror:
         self.cache_path = cache_path
         self.initialProjCache = ValueCache(path=cache_path, name="mirror_projection")
         self.status: Status = Status.IDLE
+
+    def generate_slices(self, model: str = "", transform: str = ""):
+        slices = domino(self.cache_path, self.df, num_slices=20)
+        return slices
 
     def filterProject(
         self, model: str, ids: List[str], transform: str = "", perplexity: int = 30

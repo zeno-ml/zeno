@@ -266,6 +266,10 @@ def run_zeno(args):
 
         return json.dumps({"model": req.model, "data": proj})
 
+    @api_app.get("/mirror/sdm")
+    def sdm():
+        return json.dumps({"data": zeno.mirror.generate_slices()})
+
     @api_app.get("/mirror/exists/{model}")
     def embedding_exists(model: str):
         exists = zeno.embedding_exists(model)

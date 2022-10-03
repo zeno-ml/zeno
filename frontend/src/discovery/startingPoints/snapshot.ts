@@ -26,7 +26,7 @@ function setIntersect<T>(a: Set<T>, b: Set<T>) {
 export class Snapshot implements SnapshotStructure<string> {
 	name: string;
 	ids: string[];
-	readonly start2D: Point2D[];
+	start2D: Point2D[];
 	constructor({
 		name,
 		ids,

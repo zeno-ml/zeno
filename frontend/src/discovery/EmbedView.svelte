@@ -42,8 +42,8 @@
 		recommended: Snapshot[];
 	}
 	let availableStartingPoints: StartingPoints = {
-		recommended: [],
 		my: [],
+		recommended: [],
 	};
 	let startingPoint: Snapshot = new Snapshot(); // only within these points
 	let currentState: Snapshot = new Snapshot(); // reproject and filter
@@ -82,7 +82,27 @@
 		$metadataSelections.size > 0 || $sliceSelections.length > 0;
 
 	let mounted = false;
-	onMount(() => {
+
+	async function generateSnapshots(all: Snapshot) {
+		const generatedSlices = await mirror.get({ url: "sdm" });
+		const snapshots = sliceDiscoveryToSnapshot(generatedSlices["data"]);
+
+		// initialize each snapshot with a subset of the projection
+		snapshots.forEach((sh) => {
+			const subset = all.filter(sh.ids);
+			sh.ids = subset.ids;
+			sh.start2D = subset.start2D;
+		});
+		return snapshots;
+	}
+	function sliceDiscoveryToSnapshot(slices: { ids: string[]; name: string }[]) {
+		const sliceSnapshots = slices.map((slice) => {
+			return new Snapshot({ name: `🍕 ${slice.name}`, ids: slice.ids });
+		});
+		return sliceSnapshots as Snapshot[];
+	}
+
+	onMount(async () => {
 		mounted = true;
 	});
 
@@ -113,8 +133,18 @@
 				startingPoint.ids = getIdsFromTable($table);
 				selectStartingPoint(startingPoint);
 
+				// see if we have any cached pregrenered slices
+				const generated = await generateSnapshots(startingPoint);
+
 				// show the available options for starting points
-				availableStartingPoints.recommended = [startingPoint.copy()];
+				availableStartingPoints.recommended = [
+					startingPoint.copy(),
+					...generated.filter((sh) => sh.ids.length > 10),
+				];
+				availableStartingPoints.recommended =
+					availableStartingPoints.recommended.sort(
+						(a, b) => b.ids.length - a.ids.length
+					);
 			});
 		} else {
 			canProject = false;
@@ -463,6 +493,7 @@
 		padding: 10px;
 	}
 	#apply-filter {
+		z-index: 999;
 		position: absolute;
 		bottom: 10px;
 		left: 10px;
