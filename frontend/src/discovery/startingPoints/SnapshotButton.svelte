@@ -11,7 +11,7 @@
 		class:starting-open={isSelected}
 		class:starting-selected={isSelected}
 		on:click>
-		<div class="starting-label">
+		<div class="starting-label" style={!isSelected ? "overflow: hidden;" : ""}>
 			{snapshot?.name}
 		</div>
 		<div class="no-interact">

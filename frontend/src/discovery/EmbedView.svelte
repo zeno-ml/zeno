@@ -125,7 +125,7 @@
 		if (canProject) {
 			loadingIndicator(async () => {
 				startingPoint = new Snapshot({
-					name: `ALL`,
+					name: `🌎 ALL`,
 				});
 
 				// set the starting point with the initial projection
@@ -162,7 +162,7 @@
 				currentState = await startingPoint
 					.filter(globalFilter)
 					.project($model, $transform, Number(perplexity));
-				currentState.name = "reproject";
+				currentState.name = "🏁 reproject";
 			});
 		}
 	}
@@ -187,7 +187,7 @@
 		startingPointIds.set(snapshot.ids); // global store
 		startingPoint = snapshot.copy();
 		currentState = startingPoint.copy();
-		currentState.name = "reproject";
+		currentState.name = "🏁 reproject";
 		clearAllFilters();
 	}
 

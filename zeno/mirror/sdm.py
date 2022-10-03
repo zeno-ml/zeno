@@ -15,7 +15,7 @@ def domino(cache_path, pd_with_preds_embed: pd.DataFrame, num_slices: int = 10):
     # for now i just fudge the whole system and use this file
     # I generated in a separate notebook
     data = {}
-    with open(os.path.join(cache_path, "domino_slices.json"), "r") as file:
+    with open(os.path.join(cache_path, "domino_slices_14.json"), "r") as file:
         data = json.load(file)
 
     slices = [] if "slices" not in data else data["slices"]
