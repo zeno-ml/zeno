@@ -22,7 +22,7 @@
     "@smui/circular-progress": "^6.0.0",
     "@smui/data-table": "^6.2.0",
     "@smui/form-field": "^6.1.4",
-    "@smui/layout-grid": "^6.0.0",
+    "@smui/layout-grid": "^6.1.4",
     "@smui/list": "^6.0.0",
     "@smui/paper": "^6.1.0",
     "@smui/ripple": "^6.1.0",
