@@ -12,6 +12,8 @@ To run the CIFAR-10 example:
 
 - `mkdir data; cd data; git clone https://github.com/YoongiKim/CIFAR-10-images`
 - `poetry run zeno ./examples/cifar/tests/zeno.toml`
+- `source ./.venv/bin/activate`
+- `pip install Pillow torch torchvision scikit-learn`
 - For debugging, you can use the "Run and Debug" sidebar in VSCode (a play button with a bug icon), and run the `zenocifar` configuration.
 
 To see live changes to the frontend:
