@@ -1,0 +1,12 @@
+tests = "./tests/"
+view = "zenoml-audio-transcription"
+models = [
+	"silero_sst",
+	# "whisper"
+]
+metadata = "metadata.csv"
+data_path = "/Users/acabrera/dev/data/speech-accent-archive/recordings/recordings/"
+data_column = "id"
+label_column = "label"
+batch_size = 5
+samples = 10

@@ -31,7 +31,7 @@ def add_to_path(p):
 
 
 def get_arrow_bytes(df, id_col):
-    df[id_col] = df.index
+    df.loc[:, id_col] = df.index
     df = df.infer_objects()
     d = dict.fromkeys(df.select_dtypes(np.int64).columns, np.int32)
     df = df.astype(d)
@@ -274,7 +274,7 @@ def run_inference(
                     embedding_col.to_pickle(str(embedding_save_path))
                     out = out[0]
                 else:
-                    model_col[to_predict_indices[i : i + batch_size]] = out
+                    model_col.loc[to_predict_indices[i : i + batch_size]] = out
 
                 model_col.to_pickle(str(model_save_path))
 

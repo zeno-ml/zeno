@@ -85,7 +85,7 @@
 <style>
 	#paper-container {
 		position: absolute;
-		z-index: 9999;
+		z-index: 10;
 		margin-top: 10px;
 	}
 </style>

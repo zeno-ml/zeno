@@ -88,7 +88,7 @@ interface MetadataCellDomain {
 	// Only present if continuous.
 	binEnd?: number;
 	color: string;
-	metricColor?: string;
+	metric?: string;
 	count: number;
 	filteredCount: number;
 }

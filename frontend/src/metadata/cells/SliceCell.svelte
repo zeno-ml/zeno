@@ -117,6 +117,14 @@
 			});
 		}
 	}}>
+	{#if showTooltip}
+		<div class="tooltip-container">
+			<div class="tooltip">
+				<SliceDetails predicateGroup={slice.filterPredicates} />
+			</div>
+		</div>
+	{/if}
+
 	<div class="group" style:width="100%">
 		<div class="group" style:width="100%">
 			<div class="inline">
@@ -132,6 +140,47 @@
 				</div>
 			</div>
 			<div class="group">
+				{#if showOptions}
+					<div
+						id="options-container"
+						on:mouseleave={() => (showOptions = false)}
+						on:blur={() => (showOptions = false)}>
+						<IconButton
+							on:click={(e) => {
+								e.stopPropagation();
+								showOptions = false;
+								sliceToEdit.set(slice);
+								showNewSlice.set(true);
+							}}>
+							<Icon component={Svg} viewBox="0 0 24 24">
+								<path fill="black" d={mdiPencilOutline} />
+							</Icon>
+						</IconButton>
+						<IconButton
+							on:click={(e) => {
+								e.stopPropagation();
+								showOptions = false;
+								$reports.forEach((r) => {
+									let hasSlice = false;
+									r.reportPredicates.forEach((p) => {
+										if (p.sliceName === slice.sliceName) {
+											hasSlice = true;
+										}
+									});
+									if (hasSlice) {
+										relatedReports++;
+									}
+								});
+								if (relatedReports > 0) {
+									confirmDelete = true;
+								} else {
+									deleteSlice();
+								}
+							}}>
+							<Icon class="material-icons">delete_outline</Icon>
+						</IconButton>
+					</div>
+				{/if}
 				{#if result}
 					<span style:margin-right="10px">
 						{#await result then res}
@@ -158,59 +207,10 @@
 							</IconButton>
 						{/if}
 					</div>
-
-					{#if showOptions}
-						<div
-							id="options-container"
-							on:mouseleave={() => (showOptions = false)}
-							on:blur={() => (showOptions = false)}>
-							<IconButton
-								on:click={(e) => {
-									e.stopPropagation();
-									showOptions = false;
-									sliceToEdit.set(slice);
-									showNewSlice.set(true);
-								}}>
-								<Icon component={Svg} viewBox="0 0 24 24">
-									<path fill="black" d={mdiPencilOutline} />
-								</Icon>
-							</IconButton>
-							<IconButton
-								on:click={(e) => {
-									e.stopPropagation();
-									showOptions = false;
-									$reports.forEach((r) => {
-										let hasSlice = false;
-										r.reportPredicates.forEach((p) => {
-											if (p.sliceName === slice.sliceName) {
-												hasSlice = true;
-											}
-										});
-										if (hasSlice) {
-											relatedReports++;
-										}
-									});
-									if (relatedReports > 0) {
-										confirmDelete = true;
-									} else {
-										deleteSlice();
-									}
-								}}>
-								<Icon class="material-icons">delete_outline</Icon>
-							</IconButton>
-						</div>
-					{/if}
 				</div>
 			</div>
 		</div>
 	</div>
-	{#if showTooltip}
-		<div class="tooltip-container">
-			<div class="tooltip">
-				<SliceDetails predicateGroup={slice.filterPredicates} />
-			</div>
-		</div>
-	{/if}
 </div>
 
 <Dialog
@@ -236,11 +236,12 @@
 
 <style>
 	.tooltip-container {
-		z-index: 5;
 		background: white;
-		margin-top: 36px;
 		position: absolute;
-		height: max-content;
+		top: 100%;
+		max-width: 1000px;
+		background: white;
+		z-index: 10;
 	}
 	.tooltip {
 		background: white;
@@ -254,6 +255,7 @@
 		margin-right: 10px;
 	}
 	.cell {
+		position: relative;
 		overflow: visible;
 		border: 1px solid #e0e0e0;
 		border-radius: 5px;
@@ -286,6 +288,8 @@
 		margin-bottom: 0px;
 	}
 	#options-container {
+		top: 5px;
+		right: 0px;
 		z-index: 5;
 		background: white;
 		margin-top: -7px;

@@ -75,6 +75,14 @@
       "args": ["./examples/fsdd/tests/zeno.toml"]
     },
     {
+      "name": "zenoaccent",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": ["./examples/speech-accent/zeno.toml"]
+    },
+    {
       "name": "zenosegment",
       "type": "python",
       "request": "launch",

@@ -22,6 +22,7 @@
 		status,
 		table,
 		transform,
+		metricRange,
 	} from "../stores";
 	import {
 		columnHash,
@@ -109,7 +110,7 @@
 		<div class="inline">
 			<span>
 				{#await res then r}
-					{r && r[0] !== undefined ? r[0].toFixed(2) : ""}
+					{r && r[0] !== null && r[0] !== undefined ? r[0].toFixed(2) : ""}
 				{/await}
 			</span>
 			<span class="size">({$table.size})</span>
@@ -125,7 +126,19 @@
 		<SliceCell slice={s} />
 	{/each}
 
-	<h4 style:margin-top="30px">Metadata</h4>
+	<div class="inline" style:margin-top="20px">
+		<h4>Metadata</h4>
+		<div id="legend-container">
+			<span style:margin-right="20px" style:font-style="italic">
+				{$metric}:
+			</span>
+			<span contenteditable="true" bind:textContent={$metricRange[0]}
+				>{$metricRange[0]}</span>
+			<div id="legend" />
+			<span contenteditable="true" bind:textContent={$metricRange[1]}>
+				{$metricRange[1]}</span>
+		</div>
+	</div>
 	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.METADATA) as col}
 		<MetadataCell {col} {shouldColor} />
 	{/each}
@@ -157,10 +170,10 @@
 	.side-container {
 		margin-left: 10px;
 		height: calc(100vh - 165px);
-		overflow-y: auto;
 		min-width: 450px;
 		padding: 10px;
 		padding-top: 0px;
+		overflow-y: scroll;
 	}
 	.cell {
 		border: 1px solid #e0e0e0;
@@ -200,5 +213,17 @@
 		color: rgba(0, 0, 0, 0.4);
 		margin-right: 10px;
 		margin-left: 10px;
+	}
+	#legend-container {
+		padding-right: 10px;
+		display: flex;
+		align-items: center;
+	}
+	#legend {
+		width: 70px;
+		height: 15px;
+		margin-left: 10px;
+		margin-right: 10px;
+		background-image: linear-gradient(to right, #decbe9, #6a1b9a);
 	}
 </style>

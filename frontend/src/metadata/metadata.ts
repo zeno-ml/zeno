@@ -1,5 +1,3 @@
-import { color } from "d3-color";
-import { scaleLinear } from "d3-scale";
 import { metric, model, transform } from "./../stores";
 import type ColumnTable from "arquero/dist/types/table/column-table";
 
@@ -17,6 +15,7 @@ import {
 	combineOutputOneArray,
 	interpolateColorToArray,
 } from "../util/metadataUtil";
+import { metricRange } from "../stores";
 import { getMetricsForSlices } from "../util/util";
 import { get } from "svelte/store";
 
@@ -195,9 +194,16 @@ export async function getColorsByMetric(
 			transform: get(transform),
 		} as MetricKey;
 	});
+
 	const mets = await getMetricsForSlices(keys);
-	const scale = scaleLinear().domain(extent(mets)).range([0.25, 1]);
-	return mets.map((m) => color(interpolatePurples(scale(m))).hex());
+	metricRange.update((range) => {
+		const r = extent(mets);
+		range[0] = r[0] < range[0] ? r[0] : range[0];
+		range[1] = r[1] > range[1] ? r[1] : range[1];
+		return range;
+	});
+
+	return mets ? mets : Array(keys.length).fill(0);
 }
 
 export function assignColorsFromDomain(
