@@ -257,7 +257,7 @@ def run_zeno(args):
     @api_app.post("/mirror/project")
     def mirror_project(req: MirrorProject):
         # not specified or entire data frame just use the cache
-        if req.ids is None:
+        if req.ids is None or len(req.ids) == len(zeno.df):
             proj = zeno.mirror.initProject(req.model, req.transform)
         else:
             proj = zeno.mirror.filterProject(
