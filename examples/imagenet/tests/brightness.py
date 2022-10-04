@@ -33,12 +33,6 @@ def get_border_brightness(im):
 
 
 @distill
-def brightness(df, ops):
-    imgs = [Image.open(os.path.join(ops.data_path, img)) for img in df[ops.data_column]]
-    return [get_brightness(im) for im in imgs]
-
-
-@distill
 def border_brightness(df, ops):
     imgs = [Image.open(os.path.join(ops.data_path, img)) for img in df[ops.data_column]]
     return [get_border_brightness(im) for im in imgs]

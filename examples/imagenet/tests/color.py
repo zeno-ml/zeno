@@ -4,17 +4,6 @@ import os
 import numpy as np
 from PIL import Image
 from zeno import distill
-from zeno.api import ZenoOptions
-
-
-def red_pixels(im):
-    arr = np.array(im)
-    count_red = 0
-    for x in range(arr.shape[0]):
-        for y in range(arr.shape[1]):
-            if arr[x, y, 0] > 180 and arr[x, y, 1] < 70 and arr[x, y, 2] < 70:
-                count_red += 1
-    return count_red
 
 
 def blue_border_pixels(im):
@@ -31,15 +20,6 @@ def blue_border_pixels(im):
             if hsv[0] > 0.51 and hsv[0] < 0.72:
                 count_blue += 1
     return count_blue
-
-
-@distill
-def red_count(df, ops: ZenoOptions):
-    imgs = [
-        Image.open(os.path.join(ops.data_path, img)).convert("RGB")
-        for img in df[ops.data_column]
-    ]
-    return [red_pixels(im) for im in imgs]
 
 
 @distill
