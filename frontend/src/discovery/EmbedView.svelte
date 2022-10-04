@@ -303,7 +303,7 @@
 					inferDimensions
 					height={620}
 					data={opaqueReprojectionScatter}
-					config={{ pointSize: 5 }}
+					config={{ pointSize: 3 }}
 					{colorRange}
 					on:lasso={lassoSelect}
 					on:mount={(e) => {
@@ -368,7 +368,7 @@
 								width={200}
 								height={150}
 								data={opaqueStartingPointScatter}
-								config={{ pointSize: 2 }}
+								config={{ pointSize: 1 }}
 								{colorRange} />
 						</SnapshotButtons>
 					{/each}
