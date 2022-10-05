@@ -178,12 +178,21 @@
 		selectStartingPoint(lassoedSnapshot); // then select
 	}
 
+	function recenterScatter() {
+		const fitScatterCameraAtOrigin = new Float32Array([
+			1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
+		]);
+		reglScatterplot?.set({
+			cameraView: fitScatterCameraAtOrigin,
+		});
+	}
 	/**
 	 * Overrides the current starting point
 	 * and simply copies the currentSnapshot as the start
 	 * Filters and everything are cleared
 	 */
 	function selectStartingPoint(snapshot: Snapshot) {
+		recenterScatter();
 		startingPointIds.set(snapshot.ids); // global store
 		startingPoint = snapshot.copy();
 		currentState = startingPoint.copy();
