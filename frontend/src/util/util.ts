@@ -242,7 +242,7 @@ export function filterTableForIds(t: ColumnTable, ids: string[]) {
 	return sharedTable;
 }
 
-export function filterTable(t: ColumnTable) {
+export function filterTableWithSlicesAndMetadata(t: ColumnTable) {
 	let tempTable = t;
 
 	// Filter with slices.
@@ -294,7 +294,7 @@ export function updateFilteredTable(t: ColumnTable) {
 
 	let tempTable = t;
 
-	// override filter with lasso and stop early
+	// lasso selection only (hack remove this later)
 	const lassoSelectionValues = get(lassoSelection);
 	const onlyLassoNoFilter = lassoSelectionValues.length > 0;
 	if (onlyLassoNoFilter) {
@@ -302,14 +302,14 @@ export function updateFilteredTable(t: ColumnTable) {
 		return; // don't do the other filters so end early
 	}
 
-	// in mirror, we start from the starting point and filter down
+	// in mirror, we start from a starting point, and filter from there
 	const startIdsMirror = get(startingPointIds);
 	if (startIdsMirror.length < t.size && startIdsMirror.length !== 0) {
 		tempTable = filterTableForIds(tempTable, startIdsMirror);
 	}
 
-	// filter down step of metadata or slices
-	tempTable = filterTable(tempTable);
+	// metadata and slices
+	tempTable = filterTableWithSlicesAndMetadata(tempTable);
 
 	const idCol = columnHash(get(settings).idColumn);
 	if (arrayEquals(tempTable.array(idCol), get(filteredTable).array(idCol))) {
