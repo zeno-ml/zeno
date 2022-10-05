@@ -27,9 +27,6 @@
 	<Head>
 		<Row>
 			<Cell>{""}</Cell>
-			{#if $models.length > 2}
-				<Cell>Trend</Cell>
-			{/if}
 			{#each $models as m}
 				<Cell>{m}</Cell>
 			{/each}

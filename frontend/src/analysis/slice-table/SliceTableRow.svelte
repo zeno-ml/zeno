@@ -59,9 +59,6 @@
 		</div>
 	</Cell>
 	{#await modelResults then res}
-		{#if $models.length > 2}
-			<Cell><SparkLine {res} /></Cell>
-		{/if}
 		{#each res as r}
 			<Cell>
 				{r ? r.toFixed(2) : ""}
