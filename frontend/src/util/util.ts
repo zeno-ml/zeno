@@ -236,8 +236,10 @@ function arrayEquals(a, b) {
  * Returns another arquero table with with only the ids specified
  */
 export function filterTableForIds(t: ColumnTable, ids: string[]) {
-	const idColumn = columnHash(get(settings).idColumn);
-	return t.filter(aq.escape((r) => aq.op.includes(ids, r[idColumn], 0)));
+	const idHash = columnHash(get(settings).idColumn);
+	const idTable = aq.table({ [idHash]: ids });
+	const sharedTable = t.join(idTable, idHash);
+	return sharedTable;
 }
 
 export function filterTable(t: ColumnTable) {
