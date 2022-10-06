@@ -82,6 +82,9 @@ export function updateTab(t: string) {
 }
 
 export async function getMetricsForSlices(metricKeys: MetricKey[]) {
+	if (metricKeys.length === 0) {
+		return [];
+	}
 	if (metricKeys[0].metric === undefined) {
 		return null;
 	}

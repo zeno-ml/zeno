@@ -196,12 +196,14 @@ export async function getColorsByMetric(
 	});
 
 	const mets = await getMetricsForSlices(keys);
-	metricRange.update((range) => {
-		const r = extent(mets);
-		range[0] = r[0] < range[0] ? r[0] : range[0];
-		range[1] = r[1] > range[1] ? r[1] : range[1];
-		return range;
-	});
+	if (mets) {
+		metricRange.update((range) => {
+			const r = extent(mets);
+			range[0] = r[0] < range[0] ? r[0] : range[0];
+			range[1] = r[1] > range[1] ? r[1] : range[1];
+			return range;
+		});
+	}
 
 	return mets ? mets : Array(keys.length).fill(0);
 }

@@ -16,7 +16,8 @@
 	} from "../stores";
 
 	import ReportsList from "./ReportsList.svelte";
-	import SliceTable from "./slice-table/SliceTable.svelte";
+	import SliceTable from "./slice-table-report/SliceTable.svelte";
+	import SliceChartReport from "./slice-chart/SliceChartReport.svelte";
 	import TimeseriesReportTable from "./timeseries-report/TimeseriesReportTable.svelte";
 	import TableReportTable from "./table-report/TableReportTable.svelte";
 
@@ -33,6 +34,8 @@
 				{#if currentReport}
 					{#if currentReport.reportType === "timeseries"}
 						<TimeseriesReportTable reportId={$report} />
+					{:else if currentReport.reportType === "slicechart"}
+						<SliceChartReport reportId={$report} />
 					{:else}
 						<TableReportTable reportId={$report} />
 					{/if}

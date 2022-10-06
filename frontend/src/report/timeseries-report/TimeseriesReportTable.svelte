@@ -23,31 +23,28 @@
 			bind:textContent={$reports[reportId].name}>
 			{report.name}
 		</h4>
-		<div class="export">
-			<Button
-				variant="outlined"
-				on:click={() => {
-					let img = new Image(220, 100);
-					img.src = "build/zeno.png";
-					img.onload = () => {
-						let divElem = document.createElement("div");
-						divElem.innerHTML = "<br />" + table.innerHTML;
-						divElem.prepend(img);
-						html2pdf(divElem, {
-							margin: [0, 20, 20, 20],
-							filename: "report.pdf",
-							image: { type: "jpeg", quality: 0.98 },
-							html2canvas: { scale: 2 },
-							jsPDF: { orientation: "l" },
-						});
-					};
-				}}>Export</Button>
-		</div>
+		<Button
+			variant="outlined"
+			on:click={() => {
+				let img = new Image(220, 100);
+				img.src = "build/zeno.png";
+				img.onload = () => {
+					let divElem = document.createElement("div");
+					divElem.innerHTML = "<br />" + table.innerHTML;
+					divElem.prepend(img);
+					html2pdf(divElem, {
+						margin: [0, 20, 20, 20],
+						filename: "report.pdf",
+						image: { type: "jpeg", quality: 0.98 },
+						html2canvas: { scale: 2 },
+						jsPDF: { orientation: "l" },
+					});
+				};
+			}}>Export</Button>
 	</div>
 
 	<div bind:this={table}>
-		<DataTable
-			style="max-width: calc(100vw - 450px); width: calc(100vw - 450px);">
+		<DataTable style="max-width: calc(100vw - 450px);">
 			<Head>
 				<Row>
 					<Cell class="sticky" style="border-right: 1px solid #e8e8e8">
@@ -75,7 +72,6 @@
 		display: flex;
 		flex-direction: inline;
 		align-items: center;
-		justify-content: space-between;
 	}
 	#container {
 		margin-left: 10px;
