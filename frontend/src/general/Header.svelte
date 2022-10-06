@@ -28,7 +28,7 @@
 	location.subscribe((d) => {
 		let p = d.split("/")[1];
 		if (!p) {
-			tab.set("exploration");
+			tab.set("explore");
 		} else {
 			tab.set(p);
 		}
@@ -43,40 +43,40 @@
 			alt="Square spiral logo next to 'Zeno'" />
 		<div id="tabs">
 			<div
-				class="item {$tab === 'discovery' ? 'selected' : ''}"
-				on:click={() => updateTab("discovery")}>
+				class="item {$tab === 'discover' ? 'selected' : ''}"
+				on:click={() => updateTab("discover")}>
 				<div class="icon">
 					<Icon component={Svg} viewBox="0 0 24 24">
 						<path
-							fill={$tab === "discovery" ? "#6a1b9a" : "black"}
+							fill={$tab === "discover" ? "#6a1b9a" : "black"}
 							d={mdiDotsCircle} />
 					</Icon>
 				</div>
-				<div class="tab-text">Discovery</div>
+				<div class="tab-text">Discover</div>
 			</div>
 			<div
-				class="item {$tab === 'exploration' ? 'selected' : ''}"
-				on:click={() => updateTab("exploration")}>
+				class="item {$tab === 'explore' ? 'selected' : ''}"
+				on:click={() => updateTab("explore")}>
 				<div class="icon">
 					<Icon component={Svg} viewBox="0 0 24 24">
 						<path
-							fill={$tab === "exploration" ? "#6a1b9a" : "black"}
+							fill={$tab === "explore" ? "#6a1b9a" : "black"}
 							d={mdiCircleOutline} />
 					</Icon>
 				</div>
-				<div class="tab-text">Exploration</div>
+				<div class="tab-text">Explore</div>
 			</div>
 			<div
-				class="item {$tab === 'analysis' ? 'selected' : ''}"
-				on:click={() => updateTab("analysis")}>
+				class="item {$tab === 'report' ? 'selected' : ''}"
+				on:click={() => updateTab("report")}>
 				<div class="icon">
 					<Icon component={Svg} viewBox="0 0 24 24">
 						<path
-							fill={$tab === "analysis" ? "#6a1b9a" : "black"}
+							fill={$tab === "report" ? "#6a1b9a" : "black"}
 							d={mdiCheckboxMarkedCircleOutline} />
 					</Icon>
 				</div>
-				<div class="tab-text">Analysis</div>
+				<div class="tab-text">Report</div>
 			</div>
 		</div>
 		<div class="status inline">

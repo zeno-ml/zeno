@@ -132,11 +132,9 @@
 			<span style:margin-right="20px" style:font-style="italic">
 				{$metric}:
 			</span>
-			<span contenteditable="true" bind:textContent={$metricRange[0]}
-				>{$metricRange[0]}</span>
+			<span contenteditable="true">{$metricRange[0].toFixed(2)}</span>
 			<div id="legend" />
-			<span contenteditable="true" bind:textContent={$metricRange[1]}>
-				{$metricRange[1]}</span>
+			<span contenteditable="true"> {$metricRange[1].toFixed(2)}</span>
 		</div>
 	</div>
 	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.METADATA) as col}

@@ -53,14 +53,11 @@ interface ReportPredicate {
 	sliceName: string;
 	metric: string;
 	transform: string;
-	operation: string;
-	value: string;
-	// -1, 0, 1
-	results: number[];
 }
 
 interface Report {
 	name: string;
+	reportType: string;
 	reportPredicates: ReportPredicate[];
 }
 
