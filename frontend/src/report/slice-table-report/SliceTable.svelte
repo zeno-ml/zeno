@@ -23,13 +23,10 @@
 		</div>
 	{/each}
 </div>
-<DataTable style="max-width: 100%;">
+<DataTable style="max-width: 100%; min-width: 500px;">
 	<Head>
 		<Row>
 			<Cell>{""}</Cell>
-			{#if $models.length > 2}
-				<Cell>Trend</Cell>
-			{/if}
 			{#each $models as m}
 				<Cell>{m}</Cell>
 			{/each}

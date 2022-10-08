@@ -165,6 +165,7 @@
 	#paper-container {
 		position: absolute;
 		margin-top: 10px;
+		z-index: 10;
 	}
 	#submit {
 		display: flex;

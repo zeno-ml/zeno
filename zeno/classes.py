@@ -46,13 +46,11 @@ class ReportPredicate(CamelModel):
     slice_name: str
     metric: str
     transform: str
-    operation: str
-    value: str
-    results: List[int]
 
 
 class Report(CamelModel):
     name: str
+    report_type: str
     report_predicates: List[ReportPredicate]
 
 

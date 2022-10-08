@@ -4,18 +4,25 @@
 	import Button from "@smui/button";
 	import DataTable, { Body, Cell, Head, Row } from "@smui/data-table";
 
-	import { models } from "../../stores";
+	import { models, reports } from "../../stores";
 
-	import ReportTableRow from "./ReportTableRow.svelte";
+	import TableReportTableRow from "./TableReportTableRow.svelte";
 
-	export let report: Report;
+	export let reportId: number;
+	$: report = $reports[reportId];
 
 	let table: HTMLDivElement;
 </script>
 
 <div id="container">
 	<div class="inline" style:max-width="calc(100vw - 450px)">
-		<h4 style:margin-right="20px">{report.name}</h4>
+		<h4
+			contenteditable="true"
+			style:margin-right="20px"
+			style:padding="10px"
+			bind:textContent={$reports[reportId].name}>
+			{report.name}
+		</h4>
 		<div class="export">
 			<Button
 				variant="outlined"
@@ -39,17 +46,14 @@
 	</div>
 
 	<div bind:this={table}>
-		<DataTable
-			style="max-width: calc(100vw - 450px); width: calc(100vw - 450px);">
+		<DataTable style="max-width: calc(100vw - 450px);">
 			<Head>
 				<Row>
 					<Cell class="sticky" style="border-right: 1px solid #e8e8e8">
 						Slice
 					</Cell>
-					<Cell>Test</Cell>
 					<Cell>Transform</Cell>
 					<Cell>Metric</Cell>
-					<Cell class="end-cell">Trend</Cell>
 					{#each $models as m}
 						<Cell>{m}</Cell>
 					{/each}
@@ -57,7 +61,7 @@
 			</Head>
 			<Body style="overflow: visible">
 				{#each report.reportPredicates as predicate, i}
-					<ReportTableRow {predicate} predicateIndex={i} />
+					<TableReportTableRow {predicate} predicateIndex={i} />
 				{/each}
 			</Body>
 		</DataTable>
@@ -69,7 +73,6 @@
 		display: flex;
 		flex-direction: inline;
 		align-items: center;
-		justify-content: space-between;
 	}
 	#container {
 		margin-left: 10px;

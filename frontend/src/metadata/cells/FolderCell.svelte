@@ -54,6 +54,43 @@
 		{folder}
 	</div>
 	<div class="inline">
+		{#if showOptions}
+			<div
+				id="options-container"
+				on:mouseleave={() => (showOptions = false)}
+				on:blur={() => (showOptions = false)}>
+				<IconButton
+					on:click={(e) => {
+						e.stopPropagation();
+						showNewFolder = true;
+					}}>
+					<Icon component={Svg} viewBox="0 0 24 24">
+						<path fill="black" d={mdiPencilOutline} />
+					</Icon>
+				</IconButton>
+				<IconButton
+					on:click={(e) => {
+						e.stopPropagation();
+						showOptions = false;
+						slices.update((sls) => {
+							let inFolder = [...sls.values()].filter(
+								(d) => d.folder === folder
+							);
+							inFolder.forEach((slice) => {
+								slice.folder = "";
+								sls.set(slice.sliceName, slice);
+							});
+							return sls;
+						});
+						folders.update((folders) => {
+							folders.splice(folders.indexOf(folder), 1);
+							return folders;
+						});
+					}}>
+					<Icon class="material-icons">delete_outline</Icon>
+				</IconButton>
+			</div>
+		{/if}
 		<div style:margin-right="10px">
 			{sls.length} slice{sls.length === 1 ? "" : "s"}
 		</div>
@@ -73,43 +110,6 @@
 					</IconButton>
 				{/if}
 			</div>
-			{#if showOptions}
-				<div
-					id="options-container"
-					on:mouseleave={() => (showOptions = false)}
-					on:blur={() => (showOptions = false)}>
-					<IconButton
-						on:click={(e) => {
-							e.stopPropagation();
-							showNewFolder = true;
-						}}>
-						<Icon component={Svg} viewBox="0 0 24 24">
-							<path fill="black" d={mdiPencilOutline} />
-						</Icon>
-					</IconButton>
-					<IconButton
-						on:click={(e) => {
-							e.stopPropagation();
-							showOptions = false;
-							slices.update((sls) => {
-								let inFolder = [...sls.values()].filter(
-									(d) => d.folder === folder
-								);
-								inFolder.forEach((slice) => {
-									slice.folder = "";
-									sls.set(slice.sliceName, slice);
-								});
-								return sls;
-							});
-							folders.update((folders) => {
-								folders.splice(folders.indexOf(folder), 1);
-								return folders;
-							});
-						}}>
-						<Icon class="material-icons">delete_outline</Icon>
-					</IconButton>
-				</div>
-			{/if}
 		</div>
 	</div>
 </div>
@@ -126,6 +126,7 @@
 
 <style>
 	.cell {
+		position: relative;
 		display: flex;
 		flex-direction: row;
 		justify-content: space-between;
@@ -141,6 +142,8 @@
 		background: #f8f8f8;
 	}
 	#options-container {
+		top: 5px;
+		right: 0px;
 		z-index: 5;
 		background: white;
 		margin-top: -7px;

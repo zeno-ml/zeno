@@ -1,11 +1,6 @@
 import type { VegaLiteSpec } from "svelte-vega";
 
-export function generateCountSpec({
-	width = 350,
-	height = 40,
-	colors = [],
-	opacity = 0.5,
-} = {}) {
+export function generateCountSpec(shouldColor, domain, metricRange) {
 	const countSpec = {
 		$schema: "https://vega.github.io/schema/vega-lite/v5.json",
 		data: {
@@ -14,8 +9,8 @@ export function generateCountSpec({
 		view: {
 			stroke: "transparent",
 		},
-		width: width,
-		height: height,
+		width: 350,
+		height: 40,
 		layer: [
 			{
 				params: [
@@ -27,7 +22,7 @@ export function generateCountSpec({
 				],
 				mark: {
 					type: "bar",
-					opacity: opacity,
+					opacity: 0.5,
 					fill: "#ddd",
 					cursor: "pointer",
 				},
@@ -82,9 +77,8 @@ export function generateCountSpec({
 		],
 	} as VegaLiteSpec;
 
-	const shouldColor = colors.length > 0;
 	const topLayerBars = countSpec["layer"][1];
-	if (shouldColor) {
+	if (domain[0].color && shouldColor) {
 		topLayerBars.encoding.color = {
 			field: "color",
 			type: "nominal",
@@ -93,22 +87,20 @@ export function generateCountSpec({
 		};
 	} else {
 		topLayerBars.encoding.color = {
-			field: "metricColor",
-			type: "nominal",
-			scale: null,
+			field: "metric",
+			type: "quantitative",
+			scale: {
+				domainMin: metricRange[0],
+				domainMax: metricRange[1],
+				range: ["#decbe9", "#6a1b9a"],
+			},
 			legend: null,
 		};
+		return countSpec;
 	}
-
-	return countSpec;
 }
 
-export function generateHistogramSpec({
-	width = 350,
-	height = 40,
-	colors = [],
-	opacity = 0.5,
-} = {}) {
+export function generateHistogramSpec(shouldColor, domain, metricRange) {
 	const histogramSpec = {
 		$schema: "https://vega.github.io/schema/vega-lite/v5.json",
 		data: {
@@ -117,8 +109,8 @@ export function generateHistogramSpec({
 		view: {
 			stroke: "transparent",
 		},
-		width: width,
-		height: height,
+		width: 350,
+		height: 40,
 		layer: [
 			{
 				params: [
@@ -127,7 +119,7 @@ export function generateHistogramSpec({
 						select: { type: "interval", encodings: ["x"] },
 					},
 				],
-				mark: { type: "bar", opacity: opacity, cursor: "col-resize" },
+				mark: { type: "bar", opacity: 0.5, cursor: "col-resize" },
 				encoding: {
 					x: {
 						field: "binStart",
@@ -158,16 +150,19 @@ export function generateHistogramSpec({
 						field: "filteredCount",
 						type: "quantitative",
 						title: "count",
-						axis: { title: "", tickCount: 2, labelColor: "rgba(0, 0, 0, 0.6)" },
+						axis: {
+							title: "",
+							tickCount: 2,
+							labelColor: "rgba(0, 0, 0, 0.6)",
+						},
 					},
 				},
 			},
 		],
 	} as VegaLiteSpec;
 
-	const shouldColor = colors.length > 0;
 	const topLayerBars = histogramSpec["layer"][1];
-	if (shouldColor) {
+	if (domain[0].color && shouldColor) {
 		topLayerBars.encoding.color = {
 			field: "color",
 			type: "nominal",
@@ -175,13 +170,21 @@ export function generateHistogramSpec({
 			legend: null,
 		};
 	} else {
+		// if (domain[0].metricColor && domain[0].metricColor !== "#000000") {
 		topLayerBars.encoding.color = {
-			field: "metricColor",
-			type: "nominal",
-			scale: null,
+			field: "metric",
+			type: "quantitative",
+			scale: {
+				domainMin: metricRange[0],
+				domainMax: metricRange[1],
+				range: ["#decbe9", "#6a1b9a"],
+			},
 			legend: null,
 		};
 	}
+	// } else {
+	// 	topLayerBars.mark.fill = "#6a1b9a";
+	// }
 
 	return histogramSpec;
 }

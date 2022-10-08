@@ -5,17 +5,17 @@
 	import { status } from "./stores";
 	import { initialFetch, updateTableColumns } from "./util/util";
 
-	import Analysis from "./analysis/Analysis.svelte";
-	import Discovery from "./discovery/Discovery.svelte";
-	import Exploration from "./Exploration.svelte";
+	import Report from "./report/Report.svelte";
+	import Discover from "./discover/Discover.svelte";
+	import Explore from "./Explore.svelte";
 	import Header from "./general/Header.svelte";
 
 	const routes = {
-		"/": Exploration,
-		"/discovery/": Discovery,
-		"/exploration/": Exploration,
-		"/analysis/": Analysis,
-		"*": Exploration,
+		"/": Explore,
+		"/discover/": Discover,
+		"/explore/": Explore,
+		"/report/": Report,
+		"*": Explore,
 	};
 
 	onMount(() => initialFetch());

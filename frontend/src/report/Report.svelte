@@ -16,10 +16,14 @@
 	} from "../stores";
 
 	import ReportsList from "./ReportsList.svelte";
-	import SliceTable from "./slice-table/SliceTable.svelte";
-	import ReportTable from "./report/ReportTable.svelte";
+	import SliceTable from "./slice-table-report/SliceTable.svelte";
+	import SliceChartReport from "./slice-chart/SliceChartReport.svelte";
+	import TimeseriesReportTable from "./timeseries-report/TimeseriesReportTable.svelte";
+	import TableReportTable from "./table-report/TableReportTable.svelte";
 
 	let showSlices = true;
+
+	$: currentReport = $reports[$report];
 </script>
 
 <main>
@@ -27,8 +31,14 @@
 		<ReportsList />
 		<div id="report-panel">
 			<div id="reports">
-				{#if $reports[$report]}
-					<ReportTable report={$reports[$report]} />
+				{#if currentReport}
+					{#if currentReport.reportType === "timeseries"}
+						<TimeseriesReportTable reportId={$report} />
+					{:else if currentReport.reportType === "slicechart"}
+						<SliceChartReport reportId={$report} />
+					{:else}
+						<TableReportTable reportId={$report} />
+					{/if}
 				{/if}
 			</div>
 			<div id="slice-container">

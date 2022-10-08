@@ -97,7 +97,9 @@ def main():
             os.path.realpath(os.path.join(toml_path, args["metadata"]))
         )
 
-    if "tests" not in args or not os.path.exists(args["tests"]):
+    if "tests" not in args or not os.path.exists(
+        os.path.realpath(os.path.join(toml_path, args["tests"]))
+    ):
         print("WARNING: No 'tests' directory found.")
         args["tests"] = None
     else:
@@ -147,6 +149,9 @@ def main():
 
     if "port" not in args:
         args["port"] = 8000
+
+    if "host" not in args:
+        args["host"] = "localhost"
 
     if "batch_size" not in args:
         args["batch_size"] = 1
@@ -291,4 +296,4 @@ def run_zeno(args):
                     ).json(by_alias=True)
                 )
 
-    uvicorn.run(app, host="localhost", port=args["port"])  # type: ignore
+    uvicorn.run(app, host=args["host"], port=args["port"])  # type: ignore

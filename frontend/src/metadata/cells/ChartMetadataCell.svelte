@@ -10,7 +10,7 @@
 	export let setSelection;
 	export let dynamicSpec;
 	export let shouldColor;
-	export let selectedHash;
+	export let metricRange;
 	export let domain;
 	export let histogramData;
 	export let hash;
@@ -64,9 +64,7 @@
 	on:click={setSelection}
 	on:blur={setSelection}>
 	<VegaLite
-		spec={dynamicSpec({
-			colors: shouldColor && selectedHash ? domain.map((d) => d["color"]) : [],
-		})}
+		spec={dynamicSpec(shouldColor, domain, metricRange)}
 		data={histogramData}
 		bind:view
 		options={{ tooltip: true, actions: false, theme: "vox" }} />

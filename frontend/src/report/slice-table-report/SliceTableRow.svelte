@@ -8,7 +8,6 @@
 	import { getMetricsForSlices } from "../../util/util";
 
 	import SliceDetailsContainer from "../SliceDetailsContainer.svelte";
-	import SparkLine from "../SparkLine.svelte";
 
 	export let sli: Slice;
 
@@ -42,10 +41,7 @@
 								rep.reportPredicates.push({
 									sliceName: sli.sliceName,
 									metric: $metric,
-									operation: "",
 									transform: $transform,
-									value: "",
-									results: [],
 								});
 								reps[$report] = rep;
 								return reps;
@@ -59,9 +55,6 @@
 		</div>
 	</Cell>
 	{#await modelResults then res}
-		{#if $models.length > 2}
-			<Cell><SparkLine {res} /></Cell>
-		{/if}
 		{#each res as r}
 			<Cell>
 				{r ? r.toFixed(2) : ""}

@@ -15,12 +15,12 @@
 		availableColors,
 		colorByHash,
 		filteredTable,
+		metricRange,
 	} from "../../stores";
 	import {
 		computeCountsFromDomain,
 		computeDomain,
 		assignColorsFromDomain,
-		colorDomain,
 		getColorsByMetric,
 	} from "../metadata";
 
@@ -52,19 +52,19 @@
 	$: hash = columnHash(col);
 	$: selectedHash = $colorByHash === hash;
 	$: {
-		shouldColor;
-		updateData($filteredTable);
+		col;
+		calculateDomain($table);
 	}
 	$: {
-		col;
-		drawChart($table);
+		shouldColor;
+		updateData($filteredTable);
 	}
 	onMount(() => {
 		selection.column = col;
 		updateData($filteredTable);
 	});
 
-	async function drawChart(t: ColumnTable) {
+	async function calculateDomain(t: ColumnTable) {
 		if (!t.column(hash)) {
 			return;
 		}
@@ -76,16 +76,6 @@
 		);
 		lDomain.forEach((d) => (d["filteredCount"] = d["count"]));
 		domain = lDomain;
-
-		colorDomain(domain, col.metadataType);
-		let metricColors = await getColorsByMetric(
-			$filteredTable,
-			hash,
-			columnHash($settings.idColumn),
-			domain,
-			col.metadataType
-		);
-		domain.forEach((d, i) => (d.metricColor = metricColors[i]));
 
 		if (shouldColor) {
 			const colors = assignColorsFromDomain(
@@ -126,14 +116,14 @@
 					color: d["color"],
 				}));
 			}
-			let metricColors = await getColorsByMetric(
+			let metrics = await getColorsByMetric(
 				filteredTable,
 				hash,
 				columnHash($settings.idColumn),
 				domain,
 				col.metadataType
 			);
-			domain.forEach((d, i) => (d.metricColor = metricColors[i]));
+			domain.forEach((d, i) => (d.metric = metrics[i]));
 			histogramData = { table: domain };
 		}
 	}
@@ -212,10 +202,10 @@
 				? generateHistogramSpec
 				: generateCountSpec}
 			{shouldColor}
-			{selectedHash}
 			{domain}
 			{histogramData}
 			{hash}
+			metricRange={$metricRange}
 			metadataType={col.metadataType} />
 	{/if}
 </div>
