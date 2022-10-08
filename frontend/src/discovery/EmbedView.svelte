@@ -199,6 +199,35 @@
 		currentState.name = "🏁 reproject";
 		clearAllFilters();
 	}
+	$: if (reglScatterplot && currentState.ids) {
+		adjustPointSizes(reglScatterplot, currentState.ids.length ?? Infinity, 1.5);
+	}
+
+	function adjustPointSizes(
+		scatterRef: ReglScatterplot,
+		numPoints = Infinity,
+		scaler = 1
+	) {
+		if (scatterRef === undefined) {
+			return;
+		}
+		let newSize = 1;
+		if (numPoints < 50) {
+			newSize = 10;
+		} else if (numPoints < 100) {
+			newSize = 7;
+		}
+		if (numPoints < 500) {
+			newSize = 5;
+		} else if (numPoints < 1000) {
+			newSize = 3;
+		} else if (numPoints < 10000) {
+			newSize = 2;
+		} else {
+			newSize = 1;
+		}
+		scatterRef.set({ pointSize: newSize * scaler });
+	}
 
 	function clearAllFilters() {
 		metadataSelections.set(new Map());
@@ -296,10 +325,13 @@
 		return scatterData;
 	}
 
+	let previewScatterplot: ReglScatterplot;
 	function cancelLasso() {
 		reglScatterplot?.deselect();
 		lassoSelection.set([]);
 	}
+
+	$: console.log(previewScatterplot);
 
 	let perplexity = "30";
 </script>
@@ -378,6 +410,7 @@
 								height={150}
 								data={opaqueStartingPointScatter}
 								config={{ pointSize: 1 }}
+								on:mount={({ detail }) => (previewScatterplot = detail)}
 								{colorRange} />
 						</SnapshotButtons>
 					{/each}
