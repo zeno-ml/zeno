@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Union, Optional
+from typing import List, Optional, Union
 
 import numpy as np
 from pandas import DataFrame
