@@ -4,6 +4,7 @@
 	import Select, { Option } from "@smui/select";
 	import Button from "@smui/button";
 	import { Shadow as LoadingAnimation } from "svelte-loading-spinners";
+	import { scaleLinear as scaler } from "d3-scale";
 
 	import {
 		colorSpec,
@@ -31,16 +32,21 @@
 	import { Snapshot } from "./startingPoints/snapshot";
 	import Textfield from "@smui/textfield";
 
+	interface ExistsResponse {
+		exists: boolean;
+		model: string;
+	}
+	interface StartingPoints {
+		my: Snapshot[];
+		recommended: Snapshot[];
+	}
+
 	const endpoint = "api/mirror";
 	const mirror = {
 		post: request.generator.post(endpoint),
 		get: request.generator.get(endpoint),
 	};
 
-	interface StartingPoints {
-		my: Snapshot[];
-		recommended: Snapshot[];
-	}
 	let availableStartingPoints: StartingPoints = {
 		my: [],
 		recommended: [],
@@ -51,6 +57,15 @@
 	let canProject = false;
 	let isProjecting = false;
 	let reglScatterplot: ReglScatterplot;
+	let perplexity = "30";
+	let mounted = false;
+
+	/* interpolates between point sizes based on num points and observed */
+	$: adjustPointSizes = adjustPointSizesGenerator(
+		reglScatterplot,
+		{ numPoints: 5_000, pointSize: 2 },
+		{ numPoints: 100, pointSize: 10 }
+	);
 
 	lassoSelection.subscribe(() => updateFilteredTable($table));
 	$: {
@@ -81,7 +96,13 @@
 	$: filtersApplied =
 		$metadataSelections.size > 0 || $sliceSelections.length > 0;
 
-	let mounted = false;
+	$: if (reglScatterplot && currentState.ids) {
+		adjustPointSizes(currentState.ids.length);
+	}
+
+	onMount(async () => {
+		mounted = true;
+	});
 
 	async function generateSnapshots(all: Snapshot) {
 		const generatedSlices = await mirror.get({ url: "sdm" });
@@ -101,10 +122,6 @@
 		});
 		return sliceSnapshots as Snapshot[];
 	}
-
-	onMount(async () => {
-		mounted = true;
-	});
 
 	function nameExistsInAvailableStartingPoints(name: string) {
 		if (name.length === 0) {
@@ -186,6 +203,7 @@
 			cameraView: fitScatterCameraAtOrigin,
 		});
 	}
+
 	/**
 	 * Overrides the current starting point
 	 * and simply copies the currentSnapshot as the start
@@ -199,34 +217,35 @@
 		currentState.name = "🏁 reproject";
 		clearAllFilters();
 	}
-	$: if (reglScatterplot && currentState.ids) {
-		adjustPointSizes(reglScatterplot, currentState.ids.length ?? Infinity, 1.5);
-	}
 
-	function adjustPointSizes(
+	/**
+	 * Returns a functions that interpolates between min and max point sizes based
+	 * in input numPoints
+	 * for numPoints under the min or over the max, will default to the specified pointSizes
+	 */
+	function adjustPointSizesGenerator(
 		scatterRef: ReglScatterplot,
-		numPoints = Infinity,
-		scaler = 1
+		min: { numPoints: number; pointSize: number },
+		max: { numPoints: number; pointSize: number }
 	) {
 		if (scatterRef === undefined) {
-			return;
+			return () => 1;
 		}
-		let newSize = 1;
-		if (numPoints < 50) {
-			newSize = 10;
-		} else if (numPoints < 100) {
-			newSize = 7;
-		}
-		if (numPoints < 500) {
-			newSize = 5;
-		} else if (numPoints < 1000) {
-			newSize = 3;
-		} else if (numPoints < 10000) {
-			newSize = 2;
-		} else {
-			newSize = 1;
-		}
-		scatterRef.set({ pointSize: newSize * scaler });
+		const numPointsToPointSize = scaler()
+			.domain([min.numPoints, max.numPoints])
+			.range([min.pointSize, max.pointSize]);
+
+		return (numPoints: number) => {
+			// only do values between the min and max not under or above
+			let newSize = numPointsToPointSize(numPoints);
+			if (newSize < min.pointSize) {
+				newSize = min.pointSize;
+			}
+			if (newSize > max.pointSize) {
+				newSize = max.pointSize;
+			}
+			return scatterRef.set({ pointSize: newSize });
+		};
 	}
 
 	function clearAllFilters() {
@@ -236,10 +255,6 @@
 		reglScatterplot.deselect();
 	}
 
-	interface ExistsResponse {
-		exists: boolean;
-		model: string;
-	}
 	async function embeddingsExist(model: string) {
 		const embeddingsCheck = (await mirror.get({
 			url: `exists/${model}`,
@@ -325,15 +340,10 @@
 		return scatterData;
 	}
 
-	let previewScatterplot: ReglScatterplot;
 	function cancelLasso() {
 		reglScatterplot?.deselect();
 		lassoSelection.set([]);
 	}
-
-	$: console.log(previewScatterplot);
-
-	let perplexity = "30";
 </script>
 
 <div id="container">
@@ -410,7 +420,6 @@
 								height={150}
 								data={opaqueStartingPointScatter}
 								config={{ pointSize: 1 }}
-								on:mount={({ detail }) => (previewScatterplot = detail)}
 								{colorRange} />
 						</SnapshotButtons>
 					{/each}
