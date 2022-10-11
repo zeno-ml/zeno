@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Union
+from typing import List, Union, Optional
 
 import numpy as np
 from pandas import DataFrame
@@ -37,7 +37,11 @@ class Mirror:
         return slices
 
     def filterProject(
-        self, model: str, ids: List[str], transform: str = "", perplexity: int = 30
+        self,
+        model: str,
+        ids: List[str],
+        transform: str = "",
+        perplexity: Optional[int] = 30,
     ):
         projection = self._project(
             model, ids, transform=transform, perplexity=perplexity
@@ -61,7 +65,7 @@ class Mirror:
         model: str,
         ids: Union[List[str], None] = None,
         transform: str = "",
-        perplexity: int = 30,
+        perplexity: Optional[int] = 30,
     ):
         """note that if ids is left set to None, the all embeddings are used"""
 
@@ -73,9 +77,8 @@ class Mirror:
         # cannot project 0 data samples
         # projecting nothing to nothing makes sense
         if ids is not None and len(ids) == 0:
-            nada = []
             self.status = Status.IDLE
-            return nada
+            return []
 
         # if the ids were given, then use them!
         ids_given = ids is not None
