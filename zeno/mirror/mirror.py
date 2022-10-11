@@ -24,6 +24,9 @@ class Status(Enum):
     RUNNING = 1
 
 
+DEFAULT_PERPLEXITY = 30
+
+
 class Mirror:
     def __init__(self, df: DataFrame, cache_path, id_column: ZenoColumn):
         self.df = df
@@ -41,10 +44,13 @@ class Mirror:
         model: str,
         ids: List[str],
         transform: str = "",
-        perplexity: Optional[int] = 30,
+        perplexity: Optional[int] = DEFAULT_PERPLEXITY,
     ):
         projection = self._project(
-            model, ids, transform=transform, perplexity=perplexity
+            model,
+            ids,
+            transform=transform,
+            perplexity=perplexity if perplexity is not None else DEFAULT_PERPLEXITY,
         )
         return projection
 
@@ -65,7 +71,7 @@ class Mirror:
         model: str,
         ids: Union[List[str], None] = None,
         transform: str = "",
-        perplexity: Optional[int] = 30,
+        perplexity: int = DEFAULT_PERPLEXITY,
     ):
         """note that if ids is left set to None, the all embeddings are used"""
 
