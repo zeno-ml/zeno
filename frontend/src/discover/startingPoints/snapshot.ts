@@ -6,6 +6,10 @@ interface SnapshotStructure<T> {
 	ids: T[];
 	start2D: Point2D[];
 }
+interface ProjectResponse {
+	data: Point2D[];
+	model: string;
+}
 
 function setIntersect<T>(a: Set<T>, b: Set<T>) {
 	const outputSet = new Set<T>();
@@ -89,10 +93,6 @@ export class Snapshot implements SnapshotStructure<string> {
 	}
 }
 
-interface ProjectResponse {
-	data: Point2D[];
-	model: string;
-}
 async function project(payload: {
 	model: string;
 	transform: string;
