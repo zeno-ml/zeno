@@ -57,6 +57,7 @@
 	let canProject = false;
 	let isProjecting = false;
 	let reglScatterplot: ReglScatterplot;
+	let reglPreviewScatterplot: ReglScatterplot;
 	let perplexity = "30";
 	let mounted = false;
 
@@ -65,6 +66,11 @@
 		reglScatterplot,
 		{ numPoints: 5_000, pointSize: 2 },
 		{ numPoints: 100, pointSize: 10 }
+	);
+	$: adjustPointSizesPreview = adjustPointSizesGenerator(
+		reglPreviewScatterplot,
+		{ numPoints: 5_000, pointSize: 1 },
+		{ numPoints: 100, pointSize: 4 }
 	);
 
 	lassoSelection.subscribe(() => updateFilteredTable($table));
@@ -98,6 +104,7 @@
 
 	$: if (reglScatterplot && currentState.ids) {
 		adjustPointSizes(currentState.ids.length);
+		adjustPointSizesPreview(startingPoint.ids.length);
 	}
 
 	onMount(async () => {
@@ -420,6 +427,9 @@
 								height={150}
 								data={opaqueStartingPointScatter}
 								config={{ pointSize: 1 }}
+								on:mount={(e) => {
+									reglPreviewScatterplot = e.detail;
+								}}
 								{colorRange} />
 						</SnapshotButtons>
 					{/each}
