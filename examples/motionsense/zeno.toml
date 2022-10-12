@@ -4,4 +4,4 @@ data_path = "/Users/acabrera/dev-research/22-zeno/motionsense/A_DeviceMotion_dat
 data_column = "file"
 label_column = "label"
 batch_size = 16
-port = 8005
+port = 8004

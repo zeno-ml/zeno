@@ -1,6 +1,6 @@
 import type { VegaLiteSpec } from "svelte-vega";
 
-export default function generateBarSpec(metric, model) {
+export default function generateBarSpec(metric) {
 	const spec = {
 		$schema: "https://vega.github.io/schema/vega-lite/v5.json",
 		description: "A simple bar chart with embedded data.",
@@ -13,9 +13,7 @@ export default function generateBarSpec(metric, model) {
 		},
 		mark: {
 			type: "bar",
-			fill: "#6a1a9a",
 		},
-		title: model,
 		encoding: {
 			x: {
 				field: "slice",
@@ -34,6 +32,8 @@ export default function generateBarSpec(metric, model) {
 				axis: { labelFontSize: 14, titleFontSize: 14, titlePadding: 10 },
 				labelFontSize: 14,
 			},
+			xOffset: { field: "model" },
+			color: { field: "model" },
 		},
 	} as VegaLiteSpec;
 

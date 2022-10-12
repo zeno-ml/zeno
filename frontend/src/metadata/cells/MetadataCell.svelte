@@ -15,6 +15,8 @@
 		availableColors,
 		colorByHash,
 		filteredTable,
+		metric,
+		model,
 		metricRange,
 	} from "../../stores";
 	import {
@@ -56,6 +58,8 @@
 		calculateDomain($table);
 	}
 	$: {
+		$metric;
+		$model;
 		shouldColor;
 		updateData($filteredTable);
 	}

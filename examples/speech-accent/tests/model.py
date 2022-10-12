@@ -2,7 +2,8 @@ import os
 
 import torch
 import whisper
-from zeno import ZenoOptions, model
+from jiwer import wer
+from zeno import ZenoOptions, distill, metric, model
 
 
 @model
@@ -12,7 +13,7 @@ def load_model(model_path):
         model, decoder, utils = torch.hub.load(
             repo_or_dir="snakers4/silero-models",
             model="silero_stt",
-            language="en",  # also available 'de', 'es'
+            language="en",
             device=device,
         )
         (read_batch, _, _, prepare_model_input) = utils
@@ -20,13 +21,12 @@ def load_model(model_path):
         def pred(df, ops: ZenoOptions):
             files = [os.path.join(ops.data_path, f) for f in df[ops.data_column]]
             input = prepare_model_input(read_batch(files), device=device)
-            output = model(input)
-            return [decoder(x.cpu()) for x in output]
+            return [decoder(x.cpu()) for x in model(input)]
 
         return pred
 
     elif "whisper" in model_path:
-        model = whisper.load_model("base")
+        model = whisper.load_model("tiny")
 
         def pred(df, ops: ZenoOptions):
             files = [os.path.join(ops.data_path, f) for f in df[ops.data_column]]
@@ -36,3 +36,13 @@ def load_model(model_path):
             return outs
 
         return pred
+
+
+@distill
+def wer_m(df, ops: ZenoOptions):
+    return df.apply(lambda x: wer(x[ops.label_column], x[ops.output_column]), axis=1)
+
+
+@metric
+def avg_wer(df, ops: ZenoOptions):
+    return df[ops.distill_columns["wer_m"]].mean()

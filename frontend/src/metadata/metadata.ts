@@ -196,7 +196,7 @@ export async function getColorsByMetric(
 	});
 
 	const mets = await getMetricsForSlices(keys);
-	if (mets) {
+	if (mets && !get(metricRange)[2]) {
 		metricRange.update((range) => {
 			const r = extent(mets);
 			range[0] = r[0] < range[0] ? r[0] : range[0];

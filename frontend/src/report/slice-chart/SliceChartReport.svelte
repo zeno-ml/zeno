@@ -15,14 +15,31 @@
 	export let reportId: number;
 	$: report = $reports[reportId];
 
-	$: modelResults = getMetricsForSlices(
-		report.reportPredicates.map((pred) => ({
-			sli: [...$slices.values()].find((s) => s.sliceName === pred.sliceName),
-			metric: $metric,
-			model: $model,
-			transform: pred.transform,
-		}))
-	);
+	let chartEntries = [];
+
+	function getMetKeys(rep) {
+		const entries: MetricKey[] = [];
+		chartEntries = [];
+		rep.reportPredicates.forEach((pred) => {
+			$models.forEach((mod) => {
+				chartEntries.push({
+					slice: pred.sliceName,
+					model: mod,
+				});
+				entries.push({
+					sli: [...$slices.values()].find(
+						(s) => s.sliceName === pred.sliceName
+					),
+					metric: $metric,
+					model: mod,
+					transform: pred.transform,
+				});
+			});
+		});
+		return entries;
+	}
+
+	$: modelResults = getMetricsForSlices(getMetKeys(report));
 </script>
 
 <div style:margin-left="20px">
@@ -59,13 +76,14 @@
 	<div style:margin-top="30px" style:width="500px">
 		{#await modelResults then res}
 			{@const chartData = {
-				table: res.map((r, i) => ({
-					slice: report.reportPredicates[i].sliceName,
-					metric: r,
+				table: chartEntries.map((r, i) => ({
+					slice: r.slice,
+					model: r.model,
+					metric: res[i],
 				})),
 			}}
 			<VegaLite
-				spec={generateBarSpec($metric, $model)}
+				spec={generateBarSpec($metric)}
 				data={chartData}
 				options={{ tooltip: true, theme: "vox", width: 1000, height: 300 }} />
 		{/await}
