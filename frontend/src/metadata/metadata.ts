@@ -4,7 +4,6 @@ import type ColumnTable from "arquero/dist/types/table/column-table";
 import * as aq from "arquero";
 import {
 	interpolateYlGnBu,
-	interpolatePurples,
 	schemeCategory10,
 	schemeTableau10,
 } from "d3-scale-chromatic";

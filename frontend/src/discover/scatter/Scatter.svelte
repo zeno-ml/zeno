@@ -10,11 +10,10 @@
 	export let config: ReglConfig = {};
 	export let resetSelection = true;
 	export let inferDimensions = false;
-
-	let innerWidth: number, innerHeight: number;
 	export let width = 500;
 	export let height = 500;
 
+	let innerWidth: number, innerHeight: number;
 	let calculatedWidth: number = width;
 	let calculatedHeight: number = height;
 
@@ -41,7 +40,6 @@
 {#if width && height}
 	<AutoScaleRegl
 		{data}
-		{resetSelection}
 		downScale="maxDim"
 		on:lassoIndex={lassoPoints}
 		on:mount
