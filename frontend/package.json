@@ -57,6 +57,7 @@
   },
   "dependencies": {
     "@mdi/js": "^7.0.96",
+    "@rollup/plugin-dynamic-import-vars": "^2.0.0",
     "@smui/dialog": "^6.1.0",
     "apache-arrow": "9.0.0",
     "arquero": "^5.1.0",
@@ -70,6 +71,8 @@
     "html2pdf.js": "^0.10.1",
     "internmap": "^2.0.3",
     "pub-sub-es": "^2.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "regl-scatterplot": "^1.3.0",
     "sirv-cli": "^2.0.0",
     "svelte-spa-router": "^3.3.0",

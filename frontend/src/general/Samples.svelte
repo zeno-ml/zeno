@@ -94,7 +94,7 @@
 	}
 
 	settings.subscribe(() => {
-		let v = window.location.origin + "/view/index.mjs";
+		let v = window.location.origin + "/cache/view.mjs";
 		try {
 			import(v).then((m) => (divFunction = m.default));
 		} catch (e) {

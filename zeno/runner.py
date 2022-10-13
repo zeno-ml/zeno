@@ -1,13 +1,12 @@
 import asyncio
-import importlib
 import json
 import os
 import sys
 from pathlib import Path
 from typing import List
 
-import pkg_resources  # type: ignore
-
+import pkg_resources
+import requests  # type: ignore
 import tomli
 import uvicorn  # type: ignore
 from fastapi import FastAPI, WebSocket
@@ -25,6 +24,9 @@ from zeno.classes import (
     ZenoVariables,
 )
 from zeno.zeno import Zeno
+
+VIEW_MAP_URL = "https://raw.githubusercontent.com/zeno-ml/instance-views/main/"
+VIEWS_MAP_JSON = "views.json"
 
 
 def main():
@@ -70,24 +72,25 @@ def main():
     toml_path = os.path.dirname(os.path.abspath(sys.argv[1]))
 
     if "view" not in args:
-        print(
-            "ERROR: Must have 'view' entry which is a valid and installed"
-            + "Python Zeno view package:"
+        print("ERROR: Must have 'view' entry")
+        sys.exit(1)
+
+    if "cache_path" not in args:
+        args["cache_path"] = Path(
+            os.path.realpath(os.path.join(toml_path, "./.zeno_cache/"))
         )
-        sys.exit(1)
+    else:
+        args["cache_path"] = Path(
+            os.path.realpath(os.path.join(toml_path, args["cache_path"]))
+        )
+    os.makedirs(args["cache_path"], exist_ok=True)
 
-    try:
-        args["view"] = args["view"].replace("-", "_")
-        mod = importlib.import_module(args["view"])
-    except ModuleNotFoundError:
-        print("ERROR: " + args["view"] + " is not a valid python package")
-        sys.exit(1)
-
-    if not mod.path:
-        print("ERROR: View does not export a valid path variable.")
-        sys.exit(1)
-
-    args["view"] = mod.path
+    views_res = requests.get(VIEW_MAP_URL + VIEWS_MAP_JSON)
+    views = views_res.json()
+    url = VIEW_MAP_URL + views[args["view"]]
+    with open(os.path.join(args["cache_path"], "view.mjs"), "wb") as out_file:
+        content = requests.get(url, stream=True).content
+        out_file.write(content)
 
     if "metadata" not in args:
         print("ERROR: Must have 'metadata' entry which must be a CSV or Parquet file.")
@@ -156,15 +159,6 @@ def main():
     if "batch_size" not in args:
         args["batch_size"] = 1
 
-    if "cache_path" not in args:
-        args["cache_path"] = Path(
-            os.path.realpath(os.path.join(toml_path, "./.zeno_cache/"))
-        )
-    else:
-        args["cache_path"] = Path(
-            os.path.realpath(os.path.join(toml_path, args["cache_path"]))
-        )
-
     run_zeno(args)
 
 
@@ -195,11 +189,6 @@ def run_zeno(args):
         "/cache",
         StaticFiles(directory=args["cache_path"]),
         name="cache",
-    )
-    app.mount(
-        "/view",
-        StaticFiles(directory=args["view"]),
-        name="view",
     )
     app.mount("/api", api_app)
     app.mount(

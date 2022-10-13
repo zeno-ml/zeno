@@ -1,4 +1,4 @@
-view = "zenoml-timeseries"
+view = "timeseries-classification"
 metadata = "/Users/acabrera/dev-research/22-zeno/motionsense/motionsense.csv"
 data_path = "/Users/acabrera/dev-research/22-zeno/motionsense/A_DeviceMotion_data/A_DeviceMotion_data"
 data_column = "file"

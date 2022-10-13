@@ -1,5 +1,5 @@
 tests = "./"
-view = "zenoml_audio_transcription"
+view = "zenomaudio_transcription"
 metadata = "../fsdd.csv"
 models = [
     "silero-transcription",

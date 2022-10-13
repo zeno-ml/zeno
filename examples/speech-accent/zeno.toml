@@ -1,5 +1,5 @@
 tests = "./tests/"
-view = "zenoml-audio-transcription"
+view = "audio-transcription"
 models = [
 	"silero_sst",
 	"whisper"

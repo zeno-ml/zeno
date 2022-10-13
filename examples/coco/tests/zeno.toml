@@ -1,5 +1,5 @@
 # tests = "./"
-view = "zenoml_image_object_detection"
+view = "image_object_detection"
 metadata = "../coco.parquet"
 # models = [
 #         "yolov3",
