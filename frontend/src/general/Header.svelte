@@ -100,7 +100,7 @@
 			<Tooltip>read the documentation</Tooltip>
 		</Wrapper>
 		<Wrapper>
-			<IconButton href="https://github.com/cmudig/zeno">
+			<IconButton href="https://github.com/zeno-ml/zeno">
 				<Icon component={Svg} viewBox="0 0 24 24">
 					<path fill="black" d={mdiGithub} />
 				</Icon>

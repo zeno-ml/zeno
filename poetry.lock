@@ -608,6 +608,14 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "types-setuptools"
+version = "65.4.0.0"
+description = "Typing stubs for setuptools"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "typing-extensions"
 version = "4.4.0"
 description = "Backported and Experimental Type Hints for Python 3.7+"
@@ -683,7 +691,7 @@ python-versions = ">=3.7"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11" 
-content-hash = "6c007b695b3681a9d8d6c9009d786af64847163d0fb05bc4949e6d267fc98884"
+content-hash = "807de3da5935802bb876e85abfebc39355bf674e38dc9efe0c5a451c90acee44"
 
 [metadata.files]
 anyio = [
@@ -823,6 +831,7 @@ trailrunner = [
     {file = "trailrunner-1.2.1.tar.gz", hash = "sha256:157de2b2d82139d9583ec1dbc1981c33b39e24c420bb5294f86083f1f4b44311"},
 ]
 types-pytz = []
+types-setuptools = []
 typing-extensions = []
 typing-inspect = []
 urllib3 = []

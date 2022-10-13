@@ -7,7 +7,6 @@ from typing import List
 
 import pkg_resources
 import requests  # type: ignore
-
 import tomli
 import uvicorn  # type: ignore
 from fastapi import FastAPI, WebSocket
