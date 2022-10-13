@@ -73,7 +73,6 @@ class Zeno(object):
 
         self.metadata_name = os.path.basename(metadata_path).split(".")[0]
         self.cache_path = cache_path
-        os.makedirs(self.cache_path, exist_ok=True)
 
         self.folders: List[str] = read_pickle("folders.pickle", self.cache_path, [])
         self.reports: List[Report] = read_pickle("reports.pickle", self.cache_path, [])
