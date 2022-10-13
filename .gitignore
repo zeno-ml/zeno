@@ -5,14 +5,11 @@ data/
 .zeno_cache/
 models/
 node_modules/
-frontend/index.mjs
 *.pt
 coco-tagging.csv
 model10/
 model20/
 model30/
-coverage/
-*.profile
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

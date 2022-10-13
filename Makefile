@@ -3,8 +3,6 @@ all: check lint typecheck test
 .PHONY: install
 install:
 	@echo "==> 📦 Installing"
-	@chmod +x ./build-views.sh
-	@./build-views.sh
 	@cd frontend && npm i && npm run build
 	@poetry install
 
