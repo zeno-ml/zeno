@@ -1,5 +1,5 @@
 tests = "./"
-view = "image_classification"
+view = "image-classification"
 metadata = "../imagenette_formatted.csv"
 models = ["resnet+clip"]
 data_path = "../../../data/imagenette/"

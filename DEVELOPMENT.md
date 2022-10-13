@@ -36,7 +36,3 @@ The following make recipes can be used to check properties such as tests and lin
 ### Testing
 
 `make test`
-
-### Build Docs
-
-`make book`
