@@ -64,7 +64,7 @@
 	/* interpolates between point sizes based on num points and observed */
 	$: adjustPointSizes = adjustPointSizesGenerator(
 		reglScatterplot,
-		{ numPoints: 5_000, pointSize: 2 },
+		{ numPoints: 5_000, pointSize: 3 },
 		{ numPoints: 100, pointSize: 10 }
 	);
 	$: adjustPointSizesPreview = adjustPointSizesGenerator(
@@ -163,12 +163,8 @@
 				// show the available options for starting points
 				availableStartingPoints.recommended = [
 					startingPoint.copy(),
-					...generated.filter((sh) => sh.ids.length > 10),
+					...generated,
 				];
-				availableStartingPoints.recommended =
-					availableStartingPoints.recommended.sort(
-						(a, b) => b.ids.length - a.ids.length
-					);
 			});
 		} else {
 			canProject = false;
