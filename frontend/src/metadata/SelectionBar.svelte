@@ -51,79 +51,71 @@
 	<span id="size">
 		({$filteredTable.size} instances)
 	</span>
-	{#each $sliceSelections as s}
-		<div class="meta-chip">
-			{s}
-			<TrailingIcon
-				class="remove material-icons"
-				on:click={() =>
-					sliceSelections.update((sel) => {
-						sel.splice(sel.indexOf(s), 1);
-						return sel;
-					})}>
-				cancel
-			</TrailingIcon>
-		</div>
-	{/each}
-	{#each [...$metadataSelections.entries()] as [hash, chip]}
-		<div class="meta-chip">
-			<span>
-				{#if chip.column.metadataType === MetadataType.CONTINUOUS}
-					{chip.values[0].toFixed(2)}
-					{"<"}
-					{chip.column.name}
-					{"<"}
-					{chip.values[1].toFixed(2)}
-				{:else if chip.column.metadataType === MetadataType.BOOLEAN}
-					{chip.values[0]}
-					{chip.column.name}
-				{:else if chip.column.metadataType === MetadataType.DATETIME}
-					{#if !chip.values[1]}
-						start {chip.values[0].toLocaleString()}
-					{:else if !chip.values[0]}
-						end {chip.values[0].toLocaleString()}
+
+	{#if $lassoSelection.length > 0}
+		<div class="meta-chip lasso">Viewing Selected Data</div>
+	{:else}
+		{#each $sliceSelections as s}
+			<div class="meta-chip">
+				{s}
+				<TrailingIcon
+					class="remove material-icons"
+					on:click={() =>
+						sliceSelections.update((sel) => {
+							sel.splice(sel.indexOf(s), 1);
+							return sel;
+						})}>
+					cancel
+				</TrailingIcon>
+			</div>
+		{/each}
+		{#each [...$metadataSelections.entries()] as [hash, chip]}
+			<div class="meta-chip">
+				<span>
+					{#if chip.column.metadataType === MetadataType.CONTINUOUS}
+						{chip.values[0].toFixed(2)}
+						{"<"}
+						{chip.column.name}
+						{"<"}
+						{chip.values[1].toFixed(2)}
+					{:else if chip.column.metadataType === MetadataType.BOOLEAN}
+						{chip.values[0]}
+						{chip.column.name}
+					{:else if chip.column.metadataType === MetadataType.DATETIME}
+						{#if !chip.values[1]}
+							start {chip.values[0].toLocaleString()}
+						{:else if !chip.values[0]}
+							end {chip.values[0].toLocaleString()}
+						{:else}
+							from {chip.values[0].toLocaleString()} to {chip.values[1].toLocaleString()}
+						{/if}
 					{:else}
-						from {chip.values[0].toLocaleString()} to {chip.values[1].toLocaleString()}
+						{chip.column.name}
+						{"=="}
+						{chip.values.join(" | ")}
 					{/if}
-				{:else}
-					{chip.column.name}
-					{"=="}
-					{chip.values.join(" | ")}
-				{/if}
-			</span>
-			<TrailingIcon
-				class="remove material-icons"
-				on:click={() =>
-					metadataSelections.update((m) => {
-						m.delete(hash);
-						return m;
-					})}>
-				cancel
-			</TrailingIcon>
-		</div>
-	{/each}
-	{#if $lassoSelection !== null}
-		<div class="meta-chip lasso">
-			Lasso Selection
-			<TrailingIcon
-				class="remove material-icons"
+				</span>
+				<TrailingIcon
+					class="remove material-icons"
+					on:click={() =>
+						metadataSelections.update((m) => {
+							m.delete(hash);
+							return m;
+						})}>
+					cancel
+				</TrailingIcon>
+			</div>
+		{/each}
+		{#if $metadataSelections.size + $sliceSelections.length > 0}
+			<span
+				class="clear"
 				on:click={() => {
-					lassoSelection.set(null);
+					metadataSelections.set(new Map());
+					sliceSelections.set([]);
 				}}>
-				cancel
-			</TrailingIcon>
-		</div>
-	{/if}
-	{#if $metadataSelections.size + $sliceSelections.length > 0 || $lassoSelection !== null}
-		<span
-			class="clear"
-			on:click={() => {
-				metadataSelections.set(new Map());
-				sliceSelections.set([]);
-				lassoSelection.set(null);
-			}}>
-			clear all
-		</span>
+				clear all
+			</span>
+		{/if}
 	{/if}
 </div>
 

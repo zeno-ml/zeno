@@ -130,3 +130,4 @@ class MirrorProject(BaseModel):
     model: str
     transform: str = ""
     ids: Optional[List[str]] = None
+    perplexity: Optional[int] = 30

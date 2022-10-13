@@ -1,18 +1,38 @@
 <script lang="ts">
-	import { createEventDispatcher } from "svelte";
+	import { createEventDispatcher, onMount } from "svelte";
 	import AutoScaleRegl from "./AutoScaleRegl.svelte";
-	import type { ScatterRowsWithIds, ReglConfig, ColorRange } from "./scatter";
+	import type { ScatterRowsFormat, ReglConfig, ColorRange } from "./scatter";
 
-	const dispatch = createEventDispatcher();
+	const dispatch = createEventDispatcher<{ lasso: ScatterRowsFormat }>();
 
-	export let data: ScatterRowsWithIds<string> = [];
+	export let data: ScatterRowsFormat = [];
 	export let colorRange: ColorRange = [];
 	export let config: ReglConfig = {};
+	export let resetSelection = true;
+	export let inferDimensions = false;
+	export let width = 500;
+	export let height = 500;
 
-	let innerWidth, innerHeight;
-	let width;
-	let height = 500;
-	$: width = innerWidth - 470;
+	let innerWidth: number, innerHeight: number;
+	let calculatedWidth: number = width;
+	let calculatedHeight: number = height;
+
+	$: {
+		if (inferDimensions && mounted) {
+			calculatedWidth = innerWidth ? innerWidth - 470 : width;
+		}
+	}
+
+	let mounted = false;
+	onMount(() => {
+		mounted = true;
+	});
+
+	function lassoPoints(e: CustomEvent<number[]>) {
+		const selection = e.detail;
+		const indexToInstanceMapping = selection.map((index) => data[index]);
+		dispatch("lasso", indexToInstanceMapping);
+	}
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
@@ -21,18 +41,12 @@
 	<AutoScaleRegl
 		{data}
 		downScale="maxDim"
-		on:lassoIndex={({ detail }) => {
-			if (detail !== null) {
-				const indexToInstanceMapping = detail.map((index) => data[index]);
-				dispatch("lasso", indexToInstanceMapping);
-			} else {
-				dispatch("lasso", null);
-			}
-		}}
+		on:lassoIndex={lassoPoints}
+		on:mount
 		{colorRange}
 		{config}
-		{width}
-		{height} />
+		width={inferDimensions ? calculatedWidth : width}
+		height={inferDimensions ? calculatedHeight : height} />
 {/if}
 
 <style>

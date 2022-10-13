@@ -2,6 +2,14 @@
   "version": "2.0.0",
   "configurations": [
     {
+      "name": "zenoimagenet",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": ["./examples/imagenet/tests/zeno.toml"]
+    },
+    {
       "name": "zenoimagenette",
       "type": "python",
       "request": "launch",
@@ -9,7 +17,6 @@
       "module": "zeno",
       "args": ["./examples/imagenette/tests/zeno.toml"]
     },
-
     {
       "name": "zenocifar",
       "type": "python",

@@ -22,6 +22,7 @@ import {
 	reports,
 	rowsPerPage,
 	lassoSelection,
+	startingPointIds,
 } from "../stores";
 import { ZenoColumnType } from "../globals";
 
@@ -234,10 +235,17 @@ function arrayEquals(a, b) {
 	);
 }
 
-export function updateFilteredTable(t: ColumnTable) {
-	if (!get(ready) || t.size === 0) {
-		return;
-	}
+/**
+ * Returns another arquero table with with only the ids specified
+ */
+export function filterTableForIds(t: ColumnTable, ids: string[]) {
+	const idHash = columnHash(get(settings).idColumn);
+	const idTable = aq.table({ [idHash]: ids });
+	const sharedTable = t.join(idTable, idHash);
+	return sharedTable;
+}
+
+export function filterTableWithSlicesAndMetadata(t: ColumnTable) {
 	let tempTable = t;
 
 	// Filter with slices.
@@ -279,16 +287,34 @@ export function updateFilteredTable(t: ColumnTable) {
 		}
 	});
 
-	const idCol = columnHash(get(settings).idColumn);
+	return tempTable;
+}
 
-	// filter with lasso from discovery mirror
-	const lassoSelectionValues = get(lassoSelection);
-	if (lassoSelectionValues !== null) {
-		tempTable = tempTable.filter(
-			aq.escape((r) => aq.op.includes(lassoSelectionValues, r[idCol], 0))
-		);
+export function updateFilteredTable(t: ColumnTable) {
+	if (!get(ready) || t.size === 0) {
+		return;
 	}
 
+	let tempTable = t;
+
+	// lasso selection only (hack remove this later)
+	const lassoSelectionValues = get(lassoSelection);
+	const onlyLassoNoFilter = lassoSelectionValues.length > 0;
+	if (onlyLassoNoFilter) {
+		filteredTable.set(filterTableForIds(t, lassoSelectionValues));
+		return; // don't do the other filters so end early
+	}
+
+	// in mirror, we start from a starting point, and filter from there
+	const startIdsMirror = get(startingPointIds);
+	if (startIdsMirror.length < t.size && startIdsMirror.length !== 0) {
+		tempTable = filterTableForIds(tempTable, startIdsMirror);
+	}
+
+	// metadata and slices
+	tempTable = filterTableWithSlicesAndMetadata(tempTable);
+
+	const idCol = columnHash(get(settings).idColumn);
 	if (arrayEquals(tempTable.array(idCol), get(filteredTable).array(idCol))) {
 		return;
 	}

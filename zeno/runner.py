@@ -250,16 +250,23 @@ def run_zeno(args):
 
     @api_app.post("/mirror/project")
     def mirror_project(req: MirrorProject):
-        if req.ids is None:
+        # not specified or entire data frame just use the cache
+        if req.ids is None or len(req.ids) == len(zeno.df):
             proj = zeno.mirror.initProject(req.model, req.transform)
         else:
-            proj = zeno.mirror.filterProject(req.model, req.ids, req.transform)
+            proj = zeno.mirror.filterProject(
+                req.model, req.ids, req.transform, perplexity=req.perplexity
+            )
 
         return json.dumps({"model": req.model, "data": proj})
 
-    @api_app.get("/mirror/exists")
-    def embedding_exists(model: str, transform: str = ""):
-        exists = zeno.embedding_exists(model, transform)
+    @api_app.get("/mirror/sdm")
+    def sdm():
+        return json.dumps({"data": zeno.mirror.generate_slices()})
+
+    @api_app.get("/mirror/exists/{model}")
+    def embedding_exists(model: str):
+        exists = zeno.embedding_exists(model)
         return json.dumps({"model": model, "exists": exists})
 
     @api_app.websocket("/status")

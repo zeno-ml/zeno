@@ -96,8 +96,9 @@ export function generateCountSpec(shouldColor, domain, metricRange) {
 			},
 			legend: null,
 		};
-		return countSpec;
 	}
+
+	return countSpec;
 }
 
 export function generateHistogramSpec(shouldColor, domain, metricRange) {

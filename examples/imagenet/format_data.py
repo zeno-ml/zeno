@@ -1,7 +1,15 @@
-from typing import List
+import pandas as pd
 
 
-labels = [
+CSV = "./imagenet_val.csv"
+OUT_CSV = "./imagenet_val_str.csv"
+
+
+def map_simple_labels(labels):
+    return [simple_labels[label_index] for label_index in labels]
+
+
+simple_labels = [
     "tench",
     "goldfish",
     "great white shark",
@@ -1004,14 +1012,11 @@ labels = [
     "toilet paper",
 ]
 
+if __name__ == "__main__":
 
-def label_map_generator(labels: List[str]):
-    def _mapper(idx: List[int]):
-        mapping = [labels[i] for i in idx]
-        return mapping
+    df = pd.read_csv(CSV)
 
-    return _mapper
+    df["label"] = [simple_labels[label_index] for label_index in df["label"].tolist()]
+    df["id"] = df["id"].apply(lambda x: f"{x}.JPEG")
 
-
-def imagenet_labeler():
-    return label_map_generator(labels)
+    df.to_csv(OUT_CSV, index=False)

@@ -1,10 +1,7 @@
 tests = "./"
 view = "image_classification"
 metadata = "../imagenette_formatted.csv"
-models = [
-    "resnet",
-    "resnet+clip",
-]
+models = ["resnet+clip"]
 data_path = "../../../data/imagenette/"
 data_column = "id"
 data_type = "path"

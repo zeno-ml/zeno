@@ -2,21 +2,32 @@
 	import { onDestroy, onMount, createEventDispatcher } from "svelte";
 	import createScatterPlot from "regl-scatterplot";
 	import type {
-		ScatterRows,
-		ReglScatterColumns,
+		ScatterRowsFormat,
+		ScatterColumnsFormat,
 		ReglConfig,
 		ColorRange,
+		ReglScatterplot,
 	} from "./scatter";
 
-	type ReglScatterReference = ReturnType<typeof createScatterPlot>;
-
-	const dispatch = createEventDispatcher();
+	const dispatch = createEventDispatcher<{
+		lassoIndex: number[];
+		mount: ReglScatterplot;
+	}>();
 
 	export let width: number;
 	export let height: number;
-	export let data: ScatterRows = [];
+	export let data: ScatterRowsFormat = [];
 	export let colorRange: ColorRange = [];
 	export let config: ReglConfig = {};
+
+	// when I change the height or width
+	// destroy the canvas, regl-scatterplot
+	// then re initialize
+	$: {
+		if (width && height && mounted) {
+			init();
+		}
+	}
 
 	// format data that regl-scatterplot expects
 	// change the {}[] to {} with arrays inside
@@ -44,10 +55,10 @@
 		}
 	}
 
-	let scatterPtr: ReglScatterReference;
+	let scatterPtr: ReglScatterplot;
 	let canvasEl: HTMLCanvasElement;
 
-	onMount(() => {
+	function init() {
 		scatterPtr = createScatterPlot({
 			canvas: canvasEl,
 			width,
@@ -65,13 +76,18 @@
 		scatterPtr.set({
 			lassoColor: "#6a1b9a",
 		});
+		dispatch("mount", scatterPtr);
 		dispatchLasso();
+	}
+	let mounted = false;
+	onMount(() => {
+		mounted = true;
 	});
 	onDestroy(() => {
 		scatterPtr.destroy();
 	});
 
-	function draw(points: ReglScatterColumns) {
+	function draw(points: ScatterColumnsFormat) {
 		if (scatterPtr) {
 			scatterPtr.draw(points, {
 				transition: true,
@@ -84,7 +100,7 @@
 			scatterPtr.subscribe(
 				"deselect",
 				() => {
-					dispatch("lassoIndex", null);
+					dispatch("lassoIndex", []);
 				},
 				null
 			);
@@ -100,9 +116,9 @@
 		}
 	}
 	function minorToMajorRegl(
-		data: ScatterRows,
+		data: ScatterRowsFormat,
 		colorShift = 2
-	): ReglScatterColumns {
+	): ScatterColumnsFormat {
 		const major = {
 			x: [],
 			y: [],
@@ -125,4 +141,4 @@
 	}
 </script>
 
-<canvas bind:this={canvasEl} {width} {height} />
+<canvas bind:this={canvasEl} />

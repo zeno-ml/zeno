@@ -3,7 +3,7 @@ import type ColumnTable from "arquero/dist/types/table/column-table";
 
 import * as aq from "arquero";
 import {
-	interpolatePurples,
+	interpolateOranges,
 	schemeCategory10,
 	schemeTableau10,
 } from "d3-scale-chromatic";
@@ -156,7 +156,7 @@ export function colorDomain(domain: MetadataCellDomain[], type: MetadataType) {
 	} else if (type === MetadataType.CONTINUOUS) {
 		const numBins = domain.length;
 		const colors = interpolateColorToArray(
-			interpolatePurples,
+			interpolateOranges,
 			numBins,
 			[0.15, 1.0]
 		);
