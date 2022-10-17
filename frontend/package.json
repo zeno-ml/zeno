@@ -19,7 +19,7 @@
     "@smui/card": "^6.1.0",
     "@smui/checkbox": "^6.1.0",
     "@smui/chips": "^6.0.0",
-    "@smui/circular-progress": "^6.0.0",
+    "@smui/circular-progress": "^6.1.4",
     "@smui/data-table": "^6.2.0",
     "@smui/form-field": "^6.1.4",
     "@smui/layout-grid": "^6.1.4",
