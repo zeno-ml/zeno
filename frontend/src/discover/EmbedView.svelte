@@ -465,12 +465,6 @@
 	.embed-status {
 		margin-top: 100px;
 	}
-	#overlay {
-		backdrop-filter: blur(5px);
-		position: absolute;
-		top: 10px;
-		left: 10px;
-	}
 	#scatter-container {
 		position: relative;
 		display: flex;

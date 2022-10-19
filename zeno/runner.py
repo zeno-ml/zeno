@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+import shutil
 import sys
 from pathlib import Path
 from typing import List
@@ -85,12 +86,27 @@ def main():
         )
     os.makedirs(args["cache_path"], exist_ok=True)
 
+    # Try to get view from GitHub List, if not try to read from path and copy it.
     views_res = requests.get(VIEW_MAP_URL + VIEWS_MAP_JSON)
     views = views_res.json()
-    url = VIEW_MAP_URL + views[args["view"]]
-    with open(os.path.join(args["cache_path"], "view.mjs"), "wb") as out_file:
-        content = requests.get(url, stream=True).content
-        out_file.write(content)
+    view_dest_path = Path(os.path.join(args["cache_path"], "view.mjs"))
+    try:
+        url = VIEW_MAP_URL + views[args["view"]]
+        with open(view_dest_path, "wb") as out_file:
+            content = requests.get(url, stream=True).content
+            out_file.write(content)
+    except KeyError:
+        view_path = Path(os.path.realpath(os.path.join(toml_path, args["view"])))
+        if view_path.is_file():
+            if view_dest_path.is_file():
+                os.remove(view_dest_path)
+            shutil.copyfile(view_path, view_dest_path)
+        else:
+            print(
+                "ERROR: View not found in list or relative path. See available views",
+                "at https://github.com/zeno-ml/instance-views/blob/main/views.json",
+            )
+            sys.exit(1)
 
     if "metadata" not in args:
         print("ERROR: Must have 'metadata' entry which must be a CSV or Parquet file.")

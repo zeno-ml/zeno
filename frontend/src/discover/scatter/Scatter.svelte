@@ -8,7 +8,6 @@
 	export let data: ScatterRowsFormat = [];
 	export let colorRange: ColorRange = [];
 	export let config: ReglConfig = {};
-	export let resetSelection = true;
 	export let inferDimensions = false;
 	export let width = 500;
 	export let height = 500;

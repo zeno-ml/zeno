@@ -1,7 +1,6 @@
 {
 	"extends": "@tsconfig/svelte/tsconfig.json",
 	"compilerOptions": {
-		"jsx": "react",
 		"target": "esnext",
 		"useDefineForClassFields": true,
 		"baseUrl": ".",
