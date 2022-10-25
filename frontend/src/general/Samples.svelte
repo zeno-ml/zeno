@@ -8,20 +8,29 @@
 	import IconButton from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
 
+	import { onMount, tick } from "svelte";
 	import { ZenoColumnType } from "../globals";
-	import { columnHash } from "../util/util";
+	import SelectionBar from "../metadata/SelectionBar.svelte";
 	import {
+		metadataSelections,
 		model,
-		sort,
+		rowsPerPage,
 		settings,
+		sort,
 		status,
 		transform,
-		rowsPerPage,
-		metadataSelections,
 	} from "../stores";
-	import SelectionBar from "../metadata/SelectionBar.svelte";
+	import { columnHash } from "../util/util";
 
 	export let table: ColumnTable;
+
+	let instanceTable = [];
+	let viewFunction;
+	let viewDivs = {};
+	let optionsDiv;
+	let modelColumn = "";
+	let transformColumn = "";
+	let viewOptions = {};
 
 	let sampleOptions = [5, 15, 30, 60, 100, $settings.samples].sort(
 		(a, b) => a - b
@@ -31,14 +40,9 @@
 	let end = 0;
 	let lastPage = 0;
 
-	let modelColumn = "";
-	let transformColumn = "";
-
-	let sampleDiv;
-	let divFunction;
+	$: idHash = columnHash($settings.idColumn);
 
 	$: start = currentPage * $rowsPerPage;
-
 	$: if (table) {
 		end = Math.min(start + $rowsPerPage, table.size);
 	}
@@ -49,8 +53,21 @@
 		currentPage = lastPage;
 	}
 
-	status.subscribe((s) => {
-		let obj = s.completeColumns.find((c) => {
+	onMount(() => {
+		try {
+			import(window.location.origin + "/cache/view.mjs").then((m) => {
+				viewFunction = m.getInstance;
+				if (m.getOptions) {
+					m.getOptions(optionsDiv, (opts) => (viewOptions = opts));
+				}
+			});
+		} catch (e) {
+			console.log("ERROR: failed to load sample view ---", e);
+		}
+	});
+
+	$: if ($status && $model) {
+		let obj = $status.completeColumns.find((c) => {
 			return (
 				c.columnType === ZenoColumnType.OUTPUT &&
 				c.name === $model &&
@@ -58,7 +75,7 @@
 			);
 		});
 		modelColumn = obj ? columnHash(obj) : "";
-	});
+	}
 
 	transform.subscribe((t) => {
 		if (t) {
@@ -73,40 +90,65 @@
 		metadataSelections.set(new Map());
 	});
 
-	$: if (sampleDiv && divFunction) {
-		sampleDiv.innerHTML = "";
-		let sampleTable = table;
-		if ($sort) {
-			sampleTable = sampleTable.orderby(desc(columnHash($sort)));
-		}
-		sampleTable = sampleTable.slice(start, end);
-
-		sampleDiv.appendChild(
-			divFunction(
-				sampleTable.objects(),
-				modelColumn,
-				columnHash($settings.labelColumn),
-				columnHash($settings.dataColumn),
-				transformColumn,
-				columnHash($settings.idColumn)
-			)
-		);
+	$: if (viewFunction) {
+		table;
+		start;
+		end;
+		$sort;
+		viewOptions;
+		transformColumn;
+		modelColumn;
+		drawInstances();
 	}
 
-	settings.subscribe(() => {
-		let v = window.location.origin + "/cache/view.mjs";
-		try {
-			import(v).then((m) => (divFunction = m.default));
-		} catch (e) {
-			console.log("ERROR: failed to load sample view ---", e);
+	async function drawInstances() {
+		let tempTable = table;
+		if ($sort) {
+			tempTable = tempTable.orderby(desc(columnHash($sort)));
 		}
-	});
+		tempTable = tempTable.slice(start, end);
+		instanceTable = tempTable.objects();
+
+		await tick();
+
+		let ids = instanceTable.map((inst) => inst[idHash]);
+		viewDivs = Object.fromEntries(
+			ids
+				.map(
+					(key) =>
+						!!Object.getOwnPropertyDescriptor(viewDivs, key) && [
+							key,
+							viewDivs[key],
+						]
+				)
+				.filter(Boolean)
+		);
+
+		instanceTable.forEach((inst, i) => {
+			let div = viewDivs[inst[idHash]];
+			if (div) {
+				viewFunction(
+					div,
+					viewOptions,
+					instanceTable[i],
+					modelColumn,
+					columnHash($settings.labelColumn),
+					columnHash($settings.dataColumn),
+					transformColumn,
+					idHash
+				);
+			}
+		});
+	}
 </script>
 
 {#if table}
 	<SelectionBar />
+	<div bind:this={optionsDiv} />
 	<div class="container sample-container">
-		<div bind:this={sampleDiv} />
+		{#each instanceTable as inst (inst[idHash])}
+			<div bind:this={viewDivs[inst[idHash]]} />
+		{/each}
 	</div>
 	<Pagination slot="paginate" class="pagination">
 		<svelte:fragment slot="rowsPerPage">
@@ -155,5 +197,7 @@
 		overflow-y: auto;
 		align-content: baseline;
 		border-bottom: 1px solid rgb(224, 224, 224);
+		display: flex;
+		flex-wrap: wrap;
 	}
 </style>
