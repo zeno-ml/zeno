@@ -36,7 +36,7 @@ pytest-cov = "^3.0"
 black = "^22.10.0"
 flake8 = "^5.0.0"
 mypy = "^0.990"
-pyright = "^1.1.276"
+pyright = "^1.1.278"
 usort = "^1.0.5"
 
 [tool.poetry.scripts]
