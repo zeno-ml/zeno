@@ -16,6 +16,7 @@
 		availableColors,
 	} from "../stores";
 	import Samples from "../general/Samples.svelte";
+	import DistillText from "./DistillText.svelte";
 
 	$: tableEmpty = $table.size === 0;
 	$: {
@@ -38,6 +39,7 @@
 <main>
 	{#if !tableEmpty}
 		<div id="sidebar-view">
+			<DistillText />
 			<MetadataPanel shouldColor />
 		</div>
 
