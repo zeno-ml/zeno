@@ -35,7 +35,7 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/svelte": "^3.2.2",
     "@testing-library/user-event": "^14.4.3",
-    "@tsconfig/svelte": "^2.0.1",
+    "@tsconfig/svelte": "^3.0.0",
     "@types/jest": "^28.1.6",
     "@typescript-eslint/eslint-plugin": "^5.42.1",
     "eslint": "^8.26.0",
@@ -58,8 +58,7 @@
   },
   "dependencies": {
     "@mdi/js": "^7.0.96",
-    "@rollup/plugin-dynamic-import-vars": "^2.0.0",
-    "apache-arrow": "9.0.0",
+    "apache-arrow": "10.0.0",
     "arquero": "^5.1.0",
     "d3-array": "^3.2.0",
     "d3-color": "^3.1.0",

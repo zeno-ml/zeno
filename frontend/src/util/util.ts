@@ -23,6 +23,7 @@ import {
 	rowsPerPage,
 	lassoSelection,
 	startingPointIds,
+	report,
 } from "../stores";
 import { ZenoColumnType } from "../globals";
 
@@ -74,6 +75,7 @@ export async function getSlicesAndReports(t) {
 }
 
 export function updateTab(t: string) {
+	report.set(-1);
 	if (t === "home") {
 		window.location.hash = "";
 	} else {

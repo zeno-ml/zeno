@@ -19,7 +19,7 @@ exclude = ["zeno/tests/*"]
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11" 
 pandas = "^1.4.0"
-pyarrow = "^9.0.0"
+pyarrow = "^10.0.0"
 uvicorn = ">=0.17.5,<0.20.0"
 fastapi = ">=0.75,<0.86"
 websockets = "^10.2"
@@ -28,11 +28,11 @@ tomli = "^2.0.1"
 requests = "^2.28.1"
 scikit-learn = "^1.1.2"
 types-setuptools = "^65.4.0"
+setuptools = "^65.5.1"
 
 [tool.poetry.dev-dependencies]
 pandas-stubs = "^1.5.0"
 pytest = "^7.1.1"
-pytest-cov = "^3.0"
 black = "^22.10.0"
 flake8 = "^5.0.0"
 mypy = "^0.990"
