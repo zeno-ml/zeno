@@ -131,3 +131,8 @@ class MirrorProject(BaseModel):
     transform: str = ""
     ids: Optional[List[str]] = None
     perplexity: Optional[int] = 30
+
+
+class DistillCLIPRequest(BaseModel):
+    text: str
+    batches: Optional[int] = 32

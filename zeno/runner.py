@@ -15,6 +15,7 @@ from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 
 from zeno.classes import (
+    DistillCLIPRequest,
     MetricKey,
     MirrorProject,
     Report,
@@ -263,6 +264,23 @@ def run_zeno(args):
     @api_app.post("/set-reports")
     def update_reports(reqs: List[Report]):
         zeno.set_reports(reqs)
+
+    @api_app.post("/clip/distill")
+    def distill_text(req: DistillCLIPRequest):
+        """Attempts to distill natural language description from the data
+
+        Args:
+            req ({text}): text description of the data (e.g. "a photo of a cat")
+
+        Returns:
+            ({text, column_name}): you get a status update if it failed or not!
+            The result will be an added column in the dataframe
+        """
+        # 1. compute the CLIP inner products with all the image encodings
+        # 2. add that as a column to the data frame
+        # 3. tell the user which column we just added
+
+        return json.dumps({"text": req.text, "column": "", "batches": req.batches})
 
     @api_app.post("/mirror/project")
     def mirror_project(req: MirrorProject):
