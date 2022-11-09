@@ -273,14 +273,13 @@ def run_zeno(args):
             req ({text}): text description of the data (e.g. "a photo of a cat")
 
         Returns:
-            ({text, column_name}): you get a status update if it failed or not!
+            ({text, column}): you get a status update if it failed or not!
             The result will be an added column in the dataframe
         """
-        # 1. compute the CLIP inner products with all the image encodings
-        # 2. add that as a column to the data frame
-        # 3. tell the user which column we just added
-
-        return json.dumps({"text": req.text, "column": "", "batches": req.batches})
+        col_name = zeno.distill_text_clip(
+            text=req.text, model=req.model, transform=req.transform
+        )
+        return json.dumps({"text": req.text, "column": col_name})
 
     @api_app.post("/mirror/project")
     def mirror_project(req: MirrorProject):

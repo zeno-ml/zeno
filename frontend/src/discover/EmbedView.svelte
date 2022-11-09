@@ -102,7 +102,7 @@
 	$: filtersApplied =
 		$metadataSelections.size > 0 || $sliceSelections.length > 0;
 
-	$: if (reglScatterplot && currentState.ids) {
+	$: if (reglScatterplot && currentState.ids && startingPoint.ids) {
 		adjustPointSizes(currentState.ids.length);
 		adjustPointSizesPreview(startingPoint.ids.length);
 	}

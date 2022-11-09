@@ -135,4 +135,6 @@ class MirrorProject(BaseModel):
 
 class DistillCLIPRequest(BaseModel):
     text: str
+    model: str
+    transform: str = ""
     batches: Optional[int] = 32

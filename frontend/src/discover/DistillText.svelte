@@ -3,6 +3,7 @@
 	import Textfield from "@smui/textfield";
 	import { Icon } from "@smui/icon-button";
 	import Button from "@smui/button";
+	import { model, transform } from "../stores";
 
 	let clipText = "";
 	const post = postEndpointGenerator("api/clip");
@@ -25,7 +26,7 @@
 	async function distillText(text: string) {
 		const result = (await post({
 			url: "distill",
-			payload: { text },
+			payload: { text, model: $model, transform: $transform },
 		})) as DistillTextResponse;
 
 		if (result) {
