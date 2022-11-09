@@ -315,14 +315,21 @@ export function updateFilteredTable(t: ColumnTable) {
 	tempTable = filterTableWithSlicesAndMetadata(tempTable);
 
 	const idCol = columnHash(get(settings).idColumn);
-	if (arrayEquals(tempTable.array(idCol), get(filteredTable).array(idCol))) {
-		return;
-	}
-	if (
-		arrayEquals(tempTable.array(idCol), t.array(idCol)) &&
-		arrayEquals(tempTable.array(idCol), get(filteredTable).array(idCol))
-	) {
-		return;
+
+	// if the backend added a column, don't return early
+	// we need to update the filtered table with that
+	const columnAdded =
+		tempTable._names.length === get(filteredTable)._names.length;
+	if (!columnAdded) {
+		if (arrayEquals(tempTable.array(idCol), get(filteredTable).array(idCol))) {
+			return;
+		}
+		if (
+			arrayEquals(tempTable.array(idCol), t.array(idCol)) &&
+			arrayEquals(tempTable.array(idCol), get(filteredTable).array(idCol))
+		) {
+			return;
+		}
 	}
 
 	filteredTable.set(tempTable);
