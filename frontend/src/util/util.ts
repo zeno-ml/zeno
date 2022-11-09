@@ -318,9 +318,9 @@ export function updateFilteredTable(t: ColumnTable) {
 
 	// if the backend added a column, don't return early
 	// we need to update the filtered table with that
-	const columnAdded =
-		tempTable._names.length === get(filteredTable)._names.length;
-	if (!columnAdded) {
+	const columnNumChanged =
+		tempTable._names.length !== get(filteredTable)._names.length;
+	if (!columnNumChanged) {
 		if (arrayEquals(tempTable.array(idCol), get(filteredTable).array(idCol))) {
 			return;
 		}
