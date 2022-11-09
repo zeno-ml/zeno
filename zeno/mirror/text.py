@@ -50,6 +50,7 @@ def distill_text(images: np.ndarray, text: str):
 
     # how well each image makes sense with the text
     clip_scores: torch.Tensor = image_encodings @ text_encoding
-    clip_scores_ndarray = clip_scores.detach().cpu().numpy()
+    clip_scores_normalized = clip_scores / clip_scores.max()
+    clip_scores_ndarray = clip_scores_normalized.detach().cpu().numpy()
 
     return clip_scores_ndarray
