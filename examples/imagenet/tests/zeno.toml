@@ -1,5 +1,5 @@
 tests = "./"
-view = "zenoml_image_classification"
+view = "image-classification"
 metadata = "../imagenet_val_str.csv"
 models = ["resnet", "resnet+clip"]
 data_path = "../../../data/imagenet/val"
