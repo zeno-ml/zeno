@@ -16,6 +16,7 @@ import pandas as pd  # type: ignore
 
 from zeno.api import ZenoOptions
 from zeno.classes import (
+    MetadataType,
     MetricKey,
     Report,
     Slice,
@@ -25,6 +26,7 @@ from zeno.classes import (
     ZenoFunctionType,
 )
 from zeno.mirror import Mirror
+from zeno.mirror.text import distill_text
 from zeno.util import (
     add_to_path,
     get_arrow_bytes,
@@ -509,3 +511,38 @@ class Zeno(object):
     def embedding_exists(self, model: str):
         col = ZenoColumn(name=model, column_type=ZenoColumnType.EMBEDDING)
         return str(col) in self.df.columns
+
+    def distill_text_clip(self, text: str, model: str, transform: str = ""):
+        # the column we'll eventually add the result to
+        text_distill_col = ZenoColumn(
+            column_type=ZenoColumnType.POSTDISTILL,
+            name=text,
+            metadata_type=MetadataType.CONTINUOUS,
+            model=model,
+            transform=transform,
+        )
+        if str(text_distill_col) in self.df:
+            # stop if we already have this column
+            return ""
+
+        embed_col = ZenoColumn(column_type=ZenoColumnType.EMBEDDING, name=model)
+        if str(embed_col) not in self.df:
+            # stop if we don't have embeddings
+            return ""
+
+        # extract the embeddings into ndarray from df
+        images_ndarray = np.vstack(self.df[str(embed_col)].to_numpy())  # type: ignore
+
+        # compute the text "fit" with each image
+        image_scores = distill_text(images_ndarray, text)
+
+        # add the image_scores as a new distill column
+        self.df[str(text_distill_col)] = image_scores
+
+        # register the column add with zeno
+        self.columns.append(text_distill_col)
+        self.complete_columns.append(text_distill_col)
+
+        self.status = f"Done running text distill for {text}"
+
+        return str(text_distill_col)
