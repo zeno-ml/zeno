@@ -22,13 +22,8 @@ interface MetricKey {
 	transform: string;
 }
 
-interface MetadataSelection {
-	column: ZenoColumn;
-	values: Array;
-}
-
 interface FilterPredicateGroup {
-	predicates: Array<FilterPredicate | FilterPredicateGroup>;
+	predicates: (FilterPredicate | FilterPredicateGroup)[];
 	// '', AND or OR
 	join: string;
 }
@@ -37,9 +32,9 @@ interface FilterPredicate {
 	column: ZenoColumn;
 	// >, <, ==, !=, >=, <=
 	operation: string;
-	value: string;
+	value: string | boolean | number;
 	// '', AND or OR
-	join: string;
+	join?: string;
 }
 
 interface Slice {
@@ -77,17 +72,6 @@ interface Extent {
 interface XYExtent {
 	xExtent: Extent;
 	yExtent: Extent;
-}
-
-interface MetadataCellDomain {
-	// If nominal, binStart is the bucket/category.
-	binStart: string | number;
-	// Only present if continuous.
-	binEnd?: number;
-	color: string;
-	metric?: string;
-	count: number;
-	filteredCount: number;
 }
 
 declare namespace svelte.JSX {

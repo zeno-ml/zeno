@@ -1,8 +1,8 @@
 <script lang="ts">
-	export let selection;
-	export let setSelection;
-	export let hash;
-	export let domain;
+	export let col: ZenoColumn;
+	export let filterPredicates: FilterPredicate[];
+	export let histogram;
+	export let shouldColor;
 
 	import { metadataSelections } from "../../stores";
 
@@ -34,7 +34,7 @@
 			}}
 			value={selection.values[0]
 				? selection.values[0].toISOString().slice(0, 16)
-				: domain[0].toISOString().slice(0, 16)} />
+				: histogram[0].toISOString().slice(0, 16)} />
 		<span class="reset" on:click={() => resetSelection(0)}>reset</span>
 	</div>
 	<div class="date-container">
@@ -47,7 +47,7 @@
 			}}
 			value={selection.values[1]
 				? selection[1].toISOString().slice(0, 16)
-				: domain[1].toISOString().slice(0, 16)} />
+				: histogram[1].toISOString().slice(0, 16)} />
 		<span class="reset" on:click={() => resetSelection(1)}>reset</span>
 	</div>
 </div>

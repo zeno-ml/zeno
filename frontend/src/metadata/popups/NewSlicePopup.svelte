@@ -6,15 +6,12 @@
 
 	import {
 		metadataSelections,
-		settings,
 		showNewSlice,
 		slices,
 		sliceSelections,
 		sliceToEdit,
-		table,
 	} from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
-	import { columnHash, getFilterFromPredicates } from "../../util/util";
 	import { MetadataType } from "../../globals";
 
 	import FilterGroupEntry from "./FilterGroupEntry.svelte";
@@ -36,9 +33,9 @@
 			return;
 		}
 		// Pre-fill slice creation with current metadata selections.
-		if ($metadataSelections.size !== 0) {
+		if (Object.keys($metadataSelections).length !== 0) {
 			predicateGroup.predicates = [];
-			[...$metadataSelections.values()].forEach((entry) => {
+			Object.values($metadataSelections).forEach((entry) => {
 				// TODO: support slice selections
 				if (entry.column.metadataType === MetadataType.CONTINUOUS) {
 					predicateGroup.predicates.push({
@@ -104,19 +101,18 @@
 		showNewSlice.set(false);
 		sliceToEdit.set(null);
 
-		const filt = getFilterFromPredicates(predicateGroup);
-		let tempTable = $table.filter(`(d) => ${filt}`);
+		// const filt = getFilterFromPredicates(predicateGroup);
+		// let tempTable = $table.filter(`(d) => ${filt}`);
 
 		slices.update((s) => {
 			s.set(sliceName, <Slice>{
 				sliceName: sliceName,
 				folder: "",
 				filterPredicates: Object.assign({}, predicateGroup),
-				idxs: tempTable.array(columnHash($settings.idColumn)) as string[],
+				// idxs: tempTable.array(columnHash($settings.idColumn)) as string[],
 			});
 			return s;
 		});
-		metadataSelections.set(new Map());
 		sliceSelections.set([]);
 	}
 

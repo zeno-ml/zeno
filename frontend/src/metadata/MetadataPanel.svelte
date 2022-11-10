@@ -3,8 +3,10 @@
 	import IconButton, { Icon } from "@smui/icon-button";
 	import { mdiFolderPlusOutline, mdiPlus } from "@mdi/js";
 
+	import { calculateHistograms } from "./metadata";
+
 	import FolderCell from "./cells/FolderCell.svelte";
-	import MetadataCell from "./cells/MetadataCell.svelte";
+	import MetadataCell from "./MetadataCell.svelte";
 	import NewFolderPopup from "./popups/NewFolderPopup.svelte";
 	import NewSlicePopup from "./popups/NewSlicePopup.svelte";
 	import SliceCell from "./cells/SliceCell.svelte";
@@ -24,28 +26,35 @@
 		transform,
 		metricRange,
 	} from "../stores";
-	import {
-		columnHash,
-		getMetricsForSlices,
-		updateFilteredTable,
-		updateSliceIdxs,
-	} from "../util/util";
+	import { columnHash, getMetricsForSlices } from "../util/util";
 	import { ZenoColumnType } from "../globals";
 
 	export let shouldColor = false;
 
 	let showNewFolder = false;
+	let metadataHistograms = {};
 
-	table.subscribe((t) => updateFilteredTable(t));
-	metadataSelections.subscribe(() => updateFilteredTable($table));
-	sliceSelections.subscribe(() => updateFilteredTable($table));
-	model.subscribe(() => {
-		// When model changes, update slice items (may change with postdistill values).
-		updateSliceIdxs();
-		// Also clear the metadata selection, can't dynamicallly update currently.
-		metadataSelections.set(new Map());
+	status.subscribe((stat) => {
+		let tempSelections = {};
+		stat.completeColumns
+			.filter((col) => !$metadataSelections[columnHash(col)])
+			.forEach((col) => {
+				tempSelections[columnHash(col)] = { predicates: [], join: "" };
+			});
+		metadataSelections.set(tempSelections);
 	});
 
+	metadataSelections.subscribe((mets) => {
+		calculateHistograms(
+			$status.completeColumns,
+			Object.values(mets).filter((m) => m.predicates.length > 0),
+			$model,
+			$transform,
+			$metric
+		).then((res) => (metadataHistograms = res));
+	});
+
+	$: completedColumnHashes = $status.completeColumns.map((c) => columnHash(c));
 	$: res = getMetricsForSlices([
 		<MetricKey>{
 			sli: <Slice>{
@@ -58,8 +67,6 @@
 			transform: $transform,
 		},
 	]);
-
-	$: completedColumnHashes = $status.completeColumns.map((c) => columnHash(c));
 </script>
 
 <div class="side-container">
@@ -98,12 +105,11 @@
 	</div>
 	<div
 		class={"overview " +
-			($sliceSelections.length + $metadataSelections.size === 0
+			($sliceSelections.length + Object.keys($metadataSelections).length === 0
 				? "selected"
 				: "")}
 		on:click={() => {
 			sliceSelections.set([]);
-			metadataSelections.set(new Map());
 		}}>
 		<div class="inline" style:height="44px">All instances</div>
 
@@ -158,7 +164,10 @@
 		{/if}
 	</div>
 	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.METADATA) as col}
-		<MetadataCell {col} {shouldColor} />
+		<MetadataCell
+			{col}
+			{shouldColor}
+			histogram={metadataHistograms[columnHash(col)]} />
 	{/each}
 
 	{#if $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL).length > 0}
@@ -166,16 +175,18 @@
 	{/if}
 	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL) as col}
 		{@const idx = completedColumnHashes.indexOf(columnHash(col))}
-		{#if idx > -1}
-			<MetadataCell col={$status.completeColumns[idx]} {shouldColor} />
-		{:else}
-			<MetadataCell {col} {shouldColor} />
-		{/if}
+		<MetadataCell
+			col={idx > -1 ? $status.completeColumns[idx] : col}
+			{shouldColor}
+			histogram={metadataHistograms[columnHash(col)]} />
 	{/each}
 
 	{#if $model}
 		{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.POSTDISTILL && m.model === $model && m.transform === $transform) as col}
-			<MetadataCell {col} {shouldColor} />
+			<MetadataCell
+				{col}
+				{shouldColor}
+				histogram={metadataHistograms[columnHash(col)]} />
 		{/each}
 	{/if}
 </div>

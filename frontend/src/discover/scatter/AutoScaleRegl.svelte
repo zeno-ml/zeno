@@ -1,7 +1,7 @@
 <script lang="ts">
 	import LowLevelRegl from "./LowLevelRegl.svelte";
 	import { scaleLinear } from "d3-scale";
-	import { extentXY } from "../../util/util";
+	import { extentXY } from "./scatter";
 	import type { ScatterRowsFormat, ReglConfig, ColorRange } from "./scatter";
 
 	export let width: number;

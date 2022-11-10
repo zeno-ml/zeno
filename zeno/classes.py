@@ -80,9 +80,8 @@ class ZenoColumn(CamelModel):
 class FilterPredicate(CamelModel):
     column: ZenoColumn
     operation: str
-    value: str
-    join: str
-    group_indicator: Optional[str]
+    value: Union[str, float, int, bool]
+    join: Optional[str]
 
 
 class FilterPredicateGroup(CamelModel):
@@ -118,6 +117,14 @@ class MetricKey(CamelModel):
     metric: str
     model: str
     transform: str
+
+
+class HistogramRequest(CamelModel):
+    columns: List[ZenoColumn]
+    model: str
+    metric: str
+    transform: str
+    filter_predicates: Optional[List[FilterPredicateGroup]] = None
 
 
 class StatusResponse(CamelModel):

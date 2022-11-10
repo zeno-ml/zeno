@@ -2,56 +2,63 @@
 	import Button from "@smui/button";
 	import { Label } from "@smui/common";
 
-	import { filteredTable, metadataSelections } from "../../stores";
+	export let col: ZenoColumn;
+	export let histogram;
+	export let shouldColor;
+	export let filterPredicates: FilterPredicate[];
+	export let updatePredicates;
 
-	export let selection;
-	export let setSelection;
-	export let hash;
-	export let selectedHash;
-	export let colorAssignments;
-
-	metadataSelections.subscribe((sel) => {
-		if (!sel.has(hash)) {
-			selection.values = [];
+	function setSelection(setting: boolean) {
+		if (filterPredicates.length === 0) {
+			filterPredicates = [
+				{
+					column: col,
+					operation: "==",
+					value: setting,
+					join: "&",
+				},
+			];
+		} else if (filterPredicates[0].value === setting) {
+			filterPredicates = [];
+		} else if (filterPredicates[0].value === true) {
+			filterPredicates[0].value = false;
+		} else {
+			filterPredicates[0].value = true;
 		}
-	});
+		updatePredicates(filterPredicates);
+	}
+
+	$: selectedValue =
+		filterPredicates.length > 0 ? filterPredicates[0].value : null;
 </script>
 
-<div style:display="flex">
-	<div
-		class="binary-button"
-		style=" 'grey'
+{#if histogram}
+	<div style:display="flex">
+		<div
+			class="binary-button"
+			style=" 'grey'
 			: 'a'}">
-		<Button
-			variant={selection.values.length > 0 && selection.values[0] === "is"
-				? "unelevated"
-				: "outlined"}
-			on:click={() => {
-				selection.values = selection.values[0] === "is" ? [] : ["is"];
-				setSelection();
-			}}>
-			<Label style="color: {selectedHash ? colorAssignments.colors[1] : ''}; ">
-				True
-			</Label>
-		</Button>
-		{$filteredTable.filter(`d => d["${hash}"] == 1`).count().object()["count"]}
+			<Button
+				variant={selectedValue !== null && selectedValue
+					? "unelevated"
+					: "outlined"}
+				on:click={() => setSelection(true)}>
+				<Label>True</Label>
+			</Button>
+			{histogram[0].filteredCount}
+		</div>
+		<div class="binary-button">
+			<Button
+				variant={selectedValue !== null && !selectedValue
+					? "unelevated"
+					: "outlined"}
+				on:click={() => setSelection(false)}>
+				<Label>False</Label>
+			</Button>
+			{histogram[1].filteredCount}
+		</div>
 	</div>
-	<div class="binary-button">
-		<Button
-			variant={selection.values.length > 0 && selection.values[0] === "is not"
-				? "unelevated"
-				: "outlined"}
-			on:click={() => {
-				selection.values = selection.values[0] === "is not" ? [] : ["is not"];
-				setSelection();
-			}}>
-			<Label style="color: {selectedHash ? colorAssignments.colors[0] : ''};">
-				False
-			</Label>
-		</Button>
-		{$filteredTable.filter(`d => d["${hash}"] == 0`).count().object()["count"]}
-	</div>
-</div>
+{/if}
 
 <style>
 	.binary-button {

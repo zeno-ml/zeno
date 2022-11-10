@@ -16,6 +16,8 @@ import pandas as pd  # type: ignore
 
 from zeno.api import ZenoOptions
 from zeno.classes import (
+    HistogramRequest,
+    MetadataType,
     MetricKey,
     Report,
     Slice,
@@ -24,6 +26,7 @@ from zeno.classes import (
     ZenoFunction,
     ZenoFunctionType,
 )
+from zeno.filtering import filter_table, filter_table_single
 from zeno.mirror import Mirror
 from zeno.util import (
     add_to_path,
@@ -434,19 +437,30 @@ class Zeno(object):
 
         return_metrics = []
         for metric_key in requests:
-            return_metrics.append(self.calculate_metrics(metric_key))
+            return_metrics.append(self.calculate_slice_metrics(metric_key))
 
         return return_metrics
 
-    def calculate_metrics(self, metric_key: MetricKey):
-        if not self.done_processing:
-            return
-
+    def calculate_slice_metrics(self, metric_key: MetricKey):
         sli = metric_key.sli
+        if not sli.idxs or len(sli.idxs) == 0:
+            return
+        else:
+            return self.calculate_metric(
+                self.df.loc[sli.idxs],
+                metric_key.model,
+                metric_key.transform,
+                metric_key.metric,
+            )
+
+    def calculate_metric(self, df, model, transform, metric):
+        if not self.done_processing:
+            return -1
+
         output_col = ZenoColumn(
             column_type=ZenoColumnType.OUTPUT,
-            name=metric_key.model,
-            transform=metric_key.transform,
+            name=model,
+            transform=transform,
         )
         output_hash = str(output_col)
 
@@ -457,8 +471,8 @@ class Zeno(object):
                 c.column_type == ZenoColumnType.PREDISTILL
                 or c.column_type == ZenoColumnType.POSTDISTILL
             )
-            and c.transform == metric_key.transform
-            and c.model == metric_key.model
+            and c.transform == transform
+            and c.model == model
         ]
 
         local_ops = dataclasses.replace(
@@ -469,13 +483,9 @@ class Zeno(object):
                 zip([c.name for c in distill_fns], [str(c) for c in distill_fns])
             ),
         )
-        if sli.idxs and len(sli.idxs) > 0:
-            metric_func = get_function(self.metric_functions[metric_key.metric])
-            result_metric = metric_func(self.df.loc[sli.idxs], local_ops)
-        else:
-            result_metric = None
 
-        return result_metric
+        metric_func = get_function(self.metric_functions[metric])
+        return metric_func(df, local_ops)
 
     def get_table(self, columns):
         """Get the metadata DataFrame for a given slice.
@@ -505,6 +515,82 @@ class Zeno(object):
         self.slices = dict(zip([s.slice_name for s in slices], slices))
         with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
             pickle.dump(self.slices, f)
+
+    def get_metric(
+        self, df: pd.DataFrame, col: ZenoColumn, pred, model, transform, metric
+    ):
+        df_filt = filter_table_single(df, col, pred)
+        return self.calculate_metric(df_filt, model, transform, metric)
+
+    def calculate_histograms(self, req: HistogramRequest):
+        if len(req.filter_predicates) > 0:
+            filt_df = filter_table(self.df, req.filter_predicates)
+        else:
+            filt_df = self.df
+
+        cols = req.columns
+        res = {}
+        for col in cols:
+            df_col = self.df[str(col)]
+            filt_df_col = filt_df[str(col)]
+            if col.metadata_type == MetadataType.NOMINAL:
+                ret_hist = []
+                val_counts = df_col.value_counts()
+                [
+                    ret_hist.append(
+                        {
+                            "bucket": k,
+                            "count": int(val_counts[k]),
+                            "filteredCount": int((filt_df_col == k).sum()),
+                            "metric": self.get_metric(
+                                filt_df, col, k, req.model, req.transform, req.metric
+                            ),
+                        }
+                    )
+                    for k in val_counts.keys()
+                ]
+                res[str(col)] = ret_hist
+            elif col.metadata_type == MetadataType.CONTINUOUS:
+                res[str(col)] = col.name
+                ret_hist = []
+                bins = np.histogram(df_col, bins="doane")
+                bins_filt = np.histogram(filt_df_col, bins=bins[1])
+                for i, bin_count in enumerate(bins[0]):
+                    ret_hist.append(
+                        {
+                            "bucket": round(bins[1][i], 2),
+                            "bucketEnd": round(bins[1][i + 1], 2),
+                            "count": int(bin_count),
+                            "filteredCount": int(bins_filt[0][i]),
+                            "metric": self.get_metric(
+                                filt_df,
+                                col,
+                                [bins[1][i], bins[1][i + 1]],
+                                req.model,
+                                req.transform,
+                                req.metric,
+                            ),
+                        }
+                    )
+                res[str(col)] = ret_hist
+            elif col.metadata_type == MetadataType.BOOLEAN:
+                res[str(col)] = [
+                    {
+                        "bucket": True,
+                        "count": df_col.sum(),
+                        "filteredCount": filt_df_col.sum(),
+                    },
+                    {
+                        "bucket": False,
+                        "count": len(df_col) - df_col.sum(),
+                        "filteredCount": len(filt_df_col) - filt_df_col.sum(),
+                    },
+                ]
+            elif col.metadata_type == MetadataType.DATETIME:
+                res[str(col)] = []
+            else:
+                res[str(col)] = []
+        return res
 
     def embedding_exists(self, model: str):
         col = ZenoColumn(name=model, column_type=ZenoColumnType.EMBEDDING)

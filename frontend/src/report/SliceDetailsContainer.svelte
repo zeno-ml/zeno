@@ -13,7 +13,6 @@
 	class="slice-link"
 	on:click={() => {
 		updateTab("exploration");
-		metadataSelections.set(new Map());
 		sliceSelections.set([sli.sliceName]);
 	}}
 	on:mouseover={() => (showTooltip = true)}

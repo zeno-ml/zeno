@@ -1,52 +1,28 @@
 <script lang="ts">
 	import { TrailingIcon } from "@smui/chips";
-	import { columnHash, getMetricsForSlices } from "../util/util";
 
 	import {
-		table,
 		filteredTable,
 		metadataSelections,
 		metric,
-		model,
 		sliceSelections,
-		transform,
-		settings,
 		lassoSelection,
+		overallMetric,
 	} from "../stores";
 	import { MetadataType } from "../globals";
 
-	async function updateResult(model, metric, transform, filteredTable) {
-		if (filteredTable.size === 0) {
-			return;
-		}
-
-		let name = "";
-		if ($table.size === filteredTable.size) {
-			name = "overall";
-		}
-
-		let idxs = filteredTable.array(columnHash($settings.idColumn));
-		let sli = <Slice>{ sliceName: name, folder: "", idxs: idxs };
-
-		return getMetricsForSlices([
-			<MetricKey>{
-				sli: sli,
-				metric: metric,
-				model: model,
-				transform: transform,
-			},
-		]);
-	}
-
-	$: result = updateResult($model, $metric, $transform, $filteredTable);
+	$: filters = Object.entries($metadataSelections)
+		.filter(([_, value]) => value.predicates.length > 0)
+		.map(
+			([key, value]) =>
+				[key, value.predicates as unknown] as [string, FilterPredicate[]]
+		);
 </script>
 
 <div class="chips">
 	<span id="metric">
 		{$metric ? $metric + ":" : ""}
-		{#await result then res}
-			{res && res[0] !== undefined && res[0] !== null ? res[0].toFixed(2) : ""}
-		{/await}
+		{$overallMetric ? $overallMetric.toFixed(2) : ""}
 	</span>
 	<span id="size">
 		({$filteredTable.size} instances)
@@ -69,49 +45,54 @@
 				</TrailingIcon>
 			</div>
 		{/each}
-		{#each [...$metadataSelections.entries()] as [hash, chip]}
+		{#each filters as [hash, chip]}
 			<div class="meta-chip">
 				<span>
-					{#if chip.column.metadataType === MetadataType.CONTINUOUS}
-						{chip.values[0].toFixed(2)}
+					{#if chip[0].column.metadataType === MetadataType.CONTINUOUS}
+						{parseFloat(chip[0].value).toFixed(2)}
 						{"<"}
-						{chip.column.name}
+						{chip[0].column.name}
 						{"<"}
-						{chip.values[1].toFixed(2)}
-					{:else if chip.column.metadataType === MetadataType.BOOLEAN}
-						{chip.values[0]}
-						{chip.column.name}
-					{:else if chip.column.metadataType === MetadataType.DATETIME}
-						{#if !chip.values[1]}
-							start {chip.values[0].toLocaleString()}
-						{:else if !chip.values[0]}
-							end {chip.values[0].toLocaleString()}
+						{parseFloat(chip[1].value).toFixed(2)}
+					{:else if chip[0].column.metadataType === MetadataType.BOOLEAN}
+						{chip[0].value}
+						{chip[0].column.name}
+					{:else if chip[0].column.metadataType === MetadataType.DATETIME}
+						{#if !chip[0].value}
+							start {chip[0].value.toLocaleString()}
+						{:else if !chip[0].value}
+							end {chip[0].value.toLocaleString()}
 						{:else}
-							from {chip.values[0].toLocaleString()} to {chip.values[1].toLocaleString()}
+							from {chip[0].value.toLocaleString()} to {chip.values[1].toLocaleString()}
 						{/if}
 					{:else}
-						{chip.column.name}
+						{chip[0].column.name}
 						{"=="}
-						{chip.values.join(" | ")}
+						{chip.map((c) => c.value).join(" | ")}
 					{/if}
 				</span>
 				<TrailingIcon
 					class="remove material-icons"
 					on:click={() =>
-						metadataSelections.update((m) => {
-							m.delete(hash);
-							return m;
-						})}>
+						metadataSelections.update((m) => ({
+							...m,
+							[hash]: { predicates: [], join: "&" },
+						}))}>
 					cancel
 				</TrailingIcon>
 			</div>
 		{/each}
-		{#if $metadataSelections.size + $sliceSelections.length > 0}
+		{#if Object.keys($metadataSelections).length + $sliceSelections.length > 0}
 			<span
 				class="clear"
 				on:click={() => {
-					metadataSelections.set(new Map());
 					sliceSelections.set([]);
+					metadataSelections.update((m) => {
+						for (let key in m) {
+							m[key] = { predicates: [], join: "&" };
+						}
+						return { ...m };
+					});
 				}}>
 				clear all
 			</span>

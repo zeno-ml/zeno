@@ -19,7 +19,7 @@
 		transform,
 		startingPointIds,
 	} from "../stores";
-	import { columnHash, enforce, updateFilteredTable } from "../util/util";
+	import { columnHash, updateFilteredTable } from "../util/util";
 	import request from "../util/request";
 
 	import type ColumnTable from "arquero/dist/types/table/column-table";
@@ -252,7 +252,6 @@
 	}
 
 	function clearAllFilters() {
-		metadataSelections.set(new Map());
 		sliceSelections.set([]);
 		lassoSelection.set([]);
 		reglScatterplot.deselect();
@@ -282,7 +281,9 @@
 		snapshot: Snapshot,
 		idToColor: Map<string, number>
 	): ScatterRowsFormat {
-		enforce({ rule: idToColor.size > 0, name: "color mappings exist" });
+		if (!(idToColor.size > 0)) {
+			throw new Error(`Violated: color mappings exist`);
+		}
 
 		const ids = snapshot.ids;
 		const data = snapshot.start2D.map((d, i) => {

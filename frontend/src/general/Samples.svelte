@@ -12,7 +12,6 @@
 	import { ZenoColumnType } from "../globals";
 	import SelectionBar from "../metadata/SelectionBar.svelte";
 	import {
-		metadataSelections,
 		model,
 		rowsPerPage,
 		settings,
@@ -87,7 +86,6 @@
 		} else {
 			transformColumn = "";
 		}
-		metadataSelections.set(new Map());
 	});
 
 	$: if (viewFunction) {

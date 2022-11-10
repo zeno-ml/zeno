@@ -1,4 +1,3 @@
-import { MetadataType } from "./../globals";
 import type ColumnTable from "arquero/dist/types/table/column-table";
 
 import * as aq from "arquero";
@@ -6,9 +5,7 @@ import { get } from "svelte/store";
 import {
 	filteredTable,
 	folders,
-	metadataSelections,
 	model,
-	sliceSelections,
 	tab,
 	transforms,
 	metrics,
@@ -25,13 +22,6 @@ import {
 	startingPointIds,
 	report,
 } from "../stores";
-import { ZenoColumnType } from "../globals";
-
-const PREDICATE_MAP = {
-	"": "",
-	AND: "&&",
-	OR: "||",
-};
 
 export function initialFetch() {
 	fetch("/api/settings")
@@ -58,13 +48,6 @@ export function initialFetch() {
 export async function getSlicesAndReports(t) {
 	const slicesRes = await fetch("/api/slices").then((d) => d.json());
 	const slis = JSON.parse(slicesRes) as Slice[];
-	slis.forEach((s: Slice) => {
-		if (s.filterPredicates) {
-			s.idxs = t
-				.filter("(d) => " + getFilterFromPredicates(s.filterPredicates))
-				.array(columnHash(get(settings).idColumn));
-		}
-	});
 	const sliMap = new Map();
 	slis.forEach((e) => sliMap.set(e.sliceName, e));
 	slices.set(sliMap);
@@ -120,71 +103,6 @@ export async function getMetricsForSlices(metricKeys: MetricKey[]) {
 		requiredIndices.forEach((r, i) => (returnValues[r] = res[i]));
 	}
 	return returnValues;
-}
-
-export function updateSliceIdxs() {
-	slices.update((slis) => {
-		slis.forEach((sli) => {
-			sli.idxs = get(table)
-				.filter("(d) => " + getFilterFromPredicates(sli.filterPredicates))
-				.array(columnHash(get(settings).idColumn));
-			slis.set(sli.sliceName, sli);
-		});
-		return slis;
-	});
-}
-
-export function getFilterFromPredicates(
-	predicateGroup: FilterPredicateGroup,
-	groupIndex = 0
-) {
-	if (predicateGroup.predicates.length === 0) {
-		return "true";
-	}
-
-	let ret = (groupIndex > 0 ? PREDICATE_MAP[predicateGroup.join] : "") + " (";
-
-	predicateGroup.predicates.forEach(
-		(p: FilterPredicate | FilterPredicateGroup, predicateIndex) => {
-			if ("predicates" in p) {
-				ret += getFilterFromPredicates(p, groupIndex + predicateIndex);
-				return;
-			}
-
-			if (p.column.columnType === ZenoColumnType.POSTDISTILL) {
-				p.column.model = get(model);
-			}
-
-			const hash = columnHash(p.column);
-
-			if (p.join === "") {
-				ret +=
-					` (d["${hash}"]` +
-					" " +
-					p.operation +
-					" " +
-					(isNaN(parseFloat(p.value)) ? `"${p.value}"` : p.value) +
-					") ";
-			} else {
-				let join = "";
-				if (predicateIndex !== 0) {
-					join = PREDICATE_MAP[p.join];
-				}
-				ret +=
-					join +
-					" (" +
-					`d["${hash}"]` +
-					" " +
-					p.operation +
-					" " +
-					(isNaN(parseFloat(p.value)) ? `"${p.value}"` : p.value) +
-					") ";
-			}
-		}
-	);
-
-	ret += ") ";
-	return ret;
 }
 
 export function updateTableColumns(w: WSResponse) {
@@ -247,51 +165,6 @@ export function filterTableForIds(t: ColumnTable, ids: string[]) {
 	return sharedTable;
 }
 
-export function filterTableWithSlicesAndMetadata(t: ColumnTable) {
-	let tempTable = t;
-
-	// Filter with slices.
-	get(sliceSelections).forEach((s) => {
-		const filt = getFilterFromPredicates(get(slices).get(s).filterPredicates);
-		tempTable = tempTable.filter(`(d) => ${filt}`);
-	});
-
-	// Filter with metadata selections.
-	[...get(metadataSelections).entries()].forEach((e) => {
-		const [hash, entry] = e;
-		const metadataType = entry.column.metadataType;
-		if (metadataType === MetadataType.CONTINUOUS) {
-			tempTable = tempTable.filter(
-				`(r) => r["${hash}"] > ${entry.values[0]} && r["${hash}"] < ${entry.values[1]}`
-			);
-		} else if (metadataType === MetadataType.BOOLEAN) {
-			if (entry.values[0] === "is") {
-				tempTable = tempTable.filter(`(r) => r["${hash}"] == 1`);
-			} else {
-				tempTable = tempTable.filter(`(r) => r["${hash}"] == 0`);
-			}
-		} else if (metadataType === MetadataType.DATETIME) {
-			tempTable = tempTable.filter(
-				aq.escape(
-					(r) =>
-						(entry.values[0] ? new Date(r[hash]) > entry.values[0] : true) &&
-						(entry.values[1] ? new Date(r[hash]) < entry.values[1] : true)
-				)
-			);
-		} else if (metadataType === MetadataType.NOMINAL) {
-			tempTable = tempTable.filter(
-				aq.escape((r) => aq.op.includes(entry.values, r[hash], 0))
-			);
-		} else {
-			tempTable = tempTable.filter(
-				`(r) => op.match(r["${hash}"], "${entry.values[0]}")`
-			);
-		}
-	});
-
-	return tempTable;
-}
-
 export function updateFilteredTable(t: ColumnTable) {
 	if (!get(ready) || t.size === 0) {
 		return;
@@ -314,7 +187,7 @@ export function updateFilteredTable(t: ColumnTable) {
 	}
 
 	// metadata and slices
-	tempTable = filterTableWithSlicesAndMetadata(tempTable);
+	// tempTable = filterTableWithSlicesAndMetadata(tempTable);
 
 	const idCol = columnHash(get(settings).idColumn);
 	if (arrayEquals(tempTable.array(idCol), get(filteredTable).array(idCol))) {
@@ -328,48 +201,4 @@ export function updateFilteredTable(t: ColumnTable) {
 	}
 
 	filteredTable.set(tempTable);
-}
-
-export function enforce({ rule, name }: { rule: boolean; name: string }) {
-	if (rule !== true) {
-		throw new Error(`Violated: ${name}`);
-	}
-}
-
-/**
- * extentXY returns the minimum and maximum values for each dimension X and Y
- */
-export function extentXY<T>(
-	data: T[],
-	xGetter = (d: T) => d[0],
-	yGetter = (d: T) => d[1]
-): XYExtent {
-	const getters = [xGetter, yGetter];
-	const extents: Extent[] = extent(data, getters);
-	const [xExtent, yExtent] = extents;
-	return { xExtent, yExtent };
-}
-
-/**
- * extent is a general implementation over n dimensions to get min and max values
- */
-export function extent<T>(data: T[], getters: ((d: T) => number)[]): Extent[] {
-	const extents: Extent[] = getters.map(() => ({
-		min: Infinity,
-		max: -Infinity,
-	}));
-
-	data.forEach((d) => {
-		getters.forEach((getter, i) => {
-			const value = getter(d);
-			const extent = extents[i];
-			if (value < extent.min) {
-				extent.min = value;
-			}
-			if (value > extent.max) {
-				extent.max = value;
-			}
-		});
-	});
-	return extents;
 }

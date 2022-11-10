@@ -15,6 +15,7 @@ from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 
 from zeno.classes import (
+    HistogramRequest,
     MetricKey,
     MirrorProject,
     Report,
@@ -263,6 +264,10 @@ def run_zeno(args):
     @api_app.post("/set-reports")
     def update_reports(reqs: List[Report]):
         zeno.set_reports(reqs)
+
+    @api_app.post("/calculate-histograms")
+    def calculate_histograms(req: HistogramRequest):
+        return json.dumps(zeno.calculate_histograms(req))
 
     @api_app.post("/mirror/project")
     def mirror_project(req: MirrorProject):

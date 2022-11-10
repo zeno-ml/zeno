@@ -10,8 +10,8 @@ import {
 	sliceWritable,
 } from "./util/customStores";
 
-export const ready: Writable<boolean> = writable(false);
 export const tab: Writable<string> = writable("results");
+export const rowsPerPage = writable(0);
 
 export const wsResponse = websocketStore(
 	`ws://localhost:${location.port}/api/status`,
@@ -36,6 +36,7 @@ export const status: Readable<WSResponse> = derived(
 		completeColumns: [],
 	} as WSResponse
 );
+export const ready: Writable<boolean> = writable(false);
 
 export const settings: Writable<Settings> = writable(<Settings>{
 	view: "",
@@ -47,17 +48,23 @@ export const settings: Writable<Settings> = writable(<Settings>{
 export const metrics: Writable<string[]> = writable([]);
 export const models: Writable<string[]> = writable([]);
 export const transforms: Writable<string[]> = writable([]);
-export const folders: Writable<string[]> = folderWritable();
 
 export const model: Writable<string> = writable("");
 export const metric: Writable<string> = writable("");
 export const transform: Writable<string> = writable("");
-export const rowsPerPage = writable(0);
+export const currentColumns: Readable<ZenoColumn[]> = derived(
+	[settings, model],
+	([$settings, $model]) =>
+		$settings.metadataColumns.filter(
+			(c) => c.model === "" || c.model === $model
+		)
+);
 
 export const report: Writable<number> = writable(undefined);
 export const sort: Writable<ZenoColumn> = writable();
 
 export const slices: Writable<Map<string, Slice>> = sliceWritable();
+export const folders: Writable<string[]> = folderWritable();
 export const reports: Writable<Report[]> = reportWritable();
 export const results: Writable<InternMap<MetricKey, number>> = writable(
 	new InternMap(
@@ -68,28 +75,15 @@ export const results: Writable<InternMap<MetricKey, number>> = writable(
 );
 
 export const table: Writable<ColumnTable> = writable(aq.table({}));
-
-export const metadataSelections: Writable<Map<string, MetadataSelection>> =
-	writable(new Map());
-export const sliceSelections: Writable<string[]> = writable([]);
 export const filteredTable: Writable<ColumnTable> = writable(aq.fromJSON({}));
-
-export const currentColumns: Readable<ZenoColumn[]> = derived(
-	[settings, model],
-	([$settings, $model]) =>
-		$settings.metadataColumns.filter(
-			(c) => c.model === "" || c.model === $model
-		)
-);
+export const metadataSelections: Writable<
+	Record<string, FilterPredicateGroup>
+> = writable({});
+export const sliceSelections: Writable<string[]> = writable([]);
 
 export const showNewSlice: Writable<boolean> = writable(false);
 export const sliceToEdit: Writable<Slice> = writable(null);
 
-export const metricRange: Writable<[number, number, boolean]> = writable([
-	Number.MAX_VALUE,
-	Number.MIN_VALUE,
-	false,
-]);
 // Which metadata column to color projection by.
 export const colorByHash = writable("0label");
 export const availableColors = writable({});
@@ -100,6 +94,14 @@ export const colorSpec = derived(
 		return color;
 	}
 );
+export const metricRange: Writable<[number, number, boolean]> = writable([
+	Number.MAX_VALUE,
+	Number.MIN_VALUE,
+	false,
+]);
+
 // null when not selected and string[] when we have stuff
 export const lassoSelection = writable<string[]>([]);
 export const startingPointIds = writable<string[]>([]);
+
+export const overallMetric: Writable<number> = writable(undefined);
