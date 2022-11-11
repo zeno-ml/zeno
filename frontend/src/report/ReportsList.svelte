@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { mdiChartBar, mdiChartLine, mdiPlus, mdiTable } from "@mdi/js";
+	import { mdiChartBar, mdiChartLine, mdiPlus, mdiTable, mdiChartTimelineVariant} from "@mdi/js";
 	import { Svg } from "@smui/common/elements";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Ripple from "@smui/ripple";
@@ -75,7 +75,7 @@
 									reports.update((reps) => {
 										reps.push({
 											name: "new report",
-											reportType: "timeseries",
+											reportType: "line",
 											reportPredicates: [],
 										});
 										return reps;
@@ -84,6 +84,25 @@
 								<IconButton>
 									<Icon component={Svg} viewBox="0 0 24 24">
 										<path fill="black" d={mdiChartLine} />
+									</Icon>
+								</IconButton>
+								<p>New <b>line</b> report</p>
+							</div>
+							<div
+								class="report-entry"
+								on:click={() => {
+									reports.update((reps) => {
+										reps.push({
+											name: "new report",
+											reportType: "timeseries",
+											reportPredicates: [],
+										});
+										return reps;
+									});
+								}}>
+								<IconButton>
+									<Icon component={Svg} viewBox="0 0 24 24">
+										<path fill="black" d={mdiChartTimelineVariant} />
 									</Icon>
 								</IconButton>
 								<p>New <b>timeseries</b> report</p>

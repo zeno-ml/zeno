@@ -20,6 +20,7 @@
 	import SliceChartReport from "./slice-chart/SliceChartReport.svelte";
 	import TimeseriesReportTable from "./timeseries-report/TimeseriesReportTable.svelte";
 	import TableReportTable from "./table-report/TableReportTable.svelte";
+	import LineReport from "./line-report/LineReport.svelte";
 
 	let showSlices = true;
 
@@ -36,8 +37,10 @@
 						<TimeseriesReportTable reportId={$report} />
 					{:else if currentReport.reportType === "slicechart"}
 						<SliceChartReport reportId={$report} />
-					{:else}
+					{:else if currentReport.reportType === "table"}
 						<TableReportTable reportId={$report} />
+					{:else}
+					    <LineReport reportId={$report} />
 					{/if}
 				{/if}
 			</div>

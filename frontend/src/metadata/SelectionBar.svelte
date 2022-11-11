@@ -44,9 +44,9 @@
 <div class="chips">
 	<span id="metric">
 		{$metric ? $metric + ":" : ""}
-		{#await result then res}
+		<!-- {#await result then res}
 			{res && res[0] !== undefined && res[0] !== null ? res[0].toFixed(2) : ""}
-		{/await}
+		{/await} -->
 	</span>
 	<span id="size">
 		({$filteredTable.size} instances)

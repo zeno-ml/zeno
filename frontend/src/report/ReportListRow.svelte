@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { mdiChartBar, mdiChartLine, mdiTable } from "@mdi/js";
+	import { mdiChartBar, mdiChartLine, mdiTable, mdiChartTimelineVariant } from "@mdi/js";
 	import { Icon } from "@smui/button";
 	import { Svg } from "@smui/common/elements";
 	import IconButton from "@smui/icon-button";
@@ -10,8 +10,9 @@
 
 	let iconMap = {
 		table: mdiTable,
-		timeseries: mdiChartLine,
+		timeseries: mdiChartTimelineVariant,
 		slicechart: mdiChartBar,
+		line: mdiChartLine,
 	};
 </script>
 
