@@ -11,7 +11,6 @@ import requests  # type: ignore
 import tomli
 import uvicorn  # type: ignore
 from fastapi import FastAPI, WebSocket
-from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 
 from zeno.classes import (
@@ -21,7 +20,7 @@ from zeno.classes import (
     Report,
     Slice,
     StatusResponse,
-    ZenoColumn,
+    TableRequest,
     ZenoSettings,
     ZenoVariables,
 )
@@ -226,6 +225,7 @@ def run_zeno(args):
             data_column=zeno.data_column,
             metadata_columns=zeno.columns,
             samples=args["samples"],
+            totalSize=zeno.df.shape[0],
         )
 
     @api_app.get("/initialize", response_model=ZenoVariables)
@@ -245,29 +245,29 @@ def run_zeno(args):
     def get_reports():
         return json.dumps(zeno.get_reports())
 
-    @api_app.post("/results")
-    def get_results(reqs: List[MetricKey]):
-        return json.dumps(zeno.get_results(reqs))
-
-    @api_app.post("/table")
-    def get_table(columns: List[ZenoColumn]):
-        return Response(zeno.get_table(columns))
-
     @api_app.post("/set-folders")
     def set_folders(folders: List[str]):
         zeno.set_folders(folders)
-
-    @api_app.post("/set-slices")
-    def set_slices(slices: List[Slice]):
-        zeno.set_slices(slices)
 
     @api_app.post("/set-reports")
     def update_reports(reqs: List[Report]):
         zeno.set_reports(reqs)
 
+    @api_app.post("/get-filtered-table")
+    def get_filtered_table(req: TableRequest):
+        return zeno.get_filtered_table(req)
+
     @api_app.post("/calculate-histograms")
     def calculate_histograms(req: HistogramRequest):
         return json.dumps(zeno.calculate_histograms(req))
+
+    @api_app.post("/create-new-slice")
+    def create_new_slice(req: Slice):
+        zeno.create_new_slice(req)
+
+    @api_app.post("/get-metrics-for-slices")
+    def get_metrics_for_slices(reqs: List[MetricKey]):
+        return json.dumps(zeno.get_metrics_for_slices(reqs))
 
     @api_app.post("/mirror/project")
     def mirror_project(req: MirrorProject):

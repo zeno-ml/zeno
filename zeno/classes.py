@@ -42,6 +42,12 @@ class CamelModel(BaseModel):
         allow_population_by_field_name = True
 
 
+class ZenoState(CamelModel):
+    model: str
+    metric: str
+    transform: str
+
+
 class ReportPredicate(CamelModel):
     slice_name: str
     metric: str
@@ -96,6 +102,7 @@ class ZenoSettings(CamelModel):
     data_column: ZenoColumn
     metadata_columns: List[ZenoColumn]
     samples: int
+    totalSize: int
 
 
 class ZenoVariables(CamelModel):
@@ -109,21 +116,23 @@ class Slice(CamelModel):
     slice_name: str
     folder: str
     filter_predicates: Optional[FilterPredicateGroup]
-    idxs: Optional[List[str]]
 
 
 class MetricKey(CamelModel):
     sli: Slice
-    metric: str
-    model: str
-    transform: str
+    state: ZenoState
 
 
 class HistogramRequest(CamelModel):
     columns: List[ZenoColumn]
-    model: str
-    metric: str
-    transform: str
+    state: ZenoState
+    filter_predicates: Optional[List[FilterPredicateGroup]] = None
+
+
+class TableRequest(CamelModel):
+    columns: List[ZenoColumn]
+    state: ZenoState
+    slice_range: List[int]
     filter_predicates: Optional[List[FilterPredicateGroup]] = None
 
 

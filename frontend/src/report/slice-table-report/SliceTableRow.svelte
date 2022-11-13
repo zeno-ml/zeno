@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { mdiPlusCircleOutline } from "@mdi/js";
 	import { Icon } from "@smui/common";
-	import { Svg } from "@smui/common/elements";
+	import { Svg } from "@smui/common";
 	import { Cell, Row } from "@smui/data-table";
 
 	import { metric, models, report, reports, transform } from "../../stores";
-	import { getMetricsForSlices } from "../../util/util";
+	import { getMetricsForSlices } from "../../api";
 
 	import SliceDetailsContainer from "../SliceDetailsContainer.svelte";
 
@@ -14,9 +14,11 @@
 	$: modelResults = getMetricsForSlices(
 		$models.map((m) => ({
 			sli: sli,
-			metric: $metric,
-			model: m,
-			transform: $transform,
+			state: {
+				metric: $metric,
+				model: m,
+				transform: $transform,
+			},
 		}))
 	);
 </script>

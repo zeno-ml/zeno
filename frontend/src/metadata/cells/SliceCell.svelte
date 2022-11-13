@@ -2,20 +2,18 @@
 	import { mdiPencilOutline, mdiDotsHorizontal } from "@mdi/js";
 	import Button, { Label } from "@smui/button";
 	import IconButton, { Icon } from "@smui/icon-button";
-	import { Svg } from "@smui/common/elements";
+	import { Svg } from "@smui/common";
 	import Dialog, { Actions, Content, Title, InitialFocus } from "@smui/dialog";
 	import SliceDetails from "../../general/SliceDetails.svelte";
 	import {
-		metric,
-		model,
 		showNewSlice,
 		slices,
 		sliceSelections,
 		sliceToEdit,
-		transform,
 		reports,
+		zenoState,
 	} from "../../stores";
-	import { getMetricsForSlices } from "../../util/util";
+	import { getMetricsForSlices } from "../../api";
 
 	export let slice: Slice;
 	export let inFolder = false;
@@ -88,9 +86,7 @@
 	$: result = getMetricsForSlices([
 		<MetricKey>{
 			sli: slice,
-			metric: $metric,
-			model: $model,
-			transform: $transform,
+			state: $zenoState,
 		},
 	]);
 </script>
@@ -187,9 +183,9 @@
 							{res && res[0] !== undefined ? res[0].toFixed(2) : ""}
 						{/await}
 					</span>
-					<span id="size">
+					<!-- <span id="size">
 						({slice.idxs.length})
-					</span>
+					</span> -->
 				{/if}
 				<div class="inline" style:cursor="pointer">
 					<div style:width="36px">

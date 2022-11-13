@@ -45,7 +45,7 @@
 				on:click={() => setSelection(true)}>
 				<Label>True</Label>
 			</Button>
-			{histogram[0].filteredCount}
+			<p>{histogram[0].filteredCount}</p>
 		</div>
 		<div class="binary-button">
 			<Button
@@ -55,12 +55,18 @@
 				on:click={() => setSelection(false)}>
 				<Label>False</Label>
 			</Button>
-			{histogram[1].filteredCount}
+			<p>{histogram[1].filteredCount}</p>
 		</div>
 	</div>
 {/if}
 
 <style>
+	p {
+		padding: 0px;
+		margin: 0px;
+		font-size: 14px;
+		color: #666;
+	}
 	.binary-button {
 		display: flex;
 		flex-direction: column;

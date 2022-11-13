@@ -7,9 +7,10 @@
 		metric,
 		sliceSelections,
 		lassoSelection,
-		overallMetric,
+		zenoState,
 	} from "../stores";
 	import { MetadataType } from "../globals";
+	import { getMetricsForSlices } from "../api";
 
 	$: filters = Object.entries($metadataSelections)
 		.filter(([_, value]) => value.predicates.length > 0)
@@ -17,15 +18,33 @@
 			([key, value]) =>
 				[key, value.predicates as unknown] as [string, FilterPredicate[]]
 		);
+
+	$: res = getMetricsForSlices([
+		<MetricKey>{
+			sli: <Slice>{
+				sliceName: "",
+				folder: "",
+				filterPredicates: {
+					predicates: Object.values($metadataSelections).filter(
+						(value) => value.predicates.length > 0
+					),
+					join: "",
+				},
+			},
+			state: $zenoState,
+		},
+	]);
 </script>
 
 <div class="chips">
 	<span id="metric">
 		{$metric ? $metric + ":" : ""}
-		{$overallMetric ? $overallMetric.toFixed(2) : ""}
+		{#await res then r}
+			{r && r[0] !== null && r[0] !== undefined ? r[0].toFixed(2) : ""}
+		{/await}
 	</span>
 	<span id="size">
-		({$filteredTable.size} instances)
+		({$filteredTable.length} instances)
 	</span>
 
 	{#if $lassoSelection.length > 0}
@@ -82,9 +101,12 @@
 				</TrailingIcon>
 			</div>
 		{/each}
-		{#if Object.keys($metadataSelections).length + $sliceSelections.length > 0}
+		{#if Object.values($metadataSelections)
+			.map((d) => d.predicates)
+			.flat().length + $sliceSelections.length > 0}
 			<span
 				class="clear"
+				on:keydown={() => ({})}
 				on:click={() => {
 					sliceSelections.set([]);
 					metadataSelections.update((m) => {

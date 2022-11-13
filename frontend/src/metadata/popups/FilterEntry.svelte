@@ -2,7 +2,7 @@
 	import Select, { Option } from "@smui/select";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Autocomplete from "@smui-extra/autocomplete";
-	import { Svg } from "@smui/common/elements";
+	import { Svg } from "@smui/common";
 	import Textfield from "@smui/textfield";
 	import HelperText from "@smui/textfield/helper-text";
 	import { mdiTrashCanOutline } from "@mdi/js";
@@ -24,7 +24,7 @@
 			bind:value={predicate.join}
 			label="Join"
 			style="margin-right: 20px; width: 90px">
-			{#each ["AND", "OR"] as o}
+			{#each ["&", "|"] as o}
 				<Option value={o}>{o}</Option>
 			{/each}
 		</Select>

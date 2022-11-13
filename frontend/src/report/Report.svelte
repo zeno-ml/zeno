@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Select, { Option } from "@smui/select";
-	import { Svg } from "@smui/common/elements";
+	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import { mdiChevronDown, mdiChevronUp } from "@mdi/js";
 	import { slide } from "svelte/transition";

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { mdiChartBar, mdiChartLine, mdiPlus, mdiTable } from "@mdi/js";
-	import { Svg } from "@smui/common/elements";
+	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Ripple from "@smui/ripple";
 

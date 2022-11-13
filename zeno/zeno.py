@@ -21,16 +21,17 @@ from zeno.classes import (
     MetricKey,
     Report,
     Slice,
+    TableRequest,
     ZenoColumn,
     ZenoColumnType,
     ZenoFunction,
     ZenoFunctionType,
+    ZenoState,
 )
 from zeno.filtering import filter_table, filter_table_single
 from zeno.mirror import Mirror
 from zeno.util import (
     add_to_path,
-    get_arrow_bytes,
     get_function,
     getMetadataType,
     load_series,
@@ -432,35 +433,23 @@ class Zeno(object):
 
         self.status = "Done running postprocessing"
 
-    def get_results(self, requests: List[MetricKey]):
+    def get_metrics_for_slices(self, requests: List[MetricKey]):
         """Calculate result for each requested combination."""
 
         return_metrics = []
         for metric_key in requests:
-            return_metrics.append(self.calculate_slice_metrics(metric_key))
-
+            filt_df = filter_table(self.df, metric_key.sli.filter_predicates.predicates)
+            return_metrics.append(self.calculate_metric(filt_df, metric_key.state))
         return return_metrics
 
-    def calculate_slice_metrics(self, metric_key: MetricKey):
-        sli = metric_key.sli
-        if not sli.idxs or len(sli.idxs) == 0:
-            return
-        else:
-            return self.calculate_metric(
-                self.df.loc[sli.idxs],
-                metric_key.model,
-                metric_key.transform,
-                metric_key.metric,
-            )
-
-    def calculate_metric(self, df, model, transform, metric):
+    def calculate_metric(self, df, state):
         if not self.done_processing:
             return -1
 
         output_col = ZenoColumn(
             column_type=ZenoColumnType.OUTPUT,
-            name=model,
-            transform=transform,
+            name=state.model,
+            transform=state.transform,
         )
         output_hash = str(output_col)
 
@@ -471,8 +460,8 @@ class Zeno(object):
                 c.column_type == ZenoColumnType.PREDISTILL
                 or c.column_type == ZenoColumnType.POSTDISTILL
             )
-            and c.transform == transform
-            and c.model == model
+            and c.transform == state.transform
+            and c.model == state.model
         ]
 
         local_ops = dataclasses.replace(
@@ -484,16 +473,8 @@ class Zeno(object):
             ),
         )
 
-        metric_func = get_function(self.metric_functions[metric])
+        metric_func = get_function(self.metric_functions[state.metric])
         return metric_func(df, local_ops)
-
-    def get_table(self, columns):
-        """Get the metadata DataFrame for a given slice.
-
-        Returns:
-            bytes: Arrow-encoded table of slice metadata
-        """
-        return get_arrow_bytes(self.df[[str(c) for c in columns]], str(self.id_column))
 
     def get_slices(self):
         return [s.dict(by_alias=True) for s in self.slices.values()]
@@ -511,16 +492,17 @@ class Zeno(object):
         with open(os.path.join(self.cache_path, "reports.pickle"), "wb") as f:
             pickle.dump(self.reports, f)
 
-    def set_slices(self, slices: List[Slice]):
-        self.slices = dict(zip([s.slice_name for s in slices], slices))
-        with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
-            pickle.dump(self.slices, f)
-
-    def get_metric(
-        self, df: pd.DataFrame, col: ZenoColumn, pred, model, transform, metric
+    def get_histogram_metric(
+        self, df: pd.DataFrame, col: ZenoColumn, pred, state: ZenoState
     ):
         df_filt = filter_table_single(df, col, pred)
-        return self.calculate_metric(df_filt, model, transform, metric)
+        return self.calculate_metric(df_filt, state)
+
+    def get_filtered_table(self, req: TableRequest):
+        filt_df = filter_table(self.df, req.filter_predicates).iloc[
+            req.slice_range[0] : req.slice_range[1]
+        ]
+        return filt_df[[str(col) for col in req.columns]].to_json(orient="records")
 
     def calculate_histograms(self, req: HistogramRequest):
         if len(req.filter_predicates) > 0:
@@ -542,8 +524,8 @@ class Zeno(object):
                             "bucket": k,
                             "count": int(val_counts[k]),
                             "filteredCount": int((filt_df_col == k).sum()),
-                            "metric": self.get_metric(
-                                filt_df, col, k, req.model, req.transform, req.metric
+                            "metric": self.get_histogram_metric(
+                                filt_df, col, k, req.state
                             ),
                         }
                     )
@@ -562,13 +544,8 @@ class Zeno(object):
                             "bucketEnd": round(bins[1][i + 1], 2),
                             "count": int(bin_count),
                             "filteredCount": int(bins_filt[0][i]),
-                            "metric": self.get_metric(
-                                filt_df,
-                                col,
-                                [bins[1][i], bins[1][i + 1]],
-                                req.model,
-                                req.transform,
-                                req.metric,
+                            "metric": self.get_histogram_metric(
+                                filt_df, col, [bins[1][i], bins[1][i + 1]], req.state
                             ),
                         }
                     )
@@ -591,6 +568,11 @@ class Zeno(object):
             else:
                 res[str(col)] = []
         return res
+
+    def create_new_slice(self, req: Slice):
+        self.slices[req.slice_name] = req
+        with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
+            pickle.dump(self.slices, f)
 
     def embedding_exists(self, model: str):
         col = ZenoColumn(name=model, column_type=ZenoColumnType.EMBEDDING)

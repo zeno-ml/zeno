@@ -1,0 +1,166 @@
+import { get } from "svelte/store";
+import { ZenoColumnType } from "./globals";
+import {
+	folders,
+	metric,
+	metrics,
+	model,
+	models,
+	ready,
+	reports,
+	results,
+	rowsPerPage,
+	settings,
+	slices,
+	transforms,
+} from "./stores";
+import { getMetricRange } from "./util/util";
+
+// 1) getProj() -> [id, x, y]
+// 2) lasso -> filterTable -> new table
+// a) JUST LASSO -> if lasso, only filter by lasso
+
+// 3) coloring ->
+// a) select metadata to color by
+// b) generate color scheme
+// c) get color for each ID -> BACKEND
+// getProjColors(col, bins, colors) -> [id, col]
+
+export async function getInitialData() {
+	let res = await fetch("/api/settings");
+	const sets = (await res.json()) as Settings;
+	settings.set(sets);
+	rowsPerPage.set(sets.samples);
+
+	res = await fetch("/api/initialize");
+	const r = await res.json();
+	models.set(r.models);
+	metrics.set(r.metrics);
+	transforms.set(r.transforms);
+	folders.set(r.folders);
+
+	model.set(r.models[r.models.length - 1]);
+	metric.set(r.metrics[0]);
+
+	const slicesRes = await fetch("/api/slices").then((d) => d.json());
+	const slis = JSON.parse(slicesRes) as Slice[];
+	const sliMap = new Map();
+	slis.forEach((e) => sliMap.set(e.sliceName, e));
+	slices.set(sliMap);
+
+	const reportsRes = await fetch("/api/reports").then((d) => d.json());
+	const localReports = JSON.parse(reportsRes) as Report[];
+	reports.set(localReports);
+
+	ready.set(true);
+}
+
+export async function getMetricsForSlices(metricKeys: MetricKey[]) {
+	if (metricKeys.length === 0 || metricKeys[0].state.metric === undefined) {
+		return null;
+	}
+	const returnValues = metricKeys.map((k) => {
+		if (k.sli.sliceName === "") {
+			return undefined;
+		}
+		return get(results).get(k);
+	});
+	const requiredIndices = returnValues.reduce((arr, curr, i) => {
+		if (curr === undefined) {
+			arr.push(i);
+		}
+		return arr;
+	}, []);
+
+	if (requiredIndices.length > 0) {
+		let res = await fetch("/api/get-metrics-for-slices", {
+			method: "POST",
+			headers: {
+				"Content-type": "application/json",
+			},
+			body: JSON.stringify(requiredIndices.map((i) => metricKeys[i])),
+		}).then((d) => d.json());
+		res = JSON.parse(res);
+		results.update((resmap) => {
+			res.forEach((r, i) => resmap.set(metricKeys[i], r));
+			return resmap;
+		});
+		requiredIndices.forEach((r, i) => (returnValues[r] = res[i]));
+	}
+	return returnValues;
+}
+
+export async function getHistograms(
+	completeColumns,
+	filterPredicates: FilterPredicateGroup[],
+	state: ZenoState
+) {
+	const requestedHistograms = completeColumns.filter(
+		(c) =>
+			(c.model === "" || c.model === state.model) &&
+			(c.transform === "" || c.transform === state.transform) &&
+			c.columnType !== ZenoColumnType.OUTPUT &&
+			c.columnType !== ZenoColumnType.TRANSFORM
+	);
+	let res = await fetch("/api/calculate-histograms", {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({
+			columns: requestedHistograms,
+			filter_predicates: filterPredicates,
+			state,
+		}),
+	}).then((res) => res.json());
+
+	res = JSON.parse(res);
+	getMetricRange(res);
+	return res;
+}
+
+export async function getFilteredTable(
+	completeColumns,
+	filterPredicates: FilterPredicateGroup[],
+	state: ZenoState,
+	sliceRange: [number, number]
+) {
+	const requestedColumns = completeColumns.filter(
+		(c) =>
+			(c.model === "" || c.model === state.model) &&
+			(c.transform === "" || c.transform === state.transform)
+	);
+	let res = await fetch("/api/get-filtered-table", {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({
+			columns: requestedColumns,
+			filter_predicates: filterPredicates,
+			state,
+			sliceRange,
+		}),
+	}).then((res) => res.json());
+	res = JSON.parse(res);
+	return res;
+}
+
+export async function createNewSlice(
+	sliceName: string,
+	predicateGroup: FilterPredicateGroup
+) {
+	let res = await fetch("/api/create-new-slice", {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({
+			sliceName: sliceName,
+			folder: "",
+			filterPredicates: predicateGroup,
+		} as Slice),
+	}).then((res) => res.json());
+	res = JSON.parse(res);
+	return res;
+}

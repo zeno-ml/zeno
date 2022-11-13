@@ -12,8 +12,8 @@
 		sliceToEdit,
 	} from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
-	import { MetadataType } from "../../globals";
 
+	import { createNewSlice } from "../../api";
 	import FilterGroupEntry from "./FilterGroupEntry.svelte";
 
 	let sliceName = "";
@@ -33,65 +33,11 @@
 			return;
 		}
 		// Pre-fill slice creation with current metadata selections.
-		if (Object.keys($metadataSelections).length !== 0) {
-			predicateGroup.predicates = [];
-			Object.values($metadataSelections).forEach((entry) => {
-				// TODO: support slice selections
-				if (entry.column.metadataType === MetadataType.CONTINUOUS) {
-					predicateGroup.predicates.push({
-						column: entry.column,
-						operation: ">=",
-						value: "" + entry.values[0],
-						join: "AND",
-					});
-					predicateGroup.predicates.push({
-						column: entry.column,
-						operation: "<=",
-						value: "" + entry.values[1],
-						join: "AND",
-					});
-				} else if (entry.column.metadataType === MetadataType.BOOLEAN) {
-					let val = entry.values[0] === "is" ? "1" : "0";
-					predicateGroup.predicates.push({
-						column: entry.column,
-						operation: "==",
-						value: val,
-						join: "AND",
-					});
-				} else if (entry.column.metadataType === MetadataType.NOMINAL) {
-					if (entry.values.length === 1) {
-						predicateGroup.predicates.push({
-							column: entry.column,
-							operation: "==",
-							value: "" + entry.values[0],
-							join: "AND",
-						});
-					} else {
-						let group = {
-							predicates: [],
-							join: "AND",
-						};
-						entry.values.forEach((v) =>
-							group.predicates.push({
-								column: entry.column,
-								operation: "==",
-								value: "" + v,
-								join: "OR",
-								depth: 1,
-							})
-						);
-						predicateGroup.predicates.push(group);
-					}
-				}
-			});
-		} else if (predicateGroup.predicates.length === 0) {
-			predicateGroup.predicates.push({
-				column: undefined,
-				operation: "",
-				value: "",
-				join: "",
-			});
-		}
+		Object.values($metadataSelections).forEach((filtGroup) => {
+			if (filtGroup.predicates.length !== 0) {
+				predicateGroup.predicates.push(filtGroup);
+			}
+		});
 	}
 
 	function createSlice() {
@@ -101,19 +47,17 @@
 		showNewSlice.set(false);
 		sliceToEdit.set(null);
 
-		// const filt = getFilterFromPredicates(predicateGroup);
-		// let tempTable = $table.filter(`(d) => ${filt}`);
-
-		slices.update((s) => {
-			s.set(sliceName, <Slice>{
-				sliceName: sliceName,
-				folder: "",
-				filterPredicates: Object.assign({}, predicateGroup),
-				// idxs: tempTable.array(columnHash($settings.idColumn)) as string[],
+		createNewSlice(sliceName, predicateGroup).then((d) => {
+			slices.update((s) => {
+				s.set(sliceName, <Slice>{
+					sliceName: sliceName,
+					folder: "",
+					filterPredicates: Object.assign({}, predicateGroup),
+				});
+				return s;
 			});
-			return s;
+			sliceSelections.set([]);
 		});
-		sliceSelections.set([]);
 	}
 
 	function deletePredicate(i) {

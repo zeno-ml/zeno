@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Icon } from "@smui/button";
 	import { mdiSwapVertical, mdiArrowDown } from "@mdi/js";
-	import { Svg } from "@smui/common/elements";
+	import { Svg } from "@smui/common";
 
 	import { scalePoint, scaleLinear } from "d3-scale";
 	import { extent } from "d3-array";

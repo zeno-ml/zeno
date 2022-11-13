@@ -8,9 +8,7 @@ from inspect import getsource
 from pathlib import Path
 from typing import Tuple
 
-import numpy as np
 import pandas as pd  # type: ignore
-import pyarrow as pa  # type: ignore
 from tqdm import trange  # type: ignore
 
 from zeno.api import ZenoOptions
@@ -28,19 +26,6 @@ def add_to_path(p):
         yield
     finally:
         sys.path = old_path
-
-
-def get_arrow_bytes(df, id_col):
-    df.loc[:, id_col] = df.index
-    df = df.infer_objects()
-    d = dict.fromkeys(df.select_dtypes(np.int64).columns, np.int32)
-    df = df.astype(d)
-    df_arrow = pa.Table.from_pandas(df)
-    buf = pa.BufferOutputStream()
-    with pa.ipc.new_file(buf, df_arrow.schema) as writer:
-        writer.write_table(df_arrow)
-    bs = bytes(buf.getvalue())
-    return bs
 
 
 def read_pickle(file_name: str, cache_path: Path, default):

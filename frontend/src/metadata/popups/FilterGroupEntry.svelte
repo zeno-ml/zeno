@@ -3,7 +3,7 @@
 	import Button from "@smui/button";
 	import Select, { Option } from "@smui/select";
 	import IconButton, { Icon } from "@smui/icon-button";
-	import { Svg } from "@smui/common/elements";
+	import { Svg } from "@smui/common";
 	import { mdiTrashCanOutline } from "@mdi/js";
 
 	import FilterEntry from "./FilterEntry.svelte";
@@ -29,7 +29,7 @@
 				bind:value={predicateGroup.join}
 				label="Join"
 				style="margin-right: 20px; width: 90px">
-				{#each ["AND", "OR"] as o}
+				{#each ["&", "|"] as o}
 					<Option value={o}>{o}</Option>
 				{/each}
 			</Select>
@@ -68,7 +68,7 @@
 						column: undefined,
 						operation: "",
 						value: "",
-						join: "AND",
+						join: "&",
 					});
 					predicateGroup = predicateGroup;
 				}}>
@@ -83,10 +83,10 @@
 								column: undefined,
 								operation: "",
 								value: "",
-								join: "AND",
+								join: "&",
 							},
 						],
-						join: "AND",
+						join: "&",
 					});
 					predicateGroup = predicateGroup;
 				}}>

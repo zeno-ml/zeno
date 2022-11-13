@@ -1,14 +1,8 @@
-import { derived, writable, type Readable, type Writable } from "svelte/store";
 import { InternMap } from "internmap";
+import { derived, writable, type Readable, type Writable } from "svelte/store";
 import { websocketStore } from "svelte-websocket-store";
-import type ColumnTable from "arquero/dist/types/table/column-table";
-import * as aq from "arquero";
 
-import {
-	folderWritable,
-	reportWritable,
-	sliceWritable,
-} from "./util/customStores";
+import { folderWritable, reportWritable } from "./util/customStores";
 
 export const tab: Writable<string> = writable("results");
 export const rowsPerPage = writable(0);
@@ -52,6 +46,14 @@ export const transforms: Writable<string[]> = writable([]);
 export const model: Writable<string> = writable("");
 export const metric: Writable<string> = writable("");
 export const transform: Writable<string> = writable("");
+export const zenoState: Readable<ZenoState> = derived(
+	[model, metric, transform],
+	([$model, $metric, $transform]) => ({
+		model: $model,
+		metric: $metric,
+		transform: $transform,
+	})
+);
 export const currentColumns: Readable<ZenoColumn[]> = derived(
 	[settings, model],
 	([$settings, $model]) =>
@@ -63,19 +65,24 @@ export const currentColumns: Readable<ZenoColumn[]> = derived(
 export const report: Writable<number> = writable(undefined);
 export const sort: Writable<ZenoColumn> = writable();
 
-export const slices: Writable<Map<string, Slice>> = sliceWritable();
+export const slices: Writable<Map<string, Slice>> = writable(new Map());
 export const folders: Writable<string[]> = folderWritable();
 export const reports: Writable<Report[]> = reportWritable();
 export const results: Writable<InternMap<MetricKey, number>> = writable(
 	new InternMap(
 		[],
 		(d: MetricKey) =>
-			d.sli.sliceName + "." + d.metric + "." + d.model + "." + d.transform
+			d.sli.sliceName +
+			"." +
+			d.state.metric +
+			"." +
+			d.state.model +
+			"." +
+			d.state.transform
 	)
 );
 
-export const table: Writable<ColumnTable> = writable(aq.table({}));
-export const filteredTable: Writable<ColumnTable> = writable(aq.fromJSON({}));
+export const filteredTable: Writable<Record<string, any>[]> = writable([]);
 export const metadataSelections: Writable<
 	Record<string, FilterPredicateGroup>
 > = writable({});
@@ -103,5 +110,3 @@ export const metricRange: Writable<[number, number, boolean]> = writable([
 // null when not selected and string[] when we have stuff
 export const lassoSelection = writable<string[]>([]);
 export const startingPointIds = writable<string[]>([]);
-
-export const overallMetric: Writable<number> = writable(undefined);

@@ -3,6 +3,7 @@
 
 	import { VegaLite } from "svelte-vega";
 	import { continuousVegaSpec } from "./vegaSpecs";
+	import { metricRange } from "../../stores";
 
 	export let col: ZenoColumn;
 	export let histogram;
@@ -58,7 +59,7 @@
 <div id="histogram" on:mouseup={setSelection}>
 	<VegaLite
 		bind:view
-		spec={continuousVegaSpec(shouldColor, [0, 100])}
+		spec={continuousVegaSpec(shouldColor, $metricRange)}
 		data={chartData}
 		options={{ tooltip: true, actions: false, theme: "vox" }} />
 </div>

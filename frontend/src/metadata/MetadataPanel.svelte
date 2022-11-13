@@ -1,9 +1,7 @@
 <script lang="ts">
-	import { Svg } from "@smui/common/elements";
+	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import { mdiFolderPlusOutline, mdiPlus } from "@mdi/js";
-
-	import { calculateHistograms } from "./metadata";
 
 	import FolderCell from "./cells/FolderCell.svelte";
 	import MetadataCell from "./MetadataCell.svelte";
@@ -22,49 +20,28 @@
 		sliceSelections,
 		sliceToEdit,
 		status,
-		table,
 		transform,
 		metricRange,
+		zenoState,
 	} from "../stores";
-	import { columnHash, getMetricsForSlices } from "../util/util";
+	import { columnHash } from "../util/util";
+	import { getMetricsForSlices } from "../api";
 	import { ZenoColumnType } from "../globals";
 
 	export let shouldColor = false;
+	export let metadataHistograms = {};
 
 	let showNewFolder = false;
-	let metadataHistograms = {};
-
-	status.subscribe((stat) => {
-		let tempSelections = {};
-		stat.completeColumns
-			.filter((col) => !$metadataSelections[columnHash(col)])
-			.forEach((col) => {
-				tempSelections[columnHash(col)] = { predicates: [], join: "" };
-			});
-		metadataSelections.set(tempSelections);
-	});
-
-	metadataSelections.subscribe((mets) => {
-		calculateHistograms(
-			$status.completeColumns,
-			Object.values(mets).filter((m) => m.predicates.length > 0),
-			$model,
-			$transform,
-			$metric
-		).then((res) => (metadataHistograms = res));
-	});
 
 	$: completedColumnHashes = $status.completeColumns.map((c) => columnHash(c));
 	$: res = getMetricsForSlices([
 		<MetricKey>{
 			sli: <Slice>{
-				sliceName: "overall",
+				sliceName: "",
 				folder: "",
-				idxs: $table.array(columnHash($settings.idColumn)),
+				filterPredicates: { predicates: [], join: "" },
 			},
-			metric: $metric,
-			model: $model,
-			transform: $transform,
+			state: $zenoState,
 		},
 	]);
 </script>
@@ -74,29 +51,25 @@
 		<h4>Slices</h4>
 		<div class="inline">
 			<div>
-				<div on:click={() => (showNewFolder = true)}>
-					<IconButton>
-						<Icon component={Svg} viewBox="0 0 24 24">
-							<path fill="black" d={mdiFolderPlusOutline} />
-						</Icon>
-					</IconButton>
-				</div>
+				<IconButton on:click={() => (showNewFolder = true)}>
+					<Icon component={Svg} viewBox="0 0 24 24">
+						<path fill="black" d={mdiFolderPlusOutline} />
+					</Icon>
+				</IconButton>
 				{#if showNewFolder}
 					<NewFolderPopup bind:showNewFolder />
 				{/if}
 			</div>
 			<div>
-				<div
+				<IconButton
 					on:click={() => {
 						sliceToEdit.set(undefined);
 						showNewSlice.set(true);
 					}}>
-					<IconButton>
-						<Icon component={Svg} viewBox="0 0 24 24">
-							<path fill="black" d={mdiPlus} />
-						</Icon>
-					</IconButton>
-				</div>
+					<Icon component={Svg} viewBox="0 0 24 24">
+						<path fill="black" d={mdiPlus} />
+					</Icon>
+				</IconButton>
 				{#if $showNewSlice}
 					<NewSlicePopup />
 				{/if}
@@ -110,7 +83,8 @@
 				: "")}
 		on:click={() => {
 			sliceSelections.set([]);
-		}}>
+		}}
+		on:keydown={() => ({})}>
 		<div class="inline" style:height="44px">All instances</div>
 
 		<div class="inline">
@@ -119,7 +93,7 @@
 					{r && r[0] !== null && r[0] !== undefined ? r[0].toFixed(2) : ""}
 				{/await}
 			</span>
-			<span class="size">({$table.size})</span>
+			<span class="size">({$settings.totalSize})</span>
 			<div style:width="36px" />
 		</div>
 	</div>

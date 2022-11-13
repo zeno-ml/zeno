@@ -1,5 +1,7 @@
 from typing import List, Union
 
+import pandas as pd
+
 from zeno.classes import FilterPredicate, FilterPredicateGroup, MetadataType, ZenoColumn
 
 
@@ -31,7 +33,7 @@ def get_filter_string(filter: Union[FilterPredicateGroup, FilterPredicate]):
     return ""
 
 
-def filter_table(df, filters: List[FilterPredicate]):
+def filter_table(df, filters: List[FilterPredicate]) -> pd.DataFrame:
     final_filter = ""
     for filt in filters:
         final_filter = final_filter + get_filter_string(filt)

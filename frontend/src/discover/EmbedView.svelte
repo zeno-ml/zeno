@@ -12,17 +12,15 @@
 		settings,
 		sliceSelections,
 		metadataSelections,
-		table,
 		lassoSelection,
 		model,
 		status,
 		transform,
 		startingPointIds,
 	} from "../stores";
-	import { columnHash, updateFilteredTable } from "../util/util";
+	import { columnHash } from "../util/util";
 	import request from "../util/request";
 
-	import type ColumnTable from "arquero/dist/types/table/column-table";
 	import type {
 		ReglScatterplot,
 		ScatterRow,
@@ -73,9 +71,8 @@
 		{ numPoints: 100, pointSize: 4 }
 	);
 
-	lassoSelection.subscribe(() => updateFilteredTable($table));
 	$: {
-		if (mounted && $table.size > 0) {
+		if (mounted) {
 			initSnapshots($model, $transform);
 		}
 	}
@@ -87,20 +84,20 @@
 		startingPoint,
 		idToColorIndexMapping
 	);
-	$: opaqueStartingPointScatter = makeFilteredOpaque(
-		startingPointScatter,
-		$filteredTable
-	);
+	// $: opaqueStartingPointScatter = makeFilteredOpaque(
+	// 	startingPointScatter,
+	// 	$filteredTable
+	// );
 	$: reprojectionScatter = snapshotToScatter(
 		currentState,
 		idToColorIndexMapping
 	);
-	$: opaqueReprojectionScatter = makeFilteredOpaque(
-		reprojectionScatter,
-		$filteredTable
-	);
+	// $: opaqueReprojectionScatter = makeFilteredOpaque(
+	// 	reprojectionScatter,
+	// 	$filteredTable
+	// );
 	$: filtersApplied =
-		$metadataSelections.size > 0 || $sliceSelections.length > 0;
+		Object.keys($metadataSelections).length > 0 || $sliceSelections.length > 0;
 
 	$: if (reglScatterplot && currentState.ids) {
 		adjustPointSizes(currentState.ids.length);

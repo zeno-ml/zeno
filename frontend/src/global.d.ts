@@ -7,6 +7,7 @@ interface Settings {
 	dataColumn: ZenoColumn;
 	metadataColumns: ZenoColumn[];
 	samples: number;
+	totalSize: number;
 }
 
 interface WSResponse {
@@ -15,16 +16,20 @@ interface WSResponse {
 	completeColumns: ZenoColumn[];
 }
 
+interface ZenoState {
+	model: string;
+	metric: string;
+	transform: string;
+}
+
 interface MetricKey {
 	sli: Slice;
-	metric: string;
-	model: string;
-	transform: string;
+	state: ZenoState;
 }
 
 interface FilterPredicateGroup {
 	predicates: (FilterPredicate | FilterPredicateGroup)[];
-	// '', AND or OR
+	// '', & or |
 	join: string;
 }
 
@@ -41,7 +46,6 @@ interface Slice {
 	sliceName: string;
 	folder: string;
 	filterPredicates?: FilterPredicateGroup;
-	idxs?: string[];
 }
 
 interface ReportPredicate {

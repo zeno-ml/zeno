@@ -9,7 +9,6 @@
 	import OptionsBar from "../general/OptionsBar.svelte";
 	import EmbedView from "./EmbedView.svelte";
 	import {
-		table,
 		filteredTable,
 		colorSpec,
 		colorByHash,
@@ -17,7 +16,6 @@
 	} from "../stores";
 	import Samples from "../general/Samples.svelte";
 
-	$: tableEmpty = $table.size === 0;
 	$: {
 		const colorDefined = $colorByHash in $availableColors;
 		if (!colorDefined) {
@@ -36,22 +34,20 @@
 
 <OptionsBar />
 <main>
-	{#if !tableEmpty}
-		<div id="sidebar-view">
-			<MetadataPanel shouldColor />
-		</div>
+	<div id="sidebar-view">
+		<MetadataPanel shouldColor />
+	</div>
 
-		<div id="main-view">
-			<div id="embed-view">
-				{#if $colorSpec}
-					<EmbedView />
-				{/if}
-			</div>
-			<div id="samples-view">
-				<Samples table={$filteredTable} />
-			</div>
+	<div id="main-view">
+		<div id="embed-view">
+			{#if $colorSpec}
+				<EmbedView />
+			{/if}
 		</div>
-	{/if}
+		<div id="samples-view">
+			<Samples table={$filteredTable} />
+		</div>
+	</div>
 </main>
 
 <style>
