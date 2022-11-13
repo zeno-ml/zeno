@@ -5,6 +5,7 @@
 
 	import { Label } from "@smui/button";
 	import { Pagination } from "@smui/data-table";
+    import { Icon } from "@smui/button";
 	import IconButton from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
 
@@ -27,6 +28,7 @@
 	export let table: ColumnTable;
 
 	let instanceTable = [];
+    let columnHeader = [];
 	let viewFunction;
 	let viewDivs = {};
 	let optionsDiv;
@@ -41,6 +43,8 @@
 	let currentPage = 0;
 	let end = 0;
 	let lastPage = 0;
+
+    let rowTable = []
 
 	$: idHash = columnHash($settings.idColumn);
 
@@ -103,6 +107,11 @@
 		drawInstances();
 	}
 
+	$: console.log($filteredTable.objects());
+	console.log($status.completeColumns);
+	console.log(columnHash($status.completeColumns[0]));
+    
+    // function reuse to improve readability.
 	async function drawInstances() {
 		let tempTable = table;
 		if ($sort) {
@@ -112,36 +121,7 @@
 		instanceTable = tempTable.objects();
 
 		await tick();
-
-		let ids = instanceTable.map((inst) => inst[idHash]);
-		viewDivs = Object.fromEntries(
-			ids
-				.map(
-					(key) =>
-						!!Object.getOwnPropertyDescriptor(viewDivs, key) && [
-							key,
-							viewDivs[key],
-						]
-				)
-				.filter(Boolean)
-		);
-		//console.log(instanceTable);
-		instanceTable.forEach((inst, i) => {
-			let div = viewDivs[inst[idHash]];
-			//console.log(idHash);
-			if (div) {
-				viewFunction(
-					div,
-					viewOptions,
-					instanceTable[i],
-					modelColumn,
-					columnHash($settings.labelColumn),
-					columnHash($settings.dataColumn),
-					transformColumn,
-					idHash
-				);
-			}
-		});
+        columnHeader = $status.completeColumns;
 	}
 	// filteredTable is a store. to get value from store, use $before it.
 	// filteredTable is not 
@@ -149,18 +129,49 @@
 	// the last thing: $: anything after this update will refresh the statement
 	// when refresh, the log should happen
 	// status.completeColumns
-	$: console.log($filteredTable.objects());
-	console.log($status.completeColumns);
-	console.log(columnHash($status.completeColumns[0]));
+	//$: console.log($filteredTable.objects());
+	//console.log($status.completeColumns);
+	//console.log(columnHash($status.completeColumns[0]));
 </script>
 
 {#if table}
-	<SelectionBar />
+    <SelectionBar />
 	<div bind:this={optionsDiv} />
 	<div class="container sample-container">
-		{#each instanceTable as inst (inst[idHash])}
-			<div bind:this={viewDivs[inst[idHash]]} />
-		{/each}
+        <table id="column-table">
+            <thead>
+                <tr>
+                    {#each columnHeader as header}
+                        {#if header.columnType != 4}
+                        <th>{header.name}
+                            {#if header.name == "label"}
+                            <Icon class="material-icons" style="font-size: 1em; padding-top:3px">
+                                keyboard_arrow_up
+                            </Icon>
+                            {/if}
+                        </th>
+                        {/if}
+                    {/each}
+                </tr>
+              </thead>
+            <tbody>
+		        {#each instanceTable as tableContent}
+                    <tr>
+                        {#each columnHeader as header}
+                            {#if header.name == "id"}
+                                <td><img alt="" src={"/data/" + tableContent[header.columnType + header.name]}/></td>
+                            {:else}
+                            {#if header.columnType != 4}
+                                <td>{tableContent[header.columnType + header.name]}</td>
+                            {/if}
+                            {/if}
+                            
+                            
+                        {/each}
+                    </tr>
+		        {/each}
+            </tbody>
+        </table>
 	</div>
 	<Pagination slot="paginate" class="pagination">
 		<svelte:fragment slot="rowsPerPage">
@@ -204,12 +215,27 @@
 
 <style>
 	.sample-container {
-		width: 100%;
+		width: calc(100vw - 502px);
 		height: calc(100vh - 241px);
 		overflow-y: auto;
 		align-content: baseline;
 		border-bottom: 1px solid rgb(224, 224, 224);
 		display: flex;
 		flex-wrap: wrap;
+        min-width:70px;
 	}
+    th {
+        text-align: center;
+        border-bottom: 1px solid #e0e0e0;
+        padding-bottom: 5px;
+        margin-bottom: 20px;
+        margin-right: 20px;
+        position: sticky; 
+        top: 0;
+        background-color: white;
+        min-width:70px;
+    }
+    tr {
+        text-align: center;
+    }
 </style>

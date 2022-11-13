@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { TrailingIcon } from "@smui/chips";
+	import LayoutGrid from "@smui/layout-grid";
+	import Button from "@smui/button";
 	import { columnHash, getMetricsForSlices } from "../util/util";
 
 	import {
@@ -8,12 +10,14 @@
 		metadataSelections,
 		metric,
 		model,
+		shouldUseRowTable,
 		sliceSelections,
 		transform,
 		settings,
 		lassoSelection,
 	} from "../stores";
 	import { MetadataType } from "../globals";
+  import { get } from "svelte/store";
 
 	async function updateResult(model, metric, transform, filteredTable) {
 		if (filteredTable.size === 0) {
@@ -39,6 +43,8 @@
 	}
 
 	$: result = updateResult($model, $metric, $transform, $filteredTable);
+
+	
 </script>
 
 <div class="chips">
@@ -51,7 +57,6 @@
 	<span id="size">
 		({$filteredTable.size} instances)
 	</span>
-
 	{#if $lassoSelection.length > 0}
 		<div class="meta-chip lasso">Viewing Selected Data</div>
 	{:else}
@@ -117,6 +122,22 @@
 			</span>
 		{/if}
 	{/if}
+	<span class="right-border" id="choice-bar">
+		<Button on:click={() => {shouldUseRowTable.set(false);}}
+			variant={!$shouldUseRowTable ? "unelevated"
+				: "outlined"}
+			style="color: {$shouldUseRowTable ? '#9B52DF'
+				: ''}">
+			List
+		</Button>
+		<Button on:click={() => {shouldUseRowTable.set(true);}}
+			variant={$shouldUseRowTable ? "unelevated"
+				: "outlined"}
+			style="color: {!$shouldUseRowTable ? '#9B52DF'
+				: ''}">
+			Table
+		</Button>
+	</span>
 </div>
 
 <style>
@@ -166,5 +187,10 @@
 		--color: 277, 70%, 35%;
 		background: hsla(var(--color), 0.1);
 		border: 1px solid hsl(var(--color));
+	}
+	.right-border {
+		margin-left: auto;
+		margin-right: 7%;
+		position: relative;
 	}
 </style>

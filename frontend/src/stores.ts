@@ -84,6 +84,7 @@ export const currentColumns: Readable<ZenoColumn[]> = derived(
 
 export const showNewSlice: Writable<boolean> = writable(false);
 export const sliceToEdit: Writable<Slice> = writable(null);
+export const shouldUseRowTable: Writable<boolean> = writable(false);
 
 export const metricRange: Writable<[number, number, boolean]> = writable([
 	Number.MAX_VALUE,
