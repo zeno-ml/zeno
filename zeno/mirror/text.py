@@ -1,9 +1,9 @@
 import numpy as np
 import pandas as pd
+from functools import lru_cache
 
 
 DEVICE = "cpu"
-MODEL = None
 
 
 def ndarray_from_df(df: pd.DataFrame, column_name: str):
@@ -13,20 +13,22 @@ def ndarray_from_df(df: pd.DataFrame, column_name: str):
         return np.ndarray([])
 
 
-def encode_text(text: str, device="cpu"):
+@lru_cache()
+def clip_model(variant: str = "ViT-B/32", device=DEVICE):
     try:
         import clip
     except ModuleNotFoundError:
         raise ("YOU! do => 'pip install git+https://github.com/openai/CLIP.git'")
 
-    global MODEL
-    if MODEL is None:
-        model, _ = clip.load("ViT-B/32", device)
-        MODEL = model
+    model, _ = clip.load(variant, device)
 
-    tokens = clip.tokenize(text).to(device)
+    return clip.tokenize, model
 
-    text_encoding = MODEL.encode_text(tokens)
+
+def encode_text(text: str, device="cpu"):
+    tokenize, model = clip_model(device=device)
+    tokens = tokenize(text).to(device)
+    text_encoding = model.encode_text(tokens)
     return text_encoding.T
 
 
