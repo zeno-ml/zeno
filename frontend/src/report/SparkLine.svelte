@@ -18,19 +18,20 @@
 	let height = 30;
 	let padding = { top: 5, right: 0, bottom: 5, left: 0 };
 
-	export let res: number[];
+	export let res: Result[];
+
 	const xScale = scalePoint()
 		.domain($models)
 		.range([padding.left, width - padding.right]);
 	const yScale = scaleLinear()
-		.domain(extent(res))
+		.domain(extent(res.map((r) => r.metric)))
 		.range([height - padding.top, padding.bottom]);
 	const lineGenerator = line()
 		.x((d) => xScale(d))
-		.y((d, i) => yScale(res[i]));
+		.y((d, i) => yScale(res[i].metric));
 
-	const r = regression(res.map((d, i) => [i, d]));
-	const detrended = res.map((d, i) => d - r[0] * i - r[1]);
+	const r = regression(res.map((d, i) => [i, d.metric]));
+	const detrended = res.map((d, i) => d.metric - r[0] * i - r[1]);
 	const variance = calculateStd(detrended);
 
 	onMount(() => {

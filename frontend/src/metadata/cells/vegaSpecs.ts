@@ -79,14 +79,7 @@ export function nominalVegaSpec(shouldColor, metricRange) {
 	} as VegaLiteSpec;
 
 	const topLayerBars = countSpec["layer"][1];
-	if (shouldColor) {
-		topLayerBars.encoding.color = {
-			field: "color",
-			type: "nominal",
-			scale: null,
-			legend: null,
-		};
-	} else {
+	if (metricRange[2]) {
 		topLayerBars.encoding.color = {
 			field: "metric",
 			type: "quantitative",
@@ -96,6 +89,17 @@ export function nominalVegaSpec(shouldColor, metricRange) {
 				range: ["#decbe9", "#6a1b9a"],
 			},
 			legend: null,
+		};
+	} else if (shouldColor) {
+		topLayerBars.encoding.color = {
+			field: "color",
+			type: "nominal",
+			scale: null,
+			legend: null,
+		};
+	} else {
+		topLayerBars.encoding.color = {
+			value: "#6a1b9a",
 		};
 	}
 
@@ -172,14 +176,7 @@ export function continuousVegaSpec(shouldColor, metricRange) {
 	} as VegaLiteSpec;
 
 	const topLayerBars = histogramSpec["layer"][1];
-	if (shouldColor) {
-		topLayerBars.encoding.color = {
-			field: "color",
-			type: "nominal",
-			scale: null,
-			legend: null,
-		};
-	} else {
+	if (metricRange[2]) {
 		topLayerBars.encoding.color = {
 			field: "metric",
 			type: "quantitative",
@@ -189,6 +186,17 @@ export function continuousVegaSpec(shouldColor, metricRange) {
 				range: ["#decbe9", "#6a1b9a"],
 			},
 			legend: null,
+		};
+	} else if (shouldColor) {
+		topLayerBars.encoding.color = {
+			field: "color",
+			type: "nominal",
+			scale: null,
+			legend: null,
+		};
+	} else {
+		topLayerBars.encoding.color = {
+			value: "#6a1b9a",
 		};
 	}
 

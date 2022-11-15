@@ -58,9 +58,7 @@
 	</Cell>
 	{#await modelResults then res}
 		{#each res as r}
-			<Cell>
-				{r ? r.toFixed(2) : ""}
-			</Cell>
+			<Cell>{r.metric.toFixed(2)}</Cell>
 		{/each}
 	{/await}
 </Row>

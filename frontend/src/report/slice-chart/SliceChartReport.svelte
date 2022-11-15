@@ -13,9 +13,10 @@
 	import generateBarSpec from "./vegaSpec";
 
 	export let reportId: number;
-	$: report = $reports[reportId];
 
 	let chartEntries = [];
+
+	$: report = $reports[reportId];
 
 	function getMetKeys(rep) {
 		const entries: MetricKey[] = [];
@@ -81,7 +82,7 @@
 				table: chartEntries.map((r, i) => ({
 					slice: r.slice,
 					model: r.model,
-					metric: res[i],
+					metric: res[i].metric,
 				})),
 			}}
 			<VegaLite

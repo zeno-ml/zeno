@@ -18,7 +18,9 @@
 <div id="reports-container">
 	<div class="header">
 		<h4>Reports</h4>
-		<div on:click={() => (showNewReport = !showNewReport)}>
+		<div
+			on:click={() => (showNewReport = !showNewReport)}
+			on:keydown={() => ({})}>
 			<IconButton>
 				<Icon component={Svg} viewBox="0 0 24 24">
 					<path fill="black" d={mdiPlus} />
@@ -33,6 +35,7 @@
 						<Content>
 							<div
 								class="report-entry"
+								on:keydown={() => ({})}
 								on:click={() => {
 									reports.update((reps) => {
 										reps.push({
@@ -52,6 +55,7 @@
 							</div>
 							<div
 								class="report-entry"
+								on:keydown={() => ({})}
 								on:click={() => {
 									reports.update((reps) => {
 										reps.push({
@@ -71,6 +75,7 @@
 							</div>
 							<div
 								class="report-entry"
+								on:keydown={() => ({})}
 								on:click={() => {
 									reports.update((reps) => {
 										reps.push({
@@ -98,6 +103,7 @@
 		<div
 			use:Ripple={{ surface: true, color: "primary" }}
 			class={"overview " + ($report === -1 ? "selected" : "")}
+			on:keydown={() => ({})}
 			on:click={() => {
 				report.set(-1);
 			}}>

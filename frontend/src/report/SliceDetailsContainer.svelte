@@ -1,7 +1,6 @@
 <script lang="ts">
+	import { selections } from "../stores";
 	import SliceDetails from "../general/SliceDetails.svelte";
-
-	import { metadataSelections, sliceSelections } from "../stores";
 	import { updateTab } from "../util/util";
 
 	export let sli: Slice;
@@ -13,12 +12,16 @@
 	class="slice-link"
 	on:click={() => {
 		updateTab("exploration");
-		sliceSelections.set([sli.sliceName]);
+		selections.update((sel) => ({
+			slices: [sli.sliceName],
+			metadata: sel.metadata,
+		}));
 	}}
 	on:mouseover={() => (showTooltip = true)}
 	on:mouseout={() => (showTooltip = false)}
 	on:focus={() => (showTooltip = true)}
-	on:blur={() => (showTooltip = false)}>
+	on:blur={() => (showTooltip = false)}
+	on:keydown={() => ({})}>
 	{sli.sliceName}
 </div>
 

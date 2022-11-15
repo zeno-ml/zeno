@@ -10,13 +10,13 @@
 		colorSpec,
 		filteredTable,
 		settings,
-		sliceSelections,
-		metadataSelections,
+		selections,
 		lassoSelection,
 		model,
 		status,
 		transform,
 		startingPointIds,
+		selectionPredicates,
 	} from "../stores";
 	import { columnHash } from "../util/util";
 	import request from "../util/request";
@@ -96,8 +96,7 @@
 	// 	reprojectionScatter,
 	// 	$filteredTable
 	// );
-	$: filtersApplied =
-		Object.keys($metadataSelections).length > 0 || $sliceSelections.length > 0;
+	$: filtersApplied = $selectionPredicates.length > 0;
 
 	$: if (reglScatterplot && currentState.ids) {
 		adjustPointSizes(currentState.ids.length);
@@ -249,7 +248,7 @@
 	}
 
 	function clearAllFilters() {
-		sliceSelections.set([]);
+		selections.update((sels) => ({ slices: [], metadata: sels.metadata }));
 		lassoSelection.set([]);
 		reglScatterplot.deselect();
 	}
@@ -261,7 +260,7 @@
 		return embeddingsCheck?.exists;
 	}
 
-	function getIdsFromTable(table: ColumnTable) {
+	function getIdsFromTable(table) {
 		const idColumnHash = columnHash($settings.idColumn);
 		const idColumnExists = table.size > 0 && table.column;
 		if (idColumnExists) {

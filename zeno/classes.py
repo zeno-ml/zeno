@@ -126,6 +126,7 @@ class MetricKey(CamelModel):
 class HistogramRequest(CamelModel):
     columns: List[ZenoColumn]
     state: ZenoState
+    get_metrics: bool
     filter_predicates: Optional[List[FilterPredicateGroup]] = None
 
 

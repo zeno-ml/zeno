@@ -7,7 +7,7 @@
 	import TextMetadataCell from "./cells/TextMetadataCell.svelte";
 
 	import { MetadataType } from "../globals";
-	import { colorByHash, metadataSelections } from "../stores";
+	import { colorByHash, selections } from "../stores";
 	import { columnHash } from "../util/util";
 
 	export let col: ZenoColumn;
@@ -23,14 +23,17 @@
 	};
 
 	let filterPredicates: FilterPredicateGroup;
-	$: filterPredicates = $metadataSelections[columnHash(col)]
-		? $metadataSelections[columnHash(col)]
+	$: filterPredicates = $selections.metadata[columnHash(col)]
+		? $selections.metadata[columnHash(col)]
 		: { predicates: [], join: "&" };
 
 	function updatePredicates(predicates: FilterPredicate[]) {
-		metadataSelections.update((mets) => ({
-			...mets,
-			[columnHash(col)]: { predicates, join: "&" },
+		selections.update((mets) => ({
+			slices: mets.slices,
+			metadata: {
+				...mets.metadata,
+				[columnHash(col)]: { predicates, join: "&" },
+			},
 		}));
 	}
 

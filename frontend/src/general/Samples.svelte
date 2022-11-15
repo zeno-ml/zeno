@@ -15,7 +15,7 @@
 		status,
 		transform,
 		zenoState,
-		metadataSelections,
+		selectionPredicates,
 	} from "../stores";
 	import { getFilteredTable } from "../api";
 	import { columnHash } from "../util/util";
@@ -45,11 +45,10 @@
 
 	// update on page, metadata selection, slice selection, or state change.
 	$: {
-		console.log("update");
 		currentPage;
 		getFilteredTable(
 			$status.completeColumns,
-			Object.values($metadataSelections).filter((m) => m.predicates.length > 0),
+			$selectionPredicates,
 			$zenoState,
 			[start, end]
 		).then((res) => (table = res));

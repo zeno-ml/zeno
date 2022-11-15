@@ -1,4 +1,4 @@
-import { tab, report, metricRange } from "../stores";
+import { tab, report } from "../stores";
 
 export function updateTab(t: string) {
 	report.set(-1);
@@ -20,14 +20,14 @@ export function columnHash(col: ZenoColumn) {
 }
 
 export function getMetricRange(res) {
-	const range: [number, number, boolean] = [Infinity, -Infinity, true];
+	const range: [number, number] = [Infinity, -Infinity];
 	Object.values(res).forEach((col) => {
 		(col as Array<any>).forEach((entry) => {
-			if (entry.metric) {
+			if (entry.metric !== null && entry.metric !== undefined) {
 				range[0] = Math.min(range[0], entry.metric);
 				range[1] = Math.max(range[1], entry.metric);
 			}
 		});
 	});
-	metricRange.set(range);
+	return range;
 }

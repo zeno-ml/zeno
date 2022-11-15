@@ -9,9 +9,10 @@
 	import TableReportTableRow from "./TableReportTableRow.svelte";
 
 	export let reportId: number;
-	$: report = $reports[reportId];
 
 	let table: HTMLDivElement;
+
+	$: report = $reports[reportId];
 </script>
 
 <div id="container">

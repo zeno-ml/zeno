@@ -38,7 +38,7 @@ interface FilterPredicate {
 	// >, <, ==, !=, >=, <=
 	operation: string;
 	value: string | boolean | number;
-	// '', AND or OR
+	// '', & or |
 	join?: string;
 }
 
@@ -46,6 +46,11 @@ interface Slice {
 	sliceName: string;
 	folder: string;
 	filterPredicates?: FilterPredicateGroup;
+}
+
+interface Result {
+	metric: number;
+	size: number;
 }
 
 interface ReportPredicate {

@@ -439,7 +439,11 @@ class Zeno(object):
         return_metrics = []
         for metric_key in requests:
             filt_df = filter_table(self.df, metric_key.sli.filter_predicates.predicates)
-            return_metrics.append(self.calculate_metric(filt_df, metric_key.state))
+            if metric_key.state.metric == "" or metric_key.state.model == "":
+                return_metrics.append({"metric": None, "size": filt_df.shape[0]})
+            else:
+                metric = self.calculate_metric(filt_df, metric_key.state)
+                return_metrics.append({"metric": metric, "size": filt_df.shape[0]})
         return return_metrics
 
     def calculate_metric(self, df, state):
@@ -510,6 +514,9 @@ class Zeno(object):
         else:
             filt_df = self.df
 
+        if req.state.metric == "" or req.state.model == "":
+            req.get_metrics = False
+
         cols = req.columns
         res = {}
         for col in cols:
@@ -526,7 +533,9 @@ class Zeno(object):
                             "filteredCount": int((filt_df_col == k).sum()),
                             "metric": self.get_histogram_metric(
                                 filt_df, col, k, req.state
-                            ),
+                            )
+                            if req.get_metrics
+                            else None,
                         }
                     )
                     for k in val_counts.keys()
@@ -546,7 +555,9 @@ class Zeno(object):
                             "filteredCount": int(bins_filt[0][i]),
                             "metric": self.get_histogram_metric(
                                 filt_df, col, [bins[1][i], bins[1][i + 1]], req.state
-                            ),
+                            )
+                            if req.get_metrics
+                            else None,
                         }
                     )
                 res[str(col)] = ret_hist
@@ -571,6 +582,11 @@ class Zeno(object):
 
     def create_new_slice(self, req: Slice):
         self.slices[req.slice_name] = req
+        with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
+            pickle.dump(self.slices, f)
+
+    def delete_slice(self, slice_name: str):
+        del self.slices[slice_name]
         with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
             pickle.dump(self.slices, f)
 

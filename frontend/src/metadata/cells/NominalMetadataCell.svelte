@@ -55,7 +55,7 @@
 	}
 </script>
 
-<div id="histogram" on:click={setSelection}>
+<div id="histogram" on:click={setSelection} on:keydown={() => ({})}>
 	<VegaLite
 		bind:view
 		spec={nominalVegaSpec(shouldColor, $metricRange)}

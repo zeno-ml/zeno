@@ -1,5 +1,11 @@
 import { InternMap } from "internmap";
-import { derived, writable, type Readable, type Writable } from "svelte/store";
+import {
+	derived,
+	get,
+	writable,
+	type Readable,
+	type Writable,
+} from "svelte/store";
 import { websocketStore } from "svelte-websocket-store";
 
 import { folderWritable, reportWritable } from "./util/customStores";
@@ -43,9 +49,9 @@ export const metrics: Writable<string[]> = writable([]);
 export const models: Writable<string[]> = writable([]);
 export const transforms: Writable<string[]> = writable([]);
 
-export const model: Writable<string> = writable("");
-export const metric: Writable<string> = writable("");
-export const transform: Writable<string> = writable("");
+export const model: Writable<string> = writable(undefined);
+export const metric: Writable<string> = writable(undefined);
+export const transform: Writable<string> = writable(undefined);
 export const zenoState: Readable<ZenoState> = derived(
 	[model, metric, transform],
 	([$model, $metric, $transform]) => ({
@@ -83,10 +89,34 @@ export const results: Writable<InternMap<MetricKey, number>> = writable(
 );
 
 export const filteredTable: Writable<Record<string, any>[]> = writable([]);
-export const metadataSelections: Writable<
-	Record<string, FilterPredicateGroup>
-> = writable({});
-export const sliceSelections: Writable<string[]> = writable([]);
+// slices is an array of slice names,
+// metadata is an object where keys are column names and values are FilterPredicateGroups
+export const selections: Writable<{
+	metadata: Record<string, FilterPredicateGroup>;
+	slices: Array<string>;
+}> = writable({
+	metadata: {},
+	slices: [],
+});
+export const selectionPredicates: Readable<FilterPredicateGroup[]> = derived(
+	[selections],
+	([$selections]) => {
+		const ret = [
+			...Object.values($selections.metadata).filter(
+				(d) => d.predicates.length !== 0
+			),
+		];
+		if ($selections.slices.length !== 0) {
+			ret.push({
+				join: "&",
+				predicates: $selections.slices.map(
+					(sliName) => get(slices).get(sliName).filterPredicates
+				),
+			});
+		}
+		return ret;
+	}
+);
 
 export const showNewSlice: Writable<boolean> = writable(false);
 export const sliceToEdit: Writable<Slice> = writable(null);
@@ -101,9 +131,10 @@ export const colorSpec = derived(
 		return color;
 	}
 );
+
 export const metricRange: Writable<[number, number, boolean]> = writable([
-	Number.MAX_VALUE,
-	Number.MIN_VALUE,
+	Infinity,
+	-Infinity,
 	false,
 ]);
 

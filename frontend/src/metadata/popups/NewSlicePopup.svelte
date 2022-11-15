@@ -4,13 +4,7 @@
 	import Textfield from "@smui/textfield";
 	import HelperText from "@smui/textfield/helper-text";
 
-	import {
-		metadataSelections,
-		showNewSlice,
-		slices,
-		sliceSelections,
-		sliceToEdit,
-	} from "../../stores";
+	import { showNewSlice, slices, selections, sliceToEdit } from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 
 	import { createNewSlice } from "../../api";
@@ -33,7 +27,7 @@
 			return;
 		}
 		// Pre-fill slice creation with current metadata selections.
-		Object.values($metadataSelections).forEach((filtGroup) => {
+		Object.values($selections.metadata).forEach((filtGroup) => {
 			if (filtGroup.predicates.length !== 0) {
 				predicateGroup.predicates.push(filtGroup);
 			}
@@ -56,7 +50,7 @@
 				});
 				return s;
 			});
-			sliceSelections.set([]);
+			selections.update((sels) => ({ slices: [], metadata: sels.metadata }));
 		});
 	}
 

@@ -11,7 +11,9 @@ def get_filter_string(filter: Union[FilterPredicateGroup, FilterPredicate]):
             filt = "("
             for i, pred in enumerate(filter.predicates):
                 filt = filt + get_filter_string(pred)
-                if i == len(filter.predicates) - 1:
+                if i == len(filter.predicates) - 1 and (
+                    filt[-1] == "&" or filt[-1] == "|"
+                ):
                     filt = filt[0:-1]
             return filt + ")" + (filter.join if filter.join else "")
     else:
@@ -37,7 +39,11 @@ def filter_table(df, filters: List[FilterPredicate]) -> pd.DataFrame:
     final_filter = ""
     for filt in filters:
         final_filter = final_filter + get_filter_string(filt)
-    if len(filters) > 0:
+    if (
+        len(filters) > 0
+        and len(final_filter) > 0
+        and (final_filter[-1] == "&" or final_filter[-1] == "|")
+    ):
         final_filter = final_filter[0:-1]
 
     if len(final_filter) > 0:

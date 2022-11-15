@@ -265,6 +265,10 @@ def run_zeno(args):
     def create_new_slice(req: Slice):
         zeno.create_new_slice(req)
 
+    @api_app.post("/delete-slice")
+    def delete_slice(slice_name: List[str]):
+        zeno.delete_slice(slice_name[0])
+
     @api_app.post("/get-metrics-for-slices")
     def get_metrics_for_slices(reqs: List[MetricKey]):
         return json.dumps(zeno.get_metrics_for_slices(reqs))

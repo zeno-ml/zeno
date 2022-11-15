@@ -4,24 +4,22 @@
 	export let histogram;
 	export let shouldColor;
 
-	import { metadataSelections } from "../../stores";
+	// function resetSelection(pos) {
+	// 	selection.values[pos] = undefined;
+	// 	if (
+	// 		selection.values[0] === undefined &&
+	// 		selection.values[1] === undefined
+	// 	) {
+	// 		selection.values = [];
+	// 		setSelection();
+	// 	}
+	// }
 
-	function resetSelection(pos) {
-		selection.values[pos] = undefined;
-		if (
-			selection.values[0] === undefined &&
-			selection.values[1] === undefined
-		) {
-			selection.values = [];
-			setSelection();
-		}
-	}
-
-	metadataSelections.subscribe((sel) => {
-		if (!sel.has(hash)) {
-			selection.values = [];
-		}
-	});
+	// metadataSelections.subscribe((sel) => {
+	// 	if (!sel.has(hash)) {
+	// 		selection.values = [];
+	// 	}
+	// });
 </script>
 
 <div class="inline">
@@ -29,17 +27,14 @@
 		start: <input
 			type="datetime-local"
 			on:change={(el) => {
-				selection.values[0] = new Date(el.target.value);
-				setSelection();
-			}}
-			value={selection.values[0]
-				? selection.values[0].toISOString().slice(0, 16)
-				: histogram[0].toISOString().slice(0, 16)} />
+				// selection.values[0] = new Date(el.target.value);
+				// setSelection();
+			}} />
 		<span class="reset" on:click={() => resetSelection(0)}>reset</span>
 	</div>
 	<div class="date-container">
 		end:
-		<input
+		<!-- <input
 			type="datetime-local"
 			on:change={(el) => {
 				selection.values[1] = new Date(el.target.value);
@@ -47,7 +42,7 @@
 			}}
 			value={selection.values[1]
 				? selection[1].toISOString().slice(0, 16)
-				: histogram[1].toISOString().slice(0, 16)} />
+				: histogram[1].toISOString().slice(0, 16)} /> -->
 		<span class="reset" on:click={() => resetSelection(1)}>reset</span>
 	</div>
 </div>

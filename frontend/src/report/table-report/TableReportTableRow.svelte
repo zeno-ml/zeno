@@ -11,9 +11,9 @@
 	export let predicateIndex: number;
 	export let predicate: ReportPredicate;
 
-	$: sli = $slices.get(predicate.sliceName);
-
 	let modelResults = [];
+
+	$: sli = $slices.get(predicate.sliceName);
 	$: getMetricsForSlices(
 		$models.map((m) => ({
 			sli: sli,
@@ -53,7 +53,7 @@
 	{#each modelResults as r}
 		<Cell>
 			<p>
-				{r ? r.toFixed(2) : ""}
+				{r.metric.toFixed(2)}
 			</p>
 		</Cell>
 	{/each}

@@ -2,7 +2,7 @@
 	import { onMount } from "svelte";
 	import Router from "svelte-spa-router";
 
-	import { metadataSelections, status } from "./stores";
+	import { selections, status } from "./stores";
 	import { columnHash } from "./util/util";
 	import { getInitialData } from "./api";
 
@@ -22,11 +22,14 @@
 	status.subscribe((stat) => {
 		let tempSelections = {};
 		stat.completeColumns
-			.filter((col) => !$metadataSelections[columnHash(col)])
+			.filter((col) => !$selections.metadata[columnHash(col)])
 			.forEach((col) => {
 				tempSelections[columnHash(col)] = { predicates: [], join: "" };
 			});
-		metadataSelections.set(tempSelections);
+		selections.update((sels) => ({
+			slices: sels.slices,
+			metadata: tempSelections,
+		}));
 	});
 
 	onMount(() => getInitialData());

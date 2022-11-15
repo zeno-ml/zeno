@@ -11,6 +11,7 @@
 	import { folders, slices } from "../../stores";
 	import NewFolderPopup from "../popups/NewFolderPopup.svelte";
 	import SliceCell from "./SliceCell.svelte";
+	import { createNewSlice } from "../../api";
 
 	export let folder: string;
 
@@ -40,12 +41,14 @@
 			const sli = sls.get(data);
 			sli.folder = folder;
 			sls.set(data, sli);
+			createNewSlice(sli.sliceName, sli.filterPredicates, folder);
 			return sls;
 		});
 	}}>
 	<div class="inline">
 		<div
 			style="width: 24px; height: 24px; cursor: pointer; margin-right: 10px;"
+			on:keydown={() => ({})}
 			on:click={() => (expandFolder = !expandFolder)}>
 			<Icon component={Svg} viewBox="0 0 24 24">
 				<path fill="black" d={expandFolder ? mdiChevronDown : mdiChevronUp} />

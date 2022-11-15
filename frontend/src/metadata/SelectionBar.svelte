@@ -2,17 +2,16 @@
 	import { TrailingIcon } from "@smui/chips";
 
 	import {
-		filteredTable,
-		metadataSelections,
+		selections,
 		metric,
-		sliceSelections,
 		lassoSelection,
 		zenoState,
+		selectionPredicates,
 	} from "../stores";
 	import { MetadataType } from "../globals";
 	import { getMetricsForSlices } from "../api";
 
-	$: filters = Object.entries($metadataSelections)
+	$: filters = Object.entries($selections.metadata)
 		.filter(([_, value]) => value.predicates.length > 0)
 		.map(
 			([key, value]) =>
@@ -25,7 +24,7 @@
 				sliceName: "",
 				folder: "",
 				filterPredicates: {
-					predicates: Object.values($metadataSelections).filter(
+					predicates: Object.values($selections.metadata).filter(
 						(value) => value.predicates.length > 0
 					),
 					join: "",
@@ -37,28 +36,26 @@
 </script>
 
 <div class="chips">
-	<span id="metric">
+	<span class="metric">
 		{$metric ? $metric + ":" : ""}
-		{#await res then r}
-			{r && r[0] !== null && r[0] !== undefined ? r[0].toFixed(2) : ""}
-		{/await}
 	</span>
-	<span id="size">
-		({$filteredTable.length} instances)
-	</span>
+	{#await res then r}
+		<span class="metric">{r[0].metric ? r[0].metric.toFixed(2) : ""}</span>
+		<span id="size">({r[0].size} instances)</span>
+	{/await}
 
 	{#if $lassoSelection.length > 0}
 		<div class="meta-chip lasso">Viewing Selected Data</div>
 	{:else}
-		{#each $sliceSelections as s}
+		{#each $selections.slices as s}
 			<div class="meta-chip">
 				{s}
 				<TrailingIcon
 					class="remove material-icons"
 					on:click={() =>
-						sliceSelections.update((sel) => {
-							sel.splice(sel.indexOf(s), 1);
-							return sel;
+						selections.update((sel) => {
+							sel.slices.splice(sel.slices.indexOf(s), 1);
+							return { slices: sel.slices, metadata: sel.metadata };
 						})}>
 					cancel
 				</TrailingIcon>
@@ -93,27 +90,27 @@
 				<TrailingIcon
 					class="remove material-icons"
 					on:click={() =>
-						metadataSelections.update((m) => ({
-							...m,
-							[hash]: { predicates: [], join: "&" },
+						selections.update((m) => ({
+							slices: m.slices,
+							metadata: {
+								...m.metadata,
+								[hash]: { predicates: [], join: "&" },
+							},
 						}))}>
 					cancel
 				</TrailingIcon>
 			</div>
 		{/each}
-		{#if Object.values($metadataSelections)
-			.map((d) => d.predicates)
-			.flat().length + $sliceSelections.length > 0}
+		{#if $selectionPredicates.length > 0}
 			<span
 				class="clear"
 				on:keydown={() => ({})}
 				on:click={() => {
-					sliceSelections.set([]);
-					metadataSelections.update((m) => {
-						for (let key in m) {
-							m[key] = { predicates: [], join: "&" };
+					selections.update((m) => {
+						for (let key in m.metadata) {
+							m.metadata[key] = { predicates: [], join: "&" };
 						}
-						return { ...m };
+						return { slices: [], metadata: { ...m.metadata } };
 					});
 				}}>
 				clear all
@@ -134,7 +131,7 @@
 		padding-top: 5px;
 		border-bottom: 1px solid #e0e0e0;
 	}
-	#metric {
+	.metric {
 		font-weight: 400;
 		color: #6a1b9a;
 		margin-right: 15px;
