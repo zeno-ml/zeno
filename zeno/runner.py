@@ -14,6 +14,7 @@ from fastapi import FastAPI, WebSocket
 from fastapi.staticfiles import StaticFiles
 
 from zeno.classes import (
+    FilterPredicateGroup,
     HistogramRequest,
     MetricKey,
     MirrorProject,
@@ -252,6 +253,10 @@ def run_zeno(args):
     @api_app.post("/set-reports")
     def update_reports(reqs: List[Report]):
         zeno.set_reports(reqs)
+
+    @api_app.post("/get-filtered-ids")
+    def create_new_slice(req: List[FilterPredicateGroup]):
+        return json.dumps(zeno.get_filtered_ids(req))
 
     @api_app.post("/get-filtered-table")
     def get_filtered_table(req: TableRequest):

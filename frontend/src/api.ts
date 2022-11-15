@@ -132,6 +132,17 @@ export async function getHistograms(
 	}
 	return res;
 }
+export async function getFilteredIds(filterPredicates: FilterPredicateGroup[]) {
+	let res = await fetch("/api/get-filtered-ids", {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(filterPredicates),
+	}).then((res) => res.json());
+	res = JSON.parse(res);
+	return res;
+}
 
 export async function getFilteredTable(
 	completeColumns,

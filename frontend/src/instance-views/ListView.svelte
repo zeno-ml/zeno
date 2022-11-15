@@ -4,9 +4,8 @@
 	import IconButton from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
 
-	import { onMount, tick } from "svelte";
+	import { tick } from "svelte";
 	import { ZenoColumnType } from "../globals";
-	import SelectionBar from "../metadata/SelectionBar.svelte";
 	import {
 		model,
 		rowsPerPage,
@@ -21,15 +20,14 @@
 	import { columnHash } from "../util/util";
 
 	export let table;
+	export let viewFunction;
+	export let viewOptions = {};
+
+	let viewDivs = {};
 
 	let currentPage = 0;
 	let end = 0;
 	let lastPage = 0;
-
-	let viewFunction;
-	let viewDivs = {};
-	let optionsDiv;
-	let viewOptions = {};
 
 	let sampleOptions = [5, 15, 30, 60, 100, $settings.samples].sort(
 		(a, b) => a - b
@@ -53,19 +51,6 @@
 			[start, end]
 		).then((res) => (table = res));
 	}
-
-	onMount(() => {
-		try {
-			import(window.location.origin + "/cache/view.mjs").then((m) => {
-				viewFunction = m.getInstance;
-				if (m.getOptions) {
-					m.getOptions(optionsDiv, (opts) => (viewOptions = opts));
-				}
-			});
-		} catch (e) {
-			console.log("ERROR: failed to load sample view ---", e);
-		}
-	});
 
 	$: if (viewFunction) {
 		table;
@@ -125,8 +110,6 @@
 </script>
 
 {#if table}
-	<SelectionBar />
-	<div bind:this={optionsDiv} />
 	<div class="container sample-container">
 		{#each table as inst (inst[idHash])}
 			<div bind:this={viewDivs[inst[idHash]]} />

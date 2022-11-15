@@ -2,8 +2,8 @@
 	import { status, filteredTable, ready } from "./stores";
 
 	import MetadataPanel from "./metadata/MetadataPanel.svelte";
-	import Samples from "./general/Samples.svelte";
 	import OptionsBar from "./general/OptionsBar.svelte";
+	import InstanceView from "./instance-views/InstanceView.svelte";
 </script>
 
 {#if $ready && $status.completeColumns.length > 0}
@@ -12,7 +12,8 @@
 		<MetadataPanel />
 
 		<div id="samples" style:width="100%" style:padding-left="10px">
-			<Samples table={$filteredTable} />
+			<InstanceView table={$filteredTable} />
+			<!-- <Samples table={$filteredTable} /> -->
 		</div>
 	</div>
 {/if}

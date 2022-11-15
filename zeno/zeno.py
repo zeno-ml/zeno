@@ -16,6 +16,7 @@ import pandas as pd  # type: ignore
 
 from zeno.api import ZenoOptions
 from zeno.classes import (
+    FilterPredicateGroup,
     HistogramRequest,
     MetadataType,
     MetricKey,
@@ -501,6 +502,9 @@ class Zeno(object):
     ):
         df_filt = filter_table_single(df, col, pred)
         return self.calculate_metric(df_filt, state)
+
+    def get_filtered_ids(self, req: List[FilterPredicateGroup]):
+        return filter_table(self.df, req).iloc[str(self.id_column)]
 
     def get_filtered_table(self, req: TableRequest):
         filt_df = filter_table(self.df, req.filter_predicates).iloc[

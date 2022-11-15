@@ -7,14 +7,12 @@
 
 	import MetadataPanel from "../metadata/MetadataPanel.svelte";
 	import OptionsBar from "../general/OptionsBar.svelte";
-	import EmbedView from "./EmbedView.svelte";
 	import {
 		filteredTable,
 		colorSpec,
 		colorByHash,
 		availableColors,
 	} from "../stores";
-	import Samples from "../general/Samples.svelte";
 
 	$: {
 		const colorDefined = $colorByHash in $availableColors;
@@ -39,14 +37,7 @@
 	</div>
 
 	<div id="main-view">
-		<div id="embed-view">
-			{#if $colorSpec}
-				<EmbedView />
-			{/if}
-		</div>
-		<div id="samples-view">
-			<Samples table={$filteredTable} />
-		</div>
+		<div id="embed-view" />
 	</div>
 </main>
 
