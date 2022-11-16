@@ -1,6 +1,6 @@
 <script lang="ts">
 	import CircularProgress from "@smui/circular-progress";
-	import { Svg } from "@smui/common/elements";
+	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Tooltip, { Wrapper } from "@smui/tooltip";
 	import {

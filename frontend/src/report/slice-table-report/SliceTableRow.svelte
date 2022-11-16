@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { mdiPlusCircleOutline } from "@mdi/js";
 	import { Icon } from "@smui/common";
-	import { Svg } from "@smui/common/elements";
+	import { Svg } from "@smui/common";
 	import { Cell, Row } from "@smui/data-table";
 
 	import { metric, models, report, reports, transform } from "../../stores";

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { mdiChartBar, mdiChartLine, mdiTable } from "@mdi/js";
 	import { Icon } from "@smui/button";
-	import { Svg } from "@smui/common/elements";
+	import { Svg } from "@smui/common";
 	import IconButton from "@smui/icon-button";
 	import { report as selectedReport, reports } from "../stores";
 

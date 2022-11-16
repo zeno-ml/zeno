@@ -2,7 +2,7 @@
 	import { mdiPencilOutline, mdiDotsHorizontal } from "@mdi/js";
 	import Button, { Label } from "@smui/button";
 	import IconButton, { Icon } from "@smui/icon-button";
-	import { Svg } from "@smui/common/elements";
+	import { Svg } from "@smui/common";
 	import Dialog, { Actions, Content, Title, InitialFocus } from "@smui/dialog";
 	import SliceDetails from "../../general/SliceDetails.svelte";
 	import {

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Svg } from "@smui/common/elements";
+	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import { mdiFolderPlusOutline, mdiPlus } from "@mdi/js";
 

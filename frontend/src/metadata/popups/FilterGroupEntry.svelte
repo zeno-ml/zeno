@@ -3,7 +3,7 @@
 	import Button from "@smui/button";
 	import Select, { Option } from "@smui/select";
 	import IconButton, { Icon } from "@smui/icon-button";
-	import { Svg } from "@smui/common/elements";
+	import { Svg } from "@smui/common";
 	import { mdiTrashCanOutline } from "@mdi/js";
 
 	import FilterEntry from "./FilterEntry.svelte";

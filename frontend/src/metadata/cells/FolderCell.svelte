@@ -6,7 +6,7 @@
 		mdiPencilOutline,
 	} from "@mdi/js";
 	import IconButton, { Icon } from "@smui/icon-button";
-	import { Svg } from "@smui/common/elements";
+	import { Svg } from "@smui/common";
 	import { slide } from "svelte/transition";
 	import { folders, slices } from "../../stores";
 	import NewFolderPopup from "../popups/NewFolderPopup.svelte";
