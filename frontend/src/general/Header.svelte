@@ -43,6 +43,7 @@
 		<div id="tabs">
 			<div
 				class="item {$tab === 'explore' ? 'selected' : ''}"
+				on:keydown={() => ({})}
 				on:click={() => updateTab("explore")}>
 				<div class="icon">
 					<Icon component={Svg} viewBox="0 0 24 24">
@@ -55,6 +56,7 @@
 			</div>
 			<div
 				class="item {$tab === 'report' ? 'selected' : ''}"
+				on:keydown={() => ({})}
 				on:click={() => updateTab("report")}>
 				<div class="icon">
 					<Icon component={Svg} viewBox="0 0 24 24">

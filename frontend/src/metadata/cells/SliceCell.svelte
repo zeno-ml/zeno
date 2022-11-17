@@ -73,7 +73,7 @@
 			} else {
 				selections.update((sel) => ({
 					slices: [...sel.slices, slice.sliceName],
-					metadata: sel,
+					metadata: sel.metadata,
 				}));
 			}
 		} else {

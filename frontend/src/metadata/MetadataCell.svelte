@@ -1,5 +1,4 @@
 <script lang="ts">
-	import IconButton from "@smui/icon-button";
 	import BinaryMetadataCell from "./cells/BinaryMetadataCell.svelte";
 	import NominalMetadataCell from "./cells/NominalMetadataCell.svelte";
 	import ContinuousMetadataCell from "./cells/ContinuousMetadataCell.svelte";
@@ -7,7 +6,7 @@
 	import TextMetadataCell from "./cells/TextMetadataCell.svelte";
 
 	import { MetadataType } from "../globals";
-	import { colorByHash, selections } from "../stores";
+	import { selections } from "../stores";
 	import { columnHash } from "../util/util";
 
 	export let col: ZenoColumn;
@@ -36,39 +35,15 @@
 			},
 		}));
 	}
-
-	let hoveringCell = false;
-
-	$: hash = columnHash(col);
-	$: selectedHash = $colorByHash === hash;
 </script>
 
 {#if histogram}
-	<div
-		class="cell"
-		on:mouseenter={() => (hoveringCell = true)}
-		on:mouseleave={() => (hoveringCell = false)}>
+	<div class="cell">
 		<div id="info">
 			<div id="label" class="top-text">
-				<span style:color={shouldColor && selectedHash ? "#9B52DF" : ""}>
+				<span style:color={shouldColor ? "#9B52DF" : ""}>
 					{col.name}
 				</span>
-			</div>
-
-			<div class="top-right-cell">
-				{#if col.metadataType !== MetadataType.OTHER && shouldColor && (hoveringCell || selectedHash)}
-					<div class="top-text">
-						<IconButton
-							size="mini"
-							class="material-icons"
-							style="color: {shouldColor && selectedHash
-								? '#9B52DF'
-								: ''}; margin-top: -10px;"
-							on:click={() => {
-								colorByHash.set(hash);
-							}}>brush</IconButton>
-					</div>
-				{/if}
 			</div>
 		</div>
 		<svelte:component
@@ -99,11 +74,6 @@
 		margin-left: 5px;
 		margin-bottom: 5px;
 		color: #666;
-	}
-	.top-right-cell {
-		display: flex;
-		align-items: center;
-		gap: 2px;
 	}
 	.top-text {
 		height: 18px;

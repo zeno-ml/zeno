@@ -6,7 +6,7 @@
 
 	// function resetSelection(pos) {
 	// 	selection.values[pos] = undefined;
-	// 	if (
+	// if (
 	// 		selection.values[0] === undefined &&
 	// 		selection.values[1] === undefined
 	// 	) {
@@ -22,7 +22,7 @@
 	// });
 </script>
 
-<div class="inline">
+<!-- <div class="inline">
 	<div class="date-container">
 		start: <input
 			type="datetime-local"
@@ -33,8 +33,8 @@
 		<span class="reset" on:click={() => resetSelection(0)}>reset</span>
 	</div>
 	<div class="date-container">
-		end:
-		<!-- <input
+		end: -->
+<!-- <input
 			type="datetime-local"
 			on:change={(el) => {
 				selection.values[1] = new Date(el.target.value);
@@ -43,11 +43,11 @@
 			value={selection.values[1]
 				? selection[1].toISOString().slice(0, 16)
 				: histogram[1].toISOString().slice(0, 16)} /> -->
-		<span class="reset" on:click={() => resetSelection(1)}>reset</span>
+<!-- <span class="reset" on:click={() => resetSelection(1)}>reset</span>
 	</div>
-</div>
+</div> -->
 
-<style>
+<!-- <style>
 	.date-container {
 		margin-left: 5px;
 		margin-top: 10px;
@@ -65,4 +65,4 @@
 	.reset:hover {
 		color: #666;
 	}
-</style>
+</style> -->

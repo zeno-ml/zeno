@@ -6,14 +6,12 @@
 	import { columnHash } from "./util/util";
 	import { getInitialData } from "./api";
 
-	import Discover from "./discover/Discover.svelte";
 	import Explore from "./Explore.svelte";
 	import Header from "./general/Header.svelte";
 	import Report from "./report/Report.svelte";
 
 	const routes = {
 		"/": Explore,
-		"/discover/": Discover,
 		"/explore/": Explore,
 		"/report/": Report,
 		"*": Explore,

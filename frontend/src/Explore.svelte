@@ -13,7 +13,6 @@
 
 		<div id="samples" style:width="100%" style:padding-left="10px">
 			<InstanceView table={$filteredTable} />
-			<!-- <Samples table={$filteredTable} /> -->
 		</div>
 	</div>
 {/if}

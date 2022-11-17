@@ -3,12 +3,11 @@
 	import { onMount } from "svelte";
 	import SelectionBar from "../metadata/SelectionBar.svelte";
 	import ListView from "./ListView.svelte";
-	import ProjectionView from "./ProjectionView.svelte";
 	import TableView from "./TableView.svelte";
 
 	export let table;
 
-	let CHOICES = ["list", "table", "projection"];
+	let CHOICES = ["list", "table"];
 	let selected = "list";
 
 	let viewFunction;
@@ -47,9 +46,6 @@
 {/if}
 {#if selected === "table"}
 	<TableView {table} {viewFunction} {viewOptions} />
-{/if}
-{#if selected === "projection"}
-	<ProjectionView {table} {viewFunction} {viewOptions} />
 {/if}
 
 <style>

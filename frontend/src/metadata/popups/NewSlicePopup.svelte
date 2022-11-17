@@ -21,6 +21,7 @@
 	showNewSlice.subscribe(() => updatePredicates());
 
 	function updatePredicates() {
+		predicateGroup = { predicates: [], join: "" };
 		if ($sliceToEdit) {
 			sliceName = $sliceToEdit.sliceName;
 			predicateGroup = $sliceToEdit.filterPredicates;
@@ -38,10 +39,8 @@
 		if (sliceName.length === 0) {
 			sliceName = "Slice " + $slices.size;
 		}
-		showNewSlice.set(false);
-		sliceToEdit.set(null);
 
-		createNewSlice(sliceName, predicateGroup).then((d) => {
+		createNewSlice(sliceName, predicateGroup).then(() => {
 			slices.update((s) => {
 				s.set(sliceName, <Slice>{
 					sliceName: sliceName,
@@ -51,6 +50,8 @@
 				return s;
 			});
 			selections.update((sels) => ({ slices: [], metadata: sels.metadata }));
+			showNewSlice.set(false);
+			sliceToEdit.set(null);
 		});
 	}
 

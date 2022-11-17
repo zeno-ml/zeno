@@ -1,4 +1,4 @@
-<script lang="ts">
+<!-- <script lang="ts">
 	import Select, { Option } from "@smui/select";
 	import { scaleLinear as scaler } from "d3-scale";
 	import { onMount } from "svelte";
@@ -21,7 +21,6 @@
 		ScatterRow,
 		ScatterRowsFormat,
 	} from "./scatter/scatter";
-	import { Snapshot } from "./startingPoints/snapshot";
 	import { getFilteredIds } from "../api";
 
 	interface ExistsResponse {
@@ -54,11 +53,11 @@
 		{ numPoints: 100, pointSize: 4 }
 	);
 
-	$: {
-		if (mounted) {
-			initSnapshots($model, $transform);
-		}
-	}
+	// $: {
+	// 	if (mounted) {
+	// 		initSnapshots($model, $transform);
+	// 	}
+	// }
 	$: idToColorIndexMapping = new Map<string, number>(
 		$colorSpec.labels.map((d: ScatterRow) => [d.id, d.colorIndex])
 	);
@@ -73,10 +72,10 @@
 	// );
 	// $: filtersApplied = $selectionPredicates.length > 0;
 
-	$: if (reglScatterplot && currentState.ids) {
-		adjustPointSizes(currentState.ids.length);
-		adjustPointSizesPreview(startingPoint.ids.length);
-	}
+	// $: if (reglScatterplot && currentState.ids) {
+	// 	adjustPointSizes(currentState.ids.length);
+	// 	adjustPointSizesPreview(startingPoint.ids.length);
+	// }
 
 	onMount(async () => {
 		mounted = true;
@@ -344,4 +343,4 @@
 		left: 10px;
 		padding: 10px;
 	}
-</style>
+</style> -->

@@ -25,8 +25,11 @@ def get_filter_string(filter: Union[FilterPredicateGroup, FilterPredicate]):
             try:
                 val = str(float(filter.value))
             except ValueError:
-                if filter.value.lower() in ["true", "false"]:
-                    val = "True" if filter.value.lower() == "true" else "False"
+                if str(filter.value).lower() in [
+                    "true",
+                    "false",
+                ]:
+                    val = "True" if str(filter.value).lower() == "true" else "False"
                 else:
                     val = '"{}"'.format(filter.value)
             return "(`{}` {} {}) {}".format(
@@ -35,7 +38,9 @@ def get_filter_string(filter: Union[FilterPredicateGroup, FilterPredicate]):
     return ""
 
 
-def filter_table(df, filters: List[FilterPredicate]) -> pd.DataFrame:
+def filter_table(
+    df, filters: List[Union[FilterPredicate, FilterPredicateGroup]]
+) -> pd.DataFrame:
     final_filter = ""
     for filt in filters:
         final_filter = final_filter + get_filter_string(filt)

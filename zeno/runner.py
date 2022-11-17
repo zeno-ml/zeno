@@ -4,7 +4,7 @@ import os
 import shutil
 import sys
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 import pkg_resources
 import requests  # type: ignore
@@ -14,6 +14,7 @@ from fastapi import FastAPI, WebSocket
 from fastapi.staticfiles import StaticFiles
 
 from zeno.classes import (
+    FilterPredicate,
     FilterPredicateGroup,
     HistogramRequest,
     MetricKey,
@@ -255,7 +256,7 @@ def run_zeno(args):
         zeno.set_reports(reqs)
 
     @api_app.post("/get-filtered-ids")
-    def create_new_slice(req: List[FilterPredicateGroup]):
+    def get_filtered_ids(req: List[Union[FilterPredicateGroup, FilterPredicate]]):
         return json.dumps(zeno.get_filtered_ids(req))
 
     @api_app.post("/get-filtered-table")

@@ -18,16 +18,6 @@ import {
 } from "./stores";
 import { getMetricRange } from "./util/util";
 
-// 1) getProj() -> [id, x, y]
-// 2) lasso -> filterTable -> new table
-// a) JUST LASSO -> if lasso, only filter by lasso
-
-// 3) coloring ->
-// a) select metadata to color by
-// b) generate color scheme
-// c) get color for each ID -> BACKEND
-// getProjColors(col, bins, colors) -> [id, col]
-
 export async function getInitialData() {
 	let res = await fetch("/api/settings");
 	const sets = (await res.json()) as Settings;

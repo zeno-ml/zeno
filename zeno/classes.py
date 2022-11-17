@@ -115,7 +115,7 @@ class ZenoVariables(CamelModel):
 class Slice(CamelModel):
     slice_name: str
     folder: str
-    filter_predicates: Optional[FilterPredicateGroup]
+    filter_predicates: FilterPredicateGroup
 
 
 class MetricKey(CamelModel):
@@ -127,14 +127,14 @@ class HistogramRequest(CamelModel):
     columns: List[ZenoColumn]
     state: ZenoState
     get_metrics: bool
-    filter_predicates: Optional[List[FilterPredicateGroup]] = None
+    filter_predicates: List[Union[FilterPredicate, FilterPredicateGroup]]
 
 
 class TableRequest(CamelModel):
     columns: List[ZenoColumn]
     state: ZenoState
     slice_range: List[int]
-    filter_predicates: Optional[List[FilterPredicateGroup]] = None
+    filter_predicates: List[Union[FilterPredicate, FilterPredicateGroup]]
 
 
 class StatusResponse(CamelModel):

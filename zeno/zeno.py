@@ -9,13 +9,14 @@ from importlib import util
 from inspect import getmembers, getsource, isfunction
 from multiprocessing import Pool
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Union
 
 import numpy as np
 import pandas as pd  # type: ignore
 
 from zeno.api import ZenoOptions
 from zeno.classes import (
+    FilterPredicate,
     FilterPredicateGroup,
     HistogramRequest,
     MetadataType,
@@ -503,8 +504,8 @@ class Zeno(object):
         df_filt = filter_table_single(df, col, pred)
         return self.calculate_metric(df_filt, state)
 
-    def get_filtered_ids(self, req: List[FilterPredicateGroup]):
-        return filter_table(self.df, req).iloc[str(self.id_column)]
+    def get_filtered_ids(self, req: List[Union[FilterPredicateGroup, FilterPredicate]]):
+        return filter_table(self.df, req).loc[str(self.id_column)]
 
     def get_filtered_table(self, req: TableRequest):
         filt_df = filter_table(self.df, req.filter_predicates).iloc[
@@ -533,7 +534,7 @@ class Zeno(object):
                     ret_hist.append(
                         {
                             "bucket": k,
-                            "count": int(val_counts[k]),
+                            "count": int(val_counts[k]),  # type: ignore
                             "filteredCount": int((filt_df_col == k).sum()),
                             "metric": self.get_histogram_metric(
                                 filt_df, col, k, req.state
