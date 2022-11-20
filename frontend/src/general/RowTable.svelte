@@ -132,6 +132,7 @@
 	//$: console.log($filteredTable.objects());
 	//console.log($status.completeColumns);
 	//console.log(columnHash($status.completeColumns[0]));
+	console.log($transform);
 </script>
 
 {#if table}
@@ -142,7 +143,18 @@
             <thead>
                 <tr>
                     {#each columnHeader as header}
-                        {#if header.columnType != 4}
+						{#if header.name == "id"}
+						<th>image</th>
+						{/if}
+					{/each}
+					{#if $transform == "blur"}
+						<th>blur</th>
+					{/if}
+					{#if $transform == "rotate"}
+						<th>rotate</th>
+					{/if}
+					{#each columnHeader as header}
+                        {#if header.columnType == 0 || header.columnType == 1 && header.name != "id"}
                         <th>{header.name}
                             {#if header.name == "label"}
                             <Icon class="material-icons" style="font-size: 1em; padding-top:3px">
@@ -159,14 +171,22 @@
                     <tr>
                         {#each columnHeader as header}
                             {#if header.name == "id"}
-                                <td><img alt="" src={"/data/" + tableContent[header.columnType + header.name]}/></td>
-                            {:else}
-                            {#if header.columnType != 4}
-                                <td>{tableContent[header.columnType + header.name]}</td>
+                            	<td><img alt="" src={"/data/" + tableContent["0id"]}/></td>
+								{#if $transform == "blur"}
+									<td><img alt="" src={"/cache/5blur/" + tableContent["5blur"]}/></td>
+								{/if}
+								{#if $transform == "rotate"}
+									<td><img alt="" src={"/cache/5rotate/" + tableContent["5rotate"]}/></td>
+								{/if}
                             {/if}
+						{/each}
+						{#each columnHeader as header}
+                            {#if header.columnType == 0}
+								<td>{tableContent[header.columnType + header.name]}</td>
+							{/if}
+							{#if header.columnType == 1}
+                                <td>{Math.round(tableContent[header.columnType + header.name]) / 100 }</td>
                             {/if}
-                            
-                            
                         {/each}
                     </tr>
 		        {/each}
@@ -215,27 +235,33 @@
 
 <style>
 	.sample-container {
-		width: calc(100vw - 502px);
+		width: calc(100vw - 500px);
 		height: calc(100vh - 241px);
 		overflow-y: auto;
 		align-content: baseline;
 		border-bottom: 1px solid rgb(224, 224, 224);
 		display: flex;
 		flex-wrap: wrap;
-        min-width:70px;
+        min-width:75px;
 	}
     th {
         text-align: center;
         border-bottom: 1px solid #e0e0e0;
         padding-bottom: 5px;
         margin-bottom: 20px;
-        margin-right: 20px;
+        margin-right: 30px;
         position: sticky; 
         top: 0;
         background-color: white;
         min-width:70px;
+		font-size: 14px;
+		margin-left: 20px;
+		margin-bottom: 5px;
+		color: #666;
+		padding-left: 1.60vw;
+		padding-right: 1.60vw;
     }
-    tr {
-        text-align: center;
-    }
+	td {
+		padding-left: 15px;
+	}
 </style>
