@@ -70,7 +70,7 @@ export const currentColumns: Readable<ZenoColumn[]> = derived(
 		)
 );
 
-export const sort: Writable<ZenoColumn> = writable();
+export const sort: Writable<ZenoColumn> = writable(undefined);
 
 export const slices: Writable<Map<string, Slice>> = writable(new Map());
 export const folders: Writable<string[]> = folderWritable();

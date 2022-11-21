@@ -138,7 +138,8 @@ export async function getFilteredTable(
 	completeColumns,
 	filterPredicates: FilterPredicateGroup[],
 	state: ZenoState,
-	sliceRange: [number, number]
+	sliceRange: [number, number],
+	sort: [ZenoColumn, boolean]
 ) {
 	const requestedColumns = completeColumns.filter(
 		(c) =>
@@ -155,6 +156,7 @@ export async function getFilteredTable(
 			filter_predicates: filterPredicates,
 			state,
 			sliceRange,
+			sort,
 		}),
 	}).then((res) => res.json());
 	res = JSON.parse(res);

@@ -1,6 +1,6 @@
 from enum import IntEnum
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional, Tuple, Union
 
 from pydantic import BaseModel
 
@@ -135,6 +135,7 @@ class TableRequest(CamelModel):
     state: ZenoState
     slice_range: List[int]
     filter_predicates: List[Union[FilterPredicate, FilterPredicateGroup]]
+    sort: Tuple[Union[ZenoColumn, None], bool]
 
 
 class StatusResponse(CamelModel):

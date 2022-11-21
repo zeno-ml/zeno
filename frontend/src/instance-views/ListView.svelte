@@ -48,7 +48,8 @@
 			$status.completeColumns,
 			$selectionPredicates,
 			$zenoState,
-			[start, end]
+			[start, end],
+			[$sort, true]
 		).then((res) => (table = res));
 	}
 

@@ -508,9 +508,10 @@ class Zeno(object):
         return filter_table(self.df, req).loc[str(self.id_column)]
 
     def get_filtered_table(self, req: TableRequest):
-        filt_df = filter_table(self.df, req.filter_predicates).iloc[
-            req.slice_range[0] : req.slice_range[1]
-        ]
+        filt_df = filter_table(self.df, req.filter_predicates)
+        if req.sort[0]:
+            filt_df = filt_df.sort_values(str(req.sort[0]), ascending=req.sort[1])
+        filt_df = filt_df.iloc[req.slice_range[0] : req.slice_range[1]]
         return filt_df[[str(col) for col in req.columns]].to_json(orient="records")
 
     def calculate_histograms(self, req: HistogramRequest):
