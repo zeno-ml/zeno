@@ -77,7 +77,6 @@
 		align-items: center;
 		padding-bottom: 5px;
 		padding-top: 5px;
-		border-bottom: 1px solid #e0e0e0;
 	}
 	.meta-chip {
 		padding: 5px;

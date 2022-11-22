@@ -59,11 +59,21 @@
 		).then((res) => (metadataHistograms = res));
 	});
 
-	selectionPredicates.subscribe((sels) =>
+	selectionPredicates.subscribe((sels) => {
+		res = getMetricsForSlices([
+			<MetricKey>{
+				sli: <Slice>{
+					sliceName: "",
+					folder: "",
+					filterPredicates: { predicates: [], join: "" },
+				},
+				state: $zenoState,
+			},
+		]);
 		getHistograms($status.completeColumns, sels, $zenoState, false).then(
 			(res) => (metadataHistograms = res)
-		)
-	);
+		);
+	});
 </script>
 
 <div class="side-container">

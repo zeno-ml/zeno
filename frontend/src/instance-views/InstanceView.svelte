@@ -8,17 +8,19 @@
 
 	let selected = "list";
 
+	let viewOptions = undefined;
 	let viewFunction;
-	let optionsDiv;
-	let viewOptions;
+	let optionsFunction;
 
 	onMount(() => {
 		try {
 			import(window.location.origin + "/cache/view.mjs").then((m) => {
-				viewFunction = m.getInstance;
 				if (m.getOptions) {
-					m.getOptions(optionsDiv, (opts) => (viewOptions = opts));
+					optionsFunction = m.getOptions;
+				} else {
+					viewOptions = {};
 				}
+				viewFunction = m.getInstance;
 			});
 		} catch (e) {
 			console.log("ERROR: failed to load sample view ---", e);
@@ -27,10 +29,10 @@
 </script>
 
 <div class="heading">
-	<SelectionBar bind:selected />
-	<div bind:this={optionsDiv} />
+	<SelectionBar bind:selected {optionsFunction} bind:viewOptions />
 </div>
-{#if selected === "list"}
+
+{#if selected === "list" && viewOptions !== undefined}
 	<ListView {table} {viewFunction} {viewOptions} />
 {/if}
 {#if selected === "table"}

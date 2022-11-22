@@ -168,6 +168,11 @@ def main():
     if "samples" not in args:
         args["samples"] = 30
 
+    if "editable" not in args:
+        args["editable"] = True
+    else:
+        args["editable"] = args["editable"]
+
     if "port" not in args:
         args["port"] = 8000
 
@@ -192,6 +197,7 @@ def run_zeno(args):
         data_path=args["data_path"],
         label_path=args["label_path"],
         cache_path=args["cache_path"],
+        editable=args["editable"],
     )
     zeno.start_processing()
 

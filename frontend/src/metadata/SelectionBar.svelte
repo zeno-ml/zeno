@@ -10,8 +10,19 @@
 	} from "../stores";
 	import { MetadataType } from "../globals";
 	import { getMetricsForSlices } from "../api";
+	import { onMount } from "svelte";
 
 	export let selected = "list";
+	export let optionsFunction;
+	export let viewOptions;
+
+	let optionsDiv: HTMLDivElement;
+	let mounted = false;
+
+	onMount(() => (mounted = true));
+	$: if (mounted && optionsDiv && optionsFunction) {
+		optionsFunction(optionsDiv, (opts) => (viewOptions = opts));
+	}
 
 	let CHOICES = ["list", "table"];
 
@@ -124,7 +135,10 @@
 				<span id="size">({r[0].size} instances)</span>
 			{/await}
 		</div>
-		<div>
+		<div class="inline">
+			{#if optionsFunction}
+				<div style:margin-right="20px" bind:this={optionsDiv} />
+			{/if}
 			<Group>
 				{#each CHOICES as choice}
 					<Button
@@ -191,5 +205,9 @@
 		font-style: italic;
 		color: rgba(0, 0, 0, 0.4);
 		margin-right: 10px;
+	}
+	.inline {
+		display: flex;
+		align-items: center;
 	}
 </style>

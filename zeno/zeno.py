@@ -7,6 +7,7 @@ import sys
 import threading
 from importlib import util
 from inspect import getmembers, getsource, isfunction
+from math import isnan
 from multiprocessing import Pool
 from pathlib import Path
 from typing import Dict, List, Union
@@ -58,6 +59,7 @@ class Zeno(object):
         data_path,
         label_path,
         cache_path: Path,
+        editable: bool,
     ):
         logging.basicConfig(level=logging.INFO)
 
@@ -67,6 +69,7 @@ class Zeno(object):
         self.batch_size = batch_size
         self.data_path = data_path
         self.label_path = label_path
+        self.editable = editable
         self.status: str = "Initializing"
         self.done_processing = False
 
@@ -489,20 +492,41 @@ class Zeno(object):
         return [r.dict(by_alias=True) for r in self.reports]
 
     def set_folders(self, folders):
+        if not self.editable:
+            return
         self.folders = folders
         with open(os.path.join(self.cache_path, "folders.pickle"), "wb") as f:
             pickle.dump(self.folders, f)
 
     def set_reports(self, reports: List[Report]):
+        if not self.editable:
+            return
         self.reports = reports
         with open(os.path.join(self.cache_path, "reports.pickle"), "wb") as f:
             pickle.dump(self.reports, f)
+
+    def create_new_slice(self, req: Slice):
+        if not self.editable:
+            return
+        self.slices[req.slice_name] = req
+        with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
+            pickle.dump(self.slices, f)
+
+    def delete_slice(self, slice_name: str):
+        if not self.editable:
+            return
+        del self.slices[slice_name]
+        with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
+            pickle.dump(self.slices, f)
 
     def get_histogram_metric(
         self, df: pd.DataFrame, col: ZenoColumn, pred, state: ZenoState
     ):
         df_filt = filter_table_single(df, col, pred)
-        return self.calculate_metric(df_filt, state)
+        metric = self.calculate_metric(df_filt, state)
+        if isnan(metric):
+            return -1
+        return metric
 
     def get_filtered_ids(self, req: List[Union[FilterPredicateGroup, FilterPredicate]]):
         return filter_table(self.df, req).loc[str(self.id_column)]
@@ -584,16 +608,6 @@ class Zeno(object):
             else:
                 res[str(col)] = []
         return res
-
-    def create_new_slice(self, req: Slice):
-        self.slices[req.slice_name] = req
-        with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
-            pickle.dump(self.slices, f)
-
-    def delete_slice(self, slice_name: str):
-        del self.slices[slice_name]
-        with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
-            pickle.dump(self.slices, f)
 
     def embedding_exists(self, model: str):
         col = ZenoColumn(name=model, column_type=ZenoColumnType.EMBEDDING)
