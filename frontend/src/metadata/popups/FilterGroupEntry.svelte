@@ -42,7 +42,7 @@
 			</IconButton>
 		{/if}
 	</div>
-	<div id="main">
+	<div class="main">
 		<ul use:autoAnimate>
 			{#each predicateGroup.predicates as p, i}
 				{#if !("predicates" in p)}
@@ -109,7 +109,7 @@
 		flex-direction: column;
 		align-items: flex-end;
 	}
-	#main {
+	.main {
 		background: rgba(0, 0, 0, 0.025);
 		border-radius: 5px;
 		margin-top: 10px;

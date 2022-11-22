@@ -9,7 +9,6 @@ import {
 	models,
 	ready,
 	reports,
-	results,
 	rowsPerPage,
 	settings,
 	slices,
@@ -48,39 +47,56 @@ export async function getInitialData() {
 	ready.set(true);
 }
 
+function instanceOfFilterPredicate(object): object is FilterPredicate {
+	return "column" in object;
+}
+
+function setModelForMetricKey(
+	pred: FilterPredicate | FilterPredicateGroup,
+	state: ZenoState
+) {
+	if (instanceOfFilterPredicate(pred)) {
+		if (pred.column.columnType === ZenoColumnType.POSTDISTILL) {
+			pred.column.model = state.model;
+			pred.column.transform = state.transform;
+		}
+	} else {
+		pred.predicates = pred.predicates.map((p) =>
+			setModelForMetricKey(p, state)
+		);
+	}
+	return pred;
+}
+
+function setModelForMetricKeys(metricKeys: MetricKey[]) {
+	return metricKeys.map((key) => {
+		if (key.sli.filterPredicates) {
+			key.sli.filterPredicates = setModelForMetricKey(
+				key.sli.filterPredicates,
+				key.state
+			);
+		}
+		return key;
+	});
+}
+
 export async function getMetricsForSlices(metricKeys: MetricKey[]) {
 	if (metricKeys.length === 0 || metricKeys[0].state.metric === undefined) {
 		return null;
 	}
-	const returnValues = metricKeys.map((k) => {
-		if (k.sli.sliceName === "") {
-			return undefined;
-		}
-		return get(results).get(k);
-	});
-	const requiredIndices = returnValues.reduce((arr, curr, i) => {
-		if (curr === undefined) {
-			arr.push(i);
-		}
-		return arr;
-	}, []);
+	// Update model in predicates if slices are dependent on postdistill columns.
+	metricKeys = setModelForMetricKeys(metricKeys);
 
-	if (requiredIndices.length > 0) {
-		let res = await fetch("/api/get-metrics-for-slices", {
+	if (metricKeys.length > 0) {
+		const res = await fetch("/api/get-metrics-for-slices", {
 			method: "POST",
 			headers: {
 				"Content-type": "application/json",
 			},
-			body: JSON.stringify(requiredIndices.map((i) => metricKeys[i])),
+			body: JSON.stringify(metricKeys),
 		}).then((d) => d.json());
-		res = JSON.parse(res);
-		results.update((resmap) => {
-			res.forEach((r, i) => resmap.set(metricKeys[i], r));
-			return resmap;
-		});
-		requiredIndices.forEach((r, i) => (returnValues[r] = res[i]));
+		return JSON.parse(res);
 	}
-	return returnValues;
 }
 
 export async function getHistograms(
@@ -113,8 +129,10 @@ export async function getHistograms(
 
 	const prevRange = get(metricRange);
 	if (get_metrics && prevRange[0] === Infinity) {
+		// If we want to get metric range and haven't before
 		metricRange.set([...getMetricRange(res), true]);
 	} else {
+		// Otherwise, set the previous range
 		metricRange.update((range) => {
 			range[2] = get_metrics;
 			return [...range];
@@ -122,6 +140,7 @@ export async function getHistograms(
 	}
 	return res;
 }
+
 export async function getFilteredIds(filterPredicates: FilterPredicateGroup[]) {
 	let res = await fetch("/api/get-filtered-ids", {
 		method: "POST",

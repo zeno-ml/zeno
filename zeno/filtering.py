@@ -18,7 +18,7 @@ def get_filter_string(filter: Union[FilterPredicateGroup, FilterPredicate]):
             return filt + ")" + (filter.join if filter.join else "")
     else:
         if filter.operation == "match":
-            return "(`{}`.str.match('{}')) {}".format(
+            return "(`{}`.str.match('{}', na=False)) {}".format(
                 filter.column, filter.value, filter.join
             )
         else:

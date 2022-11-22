@@ -11,6 +11,7 @@
 	import FilterGroupEntry from "./FilterGroupEntry.svelte";
 
 	let sliceName = "";
+	let folder = "";
 	let predicateGroup: FilterPredicateGroup = { predicates: [], join: "" };
 	let nameInput;
 
@@ -25,6 +26,7 @@
 		if ($sliceToEdit) {
 			sliceName = $sliceToEdit.sliceName;
 			predicateGroup = $sliceToEdit.filterPredicates;
+			folder = $sliceToEdit.folder;
 			return;
 		}
 		// Pre-fill slice creation with current metadata selections.
@@ -43,8 +45,8 @@
 		createNewSlice(sliceName, predicateGroup).then(() => {
 			slices.update((s) => {
 				s.set(sliceName, <Slice>{
-					sliceName: sliceName,
-					folder: "",
+					sliceName,
+					folder,
 					filterPredicates: Object.assign({}, predicateGroup),
 				});
 				return s;
@@ -75,9 +77,13 @@
 	on:click_outside={() => showNewSlice.set(false)}>
 	<Paper elevation={7}>
 		<Content>
-			<Textfield bind:value={sliceName} label="Name" bind:this={nameInput}>
-				<HelperText slot="helper">Slice 1</HelperText>
-			</Textfield>
+			{#if !$sliceToEdit}
+				<Textfield bind:value={sliceName} label="Name" bind:this={nameInput}>
+					<HelperText slot="helper">Slice 1</HelperText>
+				</Textfield>
+			{:else}
+				<p>{sliceName}</p>
+			{/if}
 			<FilterGroupEntry
 				index={-1}
 				deletePredicate={() => deletePredicate(-1)}

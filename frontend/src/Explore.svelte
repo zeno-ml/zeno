@@ -2,13 +2,11 @@
 	import { status, filteredTable, ready } from "./stores";
 
 	import MetadataPanel from "./metadata/MetadataPanel.svelte";
-	import OptionsBar from "./general/OptionsBar.svelte";
 	import InstanceView from "./instance-views/InstanceView.svelte";
 </script>
 
 {#if $ready && $status.completeColumns.length > 0}
-	<OptionsBar />
-	<div id="container">
+	<div class="container">
 		<MetadataPanel />
 
 		<div id="samples" style:width="100%" style:padding-left="10px">
@@ -22,7 +20,7 @@
 		width: 100%;
 		margin-right: 20px;
 	}
-	#container {
+	.container {
 		display: flex;
 		flex-direction: row;
 		min-width: 100%;

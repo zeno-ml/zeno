@@ -23,7 +23,11 @@
 		metricRange,
 		zenoState,
 		selectionPredicates,
+		metrics,
+		models,
+		transforms,
 	} from "../stores";
+	import Select, { Option } from "@smui/select";
 	import { columnHash } from "../util/util";
 	import { getHistograms, getMetricsForSlices } from "../api";
 	import { ZenoColumnType } from "../globals";
@@ -47,12 +51,6 @@
 	]);
 
 	zenoState.subscribe((state) => {
-		selections.update((m) => {
-			Object.keys(m.metadata).forEach((k) => {
-				m.metadata[k] = { predicates: [], join: "" };
-			});
-			return { slices: m.slices, metadata: m.metadata };
-		});
 		getHistograms(
 			$status.completeColumns,
 			$selectionPredicates,
@@ -69,6 +67,39 @@
 </script>
 
 <div class="side-container">
+	<div class="container">
+		{#if $model !== undefined}
+			<Select
+				bind:value={$model}
+				label="Model"
+				style="margin-right: 20px; width: 125px">
+				{#each $models as m}
+					<Option value={m}>{m}</Option>
+				{/each}
+			</Select>
+		{/if}
+		{#if $metric !== undefined}
+			<Select
+				bind:value={$metric}
+				label="Metric"
+				style="margin-right: 20px; width: 125px">
+				{#each $metrics as m}
+					<Option value={m}>{m}</Option>
+				{/each}
+			</Select>
+		{/if}
+		{#if $transform !== undefined}
+			<Select
+				bind:value={$transform}
+				label="Transform"
+				style="margin-right: 20px; width: 125px">
+				{#each ["", ...$transforms] as t}
+					<Option value={t}>{t}</Option>
+				{/each}
+			</Select>
+		{/if}
+	</div>
+
 	<div class="inline">
 		<h4>Slices</h4>
 		<div class="inline">
@@ -200,13 +231,21 @@
 </div>
 
 <style>
+	.container {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+		border-bottom: 1px solid #e0e0e0;
+		padding-bottom: 10px;
+	}
 	h4 {
 		font-weight: 500;
 		color: rgba(0, 0, 0, 0.7);
 	}
 	.side-container {
 		margin-left: 10px;
-		height: calc(100vh - 165px);
+		height: calc(100vh - 110px);
 		min-width: 450px;
 		padding: 10px;
 		padding-top: 0px;

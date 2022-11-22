@@ -1,19 +1,22 @@
 <script lang="ts">
-	import Select, { Option } from "@smui/select";
-	import IconButton, { Icon } from "@smui/icon-button";
+	import { mdiTrashCanOutline } from "@mdi/js";
 	import Autocomplete from "@smui-extra/autocomplete";
 	import { Svg } from "@smui/common";
+	import IconButton, { Icon } from "@smui/icon-button";
+	import Select, { Option } from "@smui/select";
 	import Textfield from "@smui/textfield";
 	import HelperText from "@smui/textfield/helper-text";
-	import { mdiTrashCanOutline } from "@mdi/js";
 
+	import { MetadataType } from "../../globals";
 	import { currentColumns } from "../../stores";
 
 	export let predicate: FilterPredicate;
 	export let deletePredicate: () => void;
 	export let index;
 
-	let operations = ["==", "!=", ">", "<", ">=", "<="];
+	$: console.log(predicate.column);
+
+	let operations = ["==", "!=", ">", "<", ">=", "<=", "match"];
 </script>
 
 <div id="group">
@@ -48,9 +51,23 @@
 	</div>
 
 	<div>
-		<Textfield bind:value={predicate.value} label="Value" style="width: 100px">
-			<HelperText slot="helper">0</HelperText>
-		</Textfield>
+		{#if predicate.column && predicate.column.metadataType === MetadataType.BOOLEAN}
+			<Select
+				bind:value={predicate.value}
+				label="Operation"
+				style="margin-right: 20px; width:125px">
+				{#each ["true", "false"] as o}
+					<Option value={o}>{o}</Option>
+				{/each}
+			</Select>
+		{:else}
+			<Textfield
+				bind:value={predicate.value}
+				label="Value"
+				style="width: 100px">
+				<HelperText slot="helper">0</HelperText>
+			</Textfield>
+		{/if}
 	</div>
 	<div class="selector" style:margin-top="10px">
 		<IconButton on:click={deletePredicate}>

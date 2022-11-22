@@ -1,4 +1,3 @@
-import { InternMap } from "internmap";
 import { websocketStore } from "svelte-websocket-store";
 import {
 	derived,
@@ -75,19 +74,6 @@ export const sort: Writable<ZenoColumn> = writable(undefined);
 export const slices: Writable<Map<string, Slice>> = writable(new Map());
 export const folders: Writable<string[]> = folderWritable();
 export const reports: Writable<Report[]> = reportWritable();
-export const results: Writable<InternMap<MetricKey, number>> = writable(
-	new InternMap(
-		[],
-		(d: MetricKey) =>
-			d.sli.sliceName +
-			"." +
-			d.state.metric +
-			"." +
-			d.state.model +
-			"." +
-			d.state.transform
-	)
-);
 
 export const filteredTable: Writable<Record<string, any>[]> = writable([]);
 // slices is an array of slice names,

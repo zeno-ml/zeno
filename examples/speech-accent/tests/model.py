@@ -40,6 +40,13 @@ def load_model(model_path):
 
 
 @distill
+def country(df, ops: ZenoOptions):
+    if df["0birthplace"][0] == df["0birthplace"][0]:
+        return df["0birthplace"].str.split(", ")[-1][-1]
+    return ""
+
+
+@distill
 def wer_m(df, ops: ZenoOptions):
     return df.apply(lambda x: wer(x[ops.label_column], x[ops.output_column]), axis=1)
 

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Button, { Group } from "@smui/button";
 	import { onMount } from "svelte";
 	import SelectionBar from "../metadata/SelectionBar.svelte";
 	import ListView from "./ListView.svelte";
@@ -7,7 +6,6 @@
 
 	export let table;
 
-	let CHOICES = ["list", "table"];
 	let selected = "list";
 
 	let viewFunction;
@@ -29,17 +27,8 @@
 </script>
 
 <div class="heading">
-	<SelectionBar />
+	<SelectionBar bind:selected />
 	<div bind:this={optionsDiv} />
-	<div>
-		<Group>
-			{#each CHOICES as choice}
-				<Button
-					variant={choice === selected ? "raised" : "outlined"}
-					on:click={() => (selected = choice)}>{choice}</Button>
-			{/each}
-		</Group>
-	</div>
 </div>
 {#if selected === "list"}
 	<ListView {table} {viewFunction} {viewOptions} />

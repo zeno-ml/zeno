@@ -440,7 +440,7 @@ class Zeno(object):
 
         return_metrics = []
         for metric_key in requests:
-            filt_df = filter_table(self.df, metric_key.sli.filter_predicates.predicates)
+            filt_df = filter_table(self.df, [metric_key.sli.filter_predicates])
             if metric_key.state.metric == "" or metric_key.state.model == "":
                 return_metrics.append({"metric": None, "size": filt_df.shape[0]})
             else:
