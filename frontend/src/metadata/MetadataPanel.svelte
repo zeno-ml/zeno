@@ -98,7 +98,7 @@
 				{/each}
 			</Select>
 		{/if}
-		{#if $transform !== undefined}
+		{#if $transform !== undefined && $transforms.length !== 0}
 			<Select
 				bind:value={$transform}
 				label="Transform"
@@ -155,7 +155,7 @@
 		<div class="inline">
 			<span>
 				{#await res then r}
-					{r[0].metric ? r[0].metric.toFixed(2) : ""}
+					{r && r[0].metric ? r[0].metric.toFixed(2) : ""}
 				{/await}
 			</span>
 			<span class="size">({$settings.totalSize})</span>
@@ -244,7 +244,6 @@
 	.container {
 		display: flex;
 		flex-direction: row;
-		justify-content: space-between;
 		align-items: center;
 		border-bottom: 1px solid #e0e0e0;
 		padding-bottom: 10px;

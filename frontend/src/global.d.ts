@@ -5,6 +5,7 @@ interface Settings {
 	idColumn: ZenoColumn;
 	labelColumn: ZenoColumn;
 	dataColumn: ZenoColumn;
+	dataOrigin: string;
 	metadataColumns: ZenoColumn[];
 	samples: number;
 	totalSize: number;

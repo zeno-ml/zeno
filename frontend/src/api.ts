@@ -103,7 +103,7 @@ export async function getHistograms(
 	completeColumns,
 	filterPredicates: FilterPredicateGroup[],
 	state: ZenoState,
-	get_metrics: boolean
+	getMetrics: boolean
 ) {
 	const requestedHistograms = completeColumns.filter(
 		(c) =>
@@ -112,6 +112,13 @@ export async function getHistograms(
 			c.columnType !== ZenoColumnType.OUTPUT &&
 			c.columnType !== ZenoColumnType.TRANSFORM
 	);
+	if (state.model === undefined) {
+		state.model = "";
+	}
+	if (state.metric === undefined) {
+		state.metric = "";
+	}
+	console.log(state);
 	let res = await fetch("/api/calculate-histograms", {
 		method: "POST",
 		headers: {
@@ -119,9 +126,9 @@ export async function getHistograms(
 		},
 		body: JSON.stringify({
 			columns: requestedHistograms,
-			filter_predicates: filterPredicates,
+			filterPredicates: filterPredicates,
 			state,
-			get_metrics,
+			getMetrics,
 		}),
 	}).then((res) => res.json());
 
@@ -129,7 +136,7 @@ export async function getHistograms(
 
 	const prevRange = get(metricRange);
 	if (
-		get_metrics &&
+		getMetrics &&
 		(prevRange[0] === Infinity || (prevRange[0] === -1 && prevRange[1] === -1))
 	) {
 		// If we want to get metric range and haven't before
@@ -137,7 +144,7 @@ export async function getHistograms(
 	} else {
 		// Otherwise, set the previous range
 		metricRange.update((range) => {
-			range[2] = get_metrics;
+			range[2] = getMetrics;
 			return [...range];
 		});
 	}
@@ -175,8 +182,7 @@ export async function getFilteredTable(
 		},
 		body: JSON.stringify({
 			columns: requestedColumns,
-			filter_predicates: filterPredicates,
-			state,
+			filterPredicates: filterPredicates,
 			sliceRange,
 			sort,
 		}),

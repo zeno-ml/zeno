@@ -3,7 +3,7 @@ import json
 import os
 import shutil
 import sys
-from pathlib import Path
+from pathlib import Path, PosixPath
 from typing import List, Union
 
 import pkg_resources
@@ -138,7 +138,7 @@ def main():
 
     if "data_path" not in args:
         args["data_path"] = ""
-    else:
+    elif not args["data_path"].startswith("http"):
         args["data_path"] = Path(
             os.path.realpath(os.path.join(toml_path, args["data_path"]))
         )
@@ -204,7 +204,7 @@ def run_zeno(args):
     app = FastAPI(title="Frontend API")
     api_app = FastAPI(title="Backend API")
 
-    if args["data_path"] != "":
+    if args["data_path"] != "" and isinstance(args["data_path"], PosixPath):
         app.mount("/data", StaticFiles(directory=args["data_path"]), name="static")
     if args["label_path"] != "":
         app.mount("/labels", StaticFiles(directory=args["label_path"]), name="static")
@@ -231,6 +231,9 @@ def run_zeno(args):
             id_column=zeno.id_column,
             label_column=zeno.label_column,
             data_column=zeno.data_column,
+            data_origin="/data/"
+            if isinstance(args["data_path"], PosixPath)
+            else args["data_path"],
             metadata_columns=zeno.columns,
             samples=args["samples"],
             totalSize=zeno.df.shape[0],

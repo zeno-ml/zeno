@@ -43,6 +43,7 @@ export const settings: Writable<Settings> = writable(<Settings>{
 	dataColumn: {},
 	labelColumn: {},
 	metadataColumns: [],
+	dataOrigin: "",
 	samples: 0,
 	totalSize: 0,
 });

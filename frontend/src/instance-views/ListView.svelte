@@ -102,6 +102,7 @@
 					modelColumn,
 					columnHash($settings.labelColumn),
 					columnHash($settings.dataColumn),
+					$settings.dataOrigin,
 					transformColumn,
 					idHash
 				);

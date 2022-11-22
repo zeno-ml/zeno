@@ -130,9 +130,14 @@
 				{$metric ? $metric + ":" : ""}
 			</span>
 			{#await res then r}
-				<span class="metric"
-					>{r[0].metric !== undefined ? r[0].metric.toFixed(2) : ""}</span>
-				<span id="size">({r[0].size} instances)</span>
+				{#if r}
+					<span class="metric">
+						{r[0].metric !== undefined && r[0].metric !== null
+							? r[0].metric.toFixed(2)
+							: ""}
+					</span>
+					<span id="size">({r[0].size} instances)</span>
+				{/if}
 			{/await}
 		</div>
 		<div class="inline">

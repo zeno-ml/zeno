@@ -100,6 +100,7 @@ class ZenoSettings(CamelModel):
     id_column: ZenoColumn
     label_column: ZenoColumn
     data_column: ZenoColumn
+    data_origin: str
     metadata_columns: List[ZenoColumn]
     samples: int
     totalSize: int
@@ -132,7 +133,6 @@ class HistogramRequest(CamelModel):
 
 class TableRequest(CamelModel):
     columns: List[ZenoColumn]
-    state: ZenoState
     slice_range: List[int]
     filter_predicates: List[Union[FilterPredicate, FilterPredicateGroup]]
     sort: Tuple[Union[ZenoColumn, None], bool]
