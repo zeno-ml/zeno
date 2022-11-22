@@ -548,7 +548,6 @@ class Zeno(object):
                 ]
                 res[str(col)] = ret_hist
             elif col.metadata_type == MetadataType.CONTINUOUS:
-                res[str(col)] = col.name
                 ret_hist = []
                 bins = np.histogram(df_col, bins="doane")
                 bins_filt = np.histogram(filt_df_col, bins=bins[1])
