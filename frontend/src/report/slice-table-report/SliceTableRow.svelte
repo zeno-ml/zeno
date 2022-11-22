@@ -5,7 +5,7 @@
 	import { Cell, Row } from "@smui/data-table";
 
 	import { metric, models, report, reports, transform } from "../../stores";
-	import { getMetricsForSlices } from "../../util/util";
+	import { getMetricsForSlices } from "../../api";
 
 	import SliceDetailsContainer from "../SliceDetailsContainer.svelte";
 
@@ -14,9 +14,11 @@
 	$: modelResults = getMetricsForSlices(
 		$models.map((m) => ({
 			sli: sli,
-			metric: $metric,
-			model: m,
-			transform: $transform,
+			state: {
+				metric: $metric,
+				model: m,
+				transform: $transform,
+			},
 		}))
 	);
 </script>
@@ -56,9 +58,7 @@
 	</Cell>
 	{#await modelResults then res}
 		{#each res as r}
-			<Cell>
-				{r ? r.toFixed(2) : ""}
-			</Cell>
+			<Cell>{r.metric.toFixed(2)}</Cell>
 		{/each}
 	{/await}
 </Row>

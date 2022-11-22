@@ -1,6 +1,6 @@
 import type { VegaLiteSpec } from "svelte-vega";
 
-export function generateCountSpec(shouldColor, domain, metricRange) {
+export function nominalVegaSpec(shouldColor, metricRange) {
 	const countSpec = {
 		$schema: "https://vega.github.io/schema/vega-lite/v5.json",
 		data: {
@@ -22,13 +22,14 @@ export function generateCountSpec(shouldColor, domain, metricRange) {
 				],
 				mark: {
 					type: "bar",
+					binSpacing: 0,
 					opacity: 0.5,
 					fill: "#ddd",
 					cursor: "pointer",
 				},
 				encoding: {
 					x: {
-						field: "binStart",
+						field: "bucket",
 						axis: {
 							title: "",
 							grid: false,
@@ -44,10 +45,10 @@ export function generateCountSpec(shouldColor, domain, metricRange) {
 				},
 			},
 			{
-				mark: { type: "bar" },
+				mark: { type: "bar", binSpacing: 0 },
 				encoding: {
 					x: {
-						field: "binStart",
+						field: "bucket",
 					},
 					y: {
 						field: "filteredCount",
@@ -78,14 +79,7 @@ export function generateCountSpec(shouldColor, domain, metricRange) {
 	} as VegaLiteSpec;
 
 	const topLayerBars = countSpec["layer"][1];
-	if (domain[0].color && shouldColor) {
-		topLayerBars.encoding.color = {
-			field: "color",
-			type: "nominal",
-			scale: null,
-			legend: null,
-		};
-	} else {
+	if (metricRange[2]) {
 		topLayerBars.encoding.color = {
 			field: "metric",
 			type: "quantitative",
@@ -96,12 +90,23 @@ export function generateCountSpec(shouldColor, domain, metricRange) {
 			},
 			legend: null,
 		};
+	} else if (shouldColor) {
+		topLayerBars.encoding.color = {
+			field: "color",
+			type: "nominal",
+			scale: null,
+			legend: null,
+		};
+	} else {
+		topLayerBars.encoding.color = {
+			value: "#6a1b9a",
+		};
 	}
 
 	return countSpec;
 }
 
-export function generateHistogramSpec(shouldColor, domain, metricRange) {
+export function continuousVegaSpec(shouldColor, metricRange) {
 	const histogramSpec = {
 		$schema: "https://vega.github.io/schema/vega-lite/v5.json",
 		data: {
@@ -120,13 +125,18 @@ export function generateHistogramSpec(shouldColor, domain, metricRange) {
 						select: { type: "interval", encodings: ["x"] },
 					},
 				],
-				mark: { type: "bar", opacity: 0.5, cursor: "col-resize" },
+				mark: {
+					type: "bar",
+					opacity: 0.5,
+					cursor: "col-resize",
+					binSpacing: 0,
+				},
 				encoding: {
 					x: {
-						field: "binStart",
+						field: "bucket",
 						bin: { binned: true },
 					},
-					x2: { field: "binEnd" },
+					x2: { field: "bucketEnd" },
 					y: {
 						field: "count",
 						type: "quantitative",
@@ -135,18 +145,21 @@ export function generateHistogramSpec(shouldColor, domain, metricRange) {
 				},
 			},
 			{
-				mark: { type: "bar" },
+				mark: {
+					type: "bar",
+					binSpacing: 0,
+				},
 				encoding: {
 					size: {
 						legend: null,
 					},
 					x: {
-						field: "binStart",
+						field: "bucket",
 						bin: { binned: true },
 						title: "",
 						axis: { title: "", labelColor: "rgba(0, 0, 0, 0.6)" },
 					},
-					x2: { field: "binEnd" },
+					x2: { field: "bucketEnd" },
 					y: {
 						field: "filteredCount",
 						type: "quantitative",
@@ -163,15 +176,7 @@ export function generateHistogramSpec(shouldColor, domain, metricRange) {
 	} as VegaLiteSpec;
 
 	const topLayerBars = histogramSpec["layer"][1];
-	if (domain[0].color && shouldColor) {
-		topLayerBars.encoding.color = {
-			field: "color",
-			type: "nominal",
-			scale: null,
-			legend: null,
-		};
-	} else {
-		// if (domain[0].metricColor && domain[0].metricColor !== "#000000") {
+	if (metricRange[2]) {
 		topLayerBars.encoding.color = {
 			field: "metric",
 			type: "quantitative",
@@ -182,10 +187,18 @@ export function generateHistogramSpec(shouldColor, domain, metricRange) {
 			},
 			legend: null,
 		};
+	} else if (shouldColor) {
+		topLayerBars.encoding.color = {
+			field: "color",
+			type: "nominal",
+			scale: null,
+			legend: null,
+		};
+	} else {
+		topLayerBars.encoding.color = {
+			value: "#6a1b9a",
+		};
 	}
-	// } else {
-	// 	topLayerBars.mark.fill = "#6a1b9a";
-	// }
 
 	return histogramSpec;
 }

@@ -1,45 +1,40 @@
 <script lang="ts">
-	export let selection;
-	export let setSelection;
-	export let hash;
-	export let domain;
+	export let col: ZenoColumn;
+	export let filterPredicates: FilterPredicate[];
+	export let histogram;
+	export let shouldColor;
 
-	import { metadataSelections } from "../../stores";
+	// function resetSelection(pos) {
+	// 	selection.values[pos] = undefined;
+	// if (
+	// 		selection.values[0] === undefined &&
+	// 		selection.values[1] === undefined
+	// 	) {
+	// 		selection.values = [];
+	// 		setSelection();
+	// 	}
+	// }
 
-	function resetSelection(pos) {
-		selection.values[pos] = undefined;
-		if (
-			selection.values[0] === undefined &&
-			selection.values[1] === undefined
-		) {
-			selection.values = [];
-			setSelection();
-		}
-	}
-
-	metadataSelections.subscribe((sel) => {
-		if (!sel.has(hash)) {
-			selection.values = [];
-		}
-	});
+	// metadataSelections.subscribe((sel) => {
+	// 	if (!sel.has(hash)) {
+	// 		selection.values = [];
+	// 	}
+	// });
 </script>
 
-<div class="inline">
+<!-- <div class="inline">
 	<div class="date-container">
 		start: <input
 			type="datetime-local"
 			on:change={(el) => {
-				selection.values[0] = new Date(el.target.value);
-				setSelection();
-			}}
-			value={selection.values[0]
-				? selection.values[0].toISOString().slice(0, 16)
-				: domain[0].toISOString().slice(0, 16)} />
+				// selection.values[0] = new Date(el.target.value);
+				// setSelection();
+			}} />
 		<span class="reset" on:click={() => resetSelection(0)}>reset</span>
 	</div>
 	<div class="date-container">
-		end:
-		<input
+		end: -->
+<!-- <input
 			type="datetime-local"
 			on:change={(el) => {
 				selection.values[1] = new Date(el.target.value);
@@ -47,12 +42,12 @@
 			}}
 			value={selection.values[1]
 				? selection[1].toISOString().slice(0, 16)
-				: domain[1].toISOString().slice(0, 16)} />
-		<span class="reset" on:click={() => resetSelection(1)}>reset</span>
+				: histogram[1].toISOString().slice(0, 16)} /> -->
+<!-- <span class="reset" on:click={() => resetSelection(1)}>reset</span>
 	</div>
-</div>
+</div> -->
 
-<style>
+<!-- <style>
 	.date-container {
 		margin-left: 5px;
 		margin-top: 10px;
@@ -70,4 +65,4 @@
 	.reset:hover {
 		color: #666;
 	}
-</style>
+</style> -->

@@ -1,6 +1,6 @@
 from enum import IntEnum
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional, Tuple, Union
 
 from pydantic import BaseModel
 
@@ -42,6 +42,12 @@ class CamelModel(BaseModel):
         allow_population_by_field_name = True
 
 
+class ZenoState(CamelModel):
+    model: str
+    metric: str
+    transform: str
+
+
 class ReportPredicate(CamelModel):
     slice_name: str
     metric: str
@@ -80,9 +86,8 @@ class ZenoColumn(CamelModel):
 class FilterPredicate(CamelModel):
     column: ZenoColumn
     operation: str
-    value: str
-    join: str
-    group_indicator: Optional[str]
+    value: Union[str, float, int, bool]
+    join: Optional[str]
 
 
 class FilterPredicateGroup(CamelModel):
@@ -97,6 +102,7 @@ class ZenoSettings(CamelModel):
     data_column: ZenoColumn
     metadata_columns: List[ZenoColumn]
     samples: int
+    totalSize: int
 
 
 class ZenoVariables(CamelModel):
@@ -109,15 +115,27 @@ class ZenoVariables(CamelModel):
 class Slice(CamelModel):
     slice_name: str
     folder: str
-    filter_predicates: Optional[FilterPredicateGroup]
-    idxs: Optional[List[str]]
+    filter_predicates: FilterPredicateGroup
 
 
 class MetricKey(CamelModel):
     sli: Slice
-    metric: str
-    model: str
-    transform: str
+    state: ZenoState
+
+
+class HistogramRequest(CamelModel):
+    columns: List[ZenoColumn]
+    state: ZenoState
+    get_metrics: bool
+    filter_predicates: List[Union[FilterPredicate, FilterPredicateGroup]]
+
+
+class TableRequest(CamelModel):
+    columns: List[ZenoColumn]
+    state: ZenoState
+    slice_range: List[int]
+    filter_predicates: List[Union[FilterPredicate, FilterPredicateGroup]]
+    sort: Tuple[Union[ZenoColumn, None], bool]
 
 
 class StatusResponse(CamelModel):

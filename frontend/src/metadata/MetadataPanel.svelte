@@ -4,62 +4,68 @@
 	import { mdiFolderPlusOutline, mdiPlus } from "@mdi/js";
 
 	import FolderCell from "./cells/FolderCell.svelte";
-	import MetadataCell from "./cells/MetadataCell.svelte";
+	import MetadataCell from "./MetadataCell.svelte";
 	import NewFolderPopup from "./popups/NewFolderPopup.svelte";
 	import NewSlicePopup from "./popups/NewSlicePopup.svelte";
 	import SliceCell from "./cells/SliceCell.svelte";
 
 	import {
 		folders,
-		metadataSelections,
+		selections,
 		metric,
 		model,
 		settings,
 		showNewSlice,
 		slices,
-		sliceSelections,
 		sliceToEdit,
 		status,
-		table,
 		transform,
 		metricRange,
+		zenoState,
+		selectionPredicates,
 	} from "../stores";
-	import {
-		columnHash,
-		getMetricsForSlices,
-		updateFilteredTable,
-		updateSliceIdxs,
-	} from "../util/util";
+	import { columnHash } from "../util/util";
+	import { getHistograms, getMetricsForSlices } from "../api";
 	import { ZenoColumnType } from "../globals";
+	import Button from "@smui/button/src/Button.svelte";
 
 	export let shouldColor = false;
 
+	let metadataHistograms = {};
 	let showNewFolder = false;
 
-	table.subscribe((t) => updateFilteredTable(t));
-	metadataSelections.subscribe(() => updateFilteredTable($table));
-	sliceSelections.subscribe(() => updateFilteredTable($table));
-	model.subscribe(() => {
-		// When model changes, update slice items (may change with postdistill values).
-		updateSliceIdxs();
-		// Also clear the metadata selection, can't dynamicallly update currently.
-		metadataSelections.set(new Map());
-	});
-
+	$: completedColumnHashes = $status.completeColumns.map((c) => columnHash(c));
 	$: res = getMetricsForSlices([
 		<MetricKey>{
 			sli: <Slice>{
-				sliceName: "overall",
+				sliceName: "",
 				folder: "",
-				idxs: $table.array(columnHash($settings.idColumn)),
+				filterPredicates: { predicates: [], join: "" },
 			},
-			metric: $metric,
-			model: $model,
-			transform: $transform,
+			state: $zenoState,
 		},
 	]);
 
-	$: completedColumnHashes = $status.completeColumns.map((c) => columnHash(c));
+	zenoState.subscribe((state) => {
+		selections.update((m) => {
+			Object.keys(m.metadata).forEach((k) => {
+				m.metadata[k] = { predicates: [], join: "" };
+			});
+			return { slices: m.slices, metadata: m.metadata };
+		});
+		getHistograms(
+			$status.completeColumns,
+			$selectionPredicates,
+			state,
+			Boolean($model && $metric)
+		).then((res) => (metadataHistograms = res));
+	});
+
+	selectionPredicates.subscribe((sels) =>
+		getHistograms($status.completeColumns, sels, $zenoState, false).then(
+			(res) => (metadataHistograms = res)
+		)
+	);
 </script>
 
 <div class="side-container">
@@ -67,29 +73,25 @@
 		<h4>Slices</h4>
 		<div class="inline">
 			<div>
-				<div on:click={() => (showNewFolder = true)}>
-					<IconButton>
-						<Icon component={Svg} viewBox="0 0 24 24">
-							<path fill="black" d={mdiFolderPlusOutline} />
-						</Icon>
-					</IconButton>
-				</div>
+				<IconButton on:click={() => (showNewFolder = true)}>
+					<Icon component={Svg} viewBox="0 0 24 24">
+						<path fill="black" d={mdiFolderPlusOutline} />
+					</Icon>
+				</IconButton>
 				{#if showNewFolder}
 					<NewFolderPopup bind:showNewFolder />
 				{/if}
 			</div>
 			<div>
-				<div
+				<IconButton
 					on:click={() => {
 						sliceToEdit.set(undefined);
 						showNewSlice.set(true);
 					}}>
-					<IconButton>
-						<Icon component={Svg} viewBox="0 0 24 24">
-							<path fill="black" d={mdiPlus} />
-						</Icon>
-					</IconButton>
-				</div>
+					<Icon component={Svg} viewBox="0 0 24 24">
+						<path fill="black" d={mdiPlus} />
+					</Icon>
+				</IconButton>
 				{#if $showNewSlice}
 					<NewSlicePopup />
 				{/if}
@@ -97,23 +99,25 @@
 		</div>
 	</div>
 	<div
-		class={"overview " +
-			($sliceSelections.length + $metadataSelections.size === 0
-				? "selected"
-				: "")}
+		class={"overview " + ($selectionPredicates.length === 0 ? "selected" : "")}
+		on:keydown={() => ({})}
 		on:click={() => {
-			sliceSelections.set([]);
-			metadataSelections.set(new Map());
+			selections.update((m) => {
+				for (let key in m.metadata) {
+					m.metadata[key] = { predicates: [], join: "&" };
+				}
+				return { slices: [], metadata: { ...m.metadata } };
+			});
 		}}>
 		<div class="inline" style:height="44px">All instances</div>
 
 		<div class="inline">
 			<span>
 				{#await res then r}
-					{r && r[0] !== null && r[0] !== undefined ? r[0].toFixed(2) : ""}
+					{r[0].metric ? r[0].metric.toFixed(2) : ""}
 				{/await}
 			</span>
-			<span class="size">({$table.size})</span>
+			<span class="size">({$settings.totalSize})</span>
 			<div style:width="36px" />
 		</div>
 	</div>
@@ -128,8 +132,8 @@
 
 	<div class="inline" style:margin-top="20px">
 		<h4>Metadata</h4>
-		{#if $metricRange[0] !== Number.MAX_VALUE}
-			<div id="legend-container">
+		<div id="legend-container">
+			{#if $metricRange[2] && $metricRange[0] !== Infinity}
 				<span style:margin-right="20px" style:font-style="italic">
 					{$metric}:
 				</span>
@@ -154,11 +158,24 @@
 						})}>
 					{$metricRange[1].toFixed(2)}
 				</span>
-			</div>
-		{/if}
+			{:else}
+				<Button
+					on:click={() => {
+						getHistograms(
+							$status.completeColumns,
+							$selectionPredicates,
+							$zenoState,
+							true
+						).then((res) => (metadataHistograms = res));
+					}}>get metrics</Button>
+			{/if}
+		</div>
 	</div>
 	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.METADATA) as col}
-		<MetadataCell {col} {shouldColor} />
+		<MetadataCell
+			{col}
+			{shouldColor}
+			histogram={metadataHistograms[columnHash(col)]} />
 	{/each}
 
 	{#if $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL).length > 0}
@@ -166,16 +183,18 @@
 	{/if}
 	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL) as col}
 		{@const idx = completedColumnHashes.indexOf(columnHash(col))}
-		{#if idx > -1}
-			<MetadataCell col={$status.completeColumns[idx]} {shouldColor} />
-		{:else}
-			<MetadataCell {col} {shouldColor} />
-		{/if}
+		<MetadataCell
+			col={idx > -1 ? $status.completeColumns[idx] : col}
+			{shouldColor}
+			histogram={metadataHistograms[columnHash(col)]} />
 	{/each}
 
 	{#if $model}
 		{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.POSTDISTILL && m.model === $model && m.transform === $transform) as col}
-			<MetadataCell {col} {shouldColor} />
+			<MetadataCell
+				{col}
+				{shouldColor}
+				histogram={metadataHistograms[columnHash(col)]} />
 		{/each}
 	{/if}
 </div>

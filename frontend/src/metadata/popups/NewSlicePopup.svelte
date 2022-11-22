@@ -4,19 +4,10 @@
 	import Textfield from "@smui/textfield";
 	import HelperText from "@smui/textfield/helper-text";
 
-	import {
-		metadataSelections,
-		settings,
-		showNewSlice,
-		slices,
-		sliceSelections,
-		sliceToEdit,
-		table,
-	} from "../../stores";
+	import { showNewSlice, slices, selections, sliceToEdit } from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
-	import { columnHash, getFilterFromPredicates } from "../../util/util";
-	import { MetadataType } from "../../globals";
 
+	import { createNewSlice } from "../../api";
 	import FilterGroupEntry from "./FilterGroupEntry.svelte";
 
 	let sliceName = "";
@@ -30,94 +21,38 @@
 	showNewSlice.subscribe(() => updatePredicates());
 
 	function updatePredicates() {
+		predicateGroup = { predicates: [], join: "" };
 		if ($sliceToEdit) {
 			sliceName = $sliceToEdit.sliceName;
 			predicateGroup = $sliceToEdit.filterPredicates;
 			return;
 		}
 		// Pre-fill slice creation with current metadata selections.
-		if ($metadataSelections.size !== 0) {
-			predicateGroup.predicates = [];
-			[...$metadataSelections.values()].forEach((entry) => {
-				// TODO: support slice selections
-				if (entry.column.metadataType === MetadataType.CONTINUOUS) {
-					predicateGroup.predicates.push({
-						column: entry.column,
-						operation: ">=",
-						value: "" + entry.values[0],
-						join: "AND",
-					});
-					predicateGroup.predicates.push({
-						column: entry.column,
-						operation: "<=",
-						value: "" + entry.values[1],
-						join: "AND",
-					});
-				} else if (entry.column.metadataType === MetadataType.BOOLEAN) {
-					let val = entry.values[0] === "is" ? "1" : "0";
-					predicateGroup.predicates.push({
-						column: entry.column,
-						operation: "==",
-						value: val,
-						join: "AND",
-					});
-				} else if (entry.column.metadataType === MetadataType.NOMINAL) {
-					if (entry.values.length === 1) {
-						predicateGroup.predicates.push({
-							column: entry.column,
-							operation: "==",
-							value: "" + entry.values[0],
-							join: "AND",
-						});
-					} else {
-						let group = {
-							predicates: [],
-							join: "AND",
-						};
-						entry.values.forEach((v) =>
-							group.predicates.push({
-								column: entry.column,
-								operation: "==",
-								value: "" + v,
-								join: "OR",
-								depth: 1,
-							})
-						);
-						predicateGroup.predicates.push(group);
-					}
-				}
-			});
-		} else if (predicateGroup.predicates.length === 0) {
-			predicateGroup.predicates.push({
-				column: undefined,
-				operation: "",
-				value: "",
-				join: "",
-			});
-		}
+		Object.values($selections.metadata).forEach((filtGroup) => {
+			if (filtGroup.predicates.length !== 0) {
+				predicateGroup.predicates.push(filtGroup);
+			}
+		});
 	}
 
 	function createSlice() {
 		if (sliceName.length === 0) {
 			sliceName = "Slice " + $slices.size;
 		}
-		showNewSlice.set(false);
-		sliceToEdit.set(null);
 
-		const filt = getFilterFromPredicates(predicateGroup);
-		let tempTable = $table.filter(`(d) => ${filt}`);
-
-		slices.update((s) => {
-			s.set(sliceName, <Slice>{
-				sliceName: sliceName,
-				folder: "",
-				filterPredicates: Object.assign({}, predicateGroup),
-				idxs: tempTable.array(columnHash($settings.idColumn)) as string[],
+		createNewSlice(sliceName, predicateGroup).then(() => {
+			slices.update((s) => {
+				s.set(sliceName, <Slice>{
+					sliceName: sliceName,
+					folder: "",
+					filterPredicates: Object.assign({}, predicateGroup),
+				});
+				return s;
 			});
-			return s;
+			selections.update((sels) => ({ slices: [], metadata: sels.metadata }));
+			showNewSlice.set(false);
+			sliceToEdit.set(null);
 		});
-		metadataSelections.set(new Map());
-		sliceSelections.set([]);
 	}
 
 	function deletePredicate(i) {

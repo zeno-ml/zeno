@@ -2,12 +2,13 @@
 	import Textfield from "@smui/textfield";
 	import Button from "@smui/button";
 	import { Label } from "@smui/common";
+	import { TrailingIcon } from "@smui/chips";
 
-	import { metadataSelections } from "../../stores";
-
-	export let selection;
-	export let setSelection;
-	export let hash;
+	export let col: ZenoColumn;
+	export let histogram;
+	export let shouldColor;
+	export let filterPredicates: FilterPredicate[];
+	export let updatePredicates;
 
 	let regex = "";
 	let valid = true;
@@ -21,36 +22,45 @@
 		}
 	}
 
-	metadataSelections.subscribe((sel) => {
-		if (!sel.has(hash)) {
-			regex = "";
-			selection.values = [];
-		}
-	});
+	function setSelection() {
+		filterPredicates.push({
+			column: col,
+			operation: "match",
+			value: regex,
+			join: "|",
+		});
+		updatePredicates(filterPredicates);
+	}
 </script>
 
 <div class="container">
 	<Textfield bind:value={regex} label="Regex filter" />
 
-	<Button
-		style="margin-left: 10px;"
-		variant={selection.values.length > 0 && selection.values[0] === regex
-			? "unelevated"
-			: "outlined"}
-		on:click={() => {
-			if (selection.values.length > 0 && selection.values[0] === regex) {
-				selection.values = [];
-			} else {
-				selection.values = [regex];
-			}
-			setSelection();
-		}}>
+	<Button style="margin-left: 10px;" variant="outlined" on:click={setSelection}>
 		<Label>Set</Label>
 	</Button>
 	{#if !valid}
 		<p style="margin-right: 10px; color: #B71C1C">Invalid regex</p>
 	{/if}
 	<p />
+	<br />
+</div>
+<div class="chips">
+	{#each filterPredicates as pred}
+		<div class="meta-chip">
+			<span>
+				{pred.value}
+			</span>
+			<TrailingIcon
+				class="remove material-icons"
+				on:click={() => {
+					filterPredicates = filterPredicates.filter((p) => p !== pred);
+					updatePredicates(filterPredicates);
+				}}>
+				cancel
+			</TrailingIcon>
+		</div>
+	{/each}
 </div>
 
 <style>
@@ -58,5 +68,26 @@
 		display: flex;
 		align-items: end;
 		margin-left: 5px;
+	}
+	.chips {
+		display: flex;
+		flex-direction: inline;
+		flex-wrap: wrap;
+		height: fit-content;
+		align-items: center;
+		padding-bottom: 5px;
+		padding-top: 5px;
+		border-bottom: 1px solid #e0e0e0;
+	}
+	.meta-chip {
+		padding: 5px;
+		background: #f8f8f8;
+		border: 1px solid #e8e8e8;
+		margin-left: 5px;
+		margin-right: 5px;
+		margin-top: 2px;
+		margin-bottom: 2px;
+		border-radius: 5px;
+		width: fit-content;
 	}
 </style>

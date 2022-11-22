@@ -24,7 +24,7 @@
 			bind:value={predicate.join}
 			label="Join"
 			style="margin-right: 20px; width: 90px">
-			{#each ["AND", "OR"] as o}
+			{#each ["&", "|"] as o}
 				<Option value={o}>{o}</Option>
 			{/each}
 		</Select>

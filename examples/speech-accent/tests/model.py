@@ -1,3 +1,4 @@
+import math
 import os
 
 import torch
@@ -45,4 +46,7 @@ def wer_m(df, ops: ZenoOptions):
 
 @metric
 def avg_wer(df, ops: ZenoOptions):
-    return df[ops.distill_columns["wer_m"]].mean()
+    avg = df[ops.distill_columns["wer_m"]].mean()
+    if math.isnan(avg):
+        return 0
+    return avg

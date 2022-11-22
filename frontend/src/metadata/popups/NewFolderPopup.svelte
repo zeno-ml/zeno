@@ -10,13 +10,16 @@
 	export let showNewFolder;
 	export let folderName = "";
 
-	let originalFolderName = folderName;
-
 	let input;
+	let originalFolderName = folderName;
 
 	$: invalidName =
 		($folders.includes(folderName) && folderName !== originalFolderName) ||
 		folderName.length === 0;
+
+	$: if (showNewFolder && input) {
+		input.getElement().focus();
+	}
 
 	function createFolder() {
 		if (edit) {
@@ -49,10 +52,6 @@
 		if (showNewFolder && e.key === "Enter") {
 			createFolder();
 		}
-	}
-
-	$: if (showNewFolder && input) {
-		input.getElement().focus();
 	}
 </script>
 

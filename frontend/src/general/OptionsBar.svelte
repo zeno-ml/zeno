@@ -14,21 +14,21 @@
 
 <div id="container">
 	<div>
-		{#if $models && $models.length > 0}
+		{#if $model !== undefined}
 			<Select bind:value={$model} label="Model" style="margin-right: 20px;">
 				{#each $models as m}
 					<Option value={m}>{m}</Option>
 				{/each}
 			</Select>
 		{/if}
-		{#if $metrics && $metrics.length > 0}
+		{#if $metric !== undefined}
 			<Select bind:value={$metric} label="Metric" style="margin-right: 20px;">
 				{#each $metrics as m}
 					<Option value={m}>{m}</Option>
 				{/each}
 			</Select>
 		{/if}
-		{#if $transforms && $transforms.length > 0}
+		{#if $transform !== undefined}
 			<Select
 				bind:value={$transform}
 				label="Transform"

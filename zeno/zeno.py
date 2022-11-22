@@ -9,25 +9,31 @@ from importlib import util
 from inspect import getmembers, getsource, isfunction
 from multiprocessing import Pool
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Union
 
 import numpy as np
 import pandas as pd  # type: ignore
 
 from zeno.api import ZenoOptions
 from zeno.classes import (
+    FilterPredicate,
+    FilterPredicateGroup,
+    HistogramRequest,
+    MetadataType,
     MetricKey,
     Report,
     Slice,
+    TableRequest,
     ZenoColumn,
     ZenoColumnType,
     ZenoFunction,
     ZenoFunctionType,
+    ZenoState,
 )
+from zeno.filtering import filter_table, filter_table_single
 from zeno.mirror import Mirror
 from zeno.util import (
     add_to_path,
-    get_arrow_bytes,
     get_function,
     getMetadataType,
     load_series,
@@ -429,24 +435,27 @@ class Zeno(object):
 
         self.status = "Done running postprocessing"
 
-    def get_results(self, requests: List[MetricKey]):
+    def get_metrics_for_slices(self, requests: List[MetricKey]):
         """Calculate result for each requested combination."""
 
         return_metrics = []
         for metric_key in requests:
-            return_metrics.append(self.calculate_metrics(metric_key))
-
+            filt_df = filter_table(self.df, metric_key.sli.filter_predicates.predicates)
+            if metric_key.state.metric == "" or metric_key.state.model == "":
+                return_metrics.append({"metric": None, "size": filt_df.shape[0]})
+            else:
+                metric = self.calculate_metric(filt_df, metric_key.state)
+                return_metrics.append({"metric": metric, "size": filt_df.shape[0]})
         return return_metrics
 
-    def calculate_metrics(self, metric_key: MetricKey):
+    def calculate_metric(self, df, state):
         if not self.done_processing:
-            return
+            return -1
 
-        sli = metric_key.sli
         output_col = ZenoColumn(
             column_type=ZenoColumnType.OUTPUT,
-            name=metric_key.model,
-            transform=metric_key.transform,
+            name=state.model,
+            transform=state.transform,
         )
         output_hash = str(output_col)
 
@@ -457,8 +466,8 @@ class Zeno(object):
                 c.column_type == ZenoColumnType.PREDISTILL
                 or c.column_type == ZenoColumnType.POSTDISTILL
             )
-            and c.transform == metric_key.transform
-            and c.model == metric_key.model
+            and c.transform == state.transform
+            and c.model == state.model
         ]
 
         local_ops = dataclasses.replace(
@@ -469,21 +478,9 @@ class Zeno(object):
                 zip([c.name for c in distill_fns], [str(c) for c in distill_fns])
             ),
         )
-        if sli.idxs and len(sli.idxs) > 0:
-            metric_func = get_function(self.metric_functions[metric_key.metric])
-            result_metric = metric_func(self.df.loc[sli.idxs], local_ops)
-        else:
-            result_metric = None
 
-        return result_metric
-
-    def get_table(self, columns):
-        """Get the metadata DataFrame for a given slice.
-
-        Returns:
-            bytes: Arrow-encoded table of slice metadata
-        """
-        return get_arrow_bytes(self.df[[str(c) for c in columns]], str(self.id_column))
+        metric_func = get_function(self.metric_functions[state.metric])
+        return metric_func(df, local_ops)
 
     def get_slices(self):
         return [s.dict(by_alias=True) for s in self.slices.values()]
@@ -501,8 +498,101 @@ class Zeno(object):
         with open(os.path.join(self.cache_path, "reports.pickle"), "wb") as f:
             pickle.dump(self.reports, f)
 
-    def set_slices(self, slices: List[Slice]):
-        self.slices = dict(zip([s.slice_name for s in slices], slices))
+    def get_histogram_metric(
+        self, df: pd.DataFrame, col: ZenoColumn, pred, state: ZenoState
+    ):
+        df_filt = filter_table_single(df, col, pred)
+        return self.calculate_metric(df_filt, state)
+
+    def get_filtered_ids(self, req: List[Union[FilterPredicateGroup, FilterPredicate]]):
+        return filter_table(self.df, req).loc[str(self.id_column)]
+
+    def get_filtered_table(self, req: TableRequest):
+        filt_df = filter_table(self.df, req.filter_predicates)
+        if req.sort[0]:
+            filt_df = filt_df.sort_values(str(req.sort[0]), ascending=req.sort[1])
+        filt_df = filt_df.iloc[req.slice_range[0] : req.slice_range[1]]
+        return filt_df[[str(col) for col in req.columns]].to_json(orient="records")
+
+    def calculate_histograms(self, req: HistogramRequest):
+        if len(req.filter_predicates) > 0:
+            filt_df = filter_table(self.df, req.filter_predicates)
+        else:
+            filt_df = self.df
+
+        if req.state.metric == "" or req.state.model == "":
+            req.get_metrics = False
+
+        cols = req.columns
+        res = {}
+        for col in cols:
+            df_col = self.df[str(col)]
+            filt_df_col = filt_df[str(col)]
+            if col.metadata_type == MetadataType.NOMINAL:
+                ret_hist = []
+                val_counts = df_col.value_counts()
+                [
+                    ret_hist.append(
+                        {
+                            "bucket": k,
+                            "count": int(val_counts[k]),  # type: ignore
+                            "filteredCount": int((filt_df_col == k).sum()),
+                            "metric": self.get_histogram_metric(
+                                filt_df, col, k, req.state
+                            )
+                            if req.get_metrics
+                            else None,
+                        }
+                    )
+                    for k in val_counts.keys()
+                ]
+                res[str(col)] = ret_hist
+            elif col.metadata_type == MetadataType.CONTINUOUS:
+                res[str(col)] = col.name
+                ret_hist = []
+                bins = np.histogram(df_col, bins="doane")
+                bins_filt = np.histogram(filt_df_col, bins=bins[1])
+                for i, bin_count in enumerate(bins[0]):
+                    ret_hist.append(
+                        {
+                            "bucket": round(bins[1][i], 2),
+                            "bucketEnd": round(bins[1][i + 1], 2),
+                            "count": int(bin_count),
+                            "filteredCount": int(bins_filt[0][i]),
+                            "metric": self.get_histogram_metric(
+                                filt_df, col, [bins[1][i], bins[1][i + 1]], req.state
+                            )
+                            if req.get_metrics
+                            else None,
+                        }
+                    )
+                res[str(col)] = ret_hist
+            elif col.metadata_type == MetadataType.BOOLEAN:
+                res[str(col)] = [
+                    {
+                        "bucket": True,
+                        "count": df_col.sum(),
+                        "filteredCount": filt_df_col.sum(),
+                    },
+                    {
+                        "bucket": False,
+                        "count": len(df_col) - df_col.sum(),
+                        "filteredCount": len(filt_df_col) - filt_df_col.sum(),
+                    },
+                ]
+            elif col.metadata_type == MetadataType.DATETIME:
+                res[str(col)] = []
+            else:
+                res[str(col)] = []
+        return res
+
+    def create_new_slice(self, req: Slice):
+        self.slices[req.slice_name] = req
+        with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
+            pickle.dump(self.slices, f)
+
+    def delete_slice(self, slice_name: str):
+        del self.slices[slice_name]
         with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
             pickle.dump(self.slices, f)
 

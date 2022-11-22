@@ -1,72 +1,66 @@
 <script lang="ts">
-	import type ColumnTable from "arquero/dist/types/table/column-table";
-
-	import { desc } from "arquero";
-
 	import { Label } from "@smui/button";
 	import { Pagination } from "@smui/data-table";
 	import IconButton from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
 
-	import { onMount, tick } from "svelte";
+	import { tick } from "svelte";
 	import { ZenoColumnType } from "../globals";
-	import SelectionBar from "../metadata/SelectionBar.svelte";
 	import {
-		metadataSelections,
 		model,
 		rowsPerPage,
 		settings,
 		sort,
 		status,
 		transform,
+		zenoState,
+		selectionPredicates,
 	} from "../stores";
+	import { getFilteredTable } from "../api";
 	import { columnHash } from "../util/util";
 
-	export let table: ColumnTable;
+	export let table;
+	export let viewFunction;
+	export let viewOptions = {};
 
-	let instanceTable = [];
-	let viewFunction;
 	let viewDivs = {};
-	let optionsDiv;
-	let modelColumn = "";
-	let transformColumn = "";
-	let viewOptions = {};
-
-	let sampleOptions = [5, 15, 30, 60, 100, $settings.samples].sort(
-		(a, b) => a - b
-	);
 
 	let currentPage = 0;
 	let end = 0;
 	let lastPage = 0;
 
-	$: idHash = columnHash($settings.idColumn);
+	let sampleOptions = [5, 15, 30, 60, 100, $settings.samples].sort(
+		(a, b) => a - b
+	);
 
+	$: idHash = columnHash($settings.idColumn);
 	$: start = currentPage * $rowsPerPage;
-	$: if (table) {
-		end = Math.min(start + $rowsPerPage, table.size);
-	}
-	$: if (table) {
-		lastPage = Math.max(Math.ceil(table.size / $rowsPerPage) - 1, 0);
-	}
+	$: end = Math.min(start + $rowsPerPage, $settings.totalSize);
+	$: lastPage = Math.max(Math.ceil($settings.totalSize / $rowsPerPage) - 1, 0);
 	$: if (currentPage > lastPage) {
 		currentPage = lastPage;
 	}
 
-	onMount(() => {
-		try {
-			import(window.location.origin + "/cache/view.mjs").then((m) => {
-				viewFunction = m.getInstance;
-				if (m.getOptions) {
-					m.getOptions(optionsDiv, (opts) => (viewOptions = opts));
-				}
-			});
-		} catch (e) {
-			console.log("ERROR: failed to load sample view ---", e);
-		}
-	});
+	// update on page, metadata selection, slice selection, or state change.
+	$: {
+		currentPage;
+		getFilteredTable(
+			$status.completeColumns,
+			$selectionPredicates,
+			$zenoState,
+			[start, end],
+			[$sort, true]
+		).then((res) => (table = res));
+	}
 
-	$: if ($status && $model) {
+	$: if (viewFunction) {
+		table;
+		$sort;
+		viewOptions;
+		drawInstances();
+	}
+
+	async function drawInstances() {
 		let obj = $status.completeColumns.find((c) => {
 			return (
 				c.columnType === ZenoColumnType.OUTPUT &&
@@ -74,44 +68,19 @@
 				c.transform === $transform
 			);
 		});
-		modelColumn = obj ? columnHash(obj) : "";
-	}
-
-	transform.subscribe((t) => {
-		if (t) {
+		let modelColumn = obj ? columnHash(obj) : "";
+		let transformColumn = "";
+		if ($zenoState.transform) {
 			let col = <ZenoColumn>{
 				columnType: ZenoColumnType.TRANSFORM,
-				name: t,
+				name: $zenoState.transform,
 			};
 			transformColumn = columnHash(col);
-		} else {
-			transformColumn = "";
 		}
-		metadataSelections.set(new Map());
-	});
-
-	$: if (viewFunction) {
-		table;
-		start;
-		end;
-		$sort;
-		viewOptions;
-		transformColumn;
-		modelColumn;
-		drawInstances();
-	}
-
-	async function drawInstances() {
-		let tempTable = table;
-		if ($sort) {
-			tempTable = tempTable.orderby(desc(columnHash($sort)));
-		}
-		tempTable = tempTable.slice(start, end);
-		instanceTable = tempTable.objects();
 
 		await tick();
 
-		let ids = instanceTable.map((inst) => inst[idHash]);
+		let ids = table.map((inst) => inst[idHash]);
 		viewDivs = Object.fromEntries(
 			ids
 				.map(
@@ -123,14 +92,13 @@
 				)
 				.filter(Boolean)
 		);
-
-		instanceTable.forEach((inst, i) => {
+		table.forEach((inst, i) => {
 			let div = viewDivs[inst[idHash]];
 			if (div) {
 				viewFunction(
 					div,
 					viewOptions,
-					instanceTable[i],
+					table[i],
 					modelColumn,
 					columnHash($settings.labelColumn),
 					columnHash($settings.dataColumn),
@@ -143,10 +111,8 @@
 </script>
 
 {#if table}
-	<SelectionBar />
-	<div bind:this={optionsDiv} />
 	<div class="container sample-container">
-		{#each instanceTable as inst (inst[idHash])}
+		{#each table as inst (inst[idHash])}
 			<div bind:this={viewDivs[inst[idHash]]} />
 		{/each}
 	</div>
@@ -160,7 +126,7 @@
 			</Select>
 		</svelte:fragment>
 		<svelte:fragment slot="total">
-			{start + 1}-{end} of {table.size}
+			{start + 1}-{end} of {$settings.totalSize}
 		</svelte:fragment>
 
 		<IconButton

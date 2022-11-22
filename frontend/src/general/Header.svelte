@@ -8,7 +8,6 @@
 		mdiCircleOutline,
 		mdiApi,
 		mdiGithub,
-		mdiDotsCircle,
 	} from "@mdi/js";
 
 	import { updateTab } from "../util/util";
@@ -43,19 +42,8 @@
 			alt="Square spiral logo next to 'Zeno'" />
 		<div id="tabs">
 			<div
-				class="item {$tab === 'discover' ? 'selected' : ''}"
-				on:click={() => updateTab("discover")}>
-				<div class="icon">
-					<Icon component={Svg} viewBox="0 0 24 24">
-						<path
-							fill={$tab === "discover" ? "#6a1b9a" : "black"}
-							d={mdiDotsCircle} />
-					</Icon>
-				</div>
-				<div class="tab-text">Discover</div>
-			</div>
-			<div
 				class="item {$tab === 'explore' ? 'selected' : ''}"
+				on:keydown={() => ({})}
 				on:click={() => updateTab("explore")}>
 				<div class="icon">
 					<Icon component={Svg} viewBox="0 0 24 24">
@@ -68,6 +56,7 @@
 			</div>
 			<div
 				class="item {$tab === 'report' ? 'selected' : ''}"
+				on:keydown={() => ({})}
 				on:click={() => updateTab("report")}>
 				<div class="icon">
 					<Icon component={Svg} viewBox="0 0 24 24">

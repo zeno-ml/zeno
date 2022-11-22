@@ -12,12 +12,14 @@
 	<div
 		class="tab {selectedFolder === '' ? 'selected' : ''}"
 		on:click={() => (selectedFolder = "")}
+		on:keydown={() => ({})}
 		style:margin-right="10px">
 		All Slices
 	</div>
 	{#each $folders as f}
 		<div
 			class="tab {selectedFolder === f ? 'selected' : ''}"
+			on:keydown={() => ({})}
 			on:click={() => (selectedFolder = f)}>
 			{f}
 		</div>

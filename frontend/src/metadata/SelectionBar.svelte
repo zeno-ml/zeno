@@ -1,121 +1,116 @@
 <script lang="ts">
 	import { TrailingIcon } from "@smui/chips";
-	import { columnHash, getMetricsForSlices } from "../util/util";
 
 	import {
-		table,
-		filteredTable,
-		metadataSelections,
+		selections,
 		metric,
-		model,
-		sliceSelections,
-		transform,
-		settings,
-		lassoSelection,
+		zenoState,
+		selectionPredicates,
 	} from "../stores";
 	import { MetadataType } from "../globals";
+	import { getMetricsForSlices } from "../api";
 
-	async function updateResult(model, metric, transform, filteredTable) {
-		if (filteredTable.size === 0) {
-			return;
-		}
+	$: filters = Object.entries($selections.metadata)
+		.filter(([_, value]) => value.predicates.length > 0)
+		.map(
+			([key, value]) =>
+				[key, value.predicates as unknown] as [string, FilterPredicate[]]
+		);
 
-		let name = "";
-		if ($table.size === filteredTable.size) {
-			name = "overall";
-		}
-
-		let idxs = filteredTable.array(columnHash($settings.idColumn));
-		let sli = <Slice>{ sliceName: name, folder: "", idxs: idxs };
-
-		return getMetricsForSlices([
-			<MetricKey>{
-				sli: sli,
-				metric: metric,
-				model: model,
-				transform: transform,
+	$: res = getMetricsForSlices([
+		<MetricKey>{
+			sli: <Slice>{
+				sliceName: "",
+				folder: "",
+				filterPredicates: {
+					predicates: Object.values($selections.metadata).filter(
+						(value) => value.predicates.length > 0
+					),
+					join: "",
+				},
 			},
-		]);
-	}
-
-	$: result = updateResult($model, $metric, $transform, $filteredTable);
+			state: $zenoState,
+		},
+	]);
 </script>
 
 <div class="chips">
-	<span id="metric">
+	<span class="metric">
 		{$metric ? $metric + ":" : ""}
-		{#await result then res}
-			{res && res[0] !== undefined && res[0] !== null ? res[0].toFixed(2) : ""}
-		{/await}
 	</span>
-	<span id="size">
-		({$filteredTable.size} instances)
-	</span>
+	{#await res then r}
+		<span class="metric">{r[0].metric ? r[0].metric.toFixed(2) : ""}</span>
+		<span id="size">({r[0].size} instances)</span>
+	{/await}
 
-	{#if $lassoSelection.length > 0}
-		<div class="meta-chip lasso">Viewing Selected Data</div>
-	{:else}
-		{#each $sliceSelections as s}
-			<div class="meta-chip">
-				{s}
-				<TrailingIcon
-					class="remove material-icons"
-					on:click={() =>
-						sliceSelections.update((sel) => {
-							sel.splice(sel.indexOf(s), 1);
-							return sel;
-						})}>
-					cancel
-				</TrailingIcon>
-			</div>
-		{/each}
-		{#each [...$metadataSelections.entries()] as [hash, chip]}
-			<div class="meta-chip">
-				<span>
-					{#if chip.column.metadataType === MetadataType.CONTINUOUS}
-						{chip.values[0].toFixed(2)}
-						{"<"}
-						{chip.column.name}
-						{"<"}
-						{chip.values[1].toFixed(2)}
-					{:else if chip.column.metadataType === MetadataType.BOOLEAN}
-						{chip.values[0]}
-						{chip.column.name}
-					{:else if chip.column.metadataType === MetadataType.DATETIME}
-						{#if !chip.values[1]}
-							start {chip.values[0].toLocaleString()}
-						{:else if !chip.values[0]}
-							end {chip.values[0].toLocaleString()}
-						{:else}
-							from {chip.values[0].toLocaleString()} to {chip.values[1].toLocaleString()}
-						{/if}
+	{#each $selections.slices as s}
+		<div class="meta-chip">
+			{s}
+			<TrailingIcon
+				class="remove material-icons"
+				on:click={() =>
+					selections.update((sel) => {
+						sel.slices.splice(sel.slices.indexOf(s), 1);
+						return { slices: sel.slices, metadata: sel.metadata };
+					})}>
+				cancel
+			</TrailingIcon>
+		</div>
+	{/each}
+	{#each filters as [hash, chip]}
+		<div class="meta-chip">
+			<span>
+				{#if chip[0].column.metadataType === MetadataType.CONTINUOUS}
+					{parseFloat(chip[0].value).toFixed(2)}
+					{"<"}
+					{chip[0].column.name}
+					{"<"}
+					{parseFloat(chip[1].value).toFixed(2)}
+				{:else if chip[0].column.metadataType === MetadataType.BOOLEAN}
+					{chip[0].value}
+					{chip[0].column.name}
+				{:else if chip[0].column.metadataType === MetadataType.DATETIME}
+					{#if !chip[0].value}
+						start {chip[0].value.toLocaleString()}
+					{:else if !chip[0].value}
+						end {chip[0].value.toLocaleString()}
 					{:else}
-						{chip.column.name}
-						{"=="}
-						{chip.values.join(" | ")}
+						from {chip[0].value.toLocaleString()} to {chip.values[1].toLocaleString()}
 					{/if}
-				</span>
-				<TrailingIcon
-					class="remove material-icons"
-					on:click={() =>
-						metadataSelections.update((m) => {
-							m.delete(hash);
-							return m;
-						})}>
-					cancel
-				</TrailingIcon>
-			</div>
-		{/each}
-		{#if $metadataSelections.size + $sliceSelections.length > 0}
-			<span
-				class="clear"
-				on:click={() => {
-					metadataSelections.set(new Map());
-					sliceSelections.set([]);
-				}}>
-				clear all
+				{:else}
+					{chip[0].column.name}
+					{"=="}
+					{chip.map((c) => c.value).join(" | ")}
+				{/if}
 			</span>
-		{/if}
+			<TrailingIcon
+				class="remove material-icons"
+				on:click={() =>
+					selections.update((m) => ({
+						slices: m.slices,
+						metadata: {
+							...m.metadata,
+							[hash]: { predicates: [], join: "&" },
+						},
+					}))}>
+				cancel
+			</TrailingIcon>
+		</div>
+	{/each}
+	{#if $selectionPredicates.length > 0}
+		<span
+			class="clear"
+			on:keydown={() => ({})}
+			on:click={() => {
+				selections.update((m) => {
+					for (let key in m.metadata) {
+						m.metadata[key] = { predicates: [], join: "&" };
+					}
+					return { slices: [], metadata: { ...m.metadata } };
+				});
+			}}>
+			clear all
+		</span>
 	{/if}
 </div>
 
@@ -131,7 +126,7 @@
 		padding-top: 5px;
 		border-bottom: 1px solid #e0e0e0;
 	}
-	#metric {
+	.metric {
 		font-weight: 400;
 		color: #6a1b9a;
 		margin-right: 15px;
@@ -161,10 +156,5 @@
 		font-style: italic;
 		color: rgba(0, 0, 0, 0.4);
 		margin-right: 10px;
-	}
-	.lasso {
-		--color: 277, 70%, 35%;
-		background: hsla(var(--color), 0.1);
-		border: 1px solid hsl(var(--color));
 	}
 </style>

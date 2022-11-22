@@ -2,24 +2,35 @@
 	import { onMount } from "svelte";
 	import Router from "svelte-spa-router";
 
-	import { status } from "./stores";
-	import { initialFetch, updateTableColumns } from "./util/util";
+	import { selections, status } from "./stores";
+	import { columnHash } from "./util/util";
+	import { getInitialData } from "./api";
 
-	import Report from "./report/Report.svelte";
-	import Discover from "./discover/Discover.svelte";
 	import Explore from "./Explore.svelte";
 	import Header from "./general/Header.svelte";
+	import Report from "./report/Report.svelte";
 
 	const routes = {
 		"/": Explore,
-		"/discover/": Discover,
 		"/explore/": Explore,
 		"/report/": Report,
 		"*": Explore,
 	};
 
-	onMount(() => initialFetch());
-	status.subscribe((w) => updateTableColumns(w));
+	status.subscribe((stat) => {
+		let tempSelections = {};
+		stat.completeColumns
+			.filter((col) => !$selections.metadata[columnHash(col)])
+			.forEach((col) => {
+				tempSelections[columnHash(col)] = { predicates: [], join: "" };
+			});
+		selections.update((sels) => ({
+			slices: sels.slices,
+			metadata: tempSelections,
+		}));
+	});
+
+	onMount(() => getInitialData());
 </script>
 
 <Header />

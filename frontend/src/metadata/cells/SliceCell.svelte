@@ -6,16 +6,14 @@
 	import Dialog, { Actions, Content, Title, InitialFocus } from "@smui/dialog";
 	import SliceDetails from "../../general/SliceDetails.svelte";
 	import {
-		metric,
-		model,
 		showNewSlice,
+		selections,
 		slices,
-		sliceSelections,
 		sliceToEdit,
-		transform,
 		reports,
+		zenoState,
 	} from "../../stores";
-	import { getMetricsForSlices } from "../../util/util";
+	import { getMetricsForSlices, deleteSlice, createNewSlice } from "../../api";
 
 	export let slice: Slice;
 	export let inFolder = false;
@@ -26,15 +24,17 @@
 	let showTooltip = false;
 	let hovering = false;
 	let showOptions = false;
-	$: selected = $sliceSelections.includes(slice.sliceName);
+	$: selected = $selections.slices.includes(slice.sliceName);
 
-	function deleteSlice() {
+	function removeSlice() {
 		confirmDelete = false;
 		relatedReports = 0;
 
-		sliceSelections.update((s) => {
-			s.splice(s.indexOf(slice.sliceName), 1);
-			return s;
+		selections.update((m) => {
+			for (let key in m.metadata) {
+				m.metadata[key] = { predicates: [], join: "&" };
+			}
+			return { slices: [], metadata: { ...m.metadata } };
 		});
 		slices.update((s) => {
 			s.delete(slice.sliceName);
@@ -49,38 +49,54 @@
 			});
 			return reps;
 		});
+		deleteSlice(slice.sliceName);
 	}
 
 	function setSelected(e) {
 		// Imitate selections in Vega bar charts.
 		if (
-			$sliceSelections.length === 1 &&
-			$sliceSelections.includes(slice.sliceName)
+			$selections.slices.length === 1 &&
+			$selections.slices.includes(slice.sliceName)
 		) {
-			sliceSelections.set([]);
+			selections.update((s) => ({ slices: [], metadata: s.metadata }));
 			return;
 		}
 		if (e.shiftKey) {
-			if ($sliceSelections.includes(slice.sliceName)) {
-				sliceSelections.update((sel) => {
-					sel.splice(sel.indexOf(slice.sliceName), 1);
-					return [...sel];
+			if ($selections.slices.includes(slice.sliceName)) {
+				selections.update((sel) => {
+					sel.slices.splice(sel.slices.indexOf(slice.sliceName), 1);
+					return {
+						slices: [...sel.slices],
+						metadata: sel.metadata,
+					};
 				});
 			} else {
-				sliceSelections.update((slis) => [...slis, slice.sliceName]);
+				selections.update((sel) => ({
+					slices: [...sel.slices, slice.sliceName],
+					metadata: sel.metadata,
+				}));
 			}
 		} else {
-			if ($sliceSelections.includes(slice.sliceName)) {
-				if ($sliceSelections.length > 0) {
-					sliceSelections.set([slice.sliceName]);
+			if ($selections.slices.includes(slice.sliceName)) {
+				if ($selections.slices.length > 0) {
+					selections.update((sel) => ({
+						slices: [slice.sliceName],
+						metadata: sel.metadata,
+					}));
 				} else {
-					sliceSelections.update((sel) => {
-						sel.splice(sel.indexOf(slice.sliceName), 1);
-						return [...sel];
+					selections.update((sel) => {
+						sel.slices.splice(sel.slices.indexOf(slice.sliceName), 1);
+						return {
+							slices: [...sel.slices],
+							metadata: sel.metadata,
+						};
 					});
 				}
 			} else {
-				sliceSelections.set([slice.sliceName]);
+				selections.update((sel) => ({
+					slices: [slice.sliceName],
+					metadata: sel.metadata,
+				}));
 			}
 		}
 	}
@@ -88,9 +104,7 @@
 	$: result = getMetricsForSlices([
 		<MetricKey>{
 			sli: slice,
-			metric: $metric,
-			model: $model,
-			transform: $transform,
+			state: $zenoState,
 		},
 	]);
 </script>
@@ -107,12 +121,14 @@
 		ev.dataTransfer.setData("text/plain", slice.sliceName);
 		ev.dataTransfer.dropEffect = "copy";
 	}}
+	on:keydown={() => ({})}
 	on:dragend={(ev) => {
 		if (ev.dataTransfer.dropEffect === "none") {
 			slices.update((sls) => {
 				const sli = sls.get(slice.sliceName);
 				sli.folder = "";
 				sls.set(slice.sliceName, sli);
+				createNewSlice(sli.sliceName, sli.filterPredicates);
 				return sls;
 			});
 		}
@@ -174,7 +190,7 @@
 								if (relatedReports > 0) {
 									confirmDelete = true;
 								} else {
-									deleteSlice();
+									removeSlice();
 								}
 							}}>
 							<Icon class="material-icons">delete_outline</Icon>
@@ -182,14 +198,14 @@
 					</div>
 				{/if}
 				{#if result}
-					<span style:margin-right="10px">
-						{#await result then res}
-							{res && res[0] !== undefined ? res[0].toFixed(2) : ""}
-						{/await}
-					</span>
-					<span id="size">
-						({slice.idxs.length})
-					</span>
+					{#await result then res}
+						<span style:margin-right="10px">
+							{res[0].metric.toFixed(2)}
+						</span>
+						<span id="size">
+							({res[0].size})
+						</span>
+					{/await}
 				{/if}
 				<div class="inline" style:cursor="pointer">
 					<div style:width="36px">
@@ -228,7 +244,7 @@
 		<Button on:click={() => (confirmDelete = false)}>
 			<Label>No</Label>
 		</Button>
-		<Button use={[InitialFocus]} on:click={() => deleteSlice()}>
+		<Button use={[InitialFocus]} on:click={() => removeSlice()}>
 			<Label>Yes</Label>
 		</Button>
 	</Actions>

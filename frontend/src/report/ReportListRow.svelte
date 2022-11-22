@@ -17,7 +17,8 @@
 
 <div
 	class="report {$selectedReport === reportIndex ? 'selected' : ''}"
-	on:click={() => selectedReport.set(reportIndex)}>
+	on:click={() => selectedReport.set(reportIndex)}
+	on:keydown={() => ({})}>
 	<div class="report-name">
 		<IconButton>
 			<Icon component={Svg} viewBox="0 0 24 24">
