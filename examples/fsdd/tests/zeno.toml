@@ -1,4 +1,4 @@
-tests = "./"
+functions = "./"
 view = "zenomaudio_transcription"
 metadata = "../fsdd.csv"
 models = [

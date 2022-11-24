@@ -5,15 +5,14 @@ import os
 import pickle
 import sys
 import threading
-from importlib import util
-from inspect import getmembers, getsource, isfunction
+from inspect import getsource
 from math import isnan
-from multiprocessing import Pool
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Callable, Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd  # type: ignore
+from pathos.multiprocessing import ProcessingPool as Pool  # type: ignore
 
 from zeno.api import ZenoOptions
 from zeno.classes import (
@@ -27,62 +26,56 @@ from zeno.classes import (
     TableRequest,
     ZenoColumn,
     ZenoColumnType,
-    ZenoFunction,
-    ZenoFunctionType,
     ZenoState,
 )
-from zeno.filtering import filter_table, filter_table_single
-from zeno.mirror import Mirror
-from zeno.util import (
-    add_to_path,
-    get_function,
-    getMetadataType,
-    load_series,
+from zeno.data_processing import (
     postdistill_data,
     predistill_data,
-    read_pickle,
     run_inference,
     transform_data,
 )
+from zeno.filtering import filter_table, filter_table_single
+from zeno.mirror import Mirror
+from zeno.util import getMetadataType, load_series, read_pickle
 
 
-class Zeno(object):
+class ZenoBackend(object):
     def __init__(
         self,
-        metadata_path: Path,
-        tests: Path,
+        df: pd.DataFrame,
+        functions: List[Callable],
         models: List[Path],
-        batch_size,
-        id_column,
-        data_column,
-        label_column,
+        batch_size: int,
+        id_column: str,
+        data_column: str,
+        label_column: str,
         data_path,
         label_path,
         cache_path: Path,
         editable: bool,
+        samples: int,
+        view: str,
     ):
         logging.basicConfig(level=logging.INFO)
 
-        self.__load_metadata_file(metadata_path, id_column, data_column, label_column)
-
-        self.tests = tests
+        self.df = df
+        self.tests = functions
         self.batch_size = batch_size
         self.data_path = data_path
         self.label_path = label_path
-        self.editable = editable
-        self.status: str = "Initializing"
-        self.done_processing = False
-
-        self.distill_functions: Dict[str, ZenoFunction] = {}
-        self.metric_functions: Dict[str, ZenoFunction] = {}
-        self.transform_functions: Dict[str, ZenoFunction] = {}
-        self.predict_function: ZenoFunction = ZenoFunction(
-            name="", file_name=Path(""), fn_type=ZenoFunctionType.PREDICTION
-        )
-
-        self.metadata_name = os.path.basename(metadata_path).split(".")[0]
         self.cache_path = cache_path
+        self.editable = editable
+        self.done_processing = False
+        self.samples = samples
+        self.view = view
 
+        self.predistill_functions: Dict[str, Callable] = {}
+        self.postdistill_functions: Dict[str, Callable] = {}
+        self.metric_functions: Dict[str, Callable] = {}
+        self.transform_functions: Dict[str, Callable] = {}
+        self.predict_function: Optional[Callable] = None
+
+        self.status: str = "Initializing"
         self.folders: List[str] = read_pickle("folders.pickle", self.cache_path, [])
         self.reports: List[Report] = read_pickle("reports.pickle", self.cache_path, [])
         self.slices: Dict[str, Slice] = read_pickle(
@@ -97,8 +90,9 @@ class Zeno(object):
             self.model_paths = models  # type: ignore
         self.model_names = [os.path.basename(p).split(".")[0] for p in self.model_paths]
 
+        self.__setup_dataframe(id_column, data_column, label_column)
+        self.__parse_test_functions(self.tests)
         self.mirror = Mirror(self.df, self.cache_path, self.id_column)
-        self.mirror.generate_slices()
 
         # Options passed to Zeno functions.
         self.zeno_options = ZenoOptions(
@@ -112,20 +106,7 @@ class Zeno(object):
             output_path="",
         )
 
-    def __load_metadata_file(
-        self, metadata_path: Path, id_column: str, data_column: str, label_column: str
-    ):
-        # Read metadata as Pandas for slicing
-        if metadata_path.suffix == ".csv":
-            self.df = pd.read_csv(metadata_path)
-        elif metadata_path.suffix == ".parquet":
-            self.df = pd.read_parquet(metadata_path)
-        else:
-            logging.error(
-                "Extension of " + metadata_path.suffix + " not one of .csv or .parquet"
-            )
-            sys.exit(1)
-
+    def __setup_dataframe(self, id_column: str, data_column: str, label_column: str):
         self.id_column = ZenoColumn(
             column_type=ZenoColumnType.METADATA,
             metadata_type=getMetadataType(self.df[id_column]),
@@ -158,12 +139,27 @@ class Zeno(object):
             self.columns.append(col)
             self.complete_columns.append(col)
 
-        # TODO: figure out if this breaks for big integers. Need to do this for
-        # frontend bigint issues.
-        d = dict.fromkeys(
-            self.df.select_dtypes(np.int64).columns, np.int32  # type: ignore
-        )
-        self.df = self.df.astype(d)  # type: ignore
+    def __parse_test_functions(self, tests: List[Callable]):
+        for test_fn in tests:
+            if hasattr(test_fn, "predict_function"):
+                if self.predict_function is None:
+                    self.predict_function = test_fn
+                else:
+                    print("ERROR: Multiple model functions found, can only have one")
+                    sys.exit(1)
+            if hasattr(test_fn, "distill_function"):
+                src = getsource(test_fn)
+                if "output_column" in src:
+                    self.postdistill_functions[test_fn.__name__] = test_fn
+                else:
+                    self.predistill_functions[test_fn.__name__] = test_fn
+            if hasattr(test_fn, "transform_function"):
+                self.transform_functions[test_fn.__name__] = test_fn
+            if hasattr(test_fn, "metric_function"):
+                self.metric_functions[test_fn.__name__] = test_fn
+        if not self.predict_function:
+            print("ERROR: No model function found")
+            sys.exit(1)
 
     def start_processing(self):
         """Parse testing files, distill, and run inference."""
@@ -173,73 +169,22 @@ class Zeno(object):
             self.status = "Done processing"
             return
 
-        # Add directory with tests to path for relative imports.
-        for f in list(self.tests.rglob("*.py")):
-            self.__parse_testing_file(f)
-
-        for fn in self.distill_functions.values():
-            if fn.fn_type == ZenoFunctionType.PREDISTILL:
+        for fn in self.predistill_functions.values():
+            self.columns.append(
+                ZenoColumn(column_type=ZenoColumnType.PREDISTILL, name=fn.__name__)
+            )
+        for fn in self.postdistill_functions.values():
+            for m in self.model_names:
                 self.columns.append(
-                    ZenoColumn(column_type=ZenoColumnType.PREDISTILL, name=fn.name)
-                )
-            else:
-                for m in self.model_names:
-                    self.columns.append(
-                        ZenoColumn(
-                            column_type=ZenoColumnType.POSTDISTILL,
-                            name=fn.name,
-                            model=m,
-                        )
+                    ZenoColumn(
+                        column_type=ZenoColumnType.POSTDISTILL,
+                        name=fn.__name__,
+                        model=m,
                     )
+                )
 
         self.__thread = threading.Thread(target=asyncio.run, args=(self.__process(),))
         self.__thread.start()
-
-    def __parse_testing_file(self, test_file: Path):
-        # To allow relative imports in test files,
-        # add their directory to path temporarily.
-        with add_to_path(os.path.dirname(os.path.abspath(test_file))):
-            spec = util.spec_from_file_location(str(test_file), test_file)
-            test_module = util.module_from_spec(spec)  # type: ignore
-            spec.loader.exec_module(test_module)  # type: ignore
-
-        for func_name, func in getmembers(test_module):
-            if isfunction(func):
-                if hasattr(func, "predict_function"):
-                    if self.predict_function.name == "":
-                        self.predict_function = ZenoFunction(
-                            name=func_name,
-                            file_name=test_file,
-                            fn_type=ZenoFunctionType.PREDICTION,
-                        )
-                    else:
-                        logging.error(
-                            "Multiple prediction_functions found, can only have one"
-                        )
-                        sys.exit(1)
-                if hasattr(func, "distill_function"):
-                    src = getsource(func)
-                    self.distill_functions[func_name] = ZenoFunction(
-                        name=func_name,
-                        file_name=test_file,
-                        fn_type=(
-                            ZenoFunctionType.POSTDISTILL
-                            if "output_column" in src
-                            else ZenoFunctionType.PREDISTILL
-                        ),
-                    )
-                if hasattr(func, "transform_function"):
-                    self.transform_functions[func_name] = ZenoFunction(
-                        name=func_name,
-                        file_name=test_file,
-                        fn_type=ZenoFunctionType.TRANSFORM,
-                    )
-                if hasattr(func, "metric_function"):
-                    self.metric_functions[func_name] = ZenoFunction(
-                        name=func_name,
-                        file_name=test_file,
-                        fn_type=ZenoFunctionType.METRIC,
-                    )
 
     async def __process(self):
         self.status = "Running distill functions"
@@ -247,22 +192,17 @@ class Zeno(object):
         self.status = "Running transform functions"
         self.__transform()
 
-        for transform in [
-            *self.transform_functions.values(),
-            ZenoFunction(
-                name="", file_name=Path(""), fn_type=ZenoFunctionType.TRANSFORM
-            ),
-        ]:
+        for transform in [*self.transform_functions.values(), None]:
             self.__inference_and_postdistill(transform)
 
         self.done_processing = True
 
     def __transform(self):
         """Run transform functions."""
-        transform_to_run: List[ZenoFunction] = []
+        transform_to_run: List[Callable] = []
         for transform_function in self.transform_functions.values():
             transform_column = ZenoColumn(
-                column_type=ZenoColumnType.TRANSFORM, name=transform_function.name
+                column_type=ZenoColumnType.TRANSFORM, name=transform_function.__name__
             )
             save_path = Path(self.cache_path, str(transform_column) + ".pickle")
 
@@ -275,19 +215,14 @@ class Zeno(object):
 
         if len(transform_to_run) > 0:
             with Pool() as pool:
-                transform_outputs = pool.starmap(
+                transform_outputs = pool.map(
                     transform_data,
-                    [
-                        [
-                            transform_fn,
-                            self.zeno_options,
-                            self.cache_path,
-                            self.df,
-                            self.batch_size,
-                            i,
-                        ]
-                        for i, transform_fn in enumerate(transform_to_run)
-                    ],
+                    [fn for fn in transform_to_run],
+                    [self.zeno_options] * len(transform_to_run),
+                    [self.cache_path] * len(transform_to_run),
+                    [self.df] * len(transform_to_run),
+                    [self.batch_size] * len(transform_to_run),
+                    range(len(transform_to_run)),
                 )
                 for out in transform_outputs:
                     self.df.loc[:, str(out[0])] = out[1]
@@ -314,27 +249,22 @@ class Zeno(object):
 
         if len(predistill_to_run) > 0:
             with Pool() as pool:
-                predistill_outputs = pool.starmap(
+                predistill_outputs = pool.map(
                     predistill_data,
-                    [
-                        [
-                            self.distill_functions[col.name],
-                            col,
-                            self.zeno_options,
-                            self.cache_path,
-                            self.df,
-                            self.batch_size,
-                            i,
-                        ]
-                        for i, col in enumerate(predistill_to_run)
-                    ],
+                    [self.predistill_functions[col.name] for col in predistill_to_run],
+                    [col for col in predistill_to_run],
+                    [self.zeno_options] * len(predistill_to_run),
+                    [self.cache_path] * len(predistill_to_run),
+                    [self.df] * len(predistill_to_run),
+                    [self.batch_size] * len(predistill_to_run),
+                    range(len(predistill_to_run)),
                 )
                 for out in predistill_outputs:
                     self.df.loc[:, str(out[0])] = out[1]
                     out[0].metadata_type = getMetadataType(self.df[str(out[0])])
                     self.complete_columns.append(out[0])
 
-    def __inference_and_postdistill(self, transform: ZenoFunction):
+    def __inference_and_postdistill(self, transform: Optional[Callable]):
         # Check if we need to run inference since Pool is expensive
         models_to_run = []
         for model_path in self.model_paths:
@@ -342,12 +272,12 @@ class Zeno(object):
             model_column = ZenoColumn(
                 column_type=ZenoColumnType.OUTPUT,
                 name=model_name,
-                transform=transform.name,
+                transform=transform.__name__ if transform else "",
             )
             embedding_column = ZenoColumn(
                 column_type=ZenoColumnType.EMBEDDING,
                 name=model_name,
-                transform=transform.name,
+                transform=transform.__name__ if transform else "",
             )
             model_hash = str(model_column)
             embedding_hash = str(embedding_column)
@@ -369,21 +299,16 @@ class Zeno(object):
         self.status = "Running inference"
         if len(models_to_run) > 0:
             with Pool() as pool:
-                inference_outputs = pool.starmap(
+                inference_outputs = pool.map(
                     run_inference,
-                    [
-                        [
-                            self.predict_function,
-                            self.zeno_options,
-                            transform.name,
-                            m,
-                            self.cache_path,
-                            self.df,
-                            self.batch_size,
-                            i,
-                        ]
-                        for i, m in enumerate(models_to_run)
-                    ],
+                    [self.predict_function] * len(models_to_run),
+                    [self.zeno_options] * len(models_to_run),
+                    [transform.__name__ if transform else ""] * len(models_to_run),
+                    [m for m in models_to_run],
+                    [self.cache_path] * len(models_to_run),
+                    [self.df] * len(models_to_run),
+                    [self.batch_size] * len(models_to_run),
+                    range(len(models_to_run)),
                 )
                 for out in inference_outputs:
                     self.df.loc[:, str(out[0])] = out[2]
@@ -399,7 +324,10 @@ class Zeno(object):
             c for c in self.columns if c.column_type == ZenoColumnType.POSTDISTILL
         ]:
             col_name = postdistill_column.copy(
-                update={"model": postdistill_column.model, "transform": transform.name}
+                update={
+                    "model": postdistill_column.model,
+                    "transform": transform.__name__ if transform else "",
+                }
             )
             col_hash = str(col_name)
             save_path = Path(self.cache_path, col_hash + ".pickle")
@@ -415,21 +343,16 @@ class Zeno(object):
         self.status = "Running postprocessing"
         if len(postdistill_to_run) > 0:
             with Pool() as pool:
-                post_outputs = pool.starmap(
+                post_outputs = pool.map(
                     postdistill_data,
-                    [
-                        [
-                            self.distill_functions[e.name],
-                            e.model,
-                            transform.name,
-                            self.zeno_options,
-                            self.cache_path,
-                            self.df,
-                            self.batch_size,
-                            i,
-                        ]
-                        for i, e in enumerate(postdistill_to_run)
-                    ],
+                    [self.postdistill_functions[e.name] for e in postdistill_to_run],
+                    [e.model for e in postdistill_to_run],
+                    [transform.__name__ if transform else ""] * len(postdistill_to_run),
+                    [self.zeno_options] * len(postdistill_to_run),
+                    [self.cache_path] * len(postdistill_to_run),
+                    [self.df] * len(postdistill_to_run),
+                    [self.batch_size] * len(postdistill_to_run),
+                    range(len(postdistill_to_run)),
                 )
                 for out in post_outputs:
                     self.df.loc[:, str(out[0])] = out[1]  # type: ignore
@@ -482,8 +405,7 @@ class Zeno(object):
             ),
         )
 
-        metric_func = get_function(self.metric_functions[state.metric])
-        return metric_func(df, local_ops)
+        return self.metric_functions[state.metric](df, local_ops)
 
     def get_slices(self):
         return [s.dict(by_alias=True) for s in self.slices.values()]

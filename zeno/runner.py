@@ -1,39 +1,24 @@
-import asyncio
-import json
 import os
 import shutil
 import sys
-from pathlib import Path, PosixPath
-from typing import List, Union
+from pathlib import Path
 
+import nest_asyncio  # type: ignore
+import pandas as pd
 import pkg_resources
 import requests  # type: ignore
 import tomli
-import uvicorn  # type: ignore
-from fastapi import FastAPI, WebSocket
-from fastapi.staticfiles import StaticFiles
+import uvicorn
 
-from zeno.classes import (
-    FilterPredicate,
-    FilterPredicateGroup,
-    HistogramRequest,
-    MetricKey,
-    MirrorProject,
-    Report,
-    Slice,
-    StatusResponse,
-    TableRequest,
-    ZenoSettings,
-    ZenoVariables,
-)
-from zeno.zeno import Zeno
+from zeno.server import get_server
+from zeno.util import parse_testing_file  # type: ignore
+from zeno.zeno_backend import ZenoBackend
 
 VIEW_MAP_URL = "https://raw.githubusercontent.com/zeno-ml/instance-views/main/"
 VIEWS_MAP_JSON = "views.json"
 
 
-def main():
-
+def command_line():
     if len(sys.argv) == 1:
         print(
             "\n \033[1mZeno\033[0m",
@@ -72,19 +57,53 @@ def main():
         print("ERROR: Failed to read TOML configuration file.")
         sys.exit(1)
 
-    toml_path = os.path.dirname(os.path.abspath(sys.argv[1]))
+    base_path = os.path.dirname(os.path.abspath(sys.argv[1]))
 
+    if "metadata" not in args:
+        print("ERROR: Must have 'metadata' entry which must be a CSV or Parquet file.")
+        sys.exit(1)
+    else:
+        meta_path = Path(os.path.realpath(os.path.join(base_path, args["metadata"])))
+        # take out metadata_path, tests. should be dataframe and list of functions.
+        # Read metadata as Pandas for slicing
+        if meta_path.suffix == ".csv":
+            args["metadata"] = pd.read_csv(meta_path)
+        elif meta_path.suffix == ".parquet":
+            args["metadata"] = pd.read_parquet(meta_path)
+        else:
+            print("Extension of " + meta_path.suffix + " not one of .csv or .parquet")
+            sys.exit(1)
+
+    if "functions" not in args or not os.path.exists(
+        os.path.realpath(os.path.join(base_path, args["functions"]))
+    ):
+        print("WARNING: No 'functions' directory found.")
+        args["functions"] = None
+    else:
+        args["functions"] = Path(
+            os.path.realpath(os.path.join(base_path, args["functions"]))
+        )
+        # Add directory with tests to path for relative imports.
+        fns = []
+        for f in list(args["functions"].rglob("*.py")):
+            fns = fns + parse_testing_file(f)
+        args["functions"] = fns
+
+    zeno(args, base_path)
+
+
+def parse_args(args: dict, base_path) -> dict:
     if "view" not in args:
         print("ERROR: Must have 'view' entry")
         sys.exit(1)
 
     if "cache_path" not in args:
         args["cache_path"] = Path(
-            os.path.realpath(os.path.join(toml_path, "./.zeno_cache/"))
+            os.path.realpath(os.path.join(base_path, "./.zeno_cache/"))
         )
     else:
         args["cache_path"] = Path(
-            os.path.realpath(os.path.join(toml_path, args["cache_path"]))
+            os.path.realpath(os.path.join(base_path, args["cache_path"]))
         )
     os.makedirs(args["cache_path"], exist_ok=True)
 
@@ -98,7 +117,7 @@ def main():
             content = requests.get(url, stream=True).content
             out_file.write(content)
     except KeyError:
-        view_path = Path(os.path.realpath(os.path.join(toml_path, args["view"])))
+        view_path = Path(os.path.realpath(os.path.join(base_path, args["view"])))
         if view_path.is_file():
             if view_dest_path.is_file():
                 os.remove(view_dest_path)
@@ -110,29 +129,13 @@ def main():
             )
             sys.exit(1)
 
-    if "metadata" not in args:
-        print("ERROR: Must have 'metadata' entry which must be a CSV or Parquet file.")
-        sys.exit(1)
-    else:
-        args["metadata"] = Path(
-            os.path.realpath(os.path.join(toml_path, args["metadata"]))
-        )
-
-    if "tests" not in args or not os.path.exists(
-        os.path.realpath(os.path.join(toml_path, args["tests"]))
-    ):
-        print("WARNING: No 'tests' directory found.")
-        args["tests"] = None
-    else:
-        args["tests"] = Path(os.path.realpath(os.path.join(toml_path, args["tests"])))
-
     if "models" not in args or len(args["models"]) < 1:
         print("WARNING: No 'models' found.")
         args["models"] = []
     else:
-        if Path(os.path.realpath(os.path.join(toml_path, args["models"][0]))).exists():
+        if Path(os.path.realpath(os.path.join(base_path, args["models"][0]))).exists():
             args["models"] = [
-                Path(os.path.realpath(os.path.join(toml_path, m)))
+                Path(os.path.realpath(os.path.join(base_path, m)))
                 for m in args["models"]
             ]
 
@@ -140,14 +143,14 @@ def main():
         args["data_path"] = ""
     elif not args["data_path"].startswith("http"):
         args["data_path"] = Path(
-            os.path.realpath(os.path.join(toml_path, args["data_path"]))
+            os.path.realpath(os.path.join(base_path, args["data_path"]))
         )
 
     if "label_path" not in args:
         args["label_path"] = ""
     else:
         args["label_path"] = Path(
-            os.path.realpath(os.path.join(toml_path, args["label_path"]))
+            os.path.realpath(os.path.join(base_path, args["label_path"]))
         )
 
     if "id_column" not in args:
@@ -182,13 +185,15 @@ def main():
     if "batch_size" not in args:
         args["batch_size"] = 1
 
-    run_zeno(args)
+    return args
 
 
-def run_zeno(args):
-    zeno = Zeno(
-        metadata_path=args["metadata"],
-        tests=args["tests"],
+def zeno(args, base_path="./"):
+    nest_asyncio.apply()
+    args = parse_args(args, base_path)
+    zeno = ZenoBackend(
+        df=args["metadata"],
+        functions=args["functions"],
         models=args["models"],
         batch_size=args["batch_size"],
         id_column=args["id_column"],
@@ -198,131 +203,10 @@ def run_zeno(args):
         label_path=args["label_path"],
         cache_path=args["cache_path"],
         editable=args["editable"],
+        samples=args["samples"],
+        view=args["view"],
     )
+
     zeno.start_processing()
-
-    app = FastAPI(title="Frontend API")
-    api_app = FastAPI(title="Backend API")
-
-    if args["data_path"] != "" and isinstance(args["data_path"], PosixPath):
-        app.mount("/data", StaticFiles(directory=args["data_path"]), name="static")
-    if args["label_path"] != "":
-        app.mount("/labels", StaticFiles(directory=args["label_path"]), name="static")
-
-    app.mount(
-        "/cache",
-        StaticFiles(directory=args["cache_path"]),
-        name="cache",
-    )
-    app.mount("/api", api_app)
-    app.mount(
-        "/",
-        StaticFiles(
-            directory=os.path.dirname(os.path.realpath(__file__)) + "/frontend",
-            html=True,
-        ),
-        name="base",
-    )
-
-    @api_app.get("/settings", response_model=ZenoSettings)
-    def get_settings():
-        return ZenoSettings(
-            view=args["view"],
-            id_column=zeno.id_column,
-            label_column=zeno.label_column,
-            data_column=zeno.data_column,
-            data_origin="/data/"
-            if isinstance(args["data_path"], PosixPath)
-            else args["data_path"],
-            metadata_columns=zeno.columns,
-            samples=args["samples"],
-            totalSize=zeno.df.shape[0],
-        )
-
-    @api_app.get("/initialize", response_model=ZenoVariables)
-    def get_initial_info():
-        return ZenoVariables(
-            metrics=list(zeno.metric_functions.keys()),
-            transforms=list(zeno.transform_functions.keys()),
-            models=[str(n) for n in zeno.model_names],
-            folders=zeno.folders,
-        )
-
-    @api_app.get("/slices")
-    def get_slices():
-        return json.dumps(zeno.get_slices())
-
-    @api_app.get("/reports")
-    def get_reports():
-        return json.dumps(zeno.get_reports())
-
-    @api_app.post("/set-folders")
-    def set_folders(folders: List[str]):
-        zeno.set_folders(folders)
-
-    @api_app.post("/set-reports")
-    def update_reports(reqs: List[Report]):
-        zeno.set_reports(reqs)
-
-    @api_app.post("/get-filtered-ids")
-    def get_filtered_ids(req: List[Union[FilterPredicateGroup, FilterPredicate]]):
-        return json.dumps(zeno.get_filtered_ids(req))
-
-    @api_app.post("/get-filtered-table")
-    def get_filtered_table(req: TableRequest):
-        return zeno.get_filtered_table(req)
-
-    @api_app.post("/calculate-histograms")
-    def calculate_histograms(req: HistogramRequest):
-        return json.dumps(zeno.calculate_histograms(req))
-
-    @api_app.post("/create-new-slice")
-    def create_new_slice(req: Slice):
-        zeno.create_new_slice(req)
-
-    @api_app.post("/delete-slice")
-    def delete_slice(slice_name: List[str]):
-        zeno.delete_slice(slice_name[0])
-
-    @api_app.post("/get-metrics-for-slices")
-    def get_metrics_for_slices(reqs: List[MetricKey]):
-        return json.dumps(zeno.get_metrics_for_slices(reqs))
-
-    @api_app.post("/mirror/project")
-    def mirror_project(req: MirrorProject):
-        # not specified or entire data frame just use the cache
-        if req.ids is None or len(req.ids) == len(zeno.df):
-            proj = zeno.mirror.initProject(req.model, req.transform)
-        else:
-            proj = zeno.mirror.filterProject(
-                req.model, req.ids, req.transform, perplexity=req.perplexity
-            )
-
-        return json.dumps({"model": req.model, "data": proj})
-
-    @api_app.get("/mirror/sdm")
-    def sdm():
-        return json.dumps({"data": zeno.mirror.generate_slices()})
-
-    @api_app.get("/mirror/exists/{model}")
-    def embedding_exists(model: str):
-        exists = zeno.embedding_exists(model)
-        return json.dumps({"model": model, "exists": exists})
-
-    @api_app.websocket("/status")
-    async def results_websocket(websocket: WebSocket):
-        await websocket.accept()
-        previous_status = ""
-        while True:
-            await asyncio.sleep(1)
-            if zeno.status != previous_status:
-                previous_status = zeno.status
-                await websocket.send_json(
-                    StatusResponse(
-                        status=zeno.status,
-                        done_processing=zeno.done_processing,
-                        complete_columns=zeno.complete_columns,
-                    ).json(by_alias=True)
-                )
-
-    uvicorn.run(app, host=args["host"], port=args["port"])  # type: ignore
+    app = get_server(zeno)
+    uvicorn.run(app, host=args["host"], port=args["port"])

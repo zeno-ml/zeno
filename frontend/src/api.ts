@@ -118,7 +118,6 @@ export async function getHistograms(
 	if (state.metric === undefined) {
 		state.metric = "";
 	}
-	console.log(state);
 	let res = await fetch("/api/calculate-histograms", {
 		method: "POST",
 		headers: {

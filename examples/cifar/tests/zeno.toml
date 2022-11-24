@@ -1,4 +1,4 @@
-tests = "./"
+functions = "./"
 view = "image-classification"
 metadata = "../cifar_pred.csv"
 models = [

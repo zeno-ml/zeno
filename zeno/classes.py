@@ -1,5 +1,4 @@
 from enum import IntEnum
-from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
 from pydantic import BaseModel
@@ -13,14 +12,6 @@ class ZenoColumnType(IntEnum):
     POSTDISTILL = 4
     TRANSFORM = 5
     WEAK_LABEL = 6
-
-
-class ZenoFunctionType(IntEnum):
-    PREDICTION = 0
-    PREDISTILL = 1
-    POSTDISTILL = 2
-    TRANSFORM = 3
-    METRIC = 4
 
 
 class MetadataType(IntEnum):
@@ -58,12 +49,6 @@ class Report(CamelModel):
     name: str
     report_type: str
     report_predicates: List[ReportPredicate]
-
-
-class ZenoFunction(CamelModel):
-    name: str
-    file_name: Path
-    fn_type: ZenoFunctionType
 
 
 class ZenoColumn(CamelModel):

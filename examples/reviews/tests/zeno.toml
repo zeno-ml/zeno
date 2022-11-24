@@ -1,4 +1,4 @@
-tests = "./"
+functions = "./"
 view = "text-classification"
 metadata = "../amazon_pred.csv"
 models = [

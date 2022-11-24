@@ -1,4 +1,4 @@
-# tests = "./"
+# functions = "./"
 view = "image_object_detection"
 metadata = "../coco.parquet"
 # models = [

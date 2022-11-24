@@ -3,6 +3,8 @@
 
 	import MetadataPanel from "./metadata/MetadataPanel.svelte";
 	import InstanceView from "./instance-views/InstanceView.svelte";
+
+	$: console.log($status);
 </script>
 
 {#if $ready && $status.completeColumns.length > 0}

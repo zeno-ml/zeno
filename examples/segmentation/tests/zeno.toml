@@ -1,4 +1,4 @@
-tests = "../"
+functions = "../"
 view = "image-segmentation"
 metadata = "../segmentation.csv"
 models = [

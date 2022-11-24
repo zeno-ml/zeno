@@ -50,7 +50,6 @@ def filter_table(
         and (final_filter[-1] == "&" or final_filter[-1] == "|")
     ):
         final_filter = final_filter[0:-1]
-
     if len(final_filter) > 0:
         return df.query(final_filter)
     else:
@@ -67,5 +66,4 @@ def filter_table_single(df, col: ZenoColumn, pred):
         return df[(df[str(col)] > pred[0]) & (df[str(col)] < pred[1])]
     elif col.metadata_type == MetadataType.DATETIME:
         return df
-    else:
-        return df
+    return df

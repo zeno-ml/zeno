@@ -1,4 +1,4 @@
-tests = "./"
+functions = "./"
 view = "image-classification"
 metadata = "../imagenette_formatted.csv"
 models = ["resnet+clip"]

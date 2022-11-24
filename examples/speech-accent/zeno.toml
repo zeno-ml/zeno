@@ -1,4 +1,4 @@
-tests = "./tests/"
+functions = "./tests/"
 view = "audio-transcription"
 models = [
 	"silero_sst",

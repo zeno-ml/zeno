@@ -1,4 +1,4 @@
-tests = "./"
+functions = "./"
 view = "zenoml_image_classification"
 metadata = "../imagenet_val_str.csv"
 models = ["resnet", "resnet+clip"]

@@ -1,3 +1,3 @@
-from zeno.runner import main
+from zeno.runner import command_line
 
-main()
+command_line()
