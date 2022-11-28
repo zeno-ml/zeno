@@ -66,7 +66,7 @@
         "d3-selection": "^3.0.0",
         "d3-shape": "^3.1.0",
         "html2pdf.js": "^0.10.1",
-        "regl-scatterplot": "^1.3.2",
+        "regl-scatterplot": "^1.4.0",
         "sirv-cli": "^2.0.0",
         "svelte-spa-router": "^3.3.0",
         "svelte-vega": "^1.2.0",
