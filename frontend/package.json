@@ -12,7 +12,7 @@
         "check": "svelte-check --tsconfig ./tsconfig.json"
     },
     "devDependencies": {
-        "@formkit/auto-animate": "^1.0.0-beta.3",
+        "@formkit/auto-animate": "^1.0.0-beta.5",
         "@smui-extra/accordion": "7.0.0-beta.0",
         "@smui-extra/autocomplete": "7.0.0-beta.0",
         "@smui/button": "7.0.0-beta.0",
