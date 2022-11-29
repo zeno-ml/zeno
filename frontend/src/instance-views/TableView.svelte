@@ -1,34 +1,36 @@
 <script lang="ts">
-	import { Label } from "@smui/button";
+	import { Icon, Label } from "@smui/button";
 	import { Pagination } from "@smui/data-table";
-    import { Icon } from "@smui/button";
 	import IconButton from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
-	import SelectionBar from "../metadata/SelectionBar.svelte";
+	import { MetadataType, ZenoColumnType } from "../globals";
 	import { tick } from "svelte";
-	import { ZenoColumnType } from "../globals";
+	import { getFilteredTable } from "../api";
 	import {
-		model,
 		rowsPerPage,
+		selectionPredicates,
 		settings,
 		sort,
 		status,
+		model,
 		transform,
 		zenoState,
-		selectionPredicates,
 	} from "../stores";
-	import { getFilteredTable } from "../api";
 	import { columnHash } from "../util/util";
 
 	export let table;
 	export let viewFunction;
 	export let viewOptions = {};
 
-    let columnHeader = [];
-
-    let sortingStatus = {};
+	enum SortType {
+		ASCENDING,
+		DESCENDING,
+		NONE,
+	}
 
 	let viewDivs = {};
+	let columnHeader: ZenoColumn[] = [];
+	let sortingStatus = {};
 
 	let currentPage = 0;
 	let end = 0;
@@ -65,154 +67,159 @@
 		drawInstances();
 	}
 
-    enum SortType {
-        ASCENDING,
-        DESCENDING,
-        NONE
-    }
+	function populateSortingRecord() {
+		for (let i = 0; i < $status.completeColumns.length; i++) {
+			sortingStatus[$status.completeColumns[i].name] = SortType.NONE;
+		}
+	}
 
+	function sort_row(column_name) {
+		let correctColumnNum = 0;
+		for (let i = 0; i < $status.completeColumns.length; i++) {
+			if ($status.completeColumns[i].name === column_name) {
+				correctColumnNum = i;
+				break;
+			}
+		}
 
-    function populateSortingRecord() {
-        for(let i = 0; i < $status.completeColumns.length; i++) {
-                sortingStatus[$status.completeColumns[i].name] = SortType.NONE;
-        }
-    }
+		let correctColumn = $status.completeColumns[correctColumnNum];
+		let current_status = sortingStatus[column_name];
 
+		populateSortingRecord();
 
-    function sort_row(column_name) {
-        // re-populate the record
-        // find the column
-        let correctColumnNum = 0;
-        for(let i = 0; i < $status.completeColumns.length; i++) {
-            if($status.completeColumns[i].name == column_name) {
-                correctColumnNum = i;
-                break;
-            }
-        }
+		if (current_status === SortType.DESCENDING) {
+			sortingStatus[column_name] = SortType.NONE;
+			getFilteredTable(
+				$status.completeColumns,
+				$selectionPredicates,
+				$zenoState,
+				[start, end],
+				[$sort, true]
+			).then((res) => (table = res));
+		} else if (current_status === SortType.ASCENDING) {
+			sortingStatus[column_name] = SortType.DESCENDING;
+			getFilteredTable(
+				$status.completeColumns,
+				$selectionPredicates,
+				$zenoState,
+				[start, end],
+				[correctColumn, true]
+			).then((res) => (table = res));
+		} else if (current_status === SortType.NONE) {
+			sortingStatus[column_name] = SortType.ASCENDING;
+			getFilteredTable(
+				$status.completeColumns,
+				$selectionPredicates,
+				$zenoState,
+				[start, end],
+				[correctColumn, false]
+			).then((res) => (table = res));
+		}
+	}
 
-        console.log(correctColumnNum);
+	populateSortingRecord();
 
-        let correctColumn = $status.completeColumns[correctColumnNum];
-        let current_status = sortingStatus[column_name];
-
-        populateSortingRecord();
-
-        if(current_status == SortType.DESCENDING) {
-            sortingStatus[column_name] = SortType.NONE;
-	    	getFilteredTable(
-		    	$status.completeColumns,
-			    $selectionPredicates,
-    			$zenoState,
-	    		[start, end],
-		    	[$sort, true]
-		    ).then((res) => (table = res));
-        }else if(current_status == SortType.ASCENDING) {
-            sortingStatus[column_name] = SortType.DESCENDING;
-            getFilteredTable(
-                $status.completeColumns,
-		    	$selectionPredicates,
-			    $zenoState,
-    			[start, end],
-                [correctColumn, true]
-		    ).then((res) => (table = res));
-        }else if(current_status == SortType.NONE) {
-            sortingStatus[column_name] = SortType.ASCENDING;
-            getFilteredTable(
-                $status.completeColumns,
-		    	$selectionPredicates,
-			    $zenoState,
-    			[start, end],
-                [correctColumn, false]
-		    ).then((res) => (table = res));
-        }
-    }
-
-    populateSortingRecord();
-    
-    // function reuse to improve readability.
 	async function drawInstances() {
-		let tempTable = table;
-		tempTable = tempTable.slice(start, end);
+		let obj = $status.completeColumns.find((c) => {
+			return (
+				c.columnType === ZenoColumnType.OUTPUT &&
+				c.name === $model &&
+				c.transform === $transform
+			);
+		});
+		let modelColumn = obj ? columnHash(obj) : "";
+		let transformColumn = "";
+		if ($zenoState.transform) {
+			let col = <ZenoColumn>{
+				columnType: ZenoColumnType.TRANSFORM,
+				name: $zenoState.transform,
+			};
+			transformColumn = columnHash(col);
+		}
 
 		await tick();
-        columnHeader = $status.completeColumns;
-        
+
+		columnHeader = $status.completeColumns.filter(
+			(c) =>
+				(c.model === "" || c.model === $zenoState.model) &&
+				(c.transform === "" || c.transform === $zenoState.transform) &&
+				(c.columnType === 0 || c.columnType === 1 || c.columnType === 4)
+		);
+		let ids = table.map((inst) => inst[idHash]);
+		viewDivs = Object.fromEntries(
+			ids
+				.map(
+					(key) =>
+						!!Object.getOwnPropertyDescriptor(viewDivs, key) && [
+							key,
+							viewDivs[key],
+						]
+				)
+				.filter(Boolean)
+		);
+		table.forEach((inst, i) => {
+			let div = viewDivs[inst[idHash]];
+			if (div) {
+				viewFunction(
+					div,
+					viewOptions,
+					table[i],
+					modelColumn,
+					columnHash($settings.labelColumn),
+					columnHash($settings.dataColumn),
+					$settings.dataOrigin,
+					transformColumn,
+					idHash
+				);
+			}
+		});
 	}
-	// filteredTable is a store. to get value from store, use $before it.
-	// filteredTable is not 
-	// to get js objects, call .objects(), or .slice() to get a sample of it.
-	// the last thing: $: anything after this update will refresh the statement
-	// when refresh, the log should happen
-	// status.completeColumns
-	//$: console.log($filteredTable.objects());
-	//console.log($status.completeColumns);
-	//console.log(columnHash($status.completeColumns[0]));
-	// console.log($transform);
 </script>
 
 {#if table}
-    <!--<SelectionBar />-->
-	<!--<<div bind:this={optionsDiv} />-->
 	<div class="container sample-container">
-        <table id="column-table">
-            <thead>
-                <tr>
-                    {#each columnHeader as header}
-						{#if header.name == "id"}
-						<th>image</th>
+		<table id="column-table">
+			<thead>
+				<tr>
+					<th>instance</th>
+					{#each columnHeader as header}
+						{#if header.name !== $settings.idColumn.name}
+							<th on:click={() => sort_row(header.name)}>
+								{header.name}
+								<Icon
+									class="material-icons"
+									style="font-size: 1em; padding-top:3px">
+									{#if sortingStatus[header.name] === SortType.ASCENDING}
+										keyboard_arrow_down
+									{/if}
+									{#if sortingStatus[header.name] === SortType.DESCENDING}
+										keyboard_arrow_up
+									{/if}
+								</Icon>
+							</th>
 						{/if}
 					{/each}
-					{#if $transform == "blur"}
-						<th>blur</th>
-					{/if}
-					{#if $transform == "rotate"}
-						<th>rotate</th>
-					{/if}
-					{#each columnHeader as header}
-                        {#if header.columnType == 0 || header.columnType == 1 && header.name != "id"}
-                        <th>{header.name}
-                            <Icon class="material-icons" style="font-size: 1em; padding-top:3px" on:click={() => (sort_row(header.name))}>
-                                {#if sortingStatus[header.name] == SortType.NONE}
-                                keyboard_control
-                                {/if}
-                                {#if sortingStatus[header.name] == SortType.ASCENDING}
-                                keyboard_arrow_down
-                                {/if}
-                                {#if sortingStatus[header.name] == SortType.DESCENDING}
-                                keyboard_arrow_up
-                                {/if}
-                            </Icon>
-                        </th>
-                        {/if}
-                    {/each}
-                </tr>
-              </thead>
-            <tbody>
-		        {#each table as tableContent}
-                    <tr>
-                        {#each columnHeader as header}
-                            {#if header.name == "id"}
-                            	<td><img alt="" src={"/data/" + tableContent["0id"]}/></td>
-								{#if $transform == "blur"}
-									<td><img alt="" src={"/cache/5blur/" + tableContent["5blur"]}/></td>
-								{/if}
-								{#if $transform == "rotate"}
-									<td><img alt="" src={"/cache/5rotate/" + tableContent["5rotate"]}/></td>
-								{/if}
-                            {/if}
-						{/each}
+				</tr>
+			</thead>
+			<tbody>
+				{#each table as tableContent}
+					<tr>
+						<td>
+							<div bind:this={viewDivs[tableContent[idHash]]} />
+						</td>
 						{#each columnHeader as header}
-                            {#if header.columnType == 0}
-								<td>{tableContent[header.columnType + header.name]}</td>
+							{#if header.name !== $settings.idColumn.name}
+								{#if header.metadataType === MetadataType.CONTINUOUS}
+									<td>{tableContent[columnHash(header)].toFixed(2)}</td>
+								{:else}
+									<td>{tableContent[columnHash(header)]}</td>
+								{/if}
 							{/if}
-							{#if header.columnType == 1}
-                                <td>{Math.round(tableContent[header.columnType + header.name]) / 100 }</td>
-                            {/if}
-                        {/each}
-                    </tr>
-		        {/each}
-            </tbody>
-        </table>
+						{/each}
+					</tr>
+				{/each}
+			</tbody>
+		</table>
 	</div>
 	<Pagination slot="paginate" class="pagination">
 		<svelte:fragment slot="rowsPerPage">
@@ -224,7 +231,7 @@
 			</Select>
 		</svelte:fragment>
 		<svelte:fragment slot="total">
-			{start + 1}-{end} of {table.size}
+			{start + 1}-{end} of {$settings.totalSize}
 		</svelte:fragment>
 
 		<IconButton
@@ -263,26 +270,23 @@
 		border-bottom: 1px solid rgb(224, 224, 224);
 		display: flex;
 		flex-wrap: wrap;
-        min-width:75px;
+		min-width: 75px;
 	}
-    th {
-        text-align: center;
-        border-bottom: 1px solid #e0e0e0;
-        padding-bottom: 5px;
-        margin-bottom: 20px;
-		margin-left: 20px;
-        margin-right: 20px;
-        position: sticky; 
-        top: 0;
-        background-color: white;
-        min-width:70px;
-		font-size: 14px;
+	th {
+		text-align: left;
+		border-bottom: 1px solid #e0e0e0;
+		padding-bottom: 5px;
+		margin-bottom: 20px;
+		margin-right: 20px;
+		position: sticky;
+		top: 0;
+		background-color: white;
+		min-width: 70px;
 		margin-bottom: 5px;
-		color: #666;
-		padding-left: 1.60vw;
-		padding-right: 1.60vw;
-    }
+		padding-right: 1.6vw;
+		cursor: pointer;
+	}
 	td {
-		padding-left: 15px;
+		padding-right: 15px;
 	}
 </style>
