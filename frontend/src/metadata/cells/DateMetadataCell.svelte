@@ -2,7 +2,6 @@
 	export let col: ZenoColumn;
 	export let filterPredicates: FilterPredicate[];
 	export let histogram;
-	export let shouldColor;
 
 	// function resetSelection(pos) {
 	// 	selection.values[pos] = undefined;

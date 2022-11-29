@@ -3,6 +3,8 @@
 	import SelectionBar from "../metadata/SelectionBar.svelte";
 	import ListView from "./ListView.svelte";
 	import TableView from "./TableView.svelte";
+	import { getMetricsForSlices } from "../api";
+	import { zenoState, selectionPredicates } from "../stores";
 
 	export let table;
 
@@ -26,17 +28,35 @@
 			console.log("ERROR: failed to load sample view ---", e);
 		}
 	});
+
+	$: currentResult = getMetricsForSlices([
+		<MetricKey>{
+			sli: <Slice>{
+				sliceName: "",
+				folder: "",
+				filterPredicates: {
+					predicates: $selectionPredicates,
+					join: "",
+				},
+			},
+			state: $zenoState,
+		},
+	]);
 </script>
 
 <div class="heading">
-	<SelectionBar bind:selected {optionsFunction} bind:viewOptions />
+	<SelectionBar
+		bind:selected
+		{optionsFunction}
+		{currentResult}
+		bind:viewOptions />
 </div>
 
 {#if selected === "list" && viewOptions !== undefined}
-	<ListView {table} {viewFunction} {viewOptions} />
+	<ListView {currentResult} {table} {viewFunction} {viewOptions} />
 {/if}
 {#if selected === "table"}
-	<TableView {table} {viewFunction} {viewOptions} />
+	<TableView {currentResult} {table} {viewFunction} {viewOptions} />
 {/if}
 
 <style>

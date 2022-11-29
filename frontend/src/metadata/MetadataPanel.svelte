@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
-	import { mdiFolderPlusOutline, mdiPlus } from "@mdi/js";
+	import { mdiFolderPlusOutline, mdiPlus, mdiPlusCircle } from "@mdi/js";
 
 	import FolderCell from "./cells/FolderCell.svelte";
 	import MetadataCell from "./MetadataCell.svelte";
@@ -32,8 +32,6 @@
 	import { getHistograms, getMetricsForSlices } from "../api";
 	import { ZenoColumnType } from "../globals";
 	import Button from "@smui/button/src/Button.svelte";
-
-	export let shouldColor = false;
 
 	let metadataHistograms = {};
 	let showNewFolder = false;
@@ -130,7 +128,11 @@
 						showNewSlice.set(true);
 					}}>
 					<Icon component={Svg} viewBox="0 0 24 24">
-						<path fill="black" d={mdiPlus} />
+						{#if $selectionPredicates.length > 0}
+							<path fill="#6a1a9a" d={mdiPlusCircle} />
+						{:else}
+							<path fill="black" d={mdiPlus} />
+						{/if}
 					</Icon>
 				</IconButton>
 				{#if $showNewSlice}
@@ -213,10 +215,7 @@
 		</div>
 	</div>
 	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.METADATA) as col}
-		<MetadataCell
-			{col}
-			{shouldColor}
-			histogram={metadataHistograms[columnHash(col)]} />
+		<MetadataCell {col} histogram={metadataHistograms[columnHash(col)]} />
 	{/each}
 
 	{#if $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL).length > 0}
@@ -226,16 +225,12 @@
 		{@const idx = completedColumnHashes.indexOf(columnHash(col))}
 		<MetadataCell
 			col={idx > -1 ? $status.completeColumns[idx] : col}
-			{shouldColor}
 			histogram={metadataHistograms[columnHash(col)]} />
 	{/each}
 
 	{#if $model}
 		{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.POSTDISTILL && m.model === $model && m.transform === $transform) as col}
-			<MetadataCell
-				{col}
-				{shouldColor}
-				histogram={metadataHistograms[columnHash(col)]} />
+			<MetadataCell {col} histogram={metadataHistograms[columnHash(col)]} />
 		{/each}
 	{/if}
 </div>

@@ -19,6 +19,7 @@
 	import { getFilteredTable } from "../api";
 	import { columnHash } from "../util/util";
 
+	export let currentResult;
 	export let table;
 	export let viewFunction;
 	export let viewOptions = {};
@@ -127,7 +128,9 @@
 			</Select>
 		</svelte:fragment>
 		<svelte:fragment slot="total">
-			{start + 1}-{end} of {$settings.totalSize}
+			{start + 1}-{end} of {#await currentResult then r}{r
+					? r[0].size
+					: ""}{/await}
 		</svelte:fragment>
 
 		<IconButton

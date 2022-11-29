@@ -1,6 +1,6 @@
 import type { VegaLiteSpec } from "svelte-vega";
 
-export function nominalVegaSpec(shouldColor, metricRange) {
+export function nominalVegaSpec(metricRange) {
 	const countSpec = {
 		$schema: "https://vega.github.io/schema/vega-lite/v5.json",
 		data: {
@@ -90,13 +90,6 @@ export function nominalVegaSpec(shouldColor, metricRange) {
 			},
 			legend: null,
 		};
-	} else if (shouldColor) {
-		topLayerBars.encoding.color = {
-			field: "color",
-			type: "nominal",
-			scale: null,
-			legend: null,
-		};
 	} else {
 		topLayerBars.encoding.color = {
 			value: "#6a1b9a",
@@ -106,7 +99,7 @@ export function nominalVegaSpec(shouldColor, metricRange) {
 	return countSpec;
 }
 
-export function continuousVegaSpec(shouldColor, metricRange) {
+export function continuousVegaSpec(metricRange) {
 	const histogramSpec = {
 		$schema: "https://vega.github.io/schema/vega-lite/v5.json",
 		data: {
@@ -185,13 +178,6 @@ export function continuousVegaSpec(shouldColor, metricRange) {
 				domainMax: metricRange[1],
 				range: ["#decbe9", "#6a1b9a"],
 			},
-			legend: null,
-		};
-	} else if (shouldColor) {
-		topLayerBars.encoding.color = {
-			field: "color",
-			type: "nominal",
-			scale: null,
 			legend: null,
 		};
 	} else {

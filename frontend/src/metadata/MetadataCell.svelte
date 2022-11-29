@@ -10,7 +10,6 @@
 	import { columnHash } from "../util/util";
 
 	export let col: ZenoColumn;
-	export let shouldColor = false;
 	export let histogram;
 
 	const columnMap = {
@@ -41,7 +40,7 @@
 	<div class="cell">
 		<div id="info">
 			<div id="label" class="top-text">
-				<span style:color={shouldColor ? "#9B52DF" : ""}>
+				<span>
 					{col.name}
 				</span>
 			</div>
@@ -51,8 +50,7 @@
 			filterPredicates={filterPredicates.predicates}
 			{updatePredicates}
 			{col}
-			{histogram}
-			{shouldColor} />
+			{histogram} />
 	</div>
 {/if}
 

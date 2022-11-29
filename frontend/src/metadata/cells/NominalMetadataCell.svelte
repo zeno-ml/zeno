@@ -7,7 +7,6 @@
 
 	export let col: ZenoColumn;
 	export let histogram;
-	export let shouldColor;
 	export let filterPredicates: FilterPredicate[];
 	export let updatePredicates;
 
@@ -58,7 +57,7 @@
 <div id="histogram" on:click={setSelection} on:keydown={() => ({})}>
 	<VegaLite
 		bind:view
-		spec={nominalVegaSpec(shouldColor, $metricRange)}
+		spec={nominalVegaSpec($metricRange)}
 		data={chartData}
 		options={{ tooltip: true, actions: false, theme: "vox" }} />
 </div>

@@ -7,7 +7,6 @@
 
 	export let col: ZenoColumn;
 	export let histogram;
-	export let shouldColor;
 	export let filterPredicates: FilterPredicate[];
 	export let updatePredicates;
 
@@ -15,6 +14,7 @@
 	let localSelection = [];
 
 	$: if (view && filterPredicates && filterPredicates.length === 0) {
+		console.log(view.getState().signals["brush"]);
 		view.signal("brush", {});
 		if (view.getState().signals["brush_data"]) {
 			view.signal("brush_data", {});
@@ -59,7 +59,7 @@
 <div id="histogram" on:mouseup={setSelection}>
 	<VegaLite
 		bind:view
-		spec={continuousVegaSpec(shouldColor, $metricRange)}
+		spec={continuousVegaSpec($metricRange)}
 		data={chartData}
 		options={{ tooltip: true, actions: false, theme: "vox" }} />
 </div>

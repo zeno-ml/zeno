@@ -2,16 +2,11 @@
 	import { TrailingIcon } from "@smui/chips";
 	import Button, { Group } from "@smui/button";
 
-	import {
-		selections,
-		metric,
-		zenoState,
-		selectionPredicates,
-	} from "../stores";
+	import { selections, metric, selectionPredicates } from "../stores";
 	import { MetadataType } from "../globals";
-	import { getMetricsForSlices } from "../api";
 	import { onMount } from "svelte";
 
+	export let currentResult;
 	export let selected = "list";
 	export let optionsFunction;
 	export let viewOptions;
@@ -27,25 +22,11 @@
 	let CHOICES = ["list", "table"];
 
 	$: filters = Object.entries($selections.metadata)
-		.filter(([_, value]) => value.predicates.length > 0)
+		.filter(([, value]) => value.predicates.length > 0)
 		.map(
 			([key, value]) =>
 				[key, value.predicates as unknown] as [string, FilterPredicate[]]
 		);
-
-	$: res = getMetricsForSlices([
-		<MetricKey>{
-			sli: <Slice>{
-				sliceName: "",
-				folder: "",
-				filterPredicates: {
-					predicates: $selectionPredicates,
-					join: "",
-				},
-			},
-			state: $zenoState,
-		},
-	]);
 </script>
 
 <div style:width="100%">
@@ -129,7 +110,7 @@
 			<span class="metric">
 				{$metric ? $metric + ":" : ""}
 			</span>
-			{#await res then r}
+			{#await currentResult then r}
 				{#if r}
 					<span class="metric">
 						{r[0].metric !== undefined && r[0].metric !== null

@@ -6,7 +6,6 @@
 
 	export let col: ZenoColumn;
 	export let histogram;
-	export let shouldColor;
 	export let filterPredicates: FilterPredicate[];
 	export let updatePredicates;
 
