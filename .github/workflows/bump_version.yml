@@ -1,6 +1,0 @@
-- name: Bump Versions
-  uses: remorses/bump-version@v8
-  with:
-      version_file: ./pyproject.toml
-  env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
