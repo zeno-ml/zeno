@@ -185,6 +185,9 @@ def parse_args(args: dict, base_path) -> dict:
     if "batch_size" not in args:
         args["batch_size"] = 1
 
+    if "serve" not in args:
+        args["serve"] = True
+
     return args
 
 
@@ -209,4 +212,8 @@ def zeno(args, base_path="./"):
 
     zeno.start_processing()
     app = get_server(zeno)
-    uvicorn.run(app, host=args["host"], port=args["port"])
+
+    if args["serve"]:
+        uvicorn.run(app, host=args["host"], port=args["port"])
+    else:
+        return app
