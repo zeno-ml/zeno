@@ -14,7 +14,6 @@
 	let localSelection = [];
 
 	$: if (view && filterPredicates && filterPredicates.length === 0) {
-		console.log(view.getState().signals["brush"]);
 		view.signal("brush", {});
 		if (view.getState().signals["brush_data"]) {
 			view.signal("brush_data", {});

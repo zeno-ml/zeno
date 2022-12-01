@@ -78,7 +78,7 @@ def command_line():
         os.path.realpath(os.path.join(base_path, args["functions"]))
     ):
         print("WARNING: No 'functions' directory found.")
-        args["functions"] = None
+        args["functions"] = []
     else:
         args["functions"] = Path(
             os.path.realpath(os.path.join(base_path, args["functions"]))

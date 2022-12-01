@@ -14,8 +14,6 @@
 	export let deletePredicate: () => void;
 	export let index;
 
-	$: console.log(predicate.column);
-
 	let operations = ["==", "!=", ">", "<", ">=", "<=", "match"];
 </script>
 

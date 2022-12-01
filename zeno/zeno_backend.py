@@ -158,8 +158,7 @@ class ZenoBackend(object):
             if hasattr(test_fn, "metric_function"):
                 self.metric_functions[test_fn.__name__] = test_fn
         if not self.predict_function:
-            print("ERROR: No model function found")
-            sys.exit(1)
+            print("WARNING: No model function found")
 
     def start_processing(self):
         """Parse testing files, distill, and run inference."""
@@ -446,7 +445,7 @@ class ZenoBackend(object):
     ):
         df_filt = filter_table_single(df, col, pred)
         metric = self.calculate_metric(df_filt, state)
-        if isnan(metric):
+        if metric is None or isnan(metric):
             return -1
         return metric
 
@@ -495,6 +494,7 @@ class ZenoBackend(object):
                 res[str(col)] = ret_hist
             elif col.metadata_type == MetadataType.CONTINUOUS:
                 ret_hist = []
+                df_col = df_col.fillna(0)
                 bins = np.histogram(df_col, bins="doane")
                 bins_filt = np.histogram(filt_df_col, bins=bins[1])
                 for i, bin_count in enumerate(bins[0]):

@@ -96,6 +96,14 @@
       "cwd": "${workspaceFolder}",
       "module": "zeno",
       "args": ["./examples/segmentation/tests/zeno.toml"]
+    },
+    {
+      "name": "zenocancer",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": ["./examples/breast_cancer_data/breast_cancer/zeno.toml"]
     }
   ]
 }

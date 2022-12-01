@@ -11,10 +11,17 @@ import { folderWritable, reportWritable } from "./util/customStores";
 
 export const tab: Writable<string> = writable("results");
 
-export const wsResponse = websocketStore(
-	`ws://localhost:${location.port}/api/status`,
-	""
-);
+const loc = window.location;
+let new_uri;
+if (loc.protocol === "https:") {
+	new_uri = "wss:";
+} else {
+	new_uri = "ws:";
+}
+new_uri += "//" + loc.host;
+new_uri += loc.pathname + "api/status";
+
+export const wsResponse = websocketStore(new_uri, "");
 export const status: Readable<WSResponse> = derived(
 	wsResponse,
 	($wsResponse) => {
