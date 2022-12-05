@@ -11,6 +11,8 @@ model10/
 model20/
 model30/
 
+*.parquet
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

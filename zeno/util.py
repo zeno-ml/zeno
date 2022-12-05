@@ -1,4 +1,5 @@
 import datetime
+import json
 import os
 import pickle
 import sys
@@ -7,9 +8,22 @@ from importlib import util
 from inspect import getmembers, isfunction
 from pathlib import Path
 
+import numpy as np
 import pandas as pd  # type: ignore
 
 from zeno.classes import MetadataType
+
+
+class NpEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            # 👇️ alternatively use str()
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
 
 
 def read_pickle(file_name: str, cache_path: Path, default):
@@ -40,7 +54,20 @@ def getMetadataType(col: pd.Series) -> MetadataType:
     if len(unique) < 21:
         return MetadataType.NOMINAL
 
-    if col.dtype == "int64" or col.dtype == "float64":
+    if col.dtype in [
+        "int64",
+        "int32",
+        "int16",
+        "int8",
+        "uint64",
+        "uint32",
+        "uint16",
+        "uint8",
+        "float64",
+        "float32",
+        "float16",
+        "float8",
+    ]:
         return MetadataType.CONTINUOUS
 
     return MetadataType.OTHER

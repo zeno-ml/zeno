@@ -1,0 +1,8 @@
+functions = "./tests"
+view = "image-classification"
+metadata = "./metadata_f.parquet"
+data_path = "https://diffusiondb.m4ke.org/"
+data_column = "image_name"
+label_column = "prompt"
+batch_size = 100000
+port = 8004

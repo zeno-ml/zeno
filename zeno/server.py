@@ -20,6 +20,7 @@ from zeno.classes import (
     ZenoSettings,
     ZenoVariables,
 )
+from zeno.util import NpEncoder
 from zeno.zeno_backend import ZenoBackend
 
 
@@ -97,7 +98,7 @@ def get_server(zeno: ZenoBackend):
 
     @api_app.post("/calculate-histograms")
     def calculate_histograms(req: HistogramRequest):
-        return json.dumps(zeno.calculate_histograms(req))
+        return json.dumps(zeno.calculate_histograms(req), cls=NpEncoder)
 
     @api_app.post("/create-new-slice")
     def create_new_slice(req: Slice):

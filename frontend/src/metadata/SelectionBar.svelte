@@ -53,9 +53,9 @@
 					<span>
 						{#if chip[0].column.metadataType === MetadataType.CONTINUOUS}
 							{parseFloat(chip[0].value).toFixed(2)}
-							{"<"}
+							{"<="}
 							{chip[0].column.name}
-							{"<"}
+							{"<="}
 							{parseFloat(chip[1].value).toFixed(2)}
 						{:else if chip[0].column.metadataType === MetadataType.BOOLEAN}
 							{chip[0].value}

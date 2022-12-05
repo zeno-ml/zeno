@@ -37,13 +37,13 @@
 		if (localSelection.length > 0) {
 			filterPredicates[0] = {
 				column: col,
-				operation: ">",
+				operation: ">=",
 				value: localSelection[0],
 				join: "&",
 			} as FilterPredicate;
 			filterPredicates[1] = {
 				column: col,
-				operation: "<",
+				operation: "<=",
 				value: localSelection[1],
 				join: "&",
 			} as FilterPredicate;
