@@ -10,6 +10,8 @@
 	$error: color-palette.$red-900
 );
 
+$mdc-typography-font-family: unquote("Open Sans, Roboto, sans-serif");
+
 .mdc-data-table__table-container {
 	overflow-x: scroll;
 }

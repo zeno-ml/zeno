@@ -33,8 +33,8 @@
 	onMount(() => getInitialData());
 </script>
 
-<Header />
 <main>
+	<Header />
 	<div id="main">
 		<Router {routes} />
 	</div>
@@ -58,6 +58,6 @@
 	}
 
 	#main {
-		width: 100%;
+		width: calc(100vw - 50px);
 	}
 </style>

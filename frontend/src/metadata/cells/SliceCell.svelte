@@ -147,7 +147,6 @@
 				<div
 					class="group"
 					style:color="#6a1b9a"
-					style:width="max-content"
 					on:mouseover={() => (showTooltip = true)}
 					on:mouseout={() => (showTooltip = false)}
 					on:focus={() => (showTooltip = true)}
@@ -161,17 +160,6 @@
 						id="options-container"
 						on:mouseleave={() => (showOptions = false)}
 						on:blur={() => (showOptions = false)}>
-						<IconButton
-							on:click={(e) => {
-								e.stopPropagation();
-								showOptions = false;
-								sliceToEdit.set(slice);
-								showNewSlice.set(true);
-							}}>
-							<Icon component={Svg} viewBox="0 0 24 24">
-								<path fill="black" d={mdiPencilOutline} />
-							</Icon>
-						</IconButton>
 						<IconButton
 							on:click={(e) => {
 								e.stopPropagation();
@@ -194,6 +182,17 @@
 								}
 							}}>
 							<Icon class="material-icons">delete_outline</Icon>
+						</IconButton>
+						<IconButton
+							on:click={(e) => {
+								e.stopPropagation();
+								showOptions = false;
+								sliceToEdit.set(slice);
+								showNewSlice.set(true);
+							}}>
+							<Icon component={Svg} viewBox="0 0 24 24">
+								<path fill="black" d={mdiPencilOutline} />
+							</Icon>
 						</IconButton>
 					</div>
 				{/if}
@@ -256,12 +255,15 @@
 		position: absolute;
 		top: 100%;
 		max-width: 1000px;
+		width: fit-content;
 		background: white;
 		z-index: 10;
+		left: 0px;
 	}
 	.tooltip {
 		background: white;
-		padding: 10px;
+		padding-left: 5px;
+		padding-right: 5px;
 		box-shadow: 1px 1px 3px 1px #ccc;
 		border-radius: 3px;
 	}
@@ -277,12 +279,9 @@
 		border-radius: 5px;
 		margin-top: 5px;
 		display: flex;
-		padding-top: 5px;
-		padding-bottom: 5px;
 		padding-left: 10px;
 		padding-right: 10px;
 		height: 36px;
-		margin-right: 10px;
 	}
 	.group {
 		display: flex;
@@ -299,12 +298,12 @@
 		flex-direction: row;
 	}
 	.in-folder {
-		margin-left: 25px;
+		padding-left: 44px;
 		margin-top: 0px;
 		margin-bottom: 0px;
 	}
 	#options-container {
-		top: 5px;
+		top: 0px;
 		right: 0px;
 		z-index: 5;
 		background: white;

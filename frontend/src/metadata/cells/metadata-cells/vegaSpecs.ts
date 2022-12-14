@@ -9,7 +9,7 @@ export function nominalVegaSpec(metricRange) {
 		view: {
 			stroke: "transparent",
 		},
-		width: 350,
+		width: 300,
 		height: 40,
 		layer: [
 			{
@@ -108,7 +108,7 @@ export function continuousVegaSpec(metricRange) {
 		view: {
 			stroke: "transparent",
 		},
-		width: 350,
+		width: 300,
 		height: 40,
 		layer: [
 			{

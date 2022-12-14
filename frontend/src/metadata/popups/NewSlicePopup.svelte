@@ -92,6 +92,12 @@
 				<Button variant="outlined" on:click={createSlice}>
 					{$sliceToEdit ? "Update Slice" : "Create Slice"}
 				</Button>
+				<Button
+					style="margin-right: 10px"
+					variant="outlined"
+					on:click={() => showNewSlice.set(false)}>
+					cancel
+				</Button>
 				{#if $slices.has(sliceName) && $sliceToEdit === null}
 					<p style:margin-right="10px" style:color="red">
 						slice already exists
@@ -104,8 +110,9 @@
 
 <style>
 	#paper-container {
-		position: absolute;
-		margin-top: 10px;
+		position: fixed;
+		left: 60px;
+		top: 10px;
 		z-index: 10;
 	}
 	#submit {

@@ -3,7 +3,7 @@
 
 	import { VegaLite } from "svelte-vega";
 	import { continuousVegaSpec } from "./vegaSpecs";
-	import { metricRange } from "../../stores";
+	import { metricRange } from "../../../stores";
 
 	export let col: ZenoColumn;
 	export let histogram;

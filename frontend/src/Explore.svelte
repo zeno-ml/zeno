@@ -18,11 +18,10 @@
 <style>
 	#samples {
 		width: 100%;
-		margin-right: 20px;
+		margin-right: 5px;
 	}
 	.container {
 		display: flex;
 		flex-direction: row;
-		min-width: 100%;
 	}
 </style>

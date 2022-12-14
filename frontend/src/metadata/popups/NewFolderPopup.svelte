@@ -49,6 +49,9 @@
 	}
 
 	function submit(e) {
+		if (showNewFolder && e.key === "Escape") {
+			showNewFolder = false;
+		}
 		if (showNewFolder && e.key === "Enter") {
 			createFolder();
 		}
@@ -68,7 +71,11 @@
 				label="Folder Name"
 				bind:this={input} />
 			<Button
-				style="margin-left: 20px;"
+				style="margin-left: 10px;"
+				variant="outlined"
+				on:click={() => (showNewFolder = false)}>Cancel</Button>
+			<Button
+				style="margin-left: 5px;"
 				variant="outlined"
 				disabled={invalidName}
 				on:click={() => createFolder()}>{edit ? "Update" : "Create"}</Button>
@@ -83,8 +90,9 @@
 
 <style>
 	#paper-container {
-		position: absolute;
+		position: fixed;
+		left: 60px;
+		top: 10px;
 		z-index: 10;
-		margin-top: 10px;
 	}
 </style>

@@ -1,25 +1,26 @@
 <script lang="ts">
-	import { TrailingIcon } from "@smui/chips";
 	import Button, { Group } from "@smui/button";
+	import CircularProgress from "@smui/circular-progress";
 
-	import { selections, metric, selectionPredicates } from "../stores";
-	import { MetadataType } from "../globals";
+	import { selections, metric, selectionPredicates, status } from "../stores";
 	import { onMount } from "svelte";
+	import SliceChip from "./chips/SliceChip.svelte";
+	import MetadataChip from "./chips/MetadataChip.svelte";
 
 	export let currentResult;
 	export let selected = "list";
 	export let optionsFunction;
 	export let viewOptions;
 
+	let CHOICES = ["list", "table"];
+
 	let optionsDiv: HTMLDivElement;
 	let mounted = false;
+	let runningAnalysis = true;
 
-	onMount(() => (mounted = true));
 	$: if (mounted && optionsDiv && optionsFunction) {
 		optionsFunction(optionsDiv, (opts) => (viewOptions = opts));
 	}
-
-	let CHOICES = ["list", "table"];
 
 	$: filters = Object.entries($selections.metadata)
 		.filter(([, value]) => value.predicates.length > 0)
@@ -27,83 +28,56 @@
 			([key, value]) =>
 				[key, value.predicates as unknown] as [string, FilterPredicate[]]
 		);
+
+	status.subscribe((s) => {
+		if (s.status.startsWith("Done")) {
+			runningAnalysis = false;
+		} else {
+			runningAnalysis = true;
+		}
+	});
+
+	onMount(() => (mounted = true));
 </script>
 
 <div style:width="100%">
-	<div class="chips">
-		{#if $selections.slices.length + filters.length === 0}
-			<p>Filter with the metadata distributions.</p>
-		{:else}
-			{#each $selections.slices as s}
-				<div class="meta-chip">
-					{s}
-					<TrailingIcon
-						class="remove material-icons"
-						on:click={() =>
-							selections.update((sel) => {
-								sel.slices.splice(sel.slices.indexOf(s), 1);
-								return { slices: sel.slices, metadata: sel.metadata };
-							})}>
-						cancel
-					</TrailingIcon>
-				</div>
-			{/each}
-			{#each filters as [hash, chip]}
-				<div class="meta-chip">
-					<span>
-						{#if chip[0].column.metadataType === MetadataType.CONTINUOUS}
-							{parseFloat(chip[0].value).toFixed(2)}
-							{"<="}
-							{chip[0].column.name}
-							{"<="}
-							{parseFloat(chip[1].value).toFixed(2)}
-						{:else if chip[0].column.metadataType === MetadataType.BOOLEAN}
-							{chip[0].value}
-							{chip[0].column.name}
-						{:else if chip[0].column.metadataType === MetadataType.DATETIME}
-							{#if !chip[0].value}
-								start {chip[0].value.toLocaleString()}
-							{:else if !chip[0].value}
-								end {chip[0].value.toLocaleString()}
-							{:else}
-								from {chip[0].value.toLocaleString()} to {chip.values[1].toLocaleString()}
-							{/if}
-						{:else}
-							{chip[0].column.name}
-							{"=="}
-							{chip.map((c) => c.value).join(" | ")}
-						{/if}
+	<div class="between">
+		<div class="chips">
+			{#if $selections.slices.length + filters.length === 0}
+				<p>Filter with the metadata distributions.</p>
+			{:else}
+				{#each $selections.slices as slice}
+					<SliceChip {slice} />
+				{/each}
+				{#each filters as [hash, chip]}
+					<MetadataChip {hash} {chip} />
+				{/each}
+				{#if $selectionPredicates.length > 0}
+					<span
+						class="clear"
+						on:keydown={() => ({})}
+						on:click={() => {
+							selections.update((m) => {
+								for (let key in m.metadata) {
+									m.metadata[key] = { predicates: [], join: "&" };
+								}
+								return { slices: [], metadata: { ...m.metadata } };
+							});
+						}}>
+						clear all
 					</span>
-					<TrailingIcon
-						class="remove material-icons"
-						on:click={() =>
-							selections.update((m) => ({
-								slices: m.slices,
-								metadata: {
-									...m.metadata,
-									[hash]: { predicates: [], join: "&" },
-								},
-							}))}>
-						cancel
-					</TrailingIcon>
-				</div>
-			{/each}
-			{#if $selectionPredicates.length > 0}
-				<span
-					class="clear"
-					on:keydown={() => ({})}
-					on:click={() => {
-						selections.update((m) => {
-							for (let key in m.metadata) {
-								m.metadata[key] = { predicates: [], join: "&" };
-							}
-							return { slices: [], metadata: { ...m.metadata } };
-						});
-					}}>
-					clear all
-				</span>
+				{/if}
 			{/if}
-		{/if}
+		</div>
+		<div class="status inline">
+			{#if runningAnalysis}
+				<CircularProgress
+					class="status-circle"
+					style="height: 32px; width: 32px; margin-right:20px"
+					indeterminate />
+				<span>{@html $status.status}</span>
+			{/if}
+		</div>
 	</div>
 	<div class="options">
 		<div>
@@ -140,6 +114,13 @@
 	p {
 		margin: 0px;
 	}
+	.between {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		width: 100%;
+		border-bottom: 1px solid #e0e0e0;
+	}
 	.options {
 		display: flex;
 		flex-direction: inline;
@@ -159,23 +140,11 @@
 		min-height: 40px;
 		padding-bottom: 5px;
 		padding-top: 5px;
-		border-bottom: 1px solid #e0e0e0;
 	}
 	.metric {
 		font-weight: 400;
 		color: #6a1b9a;
 		margin-right: 15px;
-	}
-	.meta-chip {
-		padding: 5px;
-		background: #f8f8f8;
-		border: 1px solid #e8e8e8;
-		margin-left: 5px;
-		margin-right: 5px;
-		margin-top: 2px;
-		margin-bottom: 2px;
-		border-radius: 5px;
-		width: fit-content;
 	}
 	.clear {
 		padding: 5px;

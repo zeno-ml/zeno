@@ -136,16 +136,12 @@
 		border: 1px solid #e0e0e0;
 		padding-left: 10px;
 		padding-right: 10px;
-		padding-top: 5px;
-		padding-bottom: 5px;
 		margin-top: 5px;
 		border-radius: 5px;
-		margin-right: 10px;
 		height: 36px;
 		background: #f8f8f8;
 	}
 	#options-container {
-		top: 5px;
 		right: 0px;
 		z-index: 5;
 		background: white;

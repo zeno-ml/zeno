@@ -186,17 +186,19 @@
 					{#each columnHeader as header}
 						{#if header.name !== $settings.idColumn.name}
 							<th on:click={() => sort_row(header.name)}>
-								{header.name}
-								<Icon
-									class="material-icons"
-									style="font-size: 1em; padding-top:3px">
-									{#if sortingStatus[header.name] === SortType.ASCENDING}
-										keyboard_arrow_down
-									{/if}
-									{#if sortingStatus[header.name] === SortType.DESCENDING}
-										keyboard_arrow_up
-									{/if}
-								</Icon>
+								<div class="inline-header">
+									{header.name}
+									<Icon
+										class="material-icons"
+										style="font-size: 14px; padding-top:3px; margin-left: 5px;">
+										{#if sortingStatus[header.name] === SortType.ASCENDING}
+											keyboard_arrow_down
+										{/if}
+										{#if sortingStatus[header.name] === SortType.DESCENDING}
+											keyboard_arrow_up
+										{/if}
+									</Icon>
+								</div>
 							</th>
 						{/if}
 					{/each}
@@ -265,9 +267,11 @@
 {/if}
 
 <style>
+	.inline-header {
+		display: flex;
+	}
 	.sample-container {
-		width: calc(100vw - 500px);
-		height: calc(100vh - 241px);
+		height: calc(100vh - 165px);
 		overflow-y: auto;
 		align-content: baseline;
 		border-bottom: 1px solid rgb(224, 224, 224);

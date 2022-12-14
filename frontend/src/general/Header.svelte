@@ -1,28 +1,18 @@
 <script lang="ts">
-	import CircularProgress from "@smui/circular-progress";
+	import {
+		mdiApi,
+		mdiCheckboxMarkedCircleOutline,
+		mdiCircleOutline,
+		mdiGithub,
+	} from "@mdi/js";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Tooltip, { Wrapper } from "@smui/tooltip";
-	import {
-		mdiCheckboxMarkedCircleOutline,
-		mdiCircleOutline,
-		mdiApi,
-		mdiGithub,
-	} from "@mdi/js";
 
-	import { updateTab } from "../util/util";
 	import { location } from "svelte-spa-router";
-	import { status, tab } from "../stores";
 
-	let runningAnalysis = true;
-
-	status.subscribe((s) => {
-		if (s.status.startsWith("Done")) {
-			runningAnalysis = false;
-		} else {
-			runningAnalysis = true;
-		}
-	});
+	import { tab } from "../stores";
+	import { updateTab } from "../util/util";
 
 	location.subscribe((d) => {
 		let p = d.split("/")[1];
@@ -36,46 +26,43 @@
 
 <header>
 	<div class="inline">
-		<img
-			style="width:100px; margin-right: 50px;"
-			src="build/zeno.png"
-			alt="Square spiral logo next to 'Zeno'" />
+		<a href="/">
+			<img
+				style="width:30px"
+				src="build/zeno.png"
+				alt="Square spiral logo next to 'Zeno'" />
+		</a>
 		<div id="tabs">
-			<div
-				class="item {$tab === 'explore' ? 'selected' : ''}"
-				on:keydown={() => ({})}
-				on:click={() => updateTab("explore")}>
-				<div class="icon">
-					<Icon component={Svg} viewBox="0 0 24 24">
-						<path
-							fill={$tab === "explore" ? "#6a1b9a" : "black"}
-							d={mdiCircleOutline} />
-					</Icon>
+			<Wrapper>
+				<div
+					class="item {$tab === 'explore' ? 'selected' : ''}"
+					on:keydown={() => ({})}
+					on:click={() => updateTab("explore")}>
+					<div class="icon">
+						<Icon component={Svg} viewBox="0 0 24 24">
+							<path
+								fill={$tab === "explore" ? "#6a1b9a" : "black"}
+								d={mdiCircleOutline} />
+						</Icon>
+					</div>
 				</div>
-				<div class="tab-text">Explore</div>
-			</div>
-			<div
-				class="item {$tab === 'report' ? 'selected' : ''}"
-				on:keydown={() => ({})}
-				on:click={() => updateTab("report")}>
-				<div class="icon">
-					<Icon component={Svg} viewBox="0 0 24 24">
-						<path
-							fill={$tab === "report" ? "#6a1b9a" : "black"}
-							d={mdiCheckboxMarkedCircleOutline} />
-					</Icon>
+				<Tooltip xPos="end">Explore your data and create slices</Tooltip>
+			</Wrapper>
+			<Wrapper>
+				<div
+					class="item {$tab === 'report' ? 'selected' : ''}"
+					on:keydown={() => ({})}
+					on:click={() => updateTab("report")}>
+					<div class="icon">
+						<Icon component={Svg} viewBox="0 0 24 24">
+							<path
+								fill={$tab === "report" ? "#6a1b9a" : "black"}
+								d={mdiCheckboxMarkedCircleOutline} />
+						</Icon>
+					</div>
 				</div>
-				<div class="tab-text">Report</div>
-			</div>
-		</div>
-		<div class="status inline">
-			{#if runningAnalysis}
-				<CircularProgress
-					class="status-circle"
-					style="height: 32px; width: 32px; margin-right:20px"
-					indeterminate />
-				<span>{@html $status.status}</span>
-			{/if}
+				<Tooltip xPos="end">Create reports of your slices</Tooltip>
+			</Wrapper>
 		</div>
 	</div>
 
@@ -86,7 +73,7 @@
 					<path fill="black" d={mdiApi} />
 				</Icon>
 			</IconButton>
-			<Tooltip>read the documentation</Tooltip>
+			<Tooltip xPos="end" yPos="above">Read the documentation</Tooltip>
 		</Wrapper>
 		<Wrapper>
 			<IconButton href="https://github.com/zeno-ml/zeno">
@@ -94,32 +81,32 @@
 					<path fill="black" d={mdiGithub} />
 				</Icon>
 			</IconButton>
-			<Tooltip>see the code on GitHub</Tooltip>
+			<Tooltip xPos="end" yPos="above">See the code on GitHub</Tooltip>
 		</Wrapper>
 	</div>
 </header>
 
 <style>
 	header {
+		height: 100vh;
+		width: 50px;
 		display: flex;
 		color: black;
-		flex-direction: row;
+		flex-direction: column;
 		justify-content: space-between;
-		padding-top: 5px;
-		padding-bottom: 5px;
-		padding-right: 20px;
-		padding-left: 20px;
 		background: #f8f8f8;
 		border-bottom: 1px solied #e0e0e0;
 	}
 
 	img {
 		align-self: center;
+		margin-top: 10px;
+		margin-bottom: 10px;
 	}
 
 	.inline {
 		display: flex;
-		flex-direction: inline;
+		flex-direction: column;
 		align-items: center;
 		justify-content: center;
 	}
@@ -127,17 +114,23 @@
 	.icon {
 		width: 24px;
 		height: 24px;
+	}
+	.icons {
 		margin: 0px auto;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
 	}
 	.item {
 		margin: 0px auto;
-		height: 50px;
 		display: flex;
 		align-items: center;
 		cursor: pointer;
-		margin-right: 20px;
 		padding-left: 10px;
 		padding-right: 10px;
+		padding-top: 10px;
+		padding-bottom: 10px;
 	}
 
 	.item:hover {
@@ -151,9 +144,7 @@
 
 	#tabs {
 		display: flex;
-		flex-direction: inline;
-	}
-	.tab-text {
-		margin-left: 10px;
+		flex-direction: column;
+		margin-top: 10px;
 	}
 </style>

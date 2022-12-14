@@ -4,7 +4,7 @@
 	import { mdiFolderPlusOutline, mdiPlus, mdiPlusCircle } from "@mdi/js";
 
 	import FolderCell from "./cells/FolderCell.svelte";
-	import MetadataCell from "./MetadataCell.svelte";
+	import MetadataCell from "./cells/MetadataCell.svelte";
 	import NewFolderPopup from "./popups/NewFolderPopup.svelte";
 	import NewSlicePopup from "./popups/NewSlicePopup.svelte";
 	import SliceCell from "./cells/SliceCell.svelte";
@@ -25,13 +25,13 @@
 		selectionPredicates,
 		metrics,
 		models,
-		transforms,
 	} from "../stores";
 	import Select, { Option } from "@smui/select";
 	import { columnHash } from "../util/util";
 	import { getHistograms, getMetricsForSlices } from "../api";
 	import { ZenoColumnType } from "../globals";
 	import Button from "@smui/button/src/Button.svelte";
+	import Tooltip, { Wrapper } from "@smui/tooltip";
 
 	let metadataHistograms = {};
 	let showNewFolder = false;
@@ -75,28 +75,25 @@
 </script>
 
 <div class="side-container">
-	<div class="container">
+	<div id="selections">
 		{#if $model !== undefined}
 			<Select
 				bind:value={$model}
 				label="Model"
-				style="margin-right: 20px; width: 125px">
+				style="margin-right: 10px; width: 170px">
 				{#each $models as m}
 					<Option value={m}>{m}</Option>
 				{/each}
 			</Select>
 		{/if}
 		{#if $metric !== undefined}
-			<Select
-				bind:value={$metric}
-				label="Metric"
-				style="margin-right: 20px; width: 125px">
+			<Select bind:value={$metric} label="Metric" style="width: 170px">
 				{#each $metrics as m}
 					<Option value={m}>{m}</Option>
 				{/each}
 			</Select>
 		{/if}
-		{#if $transform !== undefined && $transforms.length !== 0}
+		<!-- {#if $transform !== undefined && $transforms.length !== 0}
 			<Select
 				bind:value={$transform}
 				label="Transform"
@@ -105,36 +102,42 @@
 					<Option value={t}>{t}</Option>
 				{/each}
 			</Select>
-		{/if}
+		{/if} -->
 	</div>
 
 	<div class="inline">
 		<h4>Slices</h4>
 		<div class="inline">
 			<div>
-				<IconButton on:click={() => (showNewFolder = true)}>
-					<Icon component={Svg} viewBox="0 0 24 24">
-						<path fill="black" d={mdiFolderPlusOutline} />
-					</Icon>
-				</IconButton>
+				<Wrapper>
+					<IconButton on:click={() => (showNewFolder = !showNewFolder)}>
+						<Icon component={Svg} viewBox="0 0 24 24">
+							<path fill="black" d={mdiFolderPlusOutline} />
+						</Icon>
+					</IconButton>
+					<Tooltip xPos="start">Create a new folder</Tooltip>
+				</Wrapper>
 				{#if showNewFolder}
 					<NewFolderPopup bind:showNewFolder />
 				{/if}
 			</div>
 			<div>
-				<IconButton
-					on:click={() => {
-						sliceToEdit.set(undefined);
-						showNewSlice.set(true);
-					}}>
-					<Icon component={Svg} viewBox="0 0 24 24">
-						{#if $selectionPredicates.length > 0}
-							<path fill="#6a1a9a" d={mdiPlusCircle} />
-						{:else}
-							<path fill="black" d={mdiPlus} />
-						{/if}
-					</Icon>
-				</IconButton>
+				<Wrapper>
+					<IconButton
+						on:click={() => {
+							sliceToEdit.set(undefined);
+							showNewSlice.set(true);
+						}}>
+						<Icon component={Svg} viewBox="0 0 24 24">
+							{#if $selectionPredicates.length > 0}
+								<path fill="#6a1a9a" d={mdiPlusCircle} />
+							{:else}
+								<path fill="black" d={mdiPlus} />
+							{/if}
+						</Icon>
+					</IconButton>
+					<Tooltip xPos="start">Create a new slice</Tooltip>
+				</Wrapper>
 				{#if $showNewSlice}
 					<NewSlicePopup />
 				{/if}
@@ -152,7 +155,7 @@
 				return { slices: [], metadata: { ...m.metadata } };
 			});
 		}}>
-		<div class="inline" style:height="44px">All instances</div>
+		<div class="inline">All instances</div>
 
 		<div class="inline">
 			<span>
@@ -173,7 +176,7 @@
 		<SliceCell slice={s} />
 	{/each}
 
-	<div class="inline" style:margin-top="20px">
+	<div class="inline" style:margin-top="10px">
 		<h4>Metadata</h4>
 		<div id="legend-container">
 			{#if $metricRange[2] && $metricRange[0] !== Infinity}
@@ -218,9 +221,6 @@
 		<MetadataCell {col} histogram={metadataHistograms[columnHash(col)]} />
 	{/each}
 
-	{#if $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL).length > 0}
-		<h4 style:margin-top="30px">Distilled Metadata</h4>
-	{/if}
 	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL) as col}
 		{@const idx = completedColumnHashes.indexOf(columnHash(col))}
 		<MetadataCell
@@ -236,24 +236,31 @@
 </div>
 
 <style>
-	.container {
+	.side-container {
+		height: 100vh;
+		width: 350px;
+		min-width: 350px;
+		max-width: 350px;
+		padding-top: 0px;
+		padding-bottom: 0px;
+		padding-left: 15px;
+		padding-right: 10px;
+		overflow-y: scroll;
+	}
+	.ghost-container {
+		width: 100%;
+		position: absolute;
+	}
+	#selections {
 		display: flex;
 		flex-direction: row;
 		align-items: center;
-		border-bottom: 1px solid #e0e0e0;
 		padding-bottom: 10px;
+		padding-top: 5px;
 	}
 	h4 {
 		font-weight: 500;
 		color: rgba(0, 0, 0, 0.7);
-	}
-	.side-container {
-		margin-left: 10px;
-		height: calc(100vh - 110px);
-		min-width: 450px;
-		padding: 10px;
-		padding-top: 0px;
-		overflow-y: scroll;
 	}
 	.cell {
 		border: 1px solid #e0e0e0;
@@ -279,10 +286,7 @@
 		padding-left: 10px;
 		justify-content: space-between;
 		padding-right: 10px;
-		padding-top: 5px;
-		padding-bottom: 5px;
 		height: 36px;
-		margin-right: 10px;
 		cursor: pointer;
 	}
 	.selected {
@@ -295,7 +299,6 @@
 		margin-left: 10px;
 	}
 	#legend-container {
-		padding-right: 10px;
 		display: flex;
 		align-items: center;
 	}
