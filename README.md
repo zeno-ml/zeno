@@ -1,4 +1,4 @@
-<img src="./frontend/public/zeno.png" width="400px"/>
+<img src="./zeno.png" width="400px"/>
 
 [![PyPI version](https://badge.fury.io/py/zenoml.svg)](https://badge.fury.io/py/zenoml)
 ![Github Actions CI tests](https://github.com/zeno-ml/zeno/actions/workflows/test.yml/badge.svg)
