@@ -14,10 +14,6 @@ export function nominalVegaSpec(metricRange) {
 		layer: [
 			{
 				params: [
-					{
-						name: "highlight",
-						select: { type: "point", on: "mouseover" },
-					},
 					{ name: "select", select: { type: "point", encodings: ["x"] } },
 				],
 				mark: {
@@ -53,25 +49,6 @@ export function nominalVegaSpec(metricRange) {
 					y: {
 						field: "filteredCount",
 						type: "quantitative",
-					},
-					fillOpacity: {
-						condition: { param: "select", value: 1 },
-						value: 0.3,
-					},
-					strokeWidth: {
-						condition: [
-							{
-								param: "select",
-								empty: false,
-								value: 2,
-							},
-							{
-								param: "highlight",
-								empty: false,
-								value: 1,
-							},
-						],
-						value: 0,
 					},
 				},
 			},

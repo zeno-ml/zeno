@@ -495,13 +495,13 @@ class ZenoBackend(object):
             elif col.metadata_type == MetadataType.CONTINUOUS:
                 ret_hist = []
                 df_col = df_col.fillna(0)
-                bins = np.histogram(df_col, bins="doane")
+                bins = np.histogram(df_col, bins="fd")
                 bins_filt = np.histogram(filt_df_col, bins=bins[1])
                 for i, bin_count in enumerate(bins[0]):
                     ret_hist.append(
                         {
-                            "bucket": round(bins[1][i], 2),
-                            "bucketEnd": round(bins[1][i + 1], 2),
+                            "bucket": round(bins[1][i], 4),
+                            "bucketEnd": round(bins[1][i + 1], 4),
                             "count": int(bin_count),
                             "filteredCount": int(bins_filt[0][i]),
                             "metric": self.get_histogram_metric(
