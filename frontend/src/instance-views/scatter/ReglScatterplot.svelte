@@ -21,6 +21,11 @@
 	};
 	export let colorRange: ColorRange = [];
 	export let config: ReglConfig = {};
+	export let pointSize = 5;
+
+	$: scatterPtr?.set({
+		pointSize,
+	});
 
 	$: scatterPtr?.set({
 		width,
