@@ -21,8 +21,8 @@
 
 	export let currentResult;
 	export let table;
-	export let viewFunction;
-	export let viewOptions = {};
+	export let viewFunction: View.Component;
+	export let viewOptions: View.Options = {};
 
 	let viewDivs = {};
 

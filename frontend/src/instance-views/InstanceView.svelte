@@ -10,9 +10,9 @@
 
 	let selected = "list";
 
-	let viewOptions = undefined;
-	let viewFunction;
-	let optionsFunction;
+	let viewOptions: View.Options = undefined;
+	let viewFunction: View.Component;
+	let optionsFunction: View.OptionsComponent;
 
 	onMount(() => {
 		try {
