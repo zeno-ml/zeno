@@ -119,3 +119,10 @@ declare namespace View {
 	// component injected into div provided
 	type OptionsComponent = (div: HTMLDivElement, setOptions: SetOptions) => void;
 }
+
+// columnar points
+interface Points2D {
+	x: number[];
+	y: number[];
+	ids: string[];
+}
