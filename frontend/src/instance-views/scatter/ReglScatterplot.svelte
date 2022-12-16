@@ -22,14 +22,10 @@
 	export let colorRange: ColorRange = [];
 	export let config: ReglConfig = {};
 
-	// when I change the height or width
-	// destroy the canvas, regl-scatterplot
-	// then re initialize
-	$: {
-		if (width && height && mounted) {
-			init();
-		}
-	}
+	$: scatterPtr?.set({
+		width,
+		height,
+	});
 
 	$: {
 		// make sure this is not called before we actually create the scatterPtr
@@ -62,14 +58,18 @@
 		scatterPtr.set({
 			lassoColor: "#6a1b9a",
 		});
-		scatterPtr.set({ opacity: 1.0, pointColor: "#000000" });
+		scatterPtr.set({
+			opacity: 1.0,
+			pointColor: "#6a1b9a",
+			pointColorHover: "#000000",
+			pointColorActive: "#000000",
+		});
 		dispatch("mount", scatterPtr);
 		dispatchLasso();
 	}
-	let mounted = false;
-	onMount(() => {
-		mounted = true;
-	});
+
+	onMount(init);
+
 	onDestroy(() => {
 		scatterPtr.destroy();
 	});

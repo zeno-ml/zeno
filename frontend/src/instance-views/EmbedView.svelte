@@ -11,8 +11,9 @@
 	export let viewFunction;
 	export let viewOptions = {};
 
+	let height = window.innerHeight;
+	let width = window.innerWidth;
 	let embedExists = false;
-
 	let points: ScatterColumnsFormat = {
 		x: [],
 		y: [],
@@ -28,10 +29,16 @@
 	});
 </script>
 
+<svelte:window
+	on:resize={() => {
+		width = window.innerWidth;
+		height = window.innerHeight;
+	}} />
+
 {#if embedExists}
 	<div>Embed View</div>
-	<div>
-		<ReglScatterplot width={500} height={500} data={points} />
+	<div id="container">
+		<ReglScatterplot {width} {height} data={points} />
 	</div>
 {:else}
 	<div>Embeddings don't exist</div>
