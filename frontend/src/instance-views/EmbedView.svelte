@@ -61,7 +61,7 @@
 {#if embedExists}
 	<div id="container">
 		{#if points}
-			<svg class="background" style:overflow="visible">
+			<svg class="background" {width} {height}>
 				{#if hover}
 					{#each hover.neighbors as d}
 						<circle
@@ -105,7 +105,7 @@
 	}
 	.overlay {
 		position: relative;
-		z-index: 999;
+		z-index: 1;
 	}
 	.background {
 		position: absolute;
