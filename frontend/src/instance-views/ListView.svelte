@@ -21,8 +21,8 @@
 
 	export let currentResult;
 	export let table;
-	export let viewFunction;
-	export let viewOptions = {};
+	export let viewFunction: View.Component;
+	export let viewOptions: View.Options = {};
 
 	let viewDivs = {};
 
@@ -115,7 +115,7 @@
 {#if table}
 	<div class="container sample-container">
 		{#each table as inst (inst[idHash])}
-			<div bind:this={viewDivs[inst[idHash]]} />
+			<div class="instance" bind:this={viewDivs[inst[idHash]]} />
 		{/each}
 	</div>
 	<Pagination slot="paginate" class="pagination">
@@ -168,5 +168,10 @@
 		border-bottom: 1px solid rgb(224, 224, 224);
 		display: flex;
 		flex-wrap: wrap;
+	}
+	.instance {
+		margin-right: 5px;
+		margin-top: 2.5px;
+		margin-bottom: 2.5px;
 	}
 </style>

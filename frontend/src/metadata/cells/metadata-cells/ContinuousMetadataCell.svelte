@@ -12,14 +12,21 @@
 
 	let view: View;
 	let localSelection = [];
+	let localSelectionX = [];
 
-	$: if (view && filterPredicates && filterPredicates.length === 0) {
-		view.signal("brush", {});
-		if (view.getState().signals["brush_data"]) {
-			view.signal("brush_data", {});
+	function updateSel() {
+		if (filterPredicates.length !== 0) {
+			view.signal("brush", { bucket: localSelection });
+			view.signal("brush_x", localSelectionX);
+		} else {
+			view.signal("brush", {});
+			view.signal("brush_x", []);
 		}
-		view.signal("brush_x", []);
 		view.runAsync();
+	}
+
+	$: if (view && filterPredicates) {
+		updateSel();
 	}
 
 	$: chartData = {
@@ -31,6 +38,7 @@
 			"brush",
 			(...s) => (localSelection = s[1].bucket ? s[1].bucket : [])
 		);
+		view.addSignalListener("brush_x", (...s) => (localSelectionX = s[1]));
 	}
 
 	function setSelection() {
@@ -53,6 +61,8 @@
 		}
 		updatePredicates(filterPredicates);
 	}
+
+	$: console.log(col.name, chartData);
 </script>
 
 <div id="histogram" on:mouseup={setSelection}>

@@ -20,8 +20,8 @@
 
 	export let currentResult;
 	export let table;
-	export let viewFunction;
-	export let viewOptions = {};
+	export let viewFunction: View.Component;
+	export let viewOptions: View.Options = {};
 
 	enum SortType {
 		ASCENDING,
@@ -178,7 +178,7 @@
 </script>
 
 {#if table}
-	<div class="container sample-container">
+	<div class="sample-container">
 		<table id="column-table">
 			<thead>
 				<tr>
@@ -272,7 +272,9 @@
 	}
 	.sample-container {
 		height: calc(100vh - 165px);
-		overflow-y: auto;
+		width: calc(100vw - 440px);
+		overflow-x: scroll;
+		overflow-y: scroll;
 		align-content: baseline;
 		border-bottom: 1px solid rgb(224, 224, 224);
 		display: flex;

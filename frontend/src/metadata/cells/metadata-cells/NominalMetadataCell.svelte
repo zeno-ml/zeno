@@ -11,35 +11,45 @@
 	export let updatePredicates;
 
 	let view: View;
-	let localSelection = [];
+	let localSelection: Record<string, Array<number>> = {};
+	let localSelectionTuple = {};
 
 	$: chartData = {
 		table: histogram,
 	};
 
-	$: if (view && filterPredicates && filterPredicates.length === 0) {
-		view.signal("select", {});
-		view.signal("select_modify", undefined);
-		view.signal("select_toggle", false);
-		view.signal("select_tuple", undefined);
-		view.signal("highlight", {});
-		view.signal("highlight_modify", undefined);
-		view.signal("highlight_toggle", false);
-		view.signal("highlight_tuple", undefined);
+	function updateSel() {
+		if (filterPredicates.length !== 0) {
+			view.signal("select", localSelection);
+			view.signal("select_tuple", localSelectionTuple);
+		} else {
+			view.signal("select", {});
+			view.signal("select_modify", undefined);
+			view.signal("select_toggle", false);
+			view.signal("select_tuple", undefined);
+		}
 		view.runAsync();
+	}
+
+	$: if (view && filterPredicates) {
+		updateSel();
 	}
 
 	$: if (view) {
 		view.addSignalListener(
 			"select",
-			(...s) => (localSelection = s[1].bucket ? s[1].bucket : [])
+			(...s) => (localSelection = s[1] ? s[1] : [])
+		);
+		view.addSignalListener(
+			"select_tuple",
+			(...s) => (localSelectionTuple = s[1] ? s[1] : [])
 		);
 	}
 
 	function setSelection() {
 		filterPredicates = [];
-		if (localSelection.length > 0) {
-			localSelection.forEach((l) => {
+		if (localSelection.bucket && localSelection.bucket.length > 0) {
+			localSelection.bucket.forEach((l) => {
 				filterPredicates.push({
 					column: col,
 					operation: "==",
@@ -48,7 +58,7 @@
 				} as FilterPredicate);
 			});
 		} else {
-			localSelection = [];
+			localSelection = {};
 		}
 		updatePredicates(filterPredicates);
 	}

@@ -11,9 +11,17 @@
 
 	let selected = "embed";
 
-	let viewOptions = undefined;
-	let viewFunction;
-	let optionsFunction;
+	let viewOptions: View.Options = undefined;
+	/**
+	 * View component generators
+	 * that when called with a div html argument
+	 * inject content into that div
+	 *
+	 * See https://github.com/zeno-ml/instance-views
+	 * for more details
+	 */
+	let viewFunction: View.Component;
+	let optionsFunction: View.OptionsComponent;
 
 	onMount(() => {
 		try {

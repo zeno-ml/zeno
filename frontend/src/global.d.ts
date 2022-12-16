@@ -96,4 +96,25 @@ interface Points2D {
 	x: Float32Array;
 	y: Float32Array;
 	ids: string[];
+
+declare namespace View {
+	type Options = object;
+	type SetOptions = (options: Options) => void;
+	type Entry = object;
+
+	// component injected into div provided
+	type Component = (
+		div: HTMLDivElement,
+		options: Options,
+		entry: Entry,
+		modelColumn: string,
+		labelColumn: string,
+		dataColumn: string,
+		dataOrigin: string,
+		transformColumn: string,
+		idColumn: string
+	) => void;
+
+	// component injected into div provided
+	type OptionsComponent = (div: HTMLDivElement, setOptions: SetOptions) => void;
 }
