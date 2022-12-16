@@ -6,13 +6,17 @@
 		ReglConfig,
 		ColorRange,
 		ReglScatterplotObj,
+		ReglScatterplotHover,
 	} from "./types";
+	import { scaleLinear } from "d3-scale";
 
 	const dispatch = createEventDispatcher<{
 		lassoIndex: number[];
 		mount: ReglScatterplotObj;
+		hover: ReglScatterplotHover;
 	}>();
 
+	export let numNN = 10;
 	export let width: number;
 	export let height: number;
 	export let data: ScatterColumnsFormat = {
@@ -22,6 +26,9 @@
 	export let colorRange: ColorRange = [];
 	export let config: ReglConfig = {};
 	export let pointSize = 5;
+
+	let xScale = scaleLinear().domain([-1, 1]);
+	let yScale = scaleLinear().domain([-1, 1]);
 
 	$: scatterPtr?.set({
 		pointSize,
@@ -58,6 +65,8 @@
 			canvas: canvasEl,
 			width,
 			height,
+			xScale,
+			yScale,
 			...config,
 		});
 		scatterPtr.set({
@@ -107,9 +116,82 @@
 			);
 		}
 	}
-	function opacityRange(n = 10) {
-		return new Array(n).fill(0).map((_, i) => (i + 1) / n);
+
+	function shiftRight<T>(arr: T[], starting = 0) {
+		if (starting >= arr.length) {
+			return;
+		}
+
+		let temp1 = undefined;
+		let temp2 = undefined;
+
+		for (let i = starting; i < arr.length; i++) {
+			temp1 = temp2;
+			temp2 = arr[i];
+			arr[i] = temp1;
+		}
+
+		return arr;
+	}
+
+	function findNearestNeighbors(
+		pointX: number,
+		pointY: number,
+		numNearest = 1
+	) {
+		const nearestIndices = new Array(numNearest).fill(0).map(() => ({
+			index: -1,
+			dist: Infinity,
+			canvasX: null,
+			canvasY: null,
+		}));
+
+		for (let i = 0; i < data.x.length; i++) {
+			const x = data.x[i];
+			const y = data.y[i];
+			const dist = (x - pointX) ** 2 + (y - pointY) ** 2;
+
+			for (let j = 0; j < numNearest; j++) {
+				if (dist < nearestIndices[j].dist) {
+					shiftRight(nearestIndices, j);
+					nearestIndices[j] = {
+						index: i,
+						dist,
+						canvasX: null,
+						canvasY: null,
+					};
+					break;
+				}
+			}
+		}
+
+		nearestIndices.forEach((neighbor) => {
+			neighbor.canvasX = xScale(data.x[neighbor.index]);
+			neighbor.canvasY = yScale(data.y[neighbor.index]);
+		});
+
+		return nearestIndices;
 	}
 </script>
 
-<canvas bind:this={canvasEl} />
+<canvas
+	bind:this={canvasEl}
+	on:wheel={() => {
+		dispatch("hover", undefined);
+	}}
+	on:mousemove={(e) => {
+		const canvasX = e.offsetX;
+		const canvasY = e.offsetY;
+
+		const pointX = xScale.invert(canvasX);
+		const pointY = yScale.invert(canvasY);
+		const neighbors = findNearestNeighbors(pointX, pointY, numNN);
+		dispatch("hover", {
+			mouse: {
+				canvasX,
+				canvasY,
+			},
+			neighbors,
+		});
+	}}
+	on:mouseleave />

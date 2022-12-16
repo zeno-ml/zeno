@@ -7,6 +7,7 @@
 	import { scaleLinear } from "d3-scale";
 	import type { ScaleLinear } from "d3-scale";
 	import { extent } from "d3-array";
+	import type { ReglScatterplotHover } from "./scatter/types";
 
 	export let currentResult;
 	export let table;
@@ -23,6 +24,7 @@
 		y: ScaleLinear<number, number>;
 		scale: (points: Points2D) => void;
 	};
+	let hover: ReglScatterplotHover;
 
 	onMount(async () => {
 		embedExists = await checkEmbedExists($model, $transform);
@@ -59,11 +61,32 @@
 {#if embedExists}
 	<div id="container">
 		{#if points}
-			<ReglScatterplot
-				{width}
-				{height}
-				data={points}
-				pointSize={pointSizeSlider} />
+			<svg class="background" style:overflow="visible">
+				{#if hover}
+					{#each hover.neighbors as d}
+						<circle
+							cx={d.canvasX}
+							cy={d.canvasY}
+							r={20}
+							fill="none"
+							stroke="grey" />
+					{/each}
+				{/if}
+			</svg>
+			<div class="overlay">
+				<ReglScatterplot
+					numNN={1}
+					on:hover={(e) => {
+						hover = e.detail;
+					}}
+					on:lassoIndex={(e) => {
+						console.log(e.detail);
+					}}
+					{width}
+					{height}
+					data={points}
+					pointSize={pointSizeSlider} />
+			</div>
 			<div id="controls">
 				<input type="range" min="1" max="10" bind:value={pointSizeSlider} />
 				point size {pointSizeSlider}
@@ -78,4 +101,17 @@
 {/if}
 
 <style>
+	#container {
+		position: relative;
+	}
+	.overlay {
+		position: relative;
+		z-index: 999;
+	}
+	.background {
+		position: absolute;
+		top: 0;
+		left: 0;
+		z-index: 0;
+	}
 </style>
