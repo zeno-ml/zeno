@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { model } from "../stores";
+	import { model, transform } from "../stores";
 	import { onMount } from "svelte";
 
 	export let currentResult;
@@ -10,11 +10,13 @@
 	let embedExists = false;
 
 	onMount(async () => {
-		embedExists = await checkEmbedExists($model);
+		embedExists = await checkEmbedExists($model, $transform);
 	});
 
-	async function checkEmbedExists(model: string) {
-		const req = await fetch(`api/embed-exists/${model}`);
+	async function checkEmbedExists(model: string, transform: string) {
+		const req = await fetch(
+			`api/embed-exists/${model}/?transform=${transform}`
+		);
 		if (req.ok) {
 			const exists = (await req.json()) as boolean;
 			return exists;

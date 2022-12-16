@@ -531,6 +531,12 @@ class ZenoBackend(object):
                 res[str(col)] = []
         return res
 
-    def embedding_exists(self, model: str):
-        col = ZenoColumn(name=model, column_type=ZenoColumnType.EMBEDDING)
-        return str(col) in self.df.columns
+    def embed_exists(self, model: str, transform: str):
+        """Checks for the existence of an embedding column
+        returns True if the column exists, False otherwise
+        """
+        embed_column = ZenoColumn(
+            name=model, column_type=ZenoColumnType.EMBEDDING, transform=transform
+        )
+        exists = str(embed_column) in self.df.columns
+        return exists

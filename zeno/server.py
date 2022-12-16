@@ -129,8 +129,11 @@ def get_server(zeno: ZenoBackend):
         return json.dumps({"data": zeno.mirror.generate_slices()})
 
     @api_app.get("/embed-exists/{model}")
-    def embedding_exists(model: str):
-        exists = zeno.embedding_exists(model)
+    def embed_exists(model: str, transform: str = ""):
+        """checks if embedding exists for a model and transform
+        returns the boolean True or False directly
+        """
+        exists = zeno.embed_exists(model, transform)
         return exists
 
     @api_app.websocket("/status")
