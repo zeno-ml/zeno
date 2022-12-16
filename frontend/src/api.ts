@@ -240,15 +240,18 @@ export async function projectEmbedInto2D(
 	});
 
 	if (req.ok) {
-		return (await req.json()) as Points2D;
+		const result = (await req.json()) as Points2D;
+		result.x = new Float32Array(result.x);
+		result.y = new Float32Array(result.y);
+		return result;
 	} else {
 		console.error(
 			"Error making projection request to backend (http request failed)",
 			req
 		);
 		const empty = {
-			x: [],
-			y: [],
+			x: new Float32Array(),
+			y: new Float32Array(),
 			ids: [],
 		};
 		return empty;

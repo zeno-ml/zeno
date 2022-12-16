@@ -11,34 +11,23 @@
 	export let viewFunction;
 	export let viewOptions = {};
 
-	let height = window.innerHeight;
-	let width = window.innerWidth;
+	let height = 800;
+	let width = 1000;
 	let embedExists = false;
-	let points: ScatterColumnsFormat = {
-		x: [],
-		y: [],
-		ids: [],
-	};
+	let points: Points2D;
 
 	onMount(async () => {
 		embedExists = await checkEmbedExists($model, $transform);
-		points = (await projectEmbedInto2D(
-			$model,
-			$transform
-		)) as ScatterColumnsFormat;
+		points = (await projectEmbedInto2D($model, $transform)) as Points2D;
 	});
 </script>
-
-<svelte:window
-	on:resize={() => {
-		width = window.innerWidth;
-		height = window.innerHeight;
-	}} />
 
 {#if embedExists}
 	<div>Embed View</div>
 	<div id="container">
-		<ReglScatterplot {width} {height} data={points} />
+		{#if points}
+			<ReglScatterplot {width} {height} data={points} />
+		{/if}
 	</div>
 {:else}
 	<div>Embeddings don't exist</div>

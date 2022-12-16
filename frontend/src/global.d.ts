@@ -93,7 +93,7 @@ declare namespace svelte.JSX {
 
 // columnar points
 interface Points2D {
-	x: number[];
-	y: number[];
+	x: Float32Array;
+	y: Float32Array;
 	ids: string[];
 }
