@@ -226,8 +226,33 @@ export async function deleteSlice(sliceName: string) {
  *
  * @returns list of 2D coordinates
  */
-export async function projectEmbedInto2D(model: string, transform: string) {
-	return [];
+export async function projectEmbedInto2D(
+	model: string,
+	transform: string
+): Promise<Points2D> {
+	const body = { model, transform };
+	const req = await fetch("/api/embed-project", {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(body),
+	});
+
+	if (req.ok) {
+		return (await req.json()) as Points2D;
+	} else {
+		console.error(
+			"Error making projection request to backend (http request failed)",
+			req
+		);
+		const empty = {
+			x: [],
+			y: [],
+			ids: [],
+		};
+		return empty;
+	}
 }
 
 /**

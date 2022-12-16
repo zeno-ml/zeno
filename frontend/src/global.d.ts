@@ -90,3 +90,10 @@ declare namespace svelte.JSX {
 		onclick_outside?: CompositionEventHandler<T>;
 	}
 }
+
+// columnar points
+interface Points2D {
+	x: number[];
+	y: number[];
+	ids: string[];
+}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { checkEmbedExists } from "../api";
+	import { checkEmbedExists, projectEmbedInto2D } from "../api";
 	import { model, transform } from "../stores";
 	import { onMount } from "svelte";
 
@@ -12,6 +12,8 @@
 
 	onMount(async () => {
 		embedExists = await checkEmbedExists($model, $transform);
+		const points = await projectEmbedInto2D($model, $transform);
+		console.log(points);
 	});
 </script>
 
