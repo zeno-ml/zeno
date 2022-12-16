@@ -3,6 +3,7 @@
 	import SelectionBar from "../metadata/SelectionBar.svelte";
 	import ListView from "./ListView.svelte";
 	import TableView from "./TableView.svelte";
+	import EmbedView from "./EmbedView.svelte";
 	import { getMetricsForSlices } from "../api";
 	import { zenoState, selectionPredicates } from "../stores";
 
@@ -57,6 +58,9 @@
 {/if}
 {#if selected === "table"}
 	<TableView {currentResult} {table} {viewFunction} {viewOptions} />
+{/if}
+{#if selected === "embed"}
+	<EmbedView {currentResult} {table} {viewFunction} {viewOptions} />
 {/if}
 
 <style>
