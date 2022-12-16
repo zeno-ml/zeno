@@ -9,6 +9,7 @@ from inspect import getsource
 from math import isnan
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Union
+from functools import lru_cache
 
 import numpy as np
 import pandas as pd  # type: ignore
@@ -540,3 +541,44 @@ class ZenoBackend(object):
         )
         exists = str(embed_column) in self.df.columns
         return exists
+
+    @lru_cache()
+    def project_embed_into_2D(self, model: str, transform: str) -> Dict[str, list]:
+        """If the embedding exists, will use tsne to project into 2D
+        Returns the 2D embeddings as object/dict
+        {
+            x: list[float]
+            y: list[float]
+            ids: list[str]
+        }
+        """
+
+        points = {"x": [], "y": [], "ids": []}
+
+        # can't do shit if embed no existy
+        if not self.embed_exists(model, transform):
+            return points
+
+        embed_col = ZenoColumn(
+            column_type=ZenoColumnType.EMBEDDING, name=model, transform=transform
+        )
+
+        in_cache = False
+        if not in_cache:
+            embed = self.df[str(embed_col)].to_numpy()
+            embed = np.stack(embed, axis=0)  # type: ignore
+
+            # project embeddings into 2D
+            from sklearn.manifold import TSNE  # type: ignore
+
+            projection = TSNE().fit_transform(embed)
+
+            # extract points and ids
+            points["x"] = projection[:, 0].tolist()
+            points["y"] = projection[:, 1].tolist()
+            points["ids"] = self.df[str(self.id_column)].to_list()
+        else:
+            # from cache
+            pass
+
+        return points

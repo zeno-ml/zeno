@@ -136,6 +136,6 @@ class MirrorProject(BaseModel):
     perplexity: Optional[int] = 30
 
 
-class EmbedProject2D(BaseModel):
+class EmbedProject2DBody(BaseModel):
     model: str
     transform: str = ""

@@ -2,21 +2,23 @@
 	import { onDestroy, onMount, createEventDispatcher } from "svelte";
 	import createScatterPlot from "regl-scatterplot";
 	import type {
-		ScatterRowsFormat,
 		ScatterColumnsFormat,
 		ReglConfig,
 		ColorRange,
-		ReglScatterplot,
-	} from "./scatter";
+		ReglScatterplotObj,
+	} from "./types";
 
 	const dispatch = createEventDispatcher<{
 		lassoIndex: number[];
-		mount: ReglScatterplot;
+		mount: ReglScatterplotObj;
 	}>();
 
 	export let width: number;
 	export let height: number;
-	export let data: ScatterRowsFormat = [];
+	export let data: ScatterColumnsFormat = {
+		x: [],
+		y: [],
+	};
 	export let colorRange: ColorRange = [];
 	export let config: ReglConfig = {};
 
@@ -29,18 +31,10 @@
 		}
 	}
 
-	// format data that regl-scatterplot expects
-	// change the {}[] to {} with arrays inside
-	// shift colors down to regl-scatterplot reads as categorical color
-	const colorIndexShift = 2;
-	$: fixedPoints = minorToMajorRegl(data, colorIndexShift);
-	$: fudgeColorShift = new Array(colorIndexShift).fill("#cccccc");
-	$: fixedColorRange = [...fudgeColorShift, ...colorRange];
-
 	$: {
 		// make sure this is not called before we actually create the scatterPtr
-		if (scatterPtr && data.length > 0) {
-			draw(fixedPoints);
+		if (scatterPtr && data?.x.length > 0) {
+			draw(data);
 		}
 	}
 
@@ -50,12 +44,12 @@
 		if (scatterPtr && colorRange) {
 			scatterPtr.set({
 				colorBy: "category",
-				pointColor: fixedColorRange,
+				pointColor: colorRange,
 			});
 		}
 	}
 
-	let scatterPtr: ReglScatterplot;
+	let scatterPtr: ReglScatterplotObj;
 	let canvasEl: HTMLCanvasElement;
 
 	function init() {
@@ -66,16 +60,9 @@
 			...config,
 		});
 		scatterPtr.set({
-			colorBy: "category",
-			pointColor: fixedColorRange,
-		});
-		scatterPtr.set({
-			opacityBy: "value",
-			opacity: opacityRange(10),
-		});
-		scatterPtr.set({
 			lassoColor: "#6a1b9a",
 		});
+		scatterPtr.set({ opacity: 1.0, pointColor: "#000000" });
 		dispatch("mount", scatterPtr);
 		dispatchLasso();
 	}
@@ -115,27 +102,6 @@
 			);
 		}
 	}
-	function minorToMajorRegl(
-		data: ScatterRowsFormat,
-		colorShift = 2
-	): ScatterColumnsFormat {
-		const major = {
-			x: [],
-			y: [],
-			category: [], // color
-			value: [], // opacity
-		};
-
-		data.forEach((minor) => {
-			major.x.push(minor.x);
-			major.y.push(minor.y);
-			major.category.push(minor.colorIndex + colorShift);
-			major.value.push(minor.opacity);
-		});
-
-		return major;
-	}
-
 	function opacityRange(n = 10) {
 		return new Array(n).fill(0).map((_, i) => (i + 1) / n);
 	}

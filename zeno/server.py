@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from zeno.classes import (
     FilterPredicate,
     FilterPredicateGroup,
-    EmbedProject2D,
+    EmbedProject2DBody,
     HistogramRequest,
     MetricKey,
     MirrorProject,
@@ -138,8 +138,9 @@ def get_server(zeno: ZenoBackend):
         return exists
 
     @api_app.post("/embed-project")
-    def project_embed_into_2D(req: EmbedProject2D):
-        return []
+    def project_embed_into_2D(req: EmbedProject2DBody):
+        points = zeno.project_embed_into_2D(req.model, req.transform)
+        return points
 
     @api_app.websocket("/status")
     async def results_websocket(websocket: WebSocket):
