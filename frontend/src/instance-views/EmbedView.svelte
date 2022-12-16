@@ -25,6 +25,7 @@
 		scale: (points: Points2D) => void;
 	};
 	let hover: ReglScatterplotHover;
+	let hoverView: HTMLDivElement;
 
 	onMount(async () => {
 		embedExists = await checkEmbedExists($model, $transform);
@@ -63,14 +64,12 @@
 		{#if points}
 			<svg class="background" {width} {height}>
 				{#if hover}
-					{#each hover.neighbors as d}
-						<circle
-							cx={d.canvasX}
-							cy={d.canvasY}
-							r={15}
-							fill="none"
-							stroke="lightgrey" />
-					{/each}
+					<circle
+						cx={hover.neighbor.canvasX}
+						cy={hover.neighbor.canvasY}
+						r={15}
+						fill="none"
+						stroke="lightgrey" />
 				{/if}
 			</svg>
 			<div class="overlay">
@@ -85,6 +84,13 @@
 					{height}
 					data={points}
 					pointSize={pointSizeSlider} />
+				{#if hover}
+					<div
+						id="hover-view"
+						bind:this={hoverView}
+						style:left="{hover.mouse.canvasX}px"
+						style:top="{hover.mouse.canvasY}px" />
+				{/if}
 			</div>
 			<div id="controls">
 				<input type="range" min="1" max="10" bind:value={pointSizeSlider} />
@@ -112,5 +118,12 @@
 		top: 0;
 		left: 0;
 		z-index: 0;
+	}
+	#hover-view {
+		position: absolute;
+		z-index: 2;
+		width: 40px;
+		height: 40px;
+		outline: 1px solid grey;
 	}
 </style>

@@ -15,12 +15,11 @@ export type ReglConfig = Partial<Properties>;
 export type ColorRange = string[];
 
 export interface ReglScatterplotHover {
-	neighbors: {
-		dist: number;
+	neighbor: {
 		index: number;
 		canvasX: number;
 		canvasY: number;
-	}[];
+	};
 	mouse: {
 		canvasX: number;
 		canvasY: number;

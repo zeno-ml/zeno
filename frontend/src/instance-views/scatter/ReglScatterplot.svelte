@@ -151,14 +151,11 @@
 				canvasX,
 				canvasY,
 			},
-			neighbors: [
-				{
-					index: nearestIndex,
-					canvasX: xScale(nearestX),
-					canvasY: yScale(nearestY),
-					dist: undefined,
-				},
-			],
+			neighbor: {
+				index: nearestIndex,
+				canvasX: xScale(nearestX),
+				canvasY: yScale(nearestY),
+			},
 		});
 	}}
 	on:mouseleave />
