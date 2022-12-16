@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { checkEmbedExists } from "../api";
 	import { model, transform } from "../stores";
 	import { onMount } from "svelte";
 
@@ -12,18 +13,6 @@
 	onMount(async () => {
 		embedExists = await checkEmbedExists($model, $transform);
 	});
-
-	async function checkEmbedExists(model: string, transform: string) {
-		const req = await fetch(
-			`api/embed-exists/${model}/?transform=${transform}`
-		);
-		if (req.ok) {
-			const exists = (await req.json()) as boolean;
-			return exists;
-		} else {
-			return false;
-		}
-	}
 </script>
 
 {#if embedExists}

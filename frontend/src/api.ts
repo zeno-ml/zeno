@@ -219,3 +219,33 @@ export async function deleteSlice(sliceName: string) {
 		body: JSON.stringify([sliceName]),
 	});
 }
+
+/**
+ * Request the 2D representation of the embeddings from the backend.
+ * This might take some time if not cached (based on model and transform)
+ *
+ * @returns list of 2D coordinates
+ */
+export async function projectEmbedInto2D(model: string, transform: string) {
+	return [];
+}
+
+/**
+ * Check in the backend table if the embeddings data
+ * even exists at all.
+ *
+ * @returns true if exist, and false if not or if the request errors out
+ */
+export async function checkEmbedExists(model: string, transform: string) {
+	const req = await fetch(`api/embed-exists/${model}/?transform=${transform}`);
+	if (req.ok) {
+		const exists = (await req.json()) as boolean;
+		return exists;
+	} else {
+		console.error(
+			"Error checking if embeddings exist (http request failed)",
+			req
+		);
+		return false;
+	}
+}
