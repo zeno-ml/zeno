@@ -15,14 +15,13 @@
 
 	let height = 800;
 	let width = 1000;
-	let pointSizeSlider = 5;
+	let pointSizeSlider = 3;
 	let embedExists = false;
 	let points: Points2D;
 	let pointToWebGL: {
 		x: ScaleLinear<number, number>;
 		y: ScaleLinear<number, number>;
 		scale: (points: Points2D) => void;
-		invert: (points: Points2D) => void;
 	};
 
 	onMount(async () => {
@@ -53,19 +52,11 @@
 			}
 		}
 
-		function invert(points: Points2D) {
-			for (let i = 0; i < points.x.length; i++) {
-				points.x[i] = xScaler.invert(points.x[i]);
-				points.y[i] = yScaler.invert(points.y[i]);
-			}
-		}
-
-		return { x: xScaler, y: yScaler, scale, invert };
+		return { x: xScaler, y: yScaler, scale };
 	}
 </script>
 
 {#if embedExists}
-	<div>Embed View</div>
 	<div id="container">
 		{#if points}
 			<ReglScatterplot
@@ -73,11 +64,13 @@
 				{height}
 				data={points}
 				pointSize={pointSizeSlider} />
+			<div id="controls">
+				<input type="range" min="1" max="10" bind:value={pointSizeSlider} />
+				point size {pointSizeSlider}
+			</div>
+		{:else}
+			Loading
 		{/if}
-	</div>
-	<div>
-		<input type="range" min="1" max="10" bind:value={pointSizeSlider} />
-		{pointSizeSlider}
 	</div>
 {:else}
 	<div>Embeddings don't exist</div>
