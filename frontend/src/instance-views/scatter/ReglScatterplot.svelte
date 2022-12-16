@@ -9,6 +9,7 @@
 		ReglScatterplotHover,
 	} from "./types";
 	import { scaleLinear } from "d3-scale";
+	import { quadtree, type Quadtree } from "d3-quadtree";
 
 	const dispatch = createEventDispatcher<{
 		lassoIndex: number[];
@@ -16,7 +17,6 @@
 		hover: ReglScatterplotHover;
 	}>();
 
-	export let numNN = 10;
 	export let width: number;
 	export let height: number;
 	export let data: ScatterColumnsFormat = {
@@ -29,6 +29,9 @@
 
 	let xScale = scaleLinear().domain([-1, 1]);
 	let yScale = scaleLinear().domain([-1, 1]);
+	let scatterPtr: ReglScatterplotObj;
+	let canvasEl: HTMLCanvasElement;
+	let quad: Quadtree<[number, number, number]>;
 
 	$: scatterPtr?.set({
 		pointSize,
@@ -43,11 +46,21 @@
 		// make sure this is not called before we actually create the scatterPtr
 		if (scatterPtr && data?.x.length > 0) {
 			draw(data);
+			quad = createQuadtree(data);
 		}
 	}
 
 	// update when the colorRange changes, but now when the scatter changes
 	$: updateColorRange(colorRange);
+
+	onMount(() => {
+		init();
+	});
+
+	onDestroy(() => {
+		scatterPtr.destroy();
+	});
+
 	function updateColorRange(colorRange: ColorRange) {
 		if (scatterPtr && colorRange) {
 			scatterPtr.set({
@@ -56,9 +69,6 @@
 			});
 		}
 	}
-
-	let scatterPtr: ReglScatterplotObj;
-	let canvasEl: HTMLCanvasElement;
 
 	function init() {
 		scatterPtr = createScatterPlot({
@@ -81,12 +91,6 @@
 		dispatch("mount", scatterPtr);
 		dispatchLasso();
 	}
-
-	onMount(init);
-
-	onDestroy(() => {
-		scatterPtr.destroy();
-	});
 
 	function draw(points: ScatterColumnsFormat) {
 		if (scatterPtr) {
@@ -117,60 +121,15 @@
 		}
 	}
 
-	function shiftRight<T>(arr: T[], starting = 0) {
-		if (starting >= arr.length) {
-			return;
-		}
-
-		let temp1 = undefined;
-		let temp2 = undefined;
-
-		for (let i = starting; i < arr.length; i++) {
-			temp1 = temp2;
-			temp2 = arr[i];
-			arr[i] = temp1;
-		}
-
-		return arr;
-	}
-
-	function findNearestNeighbors(
-		pointX: number,
-		pointY: number,
-		numNearest = 1
-	) {
-		const nearestIndices = new Array(numNearest).fill(0).map(() => ({
-			index: -1,
-			dist: Infinity,
-			canvasX: null,
-			canvasY: null,
-		}));
-
-		for (let i = 0; i < data.x.length; i++) {
-			const x = data.x[i];
-			const y = data.y[i];
-			const dist = (x - pointX) ** 2 + (y - pointY) ** 2;
-
-			for (let j = 0; j < numNearest; j++) {
-				if (dist < nearestIndices[j].dist) {
-					shiftRight(nearestIndices, j);
-					nearestIndices[j] = {
-						index: i,
-						dist,
-						canvasX: null,
-						canvasY: null,
-					};
-					break;
-				}
-			}
-		}
-
-		nearestIndices.forEach((neighbor) => {
-			neighbor.canvasX = xScale(data.x[neighbor.index]);
-			neighbor.canvasY = yScale(data.y[neighbor.index]);
+	function createQuadtree(points: ScatterColumnsFormat) {
+		let combined: [number, number, number][] = [];
+		points.x.forEach((x, i) => {
+			combined.push([x, points.y[i], i]);
 		});
 
-		return nearestIndices;
+		const quad = quadtree<[number, number, number]>();
+		quad.addAll(combined);
+		return quad;
 	}
 </script>
 
@@ -185,13 +144,21 @@
 
 		const pointX = xScale.invert(canvasX);
 		const pointY = yScale.invert(canvasY);
-		const neighbors = findNearestNeighbors(pointX, pointY, numNN);
+		const [nearestX, nearestY, nearestIndex] = quad.find(pointX, pointY);
+
 		dispatch("hover", {
 			mouse: {
 				canvasX,
 				canvasY,
 			},
-			neighbors,
+			neighbors: [
+				{
+					index: nearestIndex,
+					canvasX: xScale(nearestX),
+					canvasY: yScale(nearestY),
+					dist: undefined,
+				},
+			],
 		});
 	}}
 	on:mouseleave />

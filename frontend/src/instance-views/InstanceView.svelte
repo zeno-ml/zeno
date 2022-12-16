@@ -9,7 +9,7 @@
 
 	export let table;
 
-	let selected = "list";
+	let selected = "embed";
 
 	let viewOptions = undefined;
 	let viewFunction;

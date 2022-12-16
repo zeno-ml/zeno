@@ -67,15 +67,14 @@
 						<circle
 							cx={d.canvasX}
 							cy={d.canvasY}
-							r={20}
+							r={15}
 							fill="none"
-							stroke="grey" />
+							stroke="lightgrey" />
 					{/each}
 				{/if}
 			</svg>
 			<div class="overlay">
 				<ReglScatterplot
-					numNN={1}
 					on:hover={(e) => {
 						hover = e.detail;
 					}}
