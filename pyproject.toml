@@ -30,6 +30,7 @@ types-setuptools = "^65.4.0"
 setuptools = "^65.5.1"
 pathos = "^0.3.0"
 nest-asyncio = "^1.5.6"
+inquirerpy = "^0.3.4"
 
 [tool.poetry.dev-dependencies]
 pandas-stubs = "^1.5.2"

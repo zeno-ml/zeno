@@ -11,15 +11,13 @@ import tomli
 import uvicorn
 
 from zeno.server import get_server
-from zeno.util import parse_testing_file  # type: ignore
+from zeno.setup import setup_zeno
+from zeno.util import parse_testing_file, VIEW_MAP_URL, VIEWS_MAP_JSON
 from zeno.zeno_backend import ZenoBackend
-
-VIEW_MAP_URL = "https://raw.githubusercontent.com/zeno-ml/instance-views/main/"
-VIEWS_MAP_JSON = "views.json"
 
 
 def command_line():
-    if len(sys.argv) == 1:
+    if len(sys.argv) == 1 or sys.argv[1] == "-h" or sys.argv[1] == "--help":
         print(
             "\n \033[1mZeno\033[0m",
             pkg_resources.get_distribution("zenoml").version,
@@ -39,7 +37,8 @@ def command_line():
 
     if len(sys.argv) != 2:
         print(
-            "ERROR: Zeno take one argument, a configuration TOML file. "
+            "ERROR: Zeno take one argument, either a configuration TOML file"
+            + " or the keyword 'init'. "
             + "{0} arguments were passed.",
             len(sys.argv),
         )
@@ -49,6 +48,13 @@ def command_line():
         print(pkg_resources.get_distribution("zenoml").version)
         sys.exit(0)
 
+    if sys.argv[1] == "init" or sys.argv[1] == "i":
+        setup_zeno()
+    else:
+        parse_toml()
+
+
+def parse_toml():
     args = {}
     try:
         with open(sys.argv[1], "rb") as f:
@@ -193,6 +199,7 @@ def parse_args(args: dict, base_path) -> dict:
 
 def zeno(args, base_path="./"):
     nest_asyncio.apply()
+
     args = parse_args(args, base_path)
     zeno = ZenoBackend(
         df=args["metadata"],

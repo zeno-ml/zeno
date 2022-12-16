@@ -178,44 +178,46 @@
 
 	<div class="inline" style:margin-top="10px">
 		<h4>Metadata</h4>
-		<div id="legend-container">
-			{#if $metricRange[2] && $metricRange[0] !== Infinity}
-				<span style:margin-right="20px" style:font-style="italic">
-					{$metric}:
-				</span>
-				<span
-					contenteditable="true"
-					on:blur={(e) =>
-						metricRange.update((range) => {
-							range[0] = parseFloat(e.currentTarget.innerText);
-							range[2] = true;
-							return [...range];
-						})}>
-					{$metricRange[0].toFixed(2)}
-				</span>
-				<div id="legend" />
-				<span
-					contenteditable="true"
-					on:blur={(e) =>
-						metricRange.update((range) => {
-							range[1] = parseFloat(e.currentTarget.innerText);
-							range[2] = true;
-							return [...range];
-						})}>
-					{$metricRange[1].toFixed(2)}
-				</span>
-			{:else}
-				<Button
-					on:click={() => {
-						getHistograms(
-							$status.completeColumns,
-							$selectionPredicates,
-							$zenoState,
-							true
-						).then((res) => (metadataHistograms = res));
-					}}>get metrics</Button>
-			{/if}
-		</div>
+		{#if $metrics.length !== 0}
+			<div id="legend-container">
+				{#if $metricRange[2] && $metricRange[0] !== Infinity}
+					<span style:margin-right="20px" style:font-style="italic">
+						{$metric}:
+					</span>
+					<span
+						contenteditable="true"
+						on:blur={(e) =>
+							metricRange.update((range) => {
+								range[0] = parseFloat(e.currentTarget.innerText);
+								range[2] = true;
+								return [...range];
+							})}>
+						{$metricRange[0].toFixed(2)}
+					</span>
+					<div id="legend" />
+					<span
+						contenteditable="true"
+						on:blur={(e) =>
+							metricRange.update((range) => {
+								range[1] = parseFloat(e.currentTarget.innerText);
+								range[2] = true;
+								return [...range];
+							})}>
+						{$metricRange[1].toFixed(2)}
+					</span>
+				{:else}
+					<Button
+						on:click={() => {
+							getHistograms(
+								$status.completeColumns,
+								$selectionPredicates,
+								$zenoState,
+								true
+							).then((res) => (metadataHistograms = res));
+						}}>get metrics</Button>
+				{/if}
+			</div>
+		{/if}
 	</div>
 	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.METADATA) as col}
 		<MetadataCell {col} histogram={metadataHistograms[columnHash(col)]} />
