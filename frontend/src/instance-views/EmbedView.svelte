@@ -1,18 +1,21 @@
 <script lang="ts">
 	import ReglScatterplot from "./scatter/ReglScatterplot.svelte";
 
-	import { checkEmbedExists, projectEmbedInto2D } from "../api";
-	import { model, transform } from "../stores";
 	import { onMount } from "svelte";
 	import { scaleLinear } from "d3-scale";
-	import type { ScaleLinear } from "d3-scale";
 	import { extent } from "d3-array";
+	import { checkEmbedExists, projectEmbedInto2D } from "../api";
+	import { model, transform, settings, zenoState } from "../stores";
+	import { columnHash } from "../util/util";
+	import { ZenoColumnType } from "../globals";
+
+	import type { ScaleLinear } from "d3-scale";
 	import type { ReglScatterplotHover } from "./scatter/types";
 
 	export let currentResult;
 	export let table;
-	export let viewFunction;
-	export let viewOptions = {};
+	export let viewFunction: View.Component;
+	export let viewOptions: View.Options = {};
 
 	let height = 800;
 	let width = 1000;
@@ -57,6 +60,53 @@
 
 		return { x: xScaler, y: yScaler, scale };
 	}
+
+	function transformHash() {
+		const transformColumn = {
+			columnType: ZenoColumnType.TRANSFORM,
+			name: $zenoState.transform,
+		} as ZenoColumn;
+		const transformColumnStr = $zenoState.transform
+			? columnHash(transformColumn)
+			: "";
+		return transformColumnStr;
+	}
+	function modelHash() {
+		const modelColumn = {
+			columnType: ZenoColumnType.OUTPUT,
+			name: $model,
+			transform: $transform,
+		} as ZenoColumn;
+		const modelColumnStr = $zenoState.model ? columnHash(modelColumn) : "";
+		return modelColumnStr;
+	}
+
+	function viewComponent(
+		entry: View.Entry,
+		options: View.Options,
+		override?: HTMLDivElement
+	) {
+		const modelColumn = modelHash();
+		const transformColumn = transformHash();
+
+		// if no override, create a new div
+		override ??= document.createElement("div");
+
+		// overrides the passed in element with view
+		viewFunction(
+			override,
+			options,
+			entry,
+			modelColumn,
+			columnHash($settings.labelColumn),
+			columnHash($settings.dataColumn),
+			$settings.dataOrigin,
+			transformColumn,
+			columnHash($settings.idColumn)
+		);
+
+		return override;
+	}
 </script>
 
 {#if embedExists}
@@ -76,6 +126,14 @@
 				<ReglScatterplot
 					on:hover={(e) => {
 						hover = e.detail;
+
+						const entry = {
+							"0label": "cat",
+							"0id": "cat/0304.jpg",
+							"2cifar_net_20": "dog",
+						};
+
+						hoverView = viewComponent(entry, viewOptions, hoverView);
 					}}
 					on:lassoIndex={(e) => {
 						console.log(e.detail);
@@ -87,9 +145,12 @@
 				{#if hover}
 					<div
 						id="hover-view"
-						bind:this={hoverView}
-						style:left="{hover.mouse.canvasX}px"
-						style:top="{hover.mouse.canvasY}px" />
+						style:width="{100}px"
+						style:height="{80}px"
+						style:left="{hover.neighbor.canvasX + 50}px"
+						style:top="{hover.neighbor.canvasY + 50}px">
+						<div id="replace-view" bind:this={hoverView} />
+					</div>
 				{/if}
 			</div>
 			<div id="controls">
@@ -122,8 +183,5 @@
 	#hover-view {
 		position: absolute;
 		z-index: 2;
-		width: 40px;
-		height: 40px;
-		outline: 1px solid grey;
 	}
 </style>
