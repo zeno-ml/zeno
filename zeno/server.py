@@ -4,10 +4,11 @@ import os
 from pathlib import PosixPath
 from typing import List, Union
 
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, HTTPException
 from fastapi.staticfiles import StaticFiles
 
 from zeno.classes import (
+    EntryRequest,
     FilterPredicate,
     FilterPredicateGroup,
     EmbedProject2DBody,
@@ -141,6 +142,19 @@ def get_server(zeno: ZenoBackend):
     def project_embed_into_2D(req: EmbedProject2DBody):
         points = zeno.project_embed_into_2D(req.model, req.transform)
         return points
+
+    @api_app.post("/entry")
+    def df_entry(req: EntryRequest):
+        try:
+            entry = zeno.df.loc[req.id, :]
+            if len(req.columns) > 0:
+                entry = entry[list(map(str, req.columns))]
+            json_entry = entry.to_json()
+            return json_entry
+        except KeyError:
+            raise HTTPException(
+                status_code=404, detail=f"Entry with id={req.id} not found"
+            )
 
     @api_app.websocket("/status")
     async def results_websocket(websocket: WebSocket):

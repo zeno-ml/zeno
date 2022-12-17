@@ -4,7 +4,7 @@
 	import { onMount } from "svelte";
 	import { scaleLinear } from "d3-scale";
 	import { extent } from "d3-array";
-	import { checkEmbedExists, projectEmbedInto2D } from "../api";
+	import { checkEmbedExists, getEntry, projectEmbedInto2D } from "../api";
 	import { model, transform, settings, zenoState } from "../stores";
 	import { columnHash } from "../util/util";
 	import { ZenoColumnType } from "../globals";
@@ -124,15 +124,11 @@
 			</svg>
 			<div class="overlay">
 				<ReglScatterplot
-					on:hover={(e) => {
+					on:hover={async (e) => {
 						hover = e.detail;
 
-						const entry = {
-							"0label": "cat",
-							"0id": "cat/0304.jpg",
-							"2cifar_net_20": "dog",
-						};
-
+						const id = points.ids[hover.neighbor.index];
+						const entry = await getEntry(id);
 						hoverView = viewComponent(entry, viewOptions, hoverView);
 					}}
 					on:lassoIndex={(e) => {

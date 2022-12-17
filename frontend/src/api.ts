@@ -277,3 +277,23 @@ export async function checkEmbedExists(model: string, transform: string) {
 		return false;
 	}
 }
+
+export async function getEntry(id: string, columns?: string[]) {
+	const body = { id, columns };
+	const req = await fetch("/api/entry", {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(body),
+	});
+
+	if (req.ok) {
+		const result = JSON.parse(await req.json());
+		return result;
+	} else {
+		console.error("Error ", req);
+		const empty = {};
+		return empty;
+	}
+}

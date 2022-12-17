@@ -139,3 +139,8 @@ class MirrorProject(BaseModel):
 class EmbedProject2DBody(BaseModel):
     model: str
     transform: str = ""
+
+
+class EntryRequest(BaseModel):
+    id: str
+    columns: List[ZenoColumn] = []
