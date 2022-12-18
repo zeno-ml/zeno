@@ -96,6 +96,7 @@ interface Points2D {
 	x: Float32Array;
 	y: Float32Array;
 	ids: string[];
+}
 
 declare namespace View {
 	type Options = object;
