@@ -1,16 +1,19 @@
 <script lang="ts">
-	import ReglScatterplot from "./scatter/ReglScatterplot.svelte";
+	import ReglScatter from "./scatter/ReglScatter.svelte";
 
 	import { onMount } from "svelte";
 	import { scaleLinear } from "d3-scale";
 	import { extent } from "d3-array";
-	import { checkEmbedExists, getEntry, projectEmbedInto2D } from "../api";
-	import { model, transform, settings, zenoState } from "../stores";
-	import { columnHash } from "../util/util";
-	import { ZenoColumnType } from "../globals";
+	import {
+		checkEmbedExists,
+		getEntry,
+		projectEmbedInto2D,
+		createViewComponent,
+	} from "../api";
+	import { model, transform } from "../stores";
 
 	import type { ScaleLinear } from "d3-scale";
-	import type { ReglScatterplotHover } from "./scatter/types";
+	import type { ReglScatterMousemove } from "./scatter/scatterTypes";
 
 	export let currentResult;
 	export let table;
@@ -27,8 +30,8 @@
 		y: ScaleLinear<number, number>;
 		scale: (points: Points2D) => void;
 	};
-	let hover: ReglScatterplotHover;
-	let hoverView: HTMLDivElement;
+	let hover: ReglScatterMousemove;
+	let hoverViewDivEl: HTMLDivElement;
 
 	onMount(async () => {
 		embedExists = await checkEmbedExists($model, $transform);
@@ -60,53 +63,6 @@
 
 		return { x: xScaler, y: yScaler, scale };
 	}
-
-	function transformHash() {
-		const transformColumn = {
-			columnType: ZenoColumnType.TRANSFORM,
-			name: $zenoState.transform,
-		} as ZenoColumn;
-		const transformColumnStr = $zenoState.transform
-			? columnHash(transformColumn)
-			: "";
-		return transformColumnStr;
-	}
-	function modelHash() {
-		const modelColumn = {
-			columnType: ZenoColumnType.OUTPUT,
-			name: $model,
-			transform: $transform,
-		} as ZenoColumn;
-		const modelColumnStr = $zenoState.model ? columnHash(modelColumn) : "";
-		return modelColumnStr;
-	}
-
-	function viewComponent(
-		entry: View.Entry,
-		options: View.Options,
-		override?: HTMLDivElement
-	) {
-		const modelColumn = modelHash();
-		const transformColumn = transformHash();
-
-		// if no override, create a new div
-		override ??= document.createElement("div");
-
-		// overrides the passed in element with view
-		viewFunction(
-			override,
-			options,
-			entry,
-			modelColumn,
-			columnHash($settings.labelColumn),
-			columnHash($settings.dataColumn),
-			$settings.dataOrigin,
-			transformColumn,
-			columnHash($settings.idColumn)
-		);
-
-		return override;
-	}
 </script>
 
 {#if embedExists}
@@ -123,13 +79,17 @@
 				{/if}
 			</svg>
 			<div class="overlay">
-				<ReglScatterplot
-					on:hover={async (e) => {
+				<ReglScatter
+					on:mousemove={async (e) => {
 						hover = e.detail;
-
 						const id = points.ids[hover.neighbor.index];
 						const entry = await getEntry(id);
-						hoverView = viewComponent(entry, viewOptions, hoverView);
+						createViewComponent(
+							viewFunction,
+							entry,
+							viewOptions,
+							hoverViewDivEl
+						);
 					}}
 					on:lassoIndex={(e) => {
 						console.log(e.detail);
@@ -145,7 +105,7 @@
 						style:height="{80}px"
 						style:left="{hover.neighbor.canvasX + 50}px"
 						style:top="{hover.neighbor.canvasY + 50}px">
-						<div id="replace-view" bind:this={hoverView} />
+						<div id="replace-view" bind:this={hoverViewDivEl} />
 					</div>
 				{/if}
 			</div>

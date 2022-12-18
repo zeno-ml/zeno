@@ -14,8 +14,9 @@ import {
 	slices,
 	transform,
 	transforms,
+	zenoState,
 } from "./stores";
-import { getMetricRange } from "./util/util";
+import { getMetricRange, columnHash } from "./util/util";
 
 export async function getInitialData() {
 	let res = await fetch("/api/settings");
@@ -296,4 +297,68 @@ export async function getEntry(id: string, columns?: string[]) {
 		const empty = {};
 		return empty;
 	}
+}
+
+/**
+ * from the zeno global state, fetches the
+ * column name for the
+ */
+export function transformColumnName() {
+	const { transform } = get(zenoState);
+	const transformColumn = {
+		columnType: ZenoColumnType.TRANSFORM,
+		name: transform,
+	} as ZenoColumn;
+	const transformColumnStr = transform ? columnHash(transformColumn) : "";
+	return transformColumnStr;
+}
+
+/**
+ * from the zeno global state, fetches the
+ * column name for model output
+ */
+export function modelOutputColumnName() {
+	const { model, transform } = get(zenoState);
+	const modelColumn = {
+		columnType: ZenoColumnType.OUTPUT,
+		name: model,
+		transform: transform,
+	} as ZenoColumn;
+	const modelColumnStr = model ? columnHash(modelColumn) : "";
+	return modelColumnStr;
+}
+
+/**
+ * Creates the view component from the view function
+ * @param override takes in a HTMLDivElement that the viewFunction can
+ * 					optionally override instead of creating a new div
+ * @returns the component as a div element
+ */
+export function createViewComponent(
+	viewFunction: View.Component,
+	entry: View.Entry,
+	options: View.Options,
+	override?: HTMLDivElement
+): HTMLDivElement {
+	const modelColumn = modelOutputColumnName();
+	const transformColumn = transformColumnName();
+
+	// if no override, create a new div
+	override ??= document.createElement("div");
+
+	// overrides the passed in element with view
+	const globalSettings = get(settings);
+	viewFunction(
+		override,
+		options,
+		entry,
+		modelColumn,
+		columnHash(globalSettings.labelColumn),
+		columnHash(globalSettings.dataColumn),
+		globalSettings.dataOrigin,
+		transformColumn,
+		columnHash(globalSettings.idColumn)
+	);
+
+	return override;
 }
