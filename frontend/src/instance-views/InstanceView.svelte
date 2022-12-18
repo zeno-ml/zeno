@@ -3,13 +3,13 @@
 	import SelectionBar from "../metadata/SelectionBar.svelte";
 	import ListView from "./ListView.svelte";
 	import TableView from "./TableView.svelte";
-	import EmbedView from "./EmbedView.svelte";
+	import ScatterView from "./ScatterView.svelte";
 	import { getMetricsForSlices } from "../api";
 	import { zenoState, selectionPredicates } from "../stores";
 
 	export let table;
 
-	let selected = "embed";
+	let selected = "list";
 
 	let viewOptions: View.Options = undefined;
 	/**
@@ -67,8 +67,8 @@
 {#if selected === "table"}
 	<TableView {currentResult} {table} {viewFunction} {viewOptions} />
 {/if}
-{#if selected === "embed"}
-	<EmbedView {currentResult} {table} {viewFunction} {viewOptions} />
+{#if selected === "scatter"}
+	<ScatterView {currentResult} {table} {viewFunction} {viewOptions} />
 {/if}
 
 <style>

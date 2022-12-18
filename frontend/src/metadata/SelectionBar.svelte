@@ -12,7 +12,7 @@
 	export let optionsFunction;
 	export let viewOptions;
 
-	let CHOICES = ["list", "table", "embed"];
+	let CHOICES = ["list", "table", "scatter"];
 
 	let optionsDiv: HTMLDivElement;
 	let mounted = false;
