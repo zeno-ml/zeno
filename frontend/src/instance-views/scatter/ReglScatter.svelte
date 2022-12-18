@@ -1,35 +1,35 @@
 <script lang="ts">
 	import { onDestroy, onMount, createEventDispatcher } from "svelte";
 	import createScatterPlot from "regl-scatterplot";
-	import type {
-		ScatterColumnsFormat,
-		ReglConfig,
-		ColorRange,
-		ReglScatterplotObj,
-		ReglScatterplotHover,
-	} from "./types";
 	import { scaleLinear } from "d3-scale";
 	import { quadtree, type Quadtree } from "d3-quadtree";
+	import type {
+		ReglScatterData,
+		ReglScatterConfig,
+		ReglScatterColorRange,
+		ReglScatterObject,
+		ReglScatterMousemove,
+	} from "./scatterTypes";
 
 	const dispatch = createEventDispatcher<{
 		lassoIndex: number[];
-		mount: ReglScatterplotObj;
-		hover: ReglScatterplotHover;
+		mount: ReglScatterObject;
+		mousemove: ReglScatterMousemove;
 	}>();
 
 	export let width: number;
 	export let height: number;
-	export let data: ScatterColumnsFormat = {
+	export let data: ReglScatterData = {
 		x: [],
 		y: [],
 	};
-	export let colorRange: ColorRange = [];
-	export let config: ReglConfig = {};
+	export let colorRange: ReglScatterColorRange = [];
+	export let config: ReglScatterConfig = {};
 	export let pointSize = 5;
 
 	let xScale = scaleLinear().domain([-1, 1]);
 	let yScale = scaleLinear().domain([-1, 1]);
-	let scatterPtr: ReglScatterplotObj;
+	let scatterPtr: ReglScatterObject;
 	let canvasEl: HTMLCanvasElement;
 	let quad: Quadtree<[number, number, number]>;
 
@@ -61,7 +61,7 @@
 		scatterPtr.destroy();
 	});
 
-	function updateColorRange(colorRange: ColorRange) {
+	function updateColorRange(colorRange: ReglScatterColorRange) {
 		if (scatterPtr && colorRange) {
 			scatterPtr.set({
 				colorBy: "category",
@@ -92,7 +92,7 @@
 		dispatchLasso();
 	}
 
-	function draw(points: ScatterColumnsFormat) {
+	function draw(points: ReglScatterData) {
 		if (scatterPtr) {
 			scatterPtr.draw(points, {
 				transition: true,
@@ -121,7 +121,7 @@
 		}
 	}
 
-	function createQuadtree(points: ScatterColumnsFormat) {
+	function createQuadtree(points: ReglScatterData) {
 		let combined: [number, number, number][] = [];
 		points.x.forEach((x, i) => {
 			combined.push([x, points.y[i], i]);
@@ -136,7 +136,7 @@
 <canvas
 	bind:this={canvasEl}
 	on:wheel={() => {
-		dispatch("hover", undefined);
+		dispatch("mousemove", undefined);
 	}}
 	on:mousemove={(e) => {
 		const canvasX = e.offsetX;
@@ -146,7 +146,7 @@
 		const pointY = yScale.invert(canvasY);
 		const [nearestX, nearestY, nearestIndex] = quad.find(pointX, pointY);
 
-		dispatch("hover", {
+		dispatch("mousemove", {
 			mouse: {
 				canvasX,
 				canvasY,
@@ -158,4 +158,5 @@
 			},
 		});
 	}}
-	on:mouseleave />
+	on:mouseleave
+	on:mouseenter />

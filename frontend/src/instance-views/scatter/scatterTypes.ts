@@ -1,20 +1,20 @@
 import type createScatterPlot from "regl-scatterplot";
 import type { Properties } from "regl-scatterplot/dist/types";
 
-export type ReglScatterplotObj = ReturnType<typeof createScatterPlot>;
+export type ReglScatterObject = ReturnType<typeof createScatterPlot>;
 
 //column format that regl takes in
-export interface ScatterColumnsFormat {
+export interface ReglScatterData {
 	x: number[] | Float32Array;
 	y: number[] | Float32Array;
 	ids?: string[];
 	category?: number[]; //notice color is now category
 	value?: number[]; // notice opacity is now value
 }
-export type ReglConfig = Partial<Properties>;
-export type ColorRange = string[];
+export type ReglScatterConfig = Partial<Properties>;
+export type ReglScatterColorRange = string[];
 
-export interface ReglScatterplotHover {
+export interface ReglScatterMousemove {
 	neighbor: {
 		index: number;
 		canvasX: number;
