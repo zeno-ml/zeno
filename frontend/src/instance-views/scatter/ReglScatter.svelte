@@ -2,19 +2,19 @@
 	import { onDestroy, onMount, createEventDispatcher } from "svelte";
 	import createScatterPlot from "regl-scatterplot";
 	import { scaleLinear } from "d3-scale";
-	import { quadtree, type Quadtree } from "d3-quadtree";
 	import type {
 		ReglScatterData,
 		ReglScatterConfig,
 		ReglScatterColorRange,
 		ReglScatterObject,
-		ReglScatterMousemove,
+		ReglScatterPointDispatch,
 	} from "./index";
 
 	const dispatch = createEventDispatcher<{
-		lassoIndex: number[];
-		mount: ReglScatterObject;
-		mousemove: ReglScatterMousemove;
+		deselect: number[];
+		select: number[];
+		pointOver: ReglScatterPointDispatch;
+		pointOut: ReglScatterPointDispatch;
 	}>();
 
 	export let width: number;
@@ -31,7 +31,6 @@
 	let yScale = scaleLinear().domain([-1, 1]);
 	let scatterPtr: ReglScatterObject;
 	let canvasEl: HTMLCanvasElement;
-	let quad: Quadtree<[number, number, number]>;
 
 	$: scatterPtr?.set({
 		pointSize,
@@ -46,7 +45,6 @@
 		// make sure this is not called before we actually create the scatterPtr
 		if (scatterPtr && data?.x.length > 0) {
 			draw(data);
-			quad = createQuadtree(data);
 		}
 	}
 
@@ -81,15 +79,17 @@
 		});
 		scatterPtr.set({
 			lassoColor: "#6a1b9a",
-		});
-		scatterPtr.set({
-			opacity: 1.0,
 			pointColor: "#6a1b9a",
-			pointColorHover: "#000000",
-			pointColorActive: "#000000",
+			pointColorHover: "#6a1b9a",
+			pointColorActive: "#6a1b9a",
+			backgroundColor: "#FFFFFF",
+			opacity: 1.0,
+			pointOutlineWidth: 3,
 		});
-		dispatch("mount", scatterPtr);
-		dispatchLasso();
+
+		// listeners
+		listenLasso();
+		listenPointHover();
 	}
 
 	function draw(points: ReglScatterData) {
@@ -101,12 +101,43 @@
 		}
 	}
 
-	function dispatchLasso() {
+	function listenPointHover() {
+		if (scatterPtr) {
+			scatterPtr.subscribe(
+				"pointOut",
+				(index) => {
+					const canvasX = xScale(data.x[index]);
+					const canvasY = yScale(data.y[index]);
+					dispatch("pointOut", {
+						index,
+						canvasX,
+						canvasY,
+					});
+				},
+				null
+			);
+			scatterPtr.subscribe(
+				"pointOver",
+				(index) => {
+					const canvasX = xScale(data.x[index]);
+					const canvasY = yScale(data.y[index]);
+					dispatch("pointOver", {
+						index,
+						canvasX,
+						canvasY,
+					});
+				},
+				null
+			);
+		}
+	}
+
+	function listenLasso() {
 		if (scatterPtr) {
 			scatterPtr.subscribe(
 				"deselect",
 				() => {
-					dispatch("lassoIndex", []);
+					dispatch("deselect", []);
 				},
 				null
 			);
@@ -114,55 +145,13 @@
 				"select",
 				(d) => {
 					if (d) {
-						dispatch("lassoIndex", d["points"]);
+						dispatch("select", d["points"]);
 					}
 				},
 				null
 			);
 		}
 	}
-
-	function createQuadtree(points: ReglScatterData) {
-		let combined: [number, number, number][] = [];
-		points.x.forEach((x, i) => {
-			combined.push([x, points.y[i], i]);
-		});
-
-		const quad = quadtree<[number, number, number]>();
-		quad.addAll(combined);
-		return quad;
-	}
 </script>
 
-<canvas
-	bind:this={canvasEl}
-	on:wheel={() => {
-		dispatch("mousemove", undefined);
-	}}
-	on:mousemove={(e) => {
-		// canvas space
-		const canvasX = e.offsetX;
-		const canvasY = e.offsetY;
-
-		// canvas space -> data space
-		const pointX = xScale.invert(canvasX);
-		const pointY = yScale.invert(canvasY);
-
-		// find the nearest point based on point location
-		const [nearestX, nearestY, nearestIndex] = quad.find(pointX, pointY);
-
-		// dispatch info on mousemove
-		dispatch("mousemove", {
-			mouse: {
-				canvasX,
-				canvasY,
-			},
-			neighbor: {
-				index: nearestIndex,
-				canvasX: xScale(nearestX),
-				canvasY: yScale(nearestY),
-			},
-		});
-	}}
-	on:mouseleave
-	on:mouseenter />
+<canvas bind:this={canvasEl} on:mousemove on:mouseleave on:mouseenter />

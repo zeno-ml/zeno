@@ -12,7 +12,7 @@
 	} from "../api";
 	import { model, transform } from "../stores";
 	import type { ScaleLinear } from "d3-scale";
-	import type { ReglScatterMousemove } from "./scatter";
+	import type { ReglScatterPointDispatch } from "./scatter";
 
 	export let currentResult;
 	export let table;
@@ -30,7 +30,7 @@
 		y: ScaleLinear<number, number>;
 		scale: (points: Points2D) => void;
 	};
-	let hover: ReglScatterMousemove;
+	let pointHover: ReglScatterPointDispatch;
 	let hoverViewDivEl: HTMLDivElement;
 
 	$: project2DOnModelAndTransformChange($model, $transform);
@@ -88,21 +88,22 @@
 	}
 
 	/**
-	 * Shows the instance view of the nearest neighbor point
+	 * Shows the instance view of the current hovering point
 	 * on top of the scatterplot by globally updating hoverViewDivEl
 	 * and receiving mouseinfo from ReglScatterplot
 	 */
-	async function showNearestPointAsView(e: CustomEvent<ReglScatterMousemove>) {
-		hover = e.detail;
-		if (hover?.neighbor) {
-			const nearestIdToMouse = points.ids[hover.neighbor.index];
+	async function showViewOnPoint(e: CustomEvent<ReglScatterPointDispatch>) {
+		pointHover = e.detail;
+		const id = points.ids[pointHover.index];
 
-			// fetch the row from the backend given that Id
-			const entry = await getEntry(nearestIdToMouse);
+		// fetch the row from the backend given that Id
+		const entry = await getEntry(id);
 
-			// create the data view component and replace the div with the new component
-			createViewComponent(viewFunction, entry, viewOptions, hoverViewDivEl);
-		}
+		// create the data view component and replace the div with the new component
+		createViewComponent(viewFunction, entry, viewOptions, hoverViewDivEl);
+	}
+	function clearPointHover() {
+		pointHover = undefined;
 	}
 </script>
 
@@ -111,10 +112,10 @@
 		{#if !computingPoints}
 			<!-- highlight nearest point with circle outline  -->
 			<svg class="background" {width} {height}>
-				{#if hover}
+				{#if pointHover !== undefined}
 					<circle
-						cx={hover.neighbor.canvasX}
-						cy={hover.neighbor.canvasY}
+						cx={pointHover.canvasX}
+						cy={pointHover.canvasY}
 						r={15}
 						fill="none"
 						stroke="lightgrey" />
@@ -129,14 +130,15 @@
 						pointSize={pointSizeSlider}
 						{width}
 						{height}
-						on:mousemove={showNearestPointAsView} />
-					{#if hover}
+						on:pointOver={showViewOnPoint}
+						on:pointOut={clearPointHover} />
+					{#if pointHover !== undefined}
 						<div
 							id="hover-view"
 							style:width="{100}px"
 							style:height="{80}px"
-							style:left="{hover.neighbor.canvasX + 50}px"
-							style:top="{hover.neighbor.canvasY + 50}px">
+							style:left="{pointHover.canvasX + 50}px"
+							style:top="{pointHover.canvasY + 50}px">
 							<div id="replace-view" bind:this={hoverViewDivEl} />
 						</div>
 					{/if}

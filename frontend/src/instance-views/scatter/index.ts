@@ -14,14 +14,8 @@ export interface ReglScatterData {
 export type ReglScatterConfig = Partial<Properties>;
 export type ReglScatterColorRange = string[];
 
-export interface ReglScatterMousemove {
-	neighbor: {
-		index: number;
-		canvasX: number;
-		canvasY: number;
-	};
-	mouse: {
-		canvasX: number;
-		canvasY: number;
-	};
+export interface ReglScatterPointDispatch {
+	index: number;
+	canvasX: number;
+	canvasY: number;
 }
