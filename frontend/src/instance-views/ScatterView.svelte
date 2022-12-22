@@ -1,5 +1,6 @@
 <script lang="ts">
 	import ReglScatter from "./scatter/ReglScatter.svelte";
+	import AddEmbedInstructions from "./AddEmbedInstructions.svelte";
 	import { scaleLinear } from "d3-scale";
 	import { extent } from "d3-array";
 	import {
@@ -138,8 +139,7 @@
 		{/if}
 	</div>
 {:else}
-	<div>Embeddings don't exist</div>
-	<div>**Instructions to add embeddings here**</div>
+	<AddEmbedInstructions />
 {/if}
 
 <style>
