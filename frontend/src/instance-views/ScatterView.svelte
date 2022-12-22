@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { BarLoader as Spinner } from "svelte-loading-spinners";
 	import ReglScatter from "./scatter/ReglScatter.svelte";
-	import AddEmbedInstructions from "./AddEmbedInstructions.svelte";
+	import AddEmbedInstructions from "../general/AddEmbedInstructions.svelte";
 	import { scaleLinear } from "d3-scale";
 	import { extent } from "d3-array";
 	import {
