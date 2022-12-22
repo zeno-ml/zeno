@@ -1,7 +1,5 @@
 <script lang="ts">
 	import ReglScatter from "./scatter/ReglScatter.svelte";
-
-	import { onMount } from "svelte";
 	import { scaleLinear } from "d3-scale";
 	import { extent } from "d3-array";
 	import {
@@ -11,9 +9,8 @@
 		createViewComponent,
 	} from "../api";
 	import { model, transform } from "../stores";
-
 	import type { ScaleLinear } from "d3-scale";
-	import type { ReglScatterMousemove } from "./scatter/scatterTypes";
+	import type { ReglScatterMousemove } from "./scatter";
 
 	export let currentResult;
 	export let table;
@@ -33,17 +30,34 @@
 	let hover: ReglScatterMousemove;
 	let hoverViewDivEl: HTMLDivElement;
 
-	onMount(async () => {
-		embedExists = await checkEmbedExists($model, $transform);
-		points = (await projectEmbedInto2D($model, $transform)) as Points2D;
-		pointToWebGL = fitPointsWebgGL(points);
+	$: project2DOnModelAndTransformChange($model, $transform);
 
-		pointToWebGL.scale(points);
-	});
+	/**
+	 * Main driver behind fetching the projected points and displaying
+	 * them in the scale that WebGL expects between [-1, 1]
+	 */
+	async function project2DOnModelAndTransformChange(
+		model: string,
+		transform: string
+	) {
+		// don't do shit if we have no gabagoo
+		embedExists = await checkEmbedExists(model, transform);
+
+		if (embedExists) {
+			// requests tsne from backend
+			points = (await projectEmbedInto2D(model, transform)) as Points2D;
+
+			// simply scales the points between [-1, 1]
+			pointToWebGL = fitPointsWebgGL(points);
+			pointToWebGL.scale(points);
+		}
+	}
 
 	/**
 	 * Create scale for points between [-1, 1] for WebGL canvas
 	 * ReglScatterplot expects this range
+	 *
+	 * scaler function changes points by memory reference
 	 */
 	function fitPointsWebgGL(points: Points2D) {
 		const WEB_GL_RANGE = [-1, 1];
@@ -63,11 +77,28 @@
 
 		return { x: xScaler, y: yScaler, scale };
 	}
+
+	/**
+	 * Shows the instance view of the nearest neighbor point
+	 * on top of the scatterplot by globally updating hoverViewDivEl
+	 * and receiving mouseinfo from ReglScatterplot
+	 */
+	async function showNearestPointAsView(e: CustomEvent<ReglScatterMousemove>) {
+		hover = e.detail;
+		const nearestIdToMouse = points.ids[hover.neighbor.index];
+
+		// fetch the row from the backend given that Id
+		const entry = await getEntry(nearestIdToMouse);
+
+		// create the data view component and replace the div with the new component
+		createViewComponent(viewFunction, entry, viewOptions, hoverViewDivEl);
+	}
 </script>
 
 {#if embedExists}
 	<div id="container">
 		{#if points}
+			<!-- highlight nearest point with circle outline  -->
 			<svg class="background" {width} {height}>
 				{#if hover}
 					<circle
@@ -78,26 +109,15 @@
 						stroke="lightgrey" />
 				{/if}
 			</svg>
+
+			<!-- Scatterplot and overlay instance on top of nearest point -->
 			<div class="overlay">
 				<ReglScatter
-					on:mousemove={async (e) => {
-						hover = e.detail;
-						const id = points.ids[hover.neighbor.index];
-						const entry = await getEntry(id);
-						createViewComponent(
-							viewFunction,
-							entry,
-							viewOptions,
-							hoverViewDivEl
-						);
-					}}
-					on:lassoIndex={(e) => {
-						console.log(e.detail);
-					}}
+					data={points}
+					pointSize={pointSizeSlider}
 					{width}
 					{height}
-					data={points}
-					pointSize={pointSizeSlider} />
+					on:mousemove={showNearestPointAsView} />
 				{#if hover}
 					<div
 						id="hover-view"

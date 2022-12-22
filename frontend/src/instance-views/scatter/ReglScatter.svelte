@@ -9,7 +9,7 @@
 		ReglScatterColorRange,
 		ReglScatterObject,
 		ReglScatterMousemove,
-	} from "./scatterTypes";
+	} from "./index";
 
 	const dispatch = createEventDispatcher<{
 		lassoIndex: number[];
