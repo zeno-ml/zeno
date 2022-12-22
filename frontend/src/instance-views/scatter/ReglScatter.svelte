@@ -34,6 +34,7 @@
 	let yScale = scaleLinear().domain([-1, 1]);
 	let scatterPtr: ReglScatterObject;
 	let canvasEl: HTMLCanvasElement;
+	let modeCssClass: "normal-mode" | "pan-mode" | "lasso-mode" = "normal-mode";
 
 	$: scatterPtr?.set({
 		pointSize,
@@ -158,4 +159,39 @@
 	}
 </script>
 
-<canvas bind:this={canvasEl} on:mousemove on:mouseleave on:mouseenter />
+<svelte:window
+	on:keydown={(e) => {
+		if (e.key === "Shift") {
+			modeCssClass = "lasso-mode";
+		}
+	}}
+	on:keyup={() => {
+		modeCssClass = "normal-mode";
+	}}
+	on:mousedown={() => {
+		if (modeCssClass !== "lasso-mode") {
+			modeCssClass = "pan-mode";
+		}
+	}}
+	on:mouseup={() => {
+		modeCssClass = "normal-mode";
+	}} />
+
+<canvas
+	class={modeCssClass}
+	bind:this={canvasEl}
+	on:mousemove
+	on:mouseleave
+	on:mouseenter />
+
+<style>
+	.normal-mode {
+		cursor: default;
+	}
+	.pan-mode {
+		cursor: move;
+	}
+	.lasso-mode {
+		cursor: crosshair;
+	}
+</style>
