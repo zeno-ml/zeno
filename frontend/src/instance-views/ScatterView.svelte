@@ -143,6 +143,8 @@
 					<ReglScatter
 						data={points}
 						pointSize={pointSizeSlider}
+						pointColor="#6a1b9a"
+						opacity={0.75}
 						{width}
 						{height}
 						on:pointOver={showViewOnPoint}
@@ -161,7 +163,7 @@
 			{/if}
 
 			<!-- settings/controls for the scatterplot -->
-			<div id="controls">
+			<div id="settings">
 				<input type="range" min="1" max="10" bind:value={pointSizeSlider} />
 				point size {pointSizeSlider}
 			</div>
@@ -200,5 +202,7 @@
 	#hover-view {
 		position: absolute;
 		z-index: 2;
+	}
+	#settings {
 	}
 </style>

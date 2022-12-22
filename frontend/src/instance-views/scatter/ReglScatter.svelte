@@ -26,6 +26,9 @@
 	export let colorRange: ReglScatterColorRange = [];
 	export let config: ReglScatterConfig = {};
 	export let pointSize = 5;
+	export let opacity = 0.85;
+	export let pointColor = "#6a1b9a";
+	export let pointOutline = 3;
 
 	let xScale = scaleLinear().domain([-1, 1]);
 	let yScale = scaleLinear().domain([-1, 1]);
@@ -77,14 +80,15 @@
 			yScale,
 			...config,
 		});
+
 		scatterPtr.set({
-			lassoColor: "#6a1b9a",
-			pointColor: "#6a1b9a",
-			pointColorHover: "#6a1b9a",
-			pointColorActive: "#6a1b9a",
+			lassoColor: pointColor,
+			pointColor: pointColor,
+			pointColorHover: pointColor,
+			pointColorActive: pointColor,
 			backgroundColor: "#FFFFFF",
-			opacity: 1.0,
-			pointOutlineWidth: 3,
+			opacity,
+			pointOutlineWidth: pointOutline,
 		});
 
 		// listeners
