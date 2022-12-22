@@ -18,6 +18,7 @@
 	export let table;
 	export let viewFunction: View.Component;
 	export let viewOptions: View.Options = {};
+	export let autoResize = true;
 
 	let height = 800;
 	let width = 1000;
@@ -32,8 +33,14 @@
 	};
 	let pointHover: ReglScatterPointDispatch;
 	let hoverViewDivEl: HTMLDivElement;
+	let containerEl: HTMLDivElement;
 
 	$: project2DOnModelAndTransformChange($model, $transform);
+	$: {
+		if (containerEl && autoResize) {
+			resizeScatter();
+		}
+	}
 
 	/**
 	 * Main driver behind fetching the projected points and displaying
@@ -105,10 +112,18 @@
 	function clearPointHover() {
 		pointHover = undefined;
 	}
+
+	function resizeScatter() {
+		if (containerEl && autoResize) {
+			width = containerEl.clientWidth;
+		}
+	}
 </script>
 
+<svelte:window on:resize={resizeScatter} />
+
 {#if embedExists}
-	<div id="container">
+	<div bind:this={containerEl} id="container">
 		{#if !computingPoints}
 			<!-- highlight nearest point with circle outline  -->
 			<svg class="background" {width} {height}>
@@ -118,7 +133,7 @@
 						cy={pointHover.canvasY}
 						r={15}
 						fill="none"
-						stroke="lightgrey" />
+						stroke="lavender" />
 				{/if}
 			</svg>
 
@@ -168,6 +183,9 @@
 <style>
 	#container {
 		position: relative;
+		width: auto;
+		height: auto;
+		outline: 1px solid lavender;
 	}
 	.overlay {
 		position: relative;
