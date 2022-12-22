@@ -13,6 +13,9 @@
 	import { model, transform } from "../stores";
 	import type { ScaleLinear } from "d3-scale";
 	import type { ReglScatterPointDispatch } from "./scatter";
+	import Slider from "@smui/slider";
+	import FormField from "@smui/form-field";
+	import { Icon } from "@smui/icon-button";
 
 	export let currentResult;
 	export let table;
@@ -20,7 +23,7 @@
 	export let viewOptions: View.Options = {};
 	export let autoResize = true;
 
-	let height = 800;
+	let height = 850;
 	let width = 1000;
 	let pointSizeSlider = 3;
 	let embedExists = false;
@@ -122,67 +125,101 @@
 
 <svelte:window on:resize={resizeScatter} />
 
-{#if embedExists}
-	<div bind:this={containerEl} id="container">
-		{#if !computingPoints}
-			<!-- highlight nearest point with circle outline  -->
-			<svg class="background" {width} {height}>
-				{#if pointHover !== undefined}
-					<circle
-						cx={pointHover.canvasX}
-						cy={pointHover.canvasY}
-						r={15}
-						fill="none"
-						stroke="lavender" />
-				{/if}
-			</svg>
-
-			<!-- Scatterplot and overlay instance on top of nearest point -->
-			{#if points}
-				<div class="overlay">
-					<ReglScatter
-						data={points}
-						pointSize={pointSizeSlider}
-						pointColor="#6a1b9a"
-						opacity={0.75}
-						{width}
-						{height}
-						on:pointOver={showViewOnPoint}
-						on:pointOut={clearPointHover} />
+<div id="scatter-view">
+	{#if embedExists}
+		<div bind:this={containerEl} id="container">
+			{#if !computingPoints}
+				<!-- highlight nearest point with circle outline  -->
+				<svg class="background" {width} {height}>
 					{#if pointHover !== undefined}
-						<div
-							id="hover-view"
-							style:width="{100}px"
-							style:height="{80}px"
-							style:left="{pointHover.canvasX + 50}px"
-							style:top="{pointHover.canvasY + 50}px">
-							<div id="replace-view" bind:this={hoverViewDivEl} />
-						</div>
+						<circle
+							cx={pointHover.canvasX}
+							cy={pointHover.canvasY}
+							r={15}
+							fill="none"
+							stroke="lavender" />
 					{/if}
+				</svg>
+
+				<!-- Scatterplot and overlay instance on top of nearest point -->
+				{#if points}
+					<div class="overlay">
+						<ReglScatter
+							data={points}
+							pointSize={pointSizeSlider}
+							pointColor="#6a1b9a"
+							opacity={0.75}
+							{width}
+							{height}
+							on:pointOver={showViewOnPoint}
+							on:pointOut={clearPointHover} />
+						{#if pointHover !== undefined}
+							<div
+								id="hover-view"
+								style:width="{100}px"
+								style:height="{80}px"
+								style:left="{pointHover.canvasX + 50}px"
+								style:top="{pointHover.canvasY + 50}px">
+								<div id="replace-view" bind:this={hoverViewDivEl} />
+							</div>
+						{/if}
+					</div>
+				{/if}
+			{:else}
+				<!--  Loading bar -->
+				<div id="loading-indicator" style:color="#6a1b9a">
+					<Spinner color="#6a1b9a" size={80} />
+					<b>Computing 2D projection</b> from
+					<code
+						>{$model}
+						{$transform}</code> embeddings
 				</div>
 			{/if}
+		</div>
+	{:else}
+		<AddEmbedInstructions />
+	{/if}
 
-			<!-- settings/controls for the scatterplot -->
-			<div id="settings">
-				<input type="range" min="1" max="10" bind:value={pointSizeSlider} />
-				point size {pointSizeSlider}
-			</div>
-		{:else}
-			<!--  Loading bar -->
-			<div id="loading-indicator" style:color="#6a1b9a">
-				<Spinner color="#6a1b9a" size={80} />
-				<b>Computing 2D projection</b> from
-				<code
-					>{$model}
-					{$transform}</code> embeddings
-			</div>
-		{/if}
+	<!-- settings/controls for the scatterplot -->
+	<div id="settings" class="frosted">
+		<h3>
+			<Icon class="material-icons" style="font-size: inherit; color: inherit;"
+				>settings</Icon>
+			Settings
+		</h3>
+		<FormField style="display: flex;">
+			<span
+				slot="label"
+				style="padding-right: 12px; width: max-content; display: block;">
+				Point Size
+			</span>
+			<Slider
+				step={1}
+				min={1}
+				max={10}
+				bind:value={pointSizeSlider}
+				discrete
+				tickMarks
+				style="flex-grow: 1;" />
+		</FormField>
 	</div>
-{:else}
-	<AddEmbedInstructions />
-{/if}
+
+	<div id="instruction">
+		<div><kbd>drag</kbd> to pan / move around</div>
+		<div><kbd>scroll</kbd> to zoom</div>
+		<div>
+			<kbd>Shift</kbd> + <kbd>drag</kbd> to lasso select points
+		</div>
+		<div>
+			<kbd>Esc</kbd> or double click to clear lasso selection
+		</div>
+	</div>
+</div>
 
 <style>
+	#scatter-view {
+		position: relative;
+	}
 	#container {
 		position: relative;
 		width: auto;
@@ -204,5 +241,47 @@
 		z-index: 2;
 	}
 	#settings {
+		position: absolute;
+		right: 10px;
+		top: 10px;
+		width: 300px;
+		height: 130px;
+		border-radius: 3px;
+		outline: 1px solid hsla(0, 0%, 0%, 0.1);
+		z-index: 999;
+		padding-left: 20px;
+	}
+
+	.frosted {
+		background: hsla(0, 0%, 95%, 0.3);
+		backdrop-filter: blur(8px);
+	}
+
+	/* https://developer.mozilla.org/en-US/docs/Web/HTML/Element/kbd */
+	kbd {
+		background-color: #eee;
+		border-radius: 3px;
+		border: 1px solid #b4b4b4;
+		box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2),
+			0 2px 0 0 rgba(255, 255, 255, 0.7) inset;
+		display: inline-block;
+		color: #333;
+		font-size: 0.85em;
+		font-weight: 700;
+		line-height: 1;
+		padding: 2px 4px;
+		white-space: nowrap;
+	}
+
+	#instruction {
+		display: flex;
+		margin-top: 10px;
+		gap: 18px;
+		color: hsl(0, 0%, 50%);
+		font-weight: 200;
+	}
+
+	h3 {
+		font-weight: 400;
 	}
 </style>
