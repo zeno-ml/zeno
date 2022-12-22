@@ -94,13 +94,15 @@
 	 */
 	async function showNearestPointAsView(e: CustomEvent<ReglScatterMousemove>) {
 		hover = e.detail;
-		const nearestIdToMouse = points.ids[hover.neighbor.index];
+		if (hover?.neighbor) {
+			const nearestIdToMouse = points.ids[hover.neighbor.index];
 
-		// fetch the row from the backend given that Id
-		const entry = await getEntry(nearestIdToMouse);
+			// fetch the row from the backend given that Id
+			const entry = await getEntry(nearestIdToMouse);
 
-		// create the data view component and replace the div with the new component
-		createViewComponent(viewFunction, entry, viewOptions, hoverViewDivEl);
+			// create the data view component and replace the div with the new component
+			createViewComponent(viewFunction, entry, viewOptions, hoverViewDivEl);
+		}
 	}
 </script>
 
