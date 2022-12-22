@@ -100,6 +100,7 @@
 			});
 		}
 	}
+
 	function dispatchLasso() {
 		if (scatterPtr) {
 			scatterPtr.subscribe(
@@ -139,13 +140,18 @@
 		dispatch("mousemove", undefined);
 	}}
 	on:mousemove={(e) => {
+		// canvas space
 		const canvasX = e.offsetX;
 		const canvasY = e.offsetY;
 
+		// canvas space -> data space
 		const pointX = xScale.invert(canvasX);
 		const pointY = yScale.invert(canvasY);
+
+		// find the nearest point based on point location
 		const [nearestX, nearestY, nearestIndex] = quad.find(pointX, pointY);
 
+		// dispatch info on mousemove
 		dispatch("mousemove", {
 			mouse: {
 				canvasX,
