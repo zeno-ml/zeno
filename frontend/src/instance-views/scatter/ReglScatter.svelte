@@ -29,6 +29,7 @@
 	export let opacity = 0.85;
 	export let pointColor = "#6a1b9a";
 	export let pointOutline = 3;
+	export let style = "";
 
 	let xScale = scaleLinear().domain([-1, 1]);
 	let yScale = scaleLinear().domain([-1, 1]);
@@ -178,6 +179,7 @@
 	}} />
 
 <canvas
+	{style}
 	class={modeCssClass}
 	bind:this={canvasEl}
 	on:mousemove
