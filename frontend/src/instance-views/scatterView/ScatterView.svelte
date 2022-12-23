@@ -1,7 +1,10 @@
 <script lang="ts">
+	import ReglScatter from "./reglScatter/ReglScatter.svelte";
+	import NoEmbed from "./NoEmbed.svelte";
 	import { BarLoader as Spinner } from "svelte-loading-spinners";
-	import ReglScatter from "./scatter/ReglScatter.svelte";
-	import AddEmbedInstructions from "../general/AddEmbedInstructions.svelte";
+	import { Icon } from "@smui/icon-button";
+	import Slider from "@smui/slider";
+	import FormField from "@smui/form-field";
 	import { scaleLinear } from "d3-scale";
 	import { extent } from "d3-array";
 	import {
@@ -9,13 +12,10 @@
 		getEntry,
 		projectEmbedInto2D,
 		createViewComponent,
-	} from "../api";
-	import { model, transform } from "../stores";
+	} from "../../api";
+	import { model, transform } from "../../stores";
 	import type { ScaleLinear } from "d3-scale";
-	import type { ReglScatterPointDispatch } from "./scatter";
-	import Slider from "@smui/slider";
-	import FormField from "@smui/form-field";
-	import { Icon } from "@smui/icon-button";
+	import type { ReglScatterPointDispatch } from "./reglScatter";
 
 	export let currentResult;
 	export let table;
@@ -167,12 +167,12 @@
 
 						<!-- settings/controls for the scatterplot -->
 						<div id="settings" class="frosted">
-							<h3>
+							<div class="title">
 								<Icon
 									class="material-icons"
 									style="font-size: inherit; color: inherit;">settings</Icon>
 								Settings
-							</h3>
+							</div>
 							<FormField style="display: flex;">
 								<span
 									slot="label"
@@ -206,14 +206,15 @@
 				<div id="loading-indicator" style:color="#6a1b9a">
 					<Spinner color="#6a1b9a" size={80} />
 					<b>Computing 2D projection</b> from
-					<code
-						>{$model}
-						{$transform}</code> embeddings
+					<code>
+						{$model}
+						{$transform}
+					</code> embeddings
 				</div>
 			{/if}
 		</div>
 	{:else}
-		<AddEmbedInstructions />
+		<NoEmbed />
 	{/if}
 </div>
 
@@ -226,6 +227,34 @@
 		width: auto;
 		height: auto;
 	}
+	#hover-view {
+		position: absolute;
+		z-index: 2;
+	}
+	#settings {
+		position: absolute;
+		bottom: 10px;
+		right: 10px;
+		width: 300px;
+		height: 80px;
+		z-index: 999;
+		padding-left: 20px;
+		padding-top: 20px;
+		box-shadow: 0px 0px 1px 1px hsla(0, 0%, 30%, 0.1);
+		border-radius: 3px;
+	}
+	#settings .title {
+		font-size: 18px;
+		font-weight: 400;
+	}
+	#instruction {
+		display: flex;
+		margin-top: 10px;
+		gap: 18px;
+		color: hsl(0, 0%, 50%);
+		font-weight: 200;
+	}
+
 	.overlay {
 		position: relative;
 		z-index: 1;
@@ -236,28 +265,12 @@
 		left: 0;
 		z-index: 0;
 	}
-	#hover-view {
-		position: absolute;
-		z-index: 2;
-	}
-	#settings {
-		position: absolute;
-		bottom: 10px;
-		right: 10px;
-		width: 300px;
-		height: 130px;
-		z-index: 999;
-		padding-left: 20px;
-		box-shadow: 0px 0px 1px 1px hsla(0, 0%, 30%, 0.1);
-		border-radius: 3px;
-	}
-
 	.frosted {
 		background: hsla(0, 0%, 95%, 0.3);
 		backdrop-filter: blur(8px);
 	}
 
-	/* https://developer.mozilla.org/en-US/docs/Web/HTML/Element/kbd */
+	/* credit to https://developer.mozilla.org/en-US/docs/Web/HTML/Element/kbd */
 	kbd {
 		background-color: #eee;
 		border-radius: 3px;
@@ -267,21 +280,9 @@
 		display: inline-block;
 		color: #333;
 		font-size: 0.85em;
-		font-weight: 700;
+		font-weight: 550;
 		line-height: 1;
 		padding: 2px 4px;
 		white-space: nowrap;
-	}
-
-	#instruction {
-		display: flex;
-		margin-top: 10px;
-		gap: 18px;
-		color: hsl(0, 0%, 50%);
-		font-weight: 200;
-	}
-
-	h3 {
-		font-weight: 400;
 	}
 </style>

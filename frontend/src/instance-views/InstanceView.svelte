@@ -3,7 +3,7 @@
 	import SelectionBar from "../metadata/SelectionBar.svelte";
 	import ListView from "./ListView.svelte";
 	import TableView from "./TableView.svelte";
-	import ScatterView from "./ScatterView.svelte";
+	import ScatterView from "./scatterView/ScatterView.svelte";
 	import { getMetricsForSlices } from "../api";
 	import { zenoState, selectionPredicates } from "../stores";
 
