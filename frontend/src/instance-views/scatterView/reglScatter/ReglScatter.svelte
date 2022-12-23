@@ -2,6 +2,7 @@
 	import { onDestroy, onMount, createEventDispatcher } from "svelte";
 	import createScatterPlot from "regl-scatterplot";
 	import { scaleLinear } from "d3-scale";
+	import { WEBGL_EXTENT } from "./index";
 	import type {
 		ReglScatterData,
 		ReglScatterConfig,
@@ -31,8 +32,8 @@
 	export let pointOutline = 3;
 	export let style = "";
 
-	let xScale = scaleLinear().domain([-1, 1]);
-	let yScale = scaleLinear().domain([-1, 1]);
+	let xScale = scaleLinear().domain(WEBGL_EXTENT); // between [-1, 1] -> canvas X
+	let yScale = scaleLinear().domain(WEBGL_EXTENT); // between [-1, 1] -> canvas Y
 	let scatterPtr: ReglScatterObject;
 	let canvasEl: HTMLCanvasElement;
 	let modeCssClass: "normal-mode" | "pan-mode" | "lasso-mode" = "normal-mode";
