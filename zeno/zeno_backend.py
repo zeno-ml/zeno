@@ -5,11 +5,11 @@ import os
 import pickle
 import sys
 import threading
+from functools import lru_cache
 from inspect import getsource
 from math import isnan
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Union
-from functools import lru_cache
 
 import numpy as np
 import pandas as pd  # type: ignore
@@ -36,7 +36,6 @@ from zeno.data_processing import (
     transform_data,
 )
 from zeno.filtering import filter_table, filter_table_single
-from zeno.mirror import Mirror
 from zeno.util import getMetadataType, load_series, read_pickle
 
 
@@ -93,7 +92,6 @@ class ZenoBackend(object):
 
         self.__setup_dataframe(id_column, data_column, label_column)
         self.__parse_test_functions(self.tests)
-        self.mirror = Mirror(self.df, self.cache_path, self.id_column)
 
         # Options passed to Zeno functions.
         self.zeno_options = ZenoOptions(
@@ -553,32 +551,29 @@ class ZenoBackend(object):
         }
         """
 
-        points = {"x": [], "y": [], "ids": []}
+        points: Dict[str, list] = {"x": [], "y": [], "ids": []}
 
         # can't do shit if embed no existy
         if not self.embed_exists(model, transform):
+            # so just return the empty points
             return points
 
         embed_col = ZenoColumn(
             column_type=ZenoColumnType.EMBEDDING, name=model, transform=transform
         )
 
-        in_cache = False
-        if not in_cache:
-            embed = self.df[str(embed_col)].to_numpy()
-            embed = np.stack(embed, axis=0)  # type: ignore
+        # extract embeddings and store in one big ndarray
+        embed = self.df[str(embed_col)].to_numpy()
+        embed = np.stack(embed, axis=0)  # type: ignore
 
-            # project embeddings into 2D
-            from sklearn.manifold import TSNE  # type: ignore
+        # project embeddings into 2D
+        from sklearn.manifold import TSNE  # type: ignore
 
-            projection = TSNE().fit_transform(embed)
+        projection = TSNE().fit_transform(embed)
 
-            # extract points and ids
-            points["x"] = projection[:, 0].tolist()
-            points["y"] = projection[:, 1].tolist()
-            points["ids"] = self.df[str(self.id_column)].to_list()
-        else:
-            # from cache
-            pass
+        # extract points and ids from computed projection
+        points["x"] = projection[:, 0].tolist()
+        points["y"] = projection[:, 1].tolist()
+        points["ids"] = self.df[str(self.id_column)].to_list()
 
         return points

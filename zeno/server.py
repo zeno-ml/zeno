@@ -4,17 +4,16 @@ import os
 from pathlib import PosixPath
 from typing import List, Union
 
-from fastapi import FastAPI, WebSocket, HTTPException
+from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.staticfiles import StaticFiles
 
 from zeno.classes import (
+    EmbedProject2DRequest,
     EntryRequest,
     FilterPredicate,
     FilterPredicateGroup,
-    EmbedProject2DBody,
     HistogramRequest,
     MetricKey,
-    MirrorProject,
     Report,
     Slice,
     StatusResponse,
@@ -114,22 +113,6 @@ def get_server(zeno: ZenoBackend):
     def get_metrics_for_slices(reqs: List[MetricKey]):
         return json.dumps(zeno.get_metrics_for_slices(reqs))
 
-    @api_app.post("/mirror/project")
-    def mirror_project(req: MirrorProject):
-        # not specified or entire data frame just use the cache
-        if req.ids is None or len(req.ids) == len(zeno.df):
-            proj = zeno.mirror.initProject(req.model, req.transform)
-        else:
-            proj = zeno.mirror.filterProject(
-                req.model, req.ids, req.transform, perplexity=req.perplexity
-            )
-
-        return json.dumps({"model": req.model, "data": proj})
-
-    @api_app.get("/mirror/sdm")
-    def sdm():
-        return json.dumps({"data": zeno.mirror.generate_slices()})
-
     @api_app.get("/embed-exists/{model}")
     def embed_exists(model: str, transform: str = ""):
         """checks if embedding exists for a model and transform
@@ -139,12 +122,12 @@ def get_server(zeno: ZenoBackend):
         return exists
 
     @api_app.post("/embed-project")
-    def project_embed_into_2D(req: EmbedProject2DBody):
+    def project_embed_into_2D(req: EmbedProject2DRequest):
         points = zeno.project_embed_into_2D(req.model, req.transform)
         return points
 
     @api_app.post("/entry")
-    def df_entry(req: EntryRequest):
+    def get_df_row_entry(req: EntryRequest):
         try:
             entry = zeno.df.loc[req.id, :]
             if len(req.columns) > 0:
