@@ -468,6 +468,15 @@ class ZenoBackend(object):
             req.get_metrics = False
 
         cols = req.columns
+
+        # For each histogram request return a list of buckets like:
+        # {
+        #    bucket: start value
+        #    bucketEnd: end value (optional)
+        #    count: number of entries in this bucket
+        #    filteredCount: number of entries in this bucket after filtering
+        #    metric: metric value for this bucket (optional)
+        # }
         res = {}
         for col in cols:
             df_col = self.df[str(col)]
@@ -531,8 +540,8 @@ class ZenoBackend(object):
         return res
 
     def embed_exists(self, model: str, transform: str):
-        """Checks for the existence of an embedding column
-        returns True if the column exists, False otherwise
+        """Checks for the existence of an embedding column.
+        Returns True if the column exists, False otherwise
         """
         embed_column = ZenoColumn(
             name=model, column_type=ZenoColumnType.EMBEDDING, transform=transform
@@ -542,7 +551,7 @@ class ZenoBackend(object):
 
     @lru_cache()
     def project_embed_into_2D(self, model: str, transform: str) -> Dict[str, list]:
-        """If the embedding exists, will use tsne to project into 2D
+        """If the embedding exists, will use t-SNE to project into 2D.
         Returns the 2D embeddings as object/dict
         {
             x: list[float]
@@ -553,16 +562,15 @@ class ZenoBackend(object):
 
         points: Dict[str, list] = {"x": [], "y": [], "ids": []}
 
-        # can't do shit if embed no existy
+        # Can't project without an embedding
         if not self.embed_exists(model, transform):
-            # so just return the empty points
             return points
 
         embed_col = ZenoColumn(
             column_type=ZenoColumnType.EMBEDDING, name=model, transform=transform
         )
 
-        # extract embeddings and store in one big ndarray
+        # Extract embeddings and store in one big ndarray
         embed = self.df[str(embed_col)].to_numpy()
         embed = np.stack(embed, axis=0)  # type: ignore
 

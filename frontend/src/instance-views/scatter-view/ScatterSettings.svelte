@@ -8,9 +8,10 @@
 
 <!-- settings/controls for the scatterplot -->
 <div class="title">
-	<Icon class="material-icons" style="font-size: inherit; color: inherit;"
-		>settings</Icon>
-	Settings
+	<Icon class="material-icons" style="font-size: inherit; color: inherit;">
+		settings
+	</Icon>
+	<span id="setting">Settings</span>
 </div>
 <FormField style="display: flex;">
 	<span
@@ -31,5 +32,11 @@
 	.title {
 		font-size: 18px;
 		font-weight: 400;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+	}
+	#setting {
+		margin-left: 5px;
 	}
 </style>

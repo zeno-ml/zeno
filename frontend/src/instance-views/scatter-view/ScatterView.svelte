@@ -1,23 +1,23 @@
 <script lang="ts">
-	import ReglScatter from "./reglScatter/ReglScatter.svelte";
 	import NoEmbed from "./NoEmbed.svelte";
-	import ScatterSettings from "./ScatterSettings.svelte";
+	import ReglScatter from "./regl-scatter/ReglScatter.svelte";
 	import ScatterHelp from "./ScatterHelp.svelte";
+	import ScatterSettings from "./ScatterSettings.svelte";
 
 	import { BarLoader as Spinner } from "svelte-loading-spinners";
 	import {
 		checkEmbedExists,
+		createViewComponent,
 		getEntry,
 		projectEmbedInto2D,
-		createViewComponent,
 	} from "../../api";
-	import { createScalesWebgGLExtent } from "./reglScatter";
 	import { model, transform } from "../../stores";
+	import { createScalesWebgGLExtent } from "./regl-scatter";
 
 	import type {
 		ReglScatterPointDispatch,
 		WebGLExtentScalers,
-	} from "./reglScatter";
+	} from "./regl-scatter";
 
 	export let currentResult;
 	export let table;
@@ -100,7 +100,7 @@
 
 <svelte:window on:resize={resizeScatter} />
 
-<div id="scatter-view">
+<div id="scatter-view" bind:clientHeight={height}>
 	{#if embedExists}
 		<div bind:this={containerEl} id="container">
 			{#if !computingPoints}
@@ -134,8 +134,8 @@
 								id="hover-view"
 								style:width="{100}px"
 								style:height="{80}px"
-								style:left="{pointHover.canvasX + 50}px"
-								style:top="{pointHover.canvasY + 50}px">
+								style:left="{pointHover.canvasX + 5}px"
+								style:top="{pointHover.canvasY + 5}px">
 								<div id="replace-view" bind:this={hoverViewDivEl} />
 							</div>
 						{/if}
@@ -169,6 +169,7 @@
 <style>
 	#scatter-view {
 		position: relative;
+		height: calc(100vh - 165px);
 	}
 	#container {
 		position: relative;
