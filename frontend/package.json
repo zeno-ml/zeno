@@ -13,7 +13,6 @@
     },
     "devDependencies": {
         "@formkit/auto-animate": "^1.0.0-beta.5",
-        "@smui-extra/accordion": "7.0.0-beta.0",
         "@smui-extra/autocomplete": "7.0.0-beta.0",
         "@smui/button": "7.0.0-beta.0",
         "@smui/card": "7.0.0-beta.0",
@@ -60,10 +59,7 @@
     "dependencies": {
         "@mdi/js": "^7.1.96",
         "d3-array": "^3.2.1",
-        "d3-color": "^3.1.0",
-        "d3-force": "^3.0.0",
         "d3-scale": "^4.0.2",
-        "d3-scale-chromatic": "^3.0.0",
         "d3-selection": "^3.0.0",
         "d3-shape": "^3.1.0",
         "html2pdf.js": "^0.10.1",
