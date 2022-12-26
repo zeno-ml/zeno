@@ -4,7 +4,7 @@ version = "0.2.6"
 description = "Interactive Evaluation Framework for Machine Learning"
 license = "MIT"
 authors = ["Ángel Alexander Cabrera <alex.cabrera@gmail.com>"]
-readme = "README.md"  # Markdown files are supported
+readme = "README.md"
 repository = "https://github.com/zeno-ml/zeno"
 homepage = "https://zenoml.com"
 keywords = ["ml", "testing", "evaluation", "machine learning", "ai"]
@@ -17,35 +17,38 @@ include = [
 exclude = ["zeno/tests/*"]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11" 
-pandas = "^1.4.0"
-uvicorn = ">=0.17.5,<0.21.0"
 fastapi = ">=0.75,<0.89"
-websockets = "^10.2"
-tqdm = "^4.64.0"
-tomli = "^2.0.1"
+inquirerpy = "^0.3.4"
+nest-asyncio = "^1.5.6"
+pandas = "^1.4.0"
+pathos = "^0.3.0"
+python = ">=3.8, <=3.11" 
 requests = "^2.28.1"
 scikit-learn = "^1.1.2"
-types-setuptools = "^65.4.0"
 setuptools = "^65.5.1"
-pathos = "^0.3.0"
-nest-asyncio = "^1.5.6"
+tomli = "^2.0.1"
+tqdm = "^4.64.0"
+types-requests = "^2.28.11"
+types-setuptools = "^65.4.0"
+types-tqdm = "^4.64.7"
+uvicorn = ">=0.17.5,<0.21.0"
+websockets = "^10.2"
 
 [tool.poetry.dev-dependencies]
-pandas-stubs = "^1.5.2"
-pytest = "^7.1.1"
 black = "^22.12.0"
 flake8 = "^5.0.0"
 mypy = "^0.991"
+pandas-stubs = "^1.5.2"
 pyright = "^1.1.285"
+pytest = "^7.1.1"
 usort = "^1.0.5"
 
 [tool.poetry.scripts]
 zeno = "zeno.runner:command_line"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0"]
 
 [tool.pyright]
 include = ["zeno"]

@@ -2,7 +2,8 @@ import math
 import os
 
 import torch
-import whisper
+
+# import whisper
 from jiwer import wer
 from zeno import ZenoOptions, distill, metric, model
 
@@ -27,16 +28,17 @@ def load_model(model_path):
         return pred
 
     elif "whisper" in model_path:
-        model = whisper.load_model("tiny")
+        pass
+        # model = whisper.load_model("tiny")
 
-        def pred(df, ops: ZenoOptions):
-            files = [os.path.join(ops.data_path, f) for f in df[ops.data_column]]
-            outs = []
-            for f in files:
-                outs.append(model.transcribe(f)["text"])
-            return outs
+        # def pred(df, ops: ZenoOptions):
+        #     files = [os.path.join(ops.data_path, f) for f in df[ops.data_column]]
+        #     outs = []
+        #     for f in files:
+        #         outs.append(model.transcribe(f)["text"])
+        #     return outs
 
-        return pred
+        # return pred
 
 
 @distill
