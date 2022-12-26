@@ -133,7 +133,7 @@ class ZenoBackend(object):
             col = ZenoColumn(
                 column_type=ZenoColumnType.METADATA,
                 metadata_type=getMetadataType(self.df[metadata_col]),
-                name=metadata_col[1:],
+                name=str(metadata_col)[1:],
             )
             self.columns.append(col)
             self.complete_columns.append(col)

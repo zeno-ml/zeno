@@ -1,7 +1,8 @@
 from torchvision import transforms
 from torchvision.models import resnet50 as resnet, ResNet50_Weights
 from PIL import Image
-from clip import load
+
+# from clip import load
 import os
 import torch
 
@@ -40,18 +41,18 @@ class Resnet50Model(torch.nn.Module):
         return self.model(x)
 
 
-@torch.no_grad()
-def resnet_predict(model: torch.nn.Module, batch):
-    model.to(DEVICE).eval()
-    x: torch.Tensor = batch.to(DEVICE)
-    out: torch.Tensor = model(x)
-    embedding: torch.Tensor = model.embedding
+# @torch.no_grad()
+# def resnet_predict(model: torch.nn.Module, batch):
+#     model.to(DEVICE).eval()
+#     x: torch.Tensor = batch.to(DEVICE)
+#     out: torch.Tensor = model(x)
+#     embedding: torch.Tensor = model.embedding
 
-    return {
-        "predictions": out.cpu().numpy().argmax(axis=-1),
-        "embeddings": embedding.cpu().numpy(),
-        "probabilities": torch.softmax(out, axis=-1).cpu().numpy(),
-    }
+#     return {
+#         "predictions": out.cpu().numpy().argmax(axis=-1),
+#         "embeddings": embedding.cpu().numpy(),
+#         "probabilities": torch.softmax(out, axis=-1).cpu().numpy(),
+#     }
 
 
 @torch.no_grad()
@@ -62,9 +63,9 @@ def clip_image_encode(model, batch):
     return out.cpu().numpy()
 
 
-def load_clip(variant="ViT-B/32"):
-    clip_model, preprocess = load(variant, DEVICE)
-    return clip_model, preprocess
+# def load_clip(variant="ViT-B/32"):
+#     clip_model, preprocess = load(variant, DEVICE)
+#     return clip_model, preprocess
 
 
 @model
@@ -75,8 +76,8 @@ def load_model(model_path):
     use_clip = model_path == "resnet+clip"
 
     clip_model, clip_preprocess = None, None
-    if use_clip is True:
-        clip_model, clip_preprocess = load_clip()
+    # if use_clip is True:
+    #     clip_model, clip_preprocess = load_clip()
     clip_present = (
         use_clip is True and clip_model is not None and clip_preprocess is not None
     )

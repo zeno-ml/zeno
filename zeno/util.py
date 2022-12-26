@@ -13,6 +13,9 @@ import pandas as pd  # type: ignore
 
 from zeno.classes import MetadataType
 
+VIEW_MAP_URL = "https://raw.githubusercontent.com/zeno-ml/instance-views/main/"
+VIEWS_MAP_JSON = "views.json"
+
 
 class NpEncoder(json.JSONEncoder):
     def default(self, obj):
