@@ -6,7 +6,7 @@ from pathlib import Path
 import nest_asyncio  # type: ignore
 import pandas as pd
 import pkg_resources
-import requests  # type: ignore
+import requests
 import tomli
 import uvicorn
 

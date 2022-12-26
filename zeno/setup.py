@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 
 import requests
 from InquirerPy.resolver import prompt

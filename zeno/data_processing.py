@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Callable, Tuple
 
 import pandas as pd
-from tqdm import trange  # type: ignore
+from tqdm import trange
 
 from zeno.api import ZenoOptions
 from zeno.classes import ZenoColumn, ZenoColumnType
