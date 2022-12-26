@@ -4,15 +4,16 @@ import os
 from pathlib import PosixPath
 from typing import List, Union
 
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.staticfiles import StaticFiles
 
 from zeno.classes import (
+    EmbedProject2DRequest,
+    EntryRequest,
     FilterPredicate,
     FilterPredicateGroup,
     HistogramRequest,
     MetricKey,
-    MirrorProject,
     Report,
     Slice,
     StatusResponse,
@@ -112,26 +113,31 @@ def get_server(zeno: ZenoBackend):
     def get_metrics_for_slices(reqs: List[MetricKey]):
         return json.dumps(zeno.get_metrics_for_slices(reqs))
 
-    @api_app.post("/mirror/project")
-    def mirror_project(req: MirrorProject):
-        # not specified or entire data frame just use the cache
-        if req.ids is None or len(req.ids) == len(zeno.df):
-            proj = zeno.mirror.initProject(req.model, req.transform)
-        else:
-            proj = zeno.mirror.filterProject(
-                req.model, req.ids, req.transform, perplexity=req.perplexity
+    @api_app.get("/embed-exists/{model}")
+    def embed_exists(model: str, transform: str = ""):
+        """checks if embedding exists for a model and transform
+        returns the boolean True or False directly
+        """
+        exists = zeno.embed_exists(model, transform)
+        return exists
+
+    @api_app.post("/embed-project")
+    def project_embed_into_2D(req: EmbedProject2DRequest):
+        points = zeno.project_embed_into_2D(req.model, req.transform)
+        return points
+
+    @api_app.post("/entry")
+    def get_df_row_entry(req: EntryRequest):
+        try:
+            entry = zeno.df.loc[req.id, :]
+            if len(req.columns) > 0:
+                entry = entry[list(map(str, req.columns))]
+            json_entry = entry.to_json()
+            return json_entry
+        except KeyError:
+            raise HTTPException(
+                status_code=404, detail=f"Entry with id={req.id} not found"
             )
-
-        return json.dumps({"model": req.model, "data": proj})
-
-    @api_app.get("/mirror/sdm")
-    def sdm():
-        return json.dumps({"data": zeno.mirror.generate_slices()})
-
-    @api_app.get("/mirror/exists/{model}")
-    def embedding_exists(model: str):
-        exists = zeno.embedding_exists(model)
-        return json.dumps({"model": model, "exists": exists})
 
     @api_app.websocket("/status")
     async def results_websocket(websocket: WebSocket):

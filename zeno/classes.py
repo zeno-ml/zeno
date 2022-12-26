@@ -129,8 +129,11 @@ class StatusResponse(CamelModel):
     complete_columns: List[ZenoColumn]
 
 
-class MirrorProject(BaseModel):
+class EmbedProject2DRequest(BaseModel):
     model: str
     transform: str = ""
-    ids: Optional[List[str]] = None
-    perplexity: Optional[int] = 30
+
+
+class EntryRequest(BaseModel):
+    id: str
+    columns: List[ZenoColumn] = []

@@ -91,6 +91,13 @@ declare namespace svelte.JSX {
 	}
 }
 
+// columnar points
+interface Points2D {
+	x: Float32Array;
+	y: Float32Array;
+	ids: string[];
+}
+
 declare namespace View {
 	type Options = object;
 	type SetOptions = (options: Options) => void;
@@ -111,4 +118,11 @@ declare namespace View {
 
 	// component injected into div provided
 	type OptionsComponent = (div: HTMLDivElement, setOptions: SetOptions) => void;
+}
+
+// columnar points
+interface Points2D {
+	x: number[];
+	y: number[];
+	ids: string[];
 }

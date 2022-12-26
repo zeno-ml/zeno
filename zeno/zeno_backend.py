@@ -5,6 +5,7 @@ import os
 import pickle
 import sys
 import threading
+from functools import lru_cache
 from inspect import getsource
 from math import isnan
 from pathlib import Path
@@ -35,7 +36,6 @@ from zeno.data_processing import (
     transform_data,
 )
 from zeno.filtering import filter_table, filter_table_single
-from zeno.mirror import Mirror
 from zeno.util import getMetadataType, load_series, read_pickle
 
 
@@ -92,7 +92,6 @@ class ZenoBackend(object):
 
         self.__setup_dataframe(id_column, data_column, label_column)
         self.__parse_test_functions(self.tests)
-        self.mirror = Mirror(self.df, self.cache_path, self.id_column)
 
         # Options passed to Zeno functions.
         self.zeno_options = ZenoOptions(
@@ -469,6 +468,15 @@ class ZenoBackend(object):
             req.get_metrics = False
 
         cols = req.columns
+
+        # For each histogram request return a list of buckets like:
+        # {
+        #    bucket: start value
+        #    bucketEnd: end value (optional)
+        #    count: number of entries in this bucket
+        #    filteredCount: number of entries in this bucket after filtering
+        #    metric: metric value for this bucket (optional)
+        # }
         res = {}
         for col in cols:
             df_col = self.df[str(col)]
@@ -531,6 +539,49 @@ class ZenoBackend(object):
                 res[str(col)] = []
         return res
 
-    def embedding_exists(self, model: str):
-        col = ZenoColumn(name=model, column_type=ZenoColumnType.EMBEDDING)
-        return str(col) in self.df.columns
+    def embed_exists(self, model: str, transform: str):
+        """Checks for the existence of an embedding column.
+        Returns True if the column exists, False otherwise
+        """
+        embed_column = ZenoColumn(
+            name=model, column_type=ZenoColumnType.EMBEDDING, transform=transform
+        )
+        exists = str(embed_column) in self.df.columns
+        return exists
+
+    @lru_cache()
+    def project_embed_into_2D(self, model: str, transform: str) -> Dict[str, list]:
+        """If the embedding exists, will use t-SNE to project into 2D.
+        Returns the 2D embeddings as object/dict
+        {
+            x: list[float]
+            y: list[float]
+            ids: list[str]
+        }
+        """
+
+        points: Dict[str, list] = {"x": [], "y": [], "ids": []}
+
+        # Can't project without an embedding
+        if not self.embed_exists(model, transform):
+            return points
+
+        embed_col = ZenoColumn(
+            column_type=ZenoColumnType.EMBEDDING, name=model, transform=transform
+        )
+
+        # Extract embeddings and store in one big ndarray
+        embed = self.df[str(embed_col)].to_numpy()
+        embed = np.stack(embed, axis=0)  # type: ignore
+
+        # project embeddings into 2D
+        from sklearn.manifold import TSNE  # type: ignore
+
+        projection = TSNE().fit_transform(embed)
+
+        # extract points and ids from computed projection
+        points["x"] = projection[:, 0].tolist()
+        points["y"] = projection[:, 1].tolist()
+        points["ids"] = self.df[str(self.id_column)].to_list()
+
+        return points

@@ -3,6 +3,7 @@
 	import SelectionBar from "../metadata/SelectionBar.svelte";
 	import ListView from "./ListView.svelte";
 	import TableView from "./TableView.svelte";
+	import ScatterView from "./scatter-view/ScatterView.svelte";
 	import { getMetricsForSlices } from "../api";
 	import { zenoState, selectionPredicates } from "../stores";
 
@@ -65,6 +66,9 @@
 {/if}
 {#if selected === "table"}
 	<TableView {currentResult} {table} {viewFunction} {viewOptions} />
+{/if}
+{#if selected === "scatter"}
+	<ScatterView {currentResult} {table} {viewFunction} {viewOptions} />
 {/if}
 
 <style>
