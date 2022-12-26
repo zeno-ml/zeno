@@ -12,7 +12,6 @@ from zeno.classes import (
     EntryRequest,
     FilterPredicate,
     FilterPredicateGroup,
-    EmbedProject2DRequest,
     HistogramRequest,
     MetricKey,
     Report,
