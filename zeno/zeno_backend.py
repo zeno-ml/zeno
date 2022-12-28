@@ -156,8 +156,6 @@ class ZenoBackend(object):
                 self.transform_functions[test_fn.__name__] = test_fn
             if hasattr(test_fn, "metric_function"):
                 self.metric_functions[test_fn.__name__] = test_fn
-        if not self.predict_function:
-            print("WARNING: No model function found")
 
     def start_processing(self):
         """Parse testing files, distill, and run inference."""

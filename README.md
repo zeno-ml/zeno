@@ -7,11 +7,48 @@
 
 Zeno is a general-purpose framework for evaluating machine learning models.
 It combines a **Python API** with an **interactive UI** to allow users to discover, explore, and analyze the performance of their models across diverse use cases.
-Zeno can be used for any data type or task with _modular views_ for everything from object detection to audio transcription.
+Zeno can be used for any data type or task with [modular views](https://zenoml.com/docs/views/) for everything from object detection to audio transcription.
 
-## Getting Started
+## Quickstart
 
-Check out the quickstart tutorial and API reference to get started with Zeno:
+Install the Zeno Python package from PyPI:
+
+```bash
+pip install zenoml
+```
+
+### Command Line
+
+To get started, run the following command to initialize a Zeno project. It will walk you through creating the `zeno.toml` configuration file:
+
+```bash
+zeno init
+```
+
+Then run `zeno zeno.toml`.
+
+### Jupyter Notebook
+
+You can also run Zeno directly from Jupyter notebooks or lab. The `zeno` command takes a dictionary of configuration options as input. See [the docs](https://zenoml.com/docs/configuration) for a full list of options. In this example we pass the minimum options for exploring a non-tabular dataset:
+
+```python
+import pandas as pd
+from zeno import zeno
+
+df = pd.read_csv("/path/to/metadata/file.csv")
+
+zeno({
+	"metadata": df, # Pandas DataFrame with a row for each instance
+    "view": "audio-transcription", # The type of view for this data/task
+    "data_path": "/path/to/raw/data/", # The folder with raw data (images, audio, etc.)
+    "data_column": "id" # The column in the metadata file that contains the relative paths of files in data_path
+})
+
+```
+
+## Learn More
+
+Check out examples and additional documentation:
 
 - [Introduction](http://zenoml.com/docs/intro/) - Learn more about Zeno.
 - [Getting Started](http://zenoml.com/docs/intro/get_started) - Setup Zeno with your own data and models.
