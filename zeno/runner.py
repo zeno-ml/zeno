@@ -12,7 +12,7 @@ import uvicorn
 
 from zeno.server import get_server
 from zeno.setup import setup_zeno
-from zeno.util import parse_testing_file, VIEW_MAP_URL, VIEWS_MAP_JSON
+from zeno.util import is_notebook, parse_testing_file, VIEW_MAP_URL, VIEWS_MAP_JSON
 from zeno.zeno_backend import ZenoBackend
 
 
@@ -83,7 +83,6 @@ def parse_toml():
     if "functions" not in args or not os.path.exists(
         os.path.realpath(os.path.join(base_path, args["functions"]))
     ):
-        print("WARNING: No 'functions' directory found.")
         args["functions"] = []
     else:
         args["functions"] = Path(
@@ -136,7 +135,6 @@ def parse_args(args: dict, base_path) -> dict:
             sys.exit(1)
 
     if "models" not in args or len(args["models"]) < 1:
-        print("WARNING: No 'models' found.")
         args["models"] = []
     else:
         if Path(os.path.realpath(os.path.join(base_path, args["models"][0]))).exists():
@@ -144,6 +142,9 @@ def parse_args(args: dict, base_path) -> dict:
                 Path(os.path.realpath(os.path.join(base_path, m)))
                 for m in args["models"]
             ]
+
+    if "functions" not in args:
+        args["functions"] = []
 
     if "data_path" not in args:
         args["data_path"] = ""
@@ -201,6 +202,7 @@ def zeno(args, base_path="./"):
     nest_asyncio.apply()
 
     args = parse_args(args, base_path)
+
     zeno = ZenoBackend(
         df=args["metadata"],
         functions=args["functions"],
@@ -221,6 +223,22 @@ def zeno(args, base_path="./"):
     app = get_server(zeno)
 
     if args["serve"]:
-        uvicorn.run(app, host=args["host"], port=args["port"])
+        print(
+            "\n\033[1mZeno\033[0m running on http://{}:{}\n".format(
+                args["host"], args["port"]
+            )
+        )
+        if is_notebook():
+            from IPython.display import IFrame  # type: ignore
+
+            display(  # noqa: F821 # type: ignore
+                IFrame(
+                    "http://{}:{}".format(args["host"], args["port"]),
+                    "100%",
+                    800,
+                )
+            )
+
+        uvicorn.run(app, host=args["host"], port=args["port"], log_level="critical")
     else:
         return app
