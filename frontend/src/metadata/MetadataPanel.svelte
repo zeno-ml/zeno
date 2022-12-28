@@ -19,7 +19,6 @@
 		slices,
 		sliceToEdit,
 		status,
-		transform,
 		metricRange,
 		zenoState,
 		selectionPredicates,
@@ -93,16 +92,6 @@
 				{/each}
 			</Select>
 		{/if}
-		<!-- {#if $transform !== undefined && $transforms.length !== 0}
-			<Select
-				bind:value={$transform}
-				label="Transform"
-				style="margin-right: 20px; width: 125px">
-				{#each ["", ...$transforms] as t}
-					<Option value={t}>{t}</Option>
-				{/each}
-			</Select>
-		{/if} -->
 	</div>
 
 	<div class="inline">
@@ -231,7 +220,7 @@
 	{/each}
 
 	{#if $model}
-		{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.POSTDISTILL && m.model === $model && m.transform === $transform) as col}
+		{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.POSTDISTILL && m.model === $model) as col}
 			<MetadataCell {col} histogram={metadataHistograms[columnHash(col)]} />
 		{/each}
 	{/if}

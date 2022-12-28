@@ -11,12 +11,7 @@ export function updateTab(t: string) {
 }
 
 export function columnHash(col: ZenoColumn) {
-	return (
-		col.columnType +
-		col.name +
-		(col.model ? col.model : "") +
-		(col.transform ? col.transform : "")
-	);
+	return col.columnType + col.name + (col.model ? col.model : "");
 }
 
 export function getMetricRange(res) {

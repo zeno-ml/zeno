@@ -11,7 +11,7 @@
 		getEntry,
 		projectEmbedInto2D,
 	} from "../../api";
-	import { model, transform } from "../../stores";
+	import { model } from "../../stores";
 	import { createScalesWebgGLExtent } from "./regl-scatter";
 
 	import type {
@@ -37,7 +37,7 @@
 	let hoverViewDivEl: HTMLDivElement; // show view on point hover
 	let containerEl: HTMLDivElement; // save so I can resize
 
-	$: project2DOnModelAndTransformChange($model, $transform);
+	$: project2DOnModelAndTransformChange($model);
 	$: {
 		if (containerEl && autoResize) {
 			resizeScatter();
@@ -48,19 +48,16 @@
 	 * Main driver behind fetching the projected points and displaying
 	 * them in the scale that WebGL expects between [-1, 1]
 	 */
-	async function project2DOnModelAndTransformChange(
-		model: string,
-		transform: string
-	) {
+	async function project2DOnModelAndTransformChange(model: string) {
 		// don't do shit if we have no gabagoo
-		embedExists = await checkEmbedExists(model, transform);
+		embedExists = await checkEmbedExists(model);
 
 		if (embedExists) {
 			// show spinner
 			computingPoints = true;
 
 			// requests tsne from backend
-			points = (await projectEmbedInto2D(model, transform)) as Points2D;
+			points = (await projectEmbedInto2D(model)) as Points2D;
 
 			// simply scales the points between [-1, 1]
 			pointToWebGL = createScalesWebgGLExtent(points);
@@ -156,7 +153,6 @@
 					<b>Computing 2D projection</b> from
 					<code>
 						{$model}
-						{$transform}
 					</code> embeddings
 				</div>
 			{/if}

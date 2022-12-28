@@ -10,8 +10,6 @@ class ZenoColumnType(IntEnum):
     OUTPUT = 2
     EMBEDDING = 3
     POSTDISTILL = 4
-    TRANSFORM = 5
-    WEAK_LABEL = 6
 
 
 class MetadataType(IntEnum):
@@ -36,13 +34,11 @@ class CamelModel(BaseModel):
 class ZenoState(CamelModel):
     model: str
     metric: str
-    transform: str
 
 
 class ReportPredicate(CamelModel):
     slice_name: str
     metric: str
-    transform: str
 
 
 class Report(CamelModel):
@@ -56,15 +52,12 @@ class ZenoColumn(CamelModel):
     name: str
     metadata_type: Optional[MetadataType] = MetadataType.OTHER
     model: Optional[str] = ""
-    transform: Optional[str] = ""
 
     def __str__(self):
         m = ""
         t = ""
         if self.model is not None:
             m = self.model
-        if self.transform is not None:
-            t = self.transform
         return str(int(self.column_type)) + self.name + m + t
 
 
@@ -93,7 +86,6 @@ class ZenoSettings(CamelModel):
 
 class ZenoVariables(CamelModel):
     metrics: List[str]
-    transforms: List[str]
     models: List[str]
     folders: List[str]
 
@@ -131,7 +123,6 @@ class StatusResponse(CamelModel):
 
 class EmbedProject2DRequest(BaseModel):
     model: str
-    transform: str = ""
 
 
 class EntryRequest(BaseModel):

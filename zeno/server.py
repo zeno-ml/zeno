@@ -68,7 +68,6 @@ def get_server(zeno: ZenoBackend):
     def get_initial_info():
         return ZenoVariables(
             metrics=list(zeno.metric_functions.keys()),
-            transforms=list(zeno.transform_functions.keys()),
             models=[str(n) for n in zeno.model_names],
             folders=zeno.folders,
         )
@@ -114,16 +113,17 @@ def get_server(zeno: ZenoBackend):
         return json.dumps(zeno.get_metrics_for_slices(reqs))
 
     @api_app.get("/embed-exists/{model}")
-    def embed_exists(model: str, transform: str = ""):
-        """checks if embedding exists for a model and transform
-        returns the boolean True or False directly
+    def embed_exists(model: str):
         """
-        exists = zeno.embed_exists(model, transform)
+        Checks if embedding exists for a model.
+        Returns the boolean True or False directly
+        """
+        exists = zeno.embed_exists(model)
         return exists
 
     @api_app.post("/embed-project")
     def project_embed_into_2D(req: EmbedProject2DRequest):
-        points = zeno.project_embed_into_2D(req.model, req.transform)
+        points = zeno.project_embed_into_2D(req.model)
         return points
 
     @api_app.post("/entry")

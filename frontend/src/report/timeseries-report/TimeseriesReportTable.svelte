@@ -50,7 +50,6 @@
 					<Cell class="sticky" style="border-right: 1px solid #e8e8e8">
 						Slice
 					</Cell>
-					<Cell>Transform</Cell>
 					<Cell>Metric</Cell>
 					<Cell class="end-cell">Trend</Cell>
 					{#each $models as m}

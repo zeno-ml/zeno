@@ -53,7 +53,6 @@
 					<Cell class="sticky" style="border-right: 1px solid #e8e8e8">
 						Slice
 					</Cell>
-					<Cell>Transform</Cell>
 					<Cell>Metric</Cell>
 					{#each $models as m}
 						<Cell>{m}</Cell>

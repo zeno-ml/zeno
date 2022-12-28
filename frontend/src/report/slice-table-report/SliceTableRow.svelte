@@ -4,7 +4,7 @@
 	import { Svg } from "@smui/common";
 	import { Cell, Row } from "@smui/data-table";
 
-	import { metric, models, report, reports, transform } from "../../stores";
+	import { metric, models, report, reports } from "../../stores";
 	import { getMetricsForSlices } from "../../api";
 
 	import SliceDetailsContainer from "../SliceDetailsContainer.svelte";
@@ -17,7 +17,6 @@
 			state: {
 				metric: $metric,
 				model: m,
-				transform: $transform,
 			},
 		}))
 	);
@@ -43,7 +42,6 @@
 								rep.reportPredicates.push({
 									sliceName: sli.sliceName,
 									metric: $metric,
-									transform: $transform,
 								});
 								reps[$report] = rep;
 								return reps;

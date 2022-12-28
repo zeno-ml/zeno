@@ -34,7 +34,6 @@
 					state: {
 						metric: $metric,
 						model: mod,
-						transform: pred.transform,
 					},
 				});
 			});
