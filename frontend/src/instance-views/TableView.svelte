@@ -13,7 +13,6 @@
 		sort,
 		status,
 		model,
-		transform,
 		zenoState,
 	} from "../stores";
 	import { columnHash } from "../util/util";
@@ -122,28 +121,15 @@
 
 	async function drawInstances() {
 		let obj = $status.completeColumns.find((c) => {
-			return (
-				c.columnType === ZenoColumnType.OUTPUT &&
-				c.name === $model &&
-				c.transform === $transform
-			);
+			return c.columnType === ZenoColumnType.OUTPUT && c.name === $model;
 		});
 		let modelColumn = obj ? columnHash(obj) : "";
-		let transformColumn = "";
-		if ($zenoState.transform) {
-			let col = <ZenoColumn>{
-				columnType: ZenoColumnType.TRANSFORM,
-				name: $zenoState.transform,
-			};
-			transformColumn = columnHash(col);
-		}
 
 		await tick();
 
 		columnHeader = $status.completeColumns.filter(
 			(c) =>
 				(c.model === "" || c.model === $zenoState.model) &&
-				(c.transform === "" || c.transform === $zenoState.transform) &&
 				(c.columnType === 0 || c.columnType === 1 || c.columnType === 4)
 		);
 		let ids = table.map((inst) => inst[idHash]);
@@ -169,7 +155,6 @@
 					columnHash($settings.labelColumn),
 					columnHash($settings.dataColumn),
 					$settings.dataOrigin,
-					transformColumn,
 					idHash
 				);
 			}

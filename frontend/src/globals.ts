@@ -9,8 +9,6 @@ export enum ZenoColumnType {
 	EMBEDDING,
 	// Distill column dependent on model output.
 	POSTDISTILL,
-	// Transformed data filenames.
-	TRANSFORM,
 }
 
 export enum MetadataType {

@@ -45,59 +45,9 @@ def predistill_data(
     return (column, col)
 
 
-def transform_data(
-    fn: Callable,
-    options: ZenoOptions,
-    cache_path: str,
-    df: pd.DataFrame,
-    batch_size: int,
-    pos: int,
-) -> Tuple[ZenoColumn, pd.Series]:
-    transform_col = ZenoColumn(
-        column_type=ZenoColumnType.TRANSFORM,
-        name=fn.__name__,
-    )
-    col_hash = str(transform_col)
-    col = df[col_hash]
-
-    save_path = Path(cache_path, col_hash + ".pickle")
-    src = getsource(fn)
-    transform_cache_path = ""
-    if "output_path" in src:
-        transform_cache_path = os.path.join(cache_path, col_hash)
-        os.makedirs(transform_cache_path, exist_ok=True)
-
-    to_transform_indices = col.loc[pd.isna(col)].index
-
-    if len(to_transform_indices) > 0:
-        if len(to_transform_indices) < batch_size:
-            out = fn(
-                df.loc[to_transform_indices],
-                dataclasses.replace(options, output_path=transform_cache_path),
-            )
-            col.loc[to_transform_indices] = out
-            col.to_pickle(str(save_path))
-        else:
-            for i in trange(
-                0,
-                len(to_transform_indices),
-                batch_size,
-                desc="transforming " + fn.__name__,
-                position=pos,
-            ):
-                out = fn(
-                    df.loc[to_transform_indices[i : i + batch_size]],
-                    dataclasses.replace(options, output_path=transform_cache_path),
-                )
-                col.loc[to_transform_indices[i : i + batch_size]] = out
-                col.to_pickle(str(save_path))
-    return (transform_col, col)
-
-
 def run_inference(
     fn: Callable,
     options: ZenoOptions,
-    transform: str,
     model_path: str,
     cache_path: str,
     df: pd.DataFrame,
@@ -109,12 +59,10 @@ def run_inference(
     model_col_obj = ZenoColumn(
         column_type=ZenoColumnType.OUTPUT,
         name=model_name,
-        transform=transform,
     )
     embedding_col_obj = ZenoColumn(
         column_type=ZenoColumnType.EMBEDDING,
         name=model_name,
-        transform=transform,
     )
     model_hash = str(model_col_obj)
     embedding_hash = str(embedding_col_obj)
@@ -125,18 +73,6 @@ def run_inference(
     embedding_save_path = Path(cache_path, embedding_hash + ".pickle")
 
     to_predict_indices = model_col.loc[pd.isna(model_col)].index
-
-    # If transform, pass transform data
-    if len(transform) != 0:
-        transform_data_col = ZenoColumn(
-            column_type=ZenoColumnType.TRANSFORM,
-            name=transform,
-        )
-        transform_col_name = str(transform_data_col)
-        transform_path = os.path.join(cache_path, transform_col_name)
-        options = dataclasses.replace(
-            options, data_path=transform_path, data_column=transform_col_name
-        )
 
     if len(to_predict_indices) > 0:
         model_fn = fn(model_path)
@@ -167,7 +103,7 @@ def run_inference(
                 0,
                 len(to_predict_indices),
                 batch_size,
-                desc="Inference on " + model_name + " with " + transform,
+                desc="Inference on " + model_name,
                 position=pos,
             ):
 
@@ -198,7 +134,6 @@ def run_inference(
 def postdistill_data(
     fn: Callable,
     model: str,
-    transform: str,
     options: ZenoOptions,
     cache_path: str,
     df: pd.DataFrame,
@@ -209,7 +144,6 @@ def postdistill_data(
         column_type=ZenoColumnType.POSTDISTILL,
         name=fn.__name__,
         model=model,
-        transform=transform,
     )
     col_hash = str(col_obj)
     col = df[col_hash]
@@ -217,7 +151,6 @@ def postdistill_data(
     output_obj = ZenoColumn(
         column_type=ZenoColumnType.OUTPUT,
         name=model,
-        transform=transform,
     )
     output_hash = str(output_obj)
 
@@ -240,12 +173,7 @@ def postdistill_data(
                 0,
                 len(to_predict_indices),
                 batch_size,
-                desc="postprocessing "
-                + fn.__name__
-                + " on "
-                + model
-                + " with "
-                + transform,
+                desc="postprocessing " + fn.__name__ + " on " + model,
                 position=pos,
             ):
                 out = fn(df.loc[to_predict_indices[i : i + batch_size]], local_options)

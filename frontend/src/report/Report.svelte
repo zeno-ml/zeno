@@ -5,15 +5,7 @@
 	import { mdiChevronDown, mdiChevronUp } from "@mdi/js";
 	import { slide } from "svelte/transition";
 
-	import {
-		metric,
-		metrics,
-		transform,
-		transforms,
-		report,
-		reports,
-		ready,
-	} from "../stores";
+	import { metric, metrics, report, reports, ready } from "../stores";
 
 	import ReportsList from "./ReportsList.svelte";
 	import SliceTable from "./slice-table-report/SliceTable.svelte";
@@ -63,16 +55,6 @@
 									style="margin-right: 20px;">
 									{#each $metrics as m}
 										<Option value={m}>{m}</Option>
-									{/each}
-								</Select>
-							{/if}
-							{#if $transforms}
-								<Select
-									bind:value={$transform}
-									label="Transform"
-									style="margin-right: 20px;">
-									{#each ["", ...$transforms] as t}
-										<Option value={t}>{t}</Option>
 									{/each}
 								</Select>
 							{/if}

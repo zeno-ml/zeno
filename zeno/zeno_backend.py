@@ -29,12 +29,7 @@ from zeno.classes import (
     ZenoColumnType,
     ZenoState,
 )
-from zeno.data_processing import (
-    postdistill_data,
-    predistill_data,
-    run_inference,
-    transform_data,
-)
+from zeno.data_processing import postdistill_data, predistill_data, run_inference
 from zeno.filtering import filter_table, filter_table_single
 from zeno.util import getMetadataType, load_series, read_pickle
 
@@ -72,7 +67,6 @@ class ZenoBackend(object):
         self.predistill_functions: Dict[str, Callable] = {}
         self.postdistill_functions: Dict[str, Callable] = {}
         self.metric_functions: Dict[str, Callable] = {}
-        self.transform_functions: Dict[str, Callable] = {}
         self.predict_function: Optional[Callable] = None
 
         self.status: str = "Initializing"
@@ -152,8 +146,6 @@ class ZenoBackend(object):
                     self.postdistill_functions[test_fn.__name__] = test_fn
                 else:
                     self.predistill_functions[test_fn.__name__] = test_fn
-            if hasattr(test_fn, "transform_function"):
-                self.transform_functions[test_fn.__name__] = test_fn
             if hasattr(test_fn, "metric_function"):
                 self.metric_functions[test_fn.__name__] = test_fn
 
@@ -183,49 +175,25 @@ class ZenoBackend(object):
         self.__thread.start()
 
     async def __process(self):
-        self.status = "Running distill functions"
+        self.status = "Running predistill functions"
+        print(self.status)
         self.__predistill()
-        self.status = "Running transform functions"
-        self.__transform()
 
-        for transform in [*self.transform_functions.values(), None]:
-            self.__inference_and_postdistill(transform)
+        self.status = "Running inference"
+        print(self.status)
+        self.__inference()
 
+        self.status = "Running postdistill functions"
+        print(self.status)
+        self.__postdistill()
+
+        self.status = "Done processing"
+        print(self.status)
         self.done_processing = True
-
-    def __transform(self):
-        """Run transform functions."""
-        transform_to_run: List[Callable] = []
-        for transform_function in self.transform_functions.values():
-            transform_column = ZenoColumn(
-                column_type=ZenoColumnType.TRANSFORM, name=transform_function.__name__
-            )
-            save_path = Path(self.cache_path, str(transform_column) + ".pickle")
-
-            load_series(self.df, str(transform_column), save_path)
-
-            if self.df[str(transform_column)].isnull().any():
-                transform_to_run.append(transform_function)
-            else:
-                self.complete_columns.append(transform_column)
-
-        if len(transform_to_run) > 0:
-            with Pool() as pool:
-                transform_outputs = pool.map(
-                    transform_data,
-                    [fn for fn in transform_to_run],
-                    [self.zeno_options] * len(transform_to_run),
-                    [self.cache_path] * len(transform_to_run),
-                    [self.df] * len(transform_to_run),
-                    [self.batch_size] * len(transform_to_run),
-                    range(len(transform_to_run)),
-                )
-                for out in transform_outputs:
-                    self.df.loc[:, str(out[0])] = out[1]
-                    self.complete_columns.append(out[0])
 
     def __predistill(self):
         """Run distilling functions not dependent on model outputs."""
+
         # Check if we need to preprocess since Pool is expensive
         predistill_to_run: List[ZenoColumn] = []
         for predistill_column in [
@@ -260,7 +228,9 @@ class ZenoBackend(object):
                     out[0].metadata_type = getMetadataType(self.df[str(out[0])])
                     self.complete_columns.append(out[0])
 
-    def __inference_and_postdistill(self, transform: Optional[Callable]):
+    def __inference(self):
+        """Run models on instances."""
+
         # Check if we need to run inference since Pool is expensive
         models_to_run = []
         for model_path in self.model_paths:
@@ -268,12 +238,10 @@ class ZenoBackend(object):
             model_column = ZenoColumn(
                 column_type=ZenoColumnType.OUTPUT,
                 name=model_name,
-                transform=transform.__name__ if transform else "",
             )
             embedding_column = ZenoColumn(
                 column_type=ZenoColumnType.EMBEDDING,
                 name=model_name,
-                transform=transform.__name__ if transform else "",
             )
             model_hash = str(model_column)
             embedding_hash = str(embedding_column)
@@ -292,14 +260,12 @@ class ZenoBackend(object):
             else:
                 self.complete_columns.append(model_column)
 
-        self.status = "Running inference"
         if len(models_to_run) > 0:
             with Pool() as pool:
                 inference_outputs = pool.map(
                     run_inference,
                     [self.predict_function] * len(models_to_run),
                     [self.zeno_options] * len(models_to_run),
-                    [transform.__name__ if transform else ""] * len(models_to_run),
                     [m for m in models_to_run],
                     [self.cache_path] * len(models_to_run),
                     [self.df] * len(models_to_run),
@@ -312,7 +278,8 @@ class ZenoBackend(object):
                         self.df.loc[:, str(out[1])] = out[3]
                     self.complete_columns.append(out[0])
 
-        self.status = "Done running inference"
+    def __postdistill(self):
+        """Run distill functions dependent on model outputs."""
 
         # Check if we need to run postprocessing since Pool is expensive
         postdistill_to_run: List[ZenoColumn] = []
@@ -322,7 +289,6 @@ class ZenoBackend(object):
             col_name = postdistill_column.copy(
                 update={
                     "model": postdistill_column.model,
-                    "transform": transform.__name__ if transform else "",
                 }
             )
             col_hash = str(col_name)
@@ -336,14 +302,12 @@ class ZenoBackend(object):
                 col_name.metadata_type = getMetadataType(self.df[col_hash])
                 self.complete_columns.append(col_name)
 
-        self.status = "Running postprocessing"
         if len(postdistill_to_run) > 0:
             with Pool() as pool:
                 post_outputs = pool.map(
                     postdistill_data,
                     [self.postdistill_functions[e.name] for e in postdistill_to_run],
                     [e.model for e in postdistill_to_run],
-                    [transform.__name__ if transform else ""] * len(postdistill_to_run),
                     [self.zeno_options] * len(postdistill_to_run),
                     [self.cache_path] * len(postdistill_to_run),
                     [self.df] * len(postdistill_to_run),
@@ -354,8 +318,6 @@ class ZenoBackend(object):
                     self.df.loc[:, str(out[0])] = out[1]  # type: ignore
                     out[0].metadata_type = getMetadataType(self.df[str(out[0])])
                     self.complete_columns.append(out[0])
-
-        self.status = "Done running postprocessing"
 
     def get_metrics_for_slices(self, requests: List[MetricKey]):
         """Calculate result for each requested combination."""
@@ -377,7 +339,6 @@ class ZenoBackend(object):
         output_col = ZenoColumn(
             column_type=ZenoColumnType.OUTPUT,
             name=state.model,
-            transform=state.transform,
         )
         output_hash = str(output_col)
 
@@ -388,7 +349,6 @@ class ZenoBackend(object):
                 c.column_type == ZenoColumnType.PREDISTILL
                 or c.column_type == ZenoColumnType.POSTDISTILL
             )
-            and c.transform == state.transform
             and c.model == state.model
         ]
 
@@ -537,18 +497,16 @@ class ZenoBackend(object):
                 res[str(col)] = []
         return res
 
-    def embed_exists(self, model: str, transform: str):
+    def embed_exists(self, model: str):
         """Checks for the existence of an embedding column.
         Returns True if the column exists, False otherwise
         """
-        embed_column = ZenoColumn(
-            name=model, column_type=ZenoColumnType.EMBEDDING, transform=transform
-        )
+        embed_column = ZenoColumn(name=model, column_type=ZenoColumnType.EMBEDDING)
         exists = str(embed_column) in self.df.columns
         return exists
 
     @lru_cache()
-    def project_embed_into_2D(self, model: str, transform: str) -> Dict[str, list]:
+    def project_embed_into_2D(self, model: str) -> Dict[str, list]:
         """If the embedding exists, will use t-SNE to project into 2D.
         Returns the 2D embeddings as object/dict
         {
@@ -561,12 +519,10 @@ class ZenoBackend(object):
         points: Dict[str, list] = {"x": [], "y": [], "ids": []}
 
         # Can't project without an embedding
-        if not self.embed_exists(model, transform):
+        if not self.embed_exists(model):
             return points
 
-        embed_col = ZenoColumn(
-            column_type=ZenoColumnType.EMBEDDING, name=model, transform=transform
-        )
+        embed_col = ZenoColumn(column_type=ZenoColumnType.EMBEDDING, name=model)
 
         # Extract embeddings and store in one big ndarray
         embed = self.df[str(embed_col)].to_numpy()

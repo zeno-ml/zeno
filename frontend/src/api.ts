@@ -12,8 +12,6 @@ import {
 	rowsPerPage,
 	settings,
 	slices,
-	transform,
-	transforms,
 	zenoState,
 } from "./stores";
 import { getMetricRange, columnHash } from "./util/util";
@@ -28,12 +26,10 @@ export async function getInitialData() {
 	const r = await res.json();
 	models.set(r.models);
 	metrics.set(r.metrics);
-	transforms.set(r.transforms);
 	folders.set(r.folders);
 
 	model.set(r.models.length > 0 ? r.models[r.models.length - 1] : "");
 	metric.set(r.metrics.length > 0 ? r.metrics[0] : "");
-	transform.set("");
 
 	const slicesRes = await fetch("/api/slices").then((d) => d.json());
 	const slis = JSON.parse(slicesRes) as Slice[];
@@ -59,7 +55,6 @@ function setModelForMetricKey(
 	if (instanceOfFilterPredicate(pred)) {
 		if (pred.column.columnType === ZenoColumnType.POSTDISTILL) {
 			pred.column.model = state.model;
-			pred.column.transform = state.transform;
 		}
 	} else {
 		pred.predicates = pred.predicates.map((p) =>
@@ -109,9 +104,7 @@ export async function getHistograms(
 	const requestedHistograms = completeColumns.filter(
 		(c) =>
 			(c.model === "" || c.model === state.model) &&
-			(c.transform === "" || c.transform === state.transform) &&
-			c.columnType !== ZenoColumnType.OUTPUT &&
-			c.columnType !== ZenoColumnType.TRANSFORM
+			c.columnType !== ZenoColumnType.OUTPUT
 	);
 	if (state.model === undefined) {
 		state.model = "";
@@ -171,9 +164,7 @@ export async function getFilteredTable(
 	sort: [ZenoColumn, boolean]
 ) {
 	const requestedColumns = completeColumns.filter(
-		(c) =>
-			(c.model === "" || c.model === state.model) &&
-			(c.transform === "" || c.transform === state.transform)
+		(c) => c.model === "" || c.model === state.model
 	);
 	let res = await fetch("/api/get-filtered-table", {
 		method: "POST",
@@ -223,15 +214,12 @@ export async function deleteSlice(sliceName: string) {
 
 /**
  * Request the 2D representation of the embeddings from the backend.
- * This might take some time if not cached (based on model and transform)
+ * This might take some time if not cached (based on model)
  *
  * @returns list of 2D coordinates
  */
-export async function projectEmbedInto2D(
-	model: string,
-	transform: string
-): Promise<Points2D> {
-	const body = { model, transform };
+export async function projectEmbedInto2D(model: string): Promise<Points2D> {
+	const body = { model };
 	const req = await fetch("/api/embed-project", {
 		method: "POST",
 		headers: {
@@ -265,8 +253,8 @@ export async function projectEmbedInto2D(
  *
  * @returns true if exist, and false if not or if the request errors out
  */
-export async function checkEmbedExists(model: string, transform: string) {
-	const req = await fetch(`api/embed-exists/${model}/?transform=${transform}`);
+export async function checkEmbedExists(model: string) {
+	const req = await fetch(`api/embed-exists/${model}`);
 	if (req.ok) {
 		const exists = (await req.json()) as boolean;
 		return exists;
@@ -301,28 +289,13 @@ export async function getEntry(id: string, columns?: string[]) {
 
 /**
  * from the zeno global state, fetches the
- * column name for the
- */
-export function transformColumnName() {
-	const { transform } = get(zenoState);
-	const transformColumn = {
-		columnType: ZenoColumnType.TRANSFORM,
-		name: transform,
-	} as ZenoColumn;
-	const transformColumnStr = transform ? columnHash(transformColumn) : "";
-	return transformColumnStr;
-}
-
-/**
- * from the zeno global state, fetches the
  * column name for model output
  */
 export function modelOutputColumnName() {
-	const { model, transform } = get(zenoState);
+	const { model } = get(zenoState);
 	const modelColumn = {
 		columnType: ZenoColumnType.OUTPUT,
 		name: model,
-		transform: transform,
 	} as ZenoColumn;
 	const modelColumnStr = model ? columnHash(modelColumn) : "";
 	return modelColumnStr;
@@ -341,7 +314,6 @@ export function createViewComponent(
 	override?: HTMLDivElement
 ): HTMLDivElement {
 	const modelColumn = modelOutputColumnName();
-	const transformColumn = transformColumnName();
 
 	// if no override, create a new div
 	override ??= document.createElement("div");
@@ -356,7 +328,6 @@ export function createViewComponent(
 		columnHash(globalSettings.labelColumn),
 		columnHash(globalSettings.dataColumn),
 		globalSettings.dataOrigin,
-		transformColumn,
 		columnHash(globalSettings.idColumn)
 	);
 

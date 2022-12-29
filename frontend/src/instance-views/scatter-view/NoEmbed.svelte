@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { model, transform } from "../../stores";
+	import { model } from "../../stores";
 </script>
 
 {#if !$model}
 	<h1>No model available for embeddings.</h1>
 {:else}
-	<h1>No embeddings for <code>{$model} {$transform}</code></h1>
+	<h1>No embeddings for <code>{$model}</code></h1>
 {/if}
 <p>
 	Where you return a batch of predictions from the model, you can also return a

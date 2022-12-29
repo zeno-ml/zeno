@@ -20,7 +20,6 @@ interface WSResponse {
 interface ZenoState {
 	model: string;
 	metric: string;
-	transform: string;
 }
 
 interface MetricKey {
@@ -57,7 +56,6 @@ interface Result {
 interface ReportPredicate {
 	sliceName: string;
 	metric: string;
-	transform: string;
 }
 
 interface Report {
@@ -70,9 +68,8 @@ interface ZenoColumn {
 	columnType: ZenoColumnType;
 	name: string;
 	metadataType?: MetadataType;
-	// model and transform are only set for OUTPUT columnTypes.
+	// model is only set for OUTPUT columnTypes.
 	model?: string;
-	transform?: string;
 }
 
 interface Extent {
@@ -112,7 +109,6 @@ declare namespace View {
 		labelColumn: string,
 		dataColumn: string,
 		dataOrigin: string,
-		transformColumn: string,
 		idColumn: string
 	) => void;
 

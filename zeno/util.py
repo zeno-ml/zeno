@@ -81,6 +81,8 @@ def load_series(df, col_name, save_path):
         df.loc[:, col_name] = pd.read_pickle(save_path)
     except FileNotFoundError:
         df.loc[:, col_name] = pd.Series([pd.NA] * df.shape[0], index=df.index)
+    except EOFError:
+        df.loc[:, col_name] = pd.Series([pd.NA] * df.shape[0], index=df.index)
 
 
 @contextmanager
@@ -108,7 +110,6 @@ def parse_testing_file(test_file: Path):
             if (
                 hasattr(func, "predict_function")
                 or hasattr(func, "distill_function")
-                or hasattr(func, "transform_function")
                 or hasattr(func, "metric_function")
             ):
                 functions.append(func)

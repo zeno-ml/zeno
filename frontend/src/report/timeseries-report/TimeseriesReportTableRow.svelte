@@ -21,7 +21,6 @@
 			state: {
 				metric: predicate.metric,
 				model: m,
-				transform: predicate.transform,
 			},
 		}))
 	).then((arr) => (modelResults = arr));
@@ -49,7 +48,6 @@
 			</div>
 		</div>
 	</Cell>
-	<Cell style="left: 100px">{predicate.transform}</Cell>
 	<Cell>{predicate.metric}</Cell>
 	{#if $models.length > 2 && modelResults.length > 0}
 		<Cell class="end-cell"><SparkLine res={modelResults} /></Cell>

@@ -12,7 +12,6 @@
 		settings,
 		sort,
 		status,
-		transform,
 		zenoState,
 		selectionPredicates,
 	} from "../stores";
@@ -63,21 +62,9 @@
 
 	async function drawInstances() {
 		let obj = $status.completeColumns.find((c) => {
-			return (
-				c.columnType === ZenoColumnType.OUTPUT &&
-				c.name === $model &&
-				c.transform === $transform
-			);
+			return c.columnType === ZenoColumnType.OUTPUT && c.name === $model;
 		});
 		let modelColumn = obj ? columnHash(obj) : "";
-		let transformColumn = "";
-		if ($zenoState.transform) {
-			let col = <ZenoColumn>{
-				columnType: ZenoColumnType.TRANSFORM,
-				name: $zenoState.transform,
-			};
-			transformColumn = columnHash(col);
-		}
 
 		await tick();
 
@@ -104,7 +91,6 @@
 					columnHash($settings.labelColumn),
 					columnHash($settings.dataColumn),
 					$settings.dataOrigin,
-					transformColumn,
 					idHash
 				);
 			}

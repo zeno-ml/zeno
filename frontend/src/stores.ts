@@ -56,17 +56,14 @@ export const settings: Writable<Settings> = writable(<Settings>{
 });
 export const metrics: Writable<string[]> = writable([]);
 export const models: Writable<string[]> = writable([]);
-export const transforms: Writable<string[]> = writable([]);
 
 export const model: Writable<string> = writable(undefined);
 export const metric: Writable<string> = writable(undefined);
-export const transform: Writable<string> = writable(undefined);
 export const zenoState: Readable<ZenoState> = derived(
-	[model, metric, transform],
-	([$model, $metric, $transform]) => ({
+	[model, metric],
+	([$model, $metric]) => ({
 		model: $model,
 		metric: $metric,
-		transform: $transform,
 	})
 );
 export const currentColumns: Readable<ZenoColumn[]> = derived(
