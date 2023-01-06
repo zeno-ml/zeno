@@ -1,4 +1,4 @@
-<img src="./zeno.png" width="400px"/>
+<img src="./zeno.png" width="250px"/>
 
 [![PyPI version](https://badge.fury.io/py/zenoml.svg)](https://badge.fury.io/py/zenoml)
 ![Github Actions CI tests](https://github.com/zeno-ml/zeno/actions/workflows/test.yml/badge.svg)
@@ -38,7 +38,7 @@ from zeno import zeno
 df = pd.read_csv("/path/to/metadata/file.csv")
 
 zeno({
-	"metadata": df, # Pandas DataFrame with a row for each instance
+    "metadata": df, # Pandas DataFrame with a row for each instance
     "view": "audio-transcription", # The type of view for this data/task
     "data_path": "/path/to/raw/data/", # The folder with raw data (images, audio, etc.)
     "data_column": "id" # The column in the metadata file that contains the relative paths of files in data_path
@@ -50,7 +50,6 @@ zeno({
 
 Check out examples and additional documentation:
 
-- [Introduction](http://zenoml.com/docs/intro/) - Learn more about Zeno.
-- [Getting Started](http://zenoml.com/docs/intro/get_started) - Setup Zeno with your own data and models.
-- [CIFAR-10 Example](http://zenoml.com/docs/intro/cifar) - Learn how to use Zeno with a CIFAR-10 classification example.
-- [Documentation & API](http://zenoml.com/docs/intro/) - Full documentation and API reference.
+- [Introduction](http://zenoml.com/intro/) - Learn more about Zeno.
+- [Quickstart](http://zenoml.com/docs/quickstart) - Setup Zeno with your own data and models.
+- [Documentation & API](http://zenoml.com/docs/intro) - Full documentation and API reference.

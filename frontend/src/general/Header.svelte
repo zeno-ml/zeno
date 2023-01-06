@@ -1,8 +1,8 @@
 <script lang="ts">
 	import {
 		mdiApi,
-		mdiCheckboxMarkedCircleOutline,
-		mdiCircleOutline,
+		mdiChartBoxOutline,
+		mdiCompassOutline,
 		mdiGithub,
 	} from "@mdi/js";
 	import { Svg } from "@smui/common";
@@ -42,7 +42,7 @@
 						<Icon component={Svg} viewBox="0 0 24 24">
 							<path
 								fill={$tab === "explore" ? "#6a1b9a" : "black"}
-								d={mdiCircleOutline} />
+								d={mdiCompassOutline} />
 						</Icon>
 					</div>
 				</div>
@@ -57,7 +57,7 @@
 						<Icon component={Svg} viewBox="0 0 24 24">
 							<path
 								fill={$tab === "report" ? "#6a1b9a" : "black"}
-								d={mdiCheckboxMarkedCircleOutline} />
+								d={mdiChartBoxOutline} />
 						</Icon>
 					</div>
 				</div>

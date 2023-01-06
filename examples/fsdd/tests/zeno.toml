@@ -1,5 +1,5 @@
 functions = "./"
-view = "zenomaudio_transcription"
+view = "/Users/acabrera/dev-research/22-zeno/instance-views/audio-transcription/index.mjs"
 metadata = "../fsdd.csv"
 models = [
     "silero-transcription",

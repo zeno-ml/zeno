@@ -5,9 +5,6 @@ models = [
 	"whisper"
 ]
 metadata = "metadata.csv"
-data_path = "/Users/acabrera/dev/data/speech-accent-archive/recordings/recordings/"
-# data_path = "https://zenoml.s3.amazonaws.com/accents/"
+data_path = "https://zenoml.s3.amazonaws.com/accents/"
 data_column = "id"
 label_column = "label"
-samples = 10
-port = 8008

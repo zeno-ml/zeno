@@ -461,7 +461,7 @@ class ZenoBackend(object):
             elif col.metadata_type == MetadataType.CONTINUOUS:
                 ret_hist = []
                 df_col = df_col.fillna(0)
-                bins = np.histogram(df_col, bins="fd")
+                bins = np.histogram(df_col, bins="doane")
                 bins_filt = np.histogram(filt_df_col, bins=bins[1])
                 for i, bin_count in enumerate(bins[0]):
                     ret_hist.append(
@@ -503,7 +503,7 @@ class ZenoBackend(object):
         """
         embed_column = ZenoColumn(name=model, column_type=ZenoColumnType.EMBEDDING)
         exists = str(embed_column) in self.df.columns
-        return exists
+        return exists and not self.df[str(embed_column)].isnull().any()
 
     @lru_cache()
     def project_embed_into_2D(self, model: str) -> Dict[str, list]:

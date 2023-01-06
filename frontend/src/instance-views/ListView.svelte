@@ -49,7 +49,7 @@
 			$selectionPredicates,
 			$zenoState,
 			[start, end],
-			[$sort, true]
+			$sort
 		).then((res) => (table = res));
 	}
 

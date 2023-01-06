@@ -61,8 +61,6 @@
 		}
 		updatePredicates(filterPredicates);
 	}
-
-	$: console.log(col.name, chartData);
 </script>
 
 <div id="histogram" on:mouseup={setSelection}>

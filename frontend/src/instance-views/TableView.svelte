@@ -22,15 +22,9 @@
 	export let viewFunction: View.Component;
 	export let viewOptions: View.Options = {};
 
-	enum SortType {
-		ASCENDING,
-		DESCENDING,
-		NONE,
-	}
-
 	let viewDivs = {};
 	let columnHeader: ZenoColumn[] = [];
-	let sortingStatus = {};
+	let body: HTMLElement;
 
 	let currentPage = 0;
 	let end = 0;
@@ -56,8 +50,11 @@
 			$selectionPredicates,
 			$zenoState,
 			[start, end],
-			[$sort, true]
-		).then((res) => (table = res));
+			$sort
+		).then((res) => {
+			table = res;
+			body ? body.scrollIntoView() : "";
+		});
 	}
 
 	$: if (viewFunction) {
@@ -67,57 +64,15 @@
 		drawInstances();
 	}
 
-	function populateSortingRecord() {
-		for (let i = 0; i < $status.completeColumns.length; i++) {
-			sortingStatus[$status.completeColumns[i].name] = SortType.NONE;
+	function updateSort(columnName) {
+		if ($sort[0] !== columnName) {
+			sort.set([columnName, true]);
+		} else if ($sort[0] === columnName && $sort[1] === true) {
+			sort.set([columnName, false]);
+		} else {
+			sort.set([undefined, true]);
 		}
 	}
-
-	function sort_row(column_name) {
-		let correctColumnNum = 0;
-		for (let i = 0; i < $status.completeColumns.length; i++) {
-			if ($status.completeColumns[i].name === column_name) {
-				correctColumnNum = i;
-				break;
-			}
-		}
-
-		let correctColumn = $status.completeColumns[correctColumnNum];
-		let current_status = sortingStatus[column_name];
-
-		populateSortingRecord();
-
-		if (current_status === SortType.DESCENDING) {
-			sortingStatus[column_name] = SortType.NONE;
-			getFilteredTable(
-				$status.completeColumns,
-				$selectionPredicates,
-				$zenoState,
-				[start, end],
-				[$sort, true]
-			).then((res) => (table = res));
-		} else if (current_status === SortType.ASCENDING) {
-			sortingStatus[column_name] = SortType.DESCENDING;
-			getFilteredTable(
-				$status.completeColumns,
-				$selectionPredicates,
-				$zenoState,
-				[start, end],
-				[correctColumn, true]
-			).then((res) => (table = res));
-		} else if (current_status === SortType.NONE) {
-			sortingStatus[column_name] = SortType.ASCENDING;
-			getFilteredTable(
-				$status.completeColumns,
-				$selectionPredicates,
-				$zenoState,
-				[start, end],
-				[correctColumn, false]
-			).then((res) => (table = res));
-		}
-	}
-
-	populateSortingRecord();
 
 	async function drawInstances() {
 		let obj = $status.completeColumns.find((c) => {
@@ -170,16 +125,15 @@
 					<th>instance</th>
 					{#each columnHeader as header}
 						{#if header.name !== $settings.idColumn.name}
-							<th on:click={() => sort_row(header.name)}>
+							<th on:click={() => updateSort(header)}>
 								<div class="inline-header">
 									{header.name}
 									<Icon
 										class="material-icons"
 										style="font-size: 14px; padding-top:3px; margin-left: 5px;">
-										{#if sortingStatus[header.name] === SortType.ASCENDING}
+										{#if $sort[0] && $sort[0].name === header.name && $sort[1]}
 											keyboard_arrow_down
-										{/if}
-										{#if sortingStatus[header.name] === SortType.DESCENDING}
+										{:else if $sort[0] && $sort[0].name === header.name}
 											keyboard_arrow_up
 										{/if}
 									</Icon>
@@ -189,7 +143,7 @@
 					{/each}
 				</tr>
 			</thead>
-			<tbody>
+			<tbody bind:this={body}>
 				{#each table as tableContent}
 					<tr>
 						<td>

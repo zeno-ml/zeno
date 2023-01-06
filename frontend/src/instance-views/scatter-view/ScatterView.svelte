@@ -49,7 +49,6 @@
 	 * them in the scale that WebGL expects between [-1, 1]
 	 */
 	async function project2DOnModelAndTransformChange(model: string) {
-		// don't do shit if we have no gabagoo
 		embedExists = await checkEmbedExists(model);
 
 		if (embedExists) {
