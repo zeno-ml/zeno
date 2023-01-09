@@ -39,7 +39,7 @@ black = "^22.12.0"
 flake8 = "^5.0.0"
 mypy = "^0.991"
 pandas-stubs = "^1.5.2"
-pyright = "^1.1.286"
+pyright = "^1.1.287"
 pytest = "^7.1.1"
 usort = "^1.0.5"
 
