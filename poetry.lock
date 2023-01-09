@@ -668,6 +668,14 @@ python-versions = ">=3.6"
 pathspec = ">=0.8.1"
 
 [[package]]
+name = "types-docutils"
+version = "0.19.1.1"
+description = "Typing stubs for docutils"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "types-pytz"
 version = "2022.7.0.0"
 description = "Typing stubs for pytz"
@@ -688,11 +696,14 @@ types-urllib3 = "<1.27"
 
 [[package]]
 name = "types-setuptools"
-version = "65.6.0.2"
+version = "65.6.0.3"
 description = "Typing stubs for setuptools"
 category = "main"
 optional = false
 python-versions = "*"
+
+[package.dependencies]
+types-docutils = "*"
 
 [[package]]
 name = "types-tqdm"
@@ -1264,6 +1275,10 @@ trailrunner = [
     {file = "trailrunner-1.2.1-py3-none-any.whl", hash = "sha256:dff4ee07cf079bcd388585ee6f14911e2c9292d58bf7cc6047912e082ec21283"},
     {file = "trailrunner-1.2.1.tar.gz", hash = "sha256:157de2b2d82139d9583ec1dbc1981c33b39e24c420bb5294f86083f1f4b44311"},
 ]
+types-docutils = [
+    {file = "types-docutils-0.19.1.1.tar.gz", hash = "sha256:be0a51ba1c7dd215d9d2df66d6845e63c1009b4bbf4c5beb87a0d9745cdba962"},
+    {file = "types_docutils-0.19.1.1-py3-none-any.whl", hash = "sha256:a024cada35f0c13cc45eb0b68a102719018a634013690b7fef723bcbfadbd1f1"},
+]
 types-pytz = [
     {file = "types-pytz-2022.7.0.0.tar.gz", hash = "sha256:4f20c2953b3a3a0587e94489ec4c9e02c3d3aedb9ba5cd7e796e12f4cfa7027e"},
     {file = "types_pytz-2022.7.0.0-py3-none-any.whl", hash = "sha256:1509f182f686ab76e9a8234f22b00b8f50d239974db0cf924b7ae8674bb31a6f"},
@@ -1273,8 +1288,8 @@ types-requests = [
     {file = "types_requests-2.28.11.7-py3-none-any.whl", hash = "sha256:b6a2fca8109f4fdba33052f11ed86102bddb2338519e1827387137fefc66a98b"},
 ]
 types-setuptools = [
-    {file = "types-setuptools-65.6.0.2.tar.gz", hash = "sha256:ad60ccf01d626de9762224448f36c13e0660e863afd6dc11d979b3739a6c7d24"},
-    {file = "types_setuptools-65.6.0.2-py3-none-any.whl", hash = "sha256:2c2b4f756f79778074ce2d21f745aa737b12160d9f8dfa274f47a7287c7a2fee"},
+    {file = "types-setuptools-65.6.0.3.tar.gz", hash = "sha256:7ddd7415282fa97ab18e490206067c0cdb126b103743e72ee86783d7af6481c5"},
+    {file = "types_setuptools-65.6.0.3-py3-none-any.whl", hash = "sha256:ad729fc3a9a3946f73915eaab16ce56b30ed5ae998479253d809d76b3889ee09"},
 ]
 types-tqdm = [
     {file = "types-tqdm-4.64.7.9.tar.gz", hash = "sha256:aecd96552e9c3b87e1926cb312734f135426ffc3254d8e64cfeb3ba591ef72c5"},
