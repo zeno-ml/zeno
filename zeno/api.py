@@ -1,10 +1,11 @@
 import functools
-from dataclasses import dataclass
-from typing import Dict
+from typing import Callable, Dict, List
+
+from pandas import DataFrame
+from pydantic import BaseModel
 
 
-@dataclass
-class ZenoOptions:
+class ZenoOptions(BaseModel):
     """Parameters passed to Zeno test functions.
 
     Args:
@@ -28,6 +29,28 @@ class ZenoOptions:
     data_path: str
     label_path: str
     output_path: str
+
+
+class ZenoParameters(BaseModel):
+    view: str
+    metadata: DataFrame
+    functions: List[Callable] = []
+    models: List[str] = []
+    id_column: str = "id"
+    data_column: str = "id"
+    label_column: str = "label"
+    data_path: str = ""
+    label_path: str = ""
+    batch_size: int = 1
+    cache_path: str = ""
+    editable: bool = True
+    serve: bool = True
+    samples: int = 30
+    port: int = 8000
+    host: str = "localhost"
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
 def model(func):

@@ -1,4 +1,4 @@
-from zeno.api import distill, metric, model, ZenoOptions
+from zeno.api import distill, metric, model, ZenoOptions, ZenoParameters
 from zeno.runner import zeno
 
 __all__ = [
@@ -6,5 +6,6 @@ __all__ = [
     "distill",
     "metric",
     "ZenoOptions",
+    "ZenoParameters",
     "zeno",
 ]

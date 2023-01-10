@@ -1,7 +1,6 @@
 import asyncio
 import json
 import os
-from pathlib import PosixPath
 from typing import List, Union
 
 from fastapi import FastAPI, HTTPException, WebSocket
@@ -29,9 +28,9 @@ def get_server(zeno: ZenoBackend):
     app = FastAPI(title="Frontend API")
     api_app = FastAPI(title="Backend API")
 
-    if zeno.data_path != "" and isinstance(zeno.data_path, PosixPath):
+    if zeno.data_path != "" and os.path.exists(zeno.data_path):
         app.mount("/data", StaticFiles(directory=zeno.data_path), name="static")
-    if zeno.label_path != "":
+    if zeno.label_path != "" and os.path.exists(zeno.label_path):
         app.mount("/labels", StaticFiles(directory=zeno.label_path), name="static")
 
     app.mount(
@@ -56,9 +55,7 @@ def get_server(zeno: ZenoBackend):
             id_column=zeno.id_column,
             label_column=zeno.label_column,
             data_column=zeno.data_column,
-            data_origin="/data/"
-            if isinstance(zeno.data_path, PosixPath)
-            else zeno.data_path,
+            data_origin="/data/" if os.path.exists(zeno.data_path) else zeno.data_path,
             metadata_columns=zeno.columns,
             samples=zeno.samples,
             totalSize=zeno.df.shape[0],

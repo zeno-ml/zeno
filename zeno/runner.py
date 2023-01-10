@@ -2,6 +2,8 @@ import os
 import shutil
 import sys
 from pathlib import Path
+from threading import Thread
+from typing import Union
 
 import nest_asyncio  # type: ignore
 import pandas as pd
@@ -10,6 +12,7 @@ import requests
 import tomli
 import uvicorn
 
+from zeno.api import ZenoParameters
 from zeno.server import get_server
 from zeno.setup import setup_zeno
 from zeno.util import is_notebook, parse_testing_file, VIEW_MAP_URL, VIEWS_MAP_JSON
@@ -65,12 +68,16 @@ def parse_toml():
 
     base_path = os.path.dirname(os.path.abspath(sys.argv[1]))
 
+    if "view" not in args:
+        print("ERROR: Must have 'view' entry")
+        sys.exit(1)
+
     if "metadata" not in args:
         print("ERROR: Must have 'metadata' entry which must be a CSV or Parquet file.")
         sys.exit(1)
     else:
         meta_path = Path(os.path.realpath(os.path.join(base_path, args["metadata"])))
-        # take out metadata_path, tests. should be dataframe and list of functions.
+
         # Read metadata as Pandas for slicing
         if meta_path.suffix == ".csv":
             args["metadata"] = pd.read_csv(meta_path)
@@ -80,11 +87,9 @@ def parse_toml():
             print("Extension of " + meta_path.suffix + " not one of .csv or .parquet")
             sys.exit(1)
 
-    if "functions" not in args or not os.path.exists(
+    if "functions" in args and os.path.exists(
         os.path.realpath(os.path.join(base_path, args["functions"]))
     ):
-        args["functions"] = []
-    else:
         args["functions"] = Path(
             os.path.realpath(os.path.join(base_path, args["functions"]))
         )
@@ -94,35 +99,32 @@ def parse_toml():
             fns = fns + parse_testing_file(f)
         args["functions"] = fns
 
-    zeno(args, base_path)
+    zeno(ZenoParameters(**args), base_path)
 
 
-def parse_args(args: dict, base_path) -> dict:
-    if "view" not in args:
-        print("ERROR: Must have 'view' entry")
-        sys.exit(1)
+def parse_args(args: ZenoParameters, base_path) -> ZenoParameters:
 
-    if "cache_path" not in args:
-        args["cache_path"] = Path(
-            os.path.realpath(os.path.join(base_path, "./.zeno_cache/"))
-        )
+    if type(args) == dict:
+        args = ZenoParameters.parse_obj(args)
+
+    if args.cache_path == "":
+        args.cache_path = os.path.realpath(os.path.join(base_path, "./.zeno_cache/"))
     else:
-        args["cache_path"] = Path(
-            os.path.realpath(os.path.join(base_path, args["cache_path"]))
-        )
-    os.makedirs(args["cache_path"], exist_ok=True)
+        args.cache_path = os.path.realpath(os.path.join(base_path, args.cache_path))
+
+    os.makedirs(args.cache_path, exist_ok=True)
 
     # Try to get view from GitHub List, if not try to read from path and copy it.
     views_res = requests.get(VIEW_MAP_URL + VIEWS_MAP_JSON)
     views = views_res.json()
-    view_dest_path = Path(os.path.join(args["cache_path"], "view.mjs"))
+    view_dest_path = Path(os.path.join(args.cache_path, "view.mjs"))
     try:
-        url = VIEW_MAP_URL + views[args["view"]]
+        url = VIEW_MAP_URL + views[args.view]
         with open(view_dest_path, "wb") as out_file:
             content = requests.get(url, stream=True).content
             out_file.write(content)
     except KeyError:
-        view_path = Path(os.path.realpath(os.path.join(base_path, args["view"])))
+        view_path = Path(os.path.realpath(os.path.join(base_path, args.view)))
         if view_path.is_file():
             if view_dest_path.is_file():
                 os.remove(view_dest_path)
@@ -134,111 +136,70 @@ def parse_args(args: dict, base_path) -> dict:
             )
             sys.exit(1)
 
-    if "models" not in args or len(args["models"]) < 1:
-        args["models"] = []
-    else:
-        if Path(os.path.realpath(os.path.join(base_path, args["models"][0]))).exists():
-            args["models"] = [
-                Path(os.path.realpath(os.path.join(base_path, m)))
-                for m in args["models"]
+    if len(args.models) > 0:
+        if Path(os.path.realpath(os.path.join(base_path, args.models[0]))).exists():
+            args.models = [
+                os.path.realpath(os.path.join(base_path, m)) for m in args.models
             ]
 
-    if "functions" not in args:
-        args["functions"] = []
+    if not args.data_path.startswith("http"):
+        args.data_path = os.path.realpath(os.path.join(base_path, args.data_path))
 
-    if "data_path" not in args:
-        args["data_path"] = ""
-    elif not args["data_path"].startswith("http"):
-        args["data_path"] = Path(
-            os.path.realpath(os.path.join(base_path, args["data_path"]))
+    if args.label_path != "":
+        args.label_path = os.path.realpath(os.path.join(base_path, args.label_path))
+
+    if args.data_column != "" and args.id_column == "":
+        args.id_column = args.data_column
+    elif args.data_column == "" and args.id_column == "":
+        print(
+            "ERROR: Must have 'id_column' referencing a column with unique IDs",
+            "if no data_column is specified.",
         )
-
-    if "label_path" not in args:
-        args["label_path"] = ""
-    else:
-        args["label_path"] = Path(
-            os.path.realpath(os.path.join(base_path, args["label_path"]))
-        )
-
-    if "id_column" not in args:
-        if "data_column" in args:
-            args["id_column"] = args["data_column"]
-        else:
-            print(
-                "ERROR: Must have 'id_column' referencing a column with unique IDs",
-                "if no data_column is specified.",
-            )
-
-    if "data_column" not in args:
-        args["data_column"] = ""
-
-    if "label_column" not in args:
-        args["label_column"] = "label"
-
-    if "samples" not in args:
-        args["samples"] = 30
-
-    if "editable" not in args:
-        args["editable"] = True
-    else:
-        args["editable"] = args["editable"]
-
-    if "port" not in args:
-        args["port"] = 8000
-
-    if "host" not in args:
-        args["host"] = "localhost"
-
-    if "batch_size" not in args:
-        args["batch_size"] = 1
-
-    if "serve" not in args:
-        args["serve"] = True
+        sys.exit(1)
 
     return args
 
 
-def zeno(args, base_path="./"):
+def zeno(args: Union[ZenoParameters, dict], base_path="./"):
     nest_asyncio.apply()
 
+    if isinstance(args, dict):
+        args = ZenoParameters.parse_obj(args)
     args = parse_args(args, base_path)
 
-    zeno = ZenoBackend(
-        df=args["metadata"],
-        functions=args["functions"],
-        models=args["models"],
-        batch_size=args["batch_size"],
-        id_column=args["id_column"],
-        data_column=args["data_column"],
-        label_column=args["label_column"],
-        data_path=args["data_path"],
-        label_path=args["label_path"],
-        cache_path=args["cache_path"],
-        editable=args["editable"],
-        samples=args["samples"],
-        view=args["view"],
-    )
+    zeno = ZenoBackend(args)
 
-    zeno.start_processing()
     app = get_server(zeno)
 
-    if args["serve"]:
+    if args.serve:
         print(
             "\n\033[1mZeno\033[0m running on http://{}:{}\n".format(
-                args["host"], args["port"]
+                args.host, args.port
             )
         )
         if is_notebook():
-            from IPython.display import IFrame  # type: ignore
+            from IPython.display import display, IFrame  # type: ignore
 
-            display(  # noqa: F821 # type: ignore
+            display(
                 IFrame(
-                    "http://{}:{}".format(args["host"], args["port"]),
+                    "http://{}:{}".format(args.host, args.port),
                     "100%",
                     800,
                 )
             )
 
-        uvicorn.run(app, host=args["host"], port=args["port"], log_level="critical")
+        Thread(
+            target=uvicorn.run,
+            args=(app,),
+            kwargs={
+                "host": args.host,
+                "port": args.port,
+                "log_level": "critical",
+            },
+        ).start()
+
+        zeno.start_processing()
+
+        return zeno
     else:
         return app

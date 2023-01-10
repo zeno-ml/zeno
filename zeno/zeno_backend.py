@@ -1,5 +1,4 @@
 import asyncio
-import dataclasses
 import logging
 import os
 import pickle
@@ -15,7 +14,7 @@ import numpy as np
 import pandas as pd  # type: ignore
 from pathos.multiprocessing import ProcessingPool as Pool  # type: ignore
 
-from zeno.api import ZenoOptions
+from zeno.api import ZenoOptions, ZenoParameters
 from zeno.classes import (
     FilterPredicate,
     FilterPredicateGroup,
@@ -35,34 +34,20 @@ from zeno.util import getMetadataType, load_series, read_pickle
 
 
 class ZenoBackend(object):
-    def __init__(
-        self,
-        df: pd.DataFrame,
-        functions: List[Callable],
-        models: List[Path],
-        batch_size: int,
-        id_column: str,
-        data_column: str,
-        label_column: str,
-        data_path,
-        label_path,
-        cache_path: Path,
-        editable: bool,
-        samples: int,
-        view: str,
-    ):
+    def __init__(self, params: ZenoParameters):
         logging.basicConfig(level=logging.INFO)
 
-        self.df = df
-        self.tests = functions
-        self.batch_size = batch_size
-        self.data_path = data_path
-        self.label_path = label_path
-        self.cache_path = cache_path
-        self.editable = editable
+        self.df = params.metadata
+        self.tests = params.functions
+        self.batch_size = params.batch_size
+        self.data_path = params.data_path
+        self.label_path = params.label_path
+        self.cache_path = params.cache_path
+        self.editable = params.editable
+        self.samples = params.samples
+        self.view = params.view
+
         self.done_processing = False
-        self.samples = samples
-        self.view = view
 
         self.predistill_functions: Dict[str, Callable] = {}
         self.postdistill_functions: Dict[str, Callable] = {}
@@ -76,15 +61,17 @@ class ZenoBackend(object):
             "slices.pickle", self.cache_path, {}
         )
 
-        if models and os.path.isdir(models[0]):
+        if params.models and os.path.isdir(params.models[0]):
             self.model_paths = [
-                os.path.join(models[0], m) for m in os.listdir(models[0])
+                os.path.join(params.models[0], m) for m in os.listdir(params.models[0])
             ]
         else:
-            self.model_paths = models  # type: ignore
+            self.model_paths = params.models  # type: ignore
         self.model_names = [os.path.basename(p).split(".")[0] for p in self.model_paths]
 
-        self.__setup_dataframe(id_column, data_column, label_column)
+        self.__setup_dataframe(
+            params.id_column, params.data_column, params.label_column
+        )
         self.__parse_test_functions(self.tests)
 
         # Options passed to Zeno functions.
@@ -352,13 +339,14 @@ class ZenoBackend(object):
             and c.model == state.model
         ]
 
-        local_ops = dataclasses.replace(
-            self.zeno_options,
-            output_column=output_hash,
-            output_path=os.path.join(self.cache_path, output_hash),
-            distill_columns=dict(
-                zip([c.name for c in distill_fns], [str(c) for c in distill_fns])
-            ),
+        local_ops = self.zeno_options.copy(
+            update={
+                "output_column": output_hash,
+                "output_path": os.path.join(self.cache_path, output_hash),
+                "distill_columns": dict(
+                    zip([c.name for c in distill_fns], [str(c) for c in distill_fns])
+                ),
+            }
         )
 
         return self.metric_functions[state.metric](df, local_ops)

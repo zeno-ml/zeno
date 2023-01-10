@@ -1,4 +1,3 @@
-import dataclasses
 import os
 from inspect import getsource
 from pathlib import Path
@@ -82,7 +81,7 @@ def run_inference(
             if "output_path" in src:
                 file_cache_path = os.path.join(cache_path, model_hash)
                 os.makedirs(file_cache_path, exist_ok=True)
-                options = dataclasses.replace(options, output_path=file_cache_path)
+                options = options.copy(update={"output_path": file_cache_path})
 
             out = model_fn(df.loc[to_predict_indices], options)
 
@@ -112,7 +111,7 @@ def run_inference(
                 if "output_path" in src:
                     file_cache_path = os.path.join(cache_path, model_hash)
                     os.makedirs(file_cache_path, exist_ok=True)
-                    options = dataclasses.replace(options, output_path=file_cache_path)
+                    options = options.copy(update={"output_path": file_cache_path})
 
                 out = model_fn(df.loc[to_predict_indices[i : i + batch_size]], options)
 
@@ -158,11 +157,13 @@ def postdistill_data(
 
     to_predict_indices = col.loc[pd.isna(col)].index
 
-    local_options = dataclasses.replace(
-        options,
-        output_column=output_hash,
-        output_path=os.path.join(cache_path, output_hash),
+    local_options = options.copy(
+        update={
+            "output_column": output_hash,
+            "output_path": os.path.join(cache_path, output_hash),
+        }
     )
+
     if len(to_predict_indices) > 0:
         if len(to_predict_indices) < batch_size:
             out = fn(df.loc[to_predict_indices], local_options)

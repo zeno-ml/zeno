@@ -13,8 +13,8 @@ import pandas as pd  # type: ignore
 
 from zeno.classes import MetadataType
 
-VIEW_MAP_URL = "https://raw.githubusercontent.com/zeno-ml/instance-views/main/"
-VIEWS_MAP_JSON = "views.json"
+VIEW_MAP_URL: str = "https://raw.githubusercontent.com/zeno-ml/instance-views/main/"
+VIEWS_MAP_JSON: str = "views.json"
 
 
 class NpEncoder(json.JSONEncoder):
@@ -29,7 +29,7 @@ class NpEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-def read_pickle(file_name: str, cache_path: Path, default):
+def read_pickle(file_name: str, cache_path: str, default):
     try:
         with open(os.path.join(cache_path, file_name), "rb") as f:
             return pickle.load(f)
