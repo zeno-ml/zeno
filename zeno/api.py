@@ -36,8 +36,8 @@ class ZenoParameters(BaseModel):
     metadata: DataFrame
     functions: List[Callable] = []
     models: List[str] = []
-    id_column: str = "id"
-    data_column: str = "id"
+    id_column: str = ""
+    data_column: str = ""
     label_column: str = "label"
     data_path: str = ""
     label_path: str = ""

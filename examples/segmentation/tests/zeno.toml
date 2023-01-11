@@ -10,6 +10,5 @@ data_path = "/Users/acabrera/dev/data/sessile-main-Kvasir-SEG/images"
 label_path = "/Users/acabrera/dev/data/sessile-main-Kvasir-SEG/masks"
 batch_size = 16
 data_column = "id"
-data_type = "path"
-output_type = "path"
+label_column = "label"
 port = 8003
