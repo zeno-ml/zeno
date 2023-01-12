@@ -178,7 +178,7 @@ class ZenoBackend(object):
         print(self.status)
         self.done_processing = True
 
-    def __predistill(self):
+    def __predistill(self) -> None:
         """Run distilling functions not dependent on model outputs."""
 
         # Check if we need to preprocess since Pool is expensive
@@ -265,7 +265,7 @@ class ZenoBackend(object):
                         self.df.loc[:, str(out[1])] = out[3]
                     self.complete_columns.append(out[0])
 
-    def __postdistill(self):
+    def __postdistill(self) -> None:
         """Run distill functions dependent on model outputs."""
 
         # Check if we need to run postprocessing since Pool is expensive

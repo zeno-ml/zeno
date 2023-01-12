@@ -200,6 +200,6 @@ def zeno(args: Union[ZenoParameters, dict], base_path="./"):
 
         zeno.start_processing()
 
-        return zeno
+        return zeno, None
     else:
-        return app
+        return app, zeno
