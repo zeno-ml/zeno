@@ -50,6 +50,6 @@ zeno({
 
 Check out examples and additional documentation:
 
-- [Introduction](http://zenoml.com/intro/) - Learn more about Zeno.
+- [Introduction](https://zenoml.com/docs/intro) - Learn more about Zeno.
 - [Quickstart](http://zenoml.com/docs/quickstart) - Setup Zeno with your own data and models.
 - [Documentation & API](http://zenoml.com/docs/intro) - Full documentation and API reference.
