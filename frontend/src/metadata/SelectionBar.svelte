@@ -2,7 +2,13 @@
 	import Button, { Group } from "@smui/button";
 	import CircularProgress from "@smui/circular-progress";
 
-	import { selections, metric, selectionPredicates, status } from "../stores";
+	import {
+		settings,
+		selections,
+		metric,
+		selectionPredicates,
+		status,
+	} from "../stores";
 	import { onMount } from "svelte";
 	import SliceChip from "./chips/SliceChip.svelte";
 	import MetadataChip from "./chips/MetadataChip.svelte";
@@ -12,7 +18,8 @@
 	export let optionsFunction;
 	export let viewOptions;
 
-	let CHOICES = ["list", "table", "scatter"];
+	let CHOICES =
+		$settings.view !== "" ? ["list", "table", "scatter"] : ["table", "scatter"];
 
 	let optionsDiv: HTMLDivElement;
 	let mounted = false;

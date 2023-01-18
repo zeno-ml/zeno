@@ -68,10 +68,6 @@ def parse_toml():
 
     base_path = os.path.dirname(os.path.abspath(sys.argv[1]))
 
-    if "view" not in args:
-        print("ERROR: Must have 'view' entry")
-        sys.exit(1)
-
     if "metadata" not in args:
         print("ERROR: Must have 'metadata' entry which must be a CSV or Parquet file.")
         sys.exit(1)
@@ -115,26 +111,28 @@ def parse_args(args: ZenoParameters, base_path) -> ZenoParameters:
     os.makedirs(args.cache_path, exist_ok=True)
 
     # Try to get view from GitHub List, if not try to read from path and copy it.
-    views_res = requests.get(VIEW_MAP_URL + VIEWS_MAP_JSON)
-    views = views_res.json()
-    view_dest_path = Path(os.path.join(args.cache_path, "view.mjs"))
-    try:
-        url = VIEW_MAP_URL + views[args.view]
-        with open(view_dest_path, "wb") as out_file:
-            content = requests.get(url, stream=True).content
-            out_file.write(content)
-    except KeyError:
-        view_path = Path(os.path.realpath(os.path.join(base_path, args.view)))
-        if view_path.is_file():
-            if view_dest_path.is_file():
-                os.remove(view_dest_path)
-            shutil.copyfile(view_path, view_dest_path)
-        else:
-            print(
-                "ERROR: View not found in list or relative path. See available views",
-                "at https://github.com/zeno-ml/instance-views/blob/main/views.json",
-            )
-            sys.exit(1)
+    if args.view != "":
+        views_res = requests.get(VIEW_MAP_URL + VIEWS_MAP_JSON)
+        views = views_res.json()
+        view_dest_path = Path(os.path.join(args.cache_path, "view.mjs"))
+        try:
+            url = VIEW_MAP_URL + views[args.view]
+            with open(view_dest_path, "wb") as out_file:
+                content = requests.get(url, stream=True).content
+                out_file.write(content)
+        except KeyError:
+            view_path = Path(os.path.realpath(os.path.join(base_path, args.view)))
+            if view_path.is_file():
+                if view_dest_path.is_file():
+                    os.remove(view_dest_path)
+                shutil.copyfile(view_path, view_dest_path)
+            else:
+                print(
+                    "ERROR: View not found in list or relative path."
+                    " See available views at ",
+                    "https://github.com/zeno-ml/instance-views/blob/main/views.json",
+                )
+                sys.exit(1)
 
     if len(args.models) > 0:
         if Path(os.path.realpath(os.path.join(base_path, args.models[0]))).exists():
@@ -150,12 +148,6 @@ def parse_args(args: ZenoParameters, base_path) -> ZenoParameters:
 
     if args.data_column != "" and args.id_column == "":
         args.id_column = args.data_column
-    elif args.data_column == "" and args.id_column == "":
-        print(
-            "ERROR: Must have 'id_column' referencing a column with unique IDs",
-            "if no data_column is specified.",
-        )
-        sys.exit(1)
 
     return args
 

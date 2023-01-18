@@ -87,23 +87,47 @@ class ZenoBackend(object):
         )
 
     def __setup_dataframe(self, id_column: str, data_column: str, label_column: str):
-        self.id_column = ZenoColumn(
-            column_type=ZenoColumnType.METADATA,
-            metadata_type=getMetadataType(self.df[id_column]),
-            name=id_column,
-        )
-        self.data_column = ZenoColumn(
-            column_type=ZenoColumnType.METADATA,
-            metadata_type=getMetadataType(self.df[data_column]),
-            name=data_column,
-        )
-        self.label_column = ZenoColumn(
-            column_type=ZenoColumnType.METADATA,
-            metadata_type=getMetadataType(self.df[label_column]),
-            name=label_column,
-        )
-        self.df = self.df.rename(columns=lambda x: "0" + str(x))
+        if id_column != "":
+            self.id_column = ZenoColumn(
+                column_type=ZenoColumnType.METADATA,
+                metadata_type=getMetadataType(self.df[id_column]),
+                name=id_column,
+            )
+        else:
+            self.df.reset_index(inplace=True)
+            self.id_column = ZenoColumn(
+                column_type=ZenoColumnType.METADATA,
+                metadata_type=MetadataType.OTHER,
+                name="index",
+            )
 
+        if data_column != "":
+            self.data_column = ZenoColumn(
+                column_type=ZenoColumnType.METADATA,
+                metadata_type=getMetadataType(self.df[data_column]),
+                name=data_column,
+            )
+        else:
+            self.data_column = ZenoColumn(
+                column_type=ZenoColumnType.METADATA,
+                metadata_type=MetadataType.OTHER,
+                name="",
+            )
+
+        if label_column != "":
+            self.label_column = ZenoColumn(
+                column_type=ZenoColumnType.METADATA,
+                metadata_type=getMetadataType(self.df[label_column]),
+                name=label_column,
+            )
+        else:
+            self.label_column = ZenoColumn(
+                column_type=ZenoColumnType.METADATA,
+                metadata_type=MetadataType.OTHER,
+                name="",
+            )
+
+        self.df = self.df.rename(columns=lambda x: "0" + str(x))
         self.df[str(self.id_column)].astype(str)
         self.df.set_index(str(self.id_column), inplace=True)
         self.df[str(self.id_column)] = self.df.index
@@ -312,7 +336,11 @@ class ZenoBackend(object):
         return_metrics = []
         for metric_key in requests:
             filt_df = filter_table(self.df, [metric_key.sli.filter_predicates])
-            if metric_key.state.metric == "" or metric_key.state.model == "":
+            if (
+                metric_key.state.metric == ""
+                or metric_key.state.model == ""
+                or self.label_column.name == ""
+            ):
                 return_metrics.append({"metric": None, "size": filt_df.shape[0]})
             else:
                 metric = self.calculate_metric(filt_df, metric_key.state)

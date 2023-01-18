@@ -2,6 +2,14 @@
   "version": "2.0.0",
   "configurations": [
     {
+      "name": "zenoadult",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": ["./examples/adult/config.toml"]
+    },
+    {
       "name": "zenoimagenet",
       "type": "python",
       "request": "launch",

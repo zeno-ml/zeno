@@ -32,13 +32,13 @@ class ZenoOptions(BaseModel):
 
 
 class ZenoParameters(BaseModel):
-    view: str
     metadata: DataFrame
+    view: str = ""
     functions: List[Callable] = []
     models: List[str] = []
     id_column: str = ""
     data_column: str = ""
-    label_column: str = "label"
+    label_column: str = ""
     data_path: str = ""
     label_path: str = ""
     batch_size: int = 1

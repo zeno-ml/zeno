@@ -37,14 +37,35 @@
 	$: idHash = columnHash($settings.idColumn);
 	$: start = currentPage * $rowsPerPage;
 	$: end = Math.min(start + $rowsPerPage, $settings.totalSize);
-	$: lastPage = Math.max(Math.ceil($settings.totalSize / $rowsPerPage) - 1, 0);
+	$: currentResult.then((r) => {
+		lastPage = Math.max(Math.ceil(r[0].size / $rowsPerPage) - 1, 0);
+	});
 	$: if (currentPage > lastPage) {
 		currentPage = lastPage;
 	}
 
 	// update on page, metadata selection, slice selection, or state change.
 	$: {
+		$status.completeColumns;
+		$selectionPredicates;
+		$zenoState;
+		$sort;
 		currentPage;
+		updateTable();
+	}
+
+	$: {
+		viewFunction;
+		table;
+		$sort;
+		viewOptions;
+		drawInstances();
+	}
+
+	// Reset pagination on metadata selection or slice selection.
+	selectionPredicates.subscribe(() => (currentPage = 0));
+
+	function updateTable() {
 		getFilteredTable(
 			$status.completeColumns,
 			$selectionPredicates,
@@ -55,13 +76,6 @@
 			table = res;
 			body ? body.scrollIntoView() : "";
 		});
-	}
-
-	$: if (viewFunction) {
-		table;
-		$sort;
-		viewOptions;
-		drawInstances();
 	}
 
 	function updateSort(columnName) {
@@ -88,6 +102,11 @@
 				(c.columnType === 0 || c.columnType === 1 || c.columnType === 4)
 		);
 		let ids = table.map((inst) => inst[idHash]);
+
+		if (!viewFunction) {
+			return;
+		}
+
 		viewDivs = Object.fromEntries(
 			ids
 				.map(
@@ -122,7 +141,9 @@
 		<table id="column-table">
 			<thead>
 				<tr>
-					<th>instance</th>
+					{#if viewFunction}
+						<th>instance</th>
+					{/if}
 					{#each columnHeader as header}
 						{#if header.name !== $settings.idColumn.name}
 							<th on:click={() => updateSort(header)}>
@@ -146,9 +167,11 @@
 			<tbody bind:this={body}>
 				{#each table as tableContent}
 					<tr>
-						<td>
-							<div bind:this={viewDivs[tableContent[idHash]]} />
-						</td>
+						{#if viewFunction}
+							<td>
+								<div bind:this={viewDivs[tableContent[idHash]]} />
+							</td>
+						{/if}
 						{#each columnHeader as header}
 							{#if header.name !== $settings.idColumn.name}
 								{#if header.metadataType === MetadataType.CONTINUOUS}

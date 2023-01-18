@@ -5,7 +5,7 @@
 	import TableView from "./TableView.svelte";
 	import ScatterView from "./scatter-view/ScatterView.svelte";
 	import { getMetricsForSlices } from "../api";
-	import { zenoState, selectionPredicates } from "../stores";
+	import { zenoState, selectionPredicates, settings } from "../stores";
 
 	export let table;
 
@@ -24,6 +24,11 @@
 	let optionsFunction: View.OptionsComponent;
 
 	onMount(() => {
+		if ($settings.view === "") {
+			selected = "table";
+			return;
+		}
+
 		try {
 			import(window.location.origin + "/cache/view.mjs").then((m) => {
 				if (m.getOptions) {
