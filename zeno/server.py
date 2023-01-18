@@ -75,7 +75,7 @@ def get_server(zeno: ZenoBackend):
 
     @api_app.get("/reports")
     def get_reports():
-        return json.dumps(zeno.get_reports())
+        return json.dumps([r.dict(by_alias=True) for r in zeno.get_reports()])
 
     @api_app.post("/set-folders")
     def set_folders(folders: List[str]):

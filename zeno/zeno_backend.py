@@ -354,10 +354,10 @@ class ZenoBackend(object):
     def get_slices(self):
         return [s.dict(by_alias=True) for s in self.slices.values()]
 
-    def get_reports(self):
-        return [r.dict(by_alias=True) for r in self.reports]
+    def get_reports(self) -> List[Report]:
+        return self.reports
 
-    def set_folders(self, folders):
+    def set_folders(self, folders: List[str]):
         if not self.editable:
             return
         self.folders = folders
