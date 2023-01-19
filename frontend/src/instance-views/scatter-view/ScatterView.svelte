@@ -19,8 +19,6 @@
 		WebGLExtentScalers,
 	} from "./regl-scatter";
 
-	export let currentResult;
-	export let table;
 	export let viewFunction: View.Component;
 	export let viewOptions: View.Options = {};
 	export let autoResize = true;

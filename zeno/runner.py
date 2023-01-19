@@ -15,7 +15,7 @@ import uvicorn
 from zeno.api import ZenoParameters
 from zeno.server import get_server
 from zeno.setup import setup_zeno
-from zeno.util import is_notebook, parse_testing_file, VIEW_MAP_URL, VIEWS_MAP_JSON
+from zeno.util import parse_testing_file, VIEW_MAP_URL, VIEWS_MAP_JSON
 from zeno.zeno_backend import ZenoBackend
 
 
@@ -152,7 +152,7 @@ def parse_args(args: ZenoParameters, base_path) -> ZenoParameters:
     return args
 
 
-def zeno(args: Union[ZenoParameters, dict], base_path="./"):
+def zeno(args: Union[ZenoParameters, dict], base_path="./") -> ZenoBackend:
     nest_asyncio.apply()
 
     if isinstance(args, dict):
@@ -161,9 +161,8 @@ def zeno(args: Union[ZenoParameters, dict], base_path="./"):
 
     zeno = ZenoBackend(args)
 
-    app = get_server(zeno)
-
     if args.serve:
+        app = get_server(zeno)
         print(
             "\n\033[1mZeno\033[0m running on http://{}:{}\n".format(
                 args.host, args.port
@@ -182,6 +181,4 @@ def zeno(args: Union[ZenoParameters, dict], base_path="./"):
 
         zeno.start_processing()
 
-        return zeno, None
-    else:
-        return app, zeno
+    return zeno

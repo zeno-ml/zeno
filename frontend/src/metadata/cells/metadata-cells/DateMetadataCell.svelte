@@ -1,8 +1,4 @@
 <script lang="ts">
-	export let col: ZenoColumn;
-	export let filterPredicates: FilterPredicate[];
-	export let histogram;
-
 	// function resetSelection(pos) {
 	// 	selection.values[pos] = undefined;
 	// if (

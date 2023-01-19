@@ -19,7 +19,7 @@ def zeno_client():
         ]
     )
 
-    _, zen = zeno(
+    zen = zeno(
         {
             "view": "image-classification",
             "metadata": df,

@@ -5,7 +5,6 @@
 	import { TrailingIcon } from "@smui/chips";
 
 	export let col: ZenoColumn;
-	export let histogram;
 	export let filterPredicates: FilterPredicate[];
 	export let updatePredicates;
 
