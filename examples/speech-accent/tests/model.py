@@ -42,8 +42,8 @@ def load_model(model_path):
 
 @distill
 def country(df, ops: ZenoOptions):
-    if df["0birthplace"][0] == df["0birthplace"][0]:
-        return df["0birthplace"].str.split(", ")[-1][-1]
+    if df["birthplace"][0] == df["birthplace"][0]:
+        return df["birthplace"].str.split(", ")[-1][-1]
     return ""
 
 

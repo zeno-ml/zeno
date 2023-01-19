@@ -96,7 +96,7 @@ export async function getMetricsForSlices(metricKeys: MetricKey[]) {
 }
 
 export async function getHistograms(
-	completeColumns,
+	completeColumns: ZenoColumn[],
 	filterPredicates: FilterPredicateGroup[],
 	state: ZenoState,
 	getMetrics: boolean

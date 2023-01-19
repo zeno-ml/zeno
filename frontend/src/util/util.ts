@@ -1,3 +1,4 @@
+import { ZenoColumnType } from "../globals";
 import { tab, report } from "../stores";
 
 export function updateTab(t: string) {
@@ -11,13 +12,17 @@ export function updateTab(t: string) {
 }
 
 export function columnHash(col: ZenoColumn) {
-	return col.columnType + col.name + (col.model ? col.model : "");
+	return (
+		(col.columnType === ZenoColumnType.METADATA ? "" : col.columnType) +
+		col.name +
+		(col.model ? col.model : "")
+	);
 }
 
 export function getMetricRange(res) {
 	const range: [number, number] = [Infinity, -Infinity];
 	Object.values(res).forEach((col) => {
-		(col as Array<any>).forEach((entry) => {
+		(col as Array<{ metric: number }>).forEach((entry) => {
 			if (entry.metric !== null && entry.metric !== undefined) {
 				range[0] = Math.min(range[0], entry.metric);
 				range[1] = Math.max(range[1], entry.metric);

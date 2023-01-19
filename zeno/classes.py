@@ -53,12 +53,15 @@ class ZenoColumn(CamelModel):
     metadata_type: Optional[MetadataType] = MetadataType.OTHER
     model: Optional[str] = ""
 
+    # Append the column type to the name unless it is a vanilla metadata column
     def __str__(self):
         m = ""
-        t = ""
         if self.model is not None:
             m = self.model
-        return str(int(self.column_type)) + self.name + m + t
+        t = ""
+        if self.column_type is not ZenoColumnType.METADATA:
+            t = str(int(self.column_type))
+        return t + self.name + m
 
 
 class FilterPredicate(CamelModel):

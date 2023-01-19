@@ -84,7 +84,7 @@ export const slices: Writable<Map<string, Slice>> = writable(new Map());
 export const folders: Writable<string[]> = folderWritable();
 export const reports: Writable<Report[]> = reportWritable();
 
-export const filteredTable: Writable<Record<string, any>[]> = writable([]);
+export const filteredTable: Writable<Record<string, unknown>[]> = writable([]);
 // slices is an array of slice names,
 // metadata is an object where keys are column names and values are FilterPredicateGroups
 export const selections: Writable<{

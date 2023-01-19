@@ -127,7 +127,6 @@ class ZenoBackend(object):
                 name="",
             )
 
-        self.df = self.df.rename(columns=lambda x: "0" + str(x))
         self.df[str(self.id_column)].astype(str)
         self.df.set_index(str(self.id_column), inplace=True)
         self.df[str(self.id_column)] = self.df.index
@@ -138,7 +137,7 @@ class ZenoBackend(object):
             col = ZenoColumn(
                 column_type=ZenoColumnType.METADATA,
                 metadata_type=getMetadataType(self.df[metadata_col]),
-                name=str(metadata_col)[1:],
+                name=str(metadata_col),
             )
             self.columns.append(col)
             self.complete_columns.append(col)

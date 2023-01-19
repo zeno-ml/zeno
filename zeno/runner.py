@@ -169,16 +169,6 @@ def zeno(args: Union[ZenoParameters, dict], base_path="./"):
                 args.host, args.port
             )
         )
-        if is_notebook():
-            from IPython.display import display, IFrame  # type: ignore
-
-            display(
-                IFrame(
-                    "http://{}:{}".format(args.host, args.port),
-                    "100%",
-                    800,
-                )
-            )
 
         Thread(
             target=uvicorn.run,
