@@ -349,7 +349,7 @@ class ZenoBackend(object):
 
     def calculate_metric(self, df, state):
         if not self.done_processing:
-            return -1
+            return None
 
         output_col = ZenoColumn(
             column_type=ZenoColumnType.OUTPUT,

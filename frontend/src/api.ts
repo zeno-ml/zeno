@@ -130,7 +130,8 @@ export async function getHistograms(
 	const prevRange = get(metricRange);
 	if (
 		getMetrics &&
-		(prevRange[0] === Infinity || (prevRange[0] === -1 && prevRange[1] === -1))
+		(prevRange[0] === Infinity ||
+			(prevRange[0] === null && prevRange[1] === null))
 	) {
 		// If we want to get metric range and haven't before
 		metricRange.set([...getMetricRange(res), true]);

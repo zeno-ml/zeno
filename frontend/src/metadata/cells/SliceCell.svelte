@@ -6,6 +6,7 @@
 	import Dialog, { Actions, Content, Title, InitialFocus } from "@smui/dialog";
 	import SliceDetails from "../../general/SliceDetails.svelte";
 	import {
+		status,
 		showNewSlice,
 		selections,
 		slices,
@@ -18,13 +19,25 @@
 	export let slice: Slice;
 	export let inFolder = false;
 
+	let result;
+
 	let confirmDelete = false;
 	let relatedReports = 0;
 
 	let showTooltip = false;
 	let hovering = false;
 	let showOptions = false;
+
 	$: selected = $selections.slices.includes(slice.sliceName);
+	$: {
+		$status;
+		result = getMetricsForSlices([
+			<MetricKey>{
+				sli: slice,
+				state: $zenoState,
+			},
+		]);
+	}
 
 	function removeSlice() {
 		confirmDelete = false;
@@ -100,13 +113,6 @@
 			}
 		}
 	}
-
-	$: result = getMetricsForSlices([
-		<MetricKey>{
-			sli: slice,
-			state: $zenoState,
-		},
-	]);
 </script>
 
 <div
