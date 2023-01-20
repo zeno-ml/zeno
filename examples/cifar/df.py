@@ -14,7 +14,6 @@ for folder in files:
         )
 df = pd.DataFrame(out, columns=["id", "label"])
 
-print(df.head())
 df.to_csv("cifar_pred.csv", index=False)
 
 df_mini = df.sample(1000)

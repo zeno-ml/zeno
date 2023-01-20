@@ -1,3 +1,5 @@
+"""Internal classes for Zeno."""
+
 from enum import IntEnum
 from typing import List, Optional, Tuple, Union
 

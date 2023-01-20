@@ -1,3 +1,5 @@
+"""Parallel processing functions for distill and inference pipelines."""
+
 import os
 from inspect import getsource
 from pathlib import Path

@@ -1,3 +1,5 @@
+"""The `zeno init` command, which sets up a new Zeno project."""
+
 import os
 
 import requests

@@ -1,3 +1,8 @@
+"""
+The FastAPI server for the Zeno frontend. Hosts both the REST API
+and the static files for the frontend.
+"""
+
 import asyncio
 import json
 import os
@@ -20,8 +25,8 @@ from zeno.classes import (
     ZenoSettings,
     ZenoVariables,
 )
+from zeno.data_pipeline.zeno_backend import ZenoBackend
 from zeno.util import NpEncoder
-from zeno.zeno_backend import ZenoBackend
 
 
 def get_server(zeno: ZenoBackend):

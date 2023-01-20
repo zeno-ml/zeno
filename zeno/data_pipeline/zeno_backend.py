@@ -1,3 +1,5 @@
+"""Primary backend for Zeno. Handles all data processing and caching."""
+
 import asyncio
 import logging
 import os
@@ -28,8 +30,12 @@ from zeno.classes import (
     ZenoColumnType,
     ZenoState,
 )
-from zeno.data_processing import postdistill_data, predistill_data, run_inference
-from zeno.filtering import filter_table, filter_table_single
+from zeno.data_pipeline.data_processing import (
+    postdistill_data,
+    predistill_data,
+    run_inference,
+)
+from zeno.data_pipeline.filtering import filter_table, filter_table_single
 from zeno.util import getMetadataType, load_series, read_pickle
 
 

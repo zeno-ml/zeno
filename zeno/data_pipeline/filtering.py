@@ -1,3 +1,4 @@
+"""Functions for parsing filter predicates and filtering dataframes"""
 from typing import List, Union
 
 import pandas as pd

@@ -1,3 +1,5 @@
+"""External API for Zeno."""
+
 import functools
 from typing import Callable, Dict, List
 
@@ -32,6 +34,8 @@ class ZenoOptions(BaseModel):
 
 
 class ZenoParameters(BaseModel):
+    """Options passed to the backend processing pipeline."""
+
     metadata: DataFrame
     view: str = ""
     functions: List[Callable] = []

@@ -1,3 +1,5 @@
+"""Entry to Zeno. Parses TOML file, starts server, and runs the pipeline."""
+
 import os
 import shutil
 import sys
@@ -12,10 +14,11 @@ import uvicorn
 from multiprocess import Process  # type: ignore
 
 from zeno.api import ZenoParameters
+from zeno.data_pipeline.zeno_backend import ZenoBackend
 from zeno.server import get_server
 from zeno.setup import setup_zeno
 from zeno.util import is_notebook, parse_testing_file, VIEW_MAP_URL, VIEWS_MAP_JSON
-from zeno.zeno_backend import ZenoBackend
+
 
 # Global variable to hold the Zeno server process.
 # This is used to kill the server when re-running in a notebook.
@@ -86,17 +89,17 @@ def parse_toml():
             print("Extension of " + meta_path.suffix + " not one of .csv or .parquet")
             sys.exit(1)
 
-    if "functions" in args and os.path.exists(
-        os.path.realpath(os.path.join(base_path, args["functions"]))
-    ):
-        args["functions"] = Path(
-            os.path.realpath(os.path.join(base_path, args["functions"]))
-        )
-        # Add directory with tests to path for relative imports.
-        fns = []
-        for f in list(args["functions"].rglob("*.py")):
-            fns = fns + parse_testing_file(f)
-        args["functions"] = fns
+    if "functions" in args:
+        fn_path = Path(os.path.realpath(os.path.join(base_path, args["functions"])))
+        print(fn_path)
+        if os.path.isfile(fn_path):
+            args["functions"] = parse_testing_file(fn_path)
+        elif os.path.exists(fn_path):
+            # Add directory with tests to path for relative imports.
+            fns = []
+            for f in list(fn_path.rglob("*.py")):
+                fns = fns + parse_testing_file(f)
+            args["functions"] = fns
 
     zeno(ZenoParameters(**args), base_path)
 
