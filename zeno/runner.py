@@ -2,21 +2,24 @@ import os
 import shutil
 import sys
 from pathlib import Path
-from threading import Thread
 from typing import Union
 
-import nest_asyncio  # type: ignore
 import pandas as pd
 import pkg_resources
 import requests
 import tomli
 import uvicorn
+from multiprocess import Process  # type: ignore
 
 from zeno.api import ZenoParameters
 from zeno.server import get_server
 from zeno.setup import setup_zeno
-from zeno.util import parse_testing_file, VIEW_MAP_URL, VIEWS_MAP_JSON
+from zeno.util import is_notebook, parse_testing_file, VIEW_MAP_URL, VIEWS_MAP_JSON
 from zeno.zeno_backend import ZenoBackend
+
+# Global variable to hold the Zeno server process.
+# This is used to kill the server when re-running in a notebook.
+ZENO_SERVER_PROCESS = None
 
 
 def command_line():
@@ -152,33 +155,31 @@ def parse_args(args: ZenoParameters, base_path) -> ZenoParameters:
     return args
 
 
-def zeno(args: Union[ZenoParameters, dict], base_path="./") -> ZenoBackend:
-    nest_asyncio.apply()
+def run_zeno(args: ZenoParameters):
+    zeno = ZenoBackend(args)
+    app = get_server(zeno)
+    zeno.start_processing()
 
+    print("\n\033[1mZeno\033[0m running on http://{}:{}\n".format(args.host, args.port))
+    uvicorn.run(app, host=args.host, port=args.port, log_level="critical")
+
+
+def zeno(args: Union[ZenoParameters, dict], base_path="./"):
     if isinstance(args, dict):
         args = ZenoParameters.parse_obj(args)
     args = parse_args(args, base_path)
 
-    zeno = ZenoBackend(args)
-
     if args.serve:
-        app = get_server(zeno)
-        print(
-            "\n\033[1mZeno\033[0m running on http://{}:{}\n".format(
-                args.host, args.port
-            )
-        )
+        global ZENO_SERVER_PROCESS
+        if ZENO_SERVER_PROCESS is not None:
+            ZENO_SERVER_PROCESS.terminate()
 
-        Thread(
-            target=uvicorn.run,
-            args=(app,),
-            kwargs={
-                "host": args.host,
-                "port": args.port,
-                "log_level": "critical",
-            },
-        ).start()
+        ZENO_SERVER_PROCESS = Process(target=run_zeno, args=(args,))
+        ZENO_SERVER_PROCESS.start()
 
-        zeno.start_processing()
+        if not is_notebook():
+            ZENO_SERVER_PROCESS.join()
 
-    return zeno
+    else:
+        zeno = ZenoBackend(args)
+        return zeno
