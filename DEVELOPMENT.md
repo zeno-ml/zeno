@@ -13,13 +13,14 @@ To run the CIFAR-10 example:
 - `mkdir data; cd data; git clone https://github.com/YoongiKim/CIFAR-10-images`
 - `source ./.venv/bin/activate`
 - `pip install Pillow torch torchvision`
-
 - `poetry run zeno ./examples/cifar/tests/zeno.toml`
-- For debugging, you can use the "Run and Debug" sidebar in VSCode (a play button with a bug icon), and run the `zenocifar` configuration.
+  -  For debugging, you can use the "Run and Debug" sidebar in VSCode (a play button with a bug icon), and run the `zenocifar` configuration.
 
-To see live changes to the frontend:
+In a different terminal window, run the following command to serve the frontend code:
 
 - `cd frontend; npm run dev`
+
+You should now be able to see a live version of zeno on `localhost:8000` in your browser.
 
 ## Development Commands
 
