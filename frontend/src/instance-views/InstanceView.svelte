@@ -5,7 +5,12 @@
 	import TableView from "./TableView.svelte";
 	import ScatterView from "./scatter-view/ScatterView.svelte";
 	import { getMetricsForSlices } from "../api";
-	import { zenoState, selectionPredicates, settings } from "../stores";
+	import {
+		zenoState,
+		selectionPredicates,
+		settings,
+		selectionIds,
+	} from "../stores";
 
 	export let table;
 
@@ -43,19 +48,22 @@
 		}
 	});
 
-	$: currentResult = getMetricsForSlices([
-		<MetricKey>{
-			sli: <Slice>{
-				sliceName: "",
-				folder: "",
-				filterPredicates: {
-					predicates: $selectionPredicates,
-					join: "",
+	$: currentResult = getMetricsForSlices(
+		[
+			<MetricKey>{
+				sli: <Slice>{
+					sliceName: "",
+					folder: "",
+					filterPredicates: {
+						predicates: $selectionPredicates,
+						join: "",
+					},
 				},
+				state: $zenoState,
 			},
-			state: $zenoState,
-		},
-	]);
+		],
+		$selectionIds
+	);
 </script>
 
 <div class="heading">

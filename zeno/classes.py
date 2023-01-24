@@ -110,6 +110,11 @@ class MetricKey(CamelModel):
     state: ZenoState
 
 
+class MetricRequest(CamelModel):
+    metric_keys: List[MetricKey]
+    filter_ids: Optional[FilterIds] = None
+
+
 class HistogramRequest(CamelModel):
     columns: List[ZenoColumn]
     state: ZenoState

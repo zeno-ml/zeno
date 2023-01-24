@@ -18,6 +18,7 @@ from zeno.classes import (
     FilterPredicateGroup,
     HistogramRequest,
     MetricKey,
+    MetricRequest,
     Report,
     Slice,
     StatusResponse,
@@ -111,8 +112,8 @@ def get_server(zeno: ZenoBackend):
         zeno.delete_slice(slice_name[0])
 
     @api_app.post("/get-metrics-for-slices")
-    def get_metrics_for_slices(reqs: List[MetricKey]):
-        return json.dumps(zeno.get_metrics_for_slices(reqs))
+    def get_metrics_for_slices(req: MetricRequest):
+        return json.dumps(zeno.get_metrics_for_slices(req.metric_keys, req.filter_ids))
 
     @api_app.get("/embed-exists/{model}")
     def embed_exists(model: str):

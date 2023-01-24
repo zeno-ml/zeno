@@ -76,23 +76,26 @@ function setModelForMetricKeys(metricKeys: MetricKey[]) {
 	});
 }
 
-export async function getMetricsForSlices(metricKeys: MetricKey[]) {
+export async function getMetricsForSlices(
+	metricKeys: MetricKey[],
+	filterIds?: FilterIds
+) {
 	if (metricKeys.length === 0 || metricKeys[0].state.metric === undefined) {
 		return null;
 	}
 	// Update model in predicates if slices are dependent on postdistill columns.
 	metricKeys = setModelForMetricKeys(metricKeys);
-
-	if (metricKeys.length > 0) {
-		const res = await fetch("/api/get-metrics-for-slices", {
-			method: "POST",
-			headers: {
-				"Content-type": "application/json",
-			},
-			body: JSON.stringify(metricKeys),
-		}).then((d) => d.json());
-		return JSON.parse(res);
-	}
+	const res = await fetch("/api/get-metrics-for-slices", {
+		method: "POST",
+		headers: {
+			"Content-type": "application/json",
+		},
+		body: JSON.stringify({
+			metricKeys,
+			filterIds,
+		}),
+	}).then((d) => d.json());
+	return JSON.parse(res);
 }
 
 export async function getHistograms(

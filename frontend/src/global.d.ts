@@ -51,6 +51,8 @@ interface Slice {
 /**
  * probably a better way to make this a FilterPredicate
  * for the id metadata value \(o_o)/ who knows
+ *
+ * Made an interface because might add more properties later
  */
 interface FilterIds {
 	ids: string[];

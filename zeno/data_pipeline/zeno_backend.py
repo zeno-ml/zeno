@@ -18,6 +18,7 @@ from pathos.multiprocessing import ProcessingPool as Pool  # type: ignore
 
 from zeno.api import ZenoOptions, ZenoParameters
 from zeno.classes import (
+    FilterIds,
     FilterPredicate,
     FilterPredicateGroup,
     HistogramRequest,
@@ -335,12 +336,18 @@ class ZenoBackend(object):
                     out[0].metadata_type = getMetadataType(self.df[str(out[0])])
                     self.complete_columns.append(out[0])
 
-    def get_metrics_for_slices(self, requests: List[MetricKey]):
+    def get_metrics_for_slices(
+        self,
+        requests: List[MetricKey],
+        filter_ids: Optional[FilterIds] = None,
+    ):
         """Calculate result for each requested combination."""
 
         return_metrics = []
         for metric_key in requests:
-            filt_df = filter_table(self.df, [metric_key.sli.filter_predicates])
+            filt_df = filter_table(
+                self.df, [metric_key.sli.filter_predicates], filter_ids
+            )
             if (
                 metric_key.state.metric == ""
                 or metric_key.state.model == ""
