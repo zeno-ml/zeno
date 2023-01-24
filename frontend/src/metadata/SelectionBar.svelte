@@ -64,7 +64,7 @@
 				{#if $selectionIds.ids.length > 0}
 					<IdsChip />
 				{/if}
-				{#if $selectionPredicates.length > 0}
+				{#if $selectionPredicates.length > 0 || $selectionIds.ids.length > 0}
 					<span
 						class="clear"
 						on:keydown={() => ({})}
@@ -75,6 +75,7 @@
 								}
 								return { slices: [], metadata: { ...m.metadata } };
 							});
+							selectionIds.set({ ids: [] });
 						}}>
 						clear all
 					</span>
