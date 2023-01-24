@@ -16,6 +16,7 @@
 		select: number[];
 		pointOver: ReglScatterPointDispatch;
 		pointOut: ReglScatterPointDispatch;
+		mount: ReglScatterObject;
 	}>();
 
 	export let width: number;
@@ -59,6 +60,7 @@
 
 	onMount(() => {
 		init();
+		dispatch("mount", scatterPtr);
 	});
 
 	onDestroy(() => {

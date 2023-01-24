@@ -29,6 +29,9 @@
 	let embedExists = false;
 	let points: Points2D;
 	let computingPoints = false; // spinner when true
+	let dehighlightPoints = () => {
+		// nada
+	};
 
 	let pointToWebGL: WebGLExtentScalers; // functions to scale points
 	let pointHover: ReglScatterPointDispatch;
@@ -41,7 +44,9 @@
 			resizeScatter();
 		}
 	}
-
+	$: if ($selectionIds.ids.length === 0) {
+		dehighlightPoints();
+	}
 	/**
 	 * Main driver behind fetching the projected points and displaying
 	 * them in the scale that WebGL expects between [-1, 1]
@@ -102,6 +107,9 @@
 		const selectedIds = selectedIndices.map((index) => points.ids[index]);
 		selectionIds.set({ ids: selectedIds });
 	}
+	function deselectPoints() {
+		selectionIds.set({ ids: [] });
+	}
 </script>
 
 <svelte:window on:resize={resizeScatter} />
@@ -135,7 +143,12 @@
 							{height}
 							on:pointOver={showViewOnPoint}
 							on:pointOut={clearPointHover}
-							on:select={selectPoints} />
+							on:select={selectPoints}
+							on:deselect={deselectPoints}
+							on:mount={(e) => {
+								const reglScatterplot = e.detail;
+								dehighlightPoints = reglScatterplot.deselect;
+							}} />
 						{#if pointHover !== undefined}
 							<div
 								id="hover-view"

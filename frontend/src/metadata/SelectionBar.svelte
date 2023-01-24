@@ -7,11 +7,13 @@
 		selections,
 		metric,
 		selectionPredicates,
+		selectionIds,
 		status,
 	} from "../stores";
 	import { onMount } from "svelte";
 	import SliceChip from "./chips/SliceChip.svelte";
 	import MetadataChip from "./chips/MetadataChip.svelte";
+	import IdsChip from "./chips/IdsChip.svelte";
 
 	export let currentResult;
 	export let selected = "list";
@@ -50,7 +52,7 @@
 <div style:width="100%">
 	<div class="between">
 		<div class="chips">
-			{#if $selections.slices.length + filters.length === 0}
+			{#if $selections.slices.length + filters.length === 0 && $selectionIds.ids.length === 0}
 				<p>Filter with the metadata distributions.</p>
 			{:else}
 				{#each $selections.slices as slice}
@@ -59,6 +61,9 @@
 				{#each filters as [hash, chip]}
 					<MetadataChip {hash} {chip} />
 				{/each}
+				{#if $selectionIds.ids.length > 0}
+					<IdsChip />
+				{/if}
 				{#if $selectionPredicates.length > 0}
 					<span
 						class="clear"
