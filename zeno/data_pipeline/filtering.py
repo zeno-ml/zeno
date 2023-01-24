@@ -1,9 +1,15 @@
 """Functions for parsing filter predicates and filtering dataframes"""
-from typing import List, Union
+from typing import List, Union, Optional
 
 import pandas as pd
 
-from zeno.classes import FilterPredicate, FilterPredicateGroup, MetadataType, ZenoColumn
+from zeno.classes import (
+    FilterPredicate,
+    FilterPredicateGroup,
+    MetadataType,
+    ZenoColumn,
+    FilterIds,
+)
 
 
 def get_filter_string(filter: Union[FilterPredicateGroup, FilterPredicate]):
@@ -40,13 +46,20 @@ def get_filter_string(filter: Union[FilterPredicateGroup, FilterPredicate]):
 
 
 def filter_table(
-    df, filters: List[Union[FilterPredicate, FilterPredicateGroup]]
+    df,
+    filter_predicates: List[Union[FilterPredicate, FilterPredicateGroup]],
+    filter_ids: Optional[FilterIds] = None,
 ) -> pd.DataFrame:
+    # if we have ids, filter them out now!
+    if filter_ids is not None and len(filter_ids.ids) > 0:
+        # this is fast because the index is set to ids
+        df = df.loc[filter_ids.ids]
+
     final_filter = ""
-    for filt in filters:
+    for filt in filter_predicates:
         final_filter = final_filter + get_filter_string(filt)
     if (
-        len(filters) > 0
+        len(filter_predicates) > 0
         and len(final_filter) > 0
         and (final_filter[-1] == "&" or final_filter[-1] == "|")
     ):

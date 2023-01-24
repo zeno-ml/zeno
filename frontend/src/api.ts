@@ -160,6 +160,7 @@ export async function getFilteredIds(filterPredicates: FilterPredicateGroup[]) {
 export async function getFilteredTable(
 	completeColumns,
 	filterPredicates: FilterPredicateGroup[],
+	filterIds: FilterIds,
 	state: ZenoState,
 	sliceRange: [number, number],
 	sort: [ZenoColumn, boolean]
@@ -177,6 +178,7 @@ export async function getFilteredTable(
 			filterPredicates: filterPredicates,
 			sliceRange,
 			sort,
+			filterIds,
 		}),
 	}).then((res) => res.json());
 	res = JSON.parse(res);

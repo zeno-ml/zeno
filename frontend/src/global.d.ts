@@ -48,6 +48,14 @@ interface Slice {
 	filterPredicates?: FilterPredicateGroup;
 }
 
+/**
+ * probably a better way to make this a FilterPredicate
+ * for the id metadata value \(o_o)/ who knows
+ */
+interface FilterIds {
+	ids: string[];
+}
+
 interface Result {
 	metric: number;
 	size: number;

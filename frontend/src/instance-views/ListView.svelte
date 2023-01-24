@@ -14,6 +14,7 @@
 		status,
 		zenoState,
 		selectionPredicates,
+		selectionIds
 	} from "../stores";
 	import { getFilteredTable } from "../api";
 	import { columnHash } from "../util/util";
@@ -47,6 +48,7 @@
 		getFilteredTable(
 			$status.completeColumns,
 			$selectionPredicates,
+			$selectionIds,
 			$zenoState,
 			[start, end],
 			$sort

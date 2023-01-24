@@ -431,7 +431,7 @@ class ZenoBackend(object):
         return filter_table(self.df, req).loc[str(self.id_column)]
 
     def get_filtered_table(self, req: TableRequest):
-        filt_df = filter_table(self.df, req.filter_predicates)
+        filt_df = filter_table(self.df, req.filter_predicates, req.filter_ids)
         if req.sort[0]:
             filt_df = filt_df.sort_values(str(req.sort[0]), ascending=req.sort[1])
         filt_df = filt_df.iloc[req.slice_range[0] : req.slice_range[1]]

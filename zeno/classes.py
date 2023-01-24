@@ -78,6 +78,10 @@ class FilterPredicateGroup(CamelModel):
     join: str
 
 
+class FilterIds(CamelModel):
+    ids: List[str]
+
+
 class ZenoSettings(CamelModel):
     view: str
     id_column: ZenoColumn
@@ -118,6 +122,7 @@ class TableRequest(CamelModel):
     slice_range: List[int]
     filter_predicates: List[Union[FilterPredicate, FilterPredicateGroup]]
     sort: Tuple[Union[ZenoColumn, None], bool]
+    filter_ids: Optional[FilterIds] = None
 
 
 class StatusResponse(CamelModel):

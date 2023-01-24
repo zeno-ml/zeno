@@ -11,7 +11,7 @@
 		getEntry,
 		projectEmbedInto2D,
 	} from "../../api";
-	import { model } from "../../stores";
+	import { model, selectionIds } from "../../stores";
 	import { createScalesWebgGLExtent } from "./regl-scatter";
 
 	import type {
@@ -90,6 +90,18 @@
 			width = containerEl.clientWidth;
 		}
 	}
+
+	/**
+	 * Selects the points and gets the ids for the selected entries
+	 *
+	 * @todo make this native to the filter predicates somehow
+	 * right now I just consider it separate
+	 */
+	function selectPoints(e: CustomEvent<number[]>) {
+		const selectedIndices = e.detail;
+		const selectedIds = selectedIndices.map((index) => points.ids[index]);
+		selectionIds.set({ ids: selectedIds });
+	}
 </script>
 
 <svelte:window on:resize={resizeScatter} />
@@ -122,7 +134,8 @@
 							{width}
 							{height}
 							on:pointOver={showViewOnPoint}
-							on:pointOut={clearPointHover} />
+							on:pointOut={clearPointHover}
+							on:select={selectPoints} />
 						{#if pointHover !== undefined}
 							<div
 								id="hover-view"
