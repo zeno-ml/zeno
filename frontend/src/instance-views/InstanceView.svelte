@@ -73,7 +73,7 @@
 	<TableView {currentResult} {table} {viewFunction} {viewOptions} />
 {/if}
 {#if selected === "scatter"}
-	<ScatterView {currentResult} {table} {viewFunction} {viewOptions} />
+	<ScatterView {viewFunction} {viewOptions} />
 {/if}
 
 <style>
