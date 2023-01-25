@@ -59,13 +59,6 @@ export const models: Writable<string[]> = writable([]);
 
 export const model: Writable<string> = writable(undefined);
 export const metric: Writable<string> = writable(undefined);
-export const zenoState: Readable<ZenoState> = derived(
-	[model, metric],
-	([$model, $metric]) => ({
-		model: $model,
-		metric: $metric,
-	})
-);
 export const currentColumns: Readable<ZenoColumn[]> = derived(
 	[settings, model],
 	([$settings, $model]) =>
@@ -118,9 +111,7 @@ export const report: Writable<number> = writable(undefined);
 export const showNewSlice: Writable<boolean> = writable(false);
 export const sliceToEdit: Writable<Slice> = writable(null);
 
-// [low, high, whether it is showing]
-export const metricRange: Writable<[number, number, boolean]> = writable([
+export const metricRange: Writable<[number, number]> = writable([
 	Infinity,
 	-Infinity,
-	false,
 ]);

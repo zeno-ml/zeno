@@ -5,7 +5,7 @@
 	import Select, { Option } from "@smui/select";
 	import { MetadataType, ZenoColumnType } from "../globals";
 	import { tick } from "svelte";
-	import { getFilteredTable } from "../api";
+	import { getFilteredTable } from "../api/table";
 	import {
 		rowsPerPage,
 		selectionPredicates,
@@ -13,7 +13,6 @@
 		sort,
 		status,
 		model,
-		zenoState,
 	} from "../stores";
 	import { columnHash } from "../util/util";
 
@@ -48,7 +47,7 @@
 	$: {
 		$status.completeColumns;
 		$selectionPredicates;
-		$zenoState;
+		$model;
 		$sort;
 		currentPage;
 		updateTable();
@@ -69,7 +68,7 @@
 		getFilteredTable(
 			$status.completeColumns,
 			$selectionPredicates,
-			$zenoState,
+			$model,
 			[start, end],
 			$sort
 		).then((res) => {
@@ -98,7 +97,7 @@
 
 		columnHeader = $status.completeColumns.filter(
 			(c) =>
-				(c.model === "" || c.model === $zenoState.model) &&
+				(c.model === "" || c.model === $model) &&
 				(c.columnType === 0 || c.columnType === 1 || c.columnType === 4)
 		);
 		let ids = table.map((inst) => inst[idHash]);

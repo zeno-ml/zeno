@@ -11,7 +11,7 @@
 	import { folders, slices } from "../../stores";
 	import NewFolderPopup from "../popups/NewFolderPopup.svelte";
 	import SliceCell from "./SliceCell.svelte";
-	import { createNewSlice } from "../../api";
+	import { createNewSlice } from "../../api/slice";
 
 	export let folder: string;
 

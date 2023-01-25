@@ -10,7 +10,7 @@
 		createViewComponent,
 		getEntry,
 		projectEmbedInto2D,
-	} from "../../api";
+	} from "../../api/api";
 	import { model } from "../../stores";
 	import { createScalesWebgGLExtent } from "./regl-scatter";
 

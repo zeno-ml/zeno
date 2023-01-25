@@ -12,10 +12,9 @@
 		settings,
 		sort,
 		status,
-		zenoState,
 		selectionPredicates,
 	} from "../stores";
-	import { getFilteredTable } from "../api";
+	import { getFilteredTable } from "../api/table";
 	import { columnHash } from "../util/util";
 
 	export let currentResult;
@@ -47,7 +46,7 @@
 		getFilteredTable(
 			$status.completeColumns,
 			$selectionPredicates,
-			$zenoState,
+			$model,
 			[start, end],
 			$sort
 		).then((res) => (table = res));
