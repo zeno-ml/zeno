@@ -222,11 +222,12 @@
 		width: 350px;
 		min-width: 350px;
 		max-width: 350px;
-		padding-top: 0px;
+		padding-top: 10px;
 		padding-bottom: 0px;
 		padding-left: 15px;
 		padding-right: 10px;
 		overflow-y: scroll;
+		background-color: #FBFBFA;
 	}
 	.ghost-container {
 		width: 100%;
@@ -239,12 +240,8 @@
 		padding-bottom: 10px;
 		padding-top: 5px;
 	}
-	h4 {
-		font-weight: 500;
-		color: rgba(0, 0, 0, 0.7);
-	}
 	.cell {
-		border: 1px solid #e0e0e0;
+		border: 0.5px solid #EBEBEA;
 		padding: 10px;
 		min-width: 400px;
 		width: 400px;
@@ -257,7 +254,6 @@
 	.icon {
 		width: 24px;
 		height: 24px;
-		margin-right: 10px;
 	}
 	.overview {
 		display: flex;

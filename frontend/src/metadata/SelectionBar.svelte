@@ -122,6 +122,7 @@
 		margin: 0px;
 	}
 	.between {
+		padding-top: 10px;
 		display: flex;
 		flex-direction: row;
 		justify-content: space-between;
