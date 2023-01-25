@@ -281,7 +281,7 @@
 	.cell {
 		position: relative;
 		overflow: visible;
-		border: 0.5px solid #EBEBEA;
+		border: 0.5px solid #ebebea;
 		border-radius: 5px;
 		margin-top: 5px;
 		display: flex;

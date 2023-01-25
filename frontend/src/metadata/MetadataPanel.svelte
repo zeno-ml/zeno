@@ -227,7 +227,7 @@
 		padding-left: 15px;
 		padding-right: 10px;
 		overflow-y: scroll;
-		background-color: #FBFBFA;
+		background-color: #fbfbfa;
 	}
 	.ghost-container {
 		width: 100%;
@@ -241,7 +241,7 @@
 		padding-top: 5px;
 	}
 	.cell {
-		border: 0.5px solid #EBEBEA;
+		border: 0.5px solid #ebebea;
 		padding: 10px;
 		min-width: 400px;
 		width: 400px;
