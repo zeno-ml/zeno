@@ -435,7 +435,7 @@ class ZenoBackend(object):
         return metric
 
     def get_filtered_ids(self, req: List[Union[FilterPredicateGroup, FilterPredicate]]):
-        return filter_table(self.df, req).loc[str(self.id_column)]
+        return filter_table(self.df, req)[str(self.id_column)].to_list()
 
     def get_filtered_table(self, req: TableRequest):
         filt_df = filter_table(self.df, req.filter_predicates, req.filter_ids)

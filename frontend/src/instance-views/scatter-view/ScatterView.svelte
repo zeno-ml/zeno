@@ -11,13 +11,18 @@
 		getEntry,
 		projectEmbedInto2D,
 	} from "../../api";
-	import { model, selectionIds } from "../../stores";
-	import { createScalesWebgGLExtent } from "./regl-scatter";
+	import { model, selectionIds, selectionPredicates } from "../../stores";
+	import {
+		createScalesWebgGLExtent,
+		type ReglScatterData,
+	} from "./regl-scatter";
+	import { getFilteredIds } from "../../api";
 
 	import type {
 		ReglScatterPointDispatch,
 		WebGLExtentScalers,
 	} from "./regl-scatter";
+	import { onDestroy } from "svelte";
 
 	export let viewFunction: View.Component;
 	export let viewOptions: View.Options = {};
@@ -32,6 +37,8 @@
 	let dehighlightPoints = () => {
 		// nada
 	};
+	let filterPredicatesIds: string[] = [];
+	let opacities: number[] = [];
 
 	let pointToWebGL: WebGLExtentScalers; // functions to scale points
 	let pointHover: ReglScatterPointDispatch;
@@ -47,6 +54,28 @@
 	$: if ($selectionIds.ids.length === 0) {
 		dehighlightPoints();
 	}
+
+	$: if (points) {
+		if (filterPredicatesIds.length > 0) {
+			opacities = points.ids.map((id) =>
+				filterPredicatesIds.includes(id) ? 1 : 0.25
+			);
+		} else {
+			opacities = new Array(points.ids.length).fill(1);
+		}
+	}
+
+	const unsubscribe = selectionPredicates.subscribe(async (sp) => {
+		if (points) {
+			const ids = await getFilteredIds(sp);
+			filterPredicatesIds = ids;
+		}
+	});
+
+	onDestroy(() => {
+		unsubscribe();
+	});
+
 	/**
 	 * Main driver behind fetching the projected points and displaying
 	 * them in the scale that WebGL expects between [-1, 1]
@@ -135,10 +164,12 @@
 					<div class="overlay">
 						<ReglScatter
 							style="outline: 1px solid lavender"
-							data={points}
+							data={{
+								...points,
+								category: opacities,
+							}}
 							pointSize={pointSizeSlider}
 							pointColor="#6a1b9a"
-							opacity={0.75}
 							{width}
 							{height}
 							on:pointOver={showViewOnPoint}

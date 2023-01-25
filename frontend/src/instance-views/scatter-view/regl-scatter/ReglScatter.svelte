@@ -28,7 +28,7 @@
 	export let colorRange: ReglScatterColorRange = [];
 	export let config: ReglScatterConfig = {};
 	export let pointSize = 5;
-	export let opacity = 0.85;
+	// export let opacity = 0.85;
 	export let pointColor = "#6a1b9a";
 	export let pointOutline = 3;
 	export let style = "";
@@ -55,8 +55,8 @@
 		}
 	}
 
-	// update when the colorRange changes, but now when the scatter changes
-	$: updateColorRange(colorRange);
+	// // update when the colorRange changes, but not when the scatter changes
+	// $: updateColorRange(colorRange);
 
 	onMount(() => {
 		init();
@@ -66,6 +66,13 @@
 	onDestroy(() => {
 		scatterPtr.destroy();
 	});
+
+	function updateOpacityRange(scatterPtr: ReglScatterObject, length: number) {
+		scatterPtr.set({
+			opacityBy: "category",
+			opacity: new Array(length).fill(0).map((_, i) => i / (length - 1)),
+		});
+	}
 
 	function updateColorRange(colorRange: ReglScatterColorRange) {
 		if (scatterPtr && colorRange) {
@@ -92,9 +99,11 @@
 			pointColorHover: pointColor,
 			pointColorActive: pointColor,
 			backgroundColor: "#FFFFFF",
-			opacity,
+			// opacity,
 			pointOutlineWidth: pointOutline,
 		});
+
+		updateOpacityRange(scatterPtr, 10);
 
 		// listeners
 		listenLasso();
