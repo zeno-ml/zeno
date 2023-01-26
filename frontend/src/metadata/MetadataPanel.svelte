@@ -23,6 +23,7 @@
 	import {
 		folders,
 		metric,
+		metricRange,
 		metrics,
 		model,
 		models,
@@ -67,6 +68,22 @@
 				});
 			});
 		});
+	});
+
+	// Calculate histogram metrics when metric changes
+	metric.subscribe((metric) => {
+		if (metadataHistograms.size === 0) {
+			return;
+		}
+		metricRange.set([Infinity, -Infinity]);
+		getHistogramMetrics(metadataHistograms, null, $model, metric).then(
+			(res) => {
+				if (res === undefined) {
+					return;
+				}
+				metadataHistograms = res;
+			}
+		);
 	});
 
 	// Calculate histogram counts when model changes for postdistill columns
@@ -235,7 +252,7 @@
 
 <style>
 	.side-container {
-		height: 100vh;
+		height: calc(100vh - 15px);
 		width: 350px;
 		min-width: 350px;
 		max-width: 350px;

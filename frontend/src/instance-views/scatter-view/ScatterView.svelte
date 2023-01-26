@@ -162,7 +162,7 @@
 <style>
 	#scatter-view {
 		position: relative;
-		height: calc(100vh - 165px);
+		height: calc(100vh - 170px);
 	}
 	#container {
 		position: relative;

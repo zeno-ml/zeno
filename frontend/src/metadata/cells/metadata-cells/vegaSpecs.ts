@@ -11,6 +11,7 @@ export function nominalVegaSpec(metricRange) {
 		},
 		width: 300,
 		height: 40,
+		background: "#fbfbfa",
 		layer: [
 			{
 				params: [
@@ -87,6 +88,7 @@ export function continuousVegaSpec(metricRange) {
 		},
 		width: 300,
 		height: 40,
+		background: "#fbfbfa",
 		layer: [
 			{
 				params: [
