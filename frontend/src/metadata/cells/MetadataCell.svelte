@@ -56,8 +56,8 @@
 
 <style>
 	.cell {
-		border-top: 1px solid #e0e0e0;
-		border-bottom: 1px solid #e0e0e0;
+		border-top: 0.5px solid #ebebea;
+		border-bottom: 0.5px solid #ebebea;
 		padding: 10px 0px 10px 0px;
 		display: flex;
 		flex-direction: column;

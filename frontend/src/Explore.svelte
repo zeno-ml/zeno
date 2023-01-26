@@ -9,7 +9,7 @@
 	<div class="container">
 		<MetadataPanel />
 
-		<div id="samples" style:width="100%" style:padding-left="10px">
+		<div id="samples" style:width="100%">
 			<InstanceView table={$filteredTable} />
 		</div>
 	</div>
@@ -18,7 +18,8 @@
 <style>
 	#samples {
 		width: 100%;
-		margin-right: 5px;
+		margin-right: 20px;
+		margin-left: 20px;
 	}
 	.container {
 		display: flex;
