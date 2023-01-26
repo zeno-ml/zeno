@@ -127,5 +127,5 @@ def is_notebook() -> bool:
             return False  # Terminal running IPython
         else:
             return False  # Other type (?)
-    except ImportError:
+    except (NameError, ImportError):
         return False  # Probably standard Python interpreter
