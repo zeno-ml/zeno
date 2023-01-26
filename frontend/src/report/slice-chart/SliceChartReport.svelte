@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Select, { Option } from "@smui/select";
-	import { getMetricsForSlices } from "../../api";
+	import { getMetricsForSlices } from "../../api/slice";
 	import {
 		models,
 		model,
@@ -31,10 +31,8 @@
 					sli: [...$slices.values()].find(
 						(s) => s.sliceName === pred.sliceName
 					),
-					state: {
-						metric: $metric,
-						model: mod,
-					},
+					metric: $metric,
+					model: mod,
 				});
 			});
 		});

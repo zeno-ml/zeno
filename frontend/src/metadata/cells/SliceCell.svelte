@@ -12,9 +12,14 @@
 		slices,
 		sliceToEdit,
 		reports,
-		zenoState,
+		model,
+		metric,
 	} from "../../stores";
-	import { getMetricsForSlices, deleteSlice, createNewSlice } from "../../api";
+	import {
+		getMetricsForSlices,
+		deleteSlice,
+		createNewSlice,
+	} from "../../api/slice";
 
 	export let slice: Slice;
 	export let inFolder = false;
@@ -34,7 +39,8 @@
 		result = getMetricsForSlices([
 			<MetricKey>{
 				sli: slice,
-				state: $zenoState,
+				model: $model,
+				metric: $metric,
 			},
 		]);
 	}

@@ -4,8 +4,8 @@
 	import ListView from "./ListView.svelte";
 	import TableView from "./TableView.svelte";
 	import ScatterView from "./scatter-view/ScatterView.svelte";
-	import { getMetricsForSlices } from "../api";
-	import { zenoState, selectionPredicates, settings } from "../stores";
+	import { getMetricsForSlices } from "../api/slice";
+	import { selectionPredicates, settings, model, metric } from "../stores";
 
 	export let table;
 
@@ -53,7 +53,8 @@
 					join: "",
 				},
 			},
-			state: $zenoState,
+			model: $model,
+			metric: $metric,
 		},
 	]);
 </script>
@@ -73,7 +74,7 @@
 	<TableView {currentResult} {table} {viewFunction} {viewOptions} />
 {/if}
 {#if selected === "scatter"}
-	<ScatterView {currentResult} {table} {viewFunction} {viewOptions} />
+	<ScatterView {viewFunction} {viewOptions} />
 {/if}
 
 <style>

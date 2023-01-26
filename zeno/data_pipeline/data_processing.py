@@ -9,7 +9,7 @@ import pandas as pd
 from tqdm import trange
 
 from zeno.api import ZenoOptions
-from zeno.classes import ZenoColumn, ZenoColumnType
+from zeno.classes.base import ZenoColumn, ZenoColumnType
 
 
 def predistill_data(

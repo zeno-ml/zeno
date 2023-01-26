@@ -4,7 +4,7 @@
 
 	import { selections, status } from "./stores";
 	import { columnHash } from "./util/util";
-	import { getInitialData } from "./api";
+	import { getInitialData } from "./api/api";
 
 	import Explore from "./Explore.svelte";
 	import Header from "./general/Header.svelte";

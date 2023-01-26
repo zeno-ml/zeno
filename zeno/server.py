@@ -11,22 +11,20 @@ from typing import List, Union
 from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.staticfiles import StaticFiles
 
-from zeno.classes import (
+from zeno.classes.base import ZenoColumn
+from zeno.classes.classes import (
     EmbedProject2DRequest,
     EntryRequest,
-    FilterPredicate,
-    FilterPredicateGroup,
-    HistogramRequest,
     MetricKey,
-    Report,
-    Slice,
     StatusResponse,
     TableRequest,
     ZenoSettings,
     ZenoVariables,
 )
+from zeno.classes.metadata import HistogramBucket, HistogramRequest
+from zeno.classes.report import Report
+from zeno.classes.slice import FilterPredicate, FilterPredicateGroup, Slice
 from zeno.data_pipeline.zeno_backend import ZenoBackend
-from zeno.util import NpEncoder
 
 
 def get_server(zeno: ZenoBackend):
@@ -82,35 +80,43 @@ def get_server(zeno: ZenoBackend):
     def get_reports():
         return json.dumps([r.dict(by_alias=True) for r in zeno.get_reports()])
 
-    @api_app.post("/set-folders")
+    @api_app.post("/folders")
     def set_folders(folders: List[str]):
         zeno.set_folders(folders)
 
-    @api_app.post("/set-reports")
+    @api_app.post("/reports")
     def update_reports(reqs: List[Report]):
         zeno.set_reports(reqs)
 
-    @api_app.post("/get-filtered-ids")
+    @api_app.post("/filtered-ids")
     def get_filtered_ids(req: List[Union[FilterPredicateGroup, FilterPredicate]]):
         return json.dumps(zeno.get_filtered_ids(req))
 
-    @api_app.post("/get-filtered-table")
+    @api_app.post("/filtered-table")
     def get_filtered_table(req: TableRequest):
         return zeno.get_filtered_table(req)
 
-    @api_app.post("/calculate-histograms")
-    def calculate_histograms(req: HistogramRequest):
-        return json.dumps(zeno.calculate_histograms(req), cls=NpEncoder)
+    @api_app.post("/histograms", response_model=List[List[HistogramBucket]])
+    def get_histogram_buckets(req: List[ZenoColumn]):
+        return zeno.get_histogram_buckets(req)
 
-    @api_app.post("/create-new-slice")
+    @api_app.post("/histogram-counts")
+    def calculate_histogram_counts(req: HistogramRequest):
+        return zeno.get_histogram_counts(req)
+
+    @api_app.post("/histogram-metrics")
+    def calculate_histogram_metrics(req: HistogramRequest):
+        return zeno.get_histogram_metrics(req)
+
+    @api_app.post("/slice")
     def create_new_slice(req: Slice):
         zeno.create_new_slice(req)
 
-    @api_app.post("/delete-slice")
+    @api_app.delete("/slice")
     def delete_slice(slice_name: List[str]):
         zeno.delete_slice(slice_name[0])
 
-    @api_app.post("/get-metrics-for-slices")
+    @api_app.post("/slice-metrics")
     def get_metrics_for_slices(reqs: List[MetricKey]):
         return json.dumps(zeno.get_metrics_for_slices(reqs))
 
@@ -152,7 +158,7 @@ def get_server(zeno: ZenoBackend):
                 await websocket.send_json(
                     StatusResponse(
                         status=zeno.status,
-                        done_processing=zeno.done_processing,
+                        done_processing=zeno.done_running_inference,
                         complete_columns=zeno.complete_columns,
                     ).json(by_alias=True)
                 )

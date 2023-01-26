@@ -10,7 +10,7 @@
 	import { columnHash } from "../../util/util";
 
 	export let col: ZenoColumn;
-	export let histogram;
+	export let histogram: HistogramEntry[];
 
 	const columnMap = {
 		[MetadataType.NOMINAL]: NominalMetadataCell,
@@ -36,7 +36,7 @@
 	}
 </script>
 
-{#if histogram}
+{#if histogram && histogram.length > 0 && histogram[0].count !== null}
 	<div class="cell">
 		<div class="info">
 			<div class="label top-text">
