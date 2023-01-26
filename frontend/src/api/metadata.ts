@@ -41,6 +41,8 @@ export async function getHistograms(
 	return histograms;
 }
 
+// Since a user might change the selection before we get counts,
+// make this fetch request cancellable.
 let histogramCountAborter = null;
 /**
  * Fetch histogram counts for the buckets of metadata columns.
@@ -92,6 +94,8 @@ export async function getHistogramCounts(
 	}
 }
 
+// Since a user might change the selection before we get metrics,
+// make this fetch request cancellable.
 let histogramMetricAborter = null;
 /**
  * Fetch histogram metrics for the buckets of metadata columns.

@@ -158,7 +158,7 @@ def get_server(zeno: ZenoBackend):
                 await websocket.send_json(
                     StatusResponse(
                         status=zeno.status,
-                        done_processing=zeno.done_processing,
+                        done_processing=zeno.done_running_inference,
                         complete_columns=zeno.complete_columns,
                     ).json(by_alias=True)
                 )

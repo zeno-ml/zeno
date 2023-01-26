@@ -46,7 +46,7 @@ class ZenoBackend(object):
         self.samples = params.samples
         self.view = params.view
 
-        self.done_processing = False
+        self.done_running_inference = False
 
         self.predistill_functions: Dict[str, Callable] = {}
         self.postdistill_functions: Dict[str, Callable] = {}
@@ -162,7 +162,7 @@ class ZenoBackend(object):
         """Parse testing files, distill, and run inference."""
 
         if not self.tests:
-            self.done_processing = True
+            self.done_running_inference = True
             self.status = "Done processing"
             return
 
@@ -191,6 +191,7 @@ class ZenoBackend(object):
         self.status = "Running inference"
         print(self.status)
         self.__inference()
+        self.done_running_inference = True
 
         self.status = "Running postdistill functions"
         print(self.status)
@@ -198,7 +199,6 @@ class ZenoBackend(object):
 
         self.status = "Done processing"
         print(self.status)
-        self.done_processing = True
 
     def __predistill(self) -> None:
         """Run distilling functions not dependent on model outputs."""
@@ -348,7 +348,7 @@ class ZenoBackend(object):
     def calculate_metric(
         self, df: DataFrame, model: Union[str, None], metric: str
     ) -> Optional[float]:
-        if not self.done_processing:
+        if not self.done_running_inference:
             return None
 
         if model is not None:

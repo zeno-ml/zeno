@@ -60,6 +60,7 @@
 	}
 </script>
 
+<!-- We shallow copy histogram to remove the vega identifiers and force it to update the chart when new data is passed in. -->
 <div id="histogram" on:click={setSelection} on:keydown={() => ({})}>
 	<VegaLite
 		bind:view
