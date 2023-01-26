@@ -13,13 +13,15 @@
 	} from "../../api/api";
 	import { getFilteredIds } from "../../api/table";
 	import { model, selectionIds, selectionPredicates } from "../../stores";
-	import { createScalesWebgGLExtent } from "./regl-scatter";
+	import {
+		createScalesWebgGLExtent,
+		type ReglScatterData,
+	} from "./regl-scatter";
 
 	import type {
 		ReglScatterPointDispatch,
 		WebGLExtentScalers,
 	} from "./regl-scatter";
-	import { onDestroy } from "svelte";
 
 	export let viewFunction: View.Component;
 	export let viewOptions: View.Options = {};
@@ -30,13 +32,12 @@
 	let pointSizeSlider = 3;
 	let embedExists = false;
 	let points: Points2D;
+	let reglScatterData: ReglScatterData; // just a different format using the points
 	let computingPoints = false; // spinner when true
 	let dehighlightPoints = () => {
 		// nada
 	};
-	let filterPredicatesIds: string[] = [];
-	let opacities: number[] = [];
-
+	let pointOpacities: number[] = [];
 	let pointToWebGL: WebGLExtentScalers; // functions to scale points
 	let pointHover: ReglScatterPointDispatch;
 	let hoverViewDivEl: HTMLDivElement; // show view on point hover
@@ -53,25 +54,52 @@
 	}
 
 	$: if (points) {
-		if (filterPredicatesIds.length > 0) {
-			opacities = points.ids.map((id) =>
-				filterPredicatesIds.includes(id) ? 1 : 0.25
+		getPointOpacities($selectionPredicates).then((filteredOpacities) => {
+			pointOpacities = filteredOpacities;
+		});
+	}
+
+	$: if (points) {
+		reglScatterData = {
+			x: points.x,
+			y: points.y,
+			ids: points.ids,
+			category: pointOpacities,
+		};
+	}
+
+	/**
+	 * assigns ones outside of the filter predicates as partial opacity
+	 * and ones inside full opacity
+	 */
+	async function getPointOpacities(
+		selectionPredicates: FilterPredicateGroup[],
+		{ fullOpacity = 1, partialOpacity = 0.25 } = {}
+	) {
+		const filteredIds = (await getFilteredIdsFromPredicates(
+			selectionPredicates
+		)) as string[];
+		const filteredIdsIndex = new Map(
+			filteredIds.map((id, index) => [id, index])
+		);
+		if (filteredIds.length > 0) {
+			return points.ids.map((id) =>
+				filteredIdsIndex.has(id) ? fullOpacity : partialOpacity
 			);
 		} else {
-			opacities = new Array(points.ids.length).fill(1);
+			return new Array(points.ids.length).fill(fullOpacity);
 		}
 	}
 
-	const unsubscribe = selectionPredicates.subscribe(async (sp) => {
-		if (points) {
-			const ids = await getFilteredIds(sp);
-			filterPredicatesIds = ids;
-		}
-	});
-
-	onDestroy(() => {
-		unsubscribe();
-	});
+	/**
+	 * Gets the ids from the filter predicates and
+	 */
+	async function getFilteredIdsFromPredicates(
+		selectionPredicates: FilterPredicateGroup[]
+	) {
+		const ids = await getFilteredIds(selectionPredicates);
+		return ids;
+	}
 
 	/**
 	 * Main driver behind fetching the projected points and displaying
@@ -161,10 +189,7 @@
 					<div class="overlay">
 						<ReglScatter
 							style="outline: 1px solid lavender"
-							data={{
-								...points,
-								category: opacities,
-							}}
+							data={reglScatterData}
 							pointSize={pointSizeSlider}
 							pointColor="#6a1b9a"
 							{width}
