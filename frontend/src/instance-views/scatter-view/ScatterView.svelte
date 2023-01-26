@@ -29,6 +29,7 @@
 	let embedExists = false;
 	let points: Points2D;
 	let computingPoints = false; // spinner when true
+	let colorByColumn: ZenoColumn; // column to color scatterplot by
 
 	let pointToWebGL: WebGLExtentScalers; // functions to scale points
 	let pointHover: ReglScatterPointDispatch;
@@ -136,7 +137,7 @@
 
 						<!-- settings/controls for the scatterplot -->
 						<div id="settings" class="frosted">
-							<ScatterSettings bind:pointSizeSlider />
+							<ScatterSettings bind:colorByColumn bind:pointSizeSlider />
 						</div>
 					</div>
 
@@ -193,7 +194,7 @@
 		bottom: 10px;
 		right: 10px;
 		width: 300px;
-		height: 80px;
+		height: 150px;
 		z-index: 999;
 		padding-left: 20px;
 		padding-top: 20px;
