@@ -49,7 +49,8 @@
 			$selectionPredicates,
 			$model,
 			[start, end],
-			$sort
+			$sort,
+			$selectionIds
 		).then((res) => (table = res));
 	}
 

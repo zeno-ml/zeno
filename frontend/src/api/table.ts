@@ -3,7 +3,8 @@ export async function getFilteredTable(
 	filterPredicates: FilterPredicateGroup[],
 	model: string,
 	sliceRange: [number, number],
-	sort: [ZenoColumn, boolean]
+	sort: [ZenoColumn, boolean],
+	filterIds?: FilterIds
 ) {
 	const requestedColumns = completeColumns.filter(
 		(c) => c.model === "" || c.model === model
@@ -18,6 +19,7 @@ export async function getFilteredTable(
 			filterPredicates: filterPredicates,
 			sliceRange,
 			sort,
+			filterIds,
 		}),
 	}).then((res) => res.json());
 	res = JSON.parse(res);
