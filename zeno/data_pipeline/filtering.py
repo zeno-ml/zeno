@@ -2,14 +2,12 @@
 from typing import List, Union, Optional
 
 import pandas as pd
+from pandas import DataFrame
 
-from zeno.classes import (
-    FilterPredicate,
-    FilterPredicateGroup,
-    MetadataType,
-    ZenoColumn,
-    FilterIds,
-)
+from zeno.classes.base import MetadataType, ZenoColumn
+from zeno.classes.metadata import HistogramBucket
+
+from zeno.classes.slice import FilterPredicate, FilterPredicateGroup, FilterIds
 
 
 def get_filter_string(filter: Union[FilterPredicateGroup, FilterPredicate]):
@@ -70,14 +68,14 @@ def filter_table(
         return df
 
 
-def filter_table_single(df, col: ZenoColumn, pred):
+def filter_table_single(df: DataFrame, col: ZenoColumn, bucket: HistogramBucket):
     if (
         col.metadata_type == MetadataType.NOMINAL
         or col.metadata_type == MetadataType.BOOLEAN
     ):
-        return df[df[str(col)] == pred]
+        return df[df[str(col)] == bucket.bucket]
     elif col.metadata_type == MetadataType.CONTINUOUS:
-        return df[(df[str(col)] > pred[0]) & (df[str(col)] < pred[1])]
+        return df[(df[str(col)] > bucket.bucket) & (df[str(col)] < bucket.bucket_end)]
     elif col.metadata_type == MetadataType.DATETIME:
         return df
     return df

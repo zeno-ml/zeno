@@ -12,11 +12,10 @@
 		settings,
 		sort,
 		status,
-		zenoState,
 		selectionPredicates,
-		selectionIds
+		selectionIds,
 	} from "../stores";
-	import { getFilteredTable } from "../api";
+	import { getFilteredTable } from "../api/table";
 	import { columnHash } from "../util/util";
 
 	export let currentResult;
@@ -48,8 +47,7 @@
 		getFilteredTable(
 			$status.completeColumns,
 			$selectionPredicates,
-			$selectionIds,
-			$zenoState,
+			$model,
 			[start, end],
 			$sort
 		).then((res) => (table = res));
@@ -150,7 +148,7 @@
 
 <style>
 	.sample-container {
-		height: calc(100vh - 165px);
+		height: calc(100vh - 170px);
 		overflow-y: auto;
 		align-content: baseline;
 		border-bottom: 1px solid rgb(224, 224, 224);

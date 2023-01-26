@@ -13,24 +13,16 @@ from pathlib import Path
 from typing import Callable, Dict, List, Optional, Union
 
 import numpy as np
-import pandas as pd  # type: ignore
+import pandas as pd
+from pandas import DataFrame  # type: ignore
 from pathos.multiprocessing import ProcessingPool as Pool  # type: ignore
 
 from zeno.api import ZenoOptions, ZenoParameters
-from zeno.classes import (
-    FilterIds,
-    FilterPredicate,
-    FilterPredicateGroup,
-    HistogramRequest,
-    MetadataType,
-    MetricKey,
-    Report,
-    Slice,
-    TableRequest,
-    ZenoColumn,
-    ZenoColumnType,
-    ZenoState,
-)
+from zeno.classes.base import MetadataType, ZenoColumnType
+from zeno.classes.classes import MetricKey, TableRequest, ZenoColumn
+from zeno.classes.metadata import HistogramBucket, HistogramRequest
+from zeno.classes.report import Report
+from zeno.classes.slice import FilterPredicate, FilterPredicateGroup, Slice, FilterIds
 from zeno.data_pipeline.data_processing import (
     postdistill_data,
     predistill_data,
@@ -54,7 +46,7 @@ class ZenoBackend(object):
         self.samples = params.samples
         self.view = params.view
 
-        self.done_processing = False
+        self.done_running_inference = False
 
         self.predistill_functions: Dict[str, Callable] = {}
         self.postdistill_functions: Dict[str, Callable] = {}
@@ -170,7 +162,7 @@ class ZenoBackend(object):
         """Parse testing files, distill, and run inference."""
 
         if not self.tests:
-            self.done_processing = True
+            self.done_running_inference = True
             self.status = "Done processing"
             return
 
@@ -199,6 +191,7 @@ class ZenoBackend(object):
         self.status = "Running inference"
         print(self.status)
         self.__inference()
+        self.done_running_inference = True
 
         self.status = "Running postdistill functions"
         print(self.status)
@@ -206,7 +199,6 @@ class ZenoBackend(object):
 
         self.status = "Done processing"
         print(self.status)
-        self.done_processing = True
 
     def __predistill(self) -> None:
         """Run distilling functions not dependent on model outputs."""
@@ -218,7 +210,7 @@ class ZenoBackend(object):
         ]:
             save_path = Path(self.cache_path, str(predistill_column) + ".pickle")
 
-            load_series(self.df, str(predistill_column), save_path)
+            load_series(self.df, predistill_column, save_path)
 
             if self.df[str(predistill_column)].isnull().any():
                 predistill_to_run.append(predistill_column)
@@ -241,8 +233,8 @@ class ZenoBackend(object):
                     range(len(predistill_to_run)),
                 )
                 for out in predistill_outputs:
+                    out[0].metadata_type = getMetadataType(out[1])
                     self.df.loc[:, str(out[0])] = out[1]
-                    out[0].metadata_type = getMetadataType(self.df[str(out[0])])
                     self.complete_columns.append(out[0])
 
     def __inference(self):
@@ -266,8 +258,8 @@ class ZenoBackend(object):
             model_save_path = Path(self.cache_path, model_hash + ".pickle")
             embedding_save_path = Path(self.cache_path, embedding_hash + ".pickle")
 
-            load_series(self.df, model_hash, model_save_path)
-            load_series(self.df, embedding_hash, embedding_save_path)
+            load_series(self.df, model_column, model_save_path)
+            load_series(self.df, embedding_column, embedding_save_path)
 
             if (
                 self.df[model_hash].isnull().any()
@@ -311,7 +303,7 @@ class ZenoBackend(object):
             col_hash = str(col_name)
             save_path = Path(self.cache_path, col_hash + ".pickle")
 
-            load_series(self.df, col_hash, save_path)
+            load_series(self.df, col_name, save_path)
 
             if self.df[col_hash].isnull().any():
                 postdistill_to_run.append(col_name)
@@ -332,8 +324,8 @@ class ZenoBackend(object):
                     range(len(postdistill_to_run)),
                 )
                 for out in post_outputs:
+                    out[0].metadata_type = getMetadataType(out[1])
                     self.df.loc[:, str(out[0])] = out[1]  # type: ignore
-                    out[0].metadata_type = getMetadataType(self.df[str(out[0])])
                     self.complete_columns.append(out[0])
 
     def get_metrics_for_slices(
@@ -345,51 +337,74 @@ class ZenoBackend(object):
 
         return_metrics = []
         for metric_key in requests:
-            filt_df = filter_table(
-                self.df, [metric_key.sli.filter_predicates], filter_ids
-            )
-            if (
-                metric_key.state.metric == ""
-                or metric_key.state.model == ""
-                or self.label_column.name == ""
-            ):
+            filt_df = filter_table(self.df, [metric_key.sli.filter_predicates], filter_ids)
+            if metric_key.metric == "" or self.label_column.name == "":
                 return_metrics.append({"metric": None, "size": filt_df.shape[0]})
             else:
-                metric = self.calculate_metric(filt_df, metric_key.state)
-                return_metrics.append({"metric": metric, "size": filt_df.shape[0]})
+                metric = self.calculate_metric(
+                    filt_df, metric_key.model, metric_key.metric
+                )
+                return_metrics.append(
+                    {"metric": metric, "size": filt_df.shape[0]}  # type: ignore
+                )
         return return_metrics
 
-    def calculate_metric(self, df, state):
-        if not self.done_processing:
+    def calculate_metric(
+        self, df: DataFrame, model: Union[str, None], metric: str
+    ) -> Optional[float]:
+        if not self.done_running_inference:
             return None
 
-        output_col = ZenoColumn(
-            column_type=ZenoColumnType.OUTPUT,
-            name=state.model,
-        )
-        output_hash = str(output_col)
+        if model is not None:
 
-        distill_fns = [
-            c
-            for c in self.columns
-            if (
-                c.column_type == ZenoColumnType.PREDISTILL
-                or c.column_type == ZenoColumnType.POSTDISTILL
+            output_col = ZenoColumn(
+                column_type=ZenoColumnType.OUTPUT,
+                name=model,
             )
-            and c.model == state.model
-        ]
+            output_hash = str(output_col)
 
-        local_ops = self.zeno_options.copy(
-            update={
-                "output_column": output_hash,
-                "output_path": os.path.join(self.cache_path, output_hash),
-                "distill_columns": dict(
-                    zip([c.name for c in distill_fns], [str(c) for c in distill_fns])
-                ),
-            }
-        )
+            distill_fns = [
+                c
+                for c in self.columns
+                if (
+                    c.column_type == ZenoColumnType.PREDISTILL
+                    or c.column_type == ZenoColumnType.POSTDISTILL
+                )
+                and c.model == model
+            ]
 
-        return self.metric_functions[state.metric](df, local_ops)
+            local_ops = self.zeno_options.copy(
+                update={
+                    "output_column": output_hash,
+                    "output_path": os.path.join(self.cache_path, output_hash),
+                    "distill_columns": dict(
+                        zip(
+                            [c.name for c in distill_fns], [str(c) for c in distill_fns]
+                        )
+                    ),
+                }
+            )
+        else:
+            distill_fns = [
+                c
+                for c in self.columns
+                if (
+                    c.column_type == ZenoColumnType.PREDISTILL
+                    or c.column_type == ZenoColumnType.POSTDISTILL
+                )
+            ]
+
+            local_ops = self.zeno_options.copy(
+                update={
+                    "distill_columns": dict(
+                        zip(
+                            [c.name for c in distill_fns], [str(c) for c in distill_fns]
+                        )
+                    ),
+                }
+            )
+
+        return self.metric_functions[metric](df, local_ops)
 
     def get_slices(self):
         return [s.dict(by_alias=True) for s in self.slices.values()]
@@ -425,105 +440,107 @@ class ZenoBackend(object):
         with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
             pickle.dump(self.slices, f)
 
-    def get_histogram_metric(
-        self, df: pd.DataFrame, col: ZenoColumn, pred, state: ZenoState
-    ):
-        df_filt = filter_table_single(df, col, pred)
-        metric = self.calculate_metric(df_filt, state)
-        if metric is None or isnan(metric):
-            return -1
-        return metric
-
     def get_filtered_ids(self, req: List[Union[FilterPredicateGroup, FilterPredicate]]):
         return filter_table(self.df, req)[str(self.id_column)].to_list()
 
     def get_filtered_table(self, req: TableRequest):
+        """Return filtered table from list of filter predicates."""
         filt_df = filter_table(self.df, req.filter_predicates, req.filter_ids)
         if req.sort[0]:
             filt_df = filt_df.sort_values(str(req.sort[0]), ascending=req.sort[1])
         filt_df = filt_df.iloc[req.slice_range[0] : req.slice_range[1]]
         return filt_df[[str(col) for col in req.columns]].to_json(orient="records")
 
-    def calculate_histograms(self, req: HistogramRequest):
-        if len(req.filter_predicates) > 0:
-            filt_df = filter_table(self.df, req.filter_predicates)
+    def get_histogram_buckets(
+        self, req: List[ZenoColumn]
+    ) -> List[List[HistogramBucket]]:
+        """Calculate the histogram buckets for a list of columns."""
+        res: List[List[HistogramBucket]] = []
+        for col in req:
+            df_col = self.df[str(col)]
+            if col.metadata_type == MetadataType.NOMINAL:
+                ret_hist: List[HistogramBucket] = []
+                val_counts = df_col.value_counts()
+                for k in val_counts.keys():
+                    ret_hist.append(HistogramBucket(bucket=k))
+                res.append(ret_hist)
+            elif col.metadata_type == MetadataType.CONTINUOUS:
+                ret_hist: List[HistogramBucket] = []  # type: ignore
+                df_col = df_col.fillna(0)
+                bins = np.histogram(df_col, bins="doane")
+                for i in range(len(bins[0])):
+                    ret_hist.append(
+                        HistogramBucket(
+                            bucket=round(bins[1][i], 4),
+                            bucket_end=round(bins[1][i + 1], 4),
+                        )
+                    )
+                res.append(ret_hist)
+            elif col.metadata_type == MetadataType.BOOLEAN:
+                res.append(
+                    [
+                        HistogramBucket(bucket=True),
+                        HistogramBucket(bucket=False),
+                    ]
+                )
+            elif col.metadata_type == MetadataType.DATETIME:
+                res.append([])
+            else:
+                res.append([])
+        return res
+
+    def get_histogram_counts(self, req: HistogramRequest) -> List[List[int]]:
+        """Calculate count for each bucket in each column histogram."""
+        if req.filter_predicates is not None:
+            filt_df = filter_table(self.df, [req.filter_predicates])
         else:
             filt_df = self.df
 
-        if req.state.metric == "" or req.state.model == "":
-            req.get_metrics = False
+        ret: List[List[int]] = []
+        for r in req.column_requests:
+            col = r.column
+            ret.append([len(filter_table_single(filt_df, col, b)) for b in r.buckets])
+        return ret
 
-        cols = req.columns
+    def get_histogram_metric(
+        self,
+        df: pd.DataFrame,
+        col: ZenoColumn,
+        bucket: HistogramBucket,
+        model: str,
+        metric: str,
+    ) -> Union[float, None]:
+        df_filt = filter_table_single(df, col, bucket)
+        output_metric = self.calculate_metric(df_filt, model, metric)
+        if output_metric is None or isnan(output_metric):
+            return None
+        return output_metric
 
-        # For each histogram request return a list of buckets like:
-        # {
-        #    bucket: start value
-        #    bucketEnd: end value (optional)
-        #    count: number of entries in this bucket
-        #    filteredCount: number of entries in this bucket after filtering
-        #    metric: metric value for this bucket (optional)
-        # }
-        res = {}
-        for col in cols:
-            df_col = self.df[str(col)]
-            filt_df_col = filt_df[str(col)]
-            if col.metadata_type == MetadataType.NOMINAL:
-                ret_hist = []
-                val_counts = df_col.value_counts()
-                [
-                    ret_hist.append(
-                        {
-                            "bucket": k,
-                            "count": int(val_counts[k]),  # type: ignore
-                            "filteredCount": int((filt_df_col == k).sum()),
-                            "metric": self.get_histogram_metric(
-                                filt_df, col, k, req.state
-                            )
-                            if req.get_metrics
-                            else None,
-                        }
-                    )
-                    for k in val_counts.keys()
-                ]
-                res[str(col)] = ret_hist
-            elif col.metadata_type == MetadataType.CONTINUOUS:
-                ret_hist = []
-                df_col = df_col.fillna(0)
-                bins = np.histogram(df_col, bins="doane")
-                bins_filt = np.histogram(filt_df_col, bins=bins[1])
-                for i, bin_count in enumerate(bins[0]):
-                    ret_hist.append(
-                        {
-                            "bucket": round(bins[1][i], 4),
-                            "bucketEnd": round(bins[1][i + 1], 4),
-                            "count": int(bin_count),
-                            "filteredCount": int(bins_filt[0][i]),
-                            "metric": self.get_histogram_metric(
-                                filt_df, col, [bins[1][i], bins[1][i + 1]], req.state
-                            )
-                            if req.get_metrics
-                            else None,
-                        }
-                    )
-                res[str(col)] = ret_hist
-            elif col.metadata_type == MetadataType.BOOLEAN:
-                res[str(col)] = [
-                    {
-                        "bucket": True,
-                        "count": df_col.sum(),
-                        "filteredCount": filt_df_col.sum(),
-                    },
-                    {
-                        "bucket": False,
-                        "count": len(df_col) - df_col.sum(),
-                        "filteredCount": len(filt_df_col) - filt_df_col.sum(),
-                    },
-                ]
-            elif col.metadata_type == MetadataType.DATETIME:
-                res[str(col)] = []
-            else:
-                res[str(col)] = []
-        return res
+    def get_histogram_metrics(
+        self, req: HistogramRequest
+    ) -> List[List[Union[float, None]]]:
+        """Calculate metric for each bucket in each column histogram."""
+        if req.metric is None:
+            return []
+
+        if req.filter_predicates is not None:
+            filt_df = filter_table(self.df, [req.filter_predicates])
+        else:
+            filt_df = self.df
+
+        ret: List[List[Union[float, None]]] = []
+        for r in req.column_requests:
+            col = r.column
+            loc_ret: List[Union[float, None]] = []
+            for b in r.buckets:
+                df_filt = filter_table_single(filt_df, col, b)
+                metric = self.calculate_metric(df_filt, req.model, req.metric)
+                if metric is None or isnan(metric):
+                    loc_ret.append(None)
+                else:
+                    loc_ret.append(metric)
+            ret.append(loc_ret)
+        return ret
 
     def embed_exists(self, model: str):
         """Checks for the existence of an embedding column.

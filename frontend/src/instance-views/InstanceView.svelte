@@ -4,12 +4,13 @@
 	import ListView from "./ListView.svelte";
 	import TableView from "./TableView.svelte";
 	import ScatterView from "./scatter-view/ScatterView.svelte";
-	import { getMetricsForSlices } from "../api";
+	import { getMetricsForSlices } from "../api/slice";
 	import {
-		zenoState,
+		selectionIds,
 		selectionPredicates,
 		settings,
-		selectionIds,
+		model,
+		metric,
 	} from "../stores";
 
 	export let table;
@@ -59,7 +60,8 @@
 						join: "",
 					},
 				},
-				state: $zenoState,
+				model: $model,
+				metric: $metric,
 			},
 		],
 		$selectionIds

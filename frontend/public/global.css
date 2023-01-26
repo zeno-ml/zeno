@@ -17,10 +17,13 @@ body {
 
 p {
 	font-size: 14px;
+	color: #989895;
 }
 
 h4 {
-	font-size: 14px;
+	font-size: 12px;
+	font-weight: 500;
+    color: #989895;
 }
 
 h2 {

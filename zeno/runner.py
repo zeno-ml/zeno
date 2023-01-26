@@ -164,7 +164,7 @@ def run_zeno(args: ZenoParameters):
     zeno.start_processing()
 
     print("\n\033[1mZeno\033[0m running on http://{}:{}\n".format(args.host, args.port))
-    uvicorn.run(app, host=args.host, port=args.port, log_level="critical")
+    uvicorn.run(app, host=args.host, port=args.port, log_level="error")
 
 
 def zeno(args: Union[ZenoParameters, dict], base_path="./"):

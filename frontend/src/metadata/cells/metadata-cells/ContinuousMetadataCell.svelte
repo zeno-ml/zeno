@@ -6,7 +6,7 @@
 	import { metricRange } from "../../../stores";
 
 	export let col: ZenoColumn;
-	export let histogram;
+	export let histogram: HistogramEntry[];
 	export let filterPredicates: FilterPredicate[];
 	export let updatePredicates;
 
@@ -28,10 +28,6 @@
 	$: if (view && filterPredicates) {
 		updateSel();
 	}
-
-	$: chartData = {
-		table: histogram,
-	};
 
 	$: if (view) {
 		view.addSignalListener(
@@ -63,10 +59,11 @@
 	}
 </script>
 
+<!-- We shallow copy histogram to remove the vega identifiers and force it to update the chart when new data is passed in. -->
 <div id="histogram" on:mouseup={setSelection}>
 	<VegaLite
 		bind:view
 		spec={continuousVegaSpec($metricRange)}
-		data={chartData}
+		data={{ table: histogram.map((h) => Object.assign({}, h)) }}
 		options={{ tooltip: true, actions: false, theme: "vox" }} />
 </div>

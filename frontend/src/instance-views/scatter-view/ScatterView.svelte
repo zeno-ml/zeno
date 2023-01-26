@@ -10,13 +10,10 @@
 		createViewComponent,
 		getEntry,
 		projectEmbedInto2D,
-	} from "../../api";
+	} from "../../api/api";
+	import { getFilteredIds } from "../../api/table";
 	import { model, selectionIds, selectionPredicates } from "../../stores";
-	import {
-		createScalesWebgGLExtent,
-		type ReglScatterData,
-	} from "./regl-scatter";
-	import { getFilteredIds } from "../../api";
+	import { createScalesWebgGLExtent } from "./regl-scatter";
 
 	import type {
 		ReglScatterPointDispatch,
@@ -219,7 +216,7 @@
 <style>
 	#scatter-view {
 		position: relative;
-		height: calc(100vh - 165px);
+		height: calc(100vh - 170px);
 	}
 	#container {
 		position: relative;

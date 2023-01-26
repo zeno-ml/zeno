@@ -3,7 +3,7 @@
 	import { Icon } from "@smui/button";
 	import IconButton from "@smui/icon-button";
 
-	import { getMetricsForSlices } from "../../api";
+	import { getMetricsForSlices } from "../../api/slice";
 	import { models, slices, reports, report } from "../../stores";
 
 	import SliceDetailsContainer from "../SliceDetailsContainer.svelte";
@@ -17,10 +17,8 @@
 	$: getMetricsForSlices(
 		$models.map((m) => ({
 			sli: sli,
-			state: {
-				metric: predicate.metric,
-				model: m,
-			},
+			metric: predicate.metric,
+			model: m,
 		}))
 	).then((arr) => (modelResults = arr));
 </script>

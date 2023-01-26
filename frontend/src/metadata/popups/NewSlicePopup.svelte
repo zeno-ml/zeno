@@ -7,7 +7,7 @@
 	import { showNewSlice, slices, selections, sliceToEdit } from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 
-	import { createNewSlice } from "../../api";
+	import { createNewSlice } from "../../api/slice";
 	import FilterGroupEntry from "./FilterGroupEntry.svelte";
 
 	let sliceName = "";

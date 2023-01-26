@@ -94,13 +94,12 @@
 		color: black;
 		flex-direction: column;
 		justify-content: space-between;
-		background: #f8f8f8;
-		border-bottom: 1px solied #e0e0e0;
+		background: #f2f2ee;
 	}
 
 	img {
 		align-self: center;
-		margin-top: 10px;
+		margin-top: 30px;
 		margin-bottom: 10px;
 	}
 

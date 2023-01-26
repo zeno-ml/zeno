@@ -17,14 +17,10 @@ interface WSResponse {
 	completeColumns: ZenoColumn[];
 }
 
-interface ZenoState {
-	model: string;
-	metric: string;
-}
-
 interface MetricKey {
 	sli: Slice;
-	state: ZenoState;
+	model: string = "";
+	metric: string;
 }
 
 interface FilterPredicateGroup {
@@ -40,6 +36,14 @@ interface FilterPredicate {
 	value: string | boolean | number;
 	// '', & or |
 	join?: string;
+}
+
+interface HistogramEntry {
+	bucket: number | string | boolean;
+	bucketEnd?: number | string | boolean;
+	count?: number;
+	filteredCount?: number;
+	metric?: number;
 }
 
 interface Slice {

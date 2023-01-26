@@ -1,41 +1,46 @@
 <script lang="ts">
+	import { mdiFolderPlusOutline, mdiPlus, mdiPlusCircle } from "@mdi/js";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
-	import { mdiFolderPlusOutline, mdiPlus, mdiPlusCircle } from "@mdi/js";
 
+	import MetricRange from "./MetricRange.svelte";
 	import FolderCell from "./cells/FolderCell.svelte";
 	import MetadataCell from "./cells/MetadataCell.svelte";
+	import SliceCell from "./cells/SliceCell.svelte";
 	import NewFolderPopup from "./popups/NewFolderPopup.svelte";
 	import NewSlicePopup from "./popups/NewSlicePopup.svelte";
-	import SliceCell from "./cells/SliceCell.svelte";
 
+	import Select, { Option } from "@smui/select";
+	import Tooltip, { Wrapper } from "@smui/tooltip";
+	import { InternMap } from "internmap";
+	import {
+		getHistogramCounts,
+		getHistogramMetrics,
+		getHistograms,
+	} from "../api/metadata";
+	import { getMetricsForSlices } from "../api/slice";
+	import { ZenoColumnType } from "../globals";
 	import {
 		folders,
-		selections,
 		metric,
+		metricRange,
+		metrics,
 		model,
+		models,
+		selectionPredicates,
+		selections,
 		settings,
 		showNewSlice,
 		slices,
 		sliceToEdit,
 		status,
-		metricRange,
-		zenoState,
-		selectionPredicates,
-		metrics,
-		models,
 	} from "../stores";
-	import Select, { Option } from "@smui/select";
 	import { columnHash } from "../util/util";
-	import { getHistograms, getMetricsForSlices } from "../api";
-	import { ZenoColumnType } from "../globals";
-	import Button from "@smui/button/src/Button.svelte";
-	import Tooltip, { Wrapper } from "@smui/tooltip";
 
-	let metadataHistograms = {};
+	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
+		new InternMap([], columnHash);
 	let showNewFolder = false;
 
-	$: completedColumnHashes = $status.completeColumns.map((c) => columnHash(c));
 	$: res = getMetricsForSlices([
 		<MetricKey>{
 			sli: <Slice>{
@@ -43,23 +48,94 @@
 				folder: "",
 				filterPredicates: { predicates: [], join: "" },
 			},
-			state: $zenoState,
+			model: $model,
+			metric: $metric,
 		},
 	]);
 
-	zenoState.subscribe((state) => {
-		getHistograms(
-			$status.completeColumns,
-			$selectionPredicates,
-			state,
-			Boolean($model && $metric)
-		).then((res) => (metadataHistograms = res));
+	// Get histogram buckets, counts, and metrics when columns update.
+	status.subscribe((s) => {
+		getHistograms(s.completeColumns, $model).then((res) => {
+			getHistogramCounts(res, null).then((res) => {
+				if (res === undefined) {
+					return;
+				}
+				metadataHistograms = res;
+				getHistogramMetrics(res, null, $model, $metric).then((res) => {
+					if (res !== undefined) {
+						metadataHistograms = res;
+					}
+				});
+			});
+		});
 	});
 
-	selectionPredicates.subscribe((sels) => {
-		getHistograms($status.completeColumns, sels, $zenoState, false).then(
-			(res) => (metadataHistograms = res)
+	// Calculate histogram metrics when metric changes
+	metric.subscribe((metric) => {
+		if (metadataHistograms.size === 0) {
+			return;
+		}
+		metricRange.set([Infinity, -Infinity]);
+		getHistogramMetrics(metadataHistograms, null, $model, metric).then(
+			(res) => {
+				if (res === undefined) {
+					return;
+				}
+				metadataHistograms = res;
+			}
 		);
+	});
+
+	// Calculate histogram counts when model changes for postdistill columns
+	model.subscribe((model) => {
+		if (metadataHistograms.size === 0) {
+			return;
+		}
+		getHistograms($status.completeColumns, model).then((res) => {
+			getHistogramCounts(res, null).then((res) => {
+				if (res === undefined) {
+					return;
+				}
+				metadataHistograms = res;
+				getHistogramMetrics(res, null, model, $metric).then((res) => {
+					if (res === undefined) {
+						return;
+					}
+					metadataHistograms = res;
+				});
+			});
+		});
+	});
+
+	// Update counts and metrics when selection changes.
+	selectionPredicates.subscribe((sels) => {
+		if (metadataHistograms.size === 0) {
+			return;
+		}
+		getHistogramCounts(metadataHistograms, {
+			predicates: sels,
+			join: "&",
+		}).then((res) => {
+			if (res === undefined) {
+				return;
+			}
+
+			metadataHistograms = res;
+			getHistogramMetrics(
+				res,
+				{
+					predicates: sels,
+					join: "&",
+				},
+				$model,
+				$metric
+			).then((res) => {
+				if (res === undefined) {
+					return;
+				}
+				metadataHistograms = res;
+			});
+		});
 	});
 </script>
 
@@ -157,76 +233,35 @@
 
 	<div class="inline" style:margin-top="10px">
 		<h4>Metadata</h4>
-		{#if $metrics.length !== 0}
-			<div id="legend-container">
-				{#if $metricRange[2] && $metricRange[0] !== Infinity}
-					<span style:margin-right="20px" style:font-style="italic">
-						{$metric}:
-					</span>
-					<span
-						contenteditable="true"
-						on:blur={(e) =>
-							metricRange.update((range) => {
-								range[0] = parseFloat(e.currentTarget.innerText);
-								range[2] = true;
-								return [...range];
-							})}>
-						{$metricRange[0].toFixed(2)}
-					</span>
-					<div id="legend" />
-					<span
-						contenteditable="true"
-						on:blur={(e) =>
-							metricRange.update((range) => {
-								range[1] = parseFloat(e.currentTarget.innerText);
-								range[2] = true;
-								return [...range];
-							})}>
-						{$metricRange[1].toFixed(2)}
-					</span>
-				{:else}
-					<Button
-						on:click={() => {
-							getHistograms(
-								$status.completeColumns,
-								$selectionPredicates,
-								$zenoState,
-								true
-							).then((res) => (metadataHistograms = res));
-						}}>get metrics</Button>
-				{/if}
-			</div>
-		{/if}
+		<MetricRange />
 	</div>
 	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.METADATA) as col}
-		<MetadataCell {col} histogram={metadataHistograms[columnHash(col)]} />
+		<MetadataCell {col} histogram={metadataHistograms.get(col)} />
 	{/each}
 
-	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL) as col}
-		{@const idx = completedColumnHashes.indexOf(columnHash(col))}
-		<MetadataCell
-			col={idx > -1 ? $status.completeColumns[idx] : col}
-			histogram={metadataHistograms[columnHash(col)]} />
+	{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL) as col}
+		<MetadataCell {col} histogram={metadataHistograms.get(col)} />
 	{/each}
 
 	{#if $model}
 		{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.POSTDISTILL && m.model === $model) as col}
-			<MetadataCell {col} histogram={metadataHistograms[columnHash(col)]} />
+			<MetadataCell {col} histogram={metadataHistograms.get(col)} />
 		{/each}
 	{/if}
 </div>
 
 <style>
 	.side-container {
-		height: 100vh;
+		height: calc(100vh - 15px);
 		width: 350px;
 		min-width: 350px;
 		max-width: 350px;
-		padding-top: 0px;
+		padding-top: 10px;
 		padding-bottom: 0px;
 		padding-left: 15px;
 		padding-right: 10px;
 		overflow-y: scroll;
+		background-color: #fbfbfa;
 	}
 	.ghost-container {
 		width: 100%;
@@ -239,12 +274,8 @@
 		padding-bottom: 10px;
 		padding-top: 5px;
 	}
-	h4 {
-		font-weight: 500;
-		color: rgba(0, 0, 0, 0.7);
-	}
 	.cell {
-		border: 1px solid #e0e0e0;
+		border: 0.5px solid #ebebea;
 		padding: 10px;
 		min-width: 400px;
 		width: 400px;
@@ -257,7 +288,6 @@
 	.icon {
 		width: 24px;
 		height: 24px;
-		margin-right: 10px;
 	}
 	.overview {
 		display: flex;
@@ -278,16 +308,5 @@
 		color: rgba(0, 0, 0, 0.4);
 		margin-right: 10px;
 		margin-left: 10px;
-	}
-	#legend-container {
-		display: flex;
-		align-items: center;
-	}
-	#legend {
-		width: 70px;
-		height: 15px;
-		margin-left: 10px;
-		margin-right: 10px;
-		background-image: linear-gradient(to right, #decbe9, #6a1b9a);
 	}
 </style>

@@ -6,7 +6,7 @@ export function folderWritable() {
 
 	function fetchSet(v) {
 		val = v;
-		fetch("/api/set-folders", {
+		fetch("/api/folders", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -34,7 +34,7 @@ export function reportWritable() {
 
 	function fetchSet(v) {
 		val = v;
-		fetch("/api/set-reports", {
+		fetch("/api/reports", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
