@@ -131,7 +131,7 @@ def get_server(zeno: ZenoBackend):
 
     @api_app.post("/embed-project")
     def project_embed_into_2D(req: EmbedProject2DRequest):
-        points = zeno.project_embed_into_2D(req.model)
+        points = zeno.project_embed_into_2D(req.model, req.column)
         return points
 
     @api_app.post("/entry")

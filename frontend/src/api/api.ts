@@ -48,8 +48,11 @@ export async function getInitialData() {
  *
  * @returns list of 2D coordinates
  */
-export async function projectEmbedInto2D(model: string): Promise<Points2D> {
-	const body = { model };
+export async function projectEmbedInto2D(
+	model: string,
+	column: ZenoColumn
+): Promise<Points2D> {
+	const body = { model, column };
 	const req = await fetch("/api/embed-project", {
 		method: "POST",
 		headers: {

@@ -546,8 +546,20 @@ class ZenoBackend(object):
         exists = str(embed_column) in self.df.columns
         return exists and not self.df[str(embed_column)].isnull().any()
 
-    @lru_cache()
-    def project_embed_into_2D(self, model: str) -> Dict[str, list]:
+    @lru_cache
+    def run_tsne(self, model: str) -> np.ndarray:
+        # Extract embeddings and store in one big ndarray
+        embed_col = ZenoColumn(column_type=ZenoColumnType.EMBEDDING, name=model)
+
+        embed = self.df[str(embed_col)].to_numpy()
+        embed = np.stack(embed, axis=0)  # type: ignore
+
+        # project embeddings into 2D
+        from sklearn.manifold import TSNE  # type: ignore
+
+        return TSNE().fit_transform(embed)
+
+    def project_embed_into_2D(self, model: str, column: ZenoColumn) -> Dict[str, list]:
         """If the embedding exists, will use t-SNE to project into 2D.
         Returns the 2D embeddings as object/dict
         {
@@ -563,16 +575,7 @@ class ZenoBackend(object):
         if not self.embed_exists(model):
             return points
 
-        embed_col = ZenoColumn(column_type=ZenoColumnType.EMBEDDING, name=model)
-
-        # Extract embeddings and store in one big ndarray
-        embed = self.df[str(embed_col)].to_numpy()
-        embed = np.stack(embed, axis=0)  # type: ignore
-
-        # project embeddings into 2D
-        from sklearn.manifold import TSNE  # type: ignore
-
-        projection = TSNE().fit_transform(embed)
+        projection = self.run_tsne(model)
 
         # extract points and ids from computed projection
         points["x"] = projection[:, 0].tolist()

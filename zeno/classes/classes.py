@@ -45,8 +45,9 @@ class TableRequest(CamelModel):
     sort: Tuple[Union[ZenoColumn, None], bool]
 
 
-class EmbedProject2DRequest(BaseModel):
+class EmbedProject2DRequest(CamelModel):
     model: str
+    column: ZenoColumn
 
 
 class EntryRequest(BaseModel):

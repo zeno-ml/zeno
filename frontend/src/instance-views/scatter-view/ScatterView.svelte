@@ -11,7 +11,7 @@
 		getEntry,
 		projectEmbedInto2D,
 	} from "../../api/api";
-	import { model } from "../../stores";
+	import { model, status } from "../../stores";
 	import { createScalesWebgGLExtent } from "./regl-scatter";
 
 	import type {
@@ -29,7 +29,8 @@
 	let embedExists = false;
 	let points: Points2D;
 	let computingPoints = false; // spinner when true
-	let colorByColumn: ZenoColumn; // column to color scatterplot by
+	// column to color scatterplot by
+	let colorByColumn: ZenoColumn = $status.completeColumns[0];
 
 	let pointToWebGL: WebGLExtentScalers; // functions to scale points
 	let pointHover: ReglScatterPointDispatch;
@@ -55,7 +56,7 @@
 			computingPoints = true;
 
 			// requests tsne from backend
-			points = (await projectEmbedInto2D(model)) as Points2D;
+			points = (await projectEmbedInto2D(model, colorByColumn)) as Points2D;
 
 			// simply scales the points between [-1, 1]
 			pointToWebGL = createScalesWebgGLExtent(points);
