@@ -91,7 +91,8 @@ interface Points2D {
 	x: Float32Array;
 	y: Float32Array;
 	color: Float32Array;
-	domain: List[float | string];
+	opacity: Float32Array;
+	domain: (number | string)[];
 	dataType: string;
 	ids: string[];
 }

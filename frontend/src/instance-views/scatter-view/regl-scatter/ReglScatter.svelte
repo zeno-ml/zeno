@@ -53,6 +53,10 @@
 		height,
 	});
 
+	$: if (scatterPtr) {
+		updateColorRange(data?.domain);
+	}
+
 	$: {
 		// make sure this is not called before we actually create the scatterPtr
 		if (scatterPtr && data?.x.length > 0) {
@@ -76,10 +80,17 @@
 		});
 	}
 
+	function updateColorRange(domain: (number | string)[]) {
+		if (scatterPtr && domain) {
+			scatterPtr.set({
+				colorBy: "value",
+				pointColor: COLOR_SCALE_MAP[data.dataType],
+			});
+		}
+	}
+
 	function init() {
 		scatterPtr = createScatterPlot({
-			colorBy: "valueA",
-			pointColor: COLOR_SCALE_MAP[data.dataType],
 			canvas: canvasEl,
 			width,
 			height,
@@ -106,17 +117,12 @@
 
 	function draw(points: Points2D) {
 		if (scatterPtr) {
-			scatterPtr.draw(
-				Array.from(points.x).map((d, i) => [
-					points.x[i],
-					points.y[i],
-					points.color[i],
-				]),
-				{
-					transition: true,
-					transitionDuration: 1200,
-				}
-			);
+			scatterPtr.draw({
+				x: points.x,
+				y: points.y,
+				category: points.opacity,
+				value: points.color,
+			});
 		}
 	}
 
@@ -138,7 +144,6 @@
 			scatterPtr.subscribe(
 				"pointOver",
 				(index) => {
-					console.log(data.color[index]);
 					const canvasX = xScale(data.x[index]);
 					const canvasY = yScale(data.y[index]);
 					dispatch("pointOver", {

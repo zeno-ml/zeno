@@ -218,7 +218,10 @@
 					<div class="overlay">
 						<ReglScatter
 							style="outline: 1px solid lavender"
-							data={points}
+							data={{
+								...points,
+								opacity: pointOpacities,
+							}}
 							pointSize={pointSizeSlider}
 							pointColor="#6a1b9a"
 							{width}
