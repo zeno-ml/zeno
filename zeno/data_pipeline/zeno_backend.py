@@ -580,7 +580,7 @@ class ZenoBackend(object):
         color_range: List[int] = []
         if len(unique) == 2:
             metadata_type = "boolean"
-        if len(unique) > 20:
+        if len(unique) > 10:
             if column.metadata_type == MetadataType.CONTINUOUS:
                 metadata_type = "continuous"
                 color_range = (
