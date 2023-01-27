@@ -4,6 +4,7 @@ import asyncio
 import logging
 import os
 import pickle
+import random
 import sys
 import threading
 from functools import lru_cache
@@ -559,12 +560,17 @@ class ZenoBackend(object):
 
         return TSNE().fit_transform(embed)
 
+    def get_projection_colors(self, column: ZenoColumn) -> List[float]:
+        series = self.df[str(column)]
+        return [random.random() for i in range(len(series))]
+
     def project_embed_into_2D(self, model: str, column: ZenoColumn) -> Dict[str, list]:
         """If the embedding exists, will use t-SNE to project into 2D.
         Returns the 2D embeddings as object/dict
         {
             x: list[float]
             y: list[float]
+            color: list[float]
             ids: list[str]
         }
         """
@@ -580,6 +586,7 @@ class ZenoBackend(object):
         # extract points and ids from computed projection
         points["x"] = projection[:, 0].tolist()
         points["y"] = projection[:, 1].tolist()
+        points["color"] = self.get_projection_colors(column)
         points["ids"] = self.df[str(self.id_column)].to_list()
 
         return points

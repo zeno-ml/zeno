@@ -4,9 +4,7 @@
 	import { scaleLinear } from "d3-scale";
 	import { WEBGL_EXTENT } from "./index";
 	import type {
-		ReglScatterData,
 		ReglScatterConfig,
-		ReglScatterColorRange,
 		ReglScatterObject,
 		ReglScatterPointDispatch,
 	} from "./index";
@@ -20,11 +18,7 @@
 
 	export let width: number;
 	export let height: number;
-	export let data: ReglScatterData = {
-		x: [],
-		y: [],
-	};
-	export let colorRange: ReglScatterColorRange = [];
+	export let data: Points2D;
 	export let config: ReglScatterConfig = {};
 	export let pointSize = 5;
 	export let opacity = 0.85;
@@ -54,9 +48,6 @@
 		}
 	}
 
-	// update when the colorRange changes, but now when the scatter changes
-	$: updateColorRange(colorRange);
-
 	onMount(() => {
 		init();
 	});
@@ -65,17 +56,31 @@
 		scatterPtr.destroy();
 	});
 
-	function updateColorRange(colorRange: ReglScatterColorRange) {
-		if (scatterPtr && colorRange) {
-			scatterPtr.set({
-				colorBy: "category",
-				pointColor: colorRange,
-			});
-		}
-	}
-
 	function init() {
 		scatterPtr = createScatterPlot({
+			colorBy: "valueA",
+			pointColor: [
+				"#002072", // dark blue
+				"#162b79",
+				"#233680",
+				"#2e4186",
+				"#394d8d",
+				"#425894",
+				"#4b649a",
+				"#5570a1",
+				"#5e7ca7",
+				"#6789ae",
+				"#7195b4",
+				"#7ba2ba",
+				"#85aec0",
+				"#90bbc6",
+				"#9cc7cc",
+				"#a9d4d2",
+				"#b8e0d7",
+				"#c8ecdc",
+				"#ddf7df",
+				"#ffffe0", // bright yellow
+			],
 			canvas: canvasEl,
 			width,
 			height,
@@ -86,7 +91,6 @@
 
 		scatterPtr.set({
 			lassoColor: pointColor,
-			pointColor: pointColor,
 			pointColorHover: pointColor,
 			pointColorActive: pointColor,
 			backgroundColor: "#FFFFFF",
@@ -99,12 +103,19 @@
 		listenPointHover();
 	}
 
-	function draw(points: ReglScatterData) {
+	function draw(points: Points2D) {
 		if (scatterPtr) {
-			scatterPtr.draw(points, {
-				transition: true,
-				transitionDuration: 1200,
-			});
+			scatterPtr.draw(
+				Array.from(points.x).map((d, i) => [
+					points.x[i],
+					points.y[i],
+					points.color[i],
+				]),
+				{
+					transition: true,
+					transitionDuration: 1200,
+				}
+			);
 		}
 	}
 
