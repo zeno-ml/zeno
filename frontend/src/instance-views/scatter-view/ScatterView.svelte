@@ -37,7 +37,7 @@
 	let hoverViewDivEl: HTMLDivElement; // show view on point hover
 	let containerEl: HTMLDivElement; // save so I can resize
 
-	$: project2DOnModelAndTransformChange($model);
+	$: project2DOnModelAndTransformChange($model, colorByColumn);
 	$: {
 		if (containerEl && autoResize) {
 			resizeScatter();
@@ -48,7 +48,10 @@
 	 * Main driver behind fetching the projected points and displaying
 	 * them in the scale that WebGL expects between [-1, 1]
 	 */
-	async function project2DOnModelAndTransformChange(model: string) {
+	async function project2DOnModelAndTransformChange(
+		model: string,
+		colorColumn: ZenoColumn
+	) {
 		embedExists = await checkEmbedExists(model);
 
 		if (embedExists) {
@@ -56,7 +59,7 @@
 			computingPoints = true;
 
 			// requests tsne from backend
-			points = (await projectEmbedInto2D(model, colorByColumn)) as Points2D;
+			points = (await projectEmbedInto2D(model, colorColumn)) as Points2D;
 
 			// simply scales the points between [-1, 1]
 			pointToWebGL = createScalesWebgGLExtent(points);
@@ -135,35 +138,40 @@
 								<div id="replace-view" bind:this={hoverViewDivEl} />
 							</div>
 						{/if}
-
-						<!-- settings/controls for the scatterplot -->
-						<div id="settings" class="frosted">
-							<ScatterSettings bind:colorByColumn bind:pointSizeSlider />
-						</div>
 					</div>
-
-					<!-- extra hints like interactions -->
-					<ScatterHelp />
 				{/if}
 			{:else}
 				<!--  Loading bar -->
-				<div id="loading-indicator" style:color="#6a1b9a">
-					<Spinner color="#6a1b9a" size={80} />
-					<b>Computing 2D projection</b> from
-					<code>
-						{$model}
-					</code> embeddings
+				<div id="loading-container">
+					<div id="loading-indicator" style:color="#6a1b9a">
+						<Spinner color="#6a1b9a" size={80} />
+						<b>Computing 2D projection</b> from
+						<code>
+							{$model}
+						</code> embeddings
+					</div>
 				</div>
 			{/if}
 		</div>
 	{:else}
 		<NoEmbed />
 	{/if}
+
+	<!-- settings/controls for the scatterplot -->
+	<div id="settings" class="frosted">
+		<ScatterSettings bind:colorByColumn bind:pointSizeSlider />
+	</div>
+
+	<!-- extra hints like interactions -->
+	<ScatterHelp />
 </div>
 
 <style>
 	#scatter-view {
 		position: relative;
+		height: calc(100vh - 170px);
+	}
+	#loading-container {
 		height: calc(100vh - 170px);
 	}
 	#container {

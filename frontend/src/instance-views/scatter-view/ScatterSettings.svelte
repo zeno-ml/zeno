@@ -8,7 +8,7 @@
 	import { columnHash } from "../../util/util";
 
 	export let pointSizeSlider = 3;
-	export let colorByColumn: ZenoColumn = $status.completeColumns[0];
+	export let colorByColumn: ZenoColumn;
 </script>
 
 <!-- settings/controls for the scatterplot -->
@@ -19,7 +19,8 @@
 	<span id="setting">Settings</span>
 </div>
 <Select
-	bind:value={colorByColumn}
+	value={colorByColumn}
+	on:MDCSelect:change={(e) => (colorByColumn = e.detail.value)}
 	key={(v) => columnHash(v)}
 	label="Color By"
 	style="width: 170px; margin-bottom: 10px;">

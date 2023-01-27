@@ -4,19 +4,19 @@ import asyncio
 import logging
 import os
 import pickle
-import random
 import sys
 import threading
 from functools import lru_cache
 from inspect import getsource
 from math import isnan
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
 from pandas import DataFrame  # type: ignore
 from pathos.multiprocessing import ProcessingPool as Pool  # type: ignore
+from sklearn import preprocessing  # type: ignore
 
 from zeno.api import ZenoOptions, ZenoParameters
 from zeno.classes.base import MetadataType, ZenoColumnType
@@ -560,22 +560,54 @@ class ZenoBackend(object):
 
         return TSNE().fit_transform(embed)
 
-    def get_projection_colors(self, column: ZenoColumn) -> List[float]:
-        series = self.df[str(column)]
-        return [random.random() for i in range(len(series))]
+    def get_projection_colors(self, column: ZenoColumn) -> Tuple[List[int], List, str]:
+        """Get colors for a projection based on a column.
 
-    def project_embed_into_2D(self, model: str, column: ZenoColumn) -> Dict[str, list]:
+        Args:
+            column (ZenoColumn): Column to use for coloring the projection.
+
+        Returns:
+            Tuple[List[int], List, str]: The color range, the unique values,
+                and the metadata type.
+        """
+        series = self.df[str(column)]
+        unique = series.unique()
+        metadata_type = "nominal"
+        color_range: List[int] = []
+        if len(unique) > 20:
+            if column.metadata_type == MetadataType.CONTINUOUS:
+                metadata_type = "continuous"
+                color_range = (
+                    np.interp(series, (series.min(), series.max()), (0, 20))
+                    .astype(int)
+                    .tolist()
+                )
+            else:
+                color_range = [0] * len(series)
+        else:
+            labels = preprocessing.LabelEncoder().fit_transform(series)
+            if isinstance(labels, np.ndarray):
+                color_range = labels.astype(int).tolist()
+            else:
+                color_range = [0] * len(series)
+        return color_range, unique.tolist(), metadata_type
+
+    def project_embed_into_2D(
+        self, model: str, column: ZenoColumn
+    ) -> Dict[str, Union[list, str]]:
         """If the embedding exists, will use t-SNE to project into 2D.
         Returns the 2D embeddings as object/dict
         {
             x: list[float]
             y: list[float]
-            color: list[float]
+            color: list[int]
             ids: list[str]
+            domain: list[str]
+            dataType: str // "nominal" or "continuous"
         }
         """
 
-        points: Dict[str, list] = {"x": [], "y": [], "ids": []}
+        points: Dict[str, Union[List, str]] = {"x": [], "y": [], "ids": []}
 
         # Can't project without an embedding
         if not self.embed_exists(model):
@@ -586,7 +618,10 @@ class ZenoBackend(object):
         # extract points and ids from computed projection
         points["x"] = projection[:, 0].tolist()
         points["y"] = projection[:, 1].tolist()
-        points["color"] = self.get_projection_colors(column)
+        color_results = self.get_projection_colors(column)
+        points["color"] = color_results[0]
+        points["domain"] = color_results[1]
+        points["dataType"] = color_results[2]
         points["ids"] = self.df[str(self.id_column)].to_list()
 
         return points

@@ -8,6 +8,7 @@
 		ReglScatterObject,
 		ReglScatterPointDispatch,
 	} from "./index";
+	import { CONTINUOUS_COLOR_SCALE, NOMINAL_COLOR_SCALE } from "./colors";
 
 	const dispatch = createEventDispatcher<{
 		deselect: number[];
@@ -56,31 +57,14 @@
 		scatterPtr.destroy();
 	});
 
+	$: console.log(data);
 	function init() {
 		scatterPtr = createScatterPlot({
 			colorBy: "valueA",
-			pointColor: [
-				"#002072", // dark blue
-				"#162b79",
-				"#233680",
-				"#2e4186",
-				"#394d8d",
-				"#425894",
-				"#4b649a",
-				"#5570a1",
-				"#5e7ca7",
-				"#6789ae",
-				"#7195b4",
-				"#7ba2ba",
-				"#85aec0",
-				"#90bbc6",
-				"#9cc7cc",
-				"#a9d4d2",
-				"#b8e0d7",
-				"#c8ecdc",
-				"#ddf7df",
-				"#ffffe0", // bright yellow
-			],
+			pointColor:
+				data.dataType === "nominal"
+					? NOMINAL_COLOR_SCALE
+					: CONTINUOUS_COLOR_SCALE,
 			canvas: canvasEl,
 			width,
 			height,

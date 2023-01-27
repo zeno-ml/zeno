@@ -97,6 +97,8 @@ interface Points2D {
 	x: Float32Array;
 	y: Float32Array;
 	color: Float32Array;
+	domain: List[float];
+	dataType: string;
 	ids: string[];
 }
 
