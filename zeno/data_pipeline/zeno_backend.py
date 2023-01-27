@@ -10,12 +10,13 @@ from functools import lru_cache
 from inspect import getsource
 from math import isnan
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
 from pandas import DataFrame  # type: ignore
 from pathos.multiprocessing import ProcessingPool as Pool  # type: ignore
+from sklearn import preprocessing  # type: ignore
 
 from zeno.api import ZenoOptions, ZenoParameters
 from zeno.classes.base import MetadataType, ZenoColumnType
@@ -552,37 +553,84 @@ class ZenoBackend(object):
         exists = str(embed_column) in self.df.columns
         return exists and not self.df[str(embed_column)].isnull().any()
 
-    @lru_cache()
-    def project_embed_into_2D(self, model: str) -> Dict[str, list]:
-        """If the embedding exists, will use t-SNE to project into 2D.
-        Returns the 2D embeddings as object/dict
-        {
-            x: list[float]
-            y: list[float]
-            ids: list[str]
-        }
-        """
-
-        points: Dict[str, list] = {"x": [], "y": [], "ids": []}
-
-        # Can't project without an embedding
-        if not self.embed_exists(model):
-            return points
-
+    @lru_cache
+    def run_tsne(self, model: str) -> np.ndarray:
+        # Extract embeddings and store in one big ndarray
         embed_col = ZenoColumn(column_type=ZenoColumnType.EMBEDDING, name=model)
 
-        # Extract embeddings and store in one big ndarray
         embed = self.df[str(embed_col)].to_numpy()
         embed = np.stack(embed, axis=0)  # type: ignore
 
         # project embeddings into 2D
         from sklearn.manifold import TSNE  # type: ignore
 
-        projection = TSNE().fit_transform(embed)
+        return TSNE().fit_transform(embed)
+
+    def get_projection_colors(self, column: ZenoColumn) -> Tuple[List[int], List, str]:
+        """Get colors for a projection based on a column.
+
+        Args:
+            column (ZenoColumn): Column to use for coloring the projection.
+
+        Returns:
+            Tuple[List[int], List, str]: The color range, the unique values,
+                and the metadata type.
+        """
+        series = self.df[str(column)]
+        unique = series.unique()
+        metadata_type = "nominal"
+        color_range: List[int] = []
+        if len(unique) == 2:
+            metadata_type = "boolean"
+        if len(unique) > 20:
+            if column.metadata_type == MetadataType.CONTINUOUS:
+                metadata_type = "continuous"
+                color_range = (
+                    np.interp(series, (series.min(), series.max()), (0, 20))
+                    .astype(int)
+                    .tolist()
+                )
+                unique = np.array([series.min(), series.max()])
+            else:
+                color_range = [0] * len(series)
+        else:
+            labels = preprocessing.LabelEncoder().fit_transform(series)
+            if isinstance(labels, np.ndarray):
+                color_range = labels.astype(int).tolist()
+            else:
+                color_range = [0] * len(series)
+        return color_range, unique.tolist(), metadata_type
+
+    def project_embed_into_2D(
+        self, model: str, column: ZenoColumn
+    ) -> Dict[str, Union[List, str]]:
+        """If the embedding exists, will use t-SNE to project into 2D.
+        Returns the 2D embeddings as object/dict
+        {
+            x: list[float]
+            y: list[float]
+            color: list[int]
+            ids: list[str]
+            domain: list[union[int, float, str]]
+            dataType: str // "nominal" or "continuous" or "boolean"
+        }
+        """
+
+        points: Dict[str, Union[List, str]] = {"x": [], "y": [], "ids": []}
+
+        # Can't project without an embedding
+        if not self.embed_exists(model):
+            return points
+
+        projection = self.run_tsne(model)
 
         # extract points and ids from computed projection
         points["x"] = projection[:, 0].tolist()
         points["y"] = projection[:, 1].tolist()
+        color_results = self.get_projection_colors(column)
+        points["color"] = color_results[0]
+        points["domain"] = color_results[1]
+        points["dataType"] = color_results[2]
         points["ids"] = self.df[str(self.id_column)].to_list()
 
         return points

@@ -4,12 +4,15 @@
 	import { scaleLinear } from "d3-scale";
 	import { WEBGL_EXTENT } from "./index";
 	import type {
-		ReglScatterData,
 		ReglScatterConfig,
-		ReglScatterColorRange,
 		ReglScatterObject,
 		ReglScatterPointDispatch,
 	} from "./index";
+	import {
+		BOOLEAN_COLOR_SCALE,
+		CONTINUOUS_COLOR_SCALE,
+		NOMINAL_COLOR_SCALE,
+	} from "./colors";
 
 	const dispatch = createEventDispatcher<{
 		deselect: number[];
@@ -21,17 +24,19 @@
 
 	export let width: number;
 	export let height: number;
-	export let data: ReglScatterData = {
-		x: [],
-		y: [],
-	};
-	export let colorRange: ReglScatterColorRange = [];
+	export let data: Points2D;
 	export let config: ReglScatterConfig = {};
 	export let pointSize = 5;
 	// export let opacity = 0.85;
 	export let pointColor = "#6a1b9a";
 	export let pointOutline = 3;
 	export let style = "";
+
+	const COLOR_SCALE_MAP = {
+		nominal: NOMINAL_COLOR_SCALE,
+		continuous: CONTINUOUS_COLOR_SCALE,
+		boolean: BOOLEAN_COLOR_SCALE,
+	};
 
 	let xScale = scaleLinear().domain(WEBGL_EXTENT); // between [-1, 1] -> canvas X
 	let yScale = scaleLinear().domain(WEBGL_EXTENT); // between [-1, 1] -> canvas Y
@@ -55,9 +60,6 @@
 		}
 	}
 
-	// // update when the colorRange changes, but not when the scatter changes
-	// $: updateColorRange(colorRange);
-
 	onMount(() => {
 		init();
 		dispatch("mount", scatterPtr);
@@ -74,17 +76,10 @@
 		});
 	}
 
-	function updateColorRange(colorRange: ReglScatterColorRange) {
-		if (scatterPtr && colorRange) {
-			scatterPtr.set({
-				colorBy: "category",
-				pointColor: colorRange,
-			});
-		}
-	}
-
 	function init() {
 		scatterPtr = createScatterPlot({
+			colorBy: "valueA",
+			pointColor: COLOR_SCALE_MAP[data.dataType],
 			canvas: canvasEl,
 			width,
 			height,
@@ -95,7 +90,6 @@
 
 		scatterPtr.set({
 			lassoColor: pointColor,
-			pointColor: pointColor,
 			pointColorHover: pointColor,
 			pointColorActive: pointColor,
 			backgroundColor: "#FFFFFF",
@@ -110,12 +104,19 @@
 		listenPointHover();
 	}
 
-	function draw(points: ReglScatterData) {
+	function draw(points: Points2D) {
 		if (scatterPtr) {
-			scatterPtr.draw(points, {
-				transition: true,
-				transitionDuration: 1200,
-			});
+			scatterPtr.draw(
+				Array.from(points.x).map((d, i) => [
+					points.x[i],
+					points.y[i],
+					points.color[i],
+				]),
+				{
+					transition: true,
+					transitionDuration: 1200,
+				}
+			);
 		}
 	}
 
@@ -137,6 +138,7 @@
 			scatterPtr.subscribe(
 				"pointOver",
 				(index) => {
+					console.log(data.color[index]);
 					const canvasX = xScale(data.x[index]);
 					const canvasY = yScale(data.y[index]);
 					dispatch("pointOver", {

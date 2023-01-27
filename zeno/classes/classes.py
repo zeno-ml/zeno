@@ -51,8 +51,9 @@ class TableRequest(CamelModel):
     filter_ids: Optional[FilterIds] = None
 
 
-class EmbedProject2DRequest(BaseModel):
+class EmbedProject2DRequest(CamelModel):
     model: str
+    column: ZenoColumn
 
 
 class EntryRequest(BaseModel):
