@@ -1,3 +1,4 @@
+import { DefaultService } from "../testapi";
 import { get } from "svelte/store";
 import { ZenoColumnType } from "../globals";
 import {
@@ -15,6 +16,7 @@ import {
 import { columnHash } from "../util/util";
 
 export async function getInitialData() {
+	DefaultService.getSettings().then((d) => console.log(d));
 	let res = await fetch("/api/settings");
 	const sets = (await res.json()) as Settings;
 	settings.set(sets);
