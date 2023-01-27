@@ -52,12 +52,6 @@ interface Slice {
 	filterPredicates?: FilterPredicateGroup;
 }
 
-/**
- * probably a better way to make this a FilterPredicate
- * for the id metadata value \(o_o)/ who knows
- *
- * Made an interface because might add more properties later
- */
 interface FilterIds {
 	ids: string[];
 }
@@ -96,9 +90,9 @@ interface Points2D {
 	x: Float32Array;
 	y: Float32Array;
 	color: Float32Array;
-	opacity: Float32Array;
-	domain: (number | string)[];
-	dataType: string;
+	opacity?: Float32Array;
+	domain?: (number | string)[];
+	dataType?: string;
 	ids: string[];
 }
 

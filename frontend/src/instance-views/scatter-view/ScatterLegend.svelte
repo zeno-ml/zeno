@@ -74,15 +74,4 @@
 		display: flex;
 		align-items: center;
 	}
-	#legend {
-		width: 40px;
-		height: 15px;
-		margin-left: 10px;
-		margin-right: 10px;
-		background-image: linear-gradient(
-			to right,
-			rgb(0, 0, 256),
-			rgb(0, 256, 128)
-		);
-	}
 </style>

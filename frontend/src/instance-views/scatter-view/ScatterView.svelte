@@ -37,15 +37,15 @@
 	let embedExists = false;
 	let points: Points2D;
 	let computingPoints = false; // spinner when true
+	let pointOpacities: number[] = [];
+	// column to color scatterplot by
+	let colorByColumn: ZenoColumn = $status.completeColumns[0];
 	let dehighlightPoints = () => {
 		// nada
 	};
 	let highlightPoints = (x: number[]) => {
 		// nada
 	};
-	let pointOpacities: number[] = [];
-	// column to color scatterplot by
-	let colorByColumn: ZenoColumn = $status.completeColumns[0];
 
 	let pointToWebGL: WebGLExtentScalers; // functions to scale points
 	let pointHover: ReglScatterPointDispatch;
@@ -68,8 +68,8 @@
 		});
 	}
 
-	// gets ran once scatter has mounted and only once
-	// visually reslects the points from when this component
+	// Runs when scatter has mounted and only once
+	// visually reselects the points from when this component
 	// was destroyed
 	let runOnce = false;
 	let mounted = false;

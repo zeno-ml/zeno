@@ -1,13 +1,10 @@
 import { schemeCategory10, interpolateBuPu } from "d3-scale-chromatic";
 import { color } from "d3-color";
 
-// tab20 from matplotlib
 export const NOMINAL_COLOR_SCALE = schemeCategory10 as string[];
 
-// Orange and blue
 export const BOOLEAN_COLOR_SCALE = ["#FF5733", "#4168E1"];
 
-// Greens from matplotlib
 export const CONTINUOUS_COLOR_SCALE = interpolateToStringArray(
 	interpolateBuPu,
 	20,
@@ -35,7 +32,6 @@ function interpolateToStringArray(
 		} else if (inputValue < 0) {
 			inputValue = 0;
 		}
-		console.log(inputValue);
 
 		// from continuous function to string hex
 		const rgbString = colorInterpolate(inputValue);

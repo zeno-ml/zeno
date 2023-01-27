@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { status, model } from "../../stores";
-	import { Icon } from "@smui/icon-button";
-	import Slider from "@smui/slider";
 	import FormField from "@smui/form-field";
+	import { Icon } from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
+	import Slider from "@smui/slider";
+
 	import { ZenoColumnType } from "../../globals";
+	import { model, status } from "../../stores";
 	import { columnHash } from "../../util/util";
 
 	export let pointSizeSlider = 3;

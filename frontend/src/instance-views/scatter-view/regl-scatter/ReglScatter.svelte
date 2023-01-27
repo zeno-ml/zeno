@@ -27,7 +27,6 @@
 	export let data: Points2D;
 	export let config: ReglScatterConfig = {};
 	export let pointSize = 5;
-	// export let opacity = 0.85;
 	export let pointColor = "#6a1b9a";
 	export let pointOutline = 3;
 	export let style = "";
@@ -104,7 +103,6 @@
 			pointColorHover: pointColor,
 			pointColorActive: pointColor,
 			backgroundColor: "#FFFFFF",
-			// opacity,
 			pointOutlineWidth: pointOutline,
 		});
 
