@@ -12,7 +12,6 @@
 		getEntry,
 		projectEmbedInto2D,
 	} from "../../api/api";
-	import { getFilteredIds } from "../../api/table";
 	import {
 		model,
 		selectionIds,
@@ -25,6 +24,12 @@
 		ReglScatterPointDispatch,
 		WebGLExtentScalers,
 	} from "./regl-scatter";
+	import {
+		deselectPoints,
+		getIndicesFromIds,
+		getPointOpacities,
+		selectPoints,
+	} from "./scatter";
 	import { tick } from "svelte";
 
 	export let viewFunction: View.Component;
@@ -40,17 +45,18 @@
 	let pointOpacities: number[] = [];
 	// column to color scatterplot by
 	let colorByColumn: ZenoColumn = $status.completeColumns[0];
-	let dehighlightPoints = () => {
-		// nada
-	};
-	let highlightPoints = (x: number[]) => {
-		// nada
-	};
+	let runOnce = false;
+	let mounted = false;
+	let reloadedIndices: number[] = [];
 
 	let pointToWebGL: WebGLExtentScalers; // functions to scale points
 	let pointHover: ReglScatterPointDispatch;
 	let hoverViewDivEl: HTMLDivElement; // show view on point hover
-	let containerEl: HTMLDivElement; // save so I can resize
+	let containerEl: HTMLDivElement; // save for resizing
+
+	// Regl Scatterplot functions for highlighting points
+	let dehighlightPoints;
+	let highlightPoints;
 
 	$: project2DOnModelAndTransformChange($model, colorByColumn);
 	$: {
@@ -58,22 +64,18 @@
 			resizeScatter();
 		}
 	}
-	$: if ($selectionIds.ids.length === 0) {
+	$: if ($selectionIds.ids.length === 0 && dehighlightPoints) {
 		dehighlightPoints();
 	}
 
 	$: if (points) {
-		getPointOpacities($selectionPredicates).then((filteredOpacities) => {
-			pointOpacities = filteredOpacities;
-		});
+		getPointOpacities($selectionPredicates, points).then(
+			(filteredOpacities) => {
+				pointOpacities = filteredOpacities;
+			}
+		);
 	}
 
-	// Runs when scatter has mounted and only once
-	// visually reselects the points from when this component
-	// was destroyed
-	let runOnce = false;
-	let mounted = false;
-	let reloadedIndices: number[] = [];
 	$: if (points && !runOnce && mounted) {
 		rehighlightSelectedPoints();
 		runOnce = true;
@@ -83,48 +85,6 @@
 		reloadedIndices = getIndicesFromIds(points.ids, $selectionIds.ids);
 		await tick();
 		highlightPoints(reloadedIndices);
-	}
-
-	function getIndicesFromIds(allIds: string[], filterIds: string[]) {
-		const index = new Map();
-		allIds.forEach((id, i) => {
-			index.set(id, i);
-		});
-		const indices = filterIds.map((id) => index.get(id));
-		return indices;
-	}
-
-	/**
-	 * assigns ones outside of the filter predicates as partial opacity
-	 * and ones inside full opacity
-	 */
-	async function getPointOpacities(
-		selectionPredicates: FilterPredicateGroup[],
-		{ fullOpacity = 1, partialOpacity = 0.25 } = {}
-	) {
-		const filteredIds = (await getFilteredIdsFromPredicates(
-			selectionPredicates
-		)) as string[];
-		const filteredIdsIndex = new Map(
-			filteredIds.map((id, index) => [id, index])
-		);
-		if (filteredIds.length > 0) {
-			return points.ids.map((id) =>
-				filteredIdsIndex.has(id) ? fullOpacity : partialOpacity
-			);
-		} else {
-			return new Array(points.ids.length).fill(fullOpacity);
-		}
-	}
-
-	/**
-	 * Gets the ids from the filter predicates and
-	 */
-	async function getFilteredIdsFromPredicates(
-		selectionPredicates: FilterPredicateGroup[]
-	) {
-		const ids = await getFilteredIds(selectionPredicates);
-		return ids;
 	}
 
 	/**
@@ -178,21 +138,6 @@
 			width = containerEl.clientWidth;
 		}
 	}
-
-	/**
-	 * Selects the points and gets the ids for the selected entries
-	 *
-	 * @todo make this native to the filter predicates somehow
-	 * right now I just consider it separate
-	 */
-	function selectPoints(e: CustomEvent<number[]>) {
-		const selectedIndices = e.detail;
-		const selectedIds = selectedIndices.map((index) => points.ids[index]);
-		selectionIds.set({ ids: selectedIds });
-	}
-	function deselectPoints() {
-		selectionIds.set({ ids: [] });
-	}
 </script>
 
 <svelte:window on:resize={resizeScatter} />
@@ -228,7 +173,7 @@
 							{height}
 							on:pointOver={showViewOnPoint}
 							on:pointOut={clearPointHover}
-							on:select={selectPoints}
+							on:select={(e) => selectPoints(e, points)}
 							on:deselect={deselectPoints}
 							on:mount={(e) => {
 								const reglScatterplot = e.detail;

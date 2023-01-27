@@ -47,7 +47,7 @@
 			style="background-color: {BOOLEAN_COLOR_SCALE[1]}" />
 		<div class="legend-label">{domain[1]}</div>
 	</div>
-{:else}
+{:else if metadataType === "nominal"}
 	{#each domain as d, i}
 		<div class="legend-item">
 			<div
@@ -56,6 +56,8 @@
 			<div class="legend-label">{d}</div>
 		</div>
 	{/each}
+{:else}
+	<p>Too many nominal values</p>
 {/if}
 
 <style>

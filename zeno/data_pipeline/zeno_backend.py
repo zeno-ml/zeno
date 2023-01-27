@@ -590,6 +590,7 @@ class ZenoBackend(object):
                 )
                 unique = np.array([series.min(), series.max()])
             else:
+                metadata_type = "other"
                 color_range = [0] * len(series)
         else:
             labels = preprocessing.LabelEncoder().fit_transform(series)

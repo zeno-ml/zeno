@@ -1,18 +1,19 @@
 <script lang="ts">
-	import { onDestroy, onMount, createEventDispatcher } from "svelte";
-	import createScatterPlot from "regl-scatterplot";
 	import { scaleLinear } from "d3-scale";
-	import { WEBGL_EXTENT } from "./index";
-	import type {
-		ReglScatterConfig,
-		ReglScatterObject,
-		ReglScatterPointDispatch,
-	} from "./index";
+	import createScatterPlot from "regl-scatterplot";
+	import { createEventDispatcher, onDestroy, onMount } from "svelte";
+	import { selectionIds } from "../../../stores";
 	import {
 		BOOLEAN_COLOR_SCALE,
 		CONTINUOUS_COLOR_SCALE,
 		NOMINAL_COLOR_SCALE,
 	} from "./colors";
+	import type {
+		ReglScatterConfig,
+		ReglScatterObject,
+		ReglScatterPointDispatch,
+	} from "./index";
+	import { WEBGL_EXTENT } from "./index";
 
 	const dispatch = createEventDispatcher<{
 		deselect: number[];
@@ -115,12 +116,23 @@
 
 	function draw(points: Points2D) {
 		if (scatterPtr) {
-			scatterPtr.draw({
-				x: points.x,
-				y: points.y,
-				category: points.opacity,
-				value: points.color,
-			});
+			scatterPtr
+				.draw({
+					x: points.x,
+					y: points.y,
+					category: points.opacity,
+					value: points.color,
+				})
+				.then(() => {
+					scatterPtr.select(
+						points.ids.reduce((acc, currVal, i) => {
+							if ($selectionIds.ids.includes(currVal)) {
+								acc.push(i);
+							}
+							return acc;
+						}, [])
+					);
+				});
 		}
 	}
 
