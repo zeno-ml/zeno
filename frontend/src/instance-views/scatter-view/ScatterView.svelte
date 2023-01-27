@@ -22,6 +22,7 @@
 		ReglScatterPointDispatch,
 		WebGLExtentScalers,
 	} from "./regl-scatter";
+	import { tick } from "svelte";
 
 	export let viewFunction: View.Component;
 	export let viewOptions: View.Options = {};
@@ -35,6 +36,9 @@
 	let reglScatterData: ReglScatterData; // just a different format using the points
 	let computingPoints = false; // spinner when true
 	let dehighlightPoints = () => {
+		// nada
+	};
+	let highlightPoints = (x: number[]) => {
 		// nada
 	};
 	let pointOpacities: number[] = [];
@@ -66,6 +70,32 @@
 			ids: points.ids,
 			category: pointOpacities,
 		};
+	}
+
+	// gets ran once scatter has mounted and only once
+	// visually reslects the points from when this component
+	// was destroyed
+	let runOnce = false;
+	let mounted = false;
+	let reloadedIndices: number[] = [];
+	$: if (points && !runOnce && mounted) {
+		rehighlightSelectedPoints();
+		runOnce = true;
+	}
+
+	async function rehighlightSelectedPoints() {
+		reloadedIndices = getIndicesFromIds(points.ids, $selectionIds.ids);
+		await tick();
+		highlightPoints(reloadedIndices);
+	}
+
+	function getIndicesFromIds(allIds: string[], filterIds: string[]) {
+		const index = new Map();
+		allIds.forEach((id, i) => {
+			index.set(id, i);
+		});
+		const indices = filterIds.map((id) => index.get(id));
+		return indices;
 	}
 
 	/**
@@ -201,6 +231,8 @@
 							on:mount={(e) => {
 								const reglScatterplot = e.detail;
 								dehighlightPoints = reglScatterplot.deselect;
+								highlightPoints = reglScatterplot.select;
+								mounted = true;
 							}} />
 						{#if pointHover !== undefined}
 							<div
