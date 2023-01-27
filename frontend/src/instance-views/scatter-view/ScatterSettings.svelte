@@ -23,7 +23,7 @@
 	on:MDCSelect:change={(e) => (colorByColumn = e.detail.value)}
 	key={(v) => columnHash(v)}
 	label="Color By"
-	style="width: 170px; margin-bottom: 10px;">
+	style="width: calc(100% - 30px); margin-bottom: 10px; ">
 	{#each $status.completeColumns.filter((c) => c.model === $model || (c.model === "" && c.columnType !== ZenoColumnType.OUTPUT)) as c}
 		<Option value={c}>{c.name}</Option>
 	{/each}
