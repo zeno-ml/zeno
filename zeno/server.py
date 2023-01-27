@@ -22,7 +22,7 @@ from zeno.classes.classes import (
 )
 from zeno.classes.metadata import HistogramBucket, HistogramRequest
 from zeno.classes.report import Report
-from zeno.classes.slice import Slice, FilterPredicate, FilterPredicateGroup
+from zeno.classes.slice import FilterPredicate, FilterPredicateGroup, Slice
 from zeno.data_pipeline.zeno_backend import ZenoBackend
 
 

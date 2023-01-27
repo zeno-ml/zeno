@@ -1,5 +1,5 @@
 """Functions for parsing filter predicates and filtering dataframes"""
-from typing import List, Union, Optional
+from typing import List, Optional, Union
 
 import pandas as pd
 from pandas import DataFrame
@@ -7,7 +7,7 @@ from pandas import DataFrame
 from zeno.classes.base import MetadataType, ZenoColumn
 from zeno.classes.metadata import HistogramBucket
 
-from zeno.classes.slice import FilterPredicate, FilterPredicateGroup, FilterIds
+from zeno.classes.slice import FilterIds, FilterPredicate, FilterPredicateGroup
 
 
 def get_filter_string(filter: Union[FilterPredicateGroup, FilterPredicate]):

@@ -1,7 +1,7 @@
 from typing import List, Optional, Union
 
 from zeno.classes.base import CamelModel, ZenoColumn
-from zeno.classes.slice import FilterPredicateGroup, FilterIds
+from zeno.classes.slice import FilterIds, FilterPredicateGroup
 
 
 class HistogramBucket(CamelModel):

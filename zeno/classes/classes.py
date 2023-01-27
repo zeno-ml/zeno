@@ -1,12 +1,12 @@
 """Internal classes for Zeno."""
 
-from typing import List, Tuple, Union, Optional
+from typing import List, Optional, Tuple, Union
 
 from pydantic import BaseModel
 
 from zeno.classes.base import CamelModel, ZenoColumn
 
-from zeno.classes.slice import FilterPredicate, FilterPredicateGroup, Slice, FilterIds
+from zeno.classes.slice import FilterIds, FilterPredicate, FilterPredicateGroup, Slice
 
 
 class ZenoSettings(CamelModel):
