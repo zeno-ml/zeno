@@ -52,6 +52,11 @@ interface Slice {
 	filterPredicates?: FilterPredicateGroup;
 }
 
+interface SliceMetric {
+	metric: float | null;
+	size: int;
+}
+
 interface Result {
 	metric: number;
 	size: number;

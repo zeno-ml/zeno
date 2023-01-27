@@ -4,9 +4,8 @@ and the static files for the frontend.
 """
 
 import asyncio
-import json
 import os
-from typing import List, Union
+from typing import Dict, List, Union
 
 from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.staticfiles import StaticFiles
@@ -23,7 +22,7 @@ from zeno.classes.classes import (
 )
 from zeno.classes.metadata import HistogramBucket, HistogramRequest
 from zeno.classes.report import Report
-from zeno.classes.slice import FilterPredicate, FilterPredicateGroup, Slice
+from zeno.classes.slice import Slice, SliceMetric
 from zeno.data_pipeline.zeno_backend import ZenoBackend
 
 
@@ -72,13 +71,13 @@ def get_server(zeno: ZenoBackend):
             folders=zeno.folders,
         )
 
-    @api_app.get("/slices")
+    @api_app.get("/slices", response_model=Dict[str, Slice])
     def get_slices():
-        return json.dumps(zeno.get_slices())
+        return zeno.slices
 
-    @api_app.get("/reports")
+    @api_app.get("/reports", response_model=List[Report])
     def get_reports():
-        return json.dumps([r.dict(by_alias=True) for r in zeno.get_reports()])
+        return zeno.reports
 
     @api_app.post("/folders")
     def set_folders(folders: List[str]):
@@ -88,10 +87,6 @@ def get_server(zeno: ZenoBackend):
     def update_reports(reqs: List[Report]):
         zeno.set_reports(reqs)
 
-    @api_app.post("/filtered-ids")
-    def get_filtered_ids(req: List[Union[FilterPredicateGroup, FilterPredicate]]):
-        return json.dumps(zeno.get_filtered_ids(req))
-
     @api_app.post("/filtered-table")
     def get_filtered_table(req: TableRequest):
         return zeno.get_filtered_table(req)
@@ -100,11 +95,11 @@ def get_server(zeno: ZenoBackend):
     def get_histogram_buckets(req: List[ZenoColumn]):
         return zeno.get_histogram_buckets(req)
 
-    @api_app.post("/histogram-counts")
+    @api_app.post("/histogram-counts", response_model=List[List[int]])
     def calculate_histogram_counts(req: HistogramRequest):
         return zeno.get_histogram_counts(req)
 
-    @api_app.post("/histogram-metrics")
+    @api_app.post("/histogram-metrics", response_model=List[List[Union[float, None]]])
     def calculate_histogram_metrics(req: HistogramRequest):
         return zeno.get_histogram_metrics(req)
 
@@ -116,23 +111,21 @@ def get_server(zeno: ZenoBackend):
     def delete_slice(slice_name: List[str]):
         zeno.delete_slice(slice_name[0])
 
-    @api_app.post("/slice-metrics")
+    @api_app.post("/slice-metrics", response_model=List[SliceMetric])
     def get_metrics_for_slices(reqs: List[MetricKey]):
-        return json.dumps(zeno.get_metrics_for_slices(reqs))
+        return zeno.get_metrics_for_slices(reqs)
 
-    @api_app.get("/embed-exists/{model}")
+    @api_app.get("/embed-exists/{model}", response_model=bool)
     def embed_exists(model: str):
         """
         Checks if embedding exists for a model.
         Returns the boolean True or False directly
         """
-        exists = zeno.embed_exists(model)
-        return exists
+        return zeno.embed_exists(model)
 
     @api_app.post("/embed-project")
     def project_embed_into_2D(req: EmbedProject2DRequest):
-        points = zeno.project_embed_into_2D(req.model)
-        return points
+        return zeno.project_embed_into_2D(req.model)
 
     @api_app.post("/entry")
     def get_df_row_entry(req: EntryRequest):

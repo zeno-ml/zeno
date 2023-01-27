@@ -62,7 +62,9 @@ export async function deleteSlice(sliceName: string) {
 	});
 }
 
-export async function getMetricsForSlices(metricKeys: MetricKey[]) {
+export async function getMetricsForSlices(
+	metricKeys: MetricKey[]
+): Promise<SliceMetric[]> {
 	if (metricKeys.length === 0 || metricKeys[0].metric === undefined) {
 		return null;
 	}
@@ -80,6 +82,6 @@ export async function getMetricsForSlices(metricKeys: MetricKey[]) {
 			},
 			body: JSON.stringify(metricKeys),
 		}).then((d) => d.json());
-		return JSON.parse(res);
+		return res;
 	}
 }

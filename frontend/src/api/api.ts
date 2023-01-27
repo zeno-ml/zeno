@@ -30,14 +30,10 @@ export async function getInitialData() {
 	metric.set(r.metrics.length > 0 ? r.metrics[0] : "");
 
 	const slicesRes = await fetch("/api/slices").then((d) => d.json());
-	const slis = JSON.parse(slicesRes) as Slice[];
-	const sliMap = new Map();
-	slis.forEach((e) => sliMap.set(e.sliceName, e));
-	slices.set(sliMap);
+	slices.set(new Map(Object.entries(slicesRes)));
 
 	const reportsRes = await fetch("/api/reports").then((d) => d.json());
-	const localReports = JSON.parse(reportsRes) as Report[];
-	reports.set(localReports);
+	reports.set(reportsRes);
 
 	ready.set(true);
 }
