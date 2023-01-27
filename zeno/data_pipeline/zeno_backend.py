@@ -337,7 +337,9 @@ class ZenoBackend(object):
 
         return_metrics = []
         for metric_key in requests:
-            filt_df = filter_table(self.df, [metric_key.sli.filter_predicates], filter_ids)
+            filt_df = filter_table(
+                self.df, [metric_key.sli.filter_predicates], filter_ids
+            )
             if metric_key.metric == "" or self.label_column.name == "":
                 return_metrics.append({"metric": None, "size": filt_df.shape[0]})
             else:
@@ -492,7 +494,7 @@ class ZenoBackend(object):
     def get_histogram_counts(self, req: HistogramRequest) -> List[List[int]]:
         """Calculate count for each bucket in each column histogram."""
         if req.filter_predicates is not None:
-            filt_df = filter_table(self.df, [req.filter_predicates])
+            filt_df = filter_table(self.df, [req.filter_predicates], req.filter_ids)
         else:
             filt_df = self.df
 
@@ -524,7 +526,7 @@ class ZenoBackend(object):
             return []
 
         if req.filter_predicates is not None:
-            filt_df = filter_table(self.df, [req.filter_predicates])
+            filt_df = filter_table(self.df, [req.filter_predicates], req.filter_ids)
         else:
             filt_df = self.df
 
