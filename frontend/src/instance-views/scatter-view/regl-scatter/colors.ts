@@ -1,53 +1,47 @@
+import { schemeCategory10, interpolateBuPu } from "d3-scale-chromatic";
+import { color } from "d3-color";
+
 // tab20 from matplotlib
-export const NOMINAL_COLOR_SCALE = [
-	[31, 119, 180],
-	[174, 199, 232],
-	[256, 127, 14],
-	[256, 187, 120],
-	[44, 160, 44],
-	[152, 223, 138],
-	[214, 39, 40],
-	[256, 152, 150],
-	[148, 103, 189],
-	[197, 176, 213],
-	[140, 86, 75],
-	[196, 156, 148],
-	[227, 119, 194],
-	[247, 182, 210],
-	[127, 127, 127],
-	[199, 199, 199],
-	[188, 189, 34],
-	[219, 219, 141],
-	[23, 190, 207],
-	[158, 218, 229],
-];
+export const NOMINAL_COLOR_SCALE = schemeCategory10 as string[];
 
 // Orange and blue
-export const BOOLEAN_COLOR_SCALE = [
-	[255, 87, 51],
-	[65, 105, 225],
-];
+export const BOOLEAN_COLOR_SCALE = ["#FF5733", "#4168E1"];
 
 // Greens from matplotlib
-export const CONTINUOUS_COLOR_SCALE = [
-	[0, 0, 256],
-	[0, 13, 249],
-	[0, 26, 242],
-	[0, 40, 235],
-	[0, 53, 229],
-	[0, 67, 222],
-	[0, 80, 215],
-	[0, 94, 208],
-	[0, 107, 202],
-	[0, 121, 195],
-	[0, 134, 188],
-	[0, 148, 181],
-	[0, 161, 175],
-	[0, 175, 168],
-	[0, 188, 161],
-	[0, 202, 154],
-	[0, 215, 148],
-	[0, 229, 141],
-	[0, 242, 134],
-	[0, 256, 128],
-];
+export const CONTINUOUS_COLOR_SCALE = interpolateToStringArray(
+	interpolateBuPu,
+	20,
+	0.1
+);
+
+/**
+ * Takes a function that produces colors from numbers into a fixed sized array
+ *
+ * @returns string array of hex colors
+ */
+function interpolateToStringArray(
+	colorInterpolate: (x: number) => string,
+	length: number,
+	padLeft = 0,
+	padRight = 0
+) {
+	const colors: string[] = new Array(length);
+	const interval = 1 / (length - padLeft - padRight);
+	let inputValue = 0 + padLeft;
+	for (let i = 0; i < length; i++) {
+		// must be a normalized value
+		if (inputValue > 1) {
+			inputValue = 1;
+		} else if (inputValue < 0) {
+			inputValue = 0;
+		}
+		console.log(inputValue);
+
+		// from continuous function to string hex
+		const rgbString = colorInterpolate(inputValue);
+		colors[i] = color(rgbString).formatHex();
+		inputValue += interval;
+	}
+
+	return colors;
+}

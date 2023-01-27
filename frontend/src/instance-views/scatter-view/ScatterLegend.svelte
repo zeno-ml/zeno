@@ -2,6 +2,7 @@
 	import {
 		BOOLEAN_COLOR_SCALE,
 		NOMINAL_COLOR_SCALE,
+		CONTINUOUS_COLOR_SCALE,
 	} from "./regl-scatter/colors";
 
 	export let domain: string[] = [];
@@ -9,11 +10,26 @@
 </script>
 
 {#if metadataType === "continuous"}
+	{@const svg = { width: 100, height: 14 }}
 	<div id="legend-container">
 		<span>
 			{parseFloat(domain[0]).toFixed(2)}
 		</span>
-		<div id="legend" />
+		<svg
+			height={svg.height}
+			width={svg.width}
+			style="border: 0.5px solid lightgrey; margin: 10px;">
+			{#each CONTINUOUS_COLOR_SCALE as color, i}
+				{@const spacing = svg.width / CONTINUOUS_COLOR_SCALE.length}
+				{@const colorWidth = (1 / CONTINUOUS_COLOR_SCALE.length) * svg.width}
+				<rect
+					x={i * spacing}
+					y={0}
+					height={svg.height}
+					width={colorWidth}
+					fill={color} />
+			{/each}
+		</svg>
 		<span>
 			{parseFloat(domain[1]).toFixed(2)}
 		</span>
@@ -22,21 +38,13 @@
 	<div class="legend-item">
 		<div
 			class="legend-color"
-			style="background-color: rgb({BOOLEAN_COLOR_SCALE[0][0] +
-				',' +
-				BOOLEAN_COLOR_SCALE[0][1] +
-				',' +
-				BOOLEAN_COLOR_SCALE[0][2]})" />
+			style="background-color: {BOOLEAN_COLOR_SCALE[0]}" />
 		<div class="legend-label">{domain[0]}</div>
 	</div>
 	<div class="legend-item">
 		<div
 			class="legend-color"
-			style="background-color: rgb({BOOLEAN_COLOR_SCALE[1][0] +
-				',' +
-				BOOLEAN_COLOR_SCALE[1][1] +
-				',' +
-				BOOLEAN_COLOR_SCALE[1][2]})" />
+			style="background-color: {BOOLEAN_COLOR_SCALE[1]}" />
 		<div class="legend-label">{domain[1]}</div>
 	</div>
 {:else}
@@ -44,11 +52,7 @@
 		<div class="legend-item">
 			<div
 				class="legend-color"
-				style="background-color: rgb({NOMINAL_COLOR_SCALE[i][0] +
-					',' +
-					NOMINAL_COLOR_SCALE[i][1] +
-					',' +
-					NOMINAL_COLOR_SCALE[i][2]})" />
+				style="background-color: {NOMINAL_COLOR_SCALE[i]}" />
 			<div class="legend-label">{d}</div>
 		</div>
 	{/each}
