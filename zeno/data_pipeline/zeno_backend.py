@@ -23,7 +23,13 @@ from zeno.classes.base import MetadataType, ZenoColumnType
 from zeno.classes.classes import MetricKey, TableRequest, ZenoColumn
 from zeno.classes.metadata import HistogramBucket, HistogramRequest
 from zeno.classes.report import Report
-from zeno.classes.slice import FilterPredicate, FilterPredicateGroup, Slice, FilterIds
+from zeno.classes.slice import (
+    FilterIds,
+    FilterPredicate,
+    FilterPredicateGroup,
+    Slice,
+    SliceMetric,
+)
 from zeno.data_pipeline.data_processing import (
     postdistill_data,
     predistill_data,
@@ -336,25 +342,23 @@ class ZenoBackend(object):
     ):
         """Calculate result for each requested combination."""
 
-        return_metrics = []
+        return_metrics: List[SliceMetric] = []
         for metric_key in requests:
             filt_df = filter_table(
                 self.df, [metric_key.sli.filter_predicates], filter_ids
             )
             if metric_key.metric == "" or self.label_column.name == "":
-                return_metrics.append({"metric": None, "size": filt_df.shape[0]})
+                return_metrics.append(SliceMetric(metric=None, size=filt_df.shape[0]))
             else:
                 metric = self.calculate_metric(
                     filt_df, metric_key.model, metric_key.metric
                 )
-                return_metrics.append(
-                    {"metric": metric, "size": filt_df.shape[0]}  # type: ignore
-                )
+                return_metrics.append(SliceMetric(metric=metric, size=filt_df.shape[0]))
         return return_metrics
 
     def calculate_metric(
         self, df: DataFrame, model: Union[str, None], metric: str
-    ) -> Optional[float]:
+    ) -> Union[float, None]:
         if not self.done_running_inference:
             return None
 
@@ -409,12 +413,6 @@ class ZenoBackend(object):
 
         return self.metric_functions[metric](df, local_ops)
 
-    def get_slices(self):
-        return [s.dict(by_alias=True) for s in self.slices.values()]
-
-    def get_reports(self) -> List[Report]:
-        return self.reports
-
     def set_folders(self, folders: List[str]):
         if not self.editable:
             return
@@ -444,7 +442,7 @@ class ZenoBackend(object):
             pickle.dump(self.slices, f)
 
     def get_filtered_ids(self, req: List[Union[FilterPredicateGroup, FilterPredicate]]):
-        return filter_table(self.df, req)[str(self.id_column)].to_list()
+        return filter_table(self.df, req)[str(self.id_column)].to_json(orient="records")
 
     def get_filtered_table(self, req: TableRequest):
         """Return filtered table from list of filter predicates."""

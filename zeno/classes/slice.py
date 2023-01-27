@@ -23,3 +23,8 @@ class Slice(CamelModel):
     slice_name: str
     folder: str
     filter_predicates: FilterPredicateGroup
+
+
+class SliceMetric(CamelModel):
+    metric: Union[float, None]
+    size: int

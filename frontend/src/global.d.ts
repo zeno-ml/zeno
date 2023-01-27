@@ -62,6 +62,11 @@ interface FilterIds {
 	ids: string[];
 }
 
+interface SliceMetric {
+	metric: float | null;
+	size: int;
+}
+
 interface Result {
 	metric: number;
 	size: number;
