@@ -275,7 +275,7 @@
 		padding-top: 5px;
 	}
 	.cell {
-		border: 0.5px solid #ebebea;
+		border: 0.5px solid #d1d1d1;
 		padding: 10px;
 		min-width: 400px;
 		width: 400px;
