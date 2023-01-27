@@ -3,6 +3,7 @@
 	import ReglScatter from "./regl-scatter/ReglScatter.svelte";
 	import ScatterHelp from "./ScatterHelp.svelte";
 	import ScatterSettings from "./ScatterSettings.svelte";
+	import ScatterLegend from "./ScatterLegend.svelte";
 
 	import { BarLoader as Spinner } from "svelte-loading-spinners";
 	import {
@@ -161,6 +162,11 @@
 	<div id="settings" class="frosted">
 		<ScatterSettings bind:colorByColumn bind:pointSizeSlider />
 	</div>
+	{#if points}
+		<div id="legend" class="frosted">
+			<ScatterLegend domain={points.domain} metadataType={points.dataType} />
+		</div>
+	{/if}
 
 	<!-- extra hints like interactions -->
 	<ScatterHelp />
@@ -198,12 +204,20 @@
 		background: hsla(0, 0%, 95%, 0.3);
 		backdrop-filter: blur(8px);
 	}
+	#legend {
+		position: absolute;
+		bottom: 10px;
+		left: 10px;
+		z-index: 999;
+		padding: 30px;
+		box-shadow: 0px 0px 1px 1px hsla(0, 0%, 30%, 0.1);
+		border-radius: 3px;
+	}
 	#settings {
 		position: absolute;
 		bottom: 10px;
 		right: 10px;
 		width: 300px;
-		height: 150px;
 		z-index: 999;
 		padding-left: 20px;
 		padding-top: 20px;

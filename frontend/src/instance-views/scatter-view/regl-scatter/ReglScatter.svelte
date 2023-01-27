@@ -8,7 +8,11 @@
 		ReglScatterObject,
 		ReglScatterPointDispatch,
 	} from "./index";
-	import { CONTINUOUS_COLOR_SCALE, NOMINAL_COLOR_SCALE } from "./colors";
+	import {
+		BOOLEAN_COLOR_SCALE,
+		CONTINUOUS_COLOR_SCALE,
+		NOMINAL_COLOR_SCALE,
+	} from "./colors";
 
 	const dispatch = createEventDispatcher<{
 		deselect: number[];
@@ -26,6 +30,12 @@
 	export let pointColor = "#6a1b9a";
 	export let pointOutline = 3;
 	export let style = "";
+
+	const COLOR_SCALE_MAP = {
+		nominal: NOMINAL_COLOR_SCALE,
+		continuous: CONTINUOUS_COLOR_SCALE,
+		boolean: BOOLEAN_COLOR_SCALE,
+	};
 
 	let xScale = scaleLinear().domain(WEBGL_EXTENT); // between [-1, 1] -> canvas X
 	let yScale = scaleLinear().domain(WEBGL_EXTENT); // between [-1, 1] -> canvas Y
@@ -57,14 +67,10 @@
 		scatterPtr.destroy();
 	});
 
-	$: console.log(data);
 	function init() {
 		scatterPtr = createScatterPlot({
 			colorBy: "valueA",
-			pointColor:
-				data.dataType === "nominal"
-					? NOMINAL_COLOR_SCALE
-					: CONTINUOUS_COLOR_SCALE,
+			pointColor: COLOR_SCALE_MAP[data.dataType],
 			canvas: canvasEl,
 			width,
 			height,
@@ -121,6 +127,7 @@
 			scatterPtr.subscribe(
 				"pointOver",
 				(index) => {
+					console.log(data.color[index]);
 					const canvasX = xScale(data.x[index]);
 					const canvasY = yScale(data.y[index]);
 					dispatch("pointOver", {

@@ -574,6 +574,8 @@ class ZenoBackend(object):
         unique = series.unique()
         metadata_type = "nominal"
         color_range: List[int] = []
+        if len(unique) == 2:
+            metadata_type = "boolean"
         if len(unique) > 20:
             if column.metadata_type == MetadataType.CONTINUOUS:
                 metadata_type = "continuous"
@@ -582,6 +584,7 @@ class ZenoBackend(object):
                     .astype(int)
                     .tolist()
                 )
+                unique = np.array([series.min(), series.max()])
             else:
                 color_range = [0] * len(series)
         else:
@@ -594,7 +597,7 @@ class ZenoBackend(object):
 
     def project_embed_into_2D(
         self, model: str, column: ZenoColumn
-    ) -> Dict[str, Union[list, str]]:
+    ) -> Dict[str, Union[List, str]]:
         """If the embedding exists, will use t-SNE to project into 2D.
         Returns the 2D embeddings as object/dict
         {
@@ -602,8 +605,8 @@ class ZenoBackend(object):
             y: list[float]
             color: list[int]
             ids: list[str]
-            domain: list[str]
-            dataType: str // "nominal" or "continuous"
+            domain: list[union[int, float, str]]
+            dataType: str // "nominal" or "continuous" or "boolean"
         }
         """
 
