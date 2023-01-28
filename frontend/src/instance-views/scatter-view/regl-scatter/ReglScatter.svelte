@@ -1,36 +1,42 @@
 <script lang="ts">
-	import { onDestroy, onMount, createEventDispatcher } from "svelte";
-	import createScatterPlot from "regl-scatterplot";
 	import { scaleLinear } from "d3-scale";
-	import { WEBGL_EXTENT } from "./index";
+	import createScatterPlot from "regl-scatterplot";
+	import { createEventDispatcher, onDestroy, onMount } from "svelte";
+	import { selectionIds } from "../../../stores";
+	import {
+		BOOLEAN_COLOR_SCALE,
+		CONTINUOUS_COLOR_SCALE,
+		NOMINAL_COLOR_SCALE,
+	} from "./colors";
 	import type {
-		ReglScatterData,
 		ReglScatterConfig,
-		ReglScatterColorRange,
 		ReglScatterObject,
 		ReglScatterPointDispatch,
 	} from "./index";
+	import { WEBGL_EXTENT } from "./index";
 
 	const dispatch = createEventDispatcher<{
 		deselect: number[];
 		select: number[];
 		pointOver: ReglScatterPointDispatch;
 		pointOut: ReglScatterPointDispatch;
+		mount: ReglScatterObject;
 	}>();
 
 	export let width: number;
 	export let height: number;
-	export let data: ReglScatterData = {
-		x: [],
-		y: [],
-	};
-	export let colorRange: ReglScatterColorRange = [];
+	export let data: Points2D;
 	export let config: ReglScatterConfig = {};
 	export let pointSize = 5;
-	export let opacity = 0.85;
 	export let pointColor = "#6a1b9a";
 	export let pointOutline = 3;
 	export let style = "";
+
+	const COLOR_SCALE_MAP = {
+		nominal: NOMINAL_COLOR_SCALE,
+		continuous: CONTINUOUS_COLOR_SCALE,
+		boolean: BOOLEAN_COLOR_SCALE,
+	};
 
 	let xScale = scaleLinear().domain(WEBGL_EXTENT); // between [-1, 1] -> canvas X
 	let yScale = scaleLinear().domain(WEBGL_EXTENT); // between [-1, 1] -> canvas Y
@@ -47,6 +53,10 @@
 		height,
 	});
 
+	$: if (scatterPtr) {
+		updateColorRange(data?.domain);
+	}
+
 	$: {
 		// make sure this is not called before we actually create the scatterPtr
 		if (scatterPtr && data?.x.length > 0) {
@@ -54,22 +64,27 @@
 		}
 	}
 
-	// update when the colorRange changes, but now when the scatter changes
-	$: updateColorRange(colorRange);
-
 	onMount(() => {
 		init();
+		dispatch("mount", scatterPtr);
 	});
 
 	onDestroy(() => {
 		scatterPtr.destroy();
 	});
 
-	function updateColorRange(colorRange: ReglScatterColorRange) {
-		if (scatterPtr && colorRange) {
+	function updateOpacityRange(scatterPtr: ReglScatterObject, length: number) {
+		scatterPtr.set({
+			opacityBy: "category",
+			opacity: new Array(length).fill(0).map((_, i) => i / (length - 1)),
+		});
+	}
+
+	function updateColorRange(domain: (number | string)[]) {
+		if (scatterPtr && domain) {
 			scatterPtr.set({
-				colorBy: "category",
-				pointColor: colorRange,
+				colorBy: "value",
+				pointColor: COLOR_SCALE_MAP[data.dataType],
 			});
 		}
 	}
@@ -86,25 +101,38 @@
 
 		scatterPtr.set({
 			lassoColor: pointColor,
-			pointColor: pointColor,
 			pointColorHover: pointColor,
 			pointColorActive: pointColor,
 			backgroundColor: "#FFFFFF",
-			opacity,
 			pointOutlineWidth: pointOutline,
 		});
+
+		updateOpacityRange(scatterPtr, 10);
 
 		// listeners
 		listenLasso();
 		listenPointHover();
 	}
 
-	function draw(points: ReglScatterData) {
+	function draw(points: Points2D) {
 		if (scatterPtr) {
-			scatterPtr.draw(points, {
-				transition: true,
-				transitionDuration: 1200,
-			});
+			scatterPtr
+				.draw({
+					x: points.x,
+					y: points.y,
+					category: points.opacity,
+					value: points.color,
+				})
+				.then(() => {
+					scatterPtr.select(
+						points.ids.reduce((acc, currVal, i) => {
+							if ($selectionIds.ids.includes(currVal)) {
+								acc.push(i);
+							}
+							return acc;
+						}, [])
+					);
+				});
 		}
 	}
 

@@ -34,6 +34,7 @@
 		slices,
 		sliceToEdit,
 		status,
+		selectionIds,
 	} from "../stores";
 	import { columnHash } from "../util/util";
 
@@ -56,16 +57,18 @@
 	// Get histogram buckets, counts, and metrics when columns update.
 	status.subscribe((s) => {
 		getHistograms(s.completeColumns, $model).then((res) => {
-			getHistogramCounts(res, null).then((res) => {
+			getHistogramCounts(res, null, $selectionIds).then((res) => {
 				if (res === undefined) {
 					return;
 				}
 				metadataHistograms = res;
-				getHistogramMetrics(res, null, $model, $metric).then((res) => {
-					if (res !== undefined) {
-						metadataHistograms = res;
+				getHistogramMetrics(res, null, $model, $metric, $selectionIds).then(
+					(res) => {
+						if (res !== undefined) {
+							metadataHistograms = res;
+						}
 					}
-				});
+				);
 			});
 		});
 	});
@@ -76,14 +79,18 @@
 			return;
 		}
 		metricRange.set([Infinity, -Infinity]);
-		getHistogramMetrics(metadataHistograms, null, $model, metric).then(
-			(res) => {
-				if (res === undefined) {
-					return;
-				}
-				metadataHistograms = res;
+		getHistogramMetrics(
+			metadataHistograms,
+			null,
+			$model,
+			metric,
+			$selectionIds
+		).then((res) => {
+			if (res === undefined) {
+				return;
 			}
-		);
+			metadataHistograms = res;
+		});
 	});
 
 	// Calculate histogram counts when model changes for postdistill columns
@@ -92,17 +99,55 @@
 			return;
 		}
 		getHistograms($status.completeColumns, model).then((res) => {
-			getHistogramCounts(res, null).then((res) => {
+			getHistogramCounts(res, null, $selectionIds).then((res) => {
 				if (res === undefined) {
 					return;
 				}
 				metadataHistograms = res;
-				getHistogramMetrics(res, null, model, $metric).then((res) => {
-					if (res === undefined) {
-						return;
+				getHistogramMetrics(res, null, model, $metric, $selectionIds).then(
+					(res) => {
+						if (res === undefined) {
+							return;
+						}
+						metadataHistograms = res;
 					}
-					metadataHistograms = res;
-				});
+				);
+			});
+		});
+	});
+
+	// when the selection Ids change, update the histograms
+	selectionIds.subscribe((selectionIds) => {
+		if (metadataHistograms.size === 0) {
+			return;
+		}
+		getHistogramCounts(
+			metadataHistograms,
+			{
+				predicates: $selectionPredicates,
+				join: "&",
+			},
+			selectionIds
+		).then((res) => {
+			if (res === undefined) {
+				return;
+			}
+
+			metadataHistograms = res;
+			getHistogramMetrics(
+				res,
+				{
+					predicates: $selectionPredicates,
+					join: "&",
+				},
+				$model,
+				$metric,
+				selectionIds
+			).then((res) => {
+				if (res === undefined) {
+					return;
+				}
+				metadataHistograms = res;
 			});
 		});
 	});
@@ -112,10 +157,14 @@
 		if (metadataHistograms.size === 0) {
 			return;
 		}
-		getHistogramCounts(metadataHistograms, {
-			predicates: sels,
-			join: "&",
-		}).then((res) => {
+		getHistogramCounts(
+			metadataHistograms,
+			{
+				predicates: sels,
+				join: "&",
+			},
+			$selectionIds
+		).then((res) => {
 			if (res === undefined) {
 				return;
 			}
@@ -128,7 +177,8 @@
 					join: "&",
 				},
 				$model,
-				$metric
+				$metric,
+				$selectionIds
 			).then((res) => {
 				if (res === undefined) {
 					return;

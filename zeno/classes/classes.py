@@ -1,12 +1,12 @@
 """Internal classes for Zeno."""
 
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 from pydantic import BaseModel
 
 from zeno.classes.base import CamelModel, ZenoColumn
 
-from zeno.classes.slice import FilterPredicate, FilterPredicateGroup, Slice
+from zeno.classes.slice import FilterIds, FilterPredicate, FilterPredicateGroup, Slice
 
 
 class ZenoSettings(CamelModel):
@@ -38,15 +38,22 @@ class MetricKey(CamelModel):
     metric: str
 
 
+class MetricRequest(CamelModel):
+    metric_keys: List[MetricKey]
+    filter_ids: Optional[FilterIds] = None
+
+
 class TableRequest(CamelModel):
     columns: List[ZenoColumn]
     slice_range: List[int]
     filter_predicates: List[Union[FilterPredicate, FilterPredicateGroup]]
     sort: Tuple[Union[ZenoColumn, None], bool]
+    filter_ids: Optional[FilterIds] = None
 
 
-class EmbedProject2DRequest(BaseModel):
+class EmbedProject2DRequest(CamelModel):
     model: str
+    column: ZenoColumn
 
 
 class EntryRequest(BaseModel):

@@ -15,7 +15,7 @@ from zeno.classes.base import ZenoColumn
 from zeno.classes.classes import (
     EmbedProject2DRequest,
     EntryRequest,
-    MetricKey,
+    MetricRequest,
     StatusResponse,
     TableRequest,
     ZenoSettings,
@@ -23,7 +23,7 @@ from zeno.classes.classes import (
 )
 from zeno.classes.metadata import HistogramBucket, HistogramRequest
 from zeno.classes.report import Report
-from zeno.classes.slice import Slice, SliceMetric
+from zeno.classes.slice import FilterPredicate, FilterPredicateGroup, Slice, SliceMetric
 from zeno.data_pipeline.zeno_backend import ZenoBackend
 
 
@@ -94,7 +94,11 @@ def get_server(zeno: ZenoBackend):
     def update_reports(reqs: List[Report]):
         zeno.set_reports(reqs)
 
-    @api_app.post("/filtered-table", tags=["zeno"])
+    @api_app.post("/filtered-ids", response_model=str, tags=["zeno"])
+    def get_filtered_ids(req: List[Union[FilterPredicateGroup, FilterPredicate]]):
+        return zeno.get_filtered_ids(req)
+
+    @api_app.post("/filtered-table", response_model=str, tags=["zeno"])
     def get_filtered_table(req: TableRequest):
         return zeno.get_filtered_table(req)
 
@@ -125,8 +129,8 @@ def get_server(zeno: ZenoBackend):
         zeno.delete_slice(slice_name[0])
 
     @api_app.post("/slice-metrics", response_model=List[SliceMetric], tags=["zeno"])
-    def get_metrics_for_slices(reqs: List[MetricKey]):
-        return zeno.get_metrics_for_slices(reqs)
+    def get_metrics_for_slices(req: MetricRequest):
+        return zeno.get_metrics_for_slices(req.metric_keys, req.filter_ids)
 
     @api_app.get("/embed-exists/{model}", response_model=bool, tags=["zeno"])
     def embed_exists(model: str):
@@ -137,7 +141,7 @@ def get_server(zeno: ZenoBackend):
 
     @api_app.post("/embed-project", tags=["zeno"])
     def project_embed_into_2D(req: EmbedProject2DRequest):
-        return zeno.project_embed_into_2D(req.model)
+        return zeno.project_embed_into_2D(req.model, req.column)
 
     @api_app.post("/entry", tags=["zeno"])
     def get_df_row_entry(req: EntryRequest):

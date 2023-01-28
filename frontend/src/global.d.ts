@@ -52,6 +52,10 @@ interface Slice {
 	filterPredicates?: FilterPredicateGroup;
 }
 
+interface FilterIds {
+	ids: string[];
+}
+
 interface SliceMetric {
 	metric: float | null;
 	size: int;
@@ -81,13 +85,15 @@ interface ZenoColumn {
 	model?: string;
 }
 
-interface Extent {
-	min: number;
-	max: number;
-}
-interface XYExtent {
-	xExtent: Extent;
-	yExtent: Extent;
+// columnar points
+interface Points2D {
+	x: Float32Array;
+	y: Float32Array;
+	color: Float32Array;
+	opacity?: Float32Array;
+	domain?: (number | string)[];
+	dataType?: string;
+	ids: string[];
 }
 
 declare namespace svelte.JSX {
@@ -95,13 +101,6 @@ declare namespace svelte.JSX {
 	interface DOMAttributes<T> {
 		onclick_outside?: CompositionEventHandler<T>;
 	}
-}
-
-// columnar points
-interface Points2D {
-	x: Float32Array;
-	y: Float32Array;
-	ids: string[];
 }
 
 declare namespace View {
@@ -123,11 +122,4 @@ declare namespace View {
 
 	// component injected into div provided
 	type OptionsComponent = (div: HTMLDivElement, setOptions: SetOptions) => void;
-}
-
-// columnar points
-interface Points2D {
-	x: number[];
-	y: number[];
-	ids: string[];
 }

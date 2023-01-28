@@ -1,7 +1,7 @@
-from typing import List, Union
+from typing import List, Optional, Union
 
 from zeno.classes.base import CamelModel, ZenoColumn
-from zeno.classes.slice import FilterPredicateGroup
+from zeno.classes.slice import FilterIds, FilterPredicateGroup
 
 
 class HistogramBucket(CamelModel):
@@ -19,3 +19,4 @@ class HistogramRequest(CamelModel):
     filter_predicates: Union[None, FilterPredicateGroup] = None
     model: Union[None, str] = None
     metric: Union[None, str] = None
+    filter_ids: Optional[FilterIds] = None
