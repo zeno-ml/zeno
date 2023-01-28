@@ -87,6 +87,9 @@ export const selections: Writable<{
 	metadata: {},
 	slices: [],
 });
+
+// the ids directly selected by the user
+export const selectionIds: Writable<FilterIds> = writable({ ids: [] });
 export const selectionPredicates: Readable<FilterPredicateGroup[]> = derived(
 	[selections],
 	([$selections]) => {

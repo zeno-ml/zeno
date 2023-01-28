@@ -44,8 +44,11 @@ export async function getInitialData() {
  *
  * @returns list of 2D coordinates
  */
-export async function projectEmbedInto2D(model: string): Promise<Points2D> {
-	const body = { model };
+export async function projectEmbedInto2D(
+	model: string,
+	column: ZenoColumn
+): Promise<Points2D> {
+	const body = { model, column };
 	const req = await fetch("/api/embed-project", {
 		method: "POST",
 		headers: {
@@ -58,6 +61,7 @@ export async function projectEmbedInto2D(model: string): Promise<Points2D> {
 		const result = (await req.json()) as Points2D;
 		result.x = new Float32Array(result.x);
 		result.y = new Float32Array(result.y);
+		result.color = new Float32Array(result.color);
 		return result;
 	} else {
 		console.error(
@@ -67,6 +71,7 @@ export async function projectEmbedInto2D(model: string): Promise<Points2D> {
 		const empty = {
 			x: new Float32Array(),
 			y: new Float32Array(),
+			color: new Float32Array(),
 			ids: [],
 		};
 		return empty;

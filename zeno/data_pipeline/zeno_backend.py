@@ -10,19 +10,26 @@ from functools import lru_cache
 from inspect import getsource
 from math import isnan
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
 from pandas import DataFrame  # type: ignore
 from pathos.multiprocessing import ProcessingPool as Pool  # type: ignore
+from sklearn import preprocessing  # type: ignore
 
 from zeno.api import ZenoOptions, ZenoParameters
 from zeno.classes.base import MetadataType, ZenoColumnType
 from zeno.classes.classes import MetricKey, TableRequest, ZenoColumn
 from zeno.classes.metadata import HistogramBucket, HistogramRequest
 from zeno.classes.report import Report
-from zeno.classes.slice import FilterPredicate, FilterPredicateGroup, Slice, SliceMetric
+from zeno.classes.slice import (
+    FilterIds,
+    FilterPredicate,
+    FilterPredicateGroup,
+    Slice,
+    SliceMetric,
+)
 from zeno.data_pipeline.data_processing import (
     postdistill_data,
     predistill_data,
@@ -328,12 +335,18 @@ class ZenoBackend(object):
                     self.df.loc[:, str(out[0])] = out[1]  # type: ignore
                     self.complete_columns.append(out[0])
 
-    def get_metrics_for_slices(self, requests: List[MetricKey]):
+    def get_metrics_for_slices(
+        self,
+        requests: List[MetricKey],
+        filter_ids: Optional[FilterIds] = None,
+    ):
         """Calculate result for each requested combination."""
 
         return_metrics: List[SliceMetric] = []
         for metric_key in requests:
-            filt_df = filter_table(self.df, [metric_key.sli.filter_predicates])
+            filt_df = filter_table(
+                self.df, [metric_key.sli.filter_predicates], filter_ids
+            )
             if metric_key.metric == "" or self.label_column.name == "":
                 return_metrics.append(SliceMetric(metric=None, size=filt_df.shape[0]))
             else:
@@ -429,11 +442,11 @@ class ZenoBackend(object):
             pickle.dump(self.slices, f)
 
     def get_filtered_ids(self, req: List[Union[FilterPredicateGroup, FilterPredicate]]):
-        return filter_table(self.df, req).loc[str(self.id_column)]
+        return filter_table(self.df, req)[str(self.id_column)].to_json(orient="records")
 
     def get_filtered_table(self, req: TableRequest):
         """Return filtered table from list of filter predicates."""
-        filt_df = filter_table(self.df, req.filter_predicates)
+        filt_df = filter_table(self.df, req.filter_predicates, req.filter_ids)
         if req.sort[0]:
             filt_df = filt_df.sort_values(str(req.sort[0]), ascending=req.sort[1])
         filt_df = filt_df.iloc[req.slice_range[0] : req.slice_range[1]]
@@ -480,7 +493,7 @@ class ZenoBackend(object):
     def get_histogram_counts(self, req: HistogramRequest) -> List[List[int]]:
         """Calculate count for each bucket in each column histogram."""
         if req.filter_predicates is not None:
-            filt_df = filter_table(self.df, [req.filter_predicates])
+            filt_df = filter_table(self.df, [req.filter_predicates], req.filter_ids)
         else:
             filt_df = self.df
 
@@ -512,7 +525,7 @@ class ZenoBackend(object):
             return []
 
         if req.filter_predicates is not None:
-            filt_df = filter_table(self.df, [req.filter_predicates])
+            filt_df = filter_table(self.df, [req.filter_predicates], req.filter_ids)
         else:
             filt_df = self.df
 
@@ -538,37 +551,85 @@ class ZenoBackend(object):
         exists = str(embed_column) in self.df.columns
         return exists and not self.df[str(embed_column)].isnull().any()
 
-    @lru_cache()
-    def project_embed_into_2D(self, model: str) -> Dict[str, list]:
-        """If the embedding exists, will use t-SNE to project into 2D.
-        Returns the 2D embeddings as object/dict
-        {
-            x: list[float]
-            y: list[float]
-            ids: list[str]
-        }
-        """
-
-        points: Dict[str, list] = {"x": [], "y": [], "ids": []}
-
-        # Can't project without an embedding
-        if not self.embed_exists(model):
-            return points
-
+    @lru_cache
+    def run_tsne(self, model: str) -> np.ndarray:
+        # Extract embeddings and store in one big ndarray
         embed_col = ZenoColumn(column_type=ZenoColumnType.EMBEDDING, name=model)
 
-        # Extract embeddings and store in one big ndarray
         embed = self.df[str(embed_col)].to_numpy()
         embed = np.stack(embed, axis=0)  # type: ignore
 
         # project embeddings into 2D
         from sklearn.manifold import TSNE  # type: ignore
 
-        projection = TSNE().fit_transform(embed)
+        return TSNE().fit_transform(embed)
+
+    def get_projection_colors(self, column: ZenoColumn) -> Tuple[List[int], List, str]:
+        """Get colors for a projection based on a column.
+
+        Args:
+            column (ZenoColumn): Column to use for coloring the projection.
+
+        Returns:
+            Tuple[List[int], List, str]: The color range, the unique values,
+                and the metadata type.
+        """
+        series = self.df[str(column)]
+        unique = series.unique()
+        metadata_type = "nominal"
+        color_range: List[int] = []
+        if len(unique) == 2:
+            metadata_type = "boolean"
+        if len(unique) > 10:
+            if column.metadata_type == MetadataType.CONTINUOUS:
+                metadata_type = "continuous"
+                color_range = (
+                    np.interp(series, (series.min(), series.max()), (0, 20))
+                    .astype(int)
+                    .tolist()
+                )
+                unique = np.array([series.min(), series.max()])
+            else:
+                metadata_type = "other"
+                color_range = [0] * len(series)
+        else:
+            labels = preprocessing.LabelEncoder().fit_transform(series)
+            if isinstance(labels, np.ndarray):
+                color_range = labels.astype(int).tolist()
+            else:
+                color_range = [0] * len(series)
+        return color_range, unique.tolist(), metadata_type
+
+    def project_embed_into_2D(
+        self, model: str, column: ZenoColumn
+    ) -> Dict[str, Union[List, str]]:
+        """If the embedding exists, will use t-SNE to project into 2D.
+        Returns the 2D embeddings as object/dict
+        {
+            x: list[float]
+            y: list[float]
+            color: list[int]
+            ids: list[str]
+            domain: list[union[int, float, str]]
+            dataType: str // "nominal" or "continuous" or "boolean"
+        }
+        """
+
+        points: Dict[str, Union[List, str]] = {"x": [], "y": [], "ids": []}
+
+        # Can't project without an embedding
+        if not self.embed_exists(model):
+            return points
+
+        projection = self.run_tsne(model)
 
         # extract points and ids from computed projection
         points["x"] = projection[:, 0].tolist()
         points["y"] = projection[:, 1].tolist()
+        color_results = self.get_projection_colors(column)
+        points["color"] = color_results[0]
+        points["domain"] = color_results[1]
+        points["dataType"] = color_results[2]
         points["ids"] = self.df[str(self.id_column)].to_list()
 
         return points

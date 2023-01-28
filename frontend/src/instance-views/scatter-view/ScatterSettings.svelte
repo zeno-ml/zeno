@@ -1,9 +1,15 @@
 <script lang="ts">
-	import { Icon } from "@smui/icon-button";
-	import Slider from "@smui/slider";
 	import FormField from "@smui/form-field";
+	import { Icon } from "@smui/icon-button";
+	import Select, { Option } from "@smui/select";
+	import Slider from "@smui/slider";
+
+	import { ZenoColumnType } from "../../globals";
+	import { model, status } from "../../stores";
+	import { columnHash } from "../../util/util";
 
 	export let pointSizeSlider = 3;
+	export let colorByColumn: ZenoColumn;
 </script>
 
 <!-- settings/controls for the scatterplot -->
@@ -13,10 +19,20 @@
 	</Icon>
 	<span id="setting">Settings</span>
 </div>
+<Select
+	value={colorByColumn}
+	on:MDCSelect:change={(e) => (colorByColumn = e.detail.value)}
+	key={(v) => columnHash(v)}
+	label="Color By"
+	style="width: calc(100% - 30px); margin-bottom: 10px; ">
+	{#each $status.completeColumns.filter((c) => c.model === $model || (c.model === "" && c.columnType !== ZenoColumnType.OUTPUT)) as c}
+		<Option value={c}>{c.name}</Option>
+	{/each}
+</Select>
 <FormField style="display: flex;">
 	<span
 		slot="label"
-		style="padding-right: 12px; width: max-content; display: block;">
+		style="padding-right: 40px; width: max-content; display: block;">
 		Point Size
 	</span>
 	<Slider
@@ -25,7 +41,7 @@
 		max={10}
 		bind:value={pointSizeSlider}
 		discrete
-		style="width: 100%" />
+		style="width: 100%; margin-left: 0px; margin-right: 20px;" />
 </FormField>
 
 <style>
@@ -35,6 +51,7 @@
 		display: flex;
 		flex-direction: row;
 		align-items: center;
+		margin-bottom: 5px;
 	}
 	#setting {
 		margin-left: 5px;

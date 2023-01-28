@@ -63,7 +63,8 @@ export async function deleteSlice(sliceName: string) {
 }
 
 export async function getMetricsForSlices(
-	metricKeys: MetricKey[]
+	metricKeys: MetricKey[],
+	filterIds?: FilterIds
 ): Promise<SliceMetric[]> {
 	if (metricKeys.length === 0 || metricKeys[0].metric === undefined) {
 		return null;
@@ -80,7 +81,10 @@ export async function getMetricsForSlices(
 			headers: {
 				"Content-type": "application/json",
 			},
-			body: JSON.stringify(metricKeys),
+			body: JSON.stringify({
+				metricKeys,
+				filterIds,
+			}),
 		}).then((d) => d.json());
 		return res;
 	}

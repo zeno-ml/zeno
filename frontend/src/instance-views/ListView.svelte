@@ -13,6 +13,7 @@
 		sort,
 		status,
 		selectionPredicates,
+		selectionIds,
 	} from "../stores";
 	import { getFilteredTable } from "../api/table";
 	import { columnHash } from "../util/util";
@@ -48,7 +49,8 @@
 			$selectionPredicates,
 			$model,
 			[start, end],
-			$sort
+			$sort,
+			$selectionIds
 		).then((res) => (table = res));
 	}
 

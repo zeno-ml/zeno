@@ -5,7 +5,13 @@
 	import TableView from "./TableView.svelte";
 	import ScatterView from "./scatter-view/ScatterView.svelte";
 	import { getMetricsForSlices } from "../api/slice";
-	import { selectionPredicates, settings, model, metric } from "../stores";
+	import {
+		selectionIds,
+		selectionPredicates,
+		settings,
+		model,
+		metric,
+	} from "../stores";
 
 	export let table;
 
@@ -43,20 +49,23 @@
 		}
 	});
 
-	$: currentResult = getMetricsForSlices([
-		<MetricKey>{
-			sli: <Slice>{
-				sliceName: "",
-				folder: "",
-				filterPredicates: {
-					predicates: $selectionPredicates,
-					join: "",
+	$: currentResult = getMetricsForSlices(
+		[
+			<MetricKey>{
+				sli: <Slice>{
+					sliceName: "",
+					folder: "",
+					filterPredicates: {
+						predicates: $selectionPredicates,
+						join: "",
+					},
 				},
+				model: $model,
+				metric: $metric,
 			},
-			model: $model,
-			metric: $metric,
-		},
-	]);
+		],
+		$selectionIds
+	);
 </script>
 
 <div class="heading">

@@ -3,6 +3,7 @@
 	import ReglScatter from "./regl-scatter/ReglScatter.svelte";
 	import ScatterHelp from "./ScatterHelp.svelte";
 	import ScatterSettings from "./ScatterSettings.svelte";
+	import ScatterLegend from "./ScatterLegend.svelte";
 
 	import { BarLoader as Spinner } from "svelte-loading-spinners";
 	import {
@@ -11,13 +12,25 @@
 		getEntry,
 		projectEmbedInto2D,
 	} from "../../api/api";
-	import { model } from "../../stores";
+	import {
+		model,
+		selectionIds,
+		selectionPredicates,
+		status,
+	} from "../../stores";
 	import { createScalesWebgGLExtent } from "./regl-scatter";
 
 	import type {
 		ReglScatterPointDispatch,
 		WebGLExtentScalers,
 	} from "./regl-scatter";
+	import {
+		deselectPoints,
+		getIndicesFromIds,
+		getPointOpacities,
+		selectPoints,
+	} from "./scatter";
+	import { tick } from "svelte";
 
 	export let viewFunction: View.Component;
 	export let viewOptions: View.Options = {};
@@ -29,24 +42,59 @@
 	let embedExists = false;
 	let points: Points2D;
 	let computingPoints = false; // spinner when true
+	let pointOpacities: number[] = [];
+	// column to color scatterplot by
+	let colorByColumn: ZenoColumn = $status.completeColumns[0];
+	let runOnce = false;
+	let mounted = false;
+	let reloadedIndices: number[] = [];
 
 	let pointToWebGL: WebGLExtentScalers; // functions to scale points
 	let pointHover: ReglScatterPointDispatch;
 	let hoverViewDivEl: HTMLDivElement; // show view on point hover
-	let containerEl: HTMLDivElement; // save so I can resize
+	let containerEl: HTMLDivElement; // save for resizing
 
-	$: project2DOnModelAndTransformChange($model);
+	// Regl Scatterplot functions for highlighting points
+	let dehighlightPoints;
+	let highlightPoints;
+
+	$: project2DOnModelAndTransformChange($model, colorByColumn);
 	$: {
 		if (containerEl && autoResize) {
 			resizeScatter();
 		}
+	}
+	$: if ($selectionIds.ids.length === 0 && dehighlightPoints) {
+		dehighlightPoints();
+	}
+
+	$: if (points) {
+		getPointOpacities($selectionPredicates, points).then(
+			(filteredOpacities) => {
+				pointOpacities = filteredOpacities;
+			}
+		);
+	}
+
+	$: if (points && !runOnce && mounted) {
+		rehighlightSelectedPoints();
+		runOnce = true;
+	}
+
+	async function rehighlightSelectedPoints() {
+		reloadedIndices = getIndicesFromIds(points.ids, $selectionIds.ids);
+		await tick();
+		highlightPoints(reloadedIndices);
 	}
 
 	/**
 	 * Main driver behind fetching the projected points and displaying
 	 * them in the scale that WebGL expects between [-1, 1]
 	 */
-	async function project2DOnModelAndTransformChange(model: string) {
+	async function project2DOnModelAndTransformChange(
+		model: string,
+		colorColumn: ZenoColumn
+	) {
 		embedExists = await checkEmbedExists(model);
 
 		if (embedExists) {
@@ -54,7 +102,7 @@
 			computingPoints = true;
 
 			// requests tsne from backend
-			points = (await projectEmbedInto2D(model)) as Points2D;
+			points = (await projectEmbedInto2D(model, colorColumn)) as Points2D;
 
 			// simply scales the points between [-1, 1]
 			pointToWebGL = createScalesWebgGLExtent(points);
@@ -115,14 +163,24 @@
 					<div class="overlay">
 						<ReglScatter
 							style="outline: 1px solid lavender"
-							data={points}
+							data={{
+								...points,
+								opacity: pointOpacities,
+							}}
 							pointSize={pointSizeSlider}
 							pointColor="#6a1b9a"
-							opacity={0.75}
 							{width}
 							{height}
 							on:pointOver={showViewOnPoint}
-							on:pointOut={clearPointHover} />
+							on:pointOut={clearPointHover}
+							on:select={(e) => selectPoints(e, points)}
+							on:deselect={deselectPoints}
+							on:mount={(e) => {
+								const reglScatterplot = e.detail;
+								dehighlightPoints = reglScatterplot.deselect;
+								highlightPoints = reglScatterplot.select;
+								mounted = true;
+							}} />
 						{#if pointHover !== undefined}
 							<div
 								id="hover-view"
@@ -133,35 +191,45 @@
 								<div id="replace-view" bind:this={hoverViewDivEl} />
 							</div>
 						{/if}
-
-						<!-- settings/controls for the scatterplot -->
-						<div id="settings" class="frosted">
-							<ScatterSettings bind:pointSizeSlider />
-						</div>
 					</div>
-
-					<!-- extra hints like interactions -->
-					<ScatterHelp />
 				{/if}
 			{:else}
 				<!--  Loading bar -->
-				<div id="loading-indicator" style:color="#6a1b9a">
-					<Spinner color="#6a1b9a" size={80} />
-					<b>Computing 2D projection</b> from
-					<code>
-						{$model}
-					</code> embeddings
+				<div id="loading-container">
+					<div id="loading-indicator" style:color="#6a1b9a">
+						<Spinner color="#6a1b9a" size={80} />
+						<b>Computing 2D projection</b> from
+						<code>
+							{$model}
+						</code> embeddings
+					</div>
 				</div>
 			{/if}
 		</div>
 	{:else}
 		<NoEmbed />
 	{/if}
+
+	<!-- settings/controls for the scatterplot -->
+	<div id="settings" class="frosted">
+		<ScatterSettings bind:colorByColumn bind:pointSizeSlider />
+	</div>
+	{#if points}
+		<div id="legend" class="frosted">
+			<ScatterLegend domain={points.domain} metadataType={points.dataType} />
+		</div>
+	{/if}
+
+	<!-- extra hints like interactions -->
+	<ScatterHelp />
 </div>
 
 <style>
 	#scatter-view {
 		position: relative;
+		height: calc(100vh - 170px);
+	}
+	#loading-container {
 		height: calc(100vh - 170px);
 	}
 	#container {
@@ -188,12 +256,20 @@
 		background: hsla(0, 0%, 95%, 0.3);
 		backdrop-filter: blur(8px);
 	}
+	#legend {
+		position: absolute;
+		bottom: 10px;
+		left: 10px;
+		z-index: 999;
+		padding: 30px;
+		box-shadow: 0px 0px 1px 1px hsla(0, 0%, 30%, 0.1);
+		border-radius: 3px;
+	}
 	#settings {
 		position: absolute;
 		bottom: 10px;
 		right: 10px;
 		width: 300px;
-		height: 80px;
 		z-index: 999;
 		padding-left: 20px;
 		padding-top: 20px;

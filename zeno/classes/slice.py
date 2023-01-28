@@ -15,6 +15,10 @@ class FilterPredicateGroup(CamelModel):
     join: str
 
 
+class FilterIds(CamelModel):
+    ids: List[str]
+
+
 class Slice(CamelModel):
     slice_name: str
     folder: str

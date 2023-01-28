@@ -8,6 +8,7 @@
 	import { getFilteredTable } from "../api/table";
 	import {
 		rowsPerPage,
+		selectionIds,
 		selectionPredicates,
 		settings,
 		sort,
@@ -70,7 +71,8 @@
 			$selectionPredicates,
 			$model,
 			[start, end],
-			$sort
+			$sort,
+			$selectionIds
 		).then((res) => {
 			table = res;
 			body ? body.scrollIntoView() : "";
