@@ -36,7 +36,7 @@
 	}
 </script>
 
-{#if histogram && histogram.length > 0 && histogram[0].count !== null}
+{#if histogram}
 	<div class="cell">
 		<div class="info">
 			<div class="label top-text">
@@ -45,6 +45,7 @@
 				</span>
 			</div>
 		</div>
+
 		<svelte:component
 			this={columnMap[col.metadataType]}
 			filterPredicates={filterPredicates.predicates}
