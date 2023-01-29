@@ -19,6 +19,11 @@ jobs:
 
       - name: Install Poetry
         uses: snok/install-poetry@v1.3
+      - name: Set Poetry config
+        run: |
+          poetry config virtualenvs.in-project false
+          poetry config virtualenvs.path ~/.virtualenvs
+
       - name: Cache Poetry virtualenv
         uses: actions/cache@v3.2.2
         id: cache-poetry
@@ -27,18 +32,10 @@ jobs:
           key: poetry-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
             poetry-${{ hashFiles('**/poetry.lock') }}
-      - name: Set Poetry config
-        run: |
-          poetry config virtualenvs.in-project false
-          poetry config virtualenvs.path ~/.virtualenvs
-
       - name: Install Poetry Dependencies
         run: poetry install --no-interaction
         if: steps.cache-poetry.outputs.cache-hit != 'true'
-      - name: Install NPM packages
-        run: |
-          cd frontend/
-          npm i
+
       - name: Cache NPM packages
         uses: actions/cache@v3.2.2
         id: cache-npm
@@ -47,6 +44,10 @@ jobs:
           key: npm-${{ hashFiles('**/package.lock') }}
           restore-keys: |
             npm-${{ hashFiles('**/package.lock') }}
+      - name: Install NPM packages
+        run: |
+          cd frontend/
+          npm i
       - name: Build frontend
         run: |
           cd frontend/
