@@ -10,7 +10,7 @@
         "format": "npx prettier -w src",
         "lint": "npx eslint src",
         "test": "npx jest tests",
-        "check": "svelte-check --tsconfig ./tsconfig.json",
+        "check": "svelte-check",
         "generate-api": "npx openapi-typescript-codegen --input http://localhost:8000/api/openapi.json --output ./src/zenoservice --client fetch"
     },
     "devDependencies": {
@@ -37,7 +37,6 @@
         "@testing-library/jest-dom": "^5.16.5",
         "@testing-library/svelte": "^3.2.2",
         "@testing-library/user-event": "^14.4.3",
-        "@tsconfig/svelte": "^3.0.0",
         "@types/jest": "^28.1.6",
         "@typescript-eslint/eslint-plugin": "^5.48.1",
         "eslint": "^8.31.0",
@@ -50,7 +49,7 @@
         "prettier-plugin-svelte": "^2.8.1",
         "smui-theme": "7.0.0-beta.0",
         "svelte": "^3.55.1",
-        "svelte-check": "^3.0.0",
+        "svelte-check": "^3.0.3",
         "svelte-jester": "^2.3.2",
         "svelte-loading-spinners": "^0.3.4",
         "svelte-preprocess": "^5.0",

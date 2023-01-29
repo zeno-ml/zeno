@@ -1,4 +1,4 @@
-all: check lint typecheck test 
+all: lint typecheck  test 
 
 .PHONY: install
 install:
@@ -6,15 +6,10 @@ install:
 	@cd frontend && npm i && npm run build
 	@poetry install
 
-.PHONY: check
-check:
-	@echo "==> 🧩 Checking Validity"
-	@poetry check
-	@cd frontend && npm run check
-
 .PHONY: lint
 lint:
 	@echo "==> 👕 Linting"
+	@poetry check
 	@poetry run black zeno/
 	@poetry run usort format zeno/
 	@poetry run flake8 zeno --statistics
@@ -25,6 +20,8 @@ typecheck:
 	@echo "==> ✅ Type checks"
 	@poetry run mypy -p zeno 
 	@poetry run pyright zeno 
+	@cd frontend && npm run check
+
 
 .PHONY: test
 test:
@@ -32,17 +29,6 @@ test:
 	@poetry run pytest -svv zeno/tests/*
 	@cd frontend && npm run test
 
-.PHONY: profile 
-profile:
-	@echo "==> 🧪 Profile"
-	@poetry run python -m cProfile -o p.profile -m zeno        
-	@snakeviz p.profile
-
-.PHONY: profile-import
-profile-import:
-	@echo "==> 🧪 Profile Imports"
-	@poetry run python -X importtime -m zeno 2> p.profile      
-	@tuna p.profile
 
 .PHONY: build
 build:
