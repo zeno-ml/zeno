@@ -38,16 +38,16 @@ jobs:
         run: poetry install --no-interaction
         if: steps.cache.outputs.cache-hit != 'true'
 
+      - name: Install NPM packages
+        run: |
+          cd frontend/
+          npm i
+
       - name: Check types
         run: make typecheck
 
       - name: Check Poetry
         run: make check
-
-      - name: Install NPM packages
-        run: |
-          cd frontend/
-          npm i
 
       - name: Lint
         run: make lint
