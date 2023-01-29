@@ -1,3 +1,4 @@
+import type { Points2D } from "./../../../zenoservice";
 import { scaleLinear, type ScaleLinear } from "d3-scale";
 import { extent } from "d3-array";
 import type createScatterPlot from "regl-scatterplot";

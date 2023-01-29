@@ -3,6 +3,7 @@
 	import createScatterPlot from "regl-scatterplot";
 	import { createEventDispatcher, onDestroy, onMount } from "svelte";
 	import { selectionIds } from "../../../stores";
+	import type { Points2D } from "../../../zenoservice";
 	import {
 		BOOLEAN_COLOR_SCALE,
 		CONTINUOUS_COLOR_SCALE,

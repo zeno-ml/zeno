@@ -1,8 +1,6 @@
 <script>
 	import DataTable, { Body, Cell, Head, Row } from "@smui/data-table";
-
-	import { models, slices, folders } from "../../stores";
-
+	import { folders, models, slices } from "../../stores";
 	import SliceTableRow from "./SliceTableRow.svelte";
 
 	let selectedFolder = "";

@@ -12,12 +12,13 @@
 		model,
 		metric,
 	} from "../stores";
+	import type { MetricKey, Slice } from "../zenoservice";
 
 	export let table;
 
 	let selected = "list";
 
-	let viewOptions: View.Options = undefined;
+	let viewOptions = undefined;
 	/**
 	 * View component generators
 	 * that when called with a div html argument
@@ -26,8 +27,8 @@
 	 * See https://github.com/zeno-ml/instance-views
 	 * for more details
 	 */
-	let viewFunction: View.Component;
-	let optionsFunction: View.OptionsComponent;
+	let viewFunction;
+	let optionsFunction;
 
 	onMount(() => {
 		if ($settings.view === "") {

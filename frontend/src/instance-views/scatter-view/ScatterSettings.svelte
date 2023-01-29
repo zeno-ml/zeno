@@ -3,8 +3,7 @@
 	import { Icon } from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
 	import Slider from "@smui/slider";
-
-	import { ZenoColumnType } from "../../globals";
+	import { ZenoColumnType, type ZenoColumn } from "../../zenoservice";
 	import { model, status } from "../../stores";
 	import { columnHash } from "../../util/util";
 

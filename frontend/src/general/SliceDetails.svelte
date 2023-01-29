@@ -1,4 +1,6 @@
 <script lang="ts">
+	import type { FilterPredicateGroup } from "../zenoservice";
+
 	export let predicateGroup: FilterPredicateGroup;
 </script>
 

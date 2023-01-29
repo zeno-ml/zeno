@@ -1,13 +1,18 @@
 <script lang="ts">
-	import BinaryMetadataCell from "./metadata-cells/BinaryMetadataCell.svelte";
-	import NominalMetadataCell from "./metadata-cells/NominalMetadataCell.svelte";
-	import ContinuousMetadataCell from "./metadata-cells/ContinuousMetadataCell.svelte";
-	import DateMetadataCell from "./metadata-cells/DateMetadataCell.svelte";
-	import TextMetadataCell from "./metadata-cells/TextMetadataCell.svelte";
-
-	import { MetadataType } from "../../globals";
+	import type { HistogramEntry } from "../../api/metadata";
 	import { selections } from "../../stores";
 	import { columnHash } from "../../util/util";
+	import {
+		MetadataType,
+		type FilterPredicate,
+		type FilterPredicateGroup,
+		type ZenoColumn,
+	} from "../../zenoservice";
+	import BinaryMetadataCell from "./metadata-cells/BinaryMetadataCell.svelte";
+	import ContinuousMetadataCell from "./metadata-cells/ContinuousMetadataCell.svelte";
+	import DateMetadataCell from "./metadata-cells/DateMetadataCell.svelte";
+	import NominalMetadataCell from "./metadata-cells/NominalMetadataCell.svelte";
+	import TextMetadataCell from "./metadata-cells/TextMetadataCell.svelte";
 
 	export let col: ZenoColumn;
 	export let histogram: HistogramEntry[];

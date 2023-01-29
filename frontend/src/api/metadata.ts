@@ -1,14 +1,29 @@
+export interface HistogramEntry {
+	bucket: number | string | boolean;
+	bucketEnd?: number | string | boolean;
+	count?: number;
+	filteredCount?: number;
+	metric?: number;
+}
+
 /**
  * API functions for calculating metadata histograms.
  * We separate them into getting buckets, counts, and metrics so we
  * can run then asynchronously and provide interactive updates while waiting
  * for more expensive computations like calculating metrics.
  */
-import { ZenoColumnType } from "../globals";
 import { InternMap } from "internmap";
+import { get } from "svelte/store";
 import { metricRange } from "../stores";
 import { columnHash, getMetricRange } from "../util/util";
-import { get } from "svelte/store";
+import {
+	CancelablePromise,
+	ZenoService,
+	ZenoColumnType,
+	type FilterIds,
+	type FilterPredicateGroup,
+	type ZenoColumn,
+} from "../zenoservice";
 
 /**
  * Fetch metadata columns buckets for histograms.
@@ -27,13 +42,7 @@ export async function getHistograms(
 			(c.model === "" || c.model === model) &&
 			c.columnType !== ZenoColumnType.OUTPUT
 	);
-	const res = await fetch("/api/histograms", {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify(requestedHistograms),
-	}).then((res) => res.json());
+	const res = await ZenoService.getHistogramBuckets(requestedHistograms);
 	const histograms = new InternMap<string, HistogramEntry[]>(
 		requestedHistograms.map((col, i) => [col, res[i]]),
 		columnHash
@@ -43,7 +52,7 @@ export async function getHistograms(
 
 // Since a user might change the selection before we get counts,
 // make this fetch request cancellable.
-let histogramCountAborter = null;
+let histogramCountRequest: CancelablePromise<Array<Array<number>>> = null;
 /**
  * Fetch histogram counts for the buckets of metadata columns.
  *
@@ -60,32 +69,25 @@ export async function getHistogramCounts(
 		column: k,
 		buckets: v,
 	}));
-	if (histogramCountAborter) {
-		histogramCountAborter.abort();
+	if (histogramCountRequest) {
+		histogramCountRequest.cancel();
 	}
-	histogramCountAborter = new AbortController();
 	try {
-		const res = await fetch("/api/histogram-counts", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				columnRequests,
-				filterPredicates,
-				filterIds,
-			}),
-			signal: histogramCountAborter.signal,
-		}).then((res) => res.json());
+		histogramCountRequest = ZenoService.calculateHistogramCounts({
+			columnRequests,
+			filterPredicates,
+			filterIds,
+		});
+		const out = await histogramCountRequest;
 
 		[...histograms.keys()].forEach((k, i) => {
 			histograms.set(
 				k,
 				histograms.get(k).map((h, j) => {
 					if (filterPredicates === null) {
-						h.count = res[i][j];
+						h.count = out[i][j];
 					}
-					h.filteredCount = res[i][j];
+					h.filteredCount = out[i][j];
 					return h;
 				})
 			);
@@ -98,7 +100,7 @@ export async function getHistogramCounts(
 
 // Since a user might change the selection before we get metrics,
 // make this fetch request cancellable.
-let histogramMetricAborter = null;
+let histogramMetricRequest: CancelablePromise<Array<Array<number>>> = null;
 /**
  * Fetch histogram metrics for the buckets of metadata columns.
  *
@@ -122,25 +124,19 @@ export async function getHistogramMetrics(
 		column: k,
 		buckets: v,
 	}));
-	if (histogramMetricAborter) {
-		histogramMetricAborter.abort();
+	if (histogramMetricRequest) {
+		histogramMetricRequest.cancel();
 	}
-	histogramMetricAborter = new AbortController();
 	try {
-		const res = await fetch("/api/histogram-metrics", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				columnRequests,
-				filterPredicates,
-				model,
-				metric,
-				filterIds,
-			}),
-			signal: histogramMetricAborter.signal,
-		}).then((res) => res.json());
+		histogramMetricRequest = ZenoService.calculateHistogramMetrics({
+			columnRequests,
+			filterPredicates,
+			model,
+			metric,
+			filterIds,
+		});
+		const res = await histogramMetricRequest;
+
 		if (res === undefined) {
 			return undefined;
 		}

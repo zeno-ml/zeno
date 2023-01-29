@@ -7,6 +7,7 @@
 	import { mdiTrashCanOutline } from "@mdi/js";
 
 	import FilterEntry from "./FilterEntry.svelte";
+	import type { FilterPredicateGroup } from "../../zenoservice";
 
 	export let predicateGroup: FilterPredicateGroup;
 	export let deletePredicate: () => void;

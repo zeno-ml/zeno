@@ -4,6 +4,7 @@
 	import { VegaLite } from "svelte-vega";
 	import { nominalVegaSpec } from "./vegaSpecs";
 	import { metricRange } from "../../../stores";
+	import type { FilterPredicate, ZenoColumn } from "../../../zenoservice";
 
 	export let col: ZenoColumn;
 	export let histogram: HistogramEntry[];

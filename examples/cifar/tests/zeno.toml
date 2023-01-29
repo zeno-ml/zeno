@@ -1,5 +1,5 @@
 functions = "./"
-view = "image-classification"
+view = "/Users/acabrera/dev-research/22-zeno/instance-views/image-classification/index.mjs"
 metadata = "../cifar_pred.csv"
 models = [
     "../cifar_net_2.pth",

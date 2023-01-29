@@ -7,10 +7,11 @@
         "dev": "npm run smui-theme && vite build && vite",
         "build": "npm run smui-theme && vite build",
         "smui-theme": "smui-theme compile public/smui.css -i src/theme",
-        "lint": "npx eslint src && npx prettier --check src",
+        "format": "npx prettier -w src",
+        "lint": "npx eslint src",
         "test": "npx jest tests",
         "check": "svelte-check --tsconfig ./tsconfig.json",
-        "generate-api": "npx openapi-typescript-codegen --input http://localhost:8000/api/openapi.json --output ./src/zenoapi --client fetch"
+        "generate-api": "npx openapi-typescript-codegen --input http://localhost:8000/api/openapi.json --output ./src/zenoservice --client fetch"
     },
     "devDependencies": {
         "@formkit/auto-animate": "^1.0.0-beta.5",

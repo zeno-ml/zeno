@@ -1,17 +1,15 @@
 <script lang="ts">
-	import html2pdf from "html2pdf.js";
-
 	import Button from "@smui/button";
 	import DataTable, { Body, Cell, Head, Row } from "@smui/data-table";
-
+	import html2pdf from "html2pdf.js";
 	import { models, reports } from "../../stores";
-
 	import TimeseriesReportTableRow from "./TimeseriesReportTableRow.svelte";
 
 	export let reportId: number;
-	$: report = $reports[reportId];
 
 	let table: HTMLDivElement;
+
+	$: report = $reports[reportId];
 </script>
 
 <div id="container">

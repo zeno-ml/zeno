@@ -17,7 +17,7 @@ lint:
 	@poetry run black zeno/
 	@poetry run usort format zeno/
 	@poetry run flake8 zeno --statistics
-	@cd frontend && npm run lint 
+	@cd frontend && npm run format && npm run lint
 
 .PHONY: typecheck
 typecheck:

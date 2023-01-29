@@ -1,14 +1,25 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 	import Router from "svelte-spa-router";
-
-	import { selections, status } from "./stores";
-	import { columnHash } from "./util/util";
-	import { getInitialData } from "./api/api";
-
 	import Explore from "./Explore.svelte";
 	import Header from "./general/Header.svelte";
-	import Report from "./report/Report.svelte";
+	import Report from "./Report.svelte";
+	import {
+		folders,
+		metric,
+		metrics,
+		model,
+		models,
+		ready,
+		reports,
+		rowsPerPage,
+		selections,
+		settings,
+		slices,
+		status,
+	} from "./stores";
+	import { columnHash } from "./util/util";
+	import { ZenoService } from "./zenoservice";
 
 	const routes = {
 		"/": Explore,
@@ -16,6 +27,30 @@
 		"/report/": Report,
 		"*": Explore,
 	};
+
+	async function getInitialData() {
+		const sets = await ZenoService.getSettings();
+		settings.set(sets);
+		rowsPerPage.set(sets.samples);
+
+		const inits = await ZenoService.getInitialInfo();
+		models.set(inits.models);
+		metrics.set(inits.metrics);
+		folders.set(inits.folders);
+
+		model.set(
+			inits.models.length > 0 ? inits.models[inits.models.length - 1] : ""
+		);
+		metric.set(inits.metrics.length > 0 ? inits.metrics[0] : "");
+
+		const slicesRes = await ZenoService.getSlices();
+		slices.set(new Map(Object.entries(slicesRes)));
+
+		const reportsRes = await ZenoService.getReports();
+		reports.set(reportsRes);
+
+		ready.set(true);
+	}
 
 	status.subscribe((stat) => {
 		let tempSelections = {};

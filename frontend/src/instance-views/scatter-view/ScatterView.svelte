@@ -2,16 +2,11 @@
 	import NoEmbed from "./NoEmbed.svelte";
 	import ReglScatter from "./regl-scatter/ReglScatter.svelte";
 	import ScatterHelp from "./ScatterHelp.svelte";
-	import ScatterSettings from "./ScatterSettings.svelte";
 	import ScatterLegend from "./ScatterLegend.svelte";
+	import ScatterSettings from "./ScatterSettings.svelte";
 
 	import { BarLoader as Spinner } from "svelte-loading-spinners";
-	import {
-		checkEmbedExists,
-		createViewComponent,
-		getEntry,
-		projectEmbedInto2D,
-	} from "../../api/api";
+	import { createViewComponent } from "../instance-views";
 	import {
 		model,
 		selectionIds,
@@ -20,6 +15,12 @@
 	} from "../../stores";
 	import { createScalesWebgGLExtent } from "./regl-scatter";
 
+	import { tick } from "svelte";
+	import {
+		ZenoService,
+		type Points2D,
+		type ZenoColumn,
+	} from "../../zenoservice";
 	import type {
 		ReglScatterPointDispatch,
 		WebGLExtentScalers,
@@ -30,10 +31,9 @@
 		getPointOpacities,
 		selectPoints,
 	} from "./scatter";
-	import { tick } from "svelte";
 
-	export let viewFunction: View.Component;
-	export let viewOptions: View.Options = {};
+	export let viewFunction;
+	export let viewOptions = {};
 	export let autoResize = true;
 
 	let height = 850; // canvas dims
@@ -95,14 +95,17 @@
 		model: string,
 		colorColumn: ZenoColumn
 	) {
-		embedExists = await checkEmbedExists(model);
+		embedExists = await ZenoService.embedExists(model);
 
 		if (embedExists) {
 			// show spinner
 			computingPoints = true;
 
 			// requests tsne from backend
-			points = (await projectEmbedInto2D(model, colorColumn)) as Points2D;
+			points = await ZenoService.projectEmbedInto2D({
+				model,
+				column: colorColumn,
+			});
 
 			// simply scales the points between [-1, 1]
 			pointToWebGL = createScalesWebgGLExtent(points);
@@ -123,10 +126,15 @@
 		const id = points.ids[pointHover.index];
 
 		// fetch the row from the backend given that Id
-		const entry = await getEntry(id);
+		const entry = await ZenoService.getDfRowEntry({ id });
 
 		// create the data view component and replace the div with the new component
-		createViewComponent(viewFunction, entry, viewOptions, hoverViewDivEl);
+		createViewComponent(
+			viewFunction,
+			JSON.parse(entry),
+			viewOptions,
+			hoverViewDivEl
+		);
 	}
 
 	function clearPointHover() {

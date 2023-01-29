@@ -1,4 +1,4 @@
-import { ZenoColumnType } from "../globals";
+import { ZenoColumnType, type ZenoColumn } from "../zenoservice";
 import { tab, report } from "../stores";
 
 export function updateTab(t: string) {

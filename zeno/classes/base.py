@@ -1,4 +1,4 @@
-from enum import IntEnum
+from enum import Enum
 from typing import Optional
 
 from pydantic import BaseModel
@@ -15,20 +15,20 @@ class CamelModel(BaseModel):
         allow_population_by_field_name = True
 
 
-class ZenoColumnType(IntEnum):
-    METADATA = 0
-    PREDISTILL = 1
-    OUTPUT = 2
-    EMBEDDING = 3
-    POSTDISTILL = 4
+class ZenoColumnType(str, Enum):
+    METADATA = "METADATA"
+    PREDISTILL = "PREDISTILL"
+    OUTPUT = "OUTPUT"
+    EMBEDDING = "EMBEDDING"
+    POSTDISTILL = "POSTDISTILL"
 
 
-class MetadataType(IntEnum):
-    NOMINAL = 0
-    CONTINUOUS = 1
-    BOOLEAN = 2
-    DATETIME = 3
-    OTHER = 4
+class MetadataType(str, Enum):
+    NOMINAL = "NOMINAL"
+    CONTINUOUS = "CONTINUOUS"
+    BOOLEAN = "BOOLEAN"
+    DATETIME = "DATETIME"
+    OTHER = "OTHER"
 
 
 class ZenoColumn(CamelModel):
@@ -44,7 +44,7 @@ class ZenoColumn(CamelModel):
             m = self.model
         t = ""
         if self.column_type is not ZenoColumnType.METADATA:
-            t = str(int(self.column_type))
+            t = self.column_type
         return t + self.name + m
 
     def __hash__(self):

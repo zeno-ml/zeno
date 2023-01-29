@@ -1,3 +1,10 @@
+import type {
+	FilterIds,
+	FilterPredicateGroup,
+	ZenoColumn,
+} from "../zenoservice";
+import { ZenoService } from "../zenoservice/";
+
 export async function getFilteredTable(
 	completeColumns,
 	filterPredicates: FilterPredicateGroup[],
@@ -9,34 +16,20 @@ export async function getFilteredTable(
 	const requestedColumns = completeColumns.filter(
 		(c) => c.model === "" || c.model === model
 	);
-	let res = await fetch("/api/filtered-table", {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify({
-			columns: requestedColumns,
-			filterPredicates: filterPredicates,
-			sliceRange,
-			sort,
-			filterIds,
-		}),
-	}).then((res) => res.json());
-	res = JSON.parse(res);
-	return res;
+	const res = await ZenoService.getFilteredTable({
+		columns: requestedColumns,
+		filterPredicates: filterPredicates,
+		sliceRange,
+		sort,
+		filterIds,
+	});
+	return JSON.parse(res);
 }
 
 /**
  * Gets a list of ids from the filter predicates only
  */
 export async function getFilteredIds(filterPredicates: FilterPredicateGroup[]) {
-	let res = await fetch("/api/filtered-ids", {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify(filterPredicates),
-	}).then((res) => res.json());
-	res = JSON.parse(res);
-	return res;
+	const res = await ZenoService.getFilteredIds(filterPredicates);
+	return JSON.parse(res);
 }

@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { mdiPlusCircleOutline } from "@mdi/js";
-	import { Icon } from "@smui/common";
-	import { Svg } from "@smui/common";
+	import { Icon, Svg } from "@smui/common";
 	import { Cell, Row } from "@smui/data-table";
-
-	import { metric, models, report, reports } from "../../stores";
 	import { getMetricsForSlices } from "../../api/slice";
-
+	import { metric, models, report, reports } from "../../stores";
+	import type { Slice } from "../../zenoservice";
 	import SliceDetailsContainer from "../SliceDetailsContainer.svelte";
 
 	export let sli: Slice;

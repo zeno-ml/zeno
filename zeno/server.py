@@ -8,8 +8,8 @@ import os
 from typing import Dict, List, Union
 
 from fastapi import FastAPI, HTTPException, WebSocket
-from fastapi.staticfiles import StaticFiles
 from fastapi.routing import APIRoute
+from fastapi.staticfiles import StaticFiles
 
 from zeno.classes.base import ZenoColumn
 from zeno.classes.classes import (
@@ -22,6 +22,7 @@ from zeno.classes.classes import (
     ZenoVariables,
 )
 from zeno.classes.metadata import HistogramBucket, HistogramRequest
+from zeno.classes.projection import Points2D
 from zeno.classes.report import Report
 from zeno.classes.slice import FilterPredicate, FilterPredicateGroup, Slice, SliceMetric
 from zeno.data_pipeline.zeno_backend import ZenoBackend
@@ -139,11 +140,11 @@ def get_server(zeno: ZenoBackend):
         """
         return zeno.embed_exists(model)
 
-    @api_app.post("/embed-project", tags=["zeno"])
+    @api_app.post("/embed-project", tags=["zeno"], response_model=Points2D)
     def project_embed_into_2D(req: EmbedProject2DRequest):
         return zeno.project_embed_into_2D(req.model, req.column)
 
-    @api_app.post("/entry", tags=["zeno"])
+    @api_app.post("/entry", tags=["zeno"], response_model=str)
     def get_df_row_entry(req: EntryRequest):
         try:
             entry = zeno.df.loc[req.id, :]

@@ -3,7 +3,6 @@
 	import { Pagination } from "@smui/data-table";
 	import IconButton from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
-	import { MetadataType, ZenoColumnType } from "../globals";
 	import { tick } from "svelte";
 	import { getFilteredTable } from "../api/table";
 	import {
@@ -16,11 +15,13 @@
 		model,
 	} from "../stores";
 	import { columnHash } from "../util/util";
+	import type { ZenoColumn } from "../zenoservice";
+	import { MetadataType, ZenoColumnType } from "../zenoservice";
 
 	export let currentResult;
 	export let table;
-	export let viewFunction: View.Component;
-	export let viewOptions: View.Options = {};
+	export let viewFunction;
+	export let viewOptions = {};
 
 	let viewDivs = {};
 	let columnHeader: ZenoColumn[] = [];
@@ -100,7 +101,9 @@
 		columnHeader = $status.completeColumns.filter(
 			(c) =>
 				(c.model === "" || c.model === $model) &&
-				(c.columnType === 0 || c.columnType === 1 || c.columnType === 4)
+				(c.columnType === ZenoColumnType.METADATA ||
+					c.columnType === ZenoColumnType.PREDISTILL ||
+					c.columnType === ZenoColumnType.POSTDISTILL)
 		);
 		let ids = table.map((inst) => inst[idHash]);
 

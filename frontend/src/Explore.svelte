@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { status, filteredTable, ready } from "./stores";
-
-	import MetadataPanel from "./metadata/MetadataPanel.svelte";
 	import InstanceView from "./instance-views/InstanceView.svelte";
+	import MetadataPanel from "./metadata/MetadataPanel.svelte";
+	import { filteredTable, ready, status } from "./stores";
 </script>
 
 {#if $ready && $status.completeColumns.length > 0}

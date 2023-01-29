@@ -9,6 +9,7 @@
 
 	import { createNewSlice } from "../../api/slice";
 	import FilterGroupEntry from "./FilterGroupEntry.svelte";
+	import type { FilterPredicateGroup, Slice } from "../../zenoservice";
 
 	let sliceName = "";
 	let folder = "";

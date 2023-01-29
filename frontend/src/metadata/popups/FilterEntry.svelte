@@ -6,9 +6,8 @@
 	import Select, { Option } from "@smui/select";
 	import Textfield from "@smui/textfield";
 	import HelperText from "@smui/textfield/helper-text";
-
-	import { MetadataType } from "../../globals";
 	import { currentColumns } from "../../stores";
+	import { MetadataType, type FilterPredicate } from "../../zenoservice";
 
 	export let predicate: FilterPredicate;
 	export let deletePredicate: () => void;
