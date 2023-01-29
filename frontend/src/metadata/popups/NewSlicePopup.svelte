@@ -3,11 +3,10 @@
 	import Paper, { Content } from "@smui/paper";
 	import Textfield from "@smui/textfield";
 	import HelperText from "@smui/textfield/helper-text";
-
-	import { showNewSlice, slices, selections, sliceToEdit } from "../../stores";
-	import { clickOutside } from "../../util/clickOutside";
-
 	import { createNewSlice } from "../../api/slice";
+	import { selections, showNewSlice, slices, sliceToEdit } from "../../stores";
+	import { clickOutside } from "../../util/clickOutside";
+	import type { FilterPredicateGroup, Slice } from "../../zenoservice";
 	import FilterGroupEntry from "./FilterGroupEntry.svelte";
 
 	let sliceName = "";

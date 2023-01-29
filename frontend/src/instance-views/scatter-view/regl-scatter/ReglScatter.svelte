@@ -3,6 +3,7 @@
 	import createScatterPlot from "regl-scatterplot";
 	import { createEventDispatcher, onDestroy, onMount } from "svelte";
 	import { selectionIds } from "../../../stores";
+	import type { Points2D } from "../../../zenoservice";
 	import {
 		BOOLEAN_COLOR_SCALE,
 		CONTINUOUS_COLOR_SCALE,
@@ -76,7 +77,9 @@
 	function updateOpacityRange(scatterPtr: ReglScatterObject, length: number) {
 		scatterPtr.set({
 			opacityBy: "category",
-			opacity: new Array(length).fill(0).map((_, i) => i / (length - 1)),
+			opacity: new Array(length)
+				.fill(0)
+				.map((_, i) => i / (length - 1)) as unknown as number,
 		});
 	}
 

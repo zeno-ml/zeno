@@ -20,6 +20,7 @@
 		deleteSlice,
 		createNewSlice,
 	} from "../../api/slice";
+	import type { MetricKey, Slice } from "../../zenoservice";
 
 	export let slice: Slice;
 	export let inFolder = false;

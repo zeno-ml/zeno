@@ -2,7 +2,6 @@
 	import Button from "@smui/button";
 	import Paper, { Content } from "@smui/paper";
 	import Textfield from "@smui/textfield";
-
 	import { folders, slices } from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 

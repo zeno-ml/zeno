@@ -1,3 +1,4 @@
+import type { FilterPredicateGroup, Points2D } from "../../zenoservice";
 import { getFilteredIds } from "../../api/table";
 import { selectionIds } from "../../stores";
 

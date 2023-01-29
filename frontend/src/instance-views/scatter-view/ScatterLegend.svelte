@@ -5,7 +5,7 @@
 		CONTINUOUS_COLOR_SCALE,
 	} from "./regl-scatter/colors";
 
-	export let domain: string[] = [];
+	export let domain: (string | number)[] = [];
 	export let metadataType = "";
 </script>
 
@@ -13,7 +13,7 @@
 	{@const svg = { width: 100, height: 14 }}
 	<div id="legend-container">
 		<span>
-			{parseFloat(domain[0]).toFixed(2)}
+			{typeof domain[0] === "number" ? domain[0].toFixed(2) : domain[0]}
 		</span>
 		<svg
 			height={svg.height}
@@ -31,7 +31,7 @@
 			{/each}
 		</svg>
 		<span>
-			{parseFloat(domain[1]).toFixed(2)}
+			{typeof domain[1] === "number" ? domain[1].toFixed(2) : domain[0]}
 		</span>
 	</div>
 {:else if metadataType === "boolean"}

@@ -1,24 +1,23 @@
 <script lang="ts">
+	import { mdiArrowDown, mdiSwapVertical } from "@mdi/js";
 	import { Icon } from "@smui/button";
-	import { mdiSwapVertical, mdiArrowDown } from "@mdi/js";
 	import { Svg } from "@smui/common";
-
-	import { scalePoint, scaleLinear } from "d3-scale";
-	import { extent } from "d3-array";
-	import { line } from "d3-shape";
-	import { select } from "d3-selection";
-	import { onMount } from "svelte";
-
-	import { calculateStd, regression } from "./stats";
-	import { models } from "../stores";
 	import Tooltip, { Wrapper } from "@smui/tooltip";
+	import { extent } from "d3-array";
+	import { scaleLinear, scalePoint } from "d3-scale";
+	import { select } from "d3-selection";
+	import { line } from "d3-shape";
+	import { onMount } from "svelte";
+	import { models } from "../stores";
+	import type { SliceMetric } from "../zenoservice";
+	import { calculateStd, regression } from "./stats";
 
 	let el: HTMLDivElement;
 	let width = 80;
 	let height = 30;
 	let padding = { top: 5, right: 0, bottom: 5, left: 0 };
 
-	export let res: Result[];
+	export let res: SliceMetric[];
 
 	const xScale = scalePoint()
 		.domain($models)

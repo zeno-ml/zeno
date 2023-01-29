@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Button from "@smui/button";
 	import { Label } from "@smui/common";
+	import type { FilterPredicate, ZenoColumn } from "../../../zenoservice";
 
 	export let col: ZenoColumn;
 	export let histogram;

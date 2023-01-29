@@ -2,14 +2,6 @@
 	import { mdiFolderPlusOutline, mdiPlus, mdiPlusCircle } from "@mdi/js";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
-
-	import MetricRange from "./MetricRange.svelte";
-	import FolderCell from "./cells/FolderCell.svelte";
-	import MetadataCell from "./cells/MetadataCell.svelte";
-	import SliceCell from "./cells/SliceCell.svelte";
-	import NewFolderPopup from "./popups/NewFolderPopup.svelte";
-	import NewSlicePopup from "./popups/NewSlicePopup.svelte";
-
 	import Select, { Option } from "@smui/select";
 	import Tooltip, { Wrapper } from "@smui/tooltip";
 	import { InternMap } from "internmap";
@@ -17,9 +9,9 @@
 		getHistogramCounts,
 		getHistogramMetrics,
 		getHistograms,
+		type HistogramEntry,
 	} from "../api/metadata";
 	import { getMetricsForSlices } from "../api/slice";
-	import { ZenoColumnType } from "../globals";
 	import {
 		folders,
 		metric,
@@ -27,6 +19,7 @@
 		metrics,
 		model,
 		models,
+		selectionIds,
 		selectionPredicates,
 		selections,
 		settings,
@@ -34,9 +27,20 @@
 		slices,
 		sliceToEdit,
 		status,
-		selectionIds,
 	} from "../stores";
 	import { columnHash } from "../util/util";
+	import {
+		ZenoColumnType,
+		type MetricKey,
+		type Slice,
+		type ZenoColumn,
+	} from "../zenoservice";
+	import FolderCell from "./cells/FolderCell.svelte";
+	import MetadataCell from "./cells/MetadataCell.svelte";
+	import SliceCell from "./cells/SliceCell.svelte";
+	import MetricRange from "./MetricRange.svelte";
+	import NewFolderPopup from "./popups/NewFolderPopup.svelte";
+	import NewSlicePopup from "./popups/NewSlicePopup.svelte";
 
 	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
 		new InternMap([], columnHash);

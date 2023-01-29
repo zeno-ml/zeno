@@ -3,25 +3,24 @@
 	import { Pagination } from "@smui/data-table";
 	import IconButton from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
-
 	import { tick } from "svelte";
-	import { ZenoColumnType } from "../globals";
+	import { ZenoColumnType } from "../zenoservice";
+	import { getFilteredTable } from "../api/table";
 	import {
 		model,
 		rowsPerPage,
+		selectionIds,
+		selectionPredicates,
 		settings,
 		sort,
 		status,
-		selectionPredicates,
-		selectionIds,
 	} from "../stores";
-	import { getFilteredTable } from "../api/table";
 	import { columnHash } from "../util/util";
 
 	export let currentResult;
 	export let table;
-	export let viewFunction: View.Component;
-	export let viewOptions: View.Options = {};
+	export let viewFunction;
+	export let viewOptions;
 
 	let viewDivs = {};
 

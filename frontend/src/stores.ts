@@ -1,4 +1,4 @@
-import { websocketStore } from "svelte-websocket-store";
+import { websocketStore } from "./util/websocketStore";
 import {
 	derived,
 	get,
@@ -6,8 +6,21 @@ import {
 	type Readable,
 	type Writable,
 } from "svelte/store";
-
 import { folderWritable, reportWritable } from "./util/customStores";
+import type {
+	FilterIds,
+	FilterPredicateGroup,
+	Report,
+	Slice,
+	ZenoColumn,
+	ZenoSettings,
+} from "./zenoservice";
+
+interface WSResponse {
+	status: string;
+	doneProcessing: boolean;
+	completeColumns: ZenoColumn[];
+}
 
 export const tab: Writable<string> = writable("results");
 
@@ -44,7 +57,7 @@ export const status: Readable<WSResponse> = derived(
 export const ready: Writable<boolean> = writable(false);
 
 export const rowsPerPage = writable(0);
-export const settings: Writable<Settings> = writable(<Settings>{
+export const settings: Writable<ZenoSettings> = writable(<ZenoSettings>{
 	view: "",
 	idColumn: {},
 	dataColumn: {},

@@ -1,13 +1,17 @@
 <script lang="ts">
-	import BinaryMetadataCell from "./metadata-cells/BinaryMetadataCell.svelte";
-	import NominalMetadataCell from "./metadata-cells/NominalMetadataCell.svelte";
-	import ContinuousMetadataCell from "./metadata-cells/ContinuousMetadataCell.svelte";
-	import DateMetadataCell from "./metadata-cells/DateMetadataCell.svelte";
-	import TextMetadataCell from "./metadata-cells/TextMetadataCell.svelte";
-
-	import { MetadataType } from "../../globals";
+	import type { HistogramEntry } from "../../api/metadata";
 	import { selections } from "../../stores";
 	import { columnHash } from "../../util/util";
+	import {
+		MetadataType,
+		type FilterPredicate,
+		type FilterPredicateGroup,
+		type ZenoColumn,
+	} from "../../zenoservice";
+	import BinaryMetadataCell from "./metadata-cells/BinaryMetadataCell.svelte";
+	import ContinuousMetadataCell from "./metadata-cells/ContinuousMetadataCell.svelte";
+	import NominalMetadataCell from "./metadata-cells/NominalMetadataCell.svelte";
+	import TextMetadataCell from "./metadata-cells/TextMetadataCell.svelte";
 
 	export let col: ZenoColumn;
 	export let histogram: HistogramEntry[];
@@ -16,7 +20,7 @@
 		[MetadataType.NOMINAL]: NominalMetadataCell,
 		[MetadataType.CONTINUOUS]: ContinuousMetadataCell,
 		[MetadataType.BOOLEAN]: BinaryMetadataCell,
-		[MetadataType.DATETIME]: DateMetadataCell,
+		[MetadataType.DATETIME]: TextMetadataCell,
 		[MetadataType.OTHER]: TextMetadataCell,
 	};
 
@@ -24,6 +28,8 @@
 	$: filterPredicates = $selections.metadata[columnHash(col)]
 		? $selections.metadata[columnHash(col)]
 		: { predicates: [], join: "&" };
+	let predicates: FilterPredicate[] = [];
+	$: predicates = filterPredicates.predicates as FilterPredicate[];
 
 	function updatePredicates(predicates: FilterPredicate[]) {
 		selections.update((mets) => ({
@@ -48,7 +54,7 @@
 
 		<svelte:component
 			this={columnMap[col.metadataType]}
-			filterPredicates={filterPredicates.predicates}
+			filterPredicates={predicates}
 			{updatePredicates}
 			{col}
 			{histogram} />

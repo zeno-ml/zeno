@@ -2,11 +2,9 @@
 	import { mdiChartBar, mdiChartLine, mdiPlus, mdiTable } from "@mdi/js";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
-	import Ripple from "@smui/ripple";
-
-	import { report, reports } from "../stores";
-
 	import Paper, { Content } from "@smui/paper";
+	import Ripple from "@smui/ripple";
+	import { report, reports } from "../stores";
 	import { clickOutside } from "../util/clickOutside";
 	import ReportListRow from "./ReportListRow.svelte";
 

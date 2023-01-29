@@ -22,6 +22,7 @@ from zeno.api import ZenoOptions, ZenoParameters
 from zeno.classes.base import MetadataType, ZenoColumnType
 from zeno.classes.classes import MetricKey, TableRequest, ZenoColumn
 from zeno.classes.metadata import HistogramBucket, HistogramRequest
+from zeno.classes.projection import Points2D
 from zeno.classes.report import Report
 from zeno.classes.slice import (
     FilterIds,
@@ -339,7 +340,7 @@ class ZenoBackend(object):
         self,
         requests: List[MetricKey],
         filter_ids: Optional[FilterIds] = None,
-    ):
+    ) -> List[SliceMetric]:
         """Calculate result for each requested combination."""
 
         return_metrics: List[SliceMetric] = []
@@ -600,22 +601,12 @@ class ZenoBackend(object):
                 color_range = [0] * len(series)
         return color_range, unique.tolist(), metadata_type
 
-    def project_embed_into_2D(
-        self, model: str, column: ZenoColumn
-    ) -> Dict[str, Union[List, str]]:
-        """If the embedding exists, will use t-SNE to project into 2D.
-        Returns the 2D embeddings as object/dict
-        {
-            x: list[float]
-            y: list[float]
-            color: list[int]
-            ids: list[str]
-            domain: list[union[int, float, str]]
-            dataType: str // "nominal" or "continuous" or "boolean"
-        }
-        """
+    def project_embed_into_2D(self, model: str, column: ZenoColumn) -> Points2D:
+        """If the embedding exists, will use t-SNE to project into 2D."""
 
-        points: Dict[str, Union[List, str]] = {"x": [], "y": [], "ids": []}
+        points = Points2D(
+            x=[], y=[], color=[], domain=[], opacity=[], dataType="", ids=[]
+        )
 
         # Can't project without an embedding
         if not self.embed_exists(model):
@@ -624,12 +615,12 @@ class ZenoBackend(object):
         projection = self.run_tsne(model)
 
         # extract points and ids from computed projection
-        points["x"] = projection[:, 0].tolist()
-        points["y"] = projection[:, 1].tolist()
+        points.x = projection[:, 0].tolist()
+        points.y = projection[:, 1].tolist()
         color_results = self.get_projection_colors(column)
-        points["color"] = color_results[0]
-        points["domain"] = color_results[1]
-        points["dataType"] = color_results[2]
-        points["ids"] = self.df[str(self.id_column)].to_list()
+        points.color = color_results[0]
+        points.domain = color_results[1]
+        points.dataType = color_results[2]
+        points.ids = self.df[str(self.id_column)].to_list()
 
         return points

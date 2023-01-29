@@ -1,19 +1,19 @@
 <script lang="ts">
 	import Button, { Group } from "@smui/button";
 	import CircularProgress from "@smui/circular-progress";
-
+	import { onMount } from "svelte";
 	import {
-		settings,
-		selections,
 		metric,
-		selectionPredicates,
 		selectionIds,
+		selectionPredicates,
+		selections,
+		settings,
 		status,
 	} from "../stores";
-	import { onMount } from "svelte";
-	import SliceChip from "./chips/SliceChip.svelte";
-	import MetadataChip from "./chips/MetadataChip.svelte";
+	import type { FilterPredicate } from "../zenoservice";
 	import IdsChip from "./chips/IdsChip.svelte";
+	import MetadataChip from "./chips/MetadataChip.svelte";
+	import SliceChip from "./chips/SliceChip.svelte";
 
 	export let currentResult;
 	export let selected = "list";

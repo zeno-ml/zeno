@@ -1,4 +1,10 @@
-import { ZenoColumnType } from "../globals";
+import { ZenoService, type FilterIds, type SliceMetric } from "../zenoservice";
+import {
+	ZenoColumnType,
+	type FilterPredicate,
+	type FilterPredicateGroup,
+	type MetricKey,
+} from "../zenoservice";
 
 function instanceOfFilterPredicate(object): object is FilterPredicate {
 	return "column" in object;
@@ -26,7 +32,7 @@ function setModelForMetricKeys(metricKeys: MetricKey[]) {
 			key.sli.filterPredicates = setModelForMetricKey(
 				key.sli.filterPredicates,
 				key.model
-			);
+			) as FilterPredicateGroup;
 		}
 		return key;
 	});
@@ -36,30 +42,15 @@ export async function createNewSlice(
 	predicateGroup: FilterPredicateGroup,
 	folder = ""
 ) {
-	let res = await fetch("/api/slice", {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify({
-			sliceName: sliceName,
-			folder,
-			filterPredicates: predicateGroup,
-		} as Slice),
-	}).then((res) => res.json());
-
-	res = JSON.parse(res);
-	return res;
+	await ZenoService.createNewSlice({
+		sliceName: sliceName,
+		folder,
+		filterPredicates: predicateGroup,
+	});
 }
 
 export async function deleteSlice(sliceName: string) {
-	await fetch("/api/slice", {
-		method: "DELETE",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify([sliceName]),
-	});
+	await ZenoService.deleteSlice([sliceName]);
 }
 
 export async function getMetricsForSlices(
@@ -76,16 +67,9 @@ export async function getMetricsForSlices(
 	metricKeys = setModelForMetricKeys(metricKeys);
 
 	if (metricKeys.length > 0) {
-		const res = await fetch("/api/slice-metrics", {
-			method: "POST",
-			headers: {
-				"Content-type": "application/json",
-			},
-			body: JSON.stringify({
-				metricKeys,
-				filterIds,
-			}),
-		}).then((d) => d.json());
-		return res;
+		return await ZenoService.getMetricsForSlices({
+			metricKeys,
+			filterIds,
+		});
 	}
 }
