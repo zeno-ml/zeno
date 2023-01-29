@@ -4,7 +4,7 @@
 
 {#if $metrics.length !== 0 && $metricRange[0] !== Infinity}
 	<div id="legend-container">
-		<span style:margin-right="15px" style:font-style="italic">
+		<span style:margin-right="15px">
 			{$metric}:
 		</span>
 		<span
@@ -34,6 +34,7 @@
 		display: flex;
 		align-items: center;
 		margin-right: 5px;
+		color: #6a1b9a;
 	}
 	#legend {
 		width: 40px;

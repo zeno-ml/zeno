@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { mdiFolderPlusOutline, mdiPlus, mdiPlusCircle } from "@mdi/js";
+	import CircularProgress from "@smui/circular-progress";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
@@ -26,6 +27,7 @@
 		showNewSlice,
 		slices,
 		sliceToEdit,
+		requestingHistogramCounts,
 		status,
 	} from "../stores";
 	import { columnHash } from "../util/util";
@@ -286,7 +288,14 @@
 	{/each}
 
 	<div class="inline" style:margin-top="10px">
-		<h4>Metadata</h4>
+		<div class="inline">
+			<h4>Metadata</h4>
+			{#if $requestingHistogramCounts}
+				<CircularProgress
+					style="height: 15px; width: 15px; margin-left: 10px;"
+					indeterminate />
+			{/if}
+		</div>
 		<MetricRange />
 	</div>
 	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.METADATA) as col}

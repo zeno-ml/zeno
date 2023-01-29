@@ -86,6 +86,8 @@ export const sort: Writable<[ZenoColumn, boolean]> = writable([
 	true,
 ]);
 
+export const requestingHistogramCounts: Writable<boolean> = writable(false);
+
 export const slices: Writable<Map<string, Slice>> = writable(new Map());
 export const folders: Writable<string[]> = folderWritable();
 export const reports: Writable<Report[]> = reportWritable();

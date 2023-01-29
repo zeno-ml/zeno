@@ -1,11 +1,3 @@
-export interface HistogramEntry {
-	bucket: number | string | boolean;
-	bucketEnd?: number | string | boolean;
-	count?: number;
-	filteredCount?: number;
-	metric?: number;
-}
-
 /**
  * API functions for calculating metadata histograms.
  * We separate them into getting buckets, counts, and metrics so we
@@ -18,12 +10,21 @@ import { metricRange } from "../stores";
 import { columnHash, getMetricRange } from "../util/util";
 import {
 	CancelablePromise,
-	ZenoService,
 	ZenoColumnType,
+	ZenoService,
 	type FilterIds,
 	type FilterPredicateGroup,
 	type ZenoColumn,
 } from "../zenoservice";
+import { requestingHistogramCounts } from "./../stores";
+
+export interface HistogramEntry {
+	bucket: number | string | boolean;
+	bucketEnd?: number | string | boolean;
+	count?: number;
+	filteredCount?: number;
+	metric?: number;
+}
 
 /**
  * Fetch metadata columns buckets for histograms.
@@ -73,12 +74,14 @@ export async function getHistogramCounts(
 		histogramCountRequest.cancel();
 	}
 	try {
+		requestingHistogramCounts.set(true);
 		histogramCountRequest = ZenoService.calculateHistogramCounts({
 			columnRequests,
 			filterPredicates,
 			filterIds,
 		});
 		const out = await histogramCountRequest;
+		requestingHistogramCounts.set(false);
 
 		[...histograms.keys()].forEach((k, i) => {
 			histograms.set(
