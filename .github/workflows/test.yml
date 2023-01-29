@@ -21,7 +21,7 @@ jobs:
         uses: snok/install-poetry@v1.3
       - name: Cache Poetry virtualenv
         uses: actions/cache@v3.2.2
-        id: cache
+        id: cache-poetry
         with:
           path: ~/.virtualenvs
           key: poetry-${{ hashFiles('**/poetry.lock') }}
@@ -41,7 +41,7 @@ jobs:
           npm i
       - name: Cache NPM packages
         uses: actions/cache@v3.2.2
-        id: cache
+        id: cache-npm
         with:
           path: ~/frontend/node_modules
           key: npm-${{ hashFiles('**/package.lock') }}
