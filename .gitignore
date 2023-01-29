@@ -3,7 +3,6 @@ examples/breast_cancer_data
 examples/face-generation
 data/
 .zeno_cache/
-models/
 node_modules/
 *.pt
 coco-tagging.csv
