@@ -7,7 +7,7 @@
 	import Textfield from "@smui/textfield";
 	import HelperText from "@smui/textfield/helper-text";
 	import { currentColumns } from "../../stores";
-	import { MetadataType, type FilterPredicate } from "../../zenoservice";
+	import type { FilterPredicate } from "../../zenoservice";
 
 	export let predicate: FilterPredicate;
 	export let deletePredicate: () => void;
@@ -48,22 +48,24 @@
 	</div>
 
 	<div>
-		{#if predicate.column && predicate.column.metadataType === MetadataType.BOOLEAN}
-			<Select
-				bind:value={predicate.value}
-				label="Operation"
-				style="margin-right: 20px; width:125px">
-				{#each ["true", "false"] as o}
-					<Option value={o}>{o}</Option>
-				{/each}
-			</Select>
-		{:else}
-			<Textfield
-				bind:value={predicate.value}
-				label="Value"
-				style="width: 100px">
-				<HelperText slot="helper">0</HelperText>
-			</Textfield>
+		{#if predicate.column}
+			{#if typeof predicate.value === "boolean"}
+				<Select
+					bind:value={predicate.value}
+					label="Operation"
+					style="margin-right: 20px; width:125px">
+					{#each ["true", "false"] as o}
+						<Option value={o}>{o}</Option>
+					{/each}
+				</Select>
+			{:else}
+				<Textfield
+					bind:value={predicate.value}
+					label="Value"
+					style="width: 100px">
+					<HelperText slot="helper">0</HelperText>
+				</Textfield>
+			{/if}
 		{/if}
 	</div>
 	<div class="selector" style:margin-top="10px">

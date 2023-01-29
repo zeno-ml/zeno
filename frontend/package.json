@@ -71,8 +71,7 @@
         "regl-scatterplot": "^1.5.1",
         "sirv-cli": "^2.0.0",
         "svelte-spa-router": "^3.3.0",
-        "svelte-vega": "^1.2.0",
-        "svelte-websocket-store": "^1.1.33"
+        "svelte-vega": "^1.2.0"
     },
     "prettier": {
         "tabWidth": 2,

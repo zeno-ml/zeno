@@ -77,7 +77,9 @@
 	function updateOpacityRange(scatterPtr: ReglScatterObject, length: number) {
 		scatterPtr.set({
 			opacityBy: "category",
-			opacity: new Array(length).fill(0).map((_, i) => i / (length - 1)),
+			opacity: new Array(length)
+				.fill(0)
+				.map((_, i) => i / (length - 1)) as unknown as number,
 		});
 	}
 

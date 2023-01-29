@@ -10,7 +10,6 @@
 	} from "../../zenoservice";
 	import BinaryMetadataCell from "./metadata-cells/BinaryMetadataCell.svelte";
 	import ContinuousMetadataCell from "./metadata-cells/ContinuousMetadataCell.svelte";
-	import DateMetadataCell from "./metadata-cells/DateMetadataCell.svelte";
 	import NominalMetadataCell from "./metadata-cells/NominalMetadataCell.svelte";
 	import TextMetadataCell from "./metadata-cells/TextMetadataCell.svelte";
 
@@ -21,7 +20,7 @@
 		[MetadataType.NOMINAL]: NominalMetadataCell,
 		[MetadataType.CONTINUOUS]: ContinuousMetadataCell,
 		[MetadataType.BOOLEAN]: BinaryMetadataCell,
-		[MetadataType.DATETIME]: DateMetadataCell,
+		[MetadataType.DATETIME]: TextMetadataCell,
 		[MetadataType.OTHER]: TextMetadataCell,
 	};
 
@@ -29,6 +28,8 @@
 	$: filterPredicates = $selections.metadata[columnHash(col)]
 		? $selections.metadata[columnHash(col)]
 		: { predicates: [], join: "&" };
+	let predicates: FilterPredicate[] = [];
+	$: predicates = filterPredicates.predicates as FilterPredicate[];
 
 	function updatePredicates(predicates: FilterPredicate[]) {
 		selections.update((mets) => ({
@@ -53,7 +54,7 @@
 
 		<svelte:component
 			this={columnMap[col.metadataType]}
-			filterPredicates={filterPredicates.predicates}
+			filterPredicates={predicates}
 			{updatePredicates}
 			{col}
 			{histogram} />

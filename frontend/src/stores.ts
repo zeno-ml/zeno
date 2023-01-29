@@ -1,4 +1,4 @@
-import { websocketStore } from "svelte-websocket-store/src/index.mjs";
+import { websocketStore } from "./util/websocketStore";
 import {
 	derived,
 	get,

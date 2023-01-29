@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { View } from "svelte-vega";
-
 	import { VegaLite } from "svelte-vega";
-	import { nominalVegaSpec } from "./vegaSpecs";
+	import type { HistogramEntry } from "../../../api/metadata";
 	import { metricRange } from "../../../stores";
 	import type { FilterPredicate, ZenoColumn } from "../../../zenoservice";
+	import { nominalVegaSpec } from "./vegaSpecs";
 
 	export let col: ZenoColumn;
 	export let histogram: HistogramEntry[];

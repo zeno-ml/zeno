@@ -32,7 +32,7 @@ function setModelForMetricKeys(metricKeys: MetricKey[]) {
 			key.sli.filterPredicates = setModelForMetricKey(
 				key.sli.filterPredicates,
 				key.model
-			);
+			) as FilterPredicateGroup;
 		}
 		return key;
 	});
