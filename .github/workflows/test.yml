@@ -34,7 +34,7 @@ jobs:
 
       - name: Install Poetry Dependencies
         run: poetry install --no-interaction
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.cache-poetry.outputs.cache-hit != 'true'
       - name: Install NPM packages
         run: |
           cd frontend/
@@ -51,6 +51,7 @@ jobs:
         run: |
           cd frontend/
           npm run build
+        if: steps.cache-npm.outputs.cache-hit != 'true'
 
       - name: Lint
         run: make lint
