@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Button, { Group } from "@smui/button";
 	import CircularProgress from "@smui/circular-progress";
-
 	import { onMount } from "svelte";
 	import {
 		metric,

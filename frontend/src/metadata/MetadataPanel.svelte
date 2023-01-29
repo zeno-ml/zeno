@@ -2,14 +2,6 @@
 	import { mdiFolderPlusOutline, mdiPlus, mdiPlusCircle } from "@mdi/js";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
-
-	import FolderCell from "./cells/FolderCell.svelte";
-	import MetadataCell from "./cells/MetadataCell.svelte";
-	import SliceCell from "./cells/SliceCell.svelte";
-	import MetricRange from "./MetricRange.svelte";
-	import NewFolderPopup from "./popups/NewFolderPopup.svelte";
-	import NewSlicePopup from "./popups/NewSlicePopup.svelte";
-
 	import Select, { Option } from "@smui/select";
 	import Tooltip, { Wrapper } from "@smui/tooltip";
 	import { InternMap } from "internmap";
@@ -43,6 +35,12 @@
 		type Slice,
 		type ZenoColumn,
 	} from "../zenoservice";
+	import FolderCell from "./cells/FolderCell.svelte";
+	import MetadataCell from "./cells/MetadataCell.svelte";
+	import SliceCell from "./cells/SliceCell.svelte";
+	import MetricRange from "./MetricRange.svelte";
+	import NewFolderPopup from "./popups/NewFolderPopup.svelte";
+	import NewSlicePopup from "./popups/NewSlicePopup.svelte";
 
 	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
 		new InternMap([], columnHash);

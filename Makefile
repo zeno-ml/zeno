@@ -10,6 +10,7 @@ install:
 check:
 	@echo "==> 🧩 Checking Validity"
 	@poetry check
+	@cd frontend && npm run check
 
 .PHONY: lint
 lint:
