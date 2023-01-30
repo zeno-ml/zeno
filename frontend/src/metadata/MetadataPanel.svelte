@@ -216,7 +216,7 @@
 		{/if}
 	</div>
 
-	<div class="inline">
+	<div id="slice-header" class="inline">
 		<h4>Slices</h4>
 		<div class="inline">
 			<div>
@@ -287,7 +287,7 @@
 		<SliceCell slice={s} />
 	{/each}
 
-	<div class="inline" style:margin-top="10px">
+	<div id="metric-header" class="inline" style:margin-top="10px">
 		<div class="inline">
 			<h4>Metadata</h4>
 			{#if $requestingHistogramCounts}
@@ -314,6 +314,20 @@
 </div>
 
 <style>
+	#slice-header {
+		position: sticky;
+		top: -10px;
+		z-index: 5;
+		background-color: #fbfbfa;
+		border-bottom: 1px solid #d1d1d1;
+	}
+	#metric-header {
+		position: sticky;
+		top: 40px;
+		z-index: 5;
+		background-color: #fbfbfa;
+		border-bottom: 1px solid #d1d1d1;
+	}
 	.side-container {
 		height: calc(100vh - 15px);
 		width: 350px;
