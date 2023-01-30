@@ -456,6 +456,24 @@ files = [
 ]
 
 [[package]]
+name = "methodtools"
+version = "0.4.5"
+description = "Expand standard functools to methods"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "methodtools-0.4.5.tar.gz", hash = "sha256:9370156e9036789e98cf0e97355b3be3bcd7cc9e520d1e15893a1407719effb2"},
+]
+
+[package.dependencies]
+wirerope = ">=0.4.5"
+
+[package.extras]
+doc = ["sphinx"]
+test = ["functools32 (>=3.2.3-2)", "pytest (==4.6.7)", "pytest-cov (==2.6.1)"]
+
+[[package]]
 name = "moreorless"
 version = "0.4.0"
 description = "Python diff wrapper"
@@ -1537,7 +1555,25 @@ files = [
     {file = "websockets-10.4.tar.gz", hash = "sha256:eef610b23933c54d5d921c92578ae5f89813438fded840c2e9809d378dc765d3"},
 ]
 
+[[package]]
+name = "wirerope"
+version = "0.4.6"
+description = "'Turn functions and methods into fully controllable objects'"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "wirerope-0.4.6.tar.gz", hash = "sha256:bd1a151d4133b3ce30ecb76ed92f861505f688151173d22be2e29f4f02e60392"},
+]
+
+[package.dependencies]
+six = ">=1.11.0"
+
+[package.extras]
+doc = ["sphinx"]
+test = ["pytest (==4.6.7)", "pytest-cov (==2.6.1)"]
+
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8, <=3.11" 
-content-hash = "14c222a86f23c7bbe21ea3b3570100b03f3006bbe4d4b2c0e9e4a55563050b5f"
+content-hash = "e4993a83d76500bc99233490bff5794db904cbca6ad5490de22f3eeef2c4d0db"
