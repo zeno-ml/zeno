@@ -21,7 +21,9 @@
 	export let viewOptions;
 
 	let CHOICES =
-		$settings.view !== "" ? ["list", "table", "scatter"] : ["table", "scatter"];
+		$settings.view !== ""
+			? ["list", "table", "projection"]
+			: ["table", "projection"];
 
 	let optionsDiv: HTMLDivElement;
 	let mounted = false;
@@ -94,17 +96,17 @@
 	</div>
 	<div class="options">
 		<div>
-			<span class="metric">
-				{$metric ? $metric + ":" : ""}
-			</span>
 			{#await currentResult then r}
-				{#if r}
+				{#if r[0].metric !== undefined && r[0].metric !== null}
 					<span class="metric">
-						{r[0].metric !== undefined && r[0].metric !== null
-							? r[0].metric.toFixed(2)
-							: ""}
+						{$metric ? $metric + ":" : ""}
 					</span>
-					<span id="size">({r[0].size} instances)</span>
+					{#if r}
+						<span class="metric">
+							{r[0].metric.toFixed(2)}
+						</span>
+						<span id="size">({r[0].size} instances)</span>
+					{/if}
 				{/if}
 			{/await}
 		</div>
@@ -115,7 +117,10 @@
 			<Group>
 				{#each CHOICES as choice}
 					<Button
-						variant={choice === selected ? "raised" : "outlined"}
+						style="background-color: {selected === choice
+							? '#f2f2ee'
+							: 'white'}"
+						variant="outlined"
 						on:click={() => (selected = choice)}>{choice}</Button>
 				{/each}
 			</Group>

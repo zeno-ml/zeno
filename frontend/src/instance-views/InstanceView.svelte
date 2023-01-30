@@ -83,7 +83,7 @@
 {#if selected === "table"}
 	<TableView {currentResult} {table} {viewFunction} {viewOptions} />
 {/if}
-{#if selected === "scatter"}
+{#if selected === "projection"}
 	<ScatterView {viewFunction} {viewOptions} />
 {/if}
 

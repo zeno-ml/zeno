@@ -1,4 +1,3 @@
-from sklearn.metrics import f1_score, recall_score
 from zeno import ZenoOptions, model, distill, metric
 from transformers import pipeline
 

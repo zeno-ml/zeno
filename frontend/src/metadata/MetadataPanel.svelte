@@ -317,16 +317,16 @@
 	#slice-header {
 		position: sticky;
 		top: -10px;
-		z-index: 5;
+		z-index: 3;
 		background-color: #fbfbfa;
-		border-bottom: 1px solid #d1d1d1;
+		border-bottom: 0.5px solid #d1d1d1;
 	}
 	#metric-header {
 		position: sticky;
 		top: 40px;
-		z-index: 5;
+		z-index: 2;
 		background-color: #fbfbfa;
-		border-bottom: 1px solid #d1d1d1;
+		border-bottom: 0.5px solid #d1d1d1;
 	}
 	.side-container {
 		height: calc(100vh - 15px);
