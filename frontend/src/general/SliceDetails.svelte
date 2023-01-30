@@ -7,7 +7,6 @@
 <div class="chip">
 	{#each predicateGroup.predicates as pred, i}
 		{#if "predicates" in pred}
-			<hr />
 			{#if i !== 0}
 				<div class="meta-chip">
 					{pred.join}
@@ -20,15 +19,22 @@
 			<div class="meta-chip">
 				{")"}
 			</div>
-			<hr />
 		{:else}
+			{#if i !== 0}
+				<div class="meta-chip">
+					{pred.join}
+				</div>
+			{/if}
 			<div class="meta-chip">
-				{i === 0 ? "" : pred.join}
 				{pred.column.name}
 				{pred.operation}
-				{!isNaN(Number(pred.value))
-					? Number(pred.value).toFixed(2)
-					: pred.value}
+				{#if typeof pred.value === "number"}
+					{!isNaN(Number(pred.value))
+						? Number(pred.value).toFixed(2)
+						: pred.value}
+				{:else}
+					{pred.value}
+				{/if}
 			</div>
 		{/if}
 	{/each}

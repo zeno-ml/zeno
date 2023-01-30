@@ -41,7 +41,7 @@
 			bind:value={predicate.operation}
 			label="Operation"
 			style="margin-right: 20px; width:125px">
-			{#each operations as o}
+			{#each typeof predicate.value === "boolean" ? ["==", "!="] : operations as o}
 				<Option value={o}>{o}</Option>
 			{/each}
 		</Select>
@@ -53,7 +53,7 @@
 				<Select
 					key={(bool) => `${bool}`}
 					bind:value={predicate.value}
-					label="Operation"
+					label="Value"
 					style="margin-right: 20px; width:125px">
 					{#each [true, false] as o}
 						<Option value={o}>{o.toString()}</Option>

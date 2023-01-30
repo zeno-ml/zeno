@@ -268,7 +268,7 @@
 		position: absolute;
 		bottom: 10px;
 		left: 10px;
-		z-index: 999;
+		z-index: 9;
 		padding: 30px;
 		box-shadow: 0px 0px 1px 1px hsla(0, 0%, 30%, 0.1);
 		border-radius: 3px;
