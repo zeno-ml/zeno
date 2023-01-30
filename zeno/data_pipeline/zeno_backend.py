@@ -6,7 +6,6 @@ import os
 import pickle
 import sys
 import threading
-from methodtools import lru_cache
 from inspect import getsource
 from math import isnan
 from pathlib import Path
@@ -14,6 +13,7 @@ from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
+from methodtools import lru_cache  # type: ignore
 from pandas import DataFrame  # type: ignore
 from pathos.multiprocessing import ProcessingPool as Pool  # type: ignore
 from sklearn import preprocessing  # type: ignore
