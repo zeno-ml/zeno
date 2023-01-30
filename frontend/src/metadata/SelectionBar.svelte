@@ -118,7 +118,7 @@
 				{#each CHOICES as choice}
 					<Button
 						style="background-color: {selected === choice
-							? '#f2f2ee'
+							? '#f8f8f8'
 							: 'white'}"
 						variant="outlined"
 						on:click={() => (selected = choice)}>{choice}</Button>
