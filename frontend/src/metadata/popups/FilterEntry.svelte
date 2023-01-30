@@ -51,11 +51,12 @@
 		{#if predicate.column}
 			{#if typeof predicate.value === "boolean"}
 				<Select
+					key={(bool) => `${bool}`}
 					bind:value={predicate.value}
 					label="Operation"
 					style="margin-right: 20px; width:125px">
-					{#each ["true", "false"] as o}
-						<Option value={o}>{o}</Option>
+					{#each [true, false] as o}
+						<Option value={o}>{o.toString()}</Option>
 					{/each}
 				</Select>
 			{:else}
