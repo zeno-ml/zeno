@@ -91,7 +91,6 @@ def parse_toml():
 
     if "functions" in args:
         fn_path = Path(os.path.realpath(os.path.join(base_path, args["functions"])))
-        print(fn_path)
         if os.path.isfile(fn_path):
             args["functions"] = parse_testing_file(fn_path)
         elif os.path.exists(fn_path):
