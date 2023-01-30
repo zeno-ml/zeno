@@ -1,12 +1,13 @@
 <script lang="ts">
 	import type { View } from "svelte-vega";
-
 	import { VegaLite } from "svelte-vega";
-	import { continuousVegaSpec } from "./vegaSpecs";
+	import type { HistogramEntry } from "../../../api/metadata";
 	import { metricRange } from "../../../stores";
+	import type { FilterPredicate, ZenoColumn } from "../../../zenoservice";
+	import { continuousVegaSpec } from "./vegaSpecs";
 
 	export let col: ZenoColumn;
-	export let histogram;
+	export let histogram: HistogramEntry[];
 	export let filterPredicates: FilterPredicate[];
 	export let updatePredicates;
 
@@ -28,10 +29,6 @@
 	$: if (view && filterPredicates) {
 		updateSel();
 	}
-
-	$: chartData = {
-		table: histogram,
-	};
 
 	$: if (view) {
 		view.addSignalListener(
@@ -63,10 +60,11 @@
 	}
 </script>
 
+<!-- We shallow copy histogram to remove the vega identifiers and force it to update the chart when new data is passed in. -->
 <div id="histogram" on:mouseup={setSelection}>
 	<VegaLite
 		bind:view
 		spec={continuousVegaSpec($metricRange)}
-		data={chartData}
+		data={{ table: histogram.map((h) => Object.assign({}, h)) }}
 		options={{ tooltip: true, actions: false, theme: "vox" }} />
 </div>

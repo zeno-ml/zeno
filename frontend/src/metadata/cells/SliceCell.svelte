@@ -12,9 +12,15 @@
 		slices,
 		sliceToEdit,
 		reports,
-		zenoState,
+		model,
+		metric,
 	} from "../../stores";
-	import { getMetricsForSlices, deleteSlice, createNewSlice } from "../../api";
+	import {
+		getMetricsForSlices,
+		deleteSlice,
+		createNewSlice,
+	} from "../../api/slice";
+	import type { MetricKey, Slice } from "../../zenoservice";
 
 	export let slice: Slice;
 	export let inFolder = false;
@@ -34,7 +40,8 @@
 		result = getMetricsForSlices([
 			<MetricKey>{
 				sli: slice,
-				state: $zenoState,
+				model: $model,
+				metric: $metric,
 			},
 		]);
 	}
@@ -205,7 +212,7 @@
 				{#if result}
 					{#await result then res}
 						<span style:margin-right="10px">
-							{res[0].metric ? res[0].metric.toFixed(2) : ""}
+							{res[0].metric !== undefined ? res[0].metric.toFixed(2) : ""}
 						</span>
 						<span id="size">
 							({res[0].size})
@@ -281,7 +288,7 @@
 	.cell {
 		position: relative;
 		overflow: visible;
-		border: 0.5px solid #EBEBEA;
+		border: 0.5px solid #d1d1d1;
 		border-radius: 5px;
 		margin-top: 5px;
 		display: flex;

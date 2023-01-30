@@ -1,4 +1,4 @@
-import { ZenoColumnType } from "../globals";
+import { ZenoColumnType, type ZenoColumn } from "../zenoservice";
 import { tab, report } from "../stores";
 
 export function updateTab(t: string) {
@@ -19,15 +19,21 @@ export function columnHash(col: ZenoColumn) {
 	);
 }
 
-export function getMetricRange(res) {
+/** Calculate the metric range for coloring histograms */
+export function getMetricRange(res: number[][]): [number, number] {
 	const range: [number, number] = [Infinity, -Infinity];
-	Object.values(res).forEach((col) => {
-		(col as Array<{ metric: number }>).forEach((entry) => {
-			if (entry.metric !== null && entry.metric !== undefined) {
-				range[0] = Math.min(range[0], entry.metric);
-				range[1] = Math.max(range[1], entry.metric);
+	let allNull = true;
+	res.forEach((arr) =>
+		arr.forEach((n) => {
+			if (n !== null) {
+				allNull = false;
 			}
-		});
-	});
+			range[0] = Math.min(range[0], n);
+			range[1] = Math.max(range[1], n);
+		})
+	);
+	if (allNull) {
+		return [Infinity, -Infinity];
+	}
 	return range;
 }

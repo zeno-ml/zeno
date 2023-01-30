@@ -1,22 +1,19 @@
 <script lang="ts">
 	import type { View } from "svelte-vega";
-
 	import { VegaLite } from "svelte-vega";
-	import { nominalVegaSpec } from "./vegaSpecs";
+	import type { HistogramEntry } from "../../../api/metadata";
 	import { metricRange } from "../../../stores";
+	import type { FilterPredicate, ZenoColumn } from "../../../zenoservice";
+	import { nominalVegaSpec } from "./vegaSpecs";
 
 	export let col: ZenoColumn;
-	export let histogram;
+	export let histogram: HistogramEntry[];
 	export let filterPredicates: FilterPredicate[];
 	export let updatePredicates;
 
 	let view: View;
 	let localSelection: Record<string, Array<number>> = {};
 	let localSelectionTuple = {};
-
-	$: chartData = {
-		table: histogram,
-	};
 
 	function updateSel() {
 		if (filterPredicates.length !== 0) {
@@ -64,10 +61,11 @@
 	}
 </script>
 
+<!-- We shallow copy histogram to remove the vega identifiers and force it to update the chart when new data is passed in. -->
 <div id="histogram" on:click={setSelection} on:keydown={() => ({})}>
 	<VegaLite
 		bind:view
 		spec={nominalVegaSpec($metricRange)}
-		data={chartData}
+		data={{ table: histogram.map((h) => Object.assign({}, h)) }}
 		options={{ tooltip: true, actions: false, theme: "vox" }} />
 </div>

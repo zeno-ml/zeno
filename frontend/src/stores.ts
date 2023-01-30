@@ -1,4 +1,4 @@
-import { websocketStore } from "svelte-websocket-store";
+import { websocketStore } from "./util/websocketStore";
 import {
 	derived,
 	get,
@@ -6,8 +6,21 @@ import {
 	type Readable,
 	type Writable,
 } from "svelte/store";
-
 import { folderWritable, reportWritable } from "./util/customStores";
+import type {
+	FilterIds,
+	FilterPredicateGroup,
+	Report,
+	Slice,
+	ZenoColumn,
+	ZenoSettings,
+} from "./zenoservice";
+
+interface WSResponse {
+	status: string;
+	doneProcessing: boolean;
+	completeColumns: ZenoColumn[];
+}
 
 export const tab: Writable<string> = writable("results");
 
@@ -44,7 +57,7 @@ export const status: Readable<WSResponse> = derived(
 export const ready: Writable<boolean> = writable(false);
 
 export const rowsPerPage = writable(0);
-export const settings: Writable<Settings> = writable(<Settings>{
+export const settings: Writable<ZenoSettings> = writable(<ZenoSettings>{
 	view: "",
 	idColumn: {},
 	dataColumn: {},
@@ -59,13 +72,6 @@ export const models: Writable<string[]> = writable([]);
 
 export const model: Writable<string> = writable(undefined);
 export const metric: Writable<string> = writable(undefined);
-export const zenoState: Readable<ZenoState> = derived(
-	[model, metric],
-	([$model, $metric]) => ({
-		model: $model,
-		metric: $metric,
-	})
-);
 export const currentColumns: Readable<ZenoColumn[]> = derived(
 	[settings, model],
 	([$settings, $model]) =>
@@ -79,6 +85,8 @@ export const sort: Writable<[ZenoColumn, boolean]> = writable([
 	undefined,
 	true,
 ]);
+
+export const requestingHistogramCounts: Writable<boolean> = writable(false);
 
 export const slices: Writable<Map<string, Slice>> = writable(new Map());
 export const folders: Writable<string[]> = folderWritable();
@@ -94,6 +102,9 @@ export const selections: Writable<{
 	metadata: {},
 	slices: [],
 });
+
+// the ids directly selected by the user
+export const selectionIds: Writable<FilterIds> = writable({ ids: [] });
 export const selectionPredicates: Readable<FilterPredicateGroup[]> = derived(
 	[selections],
 	([$selections]) => {
@@ -118,9 +129,7 @@ export const report: Writable<number> = writable(undefined);
 export const showNewSlice: Writable<boolean> = writable(false);
 export const sliceToEdit: Writable<Slice> = writable(null);
 
-// [low, high, whether it is showing]
-export const metricRange: Writable<[number, number, boolean]> = writable([
+export const metricRange: Writable<[number, number]> = writable([
 	Infinity,
 	-Infinity,
-	false,
 ]);

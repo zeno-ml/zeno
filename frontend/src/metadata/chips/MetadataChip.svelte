@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { TrailingIcon } from "@smui/chips";
-
 	import { selections } from "../../stores";
-	import { MetadataType } from "../../globals";
+	import { MetadataType } from "../../zenoservice";
 
 	export let chip;
 	export let hash;

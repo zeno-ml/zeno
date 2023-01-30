@@ -1,17 +1,19 @@
 <script lang="ts">
 	import Button, { Group } from "@smui/button";
 	import CircularProgress from "@smui/circular-progress";
-
+	import { onMount } from "svelte";
 	import {
-		settings,
-		selections,
 		metric,
+		selectionIds,
 		selectionPredicates,
+		selections,
+		settings,
 		status,
 	} from "../stores";
-	import { onMount } from "svelte";
-	import SliceChip from "./chips/SliceChip.svelte";
+	import type { FilterPredicate } from "../zenoservice";
+	import IdsChip from "./chips/IdsChip.svelte";
 	import MetadataChip from "./chips/MetadataChip.svelte";
+	import SliceChip from "./chips/SliceChip.svelte";
 
 	export let currentResult;
 	export let selected = "list";
@@ -19,7 +21,9 @@
 	export let viewOptions;
 
 	let CHOICES =
-		$settings.view !== "" ? ["list", "table", "scatter"] : ["table", "scatter"];
+		$settings.view !== ""
+			? ["list", "table", "projection"]
+			: ["table", "projection"];
 
 	let optionsDiv: HTMLDivElement;
 	let mounted = false;
@@ -50,7 +54,7 @@
 <div style:width="100%">
 	<div class="between">
 		<div class="chips">
-			{#if $selections.slices.length + filters.length === 0}
+			{#if $selections.slices.length + filters.length === 0 && $selectionIds.ids.length === 0}
 				<p>Filter with the metadata distributions.</p>
 			{:else}
 				{#each $selections.slices as slice}
@@ -59,7 +63,10 @@
 				{#each filters as [hash, chip]}
 					<MetadataChip {hash} {chip} />
 				{/each}
-				{#if $selectionPredicates.length > 0}
+				{#if $selectionIds.ids.length > 0}
+					<IdsChip />
+				{/if}
+				{#if $selectionPredicates.length > 0 || $selectionIds.ids.length > 0}
 					<span
 						class="clear"
 						on:keydown={() => ({})}
@@ -70,6 +77,7 @@
 								}
 								return { slices: [], metadata: { ...m.metadata } };
 							});
+							selectionIds.set({ ids: [] });
 						}}>
 						clear all
 					</span>
@@ -88,17 +96,17 @@
 	</div>
 	<div class="options">
 		<div>
-			<span class="metric">
-				{$metric ? $metric + ":" : ""}
-			</span>
 			{#await currentResult then r}
-				{#if r}
+				{#if r[0].metric !== undefined && r[0].metric !== null}
 					<span class="metric">
-						{r[0].metric !== undefined && r[0].metric !== null
-							? r[0].metric.toFixed(2)
-							: ""}
+						{$metric ? $metric + ":" : ""}
 					</span>
-					<span id="size">({r[0].size} instances)</span>
+					{#if r}
+						<span class="metric">
+							{r[0].metric.toFixed(2)}
+						</span>
+						<span id="size">({r[0].size} instances)</span>
+					{/if}
 				{/if}
 			{/await}
 		</div>
@@ -109,7 +117,10 @@
 			<Group>
 				{#each CHOICES as choice}
 					<Button
-						variant={choice === selected ? "raised" : "outlined"}
+						style="background-color: {selected === choice
+							? '#f8f8f8'
+							: 'white'}"
+						variant="outlined"
 						on:click={() => (selected = choice)}>{choice}</Button>
 				{/each}
 			</Group>

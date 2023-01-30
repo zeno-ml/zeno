@@ -1,11 +1,10 @@
 <script lang="ts">
-	import { Cell, Row } from "@smui/data-table";
 	import { Icon } from "@smui/button";
+	import { Cell, Row } from "@smui/data-table";
 	import IconButton from "@smui/icon-button";
-
-	import { getMetricsForSlices } from "../../api";
-	import { models, slices, reports, report } from "../../stores";
-
+	import { getMetricsForSlices } from "../../api/slice";
+	import { models, report, reports, slices } from "../../stores";
+	import type { ReportPredicate, SliceMetric } from "../../zenoservice";
 	import SliceDetailsContainer from "../SliceDetailsContainer.svelte";
 	import SparkLine from "../SparkLine.svelte";
 
@@ -14,14 +13,12 @@
 
 	$: sli = $slices.get(predicate.sliceName);
 
-	let modelResults: Result[] = [];
+	let modelResults: SliceMetric[] = [];
 	$: getMetricsForSlices(
 		$models.map((m) => ({
 			sli: sli,
-			state: {
-				metric: predicate.metric,
-				model: m,
-			},
+			metric: predicate.metric,
+			model: m,
 		}))
 	).then((arr) => (modelResults = arr));
 </script>

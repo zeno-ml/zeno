@@ -1,15 +1,16 @@
 <script lang="ts">
 	import Select, { Option } from "@smui/select";
-	import { getMetricsForSlices } from "../../api";
+	import { VegaLite } from "svelte-vega";
+	import { getMetricsForSlices } from "../../api/slice";
 	import {
-		models,
-		model,
-		reports,
-		slices,
 		metric,
 		metrics,
+		model,
+		models,
+		reports,
+		slices,
 	} from "../../stores";
-	import { VegaLite } from "svelte-vega";
+	import type { MetricKey } from "../../zenoservice";
 	import generateBarSpec from "./vegaSpec";
 
 	export let reportId: number;
@@ -31,10 +32,8 @@
 					sli: [...$slices.values()].find(
 						(s) => s.sliceName === pred.sliceName
 					),
-					state: {
-						metric: $metric,
-						model: mod,
-					},
+					metric: $metric,
+					model: mod,
 				});
 			});
 		});

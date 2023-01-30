@@ -1,5 +1,4 @@
 import datetime
-import json
 import os
 import pickle
 import sys
@@ -8,25 +7,12 @@ from importlib import util
 from inspect import getmembers, isfunction
 from pathlib import Path
 
-import numpy as np
-import pandas as pd  # type: ignore
+import pandas as pd
 
-from zeno.classes import MetadataType
+from zeno.classes.base import MetadataType
 
 VIEW_MAP_URL: str = "https://raw.githubusercontent.com/zeno-ml/instance-views/main/"
 VIEWS_MAP_JSON: str = "views.json"
-
-
-class NpEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, np.integer):
-            return int(obj)
-        if isinstance(obj, np.floating):
-            # 👇️ alternatively use str()
-            return float(obj)
-        if isinstance(obj, np.ndarray):
-            return obj.tolist()
-        return json.JSONEncoder.default(self, obj)
 
 
 def read_pickle(file_name: str, cache_path: str, default):
@@ -78,11 +64,13 @@ def getMetadataType(col: pd.Series) -> MetadataType:
 
 def load_series(df, col_name, save_path):
     try:
-        df.loc[:, col_name] = pd.read_pickle(save_path)
+        series = pd.read_pickle(save_path)
+        col_name.metadata_type = getMetadataType(series)
+        df.loc[:, str(col_name)] = series
     except FileNotFoundError:
-        df.loc[:, col_name] = pd.Series([pd.NA] * df.shape[0], index=df.index)
+        df.loc[:, str(col_name)] = pd.Series([pd.NA] * df.shape[0], index=df.index)
     except EOFError:
-        df.loc[:, col_name] = pd.Series([pd.NA] * df.shape[0], index=df.index)
+        df.loc[:, str(col_name)] = pd.Series([pd.NA] * df.shape[0], index=df.index)
 
 
 @contextmanager
@@ -127,5 +115,5 @@ def is_notebook() -> bool:
             return False  # Terminal running IPython
         else:
             return False  # Other type (?)
-    except NameError:
+    except (NameError, ImportError):
         return False  # Probably standard Python interpreter

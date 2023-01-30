@@ -6,5 +6,6 @@ models = [
     "fabriceyhc/bert-base-uncased-amazon_polarity",
 ]
 data_column = "content"
+label_column = "label"
 batch_size = 16
 port = 8002

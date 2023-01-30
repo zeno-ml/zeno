@@ -4,14 +4,21 @@
 	import ListView from "./ListView.svelte";
 	import TableView from "./TableView.svelte";
 	import ScatterView from "./scatter-view/ScatterView.svelte";
-	import { getMetricsForSlices } from "../api";
-	import { zenoState, selectionPredicates, settings } from "../stores";
+	import { getMetricsForSlices } from "../api/slice";
+	import {
+		selectionIds,
+		selectionPredicates,
+		settings,
+		model,
+		metric,
+	} from "../stores";
+	import type { MetricKey, Slice } from "../zenoservice";
 
 	export let table;
 
 	let selected = "list";
 
-	let viewOptions: View.Options = undefined;
+	let viewOptions = undefined;
 	/**
 	 * View component generators
 	 * that when called with a div html argument
@@ -20,8 +27,8 @@
 	 * See https://github.com/zeno-ml/instance-views
 	 * for more details
 	 */
-	let viewFunction: View.Component;
-	let optionsFunction: View.OptionsComponent;
+	let viewFunction;
+	let optionsFunction;
 
 	onMount(() => {
 		if ($settings.view === "") {
@@ -43,19 +50,23 @@
 		}
 	});
 
-	$: currentResult = getMetricsForSlices([
-		<MetricKey>{
-			sli: <Slice>{
-				sliceName: "",
-				folder: "",
-				filterPredicates: {
-					predicates: $selectionPredicates,
-					join: "",
+	$: currentResult = getMetricsForSlices(
+		[
+			<MetricKey>{
+				sli: <Slice>{
+					sliceName: "",
+					folder: "",
+					filterPredicates: {
+						predicates: $selectionPredicates,
+						join: "",
+					},
 				},
+				model: $model,
+				metric: $metric,
 			},
-			state: $zenoState,
-		},
-	]);
+		],
+		$selectionIds
+	);
 </script>
 
 <div class="heading">
@@ -72,8 +83,8 @@
 {#if selected === "table"}
 	<TableView {currentResult} {table} {viewFunction} {viewOptions} />
 {/if}
-{#if selected === "scatter"}
-	<ScatterView {currentResult} {table} {viewFunction} {viewOptions} />
+{#if selected === "projection"}
+	<ScatterView {viewFunction} {viewOptions} />
 {/if}
 
 <style>

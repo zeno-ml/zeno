@@ -3,24 +3,25 @@
 	import { Pagination } from "@smui/data-table";
 	import IconButton from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
-	import { MetadataType, ZenoColumnType } from "../globals";
 	import { tick } from "svelte";
-	import { getFilteredTable } from "../api";
+	import { getFilteredTable } from "../api/table";
 	import {
 		rowsPerPage,
+		selectionIds,
 		selectionPredicates,
 		settings,
 		sort,
 		status,
 		model,
-		zenoState,
 	} from "../stores";
 	import { columnHash } from "../util/util";
+	import type { ZenoColumn } from "../zenoservice";
+	import { MetadataType, ZenoColumnType } from "../zenoservice";
 
 	export let currentResult;
 	export let table;
-	export let viewFunction: View.Component;
-	export let viewOptions: View.Options = {};
+	export let viewFunction;
+	export let viewOptions = {};
 
 	let viewDivs = {};
 	let columnHeader: ZenoColumn[] = [];
@@ -48,7 +49,7 @@
 	$: {
 		$status.completeColumns;
 		$selectionPredicates;
-		$zenoState;
+		$model;
 		$sort;
 		currentPage;
 		updateTable();
@@ -69,9 +70,10 @@
 		getFilteredTable(
 			$status.completeColumns,
 			$selectionPredicates,
-			$zenoState,
+			$model,
 			[start, end],
-			$sort
+			$sort,
+			$selectionIds
 		).then((res) => {
 			table = res;
 			body ? body.scrollIntoView() : "";
@@ -98,8 +100,10 @@
 
 		columnHeader = $status.completeColumns.filter(
 			(c) =>
-				(c.model === "" || c.model === $zenoState.model) &&
-				(c.columnType === 0 || c.columnType === 1 || c.columnType === 4)
+				(c.model === "" || c.model === $model) &&
+				(c.columnType === ZenoColumnType.METADATA ||
+					c.columnType === ZenoColumnType.PREDISTILL ||
+					c.columnType === ZenoColumnType.POSTDISTILL)
 		);
 		let ids = table.map((inst) => inst[idHash]);
 
@@ -233,8 +237,8 @@
 		display: flex;
 	}
 	.sample-container {
-		height: calc(100vh - 165px);
-		width: calc(100vw - 440px);
+		height: calc(100vh - 175px);
+		width: calc(100vw - 460px);
 		overflow-x: scroll;
 		overflow-y: scroll;
 		align-content: baseline;

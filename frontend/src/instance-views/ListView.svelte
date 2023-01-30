@@ -3,25 +3,24 @@
 	import { Pagination } from "@smui/data-table";
 	import IconButton from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
-
 	import { tick } from "svelte";
-	import { ZenoColumnType } from "../globals";
+	import { ZenoColumnType } from "../zenoservice";
+	import { getFilteredTable } from "../api/table";
 	import {
 		model,
 		rowsPerPage,
+		selectionIds,
+		selectionPredicates,
 		settings,
 		sort,
 		status,
-		zenoState,
-		selectionPredicates,
 	} from "../stores";
-	import { getFilteredTable } from "../api";
 	import { columnHash } from "../util/util";
 
 	export let currentResult;
 	export let table;
-	export let viewFunction: View.Component;
-	export let viewOptions: View.Options = {};
+	export let viewFunction;
+	export let viewOptions;
 
 	let viewDivs = {};
 
@@ -47,9 +46,10 @@
 		getFilteredTable(
 			$status.completeColumns,
 			$selectionPredicates,
-			$zenoState,
+			$model,
 			[start, end],
-			$sort
+			$sort,
+			$selectionIds
 		).then((res) => (table = res));
 	}
 
@@ -148,7 +148,7 @@
 
 <style>
 	.sample-container {
-		height: calc(100vh - 165px);
+		height: calc(100vh - 170px);
 		overflow-y: auto;
 		align-content: baseline;
 		border-bottom: 1px solid rgb(224, 224, 224);

@@ -3,6 +3,7 @@
 	import Button from "@smui/button";
 	import { Label } from "@smui/common";
 	import { TrailingIcon } from "@smui/chips";
+	import type { FilterPredicate, ZenoColumn } from "../../../zenoservice";
 
 	export let col: ZenoColumn;
 	export let filterPredicates: FilterPredicate[];

@@ -3,11 +3,10 @@
 	import Paper, { Content } from "@smui/paper";
 	import Textfield from "@smui/textfield";
 	import HelperText from "@smui/textfield/helper-text";
-
-	import { showNewSlice, slices, selections, sliceToEdit } from "../../stores";
+	import { createNewSlice } from "../../api/slice";
+	import { selections, showNewSlice, slices, sliceToEdit } from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
-
-	import { createNewSlice } from "../../api";
+	import type { FilterPredicateGroup, Slice } from "../../zenoservice";
 	import FilterGroupEntry from "./FilterGroupEntry.svelte";
 
 	let sliceName = "";
@@ -76,7 +75,7 @@
 	use:clickOutside
 	on:click_outside={() => showNewSlice.set(false)}>
 	<Paper elevation={7}>
-		<Content>
+		<Content style="max-height: calc(100vh - 100px); overflow-y: scroll;">
 			{#if !$sliceToEdit}
 				<Textfield bind:value={sliceName} label="Name" bind:this={nameInput}>
 					<HelperText slot="helper">Slice 1</HelperText>
@@ -110,6 +109,7 @@
 
 <style>
 	#paper-container {
+		max-height: 100vh;
 		position: fixed;
 		left: 60px;
 		top: 10px;

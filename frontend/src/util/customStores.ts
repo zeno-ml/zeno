@@ -1,3 +1,4 @@
+import { ZenoService, type Report } from "../zenoservice";
 import { writable, type Writable } from "svelte/store";
 
 export function folderWritable() {
@@ -6,13 +7,7 @@ export function folderWritable() {
 
 	function fetchSet(v) {
 		val = v;
-		fetch("/api/set-folders", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(val),
-		});
+		ZenoService.setFolders(val);
 		set(val);
 	}
 
@@ -34,13 +29,7 @@ export function reportWritable() {
 
 	function fetchSet(v) {
 		val = v;
-		fetch("/api/set-reports", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(val),
-		});
+		ZenoService.updateReports(val);
 		set(val);
 	}
 

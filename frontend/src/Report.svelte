@@ -1,17 +1,15 @@
 <script lang="ts">
-	import Select, { Option } from "@smui/select";
+	import { mdiChevronDown, mdiChevronUp } from "@mdi/js";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
-	import { mdiChevronDown, mdiChevronUp } from "@mdi/js";
+	import Select, { Option } from "@smui/select";
 	import { slide } from "svelte/transition";
-
-	import { metric, metrics, report, reports, ready } from "../stores";
-
-	import ReportsList from "./ReportsList.svelte";
-	import SliceTable from "./slice-table-report/SliceTable.svelte";
-	import SliceChartReport from "./slice-chart/SliceChartReport.svelte";
-	import TimeseriesReportTable from "./timeseries-report/TimeseriesReportTable.svelte";
-	import TableReportTable from "./table-report/TableReportTable.svelte";
+	import ReportsList from "./report/ReportsList.svelte";
+	import SliceChartReport from "./report/slice-chart/SliceChartReport.svelte";
+	import SliceTable from "./report/slice-table-report/SliceTable.svelte";
+	import TableReportTable from "./report/table-report/TableReportTable.svelte";
+	import TimeseriesReportTable from "./report/timeseries-report/TimeseriesReportTable.svelte";
+	import { metric, metrics, ready, report, reports } from "./stores";
 
 	let showSlices = true;
 

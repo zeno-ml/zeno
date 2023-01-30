@@ -49,7 +49,7 @@ def test_reports(zeno_client):
     zeno_client.set_reports(
         [{"name": "test", "report_type": "classification", "report_predicates": []}]
     )
-    assert zeno_client.get_reports() == [
+    assert zeno_client.reports == [
         {"name": "test", "report_type": "classification", "report_predicates": []}
     ]
 

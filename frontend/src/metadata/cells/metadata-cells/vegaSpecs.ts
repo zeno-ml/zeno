@@ -11,6 +11,7 @@ export function nominalVegaSpec(metricRange) {
 		},
 		width: 300,
 		height: 40,
+		background: "#fbfbfa",
 		layer: [
 			{
 				params: [
@@ -56,7 +57,7 @@ export function nominalVegaSpec(metricRange) {
 	} as VegaLiteSpec;
 
 	const topLayerBars = countSpec["layer"][1];
-	if (metricRange[2]) {
+	if (metricRange[0] !== Infinity) {
 		topLayerBars.encoding.color = {
 			field: "metric",
 			type: "quantitative",
@@ -87,6 +88,7 @@ export function continuousVegaSpec(metricRange) {
 		},
 		width: 300,
 		height: 40,
+		background: "#fbfbfa",
 		layer: [
 			{
 				params: [
@@ -146,7 +148,7 @@ export function continuousVegaSpec(metricRange) {
 	} as VegaLiteSpec;
 
 	const topLayerBars = histogramSpec["layer"][1];
-	if (metricRange[2]) {
+	if (metricRange[0] !== Infinity) {
 		topLayerBars.encoding.color = {
 			field: "metric",
 			type: "quantitative",

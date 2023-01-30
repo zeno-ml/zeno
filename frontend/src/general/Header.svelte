@@ -94,7 +94,7 @@
 		color: black;
 		flex-direction: column;
 		justify-content: space-between;
-		background: #F2F2EE;
+		background: #f2f2ee;
 	}
 
 	img {

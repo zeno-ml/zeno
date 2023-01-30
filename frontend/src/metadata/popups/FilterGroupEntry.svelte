@@ -1,11 +1,11 @@
 <script lang="ts">
 	import autoAnimate from "@formkit/auto-animate";
-	import Button from "@smui/button";
-	import Select, { Option } from "@smui/select";
-	import IconButton, { Icon } from "@smui/icon-button";
-	import { Svg } from "@smui/common";
 	import { mdiTrashCanOutline } from "@mdi/js";
-
+	import Button from "@smui/button";
+	import { Svg } from "@smui/common";
+	import IconButton, { Icon } from "@smui/icon-button";
+	import Select, { Option } from "@smui/select";
+	import type { FilterPredicateGroup } from "../../zenoservice";
 	import FilterEntry from "./FilterEntry.svelte";
 
 	export let predicateGroup: FilterPredicateGroup;
