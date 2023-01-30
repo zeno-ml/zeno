@@ -6,7 +6,6 @@ import os
 import pickle
 import sys
 import threading
-from functools import lru_cache
 from inspect import getsource
 from math import isnan
 from pathlib import Path
@@ -14,6 +13,7 @@ from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
+from methodtools import lru_cache  # type: ignore
 from pandas import DataFrame  # type: ignore
 from pathos.multiprocessing import ProcessingPool as Pool  # type: ignore
 from sklearn import preprocessing  # type: ignore
@@ -552,7 +552,9 @@ class ZenoBackend(object):
         exists = str(embed_column) in self.df.columns
         return exists and not self.df[str(embed_column)].isnull().any()
 
-    @lru_cache
+    @lru_cache(
+        maxsize=5
+    )  # will cache up 5 model projections in memory before needing to recompute
     def run_tsne(self, model: str) -> np.ndarray:
         # Extract embeddings and store in one big ndarray
         embed_col = ZenoColumn(column_type=ZenoColumnType.EMBEDDING, name=model)
