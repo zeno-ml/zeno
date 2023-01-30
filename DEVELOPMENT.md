@@ -26,7 +26,7 @@ You should now be able to run `poetry run zeno`
 To run the CIFAR-10 example:
 
 - `mkdir data; cd data; git clone https://github.com/YoongiKim/CIFAR-10-images`
-- `source ./.venv/bin/activate`
+- `source ./.venv/bin/activate` (Windows OS command: `.\.venv\Scripts\activate`)
 - `pip install Pillow torch torchvision`
 - `poetry run zeno ./examples/cifar/tests/zeno.toml`
   - For debugging, you can use the "Run and Debug" sidebar in VSCode (a play button with a bug icon), and run the `zenocifar` configuration.
@@ -37,6 +37,10 @@ In a different terminal window, run the following command to serve the frontend 
 
 You should now be able to see a live version of zeno on `localhost:8000` in your browser.
 
+**Windows OS Note**
+- If `make` command is not working, install `gnuwin32` following the [`instructions`](https://superuser.com/a/1634350) to make it works.
+- If encountering `ModuleNotFoundError: No module named “cifar_model”`, add `zeno/examples/cifar/tests` path to `.venv/Lib/site-packages/zenoml.pth` file.
+
 ## Contributing
 
 Pull requests are welcome for any bug fixes or features.
@@ -44,3 +48,4 @@ The Zeno project includes a Makefile which runs various linting and typechecks.
 Run `make` to ensure your code passes the requirements, as it is the same command used in the GitHub Action to test PRs.
 
 **Please ensure `make` passes before submitting a pull request.**
+
