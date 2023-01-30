@@ -38,14 +38,14 @@
 	<div class="legend-item">
 		<div
 			class="legend-color"
-			style="background-color: {BOOLEAN_COLOR_SCALE[0]}" />
-		<div class="legend-label">{domain[0]}</div>
+			style="background-color: {BOOLEAN_COLOR_SCALE[1]}" />
+		<div class="legend-label">TRUE</div>
 	</div>
 	<div class="legend-item">
 		<div
 			class="legend-color"
-			style="background-color: {BOOLEAN_COLOR_SCALE[1]}" />
-		<div class="legend-label">{domain[1]}</div>
+			style="background-color: {BOOLEAN_COLOR_SCALE[0]}" />
+		<div class="legend-label">FALSE</div>
 	</div>
 {:else if metadataType === "nominal"}
 	{#each domain as d, i}
