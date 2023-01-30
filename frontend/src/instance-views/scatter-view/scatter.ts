@@ -1,4 +1,10 @@
-import type { FilterPredicateGroup, Points2D } from "../../zenoservice";
+import { ZenoService } from "../../zenoservice";
+import type {
+	FilterPredicateGroup,
+	Points2D,
+	ZenoColumn,
+	CancelablePromise,
+} from "../../zenoservice";
 import { getFilteredIds } from "../../api/table";
 import { selectionIds } from "../../stores";
 
@@ -52,5 +58,31 @@ export async function getPointOpacities(
 		);
 	} else {
 		return new Array(points.ids.length).fill(fullOpacity);
+	}
+}
+
+let projectionRequest: CancelablePromise<Points2D> = null;
+/**
+ * Main driver behind fetching the projected points and displaying
+ * them in the scale that WebGL expects between [-1, 1]
+ */
+export async function project2D(model: string, colorColumn: ZenoColumn) {
+	// if request in progress cancel it in favor of this new one
+	if (projectionRequest !== null) {
+		projectionRequest.cancel();
+	}
+
+	try {
+		// requests tsne from backend
+		projectionRequest = ZenoService.projectEmbedInto2D({
+			model,
+			column: colorColumn,
+		});
+
+		const points = await projectionRequest;
+		projectionRequest = null;
+		return points;
+	} catch (e) {
+		return undefined;
 	}
 }

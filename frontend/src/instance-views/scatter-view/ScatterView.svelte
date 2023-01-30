@@ -30,6 +30,7 @@
 		getIndicesFromIds,
 		getPointOpacities,
 		selectPoints,
+		project2D,
 	} from "./scatter";
 
 	export let viewFunction;
@@ -58,7 +59,7 @@
 	let dehighlightPoints;
 	let highlightPoints;
 
-	$: project2DOnModelAndTransformChange($model, colorByColumn);
+	$: project2DFromModel($model, colorByColumn);
 	$: {
 		if (containerEl && autoResize) {
 			resizeScatter();
@@ -91,25 +92,20 @@
 	 * Main driver behind fetching the projected points and displaying
 	 * them in the scale that WebGL expects between [-1, 1]
 	 */
-	async function project2DOnModelAndTransformChange(
-		model: string,
-		colorColumn: ZenoColumn
-	) {
+	async function project2DFromModel(model: string, colorColumn: ZenoColumn) {
 		embedExists = await ZenoService.embedExists(model);
 
 		if (embedExists) {
 			// show spinner
 			computingPoints = true;
 
-			// requests tsne from backend
-			points = await ZenoService.projectEmbedInto2D({
-				model,
-				column: colorColumn,
-			});
+			points = await project2D(model, colorColumn);
 
-			// simply scales the points between [-1, 1]
-			pointToWebGL = createScalesWebgGLExtent(points);
-			pointToWebGL.scale(points);
+			if (points) {
+				// simply scales the points between [-1, 1]
+				pointToWebGL = createScalesWebgGLExtent(points);
+				pointToWebGL.scale(points);
+			}
 
 			// stop spinner
 			computingPoints = false;
