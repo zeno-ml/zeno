@@ -3,7 +3,7 @@ import { color } from "d3-color";
 
 export const NOMINAL_COLOR_SCALE = schemeCategory10 as string[];
 
-export const BOOLEAN_COLOR_SCALE = ["#FF5733", "#4168E1"];
+export const BOOLEAN_COLOR_SCALE = ["#4168E1", "#FF5733"];
 
 export const CONTINUOUS_COLOR_SCALE = interpolateToStringArray(
 	interpolateBuPu,
