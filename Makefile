@@ -13,7 +13,7 @@ lint:
 	@poetry run black zeno/
 	@poetry run usort format zeno/
 	@poetry run flake8 zeno --statistics
-	@cd frontend && npm run format && npm run lint
+	@cd frontend && npm run lint
 
 .PHONY: typecheck
 typecheck:
@@ -26,7 +26,7 @@ typecheck:
 .PHONY: test
 test:
 	@echo "==> 🧪 Tests"
-	@poetry run pytest -svv zeno/tests/*
+	@poetry run pytest -svv zeno/tests/
 	@cd frontend && npm run test
 
 
