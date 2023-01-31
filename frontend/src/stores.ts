@@ -116,9 +116,11 @@ export const selectionPredicates: Readable<FilterPredicateGroup[]> = derived(
 		if ($selections.slices.length !== 0) {
 			ret.push({
 				join: "&",
-				predicates: $selections.slices.map(
-					(sliName) => get(slices).get(sliName).filterPredicates
-				),
+				predicates: $selections.slices.map((sliName) => {
+					const filts = get(slices).get(sliName).filterPredicates;
+					filts.join = "&";
+					return filts;
+				}),
 			});
 		}
 		return ret;
