@@ -28,10 +28,8 @@
 			<div class="meta-chip">
 				{pred.column.name}
 				{pred.operation}
-				{#if typeof pred.value === "number"}
-					{!isNaN(Number(pred.value))
-						? Number(pred.value).toFixed(2)
-						: pred.value}
+				{#if !isNaN(Number(pred.value)) && typeof pred.value !== "boolean"}
+					{Number(pred.value).toFixed(2)}
 				{:else}
 					{pred.value}
 				{/if}
