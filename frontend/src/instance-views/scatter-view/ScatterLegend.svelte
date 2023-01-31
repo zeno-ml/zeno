@@ -48,7 +48,7 @@
 		<div class="legend-label">FALSE</div>
 	</div>
 {:else if metadataType === "nominal"}
-	{#each domain as d, i}
+	{#each domain.sort() as d, i}
 		<div class="legend-item">
 			<div
 				class="legend-color"
