@@ -55,8 +55,4 @@
 		margin-bottom: 2px;
 		border-radius: 5px;
 	}
-	hr {
-		width: 100%;
-		border: none;
-	}
 </style>
