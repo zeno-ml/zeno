@@ -644,6 +644,38 @@ files = [
 ]
 
 [[package]]
+name = "opentsne"
+version = "0.6.2"
+description = "Extensible, parallel implementations of t-SNE"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "openTSNE-0.6.2-cp310-cp310-macosx_10_15_x86_64.whl", hash = "sha256:bcda086f0bcaa4b21e708e24ccd640f54d5c64753648e67c1bebca3f2310a8a6"},
+    {file = "openTSNE-0.6.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6f1739c5f01e0b435c993a85040d536b4f2cb203b37b72e3dbbf9e6437b94ac6"},
+    {file = "openTSNE-0.6.2-cp310-cp310-win_amd64.whl", hash = "sha256:14cbbc406ed7f6bd5c7dc8881c5f14d931a5693dc831e89d9ce2325a4741309f"},
+    {file = "openTSNE-0.6.2-cp37-cp37m-macosx_10_14_x86_64.whl", hash = "sha256:42b4fe40a376a11aa9471648089f45b474a568755a284bbcfb2d795ad1930054"},
+    {file = "openTSNE-0.6.2-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a75cabbaa65b05cde87aacc36840a7c4aa353855fae88769e8bc36be6282d512"},
+    {file = "openTSNE-0.6.2-cp37-cp37m-win_amd64.whl", hash = "sha256:add3fb7ff8b31b9e11050bacb91c58db0b0f68330ea357f6d216588314ac5d43"},
+    {file = "openTSNE-0.6.2-cp38-cp38-macosx_10_14_x86_64.whl", hash = "sha256:207847efb973e8eef4c753894dbcbb4bc73aef09b8e9f1c26a9c351f2814cce7"},
+    {file = "openTSNE-0.6.2-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:0e166eda980cfdd8dc57f4286be8fccffc231aebcbf54249c286b6c07da76bd0"},
+    {file = "openTSNE-0.6.2-cp38-cp38-win_amd64.whl", hash = "sha256:87af2abc4f860e59bad1288036b89497cac48b9f4e8db40b8c180dd56162ab68"},
+    {file = "openTSNE-0.6.2-cp39-cp39-macosx_10_15_x86_64.whl", hash = "sha256:244b389ec5251bc3d9f6193db8f9c1eafd4d603adfa88c99839d67e437371bc1"},
+    {file = "openTSNE-0.6.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:402a765f19324414b2b5743d17d3d09a2ad60750253a8a47008dc7bff7333f6d"},
+    {file = "openTSNE-0.6.2-cp39-cp39-win_amd64.whl", hash = "sha256:f756c682e588f63eaabdaf321294d5590ac070ff5b5824e817bedd30c9b54df1"},
+    {file = "openTSNE-0.6.2.tar.gz", hash = "sha256:92ea18afd4e34df8fb536c813c36533de892d96511f6683721003398b4fcf2e9"},
+]
+
+[package.dependencies]
+numpy = ">=1.16.6"
+scikit-learn = ">=0.20"
+scipy = "*"
+
+[package.extras]
+hnsw = ["hnswlib (>=0.4.0,<0.5.0)"]
+pynndescent = ["pynndescent (>=0.5.0,<0.6.0)"]
+
+[[package]]
 name = "packaging"
 version = "23.0"
 description = "Core utilities for Python packages"
@@ -1576,4 +1608,4 @@ test = ["pytest (==4.6.7)", "pytest-cov (==2.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1, <=3.11" 
-content-hash = "1d0355af4fbe98a138af56f0a912470155bcd343e4b5065c7540f7af1ae6b811"
+content-hash = "b8d5466587056fe7b7d3c62c2767550c59e16893154d0c8430798b1b5353f88c"
