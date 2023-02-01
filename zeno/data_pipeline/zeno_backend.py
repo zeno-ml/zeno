@@ -563,9 +563,14 @@ class ZenoBackend(object):
         embed = np.stack(embed, axis=0)  # type: ignore
 
         # project embeddings into 2D
-        from sklearn.manifold import TSNE  # type: ignore
+        from openTSNE import TSNE  # type: ignore
 
-        return TSNE().fit_transform(embed)
+        ALL_AVAILABLE_PROCESSORS = -1
+        DEFAULT_ITERATIONS = 400
+        tsne = TSNE(n_jobs=ALL_AVAILABLE_PROCESSORS, n_iter=DEFAULT_ITERATIONS)
+        projection = tsne.fit(embed)
+
+        return projection
 
     def get_projection_colors(self, column: ZenoColumn) -> Tuple[List[int], List, str]:
         """Get colors for a projection based on a column.
