@@ -563,7 +563,7 @@ class ZenoBackend(object):
         embed = np.stack(embed, axis=0)  # type: ignore
 
         # project embeddings into 2D
-        from openTSNE import TSNE
+        from openTSNE import TSNE  # type: ignore
 
         ALL_AVAILABLE_PROCESSORS = -1
         DEFAULT_ITERATIONS = 400
