@@ -46,6 +46,24 @@ zeno({
 
 ```
 
+## Citation
+
+```bibtex
+@inproceedings{cabrera23zeno,
+  author = {Cabrera, Ángel Alexander and Fu, Erica and Bertucci, Donald and Holstein, Kenneth and Talwalkar, Ameet and Hong, Jason I. and Perer, Adam},
+  title = {Zeno: An Interactive Framework for Behavioral Evaluation of Machine Learning},
+  year = {2023},
+  isbn = {978-1-4503-9421-5/23/04},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/3544548.3581268},
+  doi = {10.1145/3544548.3581268},
+  booktitle = {CHI Conference on Human Factors in Computing Systems},
+  location = {Hamburg, Germany},
+  series = {CHI '23}
+}
+```
+
 ## Learn More
 
 Check out examples and additional documentation:
