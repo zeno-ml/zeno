@@ -91,10 +91,10 @@
 		height: 100vh;
 		width: 50px;
 		display: flex;
-		color: black;
+		color: var(--G1);
 		flex-direction: column;
 		justify-content: space-between;
-		background: #f2f2ee;
+		background: var(--Y1);
 	}
 
 	img {
@@ -133,11 +133,11 @@
 	}
 
 	.item:hover {
-		background-color: #f5f5f5;
+		background-color: rgb(0, 0, 0, 0.05);
 	}
 
 	.selected {
-		color: #6a1b9a;
+		color: var(--logo);
 		font-weight: 500;
 	}
 

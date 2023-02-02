@@ -118,8 +118,8 @@
 				{#each CHOICES as choice}
 					<Button
 						style="background-color: {selected === choice
-							? '#f8f8f8'
-							: 'white'}"
+							? 'var(--G5)'
+							: 'var(--G6'}"
 						variant="outlined"
 						on:click={() => (selected = choice)}>{choice}</Button>
 				{/each}
@@ -138,7 +138,7 @@
 		flex-direction: row;
 		justify-content: space-between;
 		width: 100%;
-		border-bottom: 1px solid #e0e0e0;
+		border-bottom: 1px solid var(--G5);
 	}
 	.options {
 		display: flex;
@@ -149,7 +149,7 @@
 		align-items: center;
 		padding-top: 10px;
 		padding-bottom: 10px;
-		border-bottom: 1px solid #e0e0e0;
+		border-bottom: 1px solid var(--G5);
 	}
 	.chips {
 		display: flex;
@@ -162,22 +162,22 @@
 	}
 	.metric {
 		font-weight: 400;
-		color: #6a1b9a;
+		color: var(--logo);
 		margin-right: 15px;
 	}
 	.clear {
 		padding: 5px;
 		margin-left: 10px;
 		cursor: pointer;
-		color: #6a1b9a;
+		color: var(--G3);
 	}
 	.clear:hover {
-		background: #ede1fd;
+		background: var(--Y1);
 		border-radius: 5px;
 	}
 	#size {
 		font-style: italic;
-		color: rgba(0, 0, 0, 0.4);
+		color: var(--G3);
 		margin-right: 10px;
 	}
 	.inline {

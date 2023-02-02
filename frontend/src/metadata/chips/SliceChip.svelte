@@ -21,9 +21,8 @@
 
 <style>
 	.meta-chip {
-		padding: 5px;
-		background: #f8f8f8;
-		border: 1px solid #e8e8e8;
+		padding: 5px 10px;
+		background: var(--P3);
 		margin-left: 5px;
 		margin-right: 5px;
 		margin-top: 2px;

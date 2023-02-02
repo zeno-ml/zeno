@@ -3,10 +3,10 @@
 @use "@material/theme/color-palette";
 
 @use "@material/theme/index" as theme with (
-	$primary: #6a1b9a,
-	$secondary: #676778,
-	$surface: #fff,
-	$background: #fff,
+	$primary: var(--logo),
+	$secondary: var(--G3),
+	$surface: var(--G6),
+	$background: var(--G6),
 	$error: color-palette.$red-900
 );
 

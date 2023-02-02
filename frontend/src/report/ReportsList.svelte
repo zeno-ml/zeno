@@ -135,7 +135,7 @@
 	.overview {
 		display: flex;
 		align-items: center;
-		border: 1px solid #e0e0e0;
+		border: 1px solid var(--G5);
 		border-radius: 5px;
 		margin-top: 5px;
 		margin-bottom: 5px;
@@ -144,7 +144,7 @@
 		cursor: pointer;
 	}
 	.selected {
-		background: #f9f5ff;
+		background: var(--P3);
 	}
 	.icon {
 		width: 24px;
@@ -160,10 +160,10 @@
 		position: absolute;
 		z-index: 10;
 		margin-top: 10px;
-		background: white;
+		background: var(--G6);
 	}
 	.report-entry {
-		border: 1px solid #e0e0e0;
+		border: 1px solid var(--G5);
 		transition: 0.25s;
 		cursor: pointer;
 		width: 300px;
@@ -171,6 +171,6 @@
 		align-items: center;
 	}
 	.report-entry:hover {
-		background: #f9f5ff;
+		background: var(--P3);
 	}
 </style>

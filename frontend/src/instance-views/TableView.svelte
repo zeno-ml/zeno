@@ -242,20 +242,20 @@
 		overflow-x: scroll;
 		overflow-y: scroll;
 		align-content: baseline;
-		border-bottom: 1px solid rgb(224, 224, 224);
+		border-bottom: 1px solid var(--G5);
 		display: flex;
 		flex-wrap: wrap;
 		min-width: 75px;
 	}
 	th {
 		text-align: left;
-		border-bottom: 1px solid #e0e0e0;
+		border-bottom: 1px solid var(--G5);
 		padding-bottom: 5px;
 		margin-bottom: 20px;
 		margin-right: 20px;
 		position: sticky;
 		top: 0;
-		background-color: white;
+		background-color: var(--G6);
 		min-width: 70px;
 		margin-bottom: 5px;
 		padding-right: 1.6vw;

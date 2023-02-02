@@ -62,7 +62,7 @@
 	:global(.sticky) {
 		overflow: visible;
 		left: 0px;
-		background: white;
+		background: var(--G6);
 		z-index: 0;
 	}
 	.group {

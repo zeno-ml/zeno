@@ -318,15 +318,14 @@
 		position: sticky;
 		top: -10px;
 		z-index: 3;
-		background-color: #fbfbfa;
-		border-bottom: 0.5px solid #d1d1d1;
+		background-color: var(--Y2);
 	}
 	#metric-header {
 		position: sticky;
 		top: 40px;
 		z-index: 2;
-		background-color: #fbfbfa;
-		border-bottom: 0.5px solid #d1d1d1;
+		border-bottom: 0.5px solid var(--G5);
+		background-color: var(--Y2);
 	}
 	.side-container {
 		height: calc(100vh - 15px);
@@ -338,7 +337,7 @@
 		padding-left: 15px;
 		padding-right: 10px;
 		overflow-y: scroll;
-		background-color: #fbfbfa;
+		background-color: var(--Y2);
 	}
 	.ghost-container {
 		width: 100%;
@@ -351,8 +350,9 @@
 		padding-bottom: 10px;
 		padding-top: 5px;
 	}
+	/* I don't see where this is used, maybe delete? */
 	.cell {
-		border: 0.5px solid #d1d1d1;
+		border: 0.5px solid var(--G5);
 		padding: 10px;
 		min-width: 400px;
 		width: 400px;
@@ -369,20 +369,21 @@
 	.overview {
 		display: flex;
 		align-items: center;
-		border: 0.5px solid #e0e0e0;
-		border-radius: 5px;
+		border: 1px solid var(--G4);
+		border-radius: 10px;
 		padding-left: 10px;
 		justify-content: space-between;
 		padding-right: 10px;
-		height: 36px;
+		height: 30px;
 		cursor: pointer;
+		color: var(--G1);
 	}
 	.selected {
-		background: #f9f5ff;
+		background: var(--P3);
 	}
 	.size {
 		font-style: italic;
-		color: rgba(0, 0, 0, 0.4);
+		color: var(--G3);
 		margin-right: 10px;
 		margin-left: 10px;
 	}

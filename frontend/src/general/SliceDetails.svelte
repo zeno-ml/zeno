@@ -49,8 +49,8 @@
 	}
 	.meta-chip {
 		width: fit-content;
-		padding: 5px;
-		background: rgba(0, 0, 0, 0.07);
+		padding: 5px 10px;
+		background: var(--G5);
 		margin-left: 5px;
 		margin-right: 5px;
 		margin-top: 2px;

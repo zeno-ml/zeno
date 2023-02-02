@@ -16,7 +16,7 @@
 <style>
 	.id-chip {
 		--opacity: 0.25;
-		padding: 5px;
+		padding: 5px 10px;
 		background: rgb(87, 0, 111, var(--opacity));
 		background: linear-gradient(
 			141deg,
@@ -24,7 +24,7 @@
 			rgba(199, 15, 136, var(--opacity)) 43%,
 			rgba(0, 189, 255, var(--opacity)) 100%
 		);
-		border: 1px solid #e8e8e8;
+		border: 1px solid var(--G5);
 		margin-left: 5px;
 		margin-right: 5px;
 		margin-top: 2px;

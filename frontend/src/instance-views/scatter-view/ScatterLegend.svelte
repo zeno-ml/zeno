@@ -18,7 +18,7 @@
 		<svg
 			height={svg.height}
 			width={svg.width}
-			style="border: 0.5px solid lightgrey; margin: 10px;">
+			style="border: 0.5px solid var(--G5); margin: 10px;">
 			{#each CONTINUOUS_COLOR_SCALE as color, i}
 				{@const spacing = svg.width / CONTINUOUS_COLOR_SCALE.length}
 				{@const colorWidth = (1 / CONTINUOUS_COLOR_SCALE.length) * svg.width}
