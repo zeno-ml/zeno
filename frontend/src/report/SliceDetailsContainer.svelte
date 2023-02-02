@@ -42,9 +42,9 @@
 		transform: translateY(100%);
 	}
 	.tooltip {
-		background: white;
+		background: var(--G6);
 		padding: 10px;
-		box-shadow: 1px 1px 3px 1px #ccc;
+		box-shadow: 1px 1px 3px 1px var(--G4);
 		border-radius: 3px;
 	}
 

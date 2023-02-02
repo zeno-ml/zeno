@@ -75,6 +75,6 @@
 		align-items: center;
 		margin-left: 5px;
 		margin-bottom: 10px;
-		color: #666;
+		color: var(--G2);
 	}
 </style>

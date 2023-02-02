@@ -133,20 +133,19 @@
 		display: flex;
 		flex-direction: row;
 		justify-content: space-between;
-		border: 0.5px solid #ebebea;
 		padding-left: 10px;
 		padding-right: 10px;
 		margin-top: 5px;
-		border-radius: 5px;
+		border-radius: 10px;
 		height: 36px;
-		background: #f8f8f8;
+		background: var(--G5);
 	}
 	#options-container {
 		right: 0px;
 		z-index: 5;
-		background: white;
+		background: var(--G6);
 		margin-top: -7px;
-		border: 1px solid #e8e8e8;
+		border: 1px solid var(--G5);
 		position: absolute;
 		height: max-content;
 		display: flex;
@@ -155,7 +154,7 @@
 		margin-bottom: 0px;
 	}
 	.hover {
-		background: #f9f5ff;
+		background: var(--G4);
 	}
 	.inline {
 		display: flex;

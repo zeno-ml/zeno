@@ -78,8 +78,8 @@
 	}
 	#slices {
 		padding: 20px;
-		border-top: 1px solid #e0e0e0;
-		background: #fafafa;
+		border-top: 1px solid var(--G5);
+		background: var(--Y2);
 		max-height: 300px;
 		min-height: 300px;
 		overflow-y: scroll;
@@ -95,7 +95,7 @@
 		margin-bottom: 10px;
 	}
 	#slice-show {
-		background: #f9f5ff;
+		background: var(--P3);
 		width: fit-content;
 		border-top-right-radius: 5px;
 		border-top-left-radius: 5px;

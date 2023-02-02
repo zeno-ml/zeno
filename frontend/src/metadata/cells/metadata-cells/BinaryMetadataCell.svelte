@@ -33,7 +33,7 @@
 </script>
 
 {#if histogram}
-	<div style:display="flex">
+	<div class="binary-button-wrapper">
 		<div
 			class="binary-button"
 			style=" 'grey'
@@ -45,7 +45,7 @@
 				on:click={() => setSelection(true)}>
 				<Label>True</Label>
 			</Button>
-			<p>{histogram[0].filteredCount}</p>
+			<small>{histogram[0].filteredCount}</small>
 		</div>
 		<div class="binary-button">
 			<Button
@@ -55,21 +55,19 @@
 				on:click={() => setSelection(false)}>
 				<Label>False</Label>
 			</Button>
-			<p>{histogram[1].filteredCount}</p>
+			<small>{histogram[1].filteredCount}</small>
 		</div>
 	</div>
 {/if}
 
 <style>
-	p {
-		padding: 0px;
-		margin: 0px;
-		font-size: 14px;
-		color: #666;
-	}
 	.binary-button {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+	}
+	.binary-button-wrapper {
+		display: flex;
+		gap: 5px;
 	}
 </style>

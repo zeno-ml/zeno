@@ -52,7 +52,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		border: 1px solid #e0e0e0;
+		border: 1px solid var(--G5);
 		border-radius: 5px;
 		margin-top: 5px;
 		margin-bottom: 5px;

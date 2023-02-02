@@ -6,7 +6,7 @@ body {
 }
 
 body {
-	color: #333;
+	color: var(--G1);
 	margin: 0;
 	padding: 0;
 	box-sizing: border-box;
@@ -17,19 +17,23 @@ body {
 
 p {
 	font-size: 14px;
-	color: #545454;
+	color: var(--G2);
 }
 
 h4 {
 	font-size: 14px;
-	font-weight: 500;
-	color: #545454;
+	font-weight: 600;
+	color: var(--G2);
 }
 
 h2 {
 	font-weight: 500;
 }
 
+small {
+	font-size: 10px;
+	color: var(--G2);
+}
 .mdc-data-table__pagination {
 	border-top-width: 0px;
 }
@@ -39,7 +43,7 @@ table {
 }
 
 .end-cell {
-	border-right: 1px solid #e0e0e0;
+	border-right: 1px solid var(--G5);
 }
 
 .remove {

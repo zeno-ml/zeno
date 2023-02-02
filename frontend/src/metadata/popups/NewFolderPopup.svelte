@@ -80,9 +80,7 @@
 				on:click={() => createFolder()}>{edit ? "Update" : "Create"}</Button>
 		</Content>
 		{#if invalidName && folderName.length > 0}
-			<p style:margin-right="10px" style:color="#B71C1C">
-				folder already exists
-			</p>
+			<p style:margin-right="10px">folder already exists</p>
 		{/if}
 	</Paper>
 </div>
