@@ -80,19 +80,19 @@
 		max-width: 50px;
 	}
 	/* color styles */
-	:global(:root){
+	:global(:root) {
 		--G1: #333333;
-		--G2: #73726F;
+		--G2: #73726f;
 		--G3: #989895;
-		--G4: #D3D3D3;
-		--G5: #EBEBEA;
-		--G6: #FFFFFF;
-		--logo: #6A1B9A;
-		--P1: #B18BD3;
-		--P2: #D2BAE9;
-		--P3: #E6DEED;
-		--P4: #F9F7FB;
-		--Y1: #F2F2EE;
+		--G4: #d3d3d3;
+		--G5: #ebebea;
+		--G6: #ffffff;
+		--logo: #6a1b9a;
+		--P1: #b18bd3;
+		--P2: #d2bae9;
+		--P3: #e6deed;
+		--P4: #f9f7fb;
+		--Y1: #f2f2ee;
 		--Y2: #fbfbfa;
 
 		--mdc-theme-primary: var(--G2);
