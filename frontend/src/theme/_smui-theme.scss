@@ -3,12 +3,53 @@
 @use "@material/theme/color-palette";
 
 @use "@material/theme/index" as theme with (
-	$primary: var(--logo),
-	$secondary: var(--G3),
-	$surface: var(--G6),
-	$background: var(--G6),
+	$primary: #6a1b9a,
+	$secondary: #989895,
+	$surface: #ffffff,
+	$background: #ffffff,
 	$error: color-palette.$red-900
 );
+
+:root {
+	--G1: #333333;
+	--G2: #73726f;
+	--G3: #989895;
+	--G4: #d3d3d3;
+	--G5: #ebebea;
+	--G6: #ffffff;
+	--logo: #6a1b9a;
+	--P1: #b18bd3;
+	--P2: #d2bae9;
+	--P3: #e6deed;
+	--P4: #f9f7fb;
+	--Y1: #f2f2ee;
+	--Y2: #fbfbfa;
+
+	--mdc-theme-primary: var(--G2);
+	--mdc-theme-secondary: var(--G3);
+	--mdc-theme-background: var(--G6);
+	--mdc-theme-surface: var(--G6);
+	--mdc-theme-error: #b71c1c;
+	--mdc-theme-on-primary: var(--G6);
+	--mdc-theme-on-secondary: var(--G6);
+	--mdc-theme-on-surface: var(--G1);
+	--mdc-theme-on-error: var(--G6);
+	--mdc-theme-text-primary-on-background: rgba(0, 0, 0, 0.87);
+	--mdc-theme-text-secondary-on-background: rgba(0, 0, 0, 0.54);
+	--mdc-theme-text-hint-on-background: rgba(0, 0, 0, 0.38);
+	--mdc-theme-text-disabled-on-background: rgba(0, 0, 0, 0.38);
+	--mdc-theme-text-icon-on-background: rgba(0, 0, 0, 0.38);
+	--mdc-theme-text-primary-on-light: rgba(0, 0, 0, 0.87);
+	--mdc-theme-text-secondary-on-light: rgba(0, 0, 0, 0.54);
+	--mdc-theme-text-hint-on-light: rgba(0, 0, 0, 0.38);
+	--mdc-theme-text-disabled-on-light: rgba(0, 0, 0, 0.38);
+	--mdc-theme-text-icon-on-light: rgba(0, 0, 0, 0.38);
+	--mdc-theme-text-primary-on-dark: white;
+	--mdc-theme-text-secondary-on-dark: rgba(255, 255, 255, 0.7);
+	--mdc-theme-text-hint-on-dark: rgba(255, 255, 255, 0.5);
+	--mdc-theme-text-disabled-on-dark: rgba(255, 255, 255, 0.5);
+	--mdc-theme-text-icon-on-dark: rgba(255, 255, 255, 0.5);
+}
 
 $mdc-typography-font-family: unquote("Open Sans, Roboto, sans-serif");
 
