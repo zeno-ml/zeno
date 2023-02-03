@@ -4,6 +4,7 @@
 	import { columnHash } from "../../util/util";
 	import {
 		MetadataType,
+		ZenoColumnType,
 		type FilterPredicate,
 		type FilterPredicateGroup,
 		type ZenoColumn,
@@ -47,7 +48,7 @@
 		<div class="info">
 			<div class="label top-text">
 				<span>
-					{col.name}
+					{col.columnType === ZenoColumnType.OUTPUT ? "output" : col.name}
 				</span>
 			</div>
 		</div>

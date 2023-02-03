@@ -310,6 +310,15 @@
 		{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.POSTDISTILL && m.model === $model) as col}
 			<MetadataCell {col} histogram={metadataHistograms.get(col)} />
 		{/each}
+
+		{@const outputCol = $status.completeColumns.filter(
+			(m) => m.columnType === ZenoColumnType.OUTPUT && m.name === $model
+		)}
+		{#if outputCol.length > 0}
+			<MetadataCell
+				col={outputCol[0]}
+				histogram={metadataHistograms.get(outputCol[0])} />
+		{/if}
 	{/if}
 </div>
 

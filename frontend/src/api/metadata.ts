@@ -39,9 +39,7 @@ export async function getHistograms(
 	model: string
 ): Promise<InternMap<ZenoColumn, HistogramEntry[]>> {
 	const requestedHistograms = completeColumns.filter(
-		(c) =>
-			(c.model === "" || c.model === model) &&
-			c.columnType !== ZenoColumnType.OUTPUT
+		(c) => c.model === "" || c.model === model
 	);
 	requestingHistogramCounts.set(true);
 	const res = await ZenoService.getHistogramBuckets(requestedHistograms);
