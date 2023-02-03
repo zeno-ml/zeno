@@ -58,7 +58,8 @@
 	let dehighlightPoints;
 	let highlightPoints;
 
-	$: project2DOnModelAndTransformChange($model, colorByColumn);
+	$: project2DOnModelChange($model);
+	$: changePointsColorsOnColorChange(colorByColumn);
 	$: {
 		if (containerEl && autoResize) {
 			resizeScatter();
@@ -88,13 +89,27 @@
 	}
 
 	/**
+	 * Updates only the colors on color change
+	 */
+	async function changePointsColorsOnColorChange(colorByColumn: ZenoColumn) {
+		if (pointsExist(points)) {
+			const newColoredPoints = await ZenoService.projectEmbedInto2D({
+				model: $model,
+				column: colorByColumn,
+			});
+
+			// update the colors and leave x, y alone
+			points.color = newColoredPoints.color;
+			points.domain = newColoredPoints.domain;
+			points.dataType = newColoredPoints.dataType;
+		}
+	}
+
+	/**
 	 * Main driver behind fetching the projected points and displaying
 	 * them in the scale that WebGL expects between [-1, 1]
 	 */
-	async function project2DOnModelAndTransformChange(
-		model: string,
-		colorColumn: ZenoColumn
-	) {
+	async function project2DOnModelChange(model: string) {
 		embedExists = await ZenoService.embedExists(model);
 
 		if (embedExists) {
@@ -104,7 +119,7 @@
 			// requests tsne from backend
 			points = await ZenoService.projectEmbedInto2D({
 				model,
-				column: colorColumn,
+				column: colorByColumn,
 			});
 
 			// simply scales the points between [-1, 1]
@@ -145,6 +160,10 @@
 		if (containerEl && autoResize) {
 			width = containerEl.clientWidth;
 		}
+	}
+
+	function pointsExist(points: Points2D) {
+		return points.ids.length > 0;
 	}
 </script>
 
