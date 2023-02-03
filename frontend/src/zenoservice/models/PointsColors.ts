@@ -3,8 +3,7 @@
 /* eslint-disable */
 
 export type PointsColors = {
-    color: Array<number>;
-    domain: Array<(number | string)>;
-    dataType: string;
+	color: Array<number>;
+	domain: Array<number | string>;
+	dataType: string;
 };
-

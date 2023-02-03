@@ -3,6 +3,5 @@
 /* eslint-disable */
 
 export type FilterIds = {
-    ids: Array<string>;
+	ids: Array<string>;
 };
-

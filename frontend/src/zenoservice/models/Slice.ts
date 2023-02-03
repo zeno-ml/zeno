@@ -2,11 +2,10 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { FilterPredicateGroup } from './FilterPredicateGroup';
+import type { FilterPredicateGroup } from "./FilterPredicateGroup";
 
 export type Slice = {
-    sliceName: string;
-    folder: string;
-    filterPredicates: FilterPredicateGroup;
+	sliceName: string;
+	folder: string;
+	filterPredicates: FilterPredicateGroup;
 };
-

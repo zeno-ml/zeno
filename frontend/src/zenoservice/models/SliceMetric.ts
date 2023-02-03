@@ -3,7 +3,6 @@
 /* eslint-disable */
 
 export type SliceMetric = {
-    metric?: number;
-    size: number;
+	metric?: number;
+	size: number;
 };
-
