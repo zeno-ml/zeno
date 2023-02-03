@@ -67,5 +67,10 @@
 		bind:view
 		spec={nominalVegaSpec($metricRange)}
 		data={{ table: histogram.map((h) => Object.assign({}, h)) }}
-		options={{ tooltip: true, actions: false, theme: "vox" }} />
+		options={{
+			tooltip: true,
+			actions: false,
+			theme: "vox",
+			renderer: "svg",
+		}} />
 </div>
