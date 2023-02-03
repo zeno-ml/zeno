@@ -9,7 +9,7 @@ import threading
 from inspect import getsource
 from math import isnan
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -22,7 +22,7 @@ from zeno.api import ZenoOptions, ZenoParameters
 from zeno.classes.base import MetadataType, ZenoColumnType
 from zeno.classes.classes import MetricKey, TableRequest, ZenoColumn
 from zeno.classes.metadata import HistogramBucket, HistogramRequest
-from zeno.classes.projection import Points2D
+from zeno.classes.projection import Points2D, PointsColors
 from zeno.classes.report import Report
 from zeno.classes.slice import (
     FilterIds,
@@ -594,7 +594,7 @@ class ZenoBackend(object):
 
         return projection
 
-    def get_projection_colors(self, column: ZenoColumn) -> Tuple[List[int], List, str]:
+    def get_projection_colors(self, column: ZenoColumn) -> PointsColors:
         """Get colors for a projection based on a column.
 
         Args:
@@ -628,13 +628,16 @@ class ZenoBackend(object):
                 color_range = labels.astype(int).tolist()
             else:
                 color_range = [0] * len(series)
-        return color_range, unique.tolist(), metadata_type
+
+        return PointsColors(
+            color=color_range, domain=unique.tolist(), data_type=metadata_type
+        )
 
     def project_embed_into_2D(self, model: str, column: ZenoColumn) -> Points2D:
         """If the embedding exists, will use t-SNE to project into 2D."""
 
         points = Points2D(
-            x=[], y=[], color=[], domain=[], opacity=[], dataType="", ids=[]
+            x=[], y=[], color=[], domain=[], opacity=[], data_type="", ids=[]
         )
 
         # Can't project without an embedding
@@ -647,9 +650,9 @@ class ZenoBackend(object):
         points.x = projection[:, 0].tolist()
         points.y = projection[:, 1].tolist()
         color_results = self.get_projection_colors(column)
-        points.color = color_results[0]
-        points.domain = color_results[1]
-        points.dataType = color_results[2]
+        points.color = color_results.color
+        points.domain = color_results.domain
+        points.data_type = color_results.data_type
         points.ids = self.df[str(self.id_column)].to_list()
 
         return points

@@ -1,6 +1,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { ColorsProjectRequest } from "../models/ColorsProjectRequest";
 import type { EmbedProject2DRequest } from "../models/EmbedProject2DRequest";
 import type { EntryRequest } from "../models/EntryRequest";
 import type { FilterPredicate } from "../models/FilterPredicate";
@@ -9,6 +10,7 @@ import type { HistogramBucket } from "../models/HistogramBucket";
 import type { HistogramRequest } from "../models/HistogramRequest";
 import type { MetricRequest } from "../models/MetricRequest";
 import type { Points2D } from "../models/Points2D";
+import type { PointsColors } from "../models/PointsColors";
 import type { Report } from "../models/Report";
 import type { Slice } from "../models/Slice";
 import type { SliceMetric } from "../models/SliceMetric";
@@ -299,6 +301,26 @@ export class ZenoService {
 		return __request(OpenAPI, {
 			method: "POST",
 			url: "/embed-project",
+			body: requestBody,
+			mediaType: "application/json",
+			errors: {
+				422: `Validation Error`,
+			},
+		});
+	}
+
+	/**
+	 * Get Projection Colors
+	 * @param requestBody
+	 * @returns PointsColors Successful Response
+	 * @throws ApiError
+	 */
+	public static getProjectionColors(
+		requestBody: ColorsProjectRequest
+	): CancelablePromise<PointsColors> {
+		return __request(OpenAPI, {
+			method: "POST",
+			url: "/colors-project",
 			body: requestBody,
 			mediaType: "application/json",
 			errors: {

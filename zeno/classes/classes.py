@@ -56,6 +56,10 @@ class EmbedProject2DRequest(CamelModel):
     column: ZenoColumn
 
 
+class ColorsProjectRequest(CamelModel):
+    column: ZenoColumn
+
+
 class EntryRequest(BaseModel):
     id: str
     columns: List[ZenoColumn] = []
