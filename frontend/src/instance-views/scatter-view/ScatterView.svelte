@@ -93,15 +93,14 @@
 	 */
 	async function changePointsColorsOnColorChange(colorByColumn: ZenoColumn) {
 		if (pointsExist(points)) {
-			const newColoredPoints = await ZenoService.projectEmbedInto2D({
-				model: $model,
+			const newPointColors = await ZenoService.getProjectionColors({
 				column: colorByColumn,
 			});
 
 			// update the colors and leave x, y alone
-			points.color = newColoredPoints.color;
-			points.domain = newColoredPoints.domain;
-			points.dataType = newColoredPoints.dataType;
+			points.color = newPointColors.color;
+			points.domain = newPointColors.domain;
+			points.dataType = newPointColors.dataType;
 		}
 	}
 
@@ -163,7 +162,7 @@
 	}
 
 	function pointsExist(points: Points2D) {
-		return points.ids.length > 0;
+		return points && "ids" in points && points.ids.length > 0;
 	}
 </script>
 
