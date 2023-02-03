@@ -215,7 +215,7 @@
 							{res[0].metric !== undefined ? res[0].metric.toFixed(2) : ""}
 						</span>
 						<span id="size">
-							({res[0].size})
+							({res[0].size.toLocaleString()})
 						</span>
 					{/await}
 				{/if}

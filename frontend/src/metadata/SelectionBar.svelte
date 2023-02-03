@@ -105,7 +105,7 @@
 						<span class="metric">
 							{r[0].metric.toFixed(2)}
 						</span>
-						<span id="size">({r[0].size} instances)</span>
+						<span id="size">({r[0].size.toLocaleString()} instances)</span>
 					{/if}
 				{/if}
 			{/await}

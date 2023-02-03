@@ -469,12 +469,12 @@ class ZenoBackend(object):
             elif col.metadata_type == MetadataType.CONTINUOUS:
                 ret_hist: List[HistogramBucket] = []  # type: ignore
                 df_col = df_col.fillna(0)
-                bins = np.histogram(df_col, bins="doane")
-                for i in range(len(bins[0])):
+                bins = np.histogram_bin_edges(df_col)
+                for i in range(len(bins) - 1):
                     ret_hist.append(
                         HistogramBucket(
-                            bucket=round(bins[1][i], 4),
-                            bucket_end=round(bins[1][i + 1], 4),
+                            bucket=bins[i],
+                            bucket_end=bins[i + 1],
                         )
                     )
                 res.append(ret_hist)
@@ -501,7 +501,29 @@ class ZenoBackend(object):
         ret: List[List[int]] = []
         for r in req.column_requests:
             col = r.column
-            ret.append([len(filter_table_single(filt_df, col, b)) for b in r.buckets])
+            if str(col) not in filt_df.columns:
+                ret.append([])
+            elif (
+                col.metadata_type == MetadataType.NOMINAL
+                or col.metadata_type == MetadataType.BOOLEAN
+            ):
+                counts = filt_df.groupby([str(col)]).size()
+                ret.append(
+                    [
+                        counts[b.bucket] if b.bucket in counts else 0  # type: ignore
+                        for b in r.buckets
+                    ]
+                )
+            elif col.metadata_type == MetadataType.CONTINUOUS:
+                bucs = [b.bucket for b in r.buckets]
+                ret.append(
+                    filt_df.groupby([pd.cut(filt_df[str(col)], bucs)])  # type: ignore
+                    .size()
+                    .astype(int)
+                    .tolist()
+                )
+            else:
+                ret.append([])
         return ret
 
     def get_histogram_metric(

@@ -274,7 +274,7 @@
 					{r && r[0].metric ? r[0].metric.toFixed(2) : ""}
 				{/await}
 			</span>
-			<span class="size">({$settings.totalSize})</span>
+			<span class="size">({$settings.totalSize.toLocaleString()})</span>
 			<div style:width="36px" />
 		</div>
 	</div>

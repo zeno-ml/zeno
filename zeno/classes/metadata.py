@@ -5,8 +5,8 @@ from zeno.classes.slice import FilterIds, FilterPredicateGroup
 
 
 class HistogramBucket(CamelModel):
-    bucket: Union[int, float, str, bool]
-    bucket_end: Union[int, float, str, bool, None] = None
+    bucket: Union[float, str, bool]
+    bucket_end: Union[float, str, bool, None] = None
 
 
 class HistogramColumnRequest(CamelModel):

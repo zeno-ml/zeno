@@ -43,7 +43,9 @@ export async function getHistograms(
 			(c.model === "" || c.model === model) &&
 			c.columnType !== ZenoColumnType.OUTPUT
 	);
+	requestingHistogramCounts.set(true);
 	const res = await ZenoService.getHistogramBuckets(requestedHistograms);
+	requestingHistogramCounts.set(false);
 	const histograms = new InternMap<string, HistogramEntry[]>(
 		requestedHistograms.map((col, i) => [col, res[i]]),
 		columnHash
@@ -138,7 +140,9 @@ export async function getHistogramMetrics(
 			metric,
 			filterIds,
 		});
+		requestingHistogramCounts.set(true);
 		const res = await histogramMetricRequest;
+		requestingHistogramCounts.set(false);
 
 		if (res === undefined) {
 			return undefined;
