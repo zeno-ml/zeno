@@ -3,6 +3,7 @@
 /* eslint-disable */
 
 export type ReportPredicate = {
-	sliceName: string;
-	metric: string;
+    sliceName: string;
+    metric: string;
 };
+

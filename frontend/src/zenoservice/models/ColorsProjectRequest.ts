@@ -4,8 +4,7 @@
 
 import type { ZenoColumn } from './ZenoColumn';
 
-export type EntryRequest = {
-    id: string;
-    columns?: Array<ZenoColumn>;
+export type ColorsProjectRequest = {
+    column: ZenoColumn;
 };
 

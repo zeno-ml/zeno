@@ -2,9 +2,10 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { FilterPredicate } from "./FilterPredicate";
+import type { FilterPredicate } from './FilterPredicate';
 
 export type FilterPredicateGroup = {
-	predicates: Array<FilterPredicate | FilterPredicateGroup>;
-	join: string;
+    predicates: Array<(FilterPredicate | FilterPredicateGroup)>;
+    join: string;
 };
+
