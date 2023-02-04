@@ -41,6 +41,7 @@
 											reportType: "table",
 											reportPredicates: [],
 										});
+										report.set(reps.length - 1)
 										return reps;
 									});
 								}}>
@@ -61,6 +62,7 @@
 											reportType: "slicechart",
 											reportPredicates: [],
 										});
+										report.set(reps.length - 1)
 										return reps;
 									});
 								}}>
@@ -81,6 +83,7 @@
 											reportType: "timeseries",
 											reportPredicates: [],
 										});
+										report.set(reps.length - 1)
 										return reps;
 									});
 								}}>
