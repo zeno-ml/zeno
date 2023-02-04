@@ -49,3 +49,5 @@ Run `make` to ensure your code passes the requirements, as it is the same comman
 
 **Please ensure `make` passes before submitting a pull request.**
 
+For commit messages and pull request titles, use the [Conventional Commits Standards](https://www.conventionalcommits.org/en/v1.0.0/#summary).
+
