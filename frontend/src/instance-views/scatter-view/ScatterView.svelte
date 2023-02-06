@@ -36,6 +36,7 @@
 	export let viewOptions = {};
 	export let autoResize = true;
 
+	const hoverViewOffset = 10;
 	let height = 850; // canvas dims
 	let width = 1000; // canvas dims
 	let pointSizeSlider = 3;
