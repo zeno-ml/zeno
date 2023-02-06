@@ -210,10 +210,9 @@
 						{#if pointHover !== undefined}
 							<div
 								id="hover-view"
-								style:width="{100}px"
-								style:height="{80}px"
-								style:left="{pointHover.canvasX + 5}px"
-								style:top="{pointHover.canvasY + 5}px">
+								class="no-text-highlight"
+								style:left="{pointHover.canvasX + hoverViewOffset}px"
+								style:top="{pointHover.canvasY + hoverViewOffset}px">
 								<div id="replace-view" bind:this={hoverViewDivEl} />
 							</div>
 						{/if}
@@ -301,5 +300,16 @@
 		padding-top: 20px;
 		box-shadow: 0px 0px 1px 1px hsla(0, 0%, 30%, 0.1);
 		border-radius: 3px;
+	}
+
+	/* https://stackoverflow.com/questions/826782/how-to-disable-text-selection-highlighting */
+	.no-text-highlight {
+		-webkit-touch-callout: none; /* iOS Safari */
+		-webkit-user-select: none; /* Safari */
+		-khtml-user-select: none; /* Konqueror HTML */
+		-moz-user-select: none; /* Old versions of Firefox */
+		-ms-user-select: none; /* Internet Explorer/Edge */
+		user-select: none; /* Non-prefixed version, currently
+									supported by Chrome, Edge, Opera and Firefox */
 	}
 </style>
