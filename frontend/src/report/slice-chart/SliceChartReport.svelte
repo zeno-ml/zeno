@@ -19,7 +19,7 @@
 
 	$: report = $reports[reportId];
 
-	function getMetKeys(rep) {
+	function getMetKeys(rep, $metric) {
 		const entries: MetricKey[] = [];
 		chartEntries = [];
 		rep.reportPredicates.forEach((pred) => {
@@ -39,8 +39,8 @@
 		});
 		return entries;
 	}
-
-	$: modelResults = getMetricsForSlices(getMetKeys(report));
+	
+	$: modelResults = getMetricsForSlices(getMetKeys(report, $metric));
 </script>
 
 <div style:margin-left="20px">
