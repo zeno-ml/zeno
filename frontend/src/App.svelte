@@ -5,6 +5,8 @@
 	import Header from "./general/Header.svelte";
 	import Report from "./Report.svelte";
 	import TestReport from "./TestReport.svelte";
+	import TestReportDetail from "./TestReportDetail.svelte";
+
 	import {
 		folders,
 		metric,
@@ -27,6 +29,7 @@
 		"/explore/": Explore,
 		"/report/": Report,
 		"/testreport/": TestReport,
+		"/testreport/:id": TestReportDetail,
 		"*": Explore,
 	};
 
