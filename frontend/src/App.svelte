@@ -4,8 +4,7 @@
 	import Explore from "./Explore.svelte";
 	import Header from "./general/Header.svelte";
 	import Report from "./Report.svelte";
-	import TestReport from "./TestReport.svelte";
-	import TestReportDetail from "./TestReportDetail.svelte";
+	import ReportDetail from "./ReportDetail.svelte";
 
 	import {
 		folders,
@@ -28,8 +27,7 @@
 		"/": Explore,
 		"/explore/": Explore,
 		"/report/": Report,
-		"/testreport/": TestReport,
-		"/testreport/:id": TestReportDetail,
+		"/report/:id": ReportDetail,
 		"*": Explore,
 	};
 

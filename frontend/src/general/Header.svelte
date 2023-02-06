@@ -63,21 +63,6 @@
 				</div>
 				<Tooltip xPos="end">Create reports of your slices</Tooltip>
 			</Wrapper>
-			<Wrapper>
-				<div
-					class="item {$tab === 'testreport' ? 'selected' : ''}"
-					on:keydown={() => ({})}
-					on:click={() => updateTab("testreport")}>
-					<div class="icon">
-						<Icon component={Svg} viewBox="0 0 24 24">
-							<path
-								fill={$tab === "testreport" ? "#6a1b9a" : "black"}
-								d={mdiChartBoxOutline} />
-						</Icon>
-					</div>
-				</div>
-				<Tooltip xPos="end">Create reports of your slices</Tooltip>
-			</Wrapper>
 		</div>
 	</div>
 

@@ -7,6 +7,7 @@
 	import { report, reports } from "../stores";
 	import { clickOutside } from "../util/clickOutside";
 	import ReportListRow from "./ReportListRow.svelte";
+	import { updateTab } from "../util/util";
 
 	report.set(-1);
 
@@ -41,7 +42,8 @@
 											reportType: "table",
 											reportPredicates: [],
 										});
-										report.set(reps.length - 1)
+										let newIndex = reps.length - 1;
+										updateTab("report/" + newIndex)
 										return reps;
 									});
 								}}>
@@ -62,7 +64,8 @@
 											reportType: "slicechart",
 											reportPredicates: [],
 										});
-										report.set(reps.length - 1)
+										let newIndex = reps.length - 1;
+										updateTab("report/" + newIndex)
 										return reps;
 									});
 								}}>
@@ -83,7 +86,8 @@
 											reportType: "timeseries",
 											reportPredicates: [],
 										});
-										report.set(reps.length - 1)
+										let newIndex = reps.length - 1;
+										updateTab("report/" + newIndex)
 										return reps;
 									});
 								}}>

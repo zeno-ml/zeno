@@ -4,10 +4,10 @@
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
 	import { slide } from "svelte/transition";
-	import SliceChartReport from "./testreport/slice-chart/SliceChartReport.svelte";
-	import SliceTable from "./testreport/slice-table-report/SliceTable.svelte";
-	import TableReportTable from "./testreport/table-report/TableReportTable.svelte";
-	import TimeseriesReportTable from "./testreport/timeseries-report/TimeseriesReportTable.svelte";
+	import SliceChartReport from "./report/slice-chart/SliceChartReport.svelte";
+	import SliceTable from "./report/slice-table-report/SliceTable.svelte";
+	import TableReportTable from "./report/table-report/TableReportTable.svelte";
+	import TimeseriesReportTable from "./report/timeseries-report/TimeseriesReportTable.svelte";
 	import { metric, metrics, ready, report, reports } from "./stores";
 	
     export let params;
