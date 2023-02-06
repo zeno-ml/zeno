@@ -42,8 +42,10 @@
 											reportType: "table",
 											reportPredicates: [],
 										});
+                    
 										let newIndex = reps.length - 1;
-										updateTab("report/" + newIndex)
+										updateTab("report/" + newIndex);
+                    
 										return reps;
 									});
 								}}>
@@ -64,8 +66,10 @@
 											reportType: "slicechart",
 											reportPredicates: [],
 										});
+                    
 										let newIndex = reps.length - 1;
-										updateTab("report/" + newIndex)
+										updateTab("report/" + newIndex);
+                    
 										return reps;
 									});
 								}}>
@@ -86,8 +90,10 @@
 											reportType: "timeseries",
 											reportPredicates: [],
 										});
+                    
 										let newIndex = reps.length - 1;
-										updateTab("report/" + newIndex)
+										updateTab("report/" + newIndex);
+
 										return reps;
 									});
 								}}>
