@@ -10,7 +10,6 @@ import { metricRange } from "../stores";
 import { columnHash, getMetricRange } from "../util/util";
 import {
 	CancelablePromise,
-	ZenoColumnType,
 	ZenoService,
 	type FilterIds,
 	type FilterPredicateGroup,
