@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { mdiFolderPlusOutline, mdiPlus, mdiPlusCircle } from "@mdi/js";
+	import { mdiFolderPlusOutline, mdiPlus, mdiPlusCircle, mdiWifiPlus } from "@mdi/js";
 	import CircularProgress from "@smui/circular-progress";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
@@ -42,11 +42,13 @@
 	import SliceCell from "./cells/SliceCell.svelte";
 	import MetricRange from "./MetricRange.svelte";
 	import NewFolderPopup from "./popups/NewFolderPopup.svelte";
+	import SliceFinderPopup from "./popups/SliceFinderPopup.svelte";
 	import NewSlicePopup from "./popups/NewSlicePopup.svelte";
 
 	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
 		new InternMap([], columnHash);
 	let showNewFolder = false;
+	let showSliceFinder = false;
 
 	$: res = getMetricsForSlices([
 		<MetricKey>{
@@ -219,6 +221,19 @@
 	<div id="slice-header" class="inline">
 		<h4>Slices</h4>
 		<div class="inline">
+			<div>
+				<Wrapper>
+					<IconButton on:click={() => (showSliceFinder= !showSliceFinder)}>
+						<Icon component={Svg} viewBox="0 0 24 24">
+							<path fill="black" d={mdiWifiPlus} />
+						</Icon>
+					</IconButton>
+					<Tooltip xPos="start">Create a Slice Finder</Tooltip>
+				</Wrapper>
+				{#if showSliceFinder}
+					<SliceFinderPopup bind:showSliceFinder />
+				{/if}
+			</div>
 			<div>
 				<Wrapper>
 					<IconButton on:click={() => (showNewFolder = !showNewFolder)}>
