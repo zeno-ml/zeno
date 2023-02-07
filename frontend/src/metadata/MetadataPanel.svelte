@@ -254,6 +254,21 @@
 		<div class="inline">
 			<div
 				use:tooltip={{
+					content: "Discover underperforming slices.",
+					position: "left",
+					theme: "zeno-tooltip",
+				}}>
+				<IconButton on:click={() => (showSliceFinder = !showSliceFinder)}>
+					<Icon component={Svg} viewBox="0 0 24 24">
+						<path fill="black" d={mdiAssistant} />
+					</Icon>
+				</IconButton>
+				{#if showSliceFinder}
+					<SliceFinderPopup bind:showSliceFinder />
+				{/if}
+			</div>
+			<div
+				use:tooltip={{
 					content: "Create a new folder.",
 					position: "left",
 					theme: "zeno-tooltip",
