@@ -17,6 +17,9 @@ jobs:
         with:
           python-version: 3.9
 
+      - name: branch
+        run: echo ${{github.ref}}
+
       - name: Install Poetry
         uses: snok/install-poetry@v1.3
       - name: Set Poetry config
@@ -66,7 +69,6 @@ jobs:
         run: make test
 
       - name: Semantic Release
-        run: echo ${{github.ref}}
         if: github.ref == 'main'
         run: |
           make build 
