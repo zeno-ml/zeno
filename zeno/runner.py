@@ -127,7 +127,6 @@ def parse_args(args: ZenoParameters, base_path) -> ZenoParameters:
             try:
                 views_res = requests.get(VIEW_MAP_URL + VIEWS_MAP_JSON)
                 views = views_res.json()
-                print(views)
                 url = VIEW_MAP_URL + views[args.view]
                 with open(view_dest_path, "wb") as out_file:
                     content = requests.get(url, stream=True).content
