@@ -7,5 +7,6 @@
   "eslint.validate": ["javascript", "javascriptreact", "svelte"],
   "python.testing.pytestEnabled": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "python.analysis.typeCheckingMode": "basic"
+  "python.analysis.typeCheckingMode": "basic",
+  "editor.formatOnSave": true
 }

@@ -4,6 +4,8 @@
 	import Explore from "./Explore.svelte";
 	import Header from "./general/Header.svelte";
 	import Report from "./Report.svelte";
+	import ReportDetail from "./ReportDetail.svelte";
+
 	import {
 		folders,
 		metric,
@@ -25,6 +27,7 @@
 		"/": Explore,
 		"/explore/": Explore,
 		"/report/": Report,
+		"/report/:id": ReportDetail,
 		"*": Explore,
 	};
 
