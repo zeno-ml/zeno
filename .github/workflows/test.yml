@@ -62,3 +62,7 @@ jobs:
 
       - name: Run tests
         run: make test
+
+      - name: Semantic Release
+        if: github.base_ref == "main"
+        run: echo test run
