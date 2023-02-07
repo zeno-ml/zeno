@@ -33,8 +33,8 @@ jobs:
           restore-keys: |
             poetry-${{ hashFiles('**/poetry.lock') }}
       - name: Install Poetry Dependencies
-        run: poetry install --no-interaction
         if: steps.cache-poetry.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction
 
       - name: Cache NPM packages
         uses: actions/cache@v3.2.4
@@ -64,5 +64,5 @@ jobs:
         run: make test
 
       - name: Semantic Release
-        run: echo test run
         if: github.base_ref == 'main'
+        run: echo test run
