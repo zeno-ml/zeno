@@ -67,8 +67,7 @@ jobs:
 
       - name: Semantic Release
         if: github.ref == 'refs/heads/main'
-        run: |
-          make build
+        run: make build
 
       - name: Python Semantic Release
         if: github.ref == 'refs/heads/main'
