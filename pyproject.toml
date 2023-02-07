@@ -58,7 +58,7 @@ version_toml = "pyproject.toml:tool.poetry.version"
 version_variable = "zeno/__init__.py:__version__"
 version_source = "commit"
 branch = "main"
-upload_to_PyPI = false 
+upload_to_PyPI = true 
 upload_to_release = true
 major_on_zero = false
 
