@@ -39,7 +39,7 @@
 		});
 		return entries;
 	}
-	
+
 	$: modelResults = getMetricsForSlices(getMetKeys(report, $metric));
 </script>
 

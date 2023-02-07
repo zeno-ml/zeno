@@ -9,12 +9,12 @@
 	import TableReportTable from "./report/table-report/TableReportTable.svelte";
 	import TimeseriesReportTable from "./report/timeseries-report/TimeseriesReportTable.svelte";
 	import { metric, metrics, ready, report, reports } from "./stores";
-	
-    export let params;
+
+	export let params;
 
 	let showSlices = true;
-    
-    $: report.set(params.id);
+
+	$: report.set(params.id);
 	$: currentReport = $reports[$report];
 </script>
 

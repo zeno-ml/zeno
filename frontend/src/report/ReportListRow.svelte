@@ -18,7 +18,7 @@
 
 <div
 	class="report {$selectedReport === reportIndex ? 'selected' : ''}"
-	on:click={() => updateTab("report/"+reportIndex)}
+	on:click={() => updateTab("report/" + reportIndex)}
 	on:keydown={() => ({})}>
 	<div class="report-name">
 		<IconButton>

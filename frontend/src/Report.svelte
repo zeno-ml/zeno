@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ReportsList from "./report/ReportsList.svelte";
-	import {ready} from "./stores";
+	import { ready } from "./stores";
 </script>
 
 <main>
