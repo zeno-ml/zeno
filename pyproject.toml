@@ -42,6 +42,7 @@ httpx = "^0.23.3"
 mypy = "^0.991"
 pandas-stubs = "^1.5.3"
 pyright = "^1.1.292"
+python-semantic-release = "^7.33.1"
 pytest = "^7.1.1"
 usort = "^1.0.5"
 
@@ -51,6 +52,13 @@ zeno = "zeno.runner:command_line"
 [build-system]
 build-backend = "poetry.core.masonry.api"
 requires = ["poetry-core>=1.0.0"]
+
+[tool.semantic_release]
+version_variable = [
+    "zeno/__init__.py:__version__",
+    "pyproject.toml:tool.poetry.version"
+]
+build_command = "make build"
 
 [tool.pyright]
 include = ["zeno"]
