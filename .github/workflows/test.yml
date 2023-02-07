@@ -41,18 +41,20 @@ jobs:
         id: cache-npm
         with:
           path: ~/frontend/node_modules
-          key: npm-${{ hashFiles('**/package.lock') }}
+          key: npm-${{ hashFiles('~/frontend/**/package.lock') }}
           restore-keys: |
-            npm-${{ hashFiles('**/package.lock') }}
+            npm-${{ hashFiles('~/frontend/**/package.lock') }}
+
       - name: Install NPM packages
+        if: steps.cache-npm.outputs.cache-hit != 'true'
         run: |
           cd frontend/
           npm i
+
       - name: Build frontend
         run: |
           cd frontend/
           npm run build
-        if: steps.cache-npm.outputs.cache-hit != 'true'
 
       - name: Lint
         run: make lint
@@ -64,5 +66,8 @@ jobs:
         run: make test
 
       - name: Semantic Release
-        if: github.base_ref == 'main'
-        run: echo test run
+        run: echo ${{github.ref}}
+        if: github.ref == 'main'
+        run: |
+          make build 
+          semantic-release
