@@ -34,7 +34,12 @@ test:
 build:
 	@echo "==> 👷‍♀️ Build"
 	@cd frontend && npm run build
-	@poetry build -vvv
+	@cd frontend && node build.js
+	@mv zeno/frontend/index.html zeno/frontend/index_og.html
+	@mv zeno/frontend/index_tmp.html zeno/frontend/index.html
+	@poetry build -v
+	@rm zeno/frontend/index.html
+	@mv zeno/frontend/index_og.html zeno/frontend/index.html
 
 .PHONY: publish
 publish: build
