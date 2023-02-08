@@ -60,6 +60,7 @@ branch = "main"
 upload_to_PyPI = true 
 upload_to_release = true
 major_on_zero = false
+build = "poetry build"
 
 
 [tool.pyright]
