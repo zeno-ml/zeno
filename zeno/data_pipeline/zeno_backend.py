@@ -503,16 +503,17 @@ class ZenoBackend(object):
             col = r.column
             if str(col) not in filt_df.columns:
                 ret.append([])
-            elif (
-                col.metadata_type == MetadataType.NOMINAL
-                or col.metadata_type == MetadataType.BOOLEAN
-            ):
+            elif col.metadata_type == MetadataType.NOMINAL:
                 counts = filt_df.groupby([str(col)]).size()
                 ret.append(
                     [
                         counts[b.bucket] if b.bucket in counts else 0  # type: ignore
                         for b in r.buckets
                     ]
+                )
+            elif col.metadata_type == MetadataType.BOOLEAN:
+                ret.append(
+                    [filt_df[str(col)].sum(), len(filt_df) - filt_df[str(col)].sum()]
                 )
             elif col.metadata_type == MetadataType.CONTINUOUS:
                 bucs = [b.bucket for b in r.buckets]
