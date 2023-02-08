@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { mdiFolderPlusOutline, mdiPlus, mdiPlusCircle, mdiWifiPlus } from "@mdi/js";
+	import {
+		mdiFolderPlusOutline,
+		mdiPlus,
+		mdiPlusCircle,
+		mdiWifiPlus,
+	} from "@mdi/js";
 	import CircularProgress from "@smui/circular-progress";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
@@ -223,7 +228,7 @@
 		<div class="inline">
 			<div>
 				<Wrapper>
-					<IconButton on:click={() => (showSliceFinder= !showSliceFinder)}>
+					<IconButton on:click={() => (showSliceFinder = !showSliceFinder)}>
 						<Icon component={Svg} viewBox="0 0 24 24">
 							<path fill="black" d={mdiWifiPlus} />
 						</Icon>
