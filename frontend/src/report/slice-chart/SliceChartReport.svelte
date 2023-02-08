@@ -2,14 +2,7 @@
 	import Select, { Option } from "@smui/select";
 	import { VegaLite } from "svelte-vega";
 	import { getMetricsForSlices } from "../../api/slice";
-	import {
-		metric,
-		metrics,
-		model,
-		models,
-		reports,
-		slices,
-	} from "../../stores";
+	import { metric, metrics, models, reports, slices } from "../../stores";
 	import type { MetricKey } from "../../zenoservice";
 	import generateBarSpec from "./vegaSpec";
 	import { updateTab } from "../../util/util";
