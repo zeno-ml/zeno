@@ -22,19 +22,28 @@ export default function generateBarSpec(metric): VegaLiteSpec {
 					labelAngle: 45,
 					labelFontSize: 14,
 					titleFontSize: 14,
-					titlePadding: 10,
+					titlePadding: 10
 				},
-				sort: "-metric",
 			},
 			y: {
 				title: "",
 				field: "metric",
 				type: "quantitative",
-				axis: { labelFontSize: 14, titleFontSize: 14, titlePadding: 10 },
+				axis: {
+					labelFontSize: 14,
+					titleFontSize: 14,
+					titlePadding: 10
+				},
 				labelFontSize: 14,
 			},
-			xOffset: { field: "model" },
-			color: { field: "model" },
+			xOffset: {
+				field: "model",
+				sort: "model"
+			},
+			color: {
+				field: "model",
+				sort: "model"
+			},
 		},
 	};
 
