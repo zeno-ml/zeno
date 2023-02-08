@@ -38,6 +38,7 @@ In a different terminal window, run the following command to serve the frontend 
 You should now be able to see a live version of zeno on `localhost:8000` in your browser.
 
 **Windows OS Note**
+
 - If `make` command is not working, install `gnuwin32` following the [`instructions`](https://superuser.com/a/1634350) to make it works.
 - If encountering `ModuleNotFoundError: No module named “cifar_model”`, add `zeno/examples/cifar/tests` path to `.venv/Lib/site-packages/zenoml.pth` file.
 
@@ -51,3 +52,12 @@ Run `make` to ensure your code passes the requirements, as it is the same comman
 
 For commit messages and pull request titles, use the [Conventional Commits Standards](https://www.conventionalcommits.org/en/v1.0.0/#summary).
 
+## Making a release
+
+- Run `poetry version patch` to update version number in `pyproject.toml`
+- Run `git commit -am "chore: bump version to $(poetry version -s)"` to commit the version bump and add a tag with git tag `"v$(poetry version -s)"`.
+- Run `make build` to build the frontend and backend w/ Poetry.
+- Run `poetry publish -r testpypi` to publish the package to TestPyPI.
+- Run `poetry publish` to publish the package to PyPI.
+- Push the commits and tags with `git push && git push --tags`.
+- Create a release on GitHub for the new version tag.

@@ -1,6 +1,9 @@
 name: tests
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
 
 jobs:
@@ -61,15 +64,3 @@ jobs:
 
       - name: Run tests
         run: make test
-
-      - name: Semantic Release
-        if: github.ref == 'refs/heads/main'
-        run: make build
-
-      - name: Python Semantic Release
-        if: github.ref == 'refs/heads/main'
-        uses: relekang/python-semantic-release@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          repository_username: __token__
-          repository_password: ${{ secrets.PyPI_TOKEN }}

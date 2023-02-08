@@ -41,11 +41,6 @@ build:
 	@rm zeno/frontend/index.html
 	@mv zeno/frontend/index_og.html zeno/frontend/index.html
 
-.PHONY: publish
-publish: build
-	@echo "==> 📰 Publish"
-	@poetry publish
-
 .PHONY: clean
 clean:
 	@rm -rf dist
