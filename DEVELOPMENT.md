@@ -55,9 +55,9 @@ For commit messages and pull request titles, use the [Conventional Commits Stand
 ## Making a release
 
 - Run `poetry version patch` to update version number in `pyproject.toml`
-- Run `git commit -am "chore: bump version to $(poetry version -s)"` to commit the version bump and add a tag with git tag `"v$(poetry version -s)"`.
+- Run `git commit -am "chore: bump version to $(poetry version -s)"` to commit the version bump and add a tag with `git tag "v$(poetry version -s)"`.
 - Run `make build` to build the frontend and backend w/ Poetry.
-- Run `poetry publish -r testpypi` to publish the package to TestPyPI.
+- Test the library by installing it locally with `pip install dist/zenoml-$(poetry version -s).tar.gz`.
 - Run `poetry publish` to publish the package to PyPI.
 - Push the commits and tags with `git push && git push --tags`.
 - Create a release on GitHub for the new version tag.

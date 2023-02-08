@@ -1,4 +1,4 @@
-all: lint typecheck  test 
+all: lint typecheck test 
 
 .PHONY: install
 install:
@@ -22,13 +22,11 @@ typecheck:
 	@poetry run pyright zeno 
 	@cd frontend && npm run check
 
-
 .PHONY: test
 test:
 	@echo "==> 🧪 Tests"
 	@poetry run pytest -svv zeno/tests/
 	@cd frontend && npm run test
-
 
 .PHONY: build
 build:
