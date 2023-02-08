@@ -25,7 +25,9 @@ To get started, run the following command to initialize a Zeno project. It will 
 zeno init
 ```
 
-Then run `zeno zeno.toml`.
+Take a look at the [configuration documentation](https://zenoml.com/docs/configuration) for additional `toml` file options like adding model functions.
+
+Start Zeno with `zeno zeno.toml`.
 
 ### Jupyter Notebook
 
@@ -46,7 +48,11 @@ zeno({
 
 ```
 
+You can pass a list of decorated function references directly Zeno as you add models and metrics.
+
 ## Citation
+
+Please reference our [CHI'22 paper](https://cabreraalex.com/zeno.pdf)
 
 ```bibtex
 @inproceedings{cabrera23zeno,
@@ -64,10 +70,6 @@ zeno({
 }
 ```
 
-## Learn More
+## Community
 
-Check out examples and additional documentation:
-
-- [Introduction](https://zenoml.com/docs/intro) - Learn more about Zeno.
-- [Quickstart](http://zenoml.com/docs/quickstart) - Setup Zeno with your own data and models.
-- [Documentation & API](http://zenoml.com/docs/intro) - Full documentation and API reference.
+Chat with us on our [Gitter channel](https://gitter.im/zeno-ml-eval/community) or leave an issue on this repository if you run into any issues or have a request!
