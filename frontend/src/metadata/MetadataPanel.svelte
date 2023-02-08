@@ -11,7 +11,6 @@
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
 	import { tooltip } from "@svelte-plugins/tooltips";
-	import Tooltip, { Wrapper } from "@smui/tooltip";
 	import { InternMap } from "internmap";
 	import {
 		getHistogramCounts,
@@ -225,19 +224,6 @@
 
 	<div id="slice-header" class="inline">
 		<div class="inline">
-			<div>
-				<Wrapper>
-					<IconButton on:click={() => (showSliceFinder = !showSliceFinder)}>
-						<Icon component={Svg} viewBox="0 0 24 24">
-							<path fill="black" d={mdiAssistant} />
-						</Icon>
-					</IconButton>
-					<Tooltip xPos="start">Discover underperforming slices</Tooltip>
-				</Wrapper>
-				{#if showSliceFinder}
-					<SliceFinderPopup bind:showSliceFinder />
-				{/if}
-			</div>
 			<h4>Slices</h4>
 			<div
 				class="information-tooltip"
@@ -422,13 +408,6 @@
 		align-items: center;
 		padding-bottom: 10px;
 		padding-top: 5px;
-	}
-	/* I don't see where this is used, maybe delete? */
-	.cell {
-		border: 0.5px solid var(--G5);
-		padding: 10px;
-		min-width: 400px;
-		width: 400px;
 	}
 	.inline {
 		display: flex;
