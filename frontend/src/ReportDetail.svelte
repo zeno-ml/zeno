@@ -74,8 +74,8 @@
 	}
 	#slice-container {
 		position: absolute;
-		width: calc(100% - 80px);
-		bottom: 0;
+		width: calc(100% - 470px);
+    bottom: 0;
 	}
 	#slices {
 		padding: 20px;
