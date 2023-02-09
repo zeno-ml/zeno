@@ -3,7 +3,7 @@
 		mdiFolderPlusOutline,
 		mdiPlus,
 		mdiPlusCircle,
-		mdiWifiPlus,
+		mdiAssistant,
 	} from "@mdi/js";
 	import CircularProgress from "@smui/circular-progress";
 	import { Svg } from "@smui/common";
@@ -230,10 +230,10 @@
 				<Wrapper>
 					<IconButton on:click={() => (showSliceFinder = !showSliceFinder)}>
 						<Icon component={Svg} viewBox="0 0 24 24">
-							<path fill="black" d={mdiWifiPlus} />
+							<path fill="black" d={mdiAssistant} />
 						</Icon>
 					</IconButton>
-					<Tooltip xPos="start">Create a Slice Finder</Tooltip>
+					<Tooltip xPos="start">Discover underperforming slices</Tooltip>
 				</Wrapper>
 				{#if showSliceFinder}
 					<SliceFinderPopup bind:showSliceFinder />

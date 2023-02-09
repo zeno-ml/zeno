@@ -7,28 +7,32 @@
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
 	import { clickOutside } from "../../util/clickOutside";
-	import {
-		mdiPlus,
-		mdiClose
-	} from "@mdi/js";
+	import { mdiPlus, mdiClose } from "@mdi/js";
 	import { Pagination } from "@smui/data-table";
-	import {
-		folders,
-		metric,
-		metrics,
-		settings,
-		rowsPerPage
-	} from "../../stores";
+	import { settings } from "../../stores";
+
 	export let showSliceFinder;
-	export let folderName = "";
 
+	let currentResult;
+	let currentPage = 1;
 	let input;
-	let originalFolderName = folderName;
+	let slice_data = [];
+	let sampleOptions = [5, 15, 30, 60, 100, $settings.samples].sort(
+		(a, b) => a - b
+	);
+	// dummy data for presenting frontend UI
+	let minimumSizes = ["10", "20", "30", "50"];
+	let minimumSize = "10";
+	let depths = ["10", "20", "30", "50"];
+	let depth = "10";
+	let sliceFinderMetricss = ["accuracy", "f1", "recall"];
+	let sliceFinderMetrics = "accuracy";
+	let orderBys = ["ascending", "descending"];
+	let orderBy = "ascending";
 
-	$: invalidName =
-		($folders.includes(folderName) && folderName !== originalFolderName) ||
-		folderName.length === 0;
-
+	$: start = 0;
+	$: end = 10000;
+	$: lastPage = 10000;
 	$: if (showSliceFinder && input) {
 		input.getElement().focus();
 	}
@@ -37,12 +41,8 @@
 		if (showSliceFinder && e.key === "Escape") {
 			showSliceFinder = false;
 		}
-		if (showSliceFinder && e.key === "Enter") {
-			//createFolder();
-		}
 	}
 
-	let slice_data = [];
 	function slice_data_generator() {
 		let predicateList = [
 			"brightness > 100",
@@ -71,23 +71,6 @@
 		}
 	}
 	slice_data_generator();
-
-	$: idHash = 12; //columnHash($settings.idColumn);
-	$: start = 0; //currentPage * $rowsPerPage;
-	$: end = 10000; //Math.min(start + $rowsPerPage, $settings.totalSize);
-	$: lastPage = 10000; //Math.max(Math.ceil($settings.totalSize / $rowsPerPage) - 1, 0);
-	/*
-	$: if (currentPage > lastPage) {
-		currentPage = lastPage;
-	}
-    */
-	let sampleOptions = [5, 15, 30, 60, 100, $settings.samples].sort(
-		(a, b) => a - b
-	);
-
-	let currentResult;
-
-	let currentPage = 1;
 </script>
 
 <svelte:window on:keydown={submit} />
@@ -96,6 +79,7 @@
 {/if}
 <div
 	id="slice-finder-container"
+	style="justify-content: flex-start;"
 	transition:fade
 	use:clickOutside
 	on:click_outside={() => (showSliceFinder = false)}>
@@ -111,37 +95,37 @@
 		<div class="metrics">
 			<Select
 				class="select"
-				bind:value={$metric}
-				label="Metric"
+				bind:value={minimumSize}
+				label="Minimum Size"
 				style="width: 170px">
-				{#each $metrics as m}
+				{#each minimumSizes as m}
 					<Option value={m}>{m}</Option>
 				{/each}
 			</Select>
 			<Select
 				class="select"
-				bind:value={$metric}
-				label="Metric"
+				bind:value={depth}
+				label="Depth"
 				style="width: 170px">
-				{#each $metrics as m}
+				{#each depths as m}
 					<Option value={m}>{m}</Option>
 				{/each}
 			</Select>
 			<Select
 				class="select"
-				bind:value={$metric}
+				bind:value={sliceFinderMetrics}
 				label="Metric"
 				style="width: 170px">
-				{#each $metrics as m}
+				{#each sliceFinderMetricss as m}
 					<Option value={m}>{m}</Option>
 				{/each}
 			</Select>
 			<Select
 				class="select"
-				bind:value={$metric}
-				label="Metric"
+				bind:value={orderBy}
+				label="Order By"
 				style="width: 170px">
-				{#each $metrics as m}
+				{#each orderBys as m}
 					<Option value={m}>{m}</Option>
 				{/each}
 			</Select>
@@ -170,7 +154,7 @@
 		<Pagination>
 			<svelte:fragment slot="rowsPerPage">
 				<Label>Rows Per Page</Label>
-				<Select variant="outlined" bind:value={$rowsPerPage} noLabel>
+				<Select variant="outlined" noLabel>
 					{#each sampleOptions as option}
 						<Option value={option}>{option}</Option>
 					{/each}
