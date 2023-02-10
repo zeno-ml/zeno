@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { mdiChartBar, mdiChartLine, mdiPlus, mdiTable } from "@mdi/js";
+	import {
+		mdiChartBar,
+		mdiChartLine,
+		mdiPlus,
+		mdiTable,
+		mdiLadybug,
+	} from "@mdi/js";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Paper, { Content } from "@smui/paper";
@@ -90,6 +96,26 @@
 									</Icon>
 								</IconButton>
 								<p>New <b>timeseries</b> report</p>
+							</div>
+							<div
+								class="report-entry"
+								on:keydown={() => ({})}
+								on:click={() => {
+									reports.update((reps) => {
+										reps.push({
+											name: "new report",
+											reportType: "beeswarm",
+											reportPredicates: [],
+										});
+										return reps;
+									});
+								}}>
+								<IconButton>
+									<Icon component={Svg} viewBox="0 0 24 24">
+										<path fill="black" d={mdiLadybug} />
+									</Icon>
+								</IconButton>
+								<p>New <b>Beeswarm chart</b> report</p>
 							</div>
 						</Content>
 					</Paper>

@@ -6,6 +6,7 @@
 	import { slide } from "svelte/transition";
 	import ReportsList from "./report/ReportsList.svelte";
 	import SliceChartReport from "./report/slice-chart/SliceChartReport.svelte";
+	import BeeswarmChartReport from "./report/beeswarm-chart/BeeswarmChartReport.svelte";
 	import SliceTable from "./report/slice-table-report/SliceTable.svelte";
 	import TableReportTable from "./report/table-report/TableReportTable.svelte";
 	import TimeseriesReportTable from "./report/timeseries-report/TimeseriesReportTable.svelte";
@@ -26,6 +27,8 @@
 						<TimeseriesReportTable reportId={$report} />
 					{:else if currentReport.reportType === "slicechart"}
 						<SliceChartReport reportId={$report} />
+					{:else if currentReport.reportType === "beeswarm"}
+						<BeeswarmChartReport reportId={$report} />
 					{:else}
 						<TableReportTable reportId={$report} />
 					{/if}
