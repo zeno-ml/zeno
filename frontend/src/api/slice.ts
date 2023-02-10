@@ -11,7 +11,7 @@ function instanceOfFilterPredicate(object): object is FilterPredicate {
 }
 
 function setModelForMetricKey(
-	pred: FilterPredicate | FilterPredicateGroup,
+	pred: FilterPredicateGroup | FilterPredicate,
 	model: string
 ) {
 	if (instanceOfFilterPredicate(pred)) {
@@ -28,11 +28,13 @@ function setModelForMetricKey(
 
 function setModelForMetricKeys(metricKeys: MetricKey[]) {
 	return metricKeys.map((key) => {
-		if (key.sli.filterPredicates) {
-			key.sli.filterPredicates = setModelForMetricKey(
-				key.sli.filterPredicates,
-				key.model
-			) as FilterPredicateGroup;
+		if (
+			key.sli.filterPredicates &&
+			key.sli.filterPredicates.predicates.length > 0
+		) {
+			key.sli.filterPredicates.predicates.map((pred) =>
+				setModelForMetricKey(pred, key.model)
+			);
 		}
 		return key;
 	});
@@ -66,6 +68,7 @@ export async function getMetricsForSlices(
 	// Update model in predicates if slices are dependent on postdistill columns.
 	metricKeys = setModelForMetricKeys(metricKeys);
 
+	console.log(metricKeys, filterIds);
 	if (metricKeys.length > 0) {
 		return await ZenoService.getMetricsForSlices({
 			metricKeys,

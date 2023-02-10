@@ -50,7 +50,7 @@
 				column: col,
 				operation: "<=",
 				value: localSelection[1],
-				join: "&",
+				join: "",
 			} as FilterPredicate;
 		} else {
 			localSelection = [];

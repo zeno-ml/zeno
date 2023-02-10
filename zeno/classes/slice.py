@@ -12,7 +12,7 @@ class FilterPredicate(CamelModel):
 
 
 class FilterPredicateGroup(CamelModel):
-    predicates: List[Union[FilterPredicate, "FilterPredicateGroup"]]
+    predicates: List[Union["FilterPredicateGroup", FilterPredicate]]
     join: str
 
 

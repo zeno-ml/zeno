@@ -9,6 +9,7 @@ import {
 import { folderWritable, reportWritable } from "./util/customStores";
 import type {
 	FilterIds,
+	FilterPredicate,
 	FilterPredicateGroup,
 	Report,
 	Slice,
@@ -93,6 +94,8 @@ export const folders: Writable<string[]> = folderWritable();
 export const reports: Writable<Report[]> = reportWritable();
 
 export const filteredTable: Writable<Record<string, unknown>[]> = writable([]);
+// the ids directly selected by the user
+export const selectionIds: Writable<FilterIds> = writable({ ids: [] });
 // slices is an array of slice names,
 // metadata is an object where keys are column names and values are FilterPredicateGroups
 export const selections: Writable<{
@@ -102,28 +105,28 @@ export const selections: Writable<{
 	metadata: {},
 	slices: [],
 });
-
-// the ids directly selected by the user
-export const selectionIds: Writable<FilterIds> = writable({ ids: [] });
-export const selectionPredicates: Readable<FilterPredicateGroup[]> = derived(
+export const selectionPredicates: Readable<FilterPredicateGroup> = derived(
 	[selections],
 	([$selections]) => {
-		const ret = [
-			...Object.values($selections.metadata).filter(
-				(d) => d.predicates.length !== 0
-			),
-		];
+		let ret: (FilterPredicate | FilterPredicateGroup)[] = Array.from(
+			Object.values($selections.metadata)
+		)
+			.filter((d) => d.predicates.length !== 0)
+			.map((d, i, arr) => ({
+				predicates: d.predicates,
+				join: i === arr.length - 1 ? "" : "&",
+			}))
+			.flat();
 		if ($selections.slices.length !== 0) {
-			ret.push({
-				join: "&",
-				predicates: $selections.slices.map((sliName) => {
-					const filts = get(slices).get(sliName).filterPredicates;
-					filts.join = "&";
-					return filts;
-				}),
-			});
+			ret = [
+				...ret,
+				...$selections.slices.map((sliName, i) => ({
+					predicates: get(slices).get(sliName).filterPredicates.predicates,
+					join: i === $selections.slices.length - 1 ? "" : "&",
+				})),
+			];
 		}
-		return ret;
+		return { predicates: ret, join: "" };
 	}
 );
 export const report: Writable<number> = writable(undefined);

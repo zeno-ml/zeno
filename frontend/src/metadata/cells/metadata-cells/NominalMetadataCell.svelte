@@ -46,12 +46,12 @@
 	function setSelection() {
 		filterPredicates = [];
 		if (localSelection.bucket && localSelection.bucket.length > 0) {
-			localSelection.bucket.forEach((l) => {
+			localSelection.bucket.forEach((l, i) => {
 				filterPredicates.push({
 					column: col,
 					operation: "==",
 					value: l,
-					join: "|",
+					join: i === localSelection.bucket.length - 1 ? "" : "|",
 				} as FilterPredicate);
 			});
 		} else {

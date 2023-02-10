@@ -15,7 +15,7 @@
 					column: col,
 					operation: "==",
 					value: setting,
-					join: "&",
+					join: "",
 				},
 			];
 		} else if (filterPredicates[0].value === setting) {

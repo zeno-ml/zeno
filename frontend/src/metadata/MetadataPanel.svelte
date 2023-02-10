@@ -128,8 +128,11 @@
 		getHistogramCounts(
 			metadataHistograms,
 			{
-				predicates: $selectionPredicates,
-				join: "&",
+				predicates:
+					$selectionPredicates.predicates.length > 0
+						? [$selectionPredicates]
+						: [],
+				join: "",
 			},
 			selectionIds
 		).then((res) => {
@@ -141,8 +144,11 @@
 			getHistogramMetrics(
 				res,
 				{
-					predicates: $selectionPredicates,
-					join: "&",
+					predicates:
+						$selectionPredicates.predicates.length > 0
+							? [$selectionPredicates]
+							: [],
+					join: "",
 				},
 				$model,
 				$metric,
@@ -164,7 +170,7 @@
 		getHistogramCounts(
 			metadataHistograms,
 			{
-				predicates: sels,
+				predicates: [sels],
 				join: "&",
 			},
 			$selectionIds
@@ -177,7 +183,7 @@
 			getHistogramMetrics(
 				res,
 				{
-					predicates: sels,
+					predicates: [sels],
 					join: "&",
 				},
 				$model,
@@ -240,7 +246,7 @@
 							showNewFolder.set(false);
 						}}>
 						<Icon component={Svg} viewBox="0 0 24 24">
-							{#if $selectionPredicates.length > 0}
+							{#if $selectionPredicates.predicates.length > 0}
 								<path fill="#6a1a9a" d={mdiPlusCircle} />
 							{:else}
 								<path fill="black" d={mdiPlus} />
@@ -253,13 +259,16 @@
 		</div>
 	</div>
 	<div
-		class={"overview " + ($selectionPredicates.length === 0 ? "selected" : "")}
+		class={"overview " +
+			($selectionPredicates.predicates.length === 0 ? "selected" : "")}
 		on:keydown={() => ({})}
 		on:click={() => {
 			selections.update((m) => {
-				for (let key in m.metadata) {
-					m.metadata[key] = { predicates: [], join: "&" };
-				}
+				let len = Object.keys(m.metadata).length;
+				Object.keys(m.metadata).forEach((key, i) => {
+					m.metadata[key] = { predicates: [], join: i < len - 1 ? "&" : "" };
+				});
+				console.log(m.metadata);
 				return { slices: [], metadata: { ...m.metadata } };
 			});
 		}}>

@@ -22,8 +22,8 @@
 	}
 </script>
 
-<div class="inline">
-	<div class="column">
+<div class="group">
+	<div class="group-join">
 		{#if index > 0}
 			<Select
 				bind:value={predicateGroup.join}
@@ -97,17 +97,14 @@
 </div>
 
 <style>
-	.inline {
+	.group {
 		display: flex;
+		flex-direction: column;
+		align-items: baseline;
 	}
 	#buttons {
 		margin-bottom: 10px;
-		margin-left: 40px;
-	}
-	.column {
-		display: flex;
-		flex-direction: column;
-		align-items: flex-end;
+		margin-left: 10px;
 	}
 	.main {
 		background: rgba(0, 0, 0, 0.025);
@@ -116,6 +113,7 @@
 		margin-bottom: 10px;
 	}
 	ul {
+		padding-left: 10px;
 		list-style-type: none;
 		margin-right: 10px;
 		margin-bottom: 0px;

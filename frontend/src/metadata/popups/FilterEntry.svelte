@@ -17,13 +17,11 @@
 </script>
 
 <div id="group">
-	{#if index === 0}
-		<span id="where">Where</span>
-	{:else}
+	{#if index !== 0}
 		<Select
 			bind:value={predicate.join}
 			label="Join"
-			style="margin-right: 20px; width: 90px">
+			style="padding-left: 10px; margin-right: 20px; width: 90px">
 			{#each ["&", "|"] as o}
 				<Option value={o}>{o}</Option>
 			{/each}
@@ -40,7 +38,7 @@
 		<Select
 			bind:value={predicate.operation}
 			label="Operation"
-			style="margin-right: 20px; width:125px">
+			style="padding-left: 5px; margin-right: 20px; width:125px">
 			{#each typeof predicate.value === "boolean" ? ["==", "!="] : operations as o}
 				<Option value={o}>{o}</Option>
 			{/each}

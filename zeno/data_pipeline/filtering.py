@@ -1,5 +1,5 @@
 """Functions for parsing filter predicates and filtering dataframes"""
-from typing import List, Optional, Union
+from typing import Optional
 
 import pandas as pd
 from pandas import DataFrame
@@ -10,46 +10,45 @@ from zeno.classes.metadata import HistogramBucket
 from zeno.classes.slice import FilterIds, FilterPredicate, FilterPredicateGroup
 
 
-def get_filter_string(filter: Union[FilterPredicateGroup, FilterPredicate]):
-    if isinstance(filter, FilterPredicateGroup):
-        if len(filter.predicates) > 0:
-            filt = "("
-            for i, pred in enumerate(filter.predicates):
-                filt = filt + get_filter_string(pred)
-                if i == len(filter.predicates) - 1 and (
-                    filt[-1] == "&" or filt[-1] == "|"
-                ):
-                    filt = filt[0:-1]
-            return filt + ")" + (filter.join if filter.join else "")
-    else:
-        if filter.operation == "match":
-            return "(`{}`.str.contains('{}', na=False, regex=False)) {}".format(
-                filter.column, filter.value, filter.join
-            )
-        elif filter.operation == "match (regex)":
-            return "(`{}`.str.contains('{}', na=False)) {}".format(
-                filter.column, filter.value, filter.join
-            )
-        else:
-            try:
-                val = str(float(filter.value))
-            except ValueError:
-                if str(filter.value).lower() in [
-                    "true",
-                    "false",
-                ]:
-                    val = "True" if str(filter.value).lower() == "true" else "False"
-                else:
-                    val = '"{}"'.format(filter.value)
-            return "(`{}` {} {}) {}".format(
-                filter.column, filter.operation, val, filter.join
-            )
-    return ""
+def get_filter_string(filter: FilterPredicateGroup):
+    filt = ""
+    for f in filter.predicates:
+        if isinstance(f, FilterPredicateGroup):
+            filt = filt + "("
+            filt = filt + get_filter_string(f)
+            filt = filt + ")" + (f.join if f.join else "")
+        elif isinstance(f, FilterPredicate):
+            if f.operation == "match":
+                filt = (
+                    filt
+                    + "(`{}`.str.contains('{}', na=False, regex=False)) {}".format(
+                        f.column, f.value, f.join
+                    )
+                )
+            elif f.operation == "match (regex)":
+                filt = filt + "(`{}`.str.contains('{}', na=False)) {}".format(
+                    f.column, f.value, f.join
+                )
+            else:
+                try:
+                    val = str(float(f.value))
+                except ValueError:
+                    if str(f.value).lower() in [
+                        "true",
+                        "false",
+                    ]:
+                        val = "True" if str(f.value).lower() == "true" else "False"
+                    else:
+                        val = '"{}"'.format(f.value)
+                filt = filt + "(`{}` {} {}) {}".format(
+                    f.column, f.operation, val, f.join
+                )
+    return filt
 
 
 def filter_table(
     df,
-    filter_predicates: List[Union[FilterPredicate, FilterPredicateGroup]],
+    filter_predicates: FilterPredicateGroup,
     filter_ids: Optional[FilterIds] = None,
 ) -> pd.DataFrame:
     # if we have ids, filter them out now!
@@ -57,15 +56,7 @@ def filter_table(
         # this is fast because the index is set to ids
         df = df.loc[filter_ids.ids]
 
-    final_filter = ""
-    for filt in filter_predicates:
-        final_filter = final_filter + get_filter_string(filt)
-    if (
-        len(filter_predicates) > 0
-        and len(final_filter) > 0
-        and (final_filter[-1] == "&" or final_filter[-1] == "|")
-    ):
-        final_filter = final_filter[0:-1]
+    final_filter = get_filter_string(filter_predicates)
     if len(final_filter) > 0:
         return df.query(final_filter)
     else:

@@ -33,8 +33,11 @@
 			column: col,
 			operation: "match",
 			value: regex,
-			join: "|",
+			join: "",
 		});
+		if (filterPredicates.length > 1) {
+			filterPredicates[filterPredicates.length - 2].join = "|";
+		}
 		updatePredicates(filterPredicates);
 		regex = "";
 	}
@@ -110,6 +113,14 @@
 				class="remove material-icons"
 				on:click={() => {
 					filterPredicates = filterPredicates.filter((p) => p !== pred);
+					filterPredicates = filterPredicates.map((p, i) => {
+						if (i === filterPredicates.length - 1) {
+							p.join = "";
+						} else {
+							p.join = "|";
+						}
+						return p;
+					});
 					updatePredicates(filterPredicates);
 				}}>
 				cancel
