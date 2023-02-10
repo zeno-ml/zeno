@@ -22,7 +22,7 @@ from zeno.classes.classes import (
     ZenoSettings,
     ZenoVariables,
 )
-from zeno.classes.metadata import HistogramBucket, HistogramRequest
+from zeno.classes.metadata import HistogramBucket, HistogramRequest, StringFilterRequest
 from zeno.classes.projection import Points2D, PointsColors
 from zeno.classes.report import Report
 from zeno.classes.slice import FilterPredicate, FilterPredicateGroup, Slice, SliceMetric
@@ -129,6 +129,11 @@ def get_server(zeno: ZenoBackend):
     @api_app.delete("/slice", tags=["zeno"])
     def delete_slice(slice_name: List[str]):
         zeno.delete_slice(slice_name[0])
+
+    @api_app.post("/string-filter", response_model=List[str], tags=["zeno"])
+    def filter_string_metadata(req: StringFilterRequest):
+        filt_out = zeno.filter_string_metadata(req)
+        return filt_out
 
     @api_app.post("/slice-metrics", response_model=List[SliceMetric], tags=["zeno"])
     def get_metrics_for_slices(req: MetricRequest):

@@ -4,18 +4,18 @@
     "version": "0.0.1",
     "type": "module",
     "scripts": {
-        "dev": "npm run smui-theme && vite build && vite",
+        "dev": "vite",
         "build": "npm run smui-theme && vite build",
         "smui-theme": "smui-theme compile public/smui.css -i src/theme",
         "format": "npx prettier -w src",
-        "lint": "npx eslint src; npx prettier -c src",
+        "lint": "npx eslint --max-warnings=0 src; npx prettier -c src",
         "test": "npx jest tests",
         "check": "svelte-check",
-        "generate-api": "npx openapi-typescript-codegen --input http://localhost:8000/api/openapi.json --output ./src/zenoservice --client fetch"
+        "generate-api": "npx openapi-typescript-codegen --input http://localhost:8000/api/openapi.json --output ./src/zenoservice --client fetch; npx prettier -w ./src/zenoservice"
     },
     "devDependencies": {
         "@formkit/auto-animate": "^1.0.0-beta.5",
-        "@smui-extra/autocomplete": "7.0.0-beta.0",
+        "@smui-extra/autocomplete": "^7.0.0-beta.0",
         "@smui/button": "7.0.0-beta.0",
         "@smui/card": "7.0.0-beta.0",
         "@smui/checkbox": "7.0.0-beta.0",
@@ -48,6 +48,7 @@
         "openapi-typescript-codegen": "^0.23.0",
         "prettier": "^2.8.2",
         "prettier-plugin-svelte": "^2.8.1",
+        "simple-svelte-autocomplete": "^2.5.2",
         "smui-theme": "7.0.0-beta.0",
         "svelte": "^3.55.1",
         "svelte-check": "^3.0.3",

@@ -4,6 +4,7 @@ import asyncio
 import logging
 import os
 import pickle
+import re
 import sys
 import threading
 from inspect import getsource
@@ -21,7 +22,7 @@ from sklearn import preprocessing  # type: ignore
 from zeno.api import ZenoOptions, ZenoParameters
 from zeno.classes.base import MetadataType, ZenoColumnType
 from zeno.classes.classes import MetricKey, TableRequest, ZenoColumn
-from zeno.classes.metadata import HistogramBucket, HistogramRequest
+from zeno.classes.metadata import HistogramBucket, HistogramRequest, StringFilterRequest
 from zeno.classes.projection import Points2D, PointsColors
 from zeno.classes.report import Report
 from zeno.classes.slice import (
@@ -566,6 +567,38 @@ class ZenoBackend(object):
                     loc_ret.append(metric)
             ret.append(loc_ret)
         return ret
+
+    def filter_string_metadata(self, req: StringFilterRequest) -> List[str]:
+        """Filter the table based on a string filter request."""
+        col = self.df[str(req.column)].astype(str)
+
+        short_ret: List[str] = []
+        if req.selection_type == "string":
+            ret = [i for i in col if req.filter_string in i]
+
+            for r in ret[0:5]:
+                idx = r.find(req.filter_string)
+                loc_str = r[idx - 20 : idx + 20]
+                if len(r) > 40 + len(req.filter_string):
+                    if idx - 20 > 0:
+                        loc_str = loc_str + "..."
+                    if idx + 20 < len(r):
+                        loc_str = "..." + loc_str
+                short_ret.append(loc_str)
+        else:
+            ret = col[col.str.contains(req.filter_string, case=False)].head().tolist()
+            for r in ret:
+                idx = re.search(req.filter_string, r)
+                if idx is not None:
+                    idx = idx.start()
+                    loc_str = r[idx - 20 : idx + 20]
+                    if len(r) > 40 + len(req.filter_string):
+                        if idx - 20 > 0:
+                            loc_str = loc_str + "..."
+                        if idx + 20 < len(r):
+                            loc_str = "..." + loc_str
+                    short_ret.append(loc_str)
+        return short_ret
 
     def embed_exists(self, model: str):
         """Checks for the existence of an embedding column.
