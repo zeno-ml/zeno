@@ -20,3 +20,9 @@ class HistogramRequest(CamelModel):
     model: Union[None, str] = None
     metric: Union[None, str] = None
     filter_ids: Optional[FilterIds] = None
+
+
+class StringFilterRequest(CamelModel):
+    column: ZenoColumn
+    filter_string: str
+    selection_type: str

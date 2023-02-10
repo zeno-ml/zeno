@@ -5,6 +5,7 @@ from zeno.classes.base import CamelModel, ZenoColumn
 
 class FilterPredicate(CamelModel):
     column: ZenoColumn
+    # ==, !=, >, <, >=, <=, match
     operation: str
     value: Union[str, float, int, bool]
     join: Optional[str]

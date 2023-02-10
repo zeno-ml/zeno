@@ -14,6 +14,7 @@ import type { PointsColors } from "../models/PointsColors";
 import type { Report } from "../models/Report";
 import type { Slice } from "../models/Slice";
 import type { SliceMetric } from "../models/SliceMetric";
+import type { StringFilterRequest } from "../models/StringFilterRequest";
 import type { TableRequest } from "../models/TableRequest";
 import type { ZenoColumn } from "../models/ZenoColumn";
 import type { ZenoSettings } from "../models/ZenoSettings";
@@ -240,6 +241,26 @@ export class ZenoService {
 		return __request(OpenAPI, {
 			method: "DELETE",
 			url: "/slice",
+			body: requestBody,
+			mediaType: "application/json",
+			errors: {
+				422: `Validation Error`,
+			},
+		});
+	}
+
+	/**
+	 * Filter String Metadata
+	 * @param requestBody
+	 * @returns string Successful Response
+	 * @throws ApiError
+	 */
+	public static filterStringMetadata(
+		requestBody: StringFilterRequest
+	): CancelablePromise<Array<string>> {
+		return __request(OpenAPI, {
+			method: "POST",
+			url: "/string-filter",
 			body: requestBody,
 			mediaType: "application/json",
 			errors: {

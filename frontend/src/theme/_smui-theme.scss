@@ -49,6 +49,7 @@
 	--mdc-theme-text-hint-on-dark: rgba(255, 255, 255, 0.5);
 	--mdc-theme-text-disabled-on-dark: rgba(255, 255, 255, 0.5);
 	--mdc-theme-text-icon-on-dark: rgba(255, 255, 255, 0.5);
+	--mdc-outlined-button-container-height: 20px;
 }
 
 $mdc-typography-font-family: unquote("Open Sans, Roboto, sans-serif");
@@ -63,6 +64,12 @@ $mdc-typography-font-family: unquote("Open Sans, Roboto, sans-serif");
 .mdc-icon-button__icon {
 	height: 20px;
 	width: 20px;
+}
+
+.mdc-button--outlined {
+	padding-left: 10px;
+	padding-right: 10px;
+	height: 20px;
 }
 
 html,
