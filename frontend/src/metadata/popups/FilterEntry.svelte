@@ -13,7 +13,7 @@
 	export let deletePredicate: () => void;
 	export let index;
 
-	let operations = ["==", "!=", ">", "<", ">=", "<=", "match"];
+	let operations = ["==", "!=", ">", "<", ">=", "<=", "match", "match (regex)"];
 </script>
 
 <div id="group">

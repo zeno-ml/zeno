@@ -23,7 +23,11 @@ def get_filter_string(filter: Union[FilterPredicateGroup, FilterPredicate]):
             return filt + ")" + (filter.join if filter.join else "")
     else:
         if filter.operation == "match":
-            return "(`{}`.str.match('{}', na=False)) {}".format(
+            return "(`{}`.str.contains('{}', na=False, regex=False)) {}".format(
+                filter.column, filter.value, filter.join
+            )
+        elif filter.operation == "match (regex)":
+            return "(`{}`.str.contains('{}', na=False)) {}".format(
                 filter.column, filter.value, filter.join
             )
         else:

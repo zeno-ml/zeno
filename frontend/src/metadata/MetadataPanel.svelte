@@ -29,6 +29,7 @@
 		sliceToEdit,
 		requestingHistogramCounts,
 		status,
+		showNewFolder,
 	} from "../stores";
 	import { columnHash } from "../util/util";
 	import {
@@ -41,12 +42,9 @@
 	import MetadataCell from "./cells/MetadataCell.svelte";
 	import SliceCell from "./cells/SliceCell.svelte";
 	import MetricRange from "./MetricRange.svelte";
-	import NewFolderPopup from "./popups/NewFolderPopup.svelte";
-	import NewSlicePopup from "./popups/NewSlicePopup.svelte";
 
 	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
 		new InternMap([], columnHash);
-	let showNewFolder = false;
 
 	$: res = getMetricsForSlices([
 		<MetricKey>{
@@ -221,23 +219,25 @@
 		<div class="inline">
 			<div>
 				<Wrapper>
-					<IconButton on:click={() => (showNewFolder = !showNewFolder)}>
+					<IconButton
+						on:click={() => {
+							showNewSlice.set(false);
+							showNewFolder.update((b) => !b);
+						}}>
 						<Icon component={Svg} viewBox="0 0 24 24">
 							<path fill="black" d={mdiFolderPlusOutline} />
 						</Icon>
 					</IconButton>
 					<Tooltip xPos="start">Create a new folder</Tooltip>
 				</Wrapper>
-				{#if showNewFolder}
-					<NewFolderPopup bind:showNewFolder />
-				{/if}
 			</div>
 			<div>
 				<Wrapper>
 					<IconButton
 						on:click={() => {
 							sliceToEdit.set(undefined);
-							showNewSlice.set(true);
+							showNewSlice.update((d) => !d);
+							showNewFolder.set(false);
 						}}>
 						<Icon component={Svg} viewBox="0 0 24 24">
 							{#if $selectionPredicates.length > 0}
@@ -249,9 +249,6 @@
 					</IconButton>
 					<Tooltip xPos="start">Create a new slice</Tooltip>
 				</Wrapper>
-				{#if $showNewSlice}
-					<NewSlicePopup />
-				{/if}
 			</div>
 		</div>
 	</div>

@@ -1,15 +1,9 @@
 <script lang="ts">
-	import {
-		mdiChevronDown,
-		mdiDotsHorizontal,
-		mdiChevronUp,
-		mdiPencilOutline,
-	} from "@mdi/js";
+	import { mdiChevronDown, mdiDotsHorizontal, mdiChevronUp } from "@mdi/js";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import { Svg } from "@smui/common";
 	import { slide } from "svelte/transition";
 	import { folders, slices } from "../../stores";
-	import NewFolderPopup from "../popups/NewFolderPopup.svelte";
 	import SliceCell from "./SliceCell.svelte";
 	import { createNewSlice } from "../../api/slice";
 
@@ -17,7 +11,6 @@
 
 	let expandFolder = false;
 	let dragOver = false;
-	let showNewFolder = false;
 
 	let hovering = false;
 	let showOptions = false;
@@ -62,15 +55,6 @@
 				id="options-container"
 				on:mouseleave={() => (showOptions = false)}
 				on:blur={() => (showOptions = false)}>
-				<IconButton
-					on:click={(e) => {
-						e.stopPropagation();
-						showNewFolder = true;
-					}}>
-					<Icon component={Svg} viewBox="0 0 24 24">
-						<path fill="black" d={mdiPencilOutline} />
-					</Icon>
-				</IconButton>
 				<IconButton
 					on:click={(e) => {
 						e.stopPropagation();
@@ -122,9 +106,6 @@
 			<SliceCell slice={s} inFolder={true} />
 		{/each}
 	</div>
-{/if}
-{#if showNewFolder}
-	<NewFolderPopup folderName={folder} edit={true} bind:showNewFolder />
 {/if}
 
 <style>

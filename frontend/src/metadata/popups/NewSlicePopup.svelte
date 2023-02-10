@@ -28,12 +28,22 @@
 			folder = $sliceToEdit.folder;
 			return;
 		}
+
 		// Pre-fill slice creation with current metadata selections.
 		Object.values($selections.metadata).forEach((filtGroup) => {
 			if (filtGroup.predicates.length !== 0) {
 				predicateGroup.predicates.push(filtGroup);
 			}
 		});
+		// If no predicates, add an empty one.
+		if (predicateGroup.predicates.length === 0) {
+			predicateGroup.predicates.push({
+				column: undefined,
+				operation: "",
+				value: "",
+				join: "&",
+			});
+		}
 	}
 
 	function createSlice() {
@@ -74,8 +84,9 @@
 	id="paper-container"
 	use:clickOutside
 	on:click_outside={() => showNewSlice.set(false)}>
-	<Paper elevation={7}>
-		<Content style="max-height: calc(100vh - 100px); overflow-y: scroll;">
+	<Paper elevation={7} class="paper">
+		<Content
+			style="height: 100%; max-height: calc(100vh - 100px); overflow-y: scroll;">
 			{#if !$sliceToEdit}
 				<Textfield bind:value={sliceName} label="Name" bind:this={nameInput}>
 					<HelperText slot="helper">Slice 1</HelperText>
@@ -109,10 +120,12 @@
 
 <style>
 	#paper-container {
+		height: 500px;
+		min-height: 500px;
 		max-height: 100vh;
 		position: fixed;
-		left: 60px;
-		top: 10px;
+		left: 440px;
+		top: 70px;
 		z-index: 10;
 	}
 	#submit {
