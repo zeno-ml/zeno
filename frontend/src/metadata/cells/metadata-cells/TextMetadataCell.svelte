@@ -113,14 +113,9 @@
 				class="remove material-icons"
 				on:click={() => {
 					filterPredicates = filterPredicates.filter((p) => p !== pred);
-					filterPredicates = filterPredicates.map((p, i) => {
-						if (i === 0) {
-							p.join = "";
-						} else {
-							p.join = "|";
-						}
-						return p;
-					});
+					if (filterPredicates.length > 0) {
+						filterPredicates[0].join = "";
+					}
 					updatePredicates(filterPredicates);
 				}}>
 				cancel

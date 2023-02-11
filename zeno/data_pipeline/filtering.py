@@ -10,7 +10,16 @@ from zeno.classes.metadata import HistogramBucket
 from zeno.classes.slice import FilterIds, FilterPredicate, FilterPredicateGroup
 
 
-def get_filter_string(filter: FilterPredicateGroup):
+def get_filter_string(filter: FilterPredicateGroup) -> str:
+    """Generate a filter string for Pandas query from a nested set of FilterPredicates.
+    The join should go on the second predicate in a group.
+
+    Args:
+        filter (FilterPredicateGroup): Parent FilterPredicateGroup
+
+    Returns:
+        str: Filter string with added predicates
+    """
     filt = ""
     for f in filter.predicates:
         if isinstance(f, FilterPredicateGroup):

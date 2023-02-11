@@ -73,13 +73,6 @@ export const models: Writable<string[]> = writable([]);
 
 export const model: Writable<string> = writable(undefined);
 export const metric: Writable<string> = writable(undefined);
-export const currentColumns: Readable<ZenoColumn[]> = derived(
-	[settings, model],
-	([$settings, $model]) =>
-		$settings.metadataColumns.filter(
-			(c) => c.model === "" || c.model === $model
-		)
-);
 
 // [column, ascending]
 export const sort: Writable<[ZenoColumn, boolean]> = writable([
@@ -105,6 +98,8 @@ export const selections: Writable<{
 	metadata: {},
 	slices: [],
 });
+// Combination of selected filters and slice filters.
+// Needs to be a group because we need to join the predicates with &.
 export const selectionPredicates: Readable<FilterPredicateGroup> = derived(
 	[selections],
 	([$selections]) => {

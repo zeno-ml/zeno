@@ -258,11 +258,9 @@
 		on:keydown={() => ({})}
 		on:click={() => {
 			selections.update((m) => {
-				let len = Object.keys(m.metadata).length;
-				Object.keys(m.metadata).forEach((key, i) => {
-					m.metadata[key] = { predicates: [], join: i < len - 1 ? "&" : "" };
+				Object.keys(m.metadata).forEach((key) => {
+					m.metadata[key] = { predicates: [], join: "" };
 				});
-				console.log(m.metadata);
 				return { slices: [], metadata: { ...m.metadata } };
 			});
 		}}>
@@ -298,7 +296,7 @@
 		</div>
 		<MetricRange />
 	</div>
-	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.METADATA) as col}
+	{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.METADATA) as col}
 		<MetadataCell {col} histogram={metadataHistograms.get(col)} />
 	{/each}
 

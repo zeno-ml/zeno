@@ -102,6 +102,9 @@
 		flex-direction: column;
 		align-items: baseline;
 	}
+	.group-join {
+		margin-left: 10px;
+	}
 	#buttons {
 		margin-bottom: 10px;
 		margin-left: 10px;
@@ -111,6 +114,7 @@
 		border-radius: 5px;
 		margin-top: 10px;
 		margin-bottom: 10px;
+		margin-left: 10px;
 	}
 	ul {
 		padding-left: 10px;

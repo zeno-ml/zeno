@@ -15,7 +15,6 @@ class ZenoSettings(CamelModel):
     label_column: ZenoColumn
     data_column: ZenoColumn
     data_origin: str
-    metadata_columns: List[ZenoColumn]
     samples: int
     totalSize: int
 

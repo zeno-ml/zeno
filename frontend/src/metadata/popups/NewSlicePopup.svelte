@@ -41,7 +41,7 @@
 		// If no predicates, add an empty one.
 		if (predicateGroup.predicates.length === 0) {
 			predicateGroup.predicates.push({
-				column: undefined,
+				column: null,
 				operation: "",
 				value: "",
 				join: "",

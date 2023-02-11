@@ -72,11 +72,10 @@
 						on:keydown={() => ({})}
 						on:click={() => {
 							selections.update((m) => {
-								let len = Object.keys(m.metadata).length;
-								Object.keys(m.metadata).forEach((key, i) => {
+								Object.keys(m.metadata).forEach((key) => {
 									m.metadata[key] = {
 										predicates: [],
-										join: i < len - 1 ? "&" : "",
+										join: "",
 									};
 								});
 								return { slices: [], metadata: { ...m.metadata } };
