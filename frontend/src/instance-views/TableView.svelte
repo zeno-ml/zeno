@@ -76,7 +76,9 @@
 			$selectionIds
 		).then((res) => {
 			table = res;
-			body ? body.scrollIntoView() : "";
+			if (body) {
+				body.scrollTop = 0;
+			}
 		});
 	}
 
@@ -141,7 +143,7 @@
 </script>
 
 {#if table}
-	<div class="sample-container">
+	<div class="sample-container" bind:this={body}>
 		<table id="column-table">
 			<thead>
 				<tr>
@@ -168,7 +170,7 @@
 					{/each}
 				</tr>
 			</thead>
-			<tbody bind:this={body}>
+			<tbody>
 				{#each table as tableContent}
 					<tr>
 						{#if viewFunction}
@@ -253,8 +255,9 @@
 		padding-bottom: 5px;
 		margin-bottom: 20px;
 		margin-right: 20px;
+		top: 2px;
+		left: 0;
 		position: sticky;
-		top: 0;
 		background-color: var(--G6);
 		min-width: 70px;
 		margin-bottom: 5px;

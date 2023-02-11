@@ -49,10 +49,9 @@
 		width: fit-content;
 		padding: 5px 10px;
 		background: var(--G5);
-		margin-left: 5px;
 		margin-right: 5px;
 		margin-top: 2px;
 		margin-bottom: 2px;
-		border-radius: 5px;
+		border-radius: 4px;
 	}
 </style>

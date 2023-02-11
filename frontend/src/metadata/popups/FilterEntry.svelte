@@ -1,98 +1,116 @@
 <script lang="ts">
 	import { mdiTrashCanOutline } from "@mdi/js";
-	import Autocomplete from "@smui-extra/autocomplete";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
-	import Select, { Option } from "@smui/select";
-	import Textfield from "@smui/textfield";
-	import HelperText from "@smui/textfield/helper-text";
+	import Svelecte from "svelecte";
+	import { model, status } from "../../stores";
 	import {
 		MetadataType,
 		ZenoColumnType,
 		type FilterPredicate,
 	} from "../../zenoservice";
-	import { model, status } from "../../stores";
 
 	export let predicate: FilterPredicate;
 	export let deletePredicate: () => void;
 	export let index;
 
 	let operations = ["==", "!=", ">", "<", ">=", "<="];
-	let valueInput;
-
-	$: predicate.value = valueInput;
 </script>
 
 <div id="group">
 	{#if index !== 0}
-		<Select
-			bind:value={predicate.join}
-			label="Join"
-			style="padding-left: 10px; margin-right: 20px; width: 90px">
-			{#each ["&", "|"] as o}
-				<Option value={o}>{o}</Option>
-			{/each}
-		</Select>
+		<div class="selector">
+			<Svelecte
+				style={"width: 60px"}
+				value={predicate.join}
+				on:change={(e) => {
+					predicate.join = e.detail.label;
+					predicate = predicate;
+				}}
+				resetOnBlur={false}
+				placeholder={""}
+				valueField="label"
+				labelField="label"
+				options={["&", "|"]} />
+		</div>
+	{:else}
+		<div style="width: 70px">
+			<p>where</p>
+		</div>
 	{/if}
 	<div class="selector">
-		<Autocomplete
+		<Svelecte
+			bind:value={predicate.column}
+			placeholder={"Column"}
+			valueAsObject={true}
 			options={$status.completeColumns.filter(
 				(d) =>
 					d.model === $model ||
 					d.columnType === ZenoColumnType.METADATA ||
 					d.columnType === ZenoColumnType.PREDISTILL
-			)}
-			on:change={() => {
-				console.log("change");
-				predicate.operation = "";
-				predicate.value = "";
-			}}
-			getOptionLabel={(option) => (option ? option.name : "")}
-			bind:value={predicate.column}
-			label="Metadata or Slice" />
+			)} />
 	</div>
 	<div class="selector">
 		{#if predicate.column}
-			<Select
-				bind:value={predicate.operation}
-				label="Operation"
-				style="padding-left: 5px; margin-right: 20px; width:125px">
-				{#if predicate.column.metadataType === MetadataType.BOOLEAN}
-					<Option value="==">==</Option>
-					<Option value="!=">!=</Option>
-				{:else if predicate.column.metadataType === MetadataType.OTHER}
-					<Option value="match">match</Option>
-					<Option value="match (regex)">match (regex)</Option>
-				{:else}
-					{#each operations as o}
-						<Option value={o}>{o}</Option>
-					{/each}
-				{/if}
-			</Select>
+			{#if predicate.column.metadataType === MetadataType.BOOLEAN}
+				<Svelecte
+					value={predicate.operation}
+					on:change={(e) => {
+						predicate.operation = e.detail.label;
+						predicate = predicate;
+					}}
+					placeholder={"Operation"}
+					valueField={"label"}
+					searchable={false}
+					options={["==", "!="]} />
+			{:else if predicate.column.metadataType === MetadataType.OTHER}
+				<Svelecte
+					value={predicate.operation}
+					on:change={(e) => {
+						predicate.operation = e.detail.label;
+						predicate = predicate;
+					}}
+					placeholder={"Operation"}
+					valueField={"label"}
+					searchable={false}
+					options={["match", "match (regex)"]} />
+			{:else}
+				<Svelecte
+					value={predicate.operation}
+					on:change={(e) => {
+						predicate.operation = e.detail.label;
+						predicate = predicate;
+					}}
+					placeholder={"Operation"}
+					valueField={"label"}
+					searchable={false}
+					options={operations} />
+			{/if}
+		{:else}
+			<Svelecte options={operations} />
 		{/if}
 	</div>
 
 	<div>
 		{#if predicate.column}
 			{#if predicate.column.metadataType === MetadataType.BOOLEAN}
-				<Select
-					key={(bool) => `${bool}`}
+				<Svelecte
 					bind:value={predicate.value}
-					label="Value"
-					style="margin-right: 20px; width:125px">
-					{#each [true, false] as o}
-						<Option value={o}>{o.toString()}</Option>
-					{/each}
-				</Select>
+					placeholder={"Value"}
+					valueField={"label"}
+					searchable={false}
+					options={[true, false]} />
 			{:else}
-				<Textfield bind:value={valueInput} label="Value" style="width: 100px">
-					<HelperText slot="helper">0</HelperText>
-				</Textfield>
+				<input type="text" bind:value={predicate.value} />
 			{/if}
+		{:else}
+			<Svelecte />
 		{/if}
 	</div>
-	<div class="selector" style:margin-top="10px">
-		<IconButton on:click={deletePredicate}>
+	<div class="selector">
+		<IconButton
+			on:click={deletePredicate}
+			style="height:10px; margin-top: 5px; color: var(--G2)">
 			<Icon component={Svg} viewBox="0 0 24 24">
 				<path fill="currentColor" d={mdiTrashCanOutline} />
 			</Icon>
@@ -102,11 +120,22 @@
 
 <style>
 	.selector {
-		margin-left: 10px;
 		margin-right: 10px;
 	}
 	#group {
 		display: flex;
 		flex-direction: inline;
+		margin-bottom: 5px;
+		margin-top: 5px;
+	}
+	input {
+		height: 34px;
+		border: 1px solid #ccc;
+		border-radius: 4px;
+	}
+	p {
+		margin: 0px;
+		margin-left: 5px;
+		margin-top: 5px;
 	}
 </style>
