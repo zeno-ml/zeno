@@ -1,4 +1,4 @@
-import { websocketStore } from "./util/websocketStore";
+import { interpolate } from "d3-interpolate";
 import {
 	derived,
 	get,
@@ -7,6 +7,7 @@ import {
 	type Writable,
 } from "svelte/store";
 import { folderWritable, reportWritable } from "./util/customStores";
+import { websocketStore } from "./util/websocketStore";
 import type {
 	FilterIds,
 	FilterPredicate,
@@ -134,3 +135,11 @@ export const metricRange: Writable<[number, number]> = writable([
 	Infinity,
 	-Infinity,
 ]);
+const colorScale = interpolate("#decbe9", "#6a1b9a");
+export const metricRangeColorScale: Readable<(n: number) => string> = derived(
+	[metricRange],
+	([$metricRange]) => {
+		const [min, max] = $metricRange;
+		return (n) => colorScale((n - min) / (max - min));
+	}
+);
