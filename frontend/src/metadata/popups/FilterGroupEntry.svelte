@@ -123,7 +123,6 @@
 	}
 	#buttons {
 		margin-bottom: 10px;
-		margin-left: 10px;
 	}
 	.main {
 		border-radius: 4px;

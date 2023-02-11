@@ -86,16 +86,24 @@
 			createSlice();
 		}
 	}
+	let paperHeight;
 </script>
 
 <svelte:window on:keydown={submit} />
 
 <div
 	id="paper-container"
+	bind:clientHeight={paperHeight}
 	use:clickOutside
 	on:click_outside={() => showNewSlice.set(false)}>
-	<Paper elevation={7} class="paper">
-		<Content style="height: 100%; max-height: calc(100vh - 100px);">
+	<Paper
+		elevation={7}
+		class="paper"
+		style="max-height: 75vh; {paperHeight &&
+		paperHeight > window.innerHeight * 0.75
+			? 'overflow-y: scroll'
+			: 'overflow-y: show'}">
+		<Content>
 			{#if !$sliceToEdit}
 				<Textfield
 					bind:value={sliceName}
@@ -130,9 +138,6 @@
 
 <style>
 	#paper-container {
-		height: 500px;
-		min-height: 500px;
-		max-height: 100vh;
 		position: fixed;
 		left: 440px;
 		top: 70px;

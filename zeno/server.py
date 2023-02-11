@@ -67,6 +67,7 @@ def get_server(zeno: ZenoBackend):
             label_column=zeno.label_column,
             data_column=zeno.data_column,
             data_origin="/data/" if os.path.exists(zeno.data_path) else zeno.data_path,
+            calculate_histogram_metrics=zeno.calculate_histogram_metrics,
             samples=zeno.samples,
             totalSize=zeno.df.shape[0],
         )

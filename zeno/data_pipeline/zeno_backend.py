@@ -48,6 +48,7 @@ class ZenoBackend(object):
         self.editable = params.editable
         self.samples = params.samples
         self.view = params.view
+        self.calculate_histogram_metrics = params.calculate_histogram_metrics
 
         self.done_running_inference = False
 

@@ -59,16 +59,7 @@ export const status: Readable<WSResponse> = derived(
 export const ready: Writable<boolean> = writable(false);
 
 export const rowsPerPage = writable(0);
-export const settings: Writable<ZenoSettings> = writable(<ZenoSettings>{
-	view: "",
-	idColumn: {},
-	dataColumn: {},
-	labelColumn: {},
-	metadataColumns: [],
-	dataOrigin: "",
-	samples: 0,
-	totalSize: 0,
-});
+export const settings: Writable<ZenoSettings> = writable(null);
 export const metrics: Writable<string[]> = writable([]);
 export const models: Writable<string[]> = writable([]);
 

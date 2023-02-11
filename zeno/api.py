@@ -47,6 +47,7 @@ class ZenoParameters(BaseModel):
     label_path: str = ""
     batch_size: int = 1
     cache_path: str = ""
+    calculate_histogram_metrics = True
     editable: bool = True
     serve: bool = True
     samples: int = 30
