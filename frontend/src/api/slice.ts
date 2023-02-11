@@ -68,7 +68,6 @@ export async function getMetricsForSlices(
 	// Update model in predicates if slices are dependent on postdistill columns.
 	metricKeys = setModelForMetricKeys(metricKeys);
 
-	console.log(metricKeys, filterIds);
 	if (metricKeys.length > 0) {
 		return await ZenoService.getMetricsForSlices({
 			metricKeys,
