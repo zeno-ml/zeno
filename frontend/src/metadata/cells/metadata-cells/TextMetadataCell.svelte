@@ -36,7 +36,7 @@
 			join: "",
 		});
 		if (filterPredicates.length > 1) {
-			filterPredicates[filterPredicates.length - 2].join = "|";
+			filterPredicates[filterPredicates.length - 1].join = "|";
 		}
 		updatePredicates(filterPredicates);
 		regex = "";
@@ -114,7 +114,7 @@
 				on:click={() => {
 					filterPredicates = filterPredicates.filter((p) => p !== pred);
 					filterPredicates = filterPredicates.map((p, i) => {
-						if (i === filterPredicates.length - 1) {
+						if (i === 0) {
 							p.join = "";
 						} else {
 							p.join = "|";

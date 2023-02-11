@@ -57,10 +57,7 @@
 					sliceName: "",
 					folder: "",
 					filterPredicates: {
-						predicates:
-							$selectionPredicates.predicates.length > 0
-								? [$selectionPredicates]
-								: [],
+						predicates: [$selectionPredicates],
 						join: "",
 					},
 				},

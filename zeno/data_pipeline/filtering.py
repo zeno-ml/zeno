@@ -14,20 +14,21 @@ def get_filter_string(filter: FilterPredicateGroup):
     filt = ""
     for f in filter.predicates:
         if isinstance(f, FilterPredicateGroup):
-            filt = filt + "("
-            filt = filt + get_filter_string(f)
-            filt = filt + ")" + (f.join if f.join else "")
+            if len(f.predicates) != 0:
+                filt = filt + f.join + "("
+                filt = filt + get_filter_string(f)
+                filt = filt + ")"
         elif isinstance(f, FilterPredicate):
             if f.operation == "match":
                 filt = (
                     filt
-                    + "(`{}`.str.contains('{}', na=False, regex=False)) {}".format(
-                        f.column, f.value, f.join
+                    + "{} (`{}`.str.contains('{}', na=False, regex=False))".format(
+                        f.join, f.column, f.value
                     )
                 )
             elif f.operation == "match (regex)":
-                filt = filt + "(`{}`.str.contains('{}', na=False)) {}".format(
-                    f.column, f.value, f.join
+                filt = filt + "{} (`{}`.str.contains('{}', na=False))".format(
+                    f.join, f.column, f.value
                 )
             else:
                 try:
@@ -40,8 +41,8 @@ def get_filter_string(filter: FilterPredicateGroup):
                         val = "True" if str(f.value).lower() == "true" else "False"
                     else:
                         val = '"{}"'.format(f.value)
-                filt = filt + "(`{}` {} {}) {}".format(
-                    f.column, f.operation, val, f.join
+                filt = filt + "{} (`{}` {} {})".format(
+                    f.join, f.column, f.operation, val
                 )
     return filt
 

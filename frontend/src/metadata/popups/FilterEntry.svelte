@@ -85,8 +85,4 @@
 		display: flex;
 		flex-direction: inline;
 	}
-	#where {
-		margin-top: 15px;
-		margin-right: 70px;
-	}
 </style>

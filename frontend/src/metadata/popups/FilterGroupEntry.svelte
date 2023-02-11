@@ -68,7 +68,7 @@
 						column: undefined,
 						operation: "",
 						value: "",
-						join: "&",
+						join: predicateGroup.predicates.length === 0 ? "" : "&",
 					});
 					predicateGroup = predicateGroup;
 				}}>
@@ -83,10 +83,10 @@
 								column: undefined,
 								operation: "",
 								value: "",
-								join: "&",
+								join: "",
 							},
 						],
-						join: "&",
+						join: predicateGroup.predicates.length === 0 ? "" : "&",
 					});
 					predicateGroup = predicateGroup;
 				}}>

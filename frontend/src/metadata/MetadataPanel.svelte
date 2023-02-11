@@ -128,10 +128,7 @@
 		getHistogramCounts(
 			metadataHistograms,
 			{
-				predicates:
-					$selectionPredicates.predicates.length > 0
-						? [$selectionPredicates]
-						: [],
+				predicates: [$selectionPredicates],
 				join: "",
 			},
 			selectionIds
@@ -144,10 +141,7 @@
 			getHistogramMetrics(
 				res,
 				{
-					predicates:
-						$selectionPredicates.predicates.length > 0
-							? [$selectionPredicates]
-							: [],
+					predicates: [$selectionPredicates],
 					join: "",
 				},
 				$model,

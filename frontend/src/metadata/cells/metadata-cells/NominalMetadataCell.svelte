@@ -51,7 +51,7 @@
 					column: col,
 					operation: "==",
 					value: l,
-					join: i === localSelection.bucket.length - 1 ? "" : "|",
+					join: i === 0 ? "" : "|",
 				} as FilterPredicate);
 			});
 		} else {

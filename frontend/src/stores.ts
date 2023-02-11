@@ -112,9 +112,9 @@ export const selectionPredicates: Readable<FilterPredicateGroup> = derived(
 			Object.values($selections.metadata)
 		)
 			.filter((d) => d.predicates.length !== 0)
-			.map((d, i, arr) => ({
+			.map((d, i) => ({
 				predicates: d.predicates,
-				join: i === arr.length - 1 ? "" : "&",
+				join: i === 0 ? "" : "&",
 			}))
 			.flat();
 		if ($selections.slices.length !== 0) {
@@ -122,7 +122,7 @@ export const selectionPredicates: Readable<FilterPredicateGroup> = derived(
 				...ret,
 				...$selections.slices.map((sliName, i) => ({
 					predicates: get(slices).get(sliName).filterPredicates.predicates,
-					join: i === $selections.slices.length - 1 ? "" : "&",
+					join: i === 0 && ret.length === 0 ? "" : "&",
 				})),
 			];
 		}

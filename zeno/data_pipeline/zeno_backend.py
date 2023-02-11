@@ -25,12 +25,7 @@ from zeno.classes.classes import MetricKey, TableRequest, ZenoColumn
 from zeno.classes.metadata import HistogramBucket, HistogramRequest, StringFilterRequest
 from zeno.classes.projection import Points2D, PointsColors
 from zeno.classes.report import Report
-from zeno.classes.slice import (
-    FilterIds,
-    FilterPredicateGroup,
-    Slice,
-    SliceMetric,
-)
+from zeno.classes.slice import FilterIds, FilterPredicateGroup, Slice, SliceMetric
 from zeno.data_pipeline.data_processing import (
     postdistill_data,
     predistill_data,

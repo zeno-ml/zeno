@@ -44,13 +44,13 @@
 				column: col,
 				operation: ">=",
 				value: localSelection[0],
-				join: "&",
+				join: "",
 			} as FilterPredicate;
 			filterPredicates[1] = {
 				column: col,
 				operation: "<=",
 				value: localSelection[1],
-				join: "",
+				join: "&",
 			} as FilterPredicate;
 		} else {
 			localSelection = [];
