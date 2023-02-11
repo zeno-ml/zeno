@@ -376,12 +376,12 @@
 	.overview {
 		display: flex;
 		align-items: center;
-		border: 1px solid var(--G4);
-		border-radius: 10px;
+		border: 1px solid var(--G5);
+		border-radius: 4px;
 		padding-left: 10px;
 		justify-content: space-between;
 		padding-right: 10px;
-		height: 30px;
+		min-height: 36px;
 		cursor: pointer;
 		color: var(--G1);
 	}

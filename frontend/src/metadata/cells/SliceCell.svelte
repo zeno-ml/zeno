@@ -275,10 +275,12 @@
 	}
 	.tooltip {
 		background: var(--G6);
-		padding-left: 5px;
-		padding-right: 5px;
+		padding-left: 10px;
+		padding-right: 10px;
 		box-shadow: 1px 1px 3px 1px var(--G3);
-		border-radius: 3px;
+		border-radius: 4px;
+		padding-top: 10px;
+		padding-bottom: 10px;
 	}
 	#size {
 		font-style: italic;
@@ -288,13 +290,13 @@
 	.cell {
 		position: relative;
 		overflow: visible;
-		border: 1px solid var(--G4);
-		border-radius: 10px;
+		border: 0.5px solid var(--G4);
+		border-radius: 4px;
 		margin-top: 5px;
 		display: flex;
 		padding-left: 10px;
 		padding-right: 10px;
-		height: 30px;
+		min-height: 36px;
 	}
 	.group {
 		display: flex;
@@ -311,7 +313,7 @@
 		flex-direction: row;
 	}
 	.in-folder {
-		padding-left: 44px;
+		margin-left: 35px;
 		margin-top: 0px;
 		margin-bottom: 0px;
 	}
@@ -325,5 +327,6 @@
 		position: absolute;
 		height: max-content;
 		display: flex;
+		border-radius: 4px;
 	}
 </style>

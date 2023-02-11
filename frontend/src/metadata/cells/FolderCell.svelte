@@ -117,11 +117,12 @@
 		padding-left: 10px;
 		padding-right: 10px;
 		margin-top: 5px;
-		border-radius: 10px;
+		border-radius: 4px;
 		height: 36px;
 		background: var(--G5);
 	}
 	#options-container {
+		top: 0px;
 		right: 0px;
 		z-index: 5;
 		background: var(--G6);
@@ -130,6 +131,7 @@
 		position: absolute;
 		height: max-content;
 		display: flex;
+		border-radius: 4px;
 	}
 	.expanded {
 		margin-bottom: 0px;

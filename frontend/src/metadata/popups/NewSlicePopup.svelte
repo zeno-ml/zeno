@@ -2,7 +2,6 @@
 	import Button from "@smui/button";
 	import Paper, { Content } from "@smui/paper";
 	import Textfield from "@smui/textfield";
-	import HelperText from "@smui/textfield/helper-text";
 	import { createNewSlice } from "../../api/slice";
 	import { selections, showNewSlice, slices, sliceToEdit } from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
@@ -90,9 +89,10 @@
 	<Paper elevation={7} class="paper">
 		<Content style="height: 100%; max-height: calc(100vh - 100px);">
 			{#if !$sliceToEdit}
-				<Textfield bind:value={sliceName} label="Name" bind:this={nameInput}>
-					<HelperText slot="helper">Slice 1</HelperText>
-				</Textfield>
+				<Textfield
+					bind:value={sliceName}
+					label="Slice Name"
+					bind:this={nameInput} />
 			{:else}
 				<p>{sliceName}</p>
 			{/if}

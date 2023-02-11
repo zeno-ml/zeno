@@ -105,7 +105,7 @@
 						{$metric ? $metric + ":" : ""}
 					</span>
 					{#if r}
-						<span class="metric">
+						<span class="metric-value">
 							{r[0].metric.toFixed(2)}
 						</span>
 						<span id="size">({r[0].size.toLocaleString()} instances)</span>
@@ -165,6 +165,11 @@
 	}
 	.metric {
 		font-weight: 400;
+		color: var(--G2);
+		margin-right: 15px;
+	}
+	.metric-value {
+		font-weight: 400;
 		color: var(--logo);
 		margin-right: 15px;
 	}
@@ -176,7 +181,7 @@
 	}
 	.clear:hover {
 		background: var(--Y1);
-		border-radius: 5px;
+		border-radius: 4px;
 	}
 	#size {
 		font-style: italic;
