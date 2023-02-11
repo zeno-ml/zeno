@@ -14,7 +14,7 @@
 	export let deletePredicate: () => void;
 	export let index;
 
-	let operations = ["==", "!=", ">", "<", ">=", "<=", "match", "match (regex)"];
+	let operations = ["==", "!=", ">", "<", ">=", "<="];
 </script>
 
 <div id="group">
@@ -22,7 +22,11 @@
 		<div class="selector">
 			<Svelecte
 				style={"width: 60px"}
-				bind:value={predicate.join}
+				value={predicate.join}
+				on:change={(e) => {
+					predicate.join = e.detail.label;
+					predicate = predicate;
+				}}
 				resetOnBlur={false}
 				placeholder={""}
 				valueField="label"
@@ -50,21 +54,33 @@
 		{#if predicate.column}
 			{#if predicate.column.metadataType === MetadataType.BOOLEAN}
 				<Svelecte
-					bind:value={predicate.operation}
+					value={predicate.operation}
+					on:change={(e) => {
+						predicate.operation = e.detail.label;
+						predicate = predicate;
+					}}
 					placeholder={"Operation"}
 					valueField={"label"}
 					searchable={false}
 					options={["==", "!="]} />
 			{:else if predicate.column.metadataType === MetadataType.OTHER}
 				<Svelecte
-					bind:value={predicate.operation}
+					value={predicate.operation}
+					on:change={(e) => {
+						predicate.operation = e.detail.label;
+						predicate = predicate;
+					}}
 					placeholder={"Operation"}
 					valueField={"label"}
 					searchable={false}
 					options={["match", "match (regex)"]} />
 			{:else}
 				<Svelecte
-					bind:value={predicate.operation}
+					value={predicate.operation}
+					on:change={(e) => {
+						predicate.operation = e.detail.label;
+						predicate = predicate;
+					}}
 					placeholder={"Operation"}
 					valueField={"label"}
 					searchable={false}

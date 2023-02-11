@@ -17,11 +17,11 @@
 		if (predicateGroup.predicates.length === 0) {
 			deletePredicate();
 			return;
+		} else {
+			predicateGroup.predicates[0].join = "";
 		}
 		predicateGroup = predicateGroup;
 	}
-
-	$: console.log(predicateGroup.join);
 </script>
 
 <div class="group">
@@ -30,8 +30,13 @@
 			<Svelecte
 				placeholder={""}
 				style={"width: 60px"}
-				bind:value={predicateGroup.join}
+				value={predicateGroup.join}
+				on:change={(e) => {
+					predicateGroup.join = e.detail.label;
+					predicateGroup = predicateGroup;
+				}}
 				valueField="label"
+				labelField="label"
 				options={["&", "|"]} />
 		{/if}
 		{#if index > -1}

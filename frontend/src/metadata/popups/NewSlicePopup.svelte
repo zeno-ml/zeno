@@ -29,14 +29,19 @@
 		}
 
 		// Pre-fill slice creation with current metadata selections.
-		Object.values($selections.metadata).forEach((filtGroup, i) => {
-			if (filtGroup.predicates.length !== 0) {
+		// Join with AND.
+		predicateGroup.predicates = Object.values($selections.metadata)
+			.filter((d) => d.predicates.length > 0)
+			.flat()
+			.map((d, i) => {
 				if (i !== 0) {
-					filtGroup.join = "&";
+					d.join = "&";
+				} else {
+					d.join = "";
 				}
-				predicateGroup.predicates.push(filtGroup);
-			}
-		});
+				return d;
+			});
+
 		// If no predicates, add an empty one.
 		if (predicateGroup.predicates.length === 0) {
 			predicateGroup.predicates.push({
@@ -70,6 +75,9 @@
 
 	function deletePredicate(i) {
 		predicateGroup.predicates.splice(i, 1);
+		if (predicateGroup.predicates.length !== 0) {
+			predicateGroup.predicates[0].join = "";
+		}
 		predicateGroup = predicateGroup;
 	}
 
