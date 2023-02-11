@@ -25,13 +25,7 @@ from zeno.classes.classes import MetricKey, TableRequest, ZenoColumn
 from zeno.classes.metadata import HistogramBucket, HistogramRequest, StringFilterRequest
 from zeno.classes.projection import Points2D, PointsColors
 from zeno.classes.report import Report
-from zeno.classes.slice import (
-    FilterIds,
-    FilterPredicate,
-    FilterPredicateGroup,
-    Slice,
-    SliceMetric,
-)
+from zeno.classes.slice import FilterIds, FilterPredicateGroup, Slice, SliceMetric
 from zeno.data_pipeline.data_processing import (
     postdistill_data,
     predistill_data,
@@ -347,7 +341,7 @@ class ZenoBackend(object):
         return_metrics: List[SliceMetric] = []
         for metric_key in requests:
             filt_df = filter_table(
-                self.df, [metric_key.sli.filter_predicates], filter_ids
+                self.df, metric_key.sli.filter_predicates, filter_ids
             )
             if metric_key.metric == "" or self.label_column.name == "":
                 return_metrics.append(SliceMetric(metric=None, size=filt_df.shape[0]))
@@ -443,7 +437,7 @@ class ZenoBackend(object):
         with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
             pickle.dump(self.slices, f)
 
-    def get_filtered_ids(self, req: List[Union[FilterPredicateGroup, FilterPredicate]]):
+    def get_filtered_ids(self, req: FilterPredicateGroup):
         return filter_table(self.df, req)[str(self.id_column)].to_json(orient="records")
 
     def get_filtered_table(self, req: TableRequest):
@@ -495,7 +489,7 @@ class ZenoBackend(object):
     def get_histogram_counts(self, req: HistogramRequest) -> List[List[int]]:
         """Calculate count for each bucket in each column histogram."""
         if req.filter_predicates is not None:
-            filt_df = filter_table(self.df, [req.filter_predicates], req.filter_ids)
+            filt_df = filter_table(self.df, req.filter_predicates, req.filter_ids)
         else:
             filt_df = self.df
 
@@ -550,7 +544,7 @@ class ZenoBackend(object):
             return []
 
         if req.filter_predicates is not None:
-            filt_df = filter_table(self.df, [req.filter_predicates], req.filter_ids)
+            filt_df = filter_table(self.df, req.filter_predicates, req.filter_ids)
         else:
             filt_df = self.df
 

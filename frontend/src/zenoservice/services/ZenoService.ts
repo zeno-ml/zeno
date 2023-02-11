@@ -4,7 +4,6 @@
 import type { ColorsProjectRequest } from "../models/ColorsProjectRequest";
 import type { EmbedProject2DRequest } from "../models/EmbedProject2DRequest";
 import type { EntryRequest } from "../models/EntryRequest";
-import type { FilterPredicate } from "../models/FilterPredicate";
 import type { FilterPredicateGroup } from "../models/FilterPredicateGroup";
 import type { HistogramBucket } from "../models/HistogramBucket";
 import type { HistogramRequest } from "../models/HistogramRequest";
@@ -118,7 +117,7 @@ export class ZenoService {
 	 * @throws ApiError
 	 */
 	public static getFilteredIds(
-		requestBody: Array<FilterPredicateGroup | FilterPredicate>
+		requestBody: FilterPredicateGroup
 	): CancelablePromise<string> {
 		return __request(OpenAPI, {
 			method: "POST",

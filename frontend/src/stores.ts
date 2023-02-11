@@ -9,6 +9,7 @@ import {
 import { folderWritable, reportWritable } from "./util/customStores";
 import type {
 	FilterIds,
+	FilterPredicate,
 	FilterPredicateGroup,
 	Report,
 	Slice,
@@ -72,13 +73,6 @@ export const models: Writable<string[]> = writable([]);
 
 export const model: Writable<string> = writable(undefined);
 export const metric: Writable<string> = writable(undefined);
-export const currentColumns: Readable<ZenoColumn[]> = derived(
-	[settings, model],
-	([$settings, $model]) =>
-		$settings.metadataColumns.filter(
-			(c) => c.model === "" || c.model === $model
-		)
-);
 
 // [column, ascending]
 export const sort: Writable<[ZenoColumn, boolean]> = writable([
@@ -93,6 +87,8 @@ export const folders: Writable<string[]> = folderWritable();
 export const reports: Writable<Report[]> = reportWritable();
 
 export const filteredTable: Writable<Record<string, unknown>[]> = writable([]);
+// the ids directly selected by the user
+export const selectionIds: Writable<FilterIds> = writable({ ids: [] });
 // slices is an array of slice names,
 // metadata is an object where keys are column names and values are FilterPredicateGroups
 export const selections: Writable<{
@@ -102,28 +98,30 @@ export const selections: Writable<{
 	metadata: {},
 	slices: [],
 });
-
-// the ids directly selected by the user
-export const selectionIds: Writable<FilterIds> = writable({ ids: [] });
-export const selectionPredicates: Readable<FilterPredicateGroup[]> = derived(
+// Combination of selected filters and slice filters.
+// Needs to be a group because we need to join the predicates with &.
+export const selectionPredicates: Readable<FilterPredicateGroup> = derived(
 	[selections],
 	([$selections]) => {
-		const ret = [
-			...Object.values($selections.metadata).filter(
-				(d) => d.predicates.length !== 0
-			),
-		];
+		let ret: (FilterPredicate | FilterPredicateGroup)[] = Array.from(
+			Object.values($selections.metadata)
+		)
+			.filter((d) => d.predicates.length !== 0)
+			.map((d, i) => ({
+				predicates: d.predicates,
+				join: i === 0 ? "" : "&",
+			}))
+			.flat();
 		if ($selections.slices.length !== 0) {
-			ret.push({
-				join: "&",
-				predicates: $selections.slices.map((sliName) => {
-					const filts = get(slices).get(sliName).filterPredicates;
-					filts.join = "&";
-					return filts;
-				}),
-			});
+			ret = [
+				...ret,
+				...$selections.slices.map((sliName, i) => ({
+					predicates: get(slices).get(sliName).filterPredicates.predicates,
+					join: i === 0 && ret.length === 0 ? "" : "&",
+				})),
+			];
 		}
-		return ret;
+		return { predicates: ret, join: "" };
 	}
 );
 export const report: Writable<number> = writable(undefined);

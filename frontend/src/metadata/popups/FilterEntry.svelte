@@ -6,24 +6,29 @@
 	import Select, { Option } from "@smui/select";
 	import Textfield from "@smui/textfield";
 	import HelperText from "@smui/textfield/helper-text";
-	import { currentColumns } from "../../stores";
-	import type { FilterPredicate } from "../../zenoservice";
+	import {
+		MetadataType,
+		ZenoColumnType,
+		type FilterPredicate,
+	} from "../../zenoservice";
+	import { model, status } from "../../stores";
 
 	export let predicate: FilterPredicate;
 	export let deletePredicate: () => void;
 	export let index;
 
-	let operations = ["==", "!=", ">", "<", ">=", "<=", "match", "match (regex)"];
+	let operations = ["==", "!=", ">", "<", ">=", "<="];
+	let valueInput;
+
+	$: predicate.value = valueInput;
 </script>
 
 <div id="group">
-	{#if index === 0}
-		<span id="where">Where</span>
-	{:else}
+	{#if index !== 0}
 		<Select
 			bind:value={predicate.join}
 			label="Join"
-			style="margin-right: 20px; width: 90px">
+			style="padding-left: 10px; margin-right: 20px; width: 90px">
 			{#each ["&", "|"] as o}
 				<Option value={o}>{o}</Option>
 			{/each}
@@ -31,25 +36,45 @@
 	{/if}
 	<div class="selector">
 		<Autocomplete
-			options={$currentColumns}
+			options={$status.completeColumns.filter(
+				(d) =>
+					d.model === $model ||
+					d.columnType === ZenoColumnType.METADATA ||
+					d.columnType === ZenoColumnType.PREDISTILL
+			)}
+			on:change={() => {
+				console.log("change");
+				predicate.operation = "";
+				predicate.value = "";
+			}}
 			getOptionLabel={(option) => (option ? option.name : "")}
 			bind:value={predicate.column}
 			label="Metadata or Slice" />
 	</div>
 	<div class="selector">
-		<Select
-			bind:value={predicate.operation}
-			label="Operation"
-			style="margin-right: 20px; width:125px">
-			{#each typeof predicate.value === "boolean" ? ["==", "!="] : operations as o}
-				<Option value={o}>{o}</Option>
-			{/each}
-		</Select>
+		{#if predicate.column}
+			<Select
+				bind:value={predicate.operation}
+				label="Operation"
+				style="padding-left: 5px; margin-right: 20px; width:125px">
+				{#if predicate.column.metadataType === MetadataType.BOOLEAN}
+					<Option value="==">==</Option>
+					<Option value="!=">!=</Option>
+				{:else if predicate.column.metadataType === MetadataType.OTHER}
+					<Option value="match">match</Option>
+					<Option value="match (regex)">match (regex)</Option>
+				{:else}
+					{#each operations as o}
+						<Option value={o}>{o}</Option>
+					{/each}
+				{/if}
+			</Select>
+		{/if}
 	</div>
 
 	<div>
 		{#if predicate.column}
-			{#if typeof predicate.value === "boolean"}
+			{#if predicate.column.metadataType === MetadataType.BOOLEAN}
 				<Select
 					key={(bool) => `${bool}`}
 					bind:value={predicate.value}
@@ -60,10 +85,7 @@
 					{/each}
 				</Select>
 			{:else}
-				<Textfield
-					bind:value={predicate.value}
-					label="Value"
-					style="width: 100px">
+				<Textfield bind:value={valueInput} label="Value" style="width: 100px">
 					<HelperText slot="helper">0</HelperText>
 				</Textfield>
 			{/if}
@@ -86,9 +108,5 @@
 	#group {
 		display: flex;
 		flex-direction: inline;
-	}
-	#where {
-		margin-top: 15px;
-		margin-right: 70px;
 	}
 </style>

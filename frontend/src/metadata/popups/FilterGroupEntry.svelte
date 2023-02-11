@@ -22,8 +22,8 @@
 	}
 </script>
 
-<div class="inline">
-	<div class="column">
+<div class="group">
+	<div class="group-join">
 		{#if index > 0}
 			<Select
 				bind:value={predicateGroup.join}
@@ -68,7 +68,7 @@
 						column: undefined,
 						operation: "",
 						value: "",
-						join: "&",
+						join: predicateGroup.predicates.length === 0 ? "" : "&",
 					});
 					predicateGroup = predicateGroup;
 				}}>
@@ -83,10 +83,10 @@
 								column: undefined,
 								operation: "",
 								value: "",
-								join: "&",
+								join: "",
 							},
 						],
-						join: "&",
+						join: predicateGroup.predicates.length === 0 ? "" : "&",
 					});
 					predicateGroup = predicateGroup;
 				}}>
@@ -97,25 +97,27 @@
 </div>
 
 <style>
-	.inline {
+	.group {
 		display: flex;
+		flex-direction: column;
+		align-items: baseline;
+	}
+	.group-join {
+		margin-left: 10px;
 	}
 	#buttons {
 		margin-bottom: 10px;
-		margin-left: 40px;
-	}
-	.column {
-		display: flex;
-		flex-direction: column;
-		align-items: flex-end;
+		margin-left: 10px;
 	}
 	.main {
 		background: rgba(0, 0, 0, 0.025);
 		border-radius: 5px;
 		margin-top: 10px;
 		margin-bottom: 10px;
+		margin-left: 10px;
 	}
 	ul {
+		padding-left: 10px;
 		list-style-type: none;
 		margin-right: 10px;
 		margin-bottom: 0px;

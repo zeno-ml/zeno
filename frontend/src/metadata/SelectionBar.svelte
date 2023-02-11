@@ -66,15 +66,18 @@
 				{#if $selectionIds.ids.length > 0}
 					<IdsChip />
 				{/if}
-				{#if $selectionPredicates.length > 0 || $selectionIds.ids.length > 0}
+				{#if $selectionPredicates.predicates.length > 0 || $selectionIds.ids.length > 0}
 					<span
 						class="clear"
 						on:keydown={() => ({})}
 						on:click={() => {
 							selections.update((m) => {
-								for (let key in m.metadata) {
-									m.metadata[key] = { predicates: [], join: "&" };
-								}
+								Object.keys(m.metadata).forEach((key) => {
+									m.metadata[key] = {
+										predicates: [],
+										join: "",
+									};
+								});
 								return { slices: [], metadata: { ...m.metadata } };
 							});
 							selectionIds.set({ ids: [] });
@@ -97,7 +100,7 @@
 	<div class="options">
 		<div>
 			{#await currentResult then r}
-				{#if r[0].metric !== undefined && r[0].metric !== null}
+				{#if r && r[0].metric !== undefined && r[0].metric !== null}
 					<span class="metric">
 						{$metric ? $metric + ":" : ""}
 					</span>

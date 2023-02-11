@@ -25,7 +25,7 @@ from zeno.classes.classes import (
 from zeno.classes.metadata import HistogramBucket, HistogramRequest, StringFilterRequest
 from zeno.classes.projection import Points2D, PointsColors
 from zeno.classes.report import Report
-from zeno.classes.slice import FilterPredicate, FilterPredicateGroup, Slice, SliceMetric
+from zeno.classes.slice import FilterPredicateGroup, Slice, SliceMetric
 from zeno.data_pipeline.zeno_backend import ZenoBackend
 
 
@@ -67,7 +67,6 @@ def get_server(zeno: ZenoBackend):
             label_column=zeno.label_column,
             data_column=zeno.data_column,
             data_origin="/data/" if os.path.exists(zeno.data_path) else zeno.data_path,
-            metadata_columns=zeno.columns,
             samples=zeno.samples,
             totalSize=zeno.df.shape[0],
         )
@@ -97,7 +96,7 @@ def get_server(zeno: ZenoBackend):
         zeno.set_reports(reqs)
 
     @api_app.post("/filtered-ids", response_model=str, tags=["zeno"])
-    def get_filtered_ids(req: List[Union[FilterPredicateGroup, FilterPredicate]]):
+    def get_filtered_ids(req: FilterPredicateGroup):
         return zeno.get_filtered_ids(req)
 
     @api_app.post("/filtered-table", response_model=str, tags=["zeno"])

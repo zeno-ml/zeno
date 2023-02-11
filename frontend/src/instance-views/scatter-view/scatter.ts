@@ -25,26 +25,15 @@ export function deselectPoints() {
 	selectionIds.set({ ids: [] });
 }
 /**
- * Gets the ids from the filter predicates and
- */
-export async function getFilteredIdsFromPredicates(
-	selectionPredicates: FilterPredicateGroup[]
-) {
-	const ids = await getFilteredIds(selectionPredicates);
-	return ids;
-}
-/**
  * assigns ones outside of the filter predicates as partial opacity
  * and ones inside full opacity
  */
 export async function getPointOpacities(
-	selectionPredicates: FilterPredicateGroup[],
+	selectionPredicates: FilterPredicateGroup,
 	points: Points2D,
 	{ fullOpacity = 1, partialOpacity = 0.15 } = {}
 ) {
-	const filteredIds = (await getFilteredIdsFromPredicates(
-		selectionPredicates
-	)) as string[];
+	const filteredIds = (await getFilteredIds(selectionPredicates)) as string[];
 	const filteredIdsIndex = new Map(filteredIds.map((id, index) => [id, index]));
 	if (filteredIds.length > 0) {
 		return points.ids.map((id) =>

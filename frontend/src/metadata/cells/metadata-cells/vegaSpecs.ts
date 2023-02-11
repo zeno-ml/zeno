@@ -39,10 +39,19 @@ export function nominalVegaSpec(metricRange) {
 						type: "quantitative",
 						axis: { title: "", tickCount: 2, labelColor: "rgba(0, 0, 0, 0.6)" },
 					},
+					tooltip: [
+						{ field: "count", type: "quantitative", title: "Count" },
+						{
+							field: "metric",
+							type: "quantitative",
+							title: "Metric",
+							format: ".2f",
+						},
+					],
 				},
 			},
 			{
-				mark: { type: "bar", binSpacing: 0 },
+				mark: { type: "bar", binSpacing: 0, cursor: "pointer" },
 				encoding: {
 					x: {
 						field: "bucket",
@@ -51,6 +60,19 @@ export function nominalVegaSpec(metricRange) {
 						field: "filteredCount",
 						type: "quantitative",
 					},
+					tooltip: [
+						{
+							field: "filteredCount",
+							type: "quantitative",
+							title: "Filtered Count",
+						},
+						{
+							field: "metric",
+							type: "quantitative",
+							title: "Metric",
+							format: ".2f",
+						},
+					],
 				},
 			},
 		],
@@ -114,12 +136,22 @@ export function continuousVegaSpec(metricRange) {
 						type: "quantitative",
 					},
 					color: { value: "#ddd" },
+					tooltip: [
+						{ field: "count", type: "quantitative", title: "Count" },
+						{
+							field: "metric",
+							type: "quantitative",
+							title: "Metric",
+							format: ".2f",
+						},
+					],
 				},
 			},
 			{
 				mark: {
 					type: "bar",
 					binSpacing: 0,
+					cursor: "col-resize",
 				},
 				encoding: {
 					size: {
@@ -142,6 +174,19 @@ export function continuousVegaSpec(metricRange) {
 							labelColor: "rgba(0, 0, 0, 0.6)",
 						},
 					},
+					tooltip: [
+						{
+							field: "filteredCount",
+							type: "quantitative",
+							title: "Filtered Count",
+						},
+						{
+							field: "metric",
+							type: "quantitative",
+							title: "Metric",
+							format: ".2f",
+						},
+					],
 				},
 			},
 		],

@@ -30,18 +30,21 @@
 		}
 
 		// Pre-fill slice creation with current metadata selections.
-		Object.values($selections.metadata).forEach((filtGroup) => {
+		Object.values($selections.metadata).forEach((filtGroup, i) => {
 			if (filtGroup.predicates.length !== 0) {
+				if (i !== 0) {
+					filtGroup.join = "&";
+				}
 				predicateGroup.predicates.push(filtGroup);
 			}
 		});
 		// If no predicates, add an empty one.
 		if (predicateGroup.predicates.length === 0) {
 			predicateGroup.predicates.push({
-				column: undefined,
+				column: null,
 				operation: "",
 				value: "",
-				join: "&",
+				join: "",
 			});
 		}
 	}
@@ -85,8 +88,7 @@
 	use:clickOutside
 	on:click_outside={() => showNewSlice.set(false)}>
 	<Paper elevation={7} class="paper">
-		<Content
-			style="height: 100%; max-height: calc(100vh - 100px); overflow-y: scroll;">
+		<Content style="height: 100%; max-height: calc(100vh - 100px);">
 			{#if !$sliceToEdit}
 				<Textfield bind:value={sliceName} label="Name" bind:this={nameInput}>
 					<HelperText slot="helper">Slice 1</HelperText>

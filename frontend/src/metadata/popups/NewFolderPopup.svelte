@@ -5,8 +5,7 @@
 	import { folders, showNewFolder } from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 
-	export let folderName = "";
-
+	let folderName = "";
 	let input;
 	let originalFolderName = folderName;
 
