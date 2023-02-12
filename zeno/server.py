@@ -10,6 +10,8 @@ from typing import Dict, List, Union
 from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
+import gradio as gr
+import numpy as np
 
 from zeno.classes.base import ZenoColumn
 from zeno.classes.classes import (
@@ -58,6 +60,18 @@ def get_server(zeno: ZenoBackend):
         ),
         name="base",
     )
+
+    def sepia(input_img):
+        print(type(input_img))
+        sepia_filter = np.array(
+            [[0.393, 0.769, 0.189], [0.349, 0.686, 0.168], [0.272, 0.534, 0.131]]
+        )
+        sepia_img = input_img.dot(sepia_filter.T)
+        sepia_img /= sepia_img.max()
+        return sepia_img
+
+    demo = gr.Interface(sepia, gr.Image(shape=(200, 200)), "image")
+    api_app = gr.mount_gradio_app(api_app, demo, path="/gradio")
 
     @api_app.get("/settings", response_model=ZenoSettings, tags=["zeno"])
     def get_settings():
