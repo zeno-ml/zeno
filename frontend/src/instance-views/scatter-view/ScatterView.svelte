@@ -12,6 +12,7 @@
 		selectionIds,
 		selectionPredicates,
 		status,
+		globalColorByColumn,
 	} from "../../stores";
 	import { createScalesWebgGLExtent } from "./regl-scatter";
 
@@ -45,7 +46,6 @@
 	let computingPoints = false; // spinner when true
 	let pointOpacities: number[] = [];
 	// column to color scatterplot by
-	let colorByColumn: ZenoColumn = $status.completeColumns[0];
 	let runOnce = false;
 	let mounted = false;
 	let reloadedIndices: number[] = [];
@@ -59,8 +59,12 @@
 	let dehighlightPoints;
 	let highlightPoints;
 
+	// if no coloring, just do the first one we have
+	$: if ($globalColorByColumn === null) {
+		globalColorByColumn.set($status.completeColumns[0]);
+	}
 	$: project2DOnModelChange($model);
-	$: changePointsColorsOnColorChange(colorByColumn);
+	$: changePointsColorsOnColorChange($globalColorByColumn);
 	$: {
 		if (containerEl && autoResize) {
 			resizeScatter();
@@ -119,7 +123,7 @@
 			// requests tsne from backend
 			points = await ZenoService.projectEmbedInto2D({
 				model,
-				column: colorByColumn,
+				column: $globalColorByColumn,
 			});
 
 			// simply scales the points between [-1, 1]
@@ -238,7 +242,9 @@
 
 	<!-- settings/controls for the scatterplot -->
 	<div id="settings" class="frosted">
-		<ScatterSettings bind:colorByColumn bind:pointSizeSlider />
+		<ScatterSettings
+			bind:colorByColumn={$globalColorByColumn}
+			bind:pointSizeSlider />
 	</div>
 	{#if points}
 		<div id="legend" class="frosted">
