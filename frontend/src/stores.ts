@@ -135,4 +135,4 @@ export const metricRangeColorScale: Readable<(n: number) => string> = derived(
 	}
 );
 
-export const globalColorByColumn: Writable<ZenoColumn> = writable(null);
+export const scatterColorByColumn: Writable<ZenoColumn> = writable(null);
