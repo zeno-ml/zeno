@@ -134,3 +134,5 @@ export const metricRangeColorScale: Readable<(n: number) => string> = derived(
 		return (n) => colorScale((n - min) / (max - min));
 	}
 );
+
+export const scatterColorByColumn: Writable<ZenoColumn> = writable(null);
