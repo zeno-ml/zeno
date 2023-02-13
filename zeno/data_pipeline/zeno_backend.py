@@ -56,6 +56,7 @@ class ZenoBackend(object):
         self.postdistill_functions: Dict[str, Callable] = {}
         self.metric_functions: Dict[str, Callable] = {}
         self.predict_function: Optional[Callable] = None
+        self.inference_function: Optional[Callable] = None
 
         self.status: str = "Initializing"
         self.folders: List[str] = read_pickle("folders.pickle", self.cache_path, [])
@@ -161,6 +162,12 @@ class ZenoBackend(object):
                     self.predistill_functions[test_fn.__name__] = test_fn
             if hasattr(test_fn, "metric_function"):
                 self.metric_functions[test_fn.__name__] = test_fn
+            if hasattr(test_fn, "inference_function"):
+                if self.inference_function is None:
+                    self.inference_function = test_fn
+                else:
+                    print("ERROR: Multiple model functions found, can only have one")
+                    sys.exit(1)
 
     def start_processing(self):
         """Parse testing files, distill, and run inference."""
@@ -685,3 +692,14 @@ class ZenoBackend(object):
         points.ids = self.df[str(self.id_column)].to_list()
 
         return points
+
+    def single_inference(self, model: str, data: str):
+        """Run a single inference on a string."""
+        if not self.predict_function:
+            return
+        model_fn = self.predict_function(model)
+        temp_df = pd.DataFrame([data], columns=[str(self.data_column)])
+        out = model_fn(temp_df, self.zeno_options)
+        if type(out) == tuple and len(out) == 2:
+            return out[0][0]
+        return out[0]

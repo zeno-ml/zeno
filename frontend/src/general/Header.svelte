@@ -4,6 +4,7 @@
 		mdiChartBoxOutline,
 		mdiCompassOutline,
 		mdiGithub,
+		mdiPlusCircleOutline,
 	} from "@mdi/js";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
@@ -33,6 +34,21 @@
 				alt="Square spiral logo next to 'Zeno'" />
 		</a>
 		<div id="tabs">
+			<Wrapper>
+				<div
+					class="item {$tab === 'predict' ? 'selected' : ''}"
+					on:keydown={() => ({})}
+					on:click={() => updateTab("predict")}>
+					<div class="icon">
+						<Icon component={Svg} viewBox="0 0 24 24">
+							<path
+								fill={$tab === "predict" ? "#6a1b9a" : "black"}
+								d={mdiPlusCircleOutline} />
+						</Icon>
+					</div>
+				</div>
+				<Tooltip xPos="end">Test your model with your own inputs.</Tooltip>
+			</Wrapper>
 			<Wrapper>
 				<div
 					class="item {$tab === 'explore' ? 'selected' : ''}"
