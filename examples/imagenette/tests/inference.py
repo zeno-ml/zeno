@@ -1,13 +1,11 @@
-from typing import Callable
-from zeno import inference
+from zeno import inference, ZenoOptions
 import gradio as gr
 
 
 @inference
-def gradio_inference(model_fn: Callable, model_names):
-    return gr.Interface(
-        fn=model_fn,
-        inputs=[gr.components.Dropdown(model_names), gr.Image(type="filepath")],
-        outputs=gr.Text(label="Output"),
-        allow_flagging="never",
+def gradio_inference(ops: ZenoOptions):
+    return (
+        [gr.Image(type="filepath")],
+        gr.Text(label="Output"),
+        [ops.data_column],
     )

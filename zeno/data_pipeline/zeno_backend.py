@@ -14,6 +14,7 @@ from typing import Callable, Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
+from gradio import Blocks  # type: ignore
 from methodtools import lru_cache  # type: ignore
 from pandas import DataFrame  # type: ignore
 from pathos.multiprocessing import ProcessingPool as Pool  # type: ignore
@@ -56,7 +57,8 @@ class ZenoBackend(object):
         self.postdistill_functions: Dict[str, Callable] = {}
         self.metric_functions: Dict[str, Callable] = {}
         self.predict_function: Optional[Callable] = None
-        self.inference_function: Optional[Callable] = None
+        self.inference_function: Optional[Blocks] = None
+        self.gradio_input_columns: List = []
 
         self.status: str = "Initializing"
         self.folders: List[str] = read_pickle("folders.pickle", self.cache_path, [])
@@ -164,7 +166,7 @@ class ZenoBackend(object):
                 self.metric_functions[test_fn.__name__] = test_fn
             if hasattr(test_fn, "inference_function"):
                 if self.inference_function is None:
-                    self.inference_function = test_fn
+                    self.inference_function = test_fn  # type: ignore
                 else:
                     print("ERROR: Multiple model functions found, can only have one")
                     sys.exit(1)
@@ -693,13 +695,26 @@ class ZenoBackend(object):
 
         return points
 
-    def single_inference(self, model: str, data: str):
+    def single_inference(self, *args):
         """Run a single inference on a string."""
         if not self.predict_function:
             return
-        model_fn = self.predict_function(model)
-        temp_df = pd.DataFrame([data], columns=[str(self.data_column)])
+
+        model_fn = self.predict_function(args[0])
+
+        metadata_cols = [
+            c for c in self.columns if c.column_type == ZenoColumnType.METADATA
+        ]
+        metadata_cols_names = [c.name for c in metadata_cols]
+        cols = []
+        for c in self.gradio_input_columns:
+            if c in metadata_cols_names:
+                cols.append(str(metadata_cols[metadata_cols_names.index(c)]))
+
+        temp_df = pd.DataFrame(columns=cols)
+        temp_df.loc[0] = args[1:]  # type: ignore
         out = model_fn(temp_df, self.zeno_options)
+
         if type(out) == tuple and len(out) == 2:
             return out[0][0]
         return out[0]

@@ -7,11 +7,10 @@ import asyncio
 import os
 from typing import Dict, List, Union
 
+import gradio as gr  # type: ignore
 from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
-import gradio as gr
-import numpy as np
 
 from zeno.classes.base import ZenoColumn
 from zeno.classes.classes import (
@@ -62,9 +61,36 @@ def get_server(zeno: ZenoBackend):
     )
 
     if zeno.inference_function:
+        input_components, output_components, input_columns = zeno.inference_function(
+            zeno.zeno_options
+        )
+        zeno.gradio_input_columns = input_columns
+
+        gradio_app = gr.Interface(
+            fn=zeno.single_inference,
+            inputs=[
+                gr.components.Dropdown(
+                    zeno.model_names, value=zeno.model_names[0], label="Model"
+                ),
+                *input_components,
+            ],
+            outputs=output_components,
+            css="""
+                    :root {
+                    --button-primary-background-base: #6a1b9a;
+                    --button-primary-background-hover: #d2bae9;
+                    --button-primary-text-color-base: white;
+                    --button-primary-text-color-hover: white;
+                    --button-primary-border-color-hover: #6a1b9a;
+                    --button-primary-border-color: #6a1b9a;
+                    }
+                """,
+            allow_flagging="never",
+            analytics_enabled=False,
+        )
         api_app = gr.mount_gradio_app(
             app=api_app,
-            blocks=zeno.inference_function(zeno.single_inference, zeno.model_names),
+            blocks=gradio_app,
             path="/gradio",
         )
 

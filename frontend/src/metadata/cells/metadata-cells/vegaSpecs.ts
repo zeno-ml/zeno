@@ -51,7 +51,12 @@ export function nominalVegaSpec(metricRange) {
 				},
 			},
 			{
-				mark: { type: "bar", binSpacing: 0, cursor: "pointer" },
+				mark: {
+					type: "bar",
+					binSpacing: 0,
+					cursor: "pointer",
+					stroke: "#b18bd3",
+				},
 				encoding: {
 					x: {
 						field: "bucket",
@@ -73,6 +78,16 @@ export function nominalVegaSpec(metricRange) {
 							format: ".2f",
 						},
 					],
+					strokeWidth: {
+						condition: [
+							{
+								param: "select",
+								empty: false,
+								value: 2,
+							},
+						],
+						value: 0,
+					},
 				},
 			},
 		],
