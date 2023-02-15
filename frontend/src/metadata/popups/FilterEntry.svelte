@@ -97,9 +97,11 @@
 				<Svelecte
 					bind:value={predicate.value}
 					placeholder={"Value"}
-					valueField={"label"}
 					searchable={false}
-					options={[true, false]} />
+					options={[
+						{ id: true, name: "true" },
+						{ id: false, name: "false" },
+					]} />
 			{:else}
 				<input type="text" bind:value={predicate.value} />
 			{/if}
