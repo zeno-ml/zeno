@@ -4,11 +4,9 @@ import asyncio
 import logging
 import os
 import pickle
-import re
 import sys
 import threading
 from inspect import getsource
-from math import isnan
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Union
 
@@ -23,7 +21,6 @@ from sklearn import preprocessing  # type: ignore
 from zeno.api import ZenoOptions, ZenoParameters
 from zeno.classes.base import MetadataType, ZenoColumnType
 from zeno.classes.classes import MetricKey, TableRequest, ZenoColumn
-from zeno.classes.metadata import HistogramBucket, HistogramRequest, StringFilterRequest
 from zeno.classes.projection import Points2D, PointsColors
 from zeno.classes.report import Report
 from zeno.classes.slice import FilterIds, FilterPredicateGroup, Slice, SliceMetric
@@ -32,7 +29,7 @@ from zeno.data_pipeline.data_processing import (
     predistill_data,
     run_inference,
 )
-from zeno.data_pipeline.filtering import filter_table, filter_table_single
+from zeno.data_pipeline.filtering import filter_table
 from zeno.util import getMetadataType, load_series, read_pickle
 
 
@@ -467,152 +464,6 @@ class ZenoBackend(object):
             filt_df = filt_df.sort_values(str(req.sort[0]), ascending=req.sort[1])
         filt_df = filt_df.iloc[req.slice_range[0] : req.slice_range[1]]
         return filt_df[[str(col) for col in req.columns]].to_json(orient="records")
-
-    def get_histogram_buckets(
-        self, req: List[ZenoColumn]
-    ) -> List[List[HistogramBucket]]:
-        """Calculate the histogram buckets for a list of columns."""
-        res: List[List[HistogramBucket]] = []
-        for col in req:
-            df_col = self.df[str(col)]
-            if col.metadata_type == MetadataType.NOMINAL:
-                ret_hist: List[HistogramBucket] = []
-                val_counts = df_col.value_counts()
-                for k in val_counts.keys():
-                    ret_hist.append(HistogramBucket(bucket=k))
-                res.append(ret_hist)
-            elif col.metadata_type == MetadataType.CONTINUOUS:
-                ret_hist: List[HistogramBucket] = []  # type: ignore
-                df_col = df_col.fillna(0)
-                bins = np.histogram_bin_edges(df_col)
-                for i in range(len(bins) - 1):
-                    ret_hist.append(
-                        HistogramBucket(
-                            bucket=bins[i],
-                            bucket_end=bins[i + 1],
-                        )
-                    )
-                res.append(ret_hist)
-            elif col.metadata_type == MetadataType.BOOLEAN:
-                res.append(
-                    [
-                        HistogramBucket(bucket=True),
-                        HistogramBucket(bucket=False),
-                    ]
-                )
-            elif col.metadata_type == MetadataType.DATETIME:
-                res.append([])
-            else:
-                res.append([])
-        return res
-
-    def get_histogram_counts(self, req: HistogramRequest) -> List[List[int]]:
-        """Calculate count for each bucket in each column histogram."""
-        if req.filter_predicates is not None:
-            filt_df = filter_table(self.df, req.filter_predicates, req.filter_ids)
-        else:
-            filt_df = self.df
-
-        ret: List[List[int]] = []
-        for r in req.column_requests:
-            col = r.column
-            if str(col) not in filt_df.columns:
-                ret.append([])
-            elif col.metadata_type == MetadataType.NOMINAL:
-                counts = filt_df.groupby([str(col)]).size()
-                ret.append(
-                    [
-                        counts[b.bucket] if b.bucket in counts else 0  # type: ignore
-                        for b in r.buckets
-                    ]
-                )
-            elif col.metadata_type == MetadataType.BOOLEAN:
-                ret.append(
-                    [filt_df[str(col)].sum(), len(filt_df) - filt_df[str(col)].sum()]
-                )
-            elif col.metadata_type == MetadataType.CONTINUOUS:
-                bucs = [b.bucket for b in r.buckets]
-                ret.append(
-                    filt_df.groupby([pd.cut(filt_df[str(col)], bucs)])  # type: ignore
-                    .size()
-                    .astype(int)
-                    .tolist()
-                )
-            else:
-                ret.append([])
-        return ret
-
-    def get_histogram_metric(
-        self,
-        df: pd.DataFrame,
-        col: ZenoColumn,
-        bucket: HistogramBucket,
-        model: str,
-        metric: str,
-    ) -> Union[float, None]:
-        df_filt = filter_table_single(df, col, bucket)
-        output_metric = self.calculate_metric(df_filt, model, metric)
-        if output_metric is None or isnan(output_metric):
-            return None
-        return output_metric
-
-    def get_histogram_metrics(
-        self, req: HistogramRequest
-    ) -> List[List[Union[float, None]]]:
-        """Calculate metric for each bucket in each column histogram."""
-        if req.metric is None:
-            return []
-
-        if req.filter_predicates is not None:
-            filt_df = filter_table(self.df, req.filter_predicates, req.filter_ids)
-        else:
-            filt_df = self.df
-
-        ret: List[List[Union[float, None]]] = []
-        for r in req.column_requests:
-            col = r.column
-            loc_ret: List[Union[float, None]] = []
-            for b in r.buckets:
-                df_filt = filter_table_single(filt_df, col, b)
-                metric = self.calculate_metric(df_filt, req.model, req.metric)
-                if metric is None or isnan(metric):
-                    loc_ret.append(None)
-                else:
-                    loc_ret.append(metric)
-            ret.append(loc_ret)
-        return ret
-
-    def filter_string_metadata(self, req: StringFilterRequest) -> List[str]:
-        """Filter the table based on a string filter request."""
-        col = self.df[str(req.column)].astype(str)
-
-        short_ret: List[str] = []
-        if req.selection_type == "string":
-            ret = [i for i in col if req.filter_string in i]
-
-            for r in ret[0:5]:
-                idx = r.find(req.filter_string)
-                loc_str = r[idx - 20 : idx + 20]
-                if len(r) > 40 + len(req.filter_string):
-                    if idx - 20 > 0:
-                        loc_str = loc_str + "..."
-                    if idx + 20 < len(r):
-                        loc_str = "..." + loc_str
-                short_ret.append(loc_str)
-        else:
-            ret = col[col.str.contains(req.filter_string, case=False)].head().tolist()
-            for r in ret:
-                idx = re.search(req.filter_string, r)
-                if idx is not None:
-                    idx = idx.start()
-                    loc_str = r[idx - 20 : idx + 20]
-                    if len(r) > 40 + len(req.filter_string):
-                        if idx - 20 > 0:
-                            loc_str = loc_str + "..."
-                        if idx + 20 < len(r):
-                            loc_str = "..." + loc_str
-                    short_ret.append(loc_str)
-        return short_ret
 
     def embed_exists(self, model: str):
         """Checks for the existence of an embedding column.

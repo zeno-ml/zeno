@@ -27,6 +27,12 @@ from zeno.classes.metadata import HistogramBucket, HistogramRequest, StringFilte
 from zeno.classes.projection import Points2D, PointsColors
 from zeno.classes.report import Report
 from zeno.classes.slice import FilterPredicateGroup, Slice, SliceMetric
+from zeno.data_pipeline.histogram_processing import (
+    filter_by_string,
+    histogram_buckets,
+    histogram_counts,
+    histogram_metrics,
+)
 from zeno.data_pipeline.zeno_backend import ZenoBackend
 
 
@@ -146,11 +152,11 @@ def get_server(zeno: ZenoBackend):
         "/histograms", response_model=List[List[HistogramBucket]], tags=["zeno"]
     )
     def get_histogram_buckets(req: List[ZenoColumn]):
-        return zeno.get_histogram_buckets(req)
+        return histogram_buckets(zeno.df, req)
 
     @api_app.post("/histogram-counts", response_model=List[List[int]], tags=["zeno"])
     def calculate_histogram_counts(req: HistogramRequest):
-        return zeno.get_histogram_counts(req)
+        return histogram_counts(zeno.df, req)
 
     @api_app.post(
         "/histogram-metrics",
@@ -158,7 +164,7 @@ def get_server(zeno: ZenoBackend):
         tags=["zeno"],
     )
     def calculate_histogram_metrics(req: HistogramRequest):
-        return zeno.get_histogram_metrics(req)
+        return histogram_metrics(zeno.df, zeno.calculate_metric, req)
 
     @api_app.post("/slice", tags=["zeno"])
     def create_new_slice(req: Slice):
@@ -170,7 +176,7 @@ def get_server(zeno: ZenoBackend):
 
     @api_app.post("/string-filter", response_model=List[str], tags=["zeno"])
     def filter_string_metadata(req: StringFilterRequest):
-        filt_out = zeno.filter_string_metadata(req)
+        filt_out = filter_by_string(zeno.df, req)
         return filt_out
 
     @api_app.post("/slice-metrics", response_model=List[SliceMetric], tags=["zeno"])
