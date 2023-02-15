@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Select, { Option } from "@smui/select";
-	import { VegaLite } from "svelte-vega";
+	import type { VisualizationSpec } from "svelte-vega";
+	import { Vega } from "svelte-vega";
 	import { getMetricsForSlices } from "../../api/slice";
 	import {
 		metric,
@@ -11,36 +12,31 @@
 		slices,
 	} from "../../stores";
 	import type { MetricKey } from "../../zenoservice";
-	import generateBarSpec from "./vegaSpec";
-
+	import generateSpec from "./vegaSpec-beeswarm";
 	export let reportId: number;
 
 	let chartEntries = [];
 
 	$: report = $reports[reportId];
 
-	function getMetKeys(rep) {
+	function getMetKeys(rep, $metric, $model) {
 		const entries: MetricKey[] = [];
 		chartEntries = [];
 		rep.reportPredicates.forEach((pred) => {
-			$models.forEach((mod) => {
-				chartEntries.push({
-					slice: pred.sliceName,
-					model: mod,
-				});
-				entries.push({
-					sli: [...$slices.values()].find(
-						(s) => s.sliceName === pred.sliceName
-					),
-					metric: $metric,
-					model: mod,
-				});
+			chartEntries.push({
+				slice: pred.sliceName,
+				model: $model,
+			});
+			entries.push({
+				sli: [...$slices.values()].find((s) => s.sliceName === pred.sliceName),
+				metric: $metric,
+				model: $model,
 			});
 		});
 		return entries;
 	}
 
-	$: modelResults = getMetricsForSlices(getMetKeys(report));
+	$: modelResults = getMetricsForSlices(getMetKeys(report, $metric, $model));
 </script>
 
 <div style:margin-left="20px">
@@ -76,17 +72,14 @@
 	<br />
 	<div style:margin-top="30px" style:width="500px">
 		{#await modelResults then res}
-			{@const chartData = {
+			{@const data = {
 				table: chartEntries.map((r, i) => ({
-					slice: r.slice,
-					model: r.model,
-					metric: res[i].metric,
+					name: r.slice,
+					size: res[i].size,
+					group: res[i].metric,
 				})),
 			}}
-			<VegaLite
-				spec={generateBarSpec($metric)}
-				data={chartData}
-				options={{ tooltip: true, theme: "vox", width: 1000, height: 300 }} />
+			<Vega {data} spec={generateSpec($metric)} />
 		{/await}
 	</div>
 </div>
