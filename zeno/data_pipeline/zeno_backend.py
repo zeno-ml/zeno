@@ -4,6 +4,7 @@ import asyncio
 import logging
 import os
 import pickle
+import re
 import sys
 import threading
 from inspect import getsource
@@ -13,6 +14,7 @@ from typing import Callable, Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
+from gradio import Blocks  # type: ignore
 from methodtools import lru_cache  # type: ignore
 from pandas import DataFrame  # type: ignore
 from pathos.multiprocessing import ProcessingPool as Pool  # type: ignore
@@ -21,16 +23,10 @@ from sklearn import preprocessing  # type: ignore
 from zeno.api import ZenoOptions, ZenoParameters
 from zeno.classes.base import MetadataType, ZenoColumnType
 from zeno.classes.classes import MetricKey, TableRequest, ZenoColumn
-from zeno.classes.metadata import HistogramBucket, HistogramRequest
+from zeno.classes.metadata import HistogramBucket, HistogramRequest, StringFilterRequest
 from zeno.classes.projection import Points2D, PointsColors
 from zeno.classes.report import Report
-from zeno.classes.slice import (
-    FilterIds,
-    FilterPredicate,
-    FilterPredicateGroup,
-    Slice,
-    SliceMetric,
-)
+from zeno.classes.slice import FilterIds, FilterPredicateGroup, Slice, SliceMetric
 from zeno.classes.tag import Tag
 from zeno.data_pipeline.data_processing import (
     postdistill_data,
@@ -54,6 +50,7 @@ class ZenoBackend(object):
         self.editable = params.editable
         self.samples = params.samples
         self.view = params.view
+        self.calculate_histogram_metrics = params.calculate_histogram_metrics
 
         self.done_running_inference = False
 
@@ -61,6 +58,8 @@ class ZenoBackend(object):
         self.postdistill_functions: Dict[str, Callable] = {}
         self.metric_functions: Dict[str, Callable] = {}
         self.predict_function: Optional[Callable] = None
+        self.inference_function: Optional[Blocks] = None
+        self.gradio_input_columns: List = []
 
         self.status: str = "Initializing"
         self.folders: List[str] = read_pickle("folders.pickle", self.cache_path, [])
@@ -170,6 +169,12 @@ class ZenoBackend(object):
                     self.predistill_functions[test_fn.__name__] = test_fn
             if hasattr(test_fn, "metric_function"):
                 self.metric_functions[test_fn.__name__] = test_fn
+            if hasattr(test_fn, "inference_function"):
+                if self.inference_function is None:
+                    self.inference_function = test_fn  # type: ignore
+                else:
+                    print("ERROR: Multiple model functions found, can only have one")
+                    sys.exit(1)
 
     def start_processing(self):
         """Parse testing files, distill, and run inference."""
@@ -351,7 +356,7 @@ class ZenoBackend(object):
         return_metrics: List[SliceMetric] = []
         for metric_key in requests:
             filt_df = filter_table(
-                self.df, [metric_key.sli.filter_predicates], filter_ids
+                self.df, metric_key.sli.filter_predicates, filter_ids
             )
             if metric_key.metric == "" or self.label_column.name == "":
                 return_metrics.append(SliceMetric(metric=None, size=filt_df.shape[0]))
@@ -461,7 +466,7 @@ class ZenoBackend(object):
         with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
             pickle.dump(self.slices, f)
 
-    def get_filtered_ids(self, req: List[Union[FilterPredicateGroup, FilterPredicate]]):
+    def get_filtered_ids(self, req: FilterPredicateGroup):
         return filter_table(self.df, req)[str(self.id_column)].to_json(orient="records")
 
     def get_filtered_table(self, req: TableRequest):
@@ -513,7 +518,7 @@ class ZenoBackend(object):
     def get_histogram_counts(self, req: HistogramRequest) -> List[List[int]]:
         """Calculate count for each bucket in each column histogram."""
         if req.filter_predicates is not None:
-            filt_df = filter_table(self.df, [req.filter_predicates], req.filter_ids)
+            filt_df = filter_table(self.df, req.filter_predicates, req.filter_ids)
         else:
             filt_df = self.df
 
@@ -522,16 +527,17 @@ class ZenoBackend(object):
             col = r.column
             if str(col) not in filt_df.columns:
                 ret.append([])
-            elif (
-                col.metadata_type == MetadataType.NOMINAL
-                or col.metadata_type == MetadataType.BOOLEAN
-            ):
+            elif col.metadata_type == MetadataType.NOMINAL:
                 counts = filt_df.groupby([str(col)]).size()
                 ret.append(
                     [
                         counts[b.bucket] if b.bucket in counts else 0  # type: ignore
                         for b in r.buckets
                     ]
+                )
+            elif col.metadata_type == MetadataType.BOOLEAN:
+                ret.append(
+                    [filt_df[str(col)].sum(), len(filt_df) - filt_df[str(col)].sum()]
                 )
             elif col.metadata_type == MetadataType.CONTINUOUS:
                 bucs = [b.bucket for b in r.buckets]
@@ -567,7 +573,7 @@ class ZenoBackend(object):
             return []
 
         if req.filter_predicates is not None:
-            filt_df = filter_table(self.df, [req.filter_predicates], req.filter_ids)
+            filt_df = filter_table(self.df, req.filter_predicates, req.filter_ids)
         else:
             filt_df = self.df
 
@@ -584,6 +590,38 @@ class ZenoBackend(object):
                     loc_ret.append(metric)
             ret.append(loc_ret)
         return ret
+
+    def filter_string_metadata(self, req: StringFilterRequest) -> List[str]:
+        """Filter the table based on a string filter request."""
+        col = self.df[str(req.column)].astype(str)
+
+        short_ret: List[str] = []
+        if req.selection_type == "string":
+            ret = [i for i in col if req.filter_string in i]
+
+            for r in ret[0:5]:
+                idx = r.find(req.filter_string)
+                loc_str = r[idx - 20 : idx + 20]
+                if len(r) > 40 + len(req.filter_string):
+                    if idx - 20 > 0:
+                        loc_str = loc_str + "..."
+                    if idx + 20 < len(r):
+                        loc_str = "..." + loc_str
+                short_ret.append(loc_str)
+        else:
+            ret = col[col.str.contains(req.filter_string, case=False)].head().tolist()
+            for r in ret:
+                idx = re.search(req.filter_string, r)
+                if idx is not None:
+                    idx = idx.start()
+                    loc_str = r[idx - 20 : idx + 20]
+                    if len(r) > 40 + len(req.filter_string):
+                        if idx - 20 > 0:
+                            loc_str = loc_str + "..."
+                        if idx + 20 < len(r):
+                            loc_str = "..." + loc_str
+                    short_ret.append(loc_str)
+        return short_ret
 
     def embed_exists(self, model: str):
         """Checks for the existence of an embedding column.
@@ -675,3 +713,36 @@ class ZenoBackend(object):
         points.ids = self.df[str(self.id_column)].to_list()
 
         return points
+
+    def single_inference(self, *args):
+        """Run inference from Gradio inputs.
+        The first input to args is the model, while the rest are dynamic inputs
+        corresponding to the columns defined in self.gradio_input_columns.
+
+        Returns:
+            any: output of the selected model.
+        """
+        if not self.predict_function:
+            return
+
+        # Get prediction function for selected model.
+        model_fn = self.predict_function(args[0])
+
+        # Get the columns that correspond to the inputs.
+        metadata_cols = [
+            c for c in self.columns if c.column_type == ZenoColumnType.METADATA
+        ]
+        metadata_cols_names = [c.name for c in metadata_cols]
+        cols = []
+        for c in self.gradio_input_columns:
+            if c in metadata_cols_names:
+                cols.append(str(metadata_cols[metadata_cols_names.index(c)]))
+
+        temp_df = pd.DataFrame(columns=cols)
+        temp_df.loc[0] = args[1:]  # type: ignore
+        out = model_fn(temp_df, self.zeno_options)
+
+        # If the output gets embeddings too, only get the output.
+        if type(out) == tuple and len(out) == 2:
+            return out[0][0]
+        return out[0]

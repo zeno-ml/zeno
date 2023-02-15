@@ -7,6 +7,7 @@ import asyncio
 import os
 from typing import Dict, List, Union
 
+import gradio as gr  # type: ignore
 from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
@@ -22,10 +23,10 @@ from zeno.classes.classes import (
     ZenoSettings,
     ZenoVariables,
 )
-from zeno.classes.metadata import HistogramBucket, HistogramRequest
+from zeno.classes.metadata import HistogramBucket, HistogramRequest, StringFilterRequest
 from zeno.classes.projection import Points2D, PointsColors
 from zeno.classes.report import Report
-from zeno.classes.slice import FilterPredicate, FilterPredicateGroup, Slice, SliceMetric
+from zeno.classes.slice import FilterPredicateGroup, Slice, SliceMetric
 from zeno.classes.tag import Tag
 from zeno.data_pipeline.zeno_backend import ZenoBackend
 
@@ -60,6 +61,42 @@ def get_server(zeno: ZenoBackend):
         name="base",
     )
 
+    # If an inference function is provided, mount the gradio app.
+    if zeno.inference_function:
+        # The input_columns should map to the input_components.
+        input_components, output_components, input_columns = zeno.inference_function(
+            zeno.zeno_options
+        )
+        zeno.gradio_input_columns = input_columns
+
+        gradio_app = gr.Interface(
+            fn=zeno.single_inference,
+            inputs=[
+                gr.components.Dropdown(
+                    zeno.model_names, value=zeno.model_names[0], label="Model"
+                ),
+                *input_components,
+            ],
+            outputs=output_components,
+            css="""
+                    :root {
+                    --button-primary-background-base: #6a1b9a;
+                    --button-primary-background-hover: #d2bae9;
+                    --button-primary-text-color-base: white;
+                    --button-primary-text-color-hover: white;
+                    --button-primary-border-color-hover: #6a1b9a;
+                    --button-primary-border-color: #6a1b9a;
+                    }
+                """,
+            allow_flagging="never",
+            analytics_enabled=False,
+        )
+        api_app = gr.mount_gradio_app(
+            app=api_app,
+            blocks=gradio_app,
+            path="/gradio",
+        )
+
     @api_app.get("/settings", response_model=ZenoSettings, tags=["zeno"])
     def get_settings():
         return ZenoSettings(
@@ -68,7 +105,8 @@ def get_server(zeno: ZenoBackend):
             label_column=zeno.label_column,
             data_column=zeno.data_column,
             data_origin="/data/" if os.path.exists(zeno.data_path) else zeno.data_path,
-            metadata_columns=zeno.columns,
+            calculate_histogram_metrics=zeno.calculate_histogram_metrics,
+            inference_view=True if zeno.inference_function else False,
             samples=zeno.samples,
             totalSize=zeno.df.shape[0],
         )
@@ -102,7 +140,7 @@ def get_server(zeno: ZenoBackend):
         zeno.set_reports(reqs)
 
     @api_app.post("/filtered-ids", response_model=str, tags=["zeno"])
-    def get_filtered_ids(req: List[Union[FilterPredicateGroup, FilterPredicate]]):
+    def get_filtered_ids(req: FilterPredicateGroup):
         return zeno.get_filtered_ids(req)
 
     @api_app.post("/filtered-table", response_model=str, tags=["zeno"])
@@ -142,6 +180,11 @@ def get_server(zeno: ZenoBackend):
     @api_app.delete("/slice", tags=["zeno"])
     def delete_slice(slice_name: List[str]):
         zeno.delete_slice(slice_name[0])
+
+    @api_app.post("/string-filter", response_model=List[str], tags=["zeno"])
+    def filter_string_metadata(req: StringFilterRequest):
+        filt_out = zeno.filter_string_metadata(req)
+        return filt_out
 
     @api_app.post("/slice-metrics", response_model=List[SliceMetric], tags=["zeno"])
     def get_metrics_for_slices(req: MetricRequest):

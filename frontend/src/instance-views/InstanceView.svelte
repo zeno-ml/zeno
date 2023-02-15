@@ -57,7 +57,7 @@
 					sliceName: "",
 					folder: "",
 					filterPredicates: {
-						predicates: $selectionPredicates,
+						predicates: [$selectionPredicates],
 						join: "",
 					},
 				},

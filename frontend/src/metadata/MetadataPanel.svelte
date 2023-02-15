@@ -29,7 +29,8 @@
 		sliceToEdit,
 		requestingHistogramCounts,
 		status,
-		tags
+		tags,
+		showNewFolder,
 	} from "../stores";
 	import { columnHash } from "../util/util";
 	import {
@@ -42,13 +43,11 @@
 	import MetadataCell from "./cells/MetadataCell.svelte";
 	import SliceCell from "./cells/SliceCell.svelte";
 	import MetricRange from "./MetricRange.svelte";
-	import NewFolderPopup from "./popups/NewFolderPopup.svelte";
-	import NewSlicePopup from "./popups/NewSlicePopup.svelte";
   	import NewTagPopup from "./popups/NewTagPopup.svelte";
 
 	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
 		new InternMap([], columnHash);
-	let showNewFolder = false;
+	
 	let showNewTag = false;
 
 	$: res = getMetricsForSlices([
@@ -133,8 +132,8 @@
 		getHistogramCounts(
 			metadataHistograms,
 			{
-				predicates: $selectionPredicates,
-				join: "&",
+				predicates: [$selectionPredicates],
+				join: "",
 			},
 			selectionIds
 		).then((res) => {
@@ -146,8 +145,8 @@
 			getHistogramMetrics(
 				res,
 				{
-					predicates: $selectionPredicates,
-					join: "&",
+					predicates: [$selectionPredicates],
+					join: "",
 				},
 				$model,
 				$metric,
@@ -169,7 +168,7 @@
 		getHistogramCounts(
 			metadataHistograms,
 			{
-				predicates: sels,
+				predicates: [sels],
 				join: "&",
 			},
 			$selectionIds
@@ -182,7 +181,7 @@
 			getHistogramMetrics(
 				res,
 				{
-					predicates: sels,
+					predicates: [sels],
 					join: "&",
 				},
 				$model,
@@ -224,26 +223,28 @@
 		<div class="inline">
 			<div>
 				<Wrapper>
-					<IconButton on:click={() => (showNewFolder = !showNewFolder)}>
+					<IconButton
+						on:click={() => {
+							showNewSlice.set(false);
+							showNewFolder.update((b) => !b);
+						}}>
 						<Icon component={Svg} viewBox="0 0 24 24">
 							<path fill="black" d={mdiFolderPlusOutline} />
 						</Icon>
 					</IconButton>
 					<Tooltip xPos="start">Create a new folder</Tooltip>
 				</Wrapper>
-				{#if showNewFolder}
-					<NewFolderPopup bind:showNewFolder />
-				{/if}
 			</div>
 			<div>
 				<Wrapper>
 					<IconButton
 						on:click={() => {
 							sliceToEdit.set(undefined);
-							showNewSlice.set(true);
+							showNewSlice.update((d) => !d);
+							showNewFolder.set(false);
 						}}>
 						<Icon component={Svg} viewBox="0 0 24 24">
-							{#if $selectionPredicates.length > 0}
+							{#if $selectionPredicates.predicates.length > 0}
 								<path fill="#6a1a9a" d={mdiPlusCircle} />
 							{:else}
 								<path fill="black" d={mdiPlus} />
@@ -252,20 +253,18 @@
 					</IconButton>
 					<Tooltip xPos="start">Create a new slice</Tooltip>
 				</Wrapper>
-				{#if $showNewSlice}
-					<NewSlicePopup />
-				{/if}
 			</div>
 		</div>
 	</div>
 	<div
-		class={"overview " + ($selectionPredicates.length === 0 ? "selected" : "")}
+		class={"overview " +
+			($selectionPredicates.predicates.length === 0 ? "selected" : "")}
 		on:keydown={() => ({})}
 		on:click={() => {
 			selections.update((m) => {
-				for (let key in m.metadata) {
-					m.metadata[key] = { predicates: [], join: "&" };
-				}
+				Object.keys(m.metadata).forEach((key) => {
+					m.metadata[key] = { predicates: [], join: "" };
+				});
 				return { slices: [], metadata: { ...m.metadata }, tags: [] };
 			});
 		}}>
@@ -332,7 +331,7 @@
 		</div>
 		<MetricRange />
 	</div>
-	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.METADATA) as col}
+	{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.METADATA) as col}
 		<MetadataCell {col} histogram={metadataHistograms.get(col)} />
 	{/each}
 
@@ -416,12 +415,12 @@
 	.overview {
 		display: flex;
 		align-items: center;
-		border: 1px solid var(--G4);
-		border-radius: 10px;
+		border: 1px solid var(--G5);
+		border-radius: 4px;
 		padding-left: 10px;
 		justify-content: space-between;
 		padding-right: 10px;
-		height: 30px;
+		min-height: 36px;
 		cursor: pointer;
 		color: var(--G1);
 	}

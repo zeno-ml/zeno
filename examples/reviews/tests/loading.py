@@ -1,5 +1,6 @@
-from zeno import ZenoOptions, model, distill, metric
+from zeno import ZenoOptions, model, distill, metric, inference
 from transformers import pipeline
+import gradio as gr
 
 
 @model
@@ -12,6 +13,15 @@ def load_model(model_name):
         return clean_out
 
     return pred
+
+
+@inference
+def gradio_inference(ops: ZenoOptions):
+    return (
+        [gr.Text(label="Input")],
+        gr.Text(label="Output"),
+        [ops.data_column],
+    )
 
 
 @distill

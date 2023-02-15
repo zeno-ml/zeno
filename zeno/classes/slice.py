@@ -5,13 +5,14 @@ from zeno.classes.base import CamelModel, ZenoColumn
 
 class FilterPredicate(CamelModel):
     column: ZenoColumn
+    # ==, !=, >, <, >=, <=, match
     operation: str
     value: Union[str, float, int, bool]
     join: Optional[str]
 
 
 class FilterPredicateGroup(CamelModel):
-    predicates: List[Union[FilterPredicate, "FilterPredicateGroup"]]
+    predicates: List[Union["FilterPredicateGroup", FilterPredicate]]
     join: str
 
 

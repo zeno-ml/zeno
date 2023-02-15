@@ -4,6 +4,7 @@
 		mdiChartBoxOutline,
 		mdiCompassOutline,
 		mdiGithub,
+		mdiPlusCircleOutline,
 	} from "@mdi/js";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
@@ -11,7 +12,7 @@
 
 	import { location } from "svelte-spa-router";
 
-	import { tab } from "../stores";
+	import { settings, tab } from "../stores";
 	import { updateTab } from "../util/util";
 
 	location.subscribe((d) => {
@@ -33,6 +34,23 @@
 				alt="Square spiral logo next to 'Zeno'" />
 		</a>
 		<div id="tabs">
+			{#if $settings && $settings.inferenceView}
+				<Wrapper>
+					<div
+						class="item {$tab === 'predict' ? 'selected' : ''}"
+						on:keydown={() => ({})}
+						on:click={() => updateTab("predict")}>
+						<div class="icon">
+							<Icon component={Svg} viewBox="0 0 24 24">
+								<path
+									fill={$tab === "predict" ? "#6a1b9a" : "black"}
+									d={mdiPlusCircleOutline} />
+							</Icon>
+						</div>
+					</div>
+					<Tooltip xPos="end">Test your model with your own inputs.</Tooltip>
+				</Wrapper>
+			{/if}
 			<Wrapper>
 				<div
 					class="item {$tab === 'explore' ? 'selected' : ''}"

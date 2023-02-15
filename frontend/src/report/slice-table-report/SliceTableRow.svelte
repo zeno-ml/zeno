@@ -9,13 +9,24 @@
 
 	export let sli: Slice;
 
-	$: modelResults = getMetricsForSlices(
-		$models.map((m) => ({
-			sli: sli,
-			metric: $metric,
-			model: m,
-		}))
-	);
+	let modelResults = null;
+	$: if ($models.length > 0) {
+		modelResults = getMetricsForSlices(
+			$models.map((m) => ({
+				sli: sli,
+				metric: $metric,
+				model: m,
+			}))
+		);
+	} else {
+		modelResults = getMetricsForSlices([
+			{
+				sli: sli,
+				metric: $metric,
+				model: undefined,
+			},
+		]);
+	}
 </script>
 
 <Row>

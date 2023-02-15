@@ -1,5 +1,5 @@
 from torchvision import transforms
-from torchvision.models import resnet50 as resnet, ResNet50_Weights
+from torchvision.models import resnet50, ResNet50_Weights
 from PIL import Image
 
 # from clip import load
@@ -27,88 +27,57 @@ def image_transform(
 
 
 class Resnet50Model(torch.nn.Module):
-    def __init__(self):
+    def __init__(self, torchhub_weights="IMAGENET1K_V1"):
         super().__init__()
 
-        def layer_output(model, input, output):
-            self.embedding = output.detach()
-            self.embedding = self.embedding.reshape(-1, self.embedding.shape[0]).T
+        self.embedding = torch.tensor([])
 
-        self.model = resnet(weights=ResNet50_Weights.IMAGENET1K_V1)
-        self.model.avgpool.register_forward_hook(layer_output)
+        def get_embedding(model, input, output):
+            self.embedding = input[0].detach()
+
+        self.model = resnet50(ResNet50_Weights[torchhub_weights])
+        self.model.fc.register_forward_hook(get_embedding)
 
     def forward(self, x):
         return self.model(x)
 
 
-# @torch.no_grad()
-# def resnet_predict(model: torch.nn.Module, batch):
-#     model.to(DEVICE).eval()
-#     x: torch.Tensor = batch.to(DEVICE)
-#     out: torch.Tensor = model(x)
-#     embedding: torch.Tensor = model.embedding
-
-#     return {
-#         "predictions": out.cpu().numpy().argmax(axis=-1),
-#         "embeddings": embedding.cpu().numpy(),
-#         "probabilities": torch.softmax(out, axis=-1).cpu().numpy(),
-#     }
+def open_image(img_path):
+    img = Image.open(img_path)
+    if img.mode == "L":
+        img = img.convert("RGB")
+    return img
 
 
-@torch.no_grad()
-def clip_image_encode(model, batch):
-    x: torch.Tensor = batch.to(DEVICE)
-    out: torch.Tensor = model.encode_image(x)
-
-    return out.cpu().numpy()
-
-
-# def load_clip(variant="ViT-B/32"):
-#     clip_model, preprocess = load(variant, DEVICE)
-#     return clip_model, preprocess
+def image_paths_to_tensor(base_path, image_names, transform):
+    return torch.stack(
+        [
+            transform(open_image(os.path.join(base_path, image_name)))
+            for image_name in image_names
+        ]
+    )
 
 
 @model
 def load_model(model_path):
-    model = Resnet50Model()
+    model = Resnet50Model(model_path).to(DEVICE)
+    model.eval()
     transform = image_transform()
 
-    use_clip = model_path == "resnet+clip"
-
-    clip_model, clip_preprocess = None, None
-    # if use_clip is True:
-    #     clip_model, clip_preprocess = load_clip()
-    clip_present = (
-        use_clip is True and clip_model is not None and clip_preprocess is not None
-    )
-
+    @torch.no_grad()
     def pred(df, ops):
-        def open_image(img):
-            img = Image.open(os.path.join(ops.data_path, img))
-            if img.mode == "L":
-                img = img.convert("RGB")
-            return img
-
-        imgs = [open_image(img) for img in df[ops.data_column]]
-        transformed = torch.stack([transform(im) for im in imgs])
-
-        resnet_output = resnet_predict(model=model, batch=transformed)
-        str_imagenet_pred_labels = [
-            simple_labels[pred] for pred in resnet_output["predictions"]
-        ]
-
-        if clip_present is True:
-            clip_transformed = torch.stack([clip_preprocess(im) for im in imgs])
-            clip_image_encoding = clip_image_encode(
-                model=clip_model, batch=clip_transformed
-            )
-
-        return (
-            str_imagenet_pred_labels,
-            clip_image_encoding
-            if clip_present is True
-            else resnet_output["embeddings"],
+        # process the images and turn into a batch tensor
+        batch = image_paths_to_tensor(ops.data_path, df[ops.data_column], transform).to(
+            DEVICE
         )
+
+        # model inference
+        outputs = model(batch)
+        embeddings = model.embedding.cpu().numpy()
+        batches_highest_confidence = outputs.argmax(dim=1)
+        preds = [simple_labels[i] for i in batches_highest_confidence]
+
+        return preds, embeddings
 
     return pred
 

@@ -28,7 +28,7 @@
 	let filterPredicates: FilterPredicateGroup;
 	$: filterPredicates = $selections.metadata[columnHash(col)]
 		? $selections.metadata[columnHash(col)]
-		: { predicates: [], join: "&" };
+		: { predicates: [], join: "" };
 	let predicates: FilterPredicate[] = [];
 	$: predicates = filterPredicates.predicates as FilterPredicate[];
 
@@ -37,7 +37,7 @@
 			slices: mets.slices,
 			metadata: {
 				...mets.metadata,
-				[columnHash(col)]: { predicates, join: "&" },
+				[columnHash(col)]: { predicates, join: "" },
 			},
 		}));
 	}

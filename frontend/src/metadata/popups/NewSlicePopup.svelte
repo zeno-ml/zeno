@@ -2,7 +2,6 @@
 	import Button from "@smui/button";
 	import Paper, { Content } from "@smui/paper";
 	import Textfield from "@smui/textfield";
-	import HelperText from "@smui/textfield/helper-text";
 	import { createNewSlice } from "../../api/slice";
 	import { selections, showNewSlice, slices, sliceToEdit } from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
@@ -28,12 +27,30 @@
 			folder = $sliceToEdit.folder;
 			return;
 		}
+
 		// Pre-fill slice creation with current metadata selections.
-		Object.values($selections.metadata).forEach((filtGroup) => {
-			if (filtGroup.predicates.length !== 0) {
-				predicateGroup.predicates.push(filtGroup);
-			}
-		});
+		// Join with AND.
+		predicateGroup.predicates = Object.values($selections.metadata)
+			.filter((d) => d.predicates.length > 0)
+			.flat()
+			.map((d, i) => {
+				if (i !== 0) {
+					d.join = "&";
+				} else {
+					d.join = "";
+				}
+				return d;
+			});
+
+		// If no predicates, add an empty one.
+		if (predicateGroup.predicates.length === 0) {
+			predicateGroup.predicates.push({
+				column: null,
+				operation: "",
+				value: "",
+				join: "",
+			});
+		}
 	}
 
 	function createSlice() {
@@ -58,6 +75,9 @@
 
 	function deletePredicate(i) {
 		predicateGroup.predicates.splice(i, 1);
+		if (predicateGroup.predicates.length !== 0) {
+			predicateGroup.predicates[0].join = "";
+		}
 		predicateGroup = predicateGroup;
 	}
 
@@ -66,20 +86,29 @@
 			createSlice();
 		}
 	}
+	let paperHeight;
 </script>
 
 <svelte:window on:keydown={submit} />
 
 <div
 	id="paper-container"
+	bind:clientHeight={paperHeight}
 	use:clickOutside
 	on:click_outside={() => showNewSlice.set(false)}>
-	<Paper elevation={7}>
-		<Content style="max-height: calc(100vh - 100px); overflow-y: scroll;">
+	<Paper
+		elevation={7}
+		class="paper"
+		style="max-height: 75vh; {paperHeight &&
+		paperHeight > window.innerHeight * 0.75
+			? 'overflow-y: scroll'
+			: 'overflow-y: show'}">
+		<Content>
 			{#if !$sliceToEdit}
-				<Textfield bind:value={sliceName} label="Name" bind:this={nameInput}>
-					<HelperText slot="helper">Slice 1</HelperText>
-				</Textfield>
+				<Textfield
+					bind:value={sliceName}
+					label="Slice Name"
+					bind:this={nameInput} />
 			{:else}
 				<p>{sliceName}</p>
 			{/if}
@@ -109,10 +138,9 @@
 
 <style>
 	#paper-container {
-		max-height: 100vh;
 		position: fixed;
-		left: 60px;
-		top: 10px;
+		left: 440px;
+		top: 70px;
 		z-index: 10;
 	}
 	#submit {

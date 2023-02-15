@@ -12,6 +12,7 @@
 		selectionIds,
 		selectionPredicates,
 		status,
+		scatterColorByColumn,
 	} from "../../stores";
 	import { createScalesWebgGLExtent } from "./regl-scatter";
 
@@ -36,6 +37,7 @@
 	export let viewOptions = {};
 	export let autoResize = true;
 
+	const hoverViewOffset = 10;
 	let height = 850; // canvas dims
 	let width = 1000; // canvas dims
 	let pointSizeSlider = 3;
@@ -44,7 +46,6 @@
 	let computingPoints = false; // spinner when true
 	let pointOpacities: number[] = [];
 	// column to color scatterplot by
-	let colorByColumn: ZenoColumn = $status.completeColumns[0];
 	let runOnce = false;
 	let mounted = false;
 	let reloadedIndices: number[] = [];
@@ -58,8 +59,12 @@
 	let dehighlightPoints;
 	let highlightPoints;
 
+	// if no coloring, just do the first one we have
+	$: if ($scatterColorByColumn === null) {
+		scatterColorByColumn.set($status.completeColumns[0]);
+	}
 	$: project2DOnModelChange($model);
-	$: changePointsColorsOnColorChange(colorByColumn);
+	$: changePointsColorsOnColorChange($scatterColorByColumn);
 	$: {
 		if (containerEl && autoResize) {
 			resizeScatter();
@@ -118,7 +123,7 @@
 			// requests tsne from backend
 			points = await ZenoService.projectEmbedInto2D({
 				model,
-				column: colorByColumn,
+				column: $scatterColorByColumn,
 			});
 
 			// simply scales the points between [-1, 1]
@@ -210,10 +215,9 @@
 						{#if pointHover !== undefined}
 							<div
 								id="hover-view"
-								style:width="{100}px"
-								style:height="{80}px"
-								style:left="{pointHover.canvasX + 5}px"
-								style:top="{pointHover.canvasY + 5}px">
+								class="no-text-highlight"
+								style:left="{pointHover.canvasX + hoverViewOffset}px"
+								style:top="{pointHover.canvasY + hoverViewOffset}px">
 								<div id="replace-view" bind:this={hoverViewDivEl} />
 							</div>
 						{/if}
@@ -238,7 +242,9 @@
 
 	<!-- settings/controls for the scatterplot -->
 	<div id="settings" class="frosted">
-		<ScatterSettings bind:colorByColumn bind:pointSizeSlider />
+		<ScatterSettings
+			bind:colorByColumn={$scatterColorByColumn}
+			bind:pointSizeSlider />
 	</div>
 	{#if points}
 		<div id="legend" class="frosted">
@@ -301,5 +307,15 @@
 		padding-top: 20px;
 		box-shadow: 0px 0px 1px 1px hsla(0, 0%, 30%, 0.1);
 		border-radius: 3px;
+	}
+
+	/* https://stackoverflow.com/questions/826782/how-to-disable-text-selection-highlighting */
+	.no-text-highlight {
+		-webkit-touch-callout: none; /* iOS Safari */
+		-webkit-user-select: none; /* Safari */
+		-khtml-user-select: none; /* Konqueror HTML */
+		-moz-user-select: none; /* Old versions of Firefox */
+		-ms-user-select: none; /* Internet Explorer/Edge */
+		user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
 	}
 </style>
