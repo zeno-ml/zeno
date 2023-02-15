@@ -14,11 +14,10 @@ import uvicorn
 from multiprocess import Process  # type: ignore
 
 from zeno.api import ZenoParameters
-from zeno.data_pipeline.zeno_backend import ZenoBackend
+from zeno.backend import ZenoBackend
 from zeno.server import get_server
 from zeno.setup import setup_zeno
 from zeno.util import is_notebook, parse_testing_file, VIEW_MAP_URL, VIEWS_MAP_JSON
-
 
 # Global variable to hold the Zeno server process.
 # This is used to kill the server when re-running in a notebook.

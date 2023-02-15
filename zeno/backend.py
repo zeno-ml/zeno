@@ -10,26 +10,22 @@ from inspect import getsource
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Union
 
-import numpy as np
 import pandas as pd
 from gradio import Blocks  # type: ignore
-from methodtools import lru_cache  # type: ignore
 from pandas import DataFrame  # type: ignore
 from pathos.multiprocessing import ProcessingPool as Pool  # type: ignore
-from sklearn import preprocessing  # type: ignore
 
 from zeno.api import ZenoOptions, ZenoParameters
 from zeno.classes.base import MetadataType, ZenoColumnType
 from zeno.classes.classes import MetricKey, TableRequest, ZenoColumn
-from zeno.classes.projection import Points2D, PointsColors
 from zeno.classes.report import Report
 from zeno.classes.slice import FilterIds, FilterPredicateGroup, Slice, SliceMetric
-from zeno.data_pipeline.data_processing import (
+from zeno.processing.data_processing import (
     postdistill_data,
     predistill_data,
     run_inference,
 )
-from zeno.data_pipeline.filtering import filter_table
+from zeno.processing.filtering import filter_table
 from zeno.util import getMetadataType, load_series, read_pickle
 
 
@@ -464,97 +460,6 @@ class ZenoBackend(object):
             filt_df = filt_df.sort_values(str(req.sort[0]), ascending=req.sort[1])
         filt_df = filt_df.iloc[req.slice_range[0] : req.slice_range[1]]
         return filt_df[[str(col) for col in req.columns]].to_json(orient="records")
-
-    def embed_exists(self, model: str):
-        """Checks for the existence of an embedding column.
-        Returns True if the column exists, False otherwise
-        """
-        embed_column = ZenoColumn(name=model, column_type=ZenoColumnType.EMBEDDING)
-        exists = str(embed_column) in self.df.columns
-        return exists and not self.df[str(embed_column)].isnull().any()
-
-    @lru_cache(
-        maxsize=5
-    )  # will cache up 5 model projections in memory before needing to recompute
-    def run_tsne(self, model: str) -> np.ndarray:
-        # Extract embeddings and store in one big ndarray
-        embed_col = ZenoColumn(column_type=ZenoColumnType.EMBEDDING, name=model)
-
-        embed = self.df[str(embed_col)].to_numpy()
-        embed = np.stack(embed, axis=0)  # type: ignore
-
-        # project embeddings into 2D
-        from openTSNE import TSNE  # type: ignore
-
-        ALL_AVAILABLE_PROCESSORS = -1
-        DEFAULT_ITERATIONS = 400
-        tsne = TSNE(n_jobs=ALL_AVAILABLE_PROCESSORS, n_iter=DEFAULT_ITERATIONS)
-        projection = tsne.fit(embed)
-
-        return projection
-
-    def get_projection_colors(self, column: ZenoColumn) -> PointsColors:
-        """Get colors for a projection based on a column.
-
-        Args:
-            column (ZenoColumn): Column to use for coloring the projection.
-
-        Returns:
-            Tuple[List[int], List, str]: The color range, the unique values,
-                and the metadata type.
-        """
-        series = self.df[str(column)]
-        unique = series.unique()
-        metadata_type = "nominal"
-        color_range: List[int] = []
-        if len(unique) == 2:
-            metadata_type = "boolean"
-        if len(unique) > 10:
-            if column.metadata_type == MetadataType.CONTINUOUS:
-                metadata_type = "continuous"
-                color_range = (
-                    np.interp(series, (series.min(), series.max()), (0, 20))
-                    .astype(int)
-                    .tolist()
-                )
-                unique = np.array([series.min(), series.max()])
-            else:
-                metadata_type = "other"
-                color_range = [0] * len(series)
-        else:
-            labels = preprocessing.LabelEncoder().fit_transform(series)
-            if isinstance(labels, np.ndarray):
-                color_range = labels.astype(int).tolist()
-            else:
-                color_range = [0] * len(series)
-
-        return PointsColors(
-            color=color_range, domain=unique.tolist(), data_type=metadata_type
-        )
-
-    def project_embed_into_2D(self, model: str, column: ZenoColumn) -> Points2D:
-        """If the embedding exists, will use t-SNE to project into 2D."""
-
-        points = Points2D(
-            x=[], y=[], color=[], domain=[], opacity=[], data_type="", ids=[]
-        )
-
-        # Can't project without an embedding
-        if not self.embed_exists(model):
-            return points
-
-        projection = self.run_tsne(model)
-
-        # extract points and ids from computed projection
-        points.x = projection[:, 0].tolist()
-        points.y = projection[:, 1].tolist()
-        color_results = self.get_projection_colors(column)
-        points.color = color_results.color
-        points.domain = color_results.domain
-        points.data_type = color_results.data_type
-        points.ids = self.df[str(self.id_column)].to_list()
-
-        return points
 
     def single_inference(self, *args):
         """Run inference from Gradio inputs.

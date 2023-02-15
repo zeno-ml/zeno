@@ -4,12 +4,11 @@ from math import isnan
 from typing import Callable, List, Union
 
 import numpy as np
-
 import pandas as pd
 
 from zeno.classes.base import MetadataType, ZenoColumn
 from zeno.classes.metadata import HistogramBucket, HistogramRequest, StringFilterRequest
-from zeno.data_pipeline.filtering import filter_table, filter_table_single
+from zeno.processing.filtering import filter_table, filter_table_single
 
 
 def histogram_buckets(

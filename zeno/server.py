@@ -12,6 +12,7 @@ from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
 
+from zeno.backend import ZenoBackend
 from zeno.classes.base import ZenoColumn
 from zeno.classes.classes import (
     ColorsProjectRequest,
@@ -27,13 +28,17 @@ from zeno.classes.metadata import HistogramBucket, HistogramRequest, StringFilte
 from zeno.classes.projection import Points2D, PointsColors
 from zeno.classes.report import Report
 from zeno.classes.slice import FilterPredicateGroup, Slice, SliceMetric
-from zeno.data_pipeline.histogram_processing import (
+from zeno.processing.histogram_processing import (
     filter_by_string,
     histogram_buckets,
     histogram_counts,
     histogram_metrics,
 )
-from zeno.data_pipeline.zeno_backend import ZenoBackend
+from zeno.processing.projection_processing import (
+    check_embed_exists,
+    project_into_2D,
+    projection_colors,
+)
 
 
 def custom_generate_unique_id(route: APIRoute):
@@ -188,15 +193,15 @@ def get_server(zeno: ZenoBackend):
         """Checks if embedding exists for a model.
         Returns the boolean True or False directly
         """
-        return zeno.embed_exists(model)
+        return check_embed_exists(zeno.df, model)
 
     @api_app.post("/embed-project", tags=["zeno"], response_model=Points2D)
     def project_embed_into_2D(req: EmbedProject2DRequest):
-        return zeno.project_embed_into_2D(req.model, req.column)
+        return project_into_2D(zeno.df, zeno.id_column, req.model, req.column)
 
     @api_app.post("/colors-project", tags=["zeno"], response_model=PointsColors)
     def get_projection_colors(req: ColorsProjectRequest):
-        return zeno.get_projection_colors(req.column)
+        return projection_colors(zeno.df, req.column)
 
     @api_app.post("/entry", tags=["zeno"], response_model=str)
     def get_df_row_entry(req: EntryRequest):
