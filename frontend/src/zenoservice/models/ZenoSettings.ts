@@ -12,5 +12,6 @@ export type ZenoSettings = {
 	dataOrigin: string;
 	samples: number;
 	calculateHistogramMetrics: boolean;
+	inferenceView: boolean;
 	totalSize: number;
 };

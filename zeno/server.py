@@ -60,7 +60,9 @@ def get_server(zeno: ZenoBackend):
         name="base",
     )
 
+    # If an inference function is provided, mount the gradio app.
     if zeno.inference_function:
+        # The input_columns should map to the input_components.
         input_components, output_components, input_columns = zeno.inference_function(
             zeno.zeno_options
         )
@@ -103,6 +105,7 @@ def get_server(zeno: ZenoBackend):
             data_column=zeno.data_column,
             data_origin="/data/" if os.path.exists(zeno.data_path) else zeno.data_path,
             calculate_histogram_metrics=zeno.calculate_histogram_metrics,
+            inference_view=True if zeno.inference_function else False,
             samples=zeno.samples,
             totalSize=zeno.df.shape[0],
         )

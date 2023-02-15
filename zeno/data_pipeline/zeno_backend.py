@@ -696,12 +696,20 @@ class ZenoBackend(object):
         return points
 
     def single_inference(self, *args):
-        """Run a single inference on a string."""
+        """Run inference from Gradio inputs.
+        The first input to args is the model, while the rest are dynamic inputs
+        corresponding to the columns defined in self.gradio_input_columns.
+
+        Returns:
+            any: output of the selected model.
+        """
         if not self.predict_function:
             return
 
+        # Get prediction function for selected model.
         model_fn = self.predict_function(args[0])
 
+        # Get the columns that correspond to the inputs.
         metadata_cols = [
             c for c in self.columns if c.column_type == ZenoColumnType.METADATA
         ]
@@ -715,6 +723,7 @@ class ZenoBackend(object):
         temp_df.loc[0] = args[1:]  # type: ignore
         out = model_fn(temp_df, self.zeno_options)
 
+        # If the output gets embeddings too, only get the output.
         if type(out) == tuple and len(out) == 2:
             return out[0][0]
         return out[0]

@@ -3,6 +3,6 @@
 /* eslint-disable */
 
 export type HistogramBucket = {
-	bucket: boolean | number | string;
-	bucketEnd?: boolean | number | string;
+	bucket: number | boolean | string;
+	bucketEnd?: number | boolean | string;
 };
