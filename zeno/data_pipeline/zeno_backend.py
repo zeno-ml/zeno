@@ -224,12 +224,14 @@ class ZenoBackend(object):
             save_path = Path(self.cache_path, str(predistill_column) + ".pickle")
 
             load_series(self.df, predistill_column, save_path)
+            predistill_hash = str(predistill_column)
 
-            if self.df[str(predistill_column)].isnull().any():
+            if self.df[predistill_hash].isnull().any():
                 predistill_to_run.append(predistill_column)
             else:
+                self.df[predistill_hash] = self.df[predistill_hash].convert_dtypes()
                 predistill_column.metadata_type = getMetadataType(
-                    self.df[str(predistill_column)]
+                    self.df[predistill_hash]
                 )
                 self.complete_columns.append(predistill_column)
 
@@ -246,8 +248,9 @@ class ZenoBackend(object):
                     range(len(predistill_to_run)),
                 )
                 for out in predistill_outputs:
-                    out[0].metadata_type = getMetadataType(out[1])
                     self.df.loc[:, str(out[0])] = out[1]
+                    self.df[str(out[0])] = self.df[str(out[0])].convert_dtypes()
+                    out[0].metadata_type = getMetadataType(self.df[str(out[0])])
                     self.complete_columns.append(out[0])
 
     def __inference(self):
@@ -280,6 +283,8 @@ class ZenoBackend(object):
             ):
                 models_to_run.append(model_path)
             else:
+                self.df[model_hash] = self.df[model_hash].convert_dtypes()
+                model_column.metadata_type = getMetadataType(self.df[model_hash])
                 self.complete_columns.append(model_column)
 
         if len(models_to_run) > 0:
@@ -296,8 +301,11 @@ class ZenoBackend(object):
                 )
                 for out in inference_outputs:
                     self.df.loc[:, str(out[0])] = out[2]
+                    self.df[str(out[0])] = self.df[str(out[0])].convert_dtypes()
+                    # If we get an embedding, add it to DataFrame.
                     if not out[3].isnull().values.any():  # type: ignore
                         self.df.loc[:, str(out[1])] = out[3]
+                    out[0].metadata_type = getMetadataType(self.df[str(out[0])])
                     self.complete_columns.append(out[0])
 
     def __postdistill(self) -> None:
@@ -321,6 +329,7 @@ class ZenoBackend(object):
             if self.df[col_hash].isnull().any():
                 postdistill_to_run.append(col_name)
             else:
+                self.df[col_hash] = self.df[col_hash].convert_dtypes()
                 col_name.metadata_type = getMetadataType(self.df[col_hash])
                 self.complete_columns.append(col_name)
 
@@ -337,8 +346,9 @@ class ZenoBackend(object):
                     range(len(postdistill_to_run)),
                 )
                 for out in post_outputs:
-                    out[0].metadata_type = getMetadataType(out[1])
                     self.df.loc[:, str(out[0])] = out[1]  # type: ignore
+                    self.df[str(out[0])] = self.df[str(out[0])].convert_dtypes()
+                    out[0].metadata_type = getMetadataType(out[1])
                     self.complete_columns.append(out[0])
 
     def get_metrics_for_slices(

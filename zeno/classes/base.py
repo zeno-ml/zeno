@@ -37,7 +37,9 @@ class ZenoColumn(CamelModel):
     metadata_type: Optional[MetadataType] = MetadataType.OTHER
     model: Optional[str] = ""
 
-    # Append the column type to the name unless it is a vanilla metadata column
+    # Append the column type to the name unless it is a vanilla metadata column.
+    # We don't save the metadata_type since we dynamically change it
+    # and it's not identifying.
     def __str__(self):
         m = ""
         if self.model is not None:
