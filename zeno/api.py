@@ -83,3 +83,12 @@ def metric(func):
 
     _wrapper.metric_function = True
     return _wrapper
+
+
+def inference(func):
+    @functools.wraps(func)
+    def _wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    _wrapper.inference_function = True
+    return _wrapper

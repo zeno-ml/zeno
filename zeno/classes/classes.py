@@ -17,6 +17,7 @@ class ZenoSettings(CamelModel):
     data_origin: str
     samples: int
     calculate_histogram_metrics: bool
+    inference_view: bool
     totalSize: int
 
 

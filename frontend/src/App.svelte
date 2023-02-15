@@ -2,6 +2,7 @@
 	import { onMount } from "svelte";
 	import Router from "svelte-spa-router";
 	import Explore from "./Explore.svelte";
+	import Predict from "./Predict.svelte";
 	import Header from "./general/Header.svelte";
 	import Report from "./Report.svelte";
 	import {
@@ -23,6 +24,7 @@
 
 	const routes = {
 		"/": Explore,
+		"/predict/": Predict,
 		"/explore/": Explore,
 		"/report/": Report,
 		"*": Explore,
