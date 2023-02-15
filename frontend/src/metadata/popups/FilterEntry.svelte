@@ -98,7 +98,10 @@
 					bind:value={predicate.value}
 					placeholder={"Value"}
 					searchable={false}
-					options={[{id: true, name: "true"}, {id: false, name: "false"}]} />
+					options={[
+						{ id: true, name: "true" },
+						{ id: false, name: "false" },
+					]} />
 			{:else}
 				<input type="text" bind:value={predicate.value} />
 			{/if}
