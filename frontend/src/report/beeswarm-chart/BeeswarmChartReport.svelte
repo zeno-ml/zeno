@@ -1,6 +1,5 @@
 <script lang="ts">
 	import Select, { Option } from "@smui/select";
-	import type { VisualizationSpec } from "svelte-vega";
 	import { Vega } from "svelte-vega";
 	import { getMetricsForSlices } from "../../api/slice";
 	import {
