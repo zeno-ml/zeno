@@ -14,6 +14,7 @@ import type { PointsColors } from "../models/PointsColors";
 import type { Report } from "../models/Report";
 import type { Slice } from "../models/Slice";
 import type { SliceMetric } from "../models/SliceMetric";
+import type { Tag } from "../models/Tag";
 import type { TableRequest } from "../models/TableRequest";
 import type { ZenoColumn } from "../models/ZenoColumn";
 import type { ZenoSettings } from "../models/ZenoSettings";
@@ -61,6 +62,18 @@ export class ZenoService {
 	}
 
 	/**
+	 * Get Tags
+	 * @returns Tag Successful Response
+	 * @throws ApiError
+	 */
+	public static getTags(): CancelablePromise<Record<string, Tag>> {
+		return __request(OpenAPI, {
+			method: "GET",
+			url: "/tags",
+		});
+	}
+
+	/**
 	 * Get Reports
 	 * @returns Report Successful Response
 	 * @throws ApiError
@@ -102,6 +115,62 @@ export class ZenoService {
 		return __request(OpenAPI, {
 			method: "POST",
 			url: "/folders",
+			body: requestBody,
+			mediaType: "application/json",
+			errors: {
+				422: `Validation Error`,
+			},
+		});
+	}
+
+	// /**
+	//  * Set Tags
+	//  * @param requestBody
+	//  * @returns any Successful Response
+	//  * @throws ApiError
+	//  */
+	// public static setTags(requestBody: Array<string>): CancelablePromise<any> {
+	// 	return __request(OpenAPI, {
+	// 		method: "POST",
+	// 		url: "/tags",
+	// 		body: requestBody,
+	// 		mediaType: "application/json",
+	// 		errors: {
+	// 			422: `Validation Error`,
+	// 		},
+	// 	});
+	// }
+
+	/**
+	 * Create New Tag
+	 * @param requestBody
+	 * @returns any Successful Response
+	 * @throws ApiError
+	 */
+	public static createNewTag(requestBody: Tag): CancelablePromise<any> {
+		return __request(OpenAPI, {
+			method: "POST",
+			url: "/tag",
+			body: requestBody,
+			mediaType: "application/json",
+			errors: {
+				422: `Validation Error`,
+			},
+		});
+	}
+
+	/**
+	 * Delete Tag
+	 * @param requestBody
+	 * @returns any Successful Response
+	 * @throws ApiError
+	 */
+	public static deleteTag(
+		requestBody: Array<string>
+	): CancelablePromise<any> {
+		return __request(OpenAPI, {
+			method: "DELETE",
+			url: "/tag",
 			body: requestBody,
 			mediaType: "application/json",
 			errors: {

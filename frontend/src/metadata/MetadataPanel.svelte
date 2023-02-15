@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { mdiFolderPlusOutline, mdiPlus, mdiPlusCircle } from "@mdi/js";
+	import { mdiFolderPlusOutline, mdiTagPlusOutline, mdiPlus, mdiPlusCircle } from "@mdi/js";
 	import CircularProgress from "@smui/circular-progress";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
@@ -29,6 +29,7 @@
 		sliceToEdit,
 		requestingHistogramCounts,
 		status,
+		tags
 	} from "../stores";
 	import { columnHash } from "../util/util";
 	import {
@@ -43,10 +44,12 @@
 	import MetricRange from "./MetricRange.svelte";
 	import NewFolderPopup from "./popups/NewFolderPopup.svelte";
 	import NewSlicePopup from "./popups/NewSlicePopup.svelte";
+  	import NewTagPopup from "./popups/NewTagPopup.svelte";
 
 	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
 		new InternMap([], columnHash);
 	let showNewFolder = false;
+	let showNewTag = false;
 
 	$: res = getMetricsForSlices([
 		<MetricKey>{
@@ -263,7 +266,7 @@
 				for (let key in m.metadata) {
 					m.metadata[key] = { predicates: [], join: "&" };
 				}
-				return { slices: [], metadata: { ...m.metadata } };
+				return { slices: [], metadata: { ...m.metadata }, tags: [] };
 			});
 		}}>
 		<div class="inline">All instances</div>
@@ -285,6 +288,37 @@
 
 	{#each [...$slices.values()].filter((s) => s.folder === "") as s}
 		<SliceCell slice={s} />
+	{/each}
+
+	<div id="tag-header" class="inline" style:margin-top="10px">
+		<div class="inline">
+			<h4>Metadata Tags</h4>
+		</div>
+		<div class="inline">
+			<div>
+				<Wrapper>
+					<IconButton on:click={() => (showNewTag = !showNewTag)}>
+						<Icon component={Svg} viewBox="0 0 24 24">
+							<path fill="black" d={mdiTagPlusOutline} />
+						</Icon>
+					</IconButton>
+					<Tooltip xPos="start">Create a new tag</Tooltip>
+				</Wrapper>
+				{#if showNewTag}
+					<NewTagPopup bind:showNewTag 
+					scrollY={document.getElementsByClassName("side-container")[0].scrollTop}
+					/>
+				{/if}
+			</div>
+		</div>
+	</div>
+
+	{#each [...$tags.values()] as tag}
+		<div class="inline">
+			<p>{tag.tagName}</p>
+			<p>Folder: {tag.folder}</p>
+			<p>selIds: {tag.selectionIds.length}</p>
+		</div>
 	{/each}
 
 	<div id="metric-header" class="inline" style:margin-top="10px">
@@ -327,6 +361,10 @@
 		position: sticky;
 		top: -10px;
 		z-index: 3;
+		background-color: var(--Y2);
+	}
+	#tag-header {
+		border-bottom: 0.5px solid var(--G5);
 		background-color: var(--Y2);
 	}
 	#metric-header {

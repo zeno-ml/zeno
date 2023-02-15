@@ -12,6 +12,7 @@ import type {
 	FilterPredicateGroup,
 	Report,
 	Slice,
+	Tag,
 	ZenoColumn,
 	ZenoSettings,
 } from "./zenoservice";
@@ -90,6 +91,7 @@ export const requestingHistogramCounts: Writable<boolean> = writable(false);
 
 export const slices: Writable<Map<string, Slice>> = writable(new Map());
 export const folders: Writable<string[]> = folderWritable();
+export const tags: Writable<Map<string, Tag>> = writable(new Map());
 export const reports: Writable<Report[]> = reportWritable();
 
 export const filteredTable: Writable<Record<string, unknown>[]> = writable([]);
@@ -98,9 +100,11 @@ export const filteredTable: Writable<Record<string, unknown>[]> = writable([]);
 export const selections: Writable<{
 	metadata: Record<string, FilterPredicateGroup>;
 	slices: Array<string>;
+	tags: Array<string>;
 }> = writable({
 	metadata: {},
 	slices: [],
+	tags: [],
 });
 
 // the ids directly selected by the user

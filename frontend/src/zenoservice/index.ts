@@ -26,6 +26,7 @@ export type { ReportPredicate } from "./models/ReportPredicate";
 export type { Slice } from "./models/Slice";
 export type { SliceMetric } from "./models/SliceMetric";
 export type { TableRequest } from "./models/TableRequest";
+export type { Tag } from "./models/Tag";
 export type { ValidationError } from "./models/ValidationError";
 export type { ZenoColumn } from "./models/ZenoColumn";
 export { ZenoColumnType } from "./models/ZenoColumnType";

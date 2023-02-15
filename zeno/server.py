@@ -26,6 +26,7 @@ from zeno.classes.metadata import HistogramBucket, HistogramRequest
 from zeno.classes.projection import Points2D, PointsColors
 from zeno.classes.report import Report
 from zeno.classes.slice import FilterPredicate, FilterPredicateGroup, Slice, SliceMetric
+from zeno.classes.tag import Tag
 from zeno.data_pipeline.zeno_backend import ZenoBackend
 
 
@@ -84,6 +85,10 @@ def get_server(zeno: ZenoBackend):
     def get_slices():
         return zeno.slices
 
+    @api_app.get("/tags", response_model=Dict[str, Tag], tags=["zeno"])
+    def get_tags():
+        return zeno.tags
+
     @api_app.get("/reports", response_model=List[Report], tags=["zeno"])
     def get_reports():
         return zeno.reports
@@ -121,6 +126,14 @@ def get_server(zeno: ZenoBackend):
     )
     def calculate_histogram_metrics(req: HistogramRequest):
         return zeno.get_histogram_metrics(req)
+
+    @api_app.post("/tag", tags=["zeno"])
+    def create_new_tag(req: Tag):
+        zeno.create_new_tag(req)
+
+    @api_app.delete("/tag", tags=["zeno"])
+    def delete_tag(tag_name: List[str]):
+        zeno.delete_tag(tag_name[0])
 
     @api_app.post("/slice", tags=["zeno"])
     def create_new_slice(req: Slice):

@@ -17,6 +17,7 @@
 		settings,
 		slices,
 		status,
+		tags,
 	} from "./stores";
 	import { columnHash } from "./util/util";
 	import { ZenoService } from "./zenoservice";
@@ -37,6 +38,7 @@
 		models.set(inits.models);
 		metrics.set(inits.metrics);
 		folders.set(inits.folders);
+		// tags.set(inits.tags);
 
 		model.set(
 			inits.models.length > 0 ? inits.models[inits.models.length - 1] : ""
@@ -45,6 +47,9 @@
 
 		const slicesRes = await ZenoService.getSlices();
 		slices.set(new Map(Object.entries(slicesRes)));
+
+		const tagsRes = await ZenoService.getTags();
+		tags.set(new Map(Object.entries(tagsRes)));
 
 		const reportsRes = await ZenoService.getReports();
 		reports.set(reportsRes);
@@ -62,6 +67,7 @@
 		selections.update((sels) => ({
 			slices: sels.slices,
 			metadata: tempSelections,
+			tags: sels.tags,
 		}));
 	});
 

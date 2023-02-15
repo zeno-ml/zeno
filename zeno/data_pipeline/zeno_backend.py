@@ -31,6 +31,7 @@ from zeno.classes.slice import (
     Slice,
     SliceMetric,
 )
+from zeno.classes.tag import Tag
 from zeno.data_pipeline.data_processing import (
     postdistill_data,
     predistill_data,
@@ -66,6 +67,10 @@ class ZenoBackend(object):
         self.reports: List[Report] = read_pickle("reports.pickle", self.cache_path, [])
         self.slices: Dict[str, Slice] = read_pickle(
             "slices.pickle", self.cache_path, {}
+        )
+
+        self.tags: Dict[str, Tag] = read_pickle(
+            "tags.pickle", self.cache_path, {}
         )
 
         if params.models and os.path.isdir(params.models[0]):
@@ -420,6 +425,20 @@ class ZenoBackend(object):
         self.folders = folders
         with open(os.path.join(self.cache_path, "folders.pickle"), "wb") as f:
             pickle.dump(self.folders, f)
+
+    def create_new_tag(self, req: Tag):
+        if not self.editable:
+            return
+        self.tags[req.tag_name] = req
+        with open(os.path.join(self.cache_path, "tags.pickle"), "wb") as f:
+            pickle.dump(self.tags, f)
+
+    def delete_tag(self, tag_name: str):
+        if not self.editable:
+            return
+        del self.tags[tag_name]
+        with open(os.path.join(self.cache_path, "tags.pickle"), "wb") as f:
+            pickle.dump(self.tags, f)
 
     def set_reports(self, reports: List[Report]):
         if not self.editable:
