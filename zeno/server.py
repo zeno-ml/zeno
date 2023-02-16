@@ -86,6 +86,7 @@ def get_server(zeno: ZenoBackend):
                     zeno.model_names, value=zeno.model_names[0], label="Model"
                 ),
                 *input_components,
+                gr.components.Checkbox(label="Save instance"),
             ],
             outputs=output_components,
             css="""

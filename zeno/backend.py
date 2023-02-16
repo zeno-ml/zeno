@@ -463,8 +463,10 @@ class ZenoBackend(object):
 
     def single_inference(self, *args):
         """Run inference from Gradio inputs.
-        The first input to args is the model, while the rest are dynamic inputs
-        corresponding to the columns defined in self.gradio_input_columns.
+        The first input to args is the model, and the last arg is whether or not
+        to save the instance.
+        The rest are dynamic inputs corresponding to the columns defined
+        in self.gradio_input_columns.
 
         Returns:
             any: output of the selected model.
@@ -486,8 +488,11 @@ class ZenoBackend(object):
                 cols.append(str(metadata_cols[metadata_cols_names.index(c)]))
 
         temp_df = pd.DataFrame(columns=cols)
-        temp_df.loc[0] = args[1:]  # type: ignore
+        temp_df.loc[0] = args[1:-1]  # type: ignore
         out = model_fn(temp_df, self.zeno_options)
+
+        if args[-1] is True and (self.editable):
+            print("saving!")
 
         # If the output gets embeddings too, only get the output.
         if type(out) == tuple and len(out) == 2:
