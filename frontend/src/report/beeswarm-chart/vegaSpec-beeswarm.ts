@@ -36,7 +36,7 @@ export default function generateSpec(metric): VisualizationSpec {
 				name: "xscale",
 				domain: {
 					data: "table",
-					field: "group",
+					field: "metric",
 				},
 				range: "width",
 				nice: true,
@@ -48,16 +48,7 @@ export default function generateSpec(metric): VisualizationSpec {
 					data: "table",
 					field: "size",
 				},
-				range: "width",
-			},
-			{
-				name: "color",
-				type: "ordinal",
-				domain: {
-					data: "table",
-					field: "group",
-				},
-				range: { scheme: "category20c" },
+				range: [80, 800],
 			},
 		],
 
@@ -76,8 +67,8 @@ export default function generateSpec(metric): VisualizationSpec {
 				from: { data: "table" },
 				encode: {
 					enter: {
-						fill: { scale: "color", field: "group" },
-						xfocus: { scale: "xscale", field: "group", band: 0.5 },
+						fill: { value: "purple" },
+						xfocus: { scale: "xscale", field: "metric", band: 0.5 },
 						yfocus: { signal: "cy" },
 					},
 					update: {
@@ -90,7 +81,10 @@ export default function generateSpec(metric): VisualizationSpec {
 						stroke: { value: "purple" },
 						strokeWidth: { value: 3 },
 						zindex: { value: 1 },
-						tooltip: { field: "name" },
+						tooltip: {
+							signal:
+								"{'name': datum.sli_name, 'size': datum.size, 'metric': datum.metric}",
+						},
 					},
 				},
 				transform: [
