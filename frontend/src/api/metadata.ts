@@ -6,11 +6,10 @@
  */
 import { InternMap } from "internmap";
 import { get } from "svelte/store";
-import { metricRange } from "../stores";
+import { metricRange, settings } from "../stores";
 import { columnHash, getMetricRange } from "../util/util";
 import {
 	CancelablePromise,
-	ZenoColumnType,
 	ZenoService,
 	type FilterIds,
 	type FilterPredicateGroup,
@@ -39,9 +38,7 @@ export async function getHistograms(
 	model: string
 ): Promise<InternMap<ZenoColumn, HistogramEntry[]>> {
 	const requestedHistograms = completeColumns.filter(
-		(c) =>
-			(c.model === "" || c.model === model) &&
-			c.columnType !== ZenoColumnType.OUTPUT
+		(c) => c.model === "" || c.model === model
 	);
 	requestingHistogramCounts.set(true);
 	const res = await ZenoService.getHistogramBuckets(requestedHistograms);
@@ -122,7 +119,11 @@ export async function getHistogramMetrics(
 	metric: string,
 	filterIds?: FilterIds
 ): Promise<number[][]> {
-	if (metric === "" || metric === undefined) {
+	if (
+		metric === "" ||
+		metric === undefined ||
+		!get(settings).calculateHistogramMetrics
+	) {
 		return undefined;
 	}
 	const columnRequests = [...histograms.entries()].map(([k, v]) => ({

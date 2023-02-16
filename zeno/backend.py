@@ -7,36 +7,25 @@ import pickle
 import sys
 import threading
 from inspect import getsource
-from math import isnan
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Union
 
-import numpy as np
 import pandas as pd
-from methodtools import lru_cache  # type: ignore
+from gradio import Blocks  # type: ignore
 from pandas import DataFrame  # type: ignore
 from pathos.multiprocessing import ProcessingPool as Pool  # type: ignore
-from sklearn import preprocessing  # type: ignore
 
 from zeno.api import ZenoOptions, ZenoParameters
 from zeno.classes.base import MetadataType, ZenoColumnType
 from zeno.classes.classes import MetricKey, TableRequest, ZenoColumn
-from zeno.classes.metadata import HistogramBucket, HistogramRequest
-from zeno.classes.projection import Points2D
 from zeno.classes.report import Report
-from zeno.classes.slice import (
-    FilterIds,
-    FilterPredicate,
-    FilterPredicateGroup,
-    Slice,
-    SliceMetric,
-)
-from zeno.data_pipeline.data_processing import (
+from zeno.classes.slice import FilterIds, FilterPredicateGroup, Slice, SliceMetric
+from zeno.processing.data_processing import (
     postdistill_data,
     predistill_data,
     run_inference,
 )
-from zeno.data_pipeline.filtering import filter_table, filter_table_single
+from zeno.processing.filtering import filter_table
 from zeno.util import getMetadataType, load_series, read_pickle
 
 
@@ -53,6 +42,7 @@ class ZenoBackend(object):
         self.editable = params.editable
         self.samples = params.samples
         self.view = params.view
+        self.calculate_histogram_metrics = params.calculate_histogram_metrics
 
         self.done_running_inference = False
 
@@ -60,6 +50,8 @@ class ZenoBackend(object):
         self.postdistill_functions: Dict[str, Callable] = {}
         self.metric_functions: Dict[str, Callable] = {}
         self.predict_function: Optional[Callable] = None
+        self.inference_function: Optional[Blocks] = None
+        self.gradio_input_columns: List = []
 
         self.status: str = "Initializing"
         self.folders: List[str] = read_pickle("folders.pickle", self.cache_path, [])
@@ -165,6 +157,12 @@ class ZenoBackend(object):
                     self.predistill_functions[test_fn.__name__] = test_fn
             if hasattr(test_fn, "metric_function"):
                 self.metric_functions[test_fn.__name__] = test_fn
+            if hasattr(test_fn, "inference_function"):
+                if self.inference_function is None:
+                    self.inference_function = test_fn  # type: ignore
+                else:
+                    print("ERROR: Multiple model functions found, can only have one")
+                    sys.exit(1)
 
     def start_processing(self):
         """Parse testing files, distill, and run inference."""
@@ -219,12 +217,14 @@ class ZenoBackend(object):
             save_path = Path(self.cache_path, str(predistill_column) + ".pickle")
 
             load_series(self.df, predistill_column, save_path)
+            predistill_hash = str(predistill_column)
 
-            if self.df[str(predistill_column)].isnull().any():
+            if self.df[predistill_hash].isnull().any():
                 predistill_to_run.append(predistill_column)
             else:
+                self.df[predistill_hash] = self.df[predistill_hash].convert_dtypes()
                 predistill_column.metadata_type = getMetadataType(
-                    self.df[str(predistill_column)]
+                    self.df[predistill_hash]
                 )
                 self.complete_columns.append(predistill_column)
 
@@ -241,8 +241,9 @@ class ZenoBackend(object):
                     range(len(predistill_to_run)),
                 )
                 for out in predistill_outputs:
-                    out[0].metadata_type = getMetadataType(out[1])
                     self.df.loc[:, str(out[0])] = out[1]
+                    self.df[str(out[0])] = self.df[str(out[0])].convert_dtypes()
+                    out[0].metadata_type = getMetadataType(self.df[str(out[0])])
                     self.complete_columns.append(out[0])
 
     def __inference(self):
@@ -275,6 +276,8 @@ class ZenoBackend(object):
             ):
                 models_to_run.append(model_path)
             else:
+                self.df[model_hash] = self.df[model_hash].convert_dtypes()
+                model_column.metadata_type = getMetadataType(self.df[model_hash])
                 self.complete_columns.append(model_column)
 
         if len(models_to_run) > 0:
@@ -291,8 +294,11 @@ class ZenoBackend(object):
                 )
                 for out in inference_outputs:
                     self.df.loc[:, str(out[0])] = out[2]
+                    self.df[str(out[0])] = self.df[str(out[0])].convert_dtypes()
+                    # If we get an embedding, add it to DataFrame.
                     if not out[3].isnull().values.any():  # type: ignore
                         self.df.loc[:, str(out[1])] = out[3]
+                    out[0].metadata_type = getMetadataType(self.df[str(out[0])])
                     self.complete_columns.append(out[0])
 
     def __postdistill(self) -> None:
@@ -316,6 +322,7 @@ class ZenoBackend(object):
             if self.df[col_hash].isnull().any():
                 postdistill_to_run.append(col_name)
             else:
+                self.df[col_hash] = self.df[col_hash].convert_dtypes()
                 col_name.metadata_type = getMetadataType(self.df[col_hash])
                 self.complete_columns.append(col_name)
 
@@ -332,8 +339,9 @@ class ZenoBackend(object):
                     range(len(postdistill_to_run)),
                 )
                 for out in post_outputs:
-                    out[0].metadata_type = getMetadataType(out[1])
                     self.df.loc[:, str(out[0])] = out[1]  # type: ignore
+                    self.df[str(out[0])] = self.df[str(out[0])].convert_dtypes()
+                    out[0].metadata_type = getMetadataType(out[1])
                     self.complete_columns.append(out[0])
 
     def get_metrics_for_slices(
@@ -346,7 +354,7 @@ class ZenoBackend(object):
         return_metrics: List[SliceMetric] = []
         for metric_key in requests:
             filt_df = filter_table(
-                self.df, [metric_key.sli.filter_predicates], filter_ids
+                self.df, metric_key.sli.filter_predicates, filter_ids
             )
             if metric_key.metric == "" or self.label_column.name == "":
                 return_metrics.append(SliceMetric(metric=None, size=filt_df.shape[0]))
@@ -442,7 +450,7 @@ class ZenoBackend(object):
         with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
             pickle.dump(self.slices, f)
 
-    def get_filtered_ids(self, req: List[Union[FilterPredicateGroup, FilterPredicate]]):
+    def get_filtered_ids(self, req: FilterPredicateGroup):
         return filter_table(self.df, req)[str(self.id_column)].to_json(orient="records")
 
     def get_filtered_table(self, req: TableRequest):
@@ -453,203 +461,35 @@ class ZenoBackend(object):
         filt_df = filt_df.iloc[req.slice_range[0] : req.slice_range[1]]
         return filt_df[[str(col) for col in req.columns]].to_json(orient="records")
 
-    def get_histogram_buckets(
-        self, req: List[ZenoColumn]
-    ) -> List[List[HistogramBucket]]:
-        """Calculate the histogram buckets for a list of columns."""
-        res: List[List[HistogramBucket]] = []
-        for col in req:
-            df_col = self.df[str(col)]
-            if col.metadata_type == MetadataType.NOMINAL:
-                ret_hist: List[HistogramBucket] = []
-                val_counts = df_col.value_counts()
-                for k in val_counts.keys():
-                    ret_hist.append(HistogramBucket(bucket=k))
-                res.append(ret_hist)
-            elif col.metadata_type == MetadataType.CONTINUOUS:
-                ret_hist: List[HistogramBucket] = []  # type: ignore
-                df_col = df_col.fillna(0)
-                bins = np.histogram_bin_edges(df_col)
-                for i in range(len(bins) - 1):
-                    ret_hist.append(
-                        HistogramBucket(
-                            bucket=bins[i],
-                            bucket_end=bins[i + 1],
-                        )
-                    )
-                res.append(ret_hist)
-            elif col.metadata_type == MetadataType.BOOLEAN:
-                res.append(
-                    [
-                        HistogramBucket(bucket=True),
-                        HistogramBucket(bucket=False),
-                    ]
-                )
-            elif col.metadata_type == MetadataType.DATETIME:
-                res.append([])
-            else:
-                res.append([])
-        return res
-
-    def get_histogram_counts(self, req: HistogramRequest) -> List[List[int]]:
-        """Calculate count for each bucket in each column histogram."""
-        if req.filter_predicates is not None:
-            filt_df = filter_table(self.df, [req.filter_predicates], req.filter_ids)
-        else:
-            filt_df = self.df
-
-        ret: List[List[int]] = []
-        for r in req.column_requests:
-            col = r.column
-            if str(col) not in filt_df.columns:
-                ret.append([])
-            elif (
-                col.metadata_type == MetadataType.NOMINAL
-                or col.metadata_type == MetadataType.BOOLEAN
-            ):
-                counts = filt_df.groupby([str(col)]).size()
-                ret.append(
-                    [
-                        counts[b.bucket] if b.bucket in counts else 0  # type: ignore
-                        for b in r.buckets
-                    ]
-                )
-            elif col.metadata_type == MetadataType.CONTINUOUS:
-                bucs = [b.bucket for b in r.buckets]
-                ret.append(
-                    filt_df.groupby([pd.cut(filt_df[str(col)], bucs)])  # type: ignore
-                    .size()
-                    .astype(int)
-                    .tolist()
-                )
-            else:
-                ret.append([])
-        return ret
-
-    def get_histogram_metric(
-        self,
-        df: pd.DataFrame,
-        col: ZenoColumn,
-        bucket: HistogramBucket,
-        model: str,
-        metric: str,
-    ) -> Union[float, None]:
-        df_filt = filter_table_single(df, col, bucket)
-        output_metric = self.calculate_metric(df_filt, model, metric)
-        if output_metric is None or isnan(output_metric):
-            return None
-        return output_metric
-
-    def get_histogram_metrics(
-        self, req: HistogramRequest
-    ) -> List[List[Union[float, None]]]:
-        """Calculate metric for each bucket in each column histogram."""
-        if req.metric is None:
-            return []
-
-        if req.filter_predicates is not None:
-            filt_df = filter_table(self.df, [req.filter_predicates], req.filter_ids)
-        else:
-            filt_df = self.df
-
-        ret: List[List[Union[float, None]]] = []
-        for r in req.column_requests:
-            col = r.column
-            loc_ret: List[Union[float, None]] = []
-            for b in r.buckets:
-                df_filt = filter_table_single(filt_df, col, b)
-                metric = self.calculate_metric(df_filt, req.model, req.metric)
-                if metric is None or isnan(metric):
-                    loc_ret.append(None)
-                else:
-                    loc_ret.append(metric)
-            ret.append(loc_ret)
-        return ret
-
-    def embed_exists(self, model: str):
-        """Checks for the existence of an embedding column.
-        Returns True if the column exists, False otherwise
-        """
-        embed_column = ZenoColumn(name=model, column_type=ZenoColumnType.EMBEDDING)
-        exists = str(embed_column) in self.df.columns
-        return exists and not self.df[str(embed_column)].isnull().any()
-
-    @lru_cache(
-        maxsize=5
-    )  # will cache up 5 model projections in memory before needing to recompute
-    def run_tsne(self, model: str) -> np.ndarray:
-        # Extract embeddings and store in one big ndarray
-        embed_col = ZenoColumn(column_type=ZenoColumnType.EMBEDDING, name=model)
-
-        embed = self.df[str(embed_col)].to_numpy()
-        embed = np.stack(embed, axis=0)  # type: ignore
-
-        # project embeddings into 2D
-        from openTSNE import TSNE  # type: ignore
-
-        ALL_AVAILABLE_PROCESSORS = -1
-        DEFAULT_ITERATIONS = 400
-        tsne = TSNE(n_jobs=ALL_AVAILABLE_PROCESSORS, n_iter=DEFAULT_ITERATIONS)
-        projection = tsne.fit(embed)
-
-        return projection
-
-    def get_projection_colors(self, column: ZenoColumn) -> Tuple[List[int], List, str]:
-        """Get colors for a projection based on a column.
-
-        Args:
-            column (ZenoColumn): Column to use for coloring the projection.
+    def single_inference(self, *args):
+        """Run inference from Gradio inputs.
+        The first input to args is the model, while the rest are dynamic inputs
+        corresponding to the columns defined in self.gradio_input_columns.
 
         Returns:
-            Tuple[List[int], List, str]: The color range, the unique values,
-                and the metadata type.
+            any: output of the selected model.
         """
-        series = self.df[str(column)]
-        unique = series.unique()
-        metadata_type = "nominal"
-        color_range: List[int] = []
-        if len(unique) == 2:
-            metadata_type = "boolean"
-        if len(unique) > 10:
-            if column.metadata_type == MetadataType.CONTINUOUS:
-                metadata_type = "continuous"
-                color_range = (
-                    np.interp(series, (series.min(), series.max()), (0, 20))
-                    .astype(int)
-                    .tolist()
-                )
-                unique = np.array([series.min(), series.max()])
-            else:
-                metadata_type = "other"
-                color_range = [0] * len(series)
-        else:
-            labels = preprocessing.LabelEncoder().fit_transform(series)
-            if isinstance(labels, np.ndarray):
-                color_range = labels.astype(int).tolist()
-            else:
-                color_range = [0] * len(series)
-        return color_range, unique.tolist(), metadata_type
+        if not self.predict_function:
+            return
 
-    def project_embed_into_2D(self, model: str, column: ZenoColumn) -> Points2D:
-        """If the embedding exists, will use t-SNE to project into 2D."""
+        # Get prediction function for selected model.
+        model_fn = self.predict_function(args[0])
 
-        points = Points2D(
-            x=[], y=[], color=[], domain=[], opacity=[], dataType="", ids=[]
-        )
+        # Get the columns that correspond to the inputs.
+        metadata_cols = [
+            c for c in self.columns if c.column_type == ZenoColumnType.METADATA
+        ]
+        metadata_cols_names = [c.name for c in metadata_cols]
+        cols = []
+        for c in self.gradio_input_columns:
+            if c in metadata_cols_names:
+                cols.append(str(metadata_cols[metadata_cols_names.index(c)]))
 
-        # Can't project without an embedding
-        if not self.embed_exists(model):
-            return points
+        temp_df = pd.DataFrame(columns=cols)
+        temp_df.loc[0] = args[1:]  # type: ignore
+        out = model_fn(temp_df, self.zeno_options)
 
-        projection = self.run_tsne(model)
-
-        # extract points and ids from computed projection
-        points.x = projection[:, 0].tolist()
-        points.y = projection[:, 1].tolist()
-        color_results = self.get_projection_colors(column)
-        points.color = color_results[0]
-        points.domain = color_results[1]
-        points.dataType = color_results[2]
-        points.ids = self.df[str(self.id_column)].to_list()
-
-        return points
+        # If the output gets embeddings too, only get the output.
+        if type(out) == tuple and len(out) == 2:
+            return out[0][0]
+        return out[0]

@@ -47,6 +47,7 @@ class ZenoParameters(BaseModel):
     label_path: str = ""
     batch_size: int = 1
     cache_path: str = ""
+    calculate_histogram_metrics = True
     editable: bool = True
     serve: bool = True
     samples: int = 30
@@ -81,4 +82,13 @@ def metric(func):
         return func(*args, **kwargs)
 
     _wrapper.metric_function = True
+    return _wrapper
+
+
+def inference(func):
+    @functools.wraps(func)
+    def _wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    _wrapper.inference_function = True
     return _wrapper

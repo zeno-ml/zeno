@@ -1,4 +1,4 @@
-all: lint typecheck  test 
+all: lint typecheck test 
 
 .PHONY: install
 install:
@@ -22,24 +22,22 @@ typecheck:
 	@poetry run pyright zeno 
 	@cd frontend && npm run check
 
-
 .PHONY: test
 test:
 	@echo "==> 🧪 Tests"
 	@poetry run pytest -svv zeno/tests/
 	@cd frontend && npm run test
 
-
 .PHONY: build
 build:
 	@echo "==> 👷‍♀️ Build"
 	@cd frontend && npm run build
-	@poetry build -vvv
-
-.PHONY: publish
-publish: build
-	@echo "==> 📰 Publish"
-	@poetry publish
+	@cd frontend && node build.js
+	@mv zeno/frontend/index.html zeno/frontend/index_og.html
+	@mv zeno/frontend/index_tmp.html zeno/frontend/index.html
+	@poetry build -v
+	@rm zeno/frontend/index.html
+	@mv zeno/frontend/index_og.html zeno/frontend/index.html
 
 .PHONY: clean
 clean:
@@ -50,3 +48,13 @@ clean:
 	@find . -type d -name '*pytest_cache*' -exec rm -rf {} +
 	@find . -type f -name "*.py[co]" -exec rm -rf {} +
 	@find . -type d -name '*.ipynb_checkpoints' -exec rm -r {} +
+
+.PHONY: publish
+publish:
+	@echo "==> 🚀 Publishing"
+	@poetry version patch
+	@git commit -am "chore: bump version to $(shell poetry version -s)"
+	@git tag "v$(shell poetry version -s)"
+	@make build
+	@poetry publish
+	@git push && git push --tags

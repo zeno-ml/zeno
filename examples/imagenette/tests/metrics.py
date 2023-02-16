@@ -23,7 +23,7 @@ def f1(df, ops: ZenoOptions):
 
 @distill
 def correct(df, ops: ZenoOptions):
-    return (df[ops.label_column] == df[ops.output_column]).astype(int).tolist()
+    return (df[ops.label_column] == df[ops.output_column]).tolist()
 
 
 @distill

@@ -8,7 +8,7 @@ Zeno's backend is a Python FastAPI server (`zeno/server.py` and `zeno/runner.py`
 The FastAPI server hosts the compiled frontend files and the backend API the frontend interfaces with.
 
 For the frontend we used the compiled OpenAPI interface instead of raw `fetch` requests to interact with the backend.
-The API can be generated using the `npm run generate-api` command, which creates the `frontend/src/zenoservice` folder.
+The API can be generated using the `npm run generate-api` command, which creates the `frontend/src/zenoservice` folder (must be run while server is running).
 All the TypeScript classes used in the frontend come from the compiled OpenAPI spec, giving us a single source of truth for classes from Python.
 
 Zeno is packaged as a PyPI package `zenoml` that contains the Python backend files and the compiled frontend.
@@ -38,6 +38,7 @@ In a different terminal window, run the following command to serve the frontend 
 You should now be able to see a live version of zeno on `localhost:8000` in your browser.
 
 **Windows OS Note**
+
 - If `make` command is not working, install `gnuwin32` following the [`instructions`](https://superuser.com/a/1634350) to make it works.
 - If encountering `ModuleNotFoundError: No module named “cifar_model”`, add `zeno/examples/cifar/tests` path to `.venv/Lib/site-packages/zenoml.pth` file.
 
@@ -49,3 +50,14 @@ Run `make` to ensure your code passes the requirements, as it is the same comman
 
 **Please ensure `make` passes before submitting a pull request.**
 
+For commit messages and pull request titles, use the [Conventional Commits Standards](https://www.conventionalcommits.org/en/v1.0.0/#summary).
+
+## Making a release
+
+- Run `poetry version patch` to update version number in `pyproject.toml`
+- Run `git commit -am "chore: bump version to $(poetry version -s)"` to commit the version bump and add a tag with `git tag "v$(poetry version -s)"`.
+- Run `make build` to build the frontend and backend w/ Poetry.
+- Test the library by installing it locally with `pip install dist/zenoml-$(poetry version -s).tar.gz`.
+- Run `poetry publish` to publish the package to PyPI.
+- Push the commits and tags with `git push && git push --tags`.
+- Create a release on GitHub for the new version tag.

@@ -7,7 +7,7 @@ import { ZenoService } from "../zenoservice/";
 
 export async function getFilteredTable(
 	completeColumns,
-	filterPredicates: FilterPredicateGroup[],
+	filterPredicates: FilterPredicateGroup,
 	model: string,
 	sliceRange: [number, number],
 	sort: [ZenoColumn, boolean],
@@ -29,7 +29,7 @@ export async function getFilteredTable(
 /**
  * Gets a list of ids from the filter predicates only
  */
-export async function getFilteredIds(filterPredicates: FilterPredicateGroup[]) {
+export async function getFilteredIds(filterPredicates: FilterPredicateGroup) {
 	const res = await ZenoService.getFilteredIds(filterPredicates);
 	return JSON.parse(res);
 }
