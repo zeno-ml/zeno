@@ -4,6 +4,7 @@
 	import { Svg } from "@smui/common";
 	import IconButton from "@smui/icon-button";
 	import { report as selectedReport, reports } from "../stores";
+	import { updateTab } from "../util/util";
 
 	export let report;
 	export let reportIndex;
@@ -18,7 +19,7 @@
 
 <div
 	class="report {$selectedReport === reportIndex ? 'selected' : ''}"
-	on:click={() => selectedReport.set(reportIndex)}
+	on:click={() => updateTab("report/" + reportIndex)}
 	on:keydown={() => ({})}>
 	<div class="report-name">
 		<IconButton>

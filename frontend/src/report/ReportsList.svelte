@@ -13,6 +13,7 @@
 	import { report, reports } from "../stores";
 	import { clickOutside } from "../util/clickOutside";
 	import ReportListRow from "./ReportListRow.svelte";
+	import { updateTab } from "../util/util";
 
 	report.set(-1);
 
@@ -47,6 +48,10 @@
 											reportType: "table",
 											reportPredicates: [],
 										});
+
+										let newIndex = reps.length - 1;
+										updateTab("report/" + newIndex);
+
 										return reps;
 									});
 								}}>
@@ -67,6 +72,10 @@
 											reportType: "slicechart",
 											reportPredicates: [],
 										});
+
+										let newIndex = reps.length - 1;
+										updateTab("report/" + newIndex);
+
 										return reps;
 									});
 								}}>
@@ -87,6 +96,10 @@
 											reportType: "timeseries",
 											reportPredicates: [],
 										});
+
+										let newIndex = reps.length - 1;
+										updateTab("report/" + newIndex);
+
 										return reps;
 									});
 								}}>
