@@ -22,7 +22,7 @@ export default function generateBarSpec(metric): VegaLiteSpec {
 					labelAngle: 45,
 					labelFontSize: 14,
 					titleFontSize: 14,
-					titlePadding: 10,
+					titlePadding: 10
 				},
 			},
 			y: {
