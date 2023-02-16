@@ -281,7 +281,7 @@
 		<FolderCell {folder} />
 	{/each}
 
-	{#each [...$slices.values()].filter((s) => s.folder === "") as s}
+	{#each [...$slices.values()].filter((s) => s.folder === "") as s (s.sliceName)}
 		<SliceCell slice={s} />
 	{/each}
 
@@ -296,16 +296,16 @@
 		</div>
 		<MetricRange />
 	</div>
-	{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.METADATA) as col}
+	{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.METADATA) as col (columnHash(col))}
 		<MetadataCell {col} histogram={metadataHistograms.get(col)} />
 	{/each}
 
-	{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL) as col}
+	{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL) as col (columnHash(col))}
 		<MetadataCell {col} histogram={metadataHistograms.get(col)} />
 	{/each}
 
 	{#if $model}
-		{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.POSTDISTILL && m.model === $model) as col}
+		{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.POSTDISTILL && m.model === $model) as col (columnHash(col))}
 			<MetadataCell {col} histogram={metadataHistograms.get(col)} />
 		{/each}
 
