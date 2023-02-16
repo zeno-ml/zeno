@@ -4,7 +4,7 @@
 		mdiChartLine,
 		mdiPlus,
 		mdiTable,
-		mdiLadybug,
+		mdiBee,
 	} from "@mdi/js";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
@@ -112,7 +112,7 @@
 								}}>
 								<IconButton>
 									<Icon component={Svg} viewBox="0 0 24 24">
-										<path fill="black" d={mdiLadybug} />
+										<path fill="black" d={mdiBee} />
 									</Icon>
 								</IconButton>
 								<p>New <b>Beeswarm chart</b> report</p>

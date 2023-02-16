@@ -73,9 +73,9 @@
 		{#await modelResults then res}
 			{@const data = {
 				table: chartEntries.map((r, i) => ({
-					name: r.slice,
+					sli_name: r.slice,
 					size: res[i].size,
-					group: res[i].metric,
+					metric: res[i].metric.toFixed(2),
 				})),
 			}}
 			<Vega {data} spec={generateSpec($metric)} />

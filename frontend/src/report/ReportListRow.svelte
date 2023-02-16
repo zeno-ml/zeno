@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { mdiChartBar, mdiChartLine, mdiTable, mdiLadybug } from "@mdi/js";
+	import { mdiChartBar, mdiChartLine, mdiTable, mdiBee } from "@mdi/js";
 	import { Icon } from "@smui/button";
 	import { Svg } from "@smui/common";
 	import IconButton from "@smui/icon-button";
@@ -12,7 +12,7 @@
 		table: mdiTable,
 		timeseries: mdiChartLine,
 		slicechart: mdiChartBar,
-		beeswarm: mdiLadybug,
+		beeswarm: mdiBee,
 	};
 </script>
 
