@@ -19,10 +19,10 @@
 	import { MetadataType, ZenoColumnType } from "../zenoservice";
 
 	export let currentResult;
-	export let table;
 	export let viewFunction;
 	export let viewOptions = {};
 
+	let table;
 	let viewDivs = {};
 	let columnHeader: ZenoColumn[] = [];
 	let body: HTMLElement;

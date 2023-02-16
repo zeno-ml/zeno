@@ -3,16 +3,11 @@
 	import MetadataPanel from "./metadata/MetadataPanel.svelte";
 	import NewFolderPopup from "./metadata/popups/NewFolderPopup.svelte";
 	import NewSlicePopup from "./metadata/popups/NewSlicePopup.svelte";
-	import {
-		filteredTable,
-		ready,
-		showNewFolder,
-		showNewSlice,
-		status,
-	} from "./stores";
+	import { ready, showNewFolder, showNewSlice, status } from "./stores";
 </script>
 
 {#if $ready && $status.completeColumns.length > 0}
+	<!-- These popups are at the top level b/c of issues with overflow-y scroll. -->
 	{#if $showNewSlice}
 		<NewSlicePopup />
 	{/if}
@@ -21,9 +16,8 @@
 	{/if}
 	<div class="container">
 		<MetadataPanel />
-
-		<div id="samples" style:width="100%">
-			<InstanceView table={$filteredTable} />
+		<div id="samples">
+			<InstanceView />
 		</div>
 	</div>
 {/if}
