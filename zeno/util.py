@@ -11,7 +11,7 @@ import pandas as pd
 
 from zeno.classes.base import MetadataType
 
-VIEW_MAP_URL: str = "https://raw.githubusercontent.com/zeno-ml/instance-views/main/"
+VIEW_MAP_URL: str = "https://raw.githubusercontent.com/zeno-ml/instance-views/0.1/"
 VIEWS_MAP_JSON: str = "views.json"
 
 
