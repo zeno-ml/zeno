@@ -5,6 +5,8 @@
 	import Predict from "./Predict.svelte";
 	import Header from "./general/Header.svelte";
 	import Report from "./Report.svelte";
+	import ReportDetail from "./ReportDetail.svelte";
+
 	import {
 		folders,
 		metric,
@@ -27,6 +29,7 @@
 		"/predict/": Predict,
 		"/explore/": Explore,
 		"/report/": Report,
+		"/report/:id": ReportDetail,
 		"*": Explore,
 	};
 

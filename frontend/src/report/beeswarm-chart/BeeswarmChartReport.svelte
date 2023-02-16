@@ -12,6 +12,8 @@
 	} from "../../stores";
 	import type { MetricKey } from "../../zenoservice";
 	import generateSpec from "./vegaSpec-beeswarm";
+	import { updateTab } from "../../util/util";
+
 	export let reportId: number;
 
 	let chartEntries = [];
@@ -38,15 +40,24 @@
 	$: modelResults = getMetricsForSlices(getMetKeys(report, $metric, $model));
 </script>
 
-<div style:margin-left="20px">
-	<h4
-		contenteditable="true"
-		style:margin-right="20px"
-		style:padding="10px"
-		style:width="fit-content"
-		bind:textContent={$reports[reportId].name}>
-		{report.name}
-	</h4>
+<div class="main">
+	<div class="inline">
+		<h4
+			class="report-link"
+			on:keydown={() => ({})}
+			on:click={() => {
+				updateTab("report");
+			}}>
+			Reports
+		</h4>
+		<b>></b>
+		<h4
+			class="report-name"
+			contenteditable="true"
+			bind:textContent={$reports[reportId].name}>
+			{report.name}
+		</h4>
+	</div>
 
 	{#if $models && $models.length > 0}
 		<Select
@@ -69,7 +80,7 @@
 		</Select>
 	{/if}
 	<br />
-	<div style:margin-top="30px" style:width="500px">
+	<div class="model-result">
 		{#await modelResults then res}
 			{@const data = {
 				table: chartEntries.map((r, i) => ({
@@ -82,3 +93,33 @@
 		{/await}
 	</div>
 </div>
+
+<style>
+	.main {
+		margin-left: 20px;
+	}
+	.inline {
+		display: flex;
+		flex-direction: inline;
+		align-items: center;
+		max-width: calc(100vw - 450px);
+	}
+	.report-link {
+		padding: 10px 18px 10px 0px;
+		width: fit-content;
+		cursor: pointer;
+	}
+	.report-link:hover {
+		color: black;
+	}
+	.report-name {
+		margin-left: 5px;
+		margin-right: 5px;
+		padding: 10px;
+		width: fit-content;
+	}
+	.model-result {
+		margin-top: 30px;
+		width: 500px;
+	}
+</style>
