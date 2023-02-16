@@ -114,7 +114,6 @@ def get_server(zeno: ZenoBackend):
             id_column=zeno.id_column,
             label_column=zeno.label_column,
             data_column=zeno.data_column,
-            data_origin="/data/" if os.path.exists(zeno.data_path) else zeno.data_path,
             calculate_histogram_metrics=zeno.calculate_histogram_metrics,
             inference_view=True if zeno.inference_function else False,
             samples=zeno.samples,
@@ -206,11 +205,16 @@ def get_server(zeno: ZenoBackend):
     @api_app.post("/entry", tags=["zeno"], response_model=str)
     def get_df_row_entry(req: EntryRequest):
         try:
-            entry = zeno.df.loc[req.id, :]
+            entry = zeno.df.loc[req.id, :].copy()
             if len(req.columns) > 0:
                 entry = entry[list(map(str, req.columns))]
-            json_entry = entry.to_json()
-            return json_entry
+
+            # Add data prefix to data column depending on type of data_path.
+            entry.loc[str(zeno.data_column)] = (
+                zeno.data_prefix + entry[str(zeno.data_column)]
+            )
+
+            return entry.to_json()
         except KeyError:
             raise HTTPException(
                 status_code=404, detail=f"Entry with id={req.id} not found"
