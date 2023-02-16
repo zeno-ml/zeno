@@ -32,17 +32,17 @@ export default function generateBarSpec(metric): VegaLiteSpec {
 				axis: {
 					labelFontSize: 14,
 					titleFontSize: 14,
-					titlePadding: 10
+					titlePadding: 10,
 				},
 				labelFontSize: 14,
 			},
 			xOffset: {
 				field: "model",
-				sort: "model"
+				sort: "model",
 			},
 			color: {
 				field: "model",
-				sort: "model"
+				sort: "model",
 			},
 		},
 	};
