@@ -4,7 +4,6 @@
 	import IconButton from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
 	import { tick } from "svelte";
-	import { ZenoColumnType } from "../zenoservice";
 	import { getFilteredTable } from "../api/table";
 	import {
 		model,
@@ -16,9 +15,11 @@
 		status,
 	} from "../stores";
 	import { columnHash } from "../util/util";
+	import { ZenoColumnType } from "../zenoservice";
+	import type { ViewRenderFunction } from "./instance-views";
 
 	export let currentResult;
-	export let viewFunction;
+	export let viewFunction: ViewRenderFunction;
 	export let viewOptions;
 
 	let table;
@@ -61,6 +62,10 @@
 	}
 
 	async function drawInstances() {
+		if (!table) {
+			return;
+		}
+
 		let obj = $status.completeColumns.find((c) => {
 			return c.columnType === ZenoColumnType.OUTPUT && c.name === $model;
 		});
@@ -90,7 +95,6 @@
 					modelColumn,
 					columnHash($settings.labelColumn),
 					columnHash($settings.dataColumn),
-					$settings.dataOrigin,
 					idHash
 				);
 			}

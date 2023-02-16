@@ -144,7 +144,7 @@ def parse_args(args: ZenoParameters, base_path) -> ZenoParameters:
                 os.path.realpath(os.path.join(base_path, m)) for m in args.models
             ]
 
-    if not args.data_path.startswith("http"):
+    if not args.data_path.startswith("http") and args.data_path != "":
         args.data_path = os.path.realpath(os.path.join(base_path, args.data_path))
 
     if args.label_path != "":

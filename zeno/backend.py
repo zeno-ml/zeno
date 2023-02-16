@@ -44,6 +44,11 @@ class ZenoBackend(object):
         self.view = params.view
         self.calculate_histogram_metrics = params.calculate_histogram_metrics
 
+        self.data_prefix = ""
+        if self.data_path.startswith("http"):
+            self.data_prefix = self.data_path
+        elif self.data_path != "":
+            self.data_prefix = "/data/"
         self.done_running_inference = False
 
         self.predistill_functions: Dict[str, Callable] = {}
@@ -458,7 +463,13 @@ class ZenoBackend(object):
         filt_df = filter_table(self.df, req.filter_predicates, req.filter_ids)
         if req.sort[0]:
             filt_df = filt_df.sort_values(str(req.sort[0]), ascending=req.sort[1])
-        filt_df = filt_df.iloc[req.slice_range[0] : req.slice_range[1]]
+        filt_df = filt_df.iloc[req.slice_range[0] : req.slice_range[1]].copy()
+
+        # Add data prefix to data column depending on type of data_path.
+        filt_df.loc[:, str(self.data_column)] = (
+            self.data_prefix + filt_df[str(self.data_column)]
+        )
+
         return filt_df[[str(col) for col in req.columns]].to_json(orient="records")
 
     def single_inference(self, *args):
