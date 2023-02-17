@@ -27,9 +27,13 @@
 	<Head>
 		<Row>
 			<Cell>{""}</Cell>
-			{#each $models as m}
-				<Cell>{m}</Cell>
-			{/each}
+			{#if $models.length > 0}
+				{#each $models as m}
+					<Cell>{m}</Cell>
+				{/each}
+			{:else}
+				<Cell>Metric</Cell>
+			{/if}
 		</Row>
 	</Head>
 	<Body>
@@ -55,18 +59,18 @@
 	.tab {
 		cursor: pointer;
 		padding: 10px;
-		border: 1px solid #e0e0e0;
-		background: white;
+		border: 1px solid var(--G5);
+		background: var(--G6);
 		border-bottom: none;
 		border-top-right-radius: 5px;
 		border-top-left-radius: 5px;
 	}
 
 	.tab:hover {
-		background: #f9f5ff;
+		background: var(--P3);
 	}
 
 	.selected {
-		background: #f9f5ff;
+		background: var(--P3);
 	}
 </style>

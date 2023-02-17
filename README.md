@@ -25,7 +25,9 @@ To get started, run the following command to initialize a Zeno project. It will 
 zeno init
 ```
 
-Then run `zeno zeno.toml`.
+Take a look at the [configuration documentation](https://zenoml.com/docs/configuration) for additional `toml` file options like adding model functions.
+
+Start Zeno with `zeno zeno.toml`.
 
 ### Jupyter Notebook
 
@@ -46,10 +48,28 @@ zeno({
 
 ```
 
-## Learn More
+You can pass a list of decorated function references directly Zeno as you add models and metrics.
 
-Check out examples and additional documentation:
+## Citation
 
-- [Introduction](https://zenoml.com/docs/intro) - Learn more about Zeno.
-- [Quickstart](http://zenoml.com/docs/quickstart) - Setup Zeno with your own data and models.
-- [Documentation & API](http://zenoml.com/docs/intro) - Full documentation and API reference.
+Please reference our [CHI'22 paper](https://cabreraalex.com/zeno.pdf)
+
+```bibtex
+@inproceedings{cabrera23zeno,
+  author = {Cabrera, Ángel Alexander and Fu, Erica and Bertucci, Donald and Holstein, Kenneth and Talwalkar, Ameet and Hong, Jason I. and Perer, Adam},
+  title = {Zeno: An Interactive Framework for Behavioral Evaluation of Machine Learning},
+  year = {2023},
+  isbn = {978-1-4503-9421-5/23/04},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/3544548.3581268},
+  doi = {10.1145/3544548.3581268},
+  booktitle = {CHI Conference on Human Factors in Computing Systems},
+  location = {Hamburg, Germany},
+  series = {CHI '23}
+}
+```
+
+## Community
+
+Chat with us on our [Gitter channel](https://gitter.im/zeno-ml-eval/community) or leave an issue on this repository if you run into any issues or have a request!

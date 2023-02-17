@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { mdiChartBar, mdiChartLine, mdiPlus, mdiTable } from "@mdi/js";
+	import {
+		mdiChartBar,
+		mdiChartLine,
+		mdiPlus,
+		mdiTable,
+		mdiBee,
+	} from "@mdi/js";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Paper, { Content } from "@smui/paper";
@@ -7,6 +13,7 @@
 	import { report, reports } from "../stores";
 	import { clickOutside } from "../util/clickOutside";
 	import ReportListRow from "./ReportListRow.svelte";
+	import { updateTab } from "../util/util";
 
 	report.set(-1);
 
@@ -41,6 +48,10 @@
 											reportType: "table",
 											reportPredicates: [],
 										});
+
+										let newIndex = reps.length - 1;
+										updateTab("report/" + newIndex);
+
 										return reps;
 									});
 								}}>
@@ -61,6 +72,10 @@
 											reportType: "slicechart",
 											reportPredicates: [],
 										});
+
+										let newIndex = reps.length - 1;
+										updateTab("report/" + newIndex);
+
 										return reps;
 									});
 								}}>
@@ -81,6 +96,10 @@
 											reportType: "timeseries",
 											reportPredicates: [],
 										});
+
+										let newIndex = reps.length - 1;
+										updateTab("report/" + newIndex);
+
 										return reps;
 									});
 								}}>
@@ -90,6 +109,26 @@
 									</Icon>
 								</IconButton>
 								<p>New <b>timeseries</b> report</p>
+							</div>
+							<div
+								class="report-entry"
+								on:keydown={() => ({})}
+								on:click={() => {
+									reports.update((reps) => {
+										reps.push({
+											name: "new report",
+											reportType: "beeswarm",
+											reportPredicates: [],
+										});
+										return reps;
+									});
+								}}>
+								<IconButton>
+									<Icon component={Svg} viewBox="0 0 24 24">
+										<path fill="black" d={mdiBee} />
+									</Icon>
+								</IconButton>
+								<p>New <b>Beeswarm chart</b> report</p>
 							</div>
 						</Content>
 					</Paper>
@@ -135,8 +174,8 @@
 	.overview {
 		display: flex;
 		align-items: center;
-		border: 1px solid #e0e0e0;
-		border-radius: 5px;
+		border: 1px solid var(--G5);
+		border-radius: 4px;
 		margin-top: 5px;
 		margin-bottom: 5px;
 		padding-left: 10px;
@@ -144,7 +183,7 @@
 		cursor: pointer;
 	}
 	.selected {
-		background: #f9f5ff;
+		background: var(--P3);
 	}
 	.icon {
 		width: 24px;
@@ -160,10 +199,10 @@
 		position: absolute;
 		z-index: 10;
 		margin-top: 10px;
-		background: white;
+		background: var(--G6);
 	}
 	.report-entry {
-		border: 1px solid #e0e0e0;
+		border: 1px solid var(--G5);
 		transition: 0.25s;
 		cursor: pointer;
 		width: 300px;
@@ -171,6 +210,6 @@
 		align-items: center;
 	}
 	.report-entry:hover {
-		background: #f9f5ff;
+		background: var(--P3);
 	}
 </style>

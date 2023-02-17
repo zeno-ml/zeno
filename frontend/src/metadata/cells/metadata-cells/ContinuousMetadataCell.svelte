@@ -44,7 +44,7 @@
 				column: col,
 				operation: ">=",
 				value: localSelection[0],
-				join: "&",
+				join: "",
 			} as FilterPredicate;
 			filterPredicates[1] = {
 				column: col,
@@ -66,5 +66,10 @@
 		bind:view
 		spec={continuousVegaSpec($metricRange)}
 		data={{ table: histogram.map((h) => Object.assign({}, h)) }}
-		options={{ tooltip: true, actions: false, theme: "vox" }} />
+		options={{
+			tooltip: true,
+			actions: false,
+			theme: "vox",
+			renderer: "svg",
+		}} />
 </div>

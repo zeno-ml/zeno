@@ -34,6 +34,7 @@
 		sliceToEdit,
 		requestingHistogramCounts,
 		status,
+		showNewFolder,
 	} from "../stores";
 	import { columnHash } from "../util/util";
 	import {
@@ -52,7 +53,6 @@
 
 	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
 		new InternMap([], columnHash);
-	let showNewFolder = false;
 	let showSliceFinder = false;
 
 	$: res = getMetricsForSlices([
@@ -137,8 +137,8 @@
 		getHistogramCounts(
 			metadataHistograms,
 			{
-				predicates: $selectionPredicates,
-				join: "&",
+				predicates: [$selectionPredicates],
+				join: "",
 			},
 			selectionIds
 		).then((res) => {
@@ -150,8 +150,8 @@
 			getHistogramMetrics(
 				res,
 				{
-					predicates: $selectionPredicates,
-					join: "&",
+					predicates: [$selectionPredicates],
+					join: "",
 				},
 				$model,
 				$metric,
@@ -173,7 +173,7 @@
 		getHistogramCounts(
 			metadataHistograms,
 			{
-				predicates: sels,
+				predicates: [sels],
 				join: "&",
 			},
 			$selectionIds
@@ -186,7 +186,7 @@
 			getHistogramMetrics(
 				res,
 				{
-					predicates: sels,
+					predicates: [sels],
 					join: "&",
 				},
 				$model,
@@ -241,26 +241,28 @@
 			</div>
 			<div>
 				<Wrapper>
-					<IconButton on:click={() => (showNewFolder = !showNewFolder)}>
+					<IconButton
+						on:click={() => {
+							showNewSlice.set(false);
+							showNewFolder.update((b) => !b);
+						}}>
 						<Icon component={Svg} viewBox="0 0 24 24">
 							<path fill="black" d={mdiFolderPlusOutline} />
 						</Icon>
 					</IconButton>
 					<Tooltip xPos="start">Create a new folder</Tooltip>
 				</Wrapper>
-				{#if showNewFolder}
-					<NewFolderPopup bind:showNewFolder />
-				{/if}
 			</div>
 			<div>
 				<Wrapper>
 					<IconButton
 						on:click={() => {
 							sliceToEdit.set(undefined);
-							showNewSlice.set(true);
+							showNewSlice.update((d) => !d);
+							showNewFolder.set(false);
 						}}>
 						<Icon component={Svg} viewBox="0 0 24 24">
-							{#if $selectionPredicates.length > 0}
+							{#if $selectionPredicates.predicates.length > 0}
 								<path fill="#6a1a9a" d={mdiPlusCircle} />
 							{:else}
 								<path fill="black" d={mdiPlus} />
@@ -269,20 +271,18 @@
 					</IconButton>
 					<Tooltip xPos="start">Create a new slice</Tooltip>
 				</Wrapper>
-				{#if $showNewSlice}
-					<NewSlicePopup />
-				{/if}
 			</div>
 		</div>
 	</div>
 	<div
-		class={"overview " + ($selectionPredicates.length === 0 ? "selected" : "")}
+		class={"overview " +
+			($selectionPredicates.predicates.length === 0 ? "selected" : "")}
 		on:keydown={() => ({})}
 		on:click={() => {
 			selections.update((m) => {
-				for (let key in m.metadata) {
-					m.metadata[key] = { predicates: [], join: "&" };
-				}
+				Object.keys(m.metadata).forEach((key) => {
+					m.metadata[key] = { predicates: [], join: "" };
+				});
 				return { slices: [], metadata: { ...m.metadata } };
 			});
 		}}>
@@ -294,7 +294,7 @@
 					{r && r[0].metric ? r[0].metric.toFixed(2) : ""}
 				{/await}
 			</span>
-			<span class="size">({$settings.totalSize})</span>
+			<span class="size">({$settings.totalSize.toLocaleString()})</span>
 			<div style:width="36px" />
 		</div>
 	</div>
@@ -303,7 +303,7 @@
 		<FolderCell {folder} />
 	{/each}
 
-	{#each [...$slices.values()].filter((s) => s.folder === "") as s}
+	{#each [...$slices.values()].filter((s) => s.folder === "") as s (s.sliceName)}
 		<SliceCell slice={s} />
 	{/each}
 
@@ -318,18 +318,27 @@
 		</div>
 		<MetricRange />
 	</div>
-	{#each $settings.metadataColumns.filter((m) => m.columnType === ZenoColumnType.METADATA) as col}
+	{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.METADATA) as col (columnHash(col))}
 		<MetadataCell {col} histogram={metadataHistograms.get(col)} />
 	{/each}
 
-	{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL) as col}
+	{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL) as col (columnHash(col))}
 		<MetadataCell {col} histogram={metadataHistograms.get(col)} />
 	{/each}
 
 	{#if $model}
-		{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.POSTDISTILL && m.model === $model) as col}
+		{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.POSTDISTILL && m.model === $model) as col (columnHash(col))}
 			<MetadataCell {col} histogram={metadataHistograms.get(col)} />
 		{/each}
+
+		{@const outputCol = $status.completeColumns.filter(
+			(m) => m.columnType === ZenoColumnType.OUTPUT && m.name === $model
+		)}
+		{#if outputCol.length > 0}
+			<MetadataCell
+				col={outputCol[0]}
+				histogram={metadataHistograms.get(outputCol[0])} />
+		{/if}
 	{/if}
 </div>
 
@@ -338,15 +347,14 @@
 		position: sticky;
 		top: -10px;
 		z-index: 3;
-		background-color: #fbfbfa;
-		border-bottom: 0.5px solid #d1d1d1;
+		background-color: var(--Y2);
 	}
 	#metric-header {
 		position: sticky;
 		top: 40px;
 		z-index: 2;
-		background-color: #fbfbfa;
-		border-bottom: 0.5px solid #d1d1d1;
+		border-bottom: 0.5px solid var(--G5);
+		background-color: var(--Y2);
 	}
 	.side-container {
 		height: calc(100vh - 15px);
@@ -358,7 +366,7 @@
 		padding-left: 15px;
 		padding-right: 10px;
 		overflow-y: scroll;
-		background-color: #fbfbfa;
+		background-color: var(--Y2);
 	}
 	.ghost-container {
 		width: 100%;
@@ -371,8 +379,9 @@
 		padding-bottom: 10px;
 		padding-top: 5px;
 	}
+	/* I don't see where this is used, maybe delete? */
 	.cell {
-		border: 0.5px solid #d1d1d1;
+		border: 0.5px solid var(--G5);
 		padding: 10px;
 		min-width: 400px;
 		width: 400px;
@@ -389,20 +398,21 @@
 	.overview {
 		display: flex;
 		align-items: center;
-		border: 0.5px solid #e0e0e0;
-		border-radius: 5px;
+		border: 1px solid var(--G5);
+		border-radius: 4px;
 		padding-left: 10px;
 		justify-content: space-between;
 		padding-right: 10px;
-		height: 36px;
+		min-height: 36px;
 		cursor: pointer;
+		color: var(--G1);
 	}
 	.selected {
-		background: #f9f5ff;
+		background: var(--P3);
 	}
 	.size {
 		font-style: italic;
-		color: rgba(0, 0, 0, 0.4);
+		color: var(--G3);
 		margin-right: 10px;
 		margin-left: 10px;
 	}

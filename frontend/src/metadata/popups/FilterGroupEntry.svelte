@@ -4,7 +4,7 @@
 	import Button from "@smui/button";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
-	import Select, { Option } from "@smui/select";
+	import Svelecte from "svelecte";
 	import type { FilterPredicateGroup } from "../../zenoservice";
 	import FilterEntry from "./FilterEntry.svelte";
 
@@ -17,32 +17,39 @@
 		if (predicateGroup.predicates.length === 0) {
 			deletePredicate();
 			return;
+		} else {
+			predicateGroup.predicates[0].join = "";
 		}
 		predicateGroup = predicateGroup;
 	}
 </script>
 
-<div class="inline">
-	<div class="column">
+<div class="group">
+	<div class="group-join">
 		{#if index > 0}
-			<Select
-				bind:value={predicateGroup.join}
-				label="Join"
-				style="margin-right: 20px; width: 90px">
-				{#each ["&", "|"] as o}
-					<Option value={o}>{o}</Option>
-				{/each}
-			</Select>
+			<Svelecte
+				placeholder={""}
+				style={"width: 60px"}
+				value={predicateGroup.join}
+				on:change={(e) => {
+					predicateGroup.join = e.detail.label;
+					predicateGroup = predicateGroup;
+				}}
+				valueField="label"
+				labelField="label"
+				options={["&", "|"]} />
 		{/if}
 		{#if index > -1}
-			<IconButton on:click={deletePredicate}>
+			<IconButton
+				on:click={deletePredicate}
+				style="min-width: 60px; color: var(--G2)">
 				<Icon component={Svg} viewBox="0 0 24 24">
 					<path fill="currentColor" d={mdiTrashCanOutline} />
 				</Icon>
 			</IconButton>
 		{/if}
 	</div>
-	<div class="main">
+	<div class="{index === -1 ? 'no-bg' : 'bg'} main ">
 		<ul use:autoAnimate>
 			{#each predicateGroup.predicates as p, i}
 				{#if !("predicates" in p)}
@@ -68,7 +75,7 @@
 						column: undefined,
 						operation: "",
 						value: "",
-						join: "&",
+						join: predicateGroup.predicates.length === 0 ? "" : "&",
 					});
 					predicateGroup = predicateGroup;
 				}}>
@@ -83,10 +90,10 @@
 								column: undefined,
 								operation: "",
 								value: "",
-								join: "&",
+								join: "",
 							},
 						],
-						join: "&",
+						join: predicateGroup.predicates.length === 0 ? "" : "&",
 					});
 					predicateGroup = predicateGroup;
 				}}>
@@ -97,27 +104,34 @@
 </div>
 
 <style>
-	.inline {
+	.group {
 		display: flex;
+	}
+	.group-join {
+		margin-top: 5px;
+		margin-right: 10px;
+	}
+	.no-bg {
+		background: none;
+		padding-left: 0px;
+		margin-bottom: 0px;
+	}
+	.bg {
+		margin-bottom: 10px;
+		padding-left: 10px;
+		background: rgba(0, 0, 0, 0.025);
 	}
 	#buttons {
 		margin-bottom: 10px;
-		margin-left: 40px;
-	}
-	.column {
-		display: flex;
-		flex-direction: column;
-		align-items: flex-end;
 	}
 	.main {
-		background: rgba(0, 0, 0, 0.025);
-		border-radius: 5px;
-		margin-top: 10px;
-		margin-bottom: 10px;
+		border-radius: 4px;
+		margin-top: 5px;
 	}
 	ul {
 		list-style-type: none;
 		margin-right: 10px;
 		margin-bottom: 0px;
+		padding-left: 0px;
 	}
 </style>

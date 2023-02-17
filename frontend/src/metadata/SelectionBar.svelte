@@ -66,15 +66,18 @@
 				{#if $selectionIds.ids.length > 0}
 					<IdsChip />
 				{/if}
-				{#if $selectionPredicates.length > 0 || $selectionIds.ids.length > 0}
+				{#if $selectionPredicates.predicates.length > 0 || $selectionIds.ids.length > 0}
 					<span
 						class="clear"
 						on:keydown={() => ({})}
 						on:click={() => {
 							selections.update((m) => {
-								for (let key in m.metadata) {
-									m.metadata[key] = { predicates: [], join: "&" };
-								}
+								Object.keys(m.metadata).forEach((key) => {
+									m.metadata[key] = {
+										predicates: [],
+										join: "",
+									};
+								});
 								return { slices: [], metadata: { ...m.metadata } };
 							});
 							selectionIds.set({ ids: [] });
@@ -97,15 +100,15 @@
 	<div class="options">
 		<div>
 			{#await currentResult then r}
-				{#if r[0].metric !== undefined && r[0].metric !== null}
+				{#if r && r[0].metric !== undefined && r[0].metric !== null}
 					<span class="metric">
 						{$metric ? $metric + ":" : ""}
 					</span>
 					{#if r}
-						<span class="metric">
+						<span class="metric-value">
 							{r[0].metric.toFixed(2)}
 						</span>
-						<span id="size">({r[0].size} instances)</span>
+						<span id="size">({r[0].size.toLocaleString()} instances)</span>
 					{/if}
 				{/if}
 			{/await}
@@ -118,8 +121,8 @@
 				{#each CHOICES as choice}
 					<Button
 						style="background-color: {selected === choice
-							? '#f8f8f8'
-							: 'white'}"
+							? 'var(--G5)'
+							: 'var(--G6'}"
 						variant="outlined"
 						on:click={() => (selected = choice)}>{choice}</Button>
 				{/each}
@@ -138,7 +141,7 @@
 		flex-direction: row;
 		justify-content: space-between;
 		width: 100%;
-		border-bottom: 1px solid #e0e0e0;
+		border-bottom: 1px solid var(--G5);
 	}
 	.options {
 		display: flex;
@@ -149,7 +152,7 @@
 		align-items: center;
 		padding-top: 10px;
 		padding-bottom: 10px;
-		border-bottom: 1px solid #e0e0e0;
+		border-bottom: 1px solid var(--G5);
 	}
 	.chips {
 		display: flex;
@@ -162,22 +165,27 @@
 	}
 	.metric {
 		font-weight: 400;
-		color: #6a1b9a;
+		color: var(--G2);
+		margin-right: 15px;
+	}
+	.metric-value {
+		font-weight: 400;
+		color: var(--logo);
 		margin-right: 15px;
 	}
 	.clear {
 		padding: 5px;
 		margin-left: 10px;
 		cursor: pointer;
-		color: #6a1b9a;
+		color: var(--G3);
 	}
 	.clear:hover {
-		background: #ede1fd;
-		border-radius: 5px;
+		background: var(--Y1);
+		border-radius: 4px;
 	}
 	#size {
 		font-style: italic;
-		color: rgba(0, 0, 0, 0.4);
+		color: var(--G3);
 		margin-right: 10px;
 	}
 	.inline {

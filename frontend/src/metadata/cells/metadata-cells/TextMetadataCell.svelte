@@ -1,23 +1,30 @@
 <script lang="ts">
-	import Textfield from "@smui/textfield";
 	import Button from "@smui/button";
-	import { Label } from "@smui/common";
 	import { TrailingIcon } from "@smui/chips";
-	import type { FilterPredicate, ZenoColumn } from "../../../zenoservice";
+	import { Label } from "@smui/common";
+	import AutoComplete from "simple-svelte-autocomplete";
+	import {
+		ZenoService,
+		type FilterPredicate,
+		type ZenoColumn,
+	} from "../../../zenoservice";
 
 	export let col: ZenoColumn;
 	export let filterPredicates: FilterPredicate[];
 	export let updatePredicates;
 
 	let regex = "";
+	let selectionType = "string";
 	let valid = true;
 
 	$: {
 		valid = true;
-		try {
-			new RegExp(regex);
-		} catch (e) {
-			valid = false;
+		if (selectionType === "regex") {
+			try {
+				new RegExp(regex);
+			} catch (e) {
+				valid = false;
+			}
 		}
 	}
 
@@ -26,24 +33,76 @@
 			column: col,
 			operation: "match",
 			value: regex,
-			join: "|",
+			join: "",
 		});
+		if (filterPredicates.length > 1) {
+			filterPredicates[filterPredicates.length - 1].join = "|";
+		}
 		updatePredicates(filterPredicates);
+		regex = "";
+	}
+
+	async function searchItems(input: string) {
+		if (selectionType === "regex") {
+			try {
+				new RegExp(regex);
+			} catch (e) {
+				return [];
+			}
+		}
+
+		try {
+			let res = await ZenoService.filterStringMetadata({
+				column: col,
+				filterString: input,
+				selectionType: selectionType,
+			});
+
+			return res;
+		} catch (e) {
+			return [];
+		}
 	}
 </script>
 
 <div class="container">
-	<Textfield bind:value={regex} label="Regex filter" />
+	<AutoComplete
+		bind:text={regex}
+		placeholder={"Search"}
+		noResultsText={"No results"}
+		createText={""}
+		hideArrow={true}
+		searchFunction={searchItems}
+		showLoadingIndicator={true}
+		cleanUserText={false}
+		ignoreAccents={false}
+		create={true}
+		delay={200} />
+	<div id="options">
+		<div
+			class="option option-left"
+			style:background={selectionType === "string" ? "var(--G5)" : ""}
+			on:click={() => (selectionType = "string")}
+			on:keydown={() => (selectionType = "regex")}>
+			abc
+		</div>
+		<div
+			class="option option-right"
+			style:background={selectionType === "regex" ? "var(--G5)" : ""}
+			on:click={() => (selectionType = "regex")}
+			on:keydown={() => (selectionType = "regex")}>
+			.*
+		</div>
+	</div>
 
 	<Button style="margin-left: 10px;" variant="outlined" on:click={setSelection}>
 		<Label>Set</Label>
 	</Button>
-	{#if !valid}
-		<p style="margin-right: 10px; color: #B71C1C">Invalid regex</p>
-	{/if}
 	<p />
-	<br />
 </div>
+{#if !valid}
+	<p style="margin-right: 10px; color: #B71C1C">Invalid regex</p>
+{/if}
 <div class="chips">
 	{#each filterPredicates as pred}
 		<div class="meta-chip">
@@ -54,6 +113,9 @@
 				class="remove material-icons"
 				on:click={() => {
 					filterPredicates = filterPredicates.filter((p) => p !== pred);
+					if (filterPredicates.length > 0) {
+						filterPredicates[0].join = "";
+					}
 					updatePredicates(filterPredicates);
 				}}>
 				cancel
@@ -63,9 +125,31 @@
 </div>
 
 <style>
+	#options {
+		display: flex;
+		flex-direction: row;
+		margin-left: 10px;
+	}
+	.option {
+		padding: 6px 10px;
+		border: 0.5px solid var(--G4);
+		width: fit-content;
+		cursor: pointer;
+	}
+	.option:hover {
+		background: var(--G4);
+	}
+	.option-left {
+		margin-right: -1px;
+		border-radius: 5px 0px 0px 5px;
+		border-right: 1px solid var(--G4);
+	}
+	.option-right {
+		border-radius: 0px 5px 5px 0px;
+	}
 	.container {
 		display: flex;
-		align-items: end;
+		align-items: center;
 		margin-left: 5px;
 	}
 	.chips {
@@ -78,9 +162,8 @@
 		padding-top: 5px;
 	}
 	.meta-chip {
-		padding: 5px;
-		background: #f8f8f8;
-		border: 1px solid #e8e8e8;
+		padding: 5px 10px;
+		background: var(--P3);
 		margin-left: 5px;
 		margin-right: 5px;
 		margin-top: 2px;

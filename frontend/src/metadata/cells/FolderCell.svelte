@@ -1,15 +1,9 @@
 <script lang="ts">
-	import {
-		mdiChevronDown,
-		mdiDotsHorizontal,
-		mdiChevronUp,
-		mdiPencilOutline,
-	} from "@mdi/js";
+	import { mdiChevronDown, mdiDotsHorizontal, mdiChevronUp } from "@mdi/js";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import { Svg } from "@smui/common";
 	import { slide } from "svelte/transition";
 	import { folders, slices } from "../../stores";
-	import NewFolderPopup from "../popups/NewFolderPopup.svelte";
 	import SliceCell from "./SliceCell.svelte";
 	import { createNewSlice } from "../../api/slice";
 
@@ -17,7 +11,6 @@
 
 	let expandFolder = false;
 	let dragOver = false;
-	let showNewFolder = false;
 
 	let hovering = false;
 	let showOptions = false;
@@ -62,15 +55,6 @@
 				id="options-container"
 				on:mouseleave={() => (showOptions = false)}
 				on:blur={() => (showOptions = false)}>
-				<IconButton
-					on:click={(e) => {
-						e.stopPropagation();
-						showNewFolder = true;
-					}}>
-					<Icon component={Svg} viewBox="0 0 24 24">
-						<path fill="black" d={mdiPencilOutline} />
-					</Icon>
-				</IconButton>
 				<IconButton
 					on:click={(e) => {
 						e.stopPropagation();
@@ -123,9 +107,6 @@
 		{/each}
 	</div>
 {/if}
-{#if showNewFolder}
-	<NewFolderPopup folderName={folder} edit={true} bind:showNewFolder />
-{/if}
 
 <style>
 	.cell {
@@ -133,29 +114,30 @@
 		display: flex;
 		flex-direction: row;
 		justify-content: space-between;
-		border: 0.5px solid #ebebea;
 		padding-left: 10px;
 		padding-right: 10px;
 		margin-top: 5px;
-		border-radius: 5px;
+		border-radius: 4px;
 		height: 36px;
-		background: #f8f8f8;
+		background: var(--G5);
 	}
 	#options-container {
+		top: 0px;
 		right: 0px;
 		z-index: 5;
-		background: white;
+		background: var(--G6);
 		margin-top: -7px;
-		border: 1px solid #e8e8e8;
+		border: 1px solid var(--G5);
 		position: absolute;
 		height: max-content;
 		display: flex;
+		border-radius: 4px;
 	}
 	.expanded {
 		margin-bottom: 0px;
 	}
 	.hover {
-		background: #f9f5ff;
+		background: var(--G4);
 	}
 	.inline {
 		display: flex;

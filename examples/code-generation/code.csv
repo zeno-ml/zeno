@@ -1,0 +1,4303 @@
+name,code,completion
+qr2022_task2_var1.py,"T=int(input())
+for t in range(T):
+    C,M,Y,K=[],[],[],[]
+    for i in range(3):
+        N=input()
+        N=[int(n) for n in N.split()]
+        C+=[N[0]]; M+=[N[1]]; Y+=[N[2]]; K+=[N[3]]
+    c,m,y,k=min(C),min(M),min(Y),min(K)
+    if c+m+y+k<10**6:
+        R='IMPOSSIBLE'
+    else:
+        m=min([m,10**6-c])
+        y=min([y,10**6-c-m])
+        k=10**6-c-m-y
+        R='{} {} {} {}'.format(c,m,y,k)
+    print('Case #{}: {}'.format(t+1,R))
+","T=int(input())
+for t in range(T):
+    C,M,Y,K=[],["
+qr2021_task3_var1.py,"# S ✓ TLE
+def max_cost(n):
+    if n==2: return 2
+    else: return n+max_cost(n-1)
+def max_res(n):
+    res=[2,1]
+    for i in range(3,n+1):
+        p=len(res)//2
+        res=res[:p]+[i]+res[p:]
+    return res
+def cost(N):
+    COST=0; I=len(N)
+    for i in range(I-1):
+        j=i+N[i:].index(min(N[i:]))
+        if i==j:
+            COST+=1 
+        else:
+            L=[N[k] for k in range(i)]
+            L+=[N[j-k] for k in range(j-i+1)]
+            L+=[N[k] for k in range(j+1,I)]
+            COST+=j-i+1
+            N=L
+    return COST
+def permutate(N):
+    if len(N)<=1:
+        yield N
+    else:
+        for p in permutate(N[1:]):
+            for i in range(len(N)):
+                yield p[:i]+N[0:1]+p[i:]
+T=int(input())
+for t in range(T):
+    S=input().split()
+    L=int(S[0])
+    COST=int(S[1])
+    BASE=list(range(1,L+1))
+    if COST<L-1 or COST>max_cost(L):
+        RES='IMPOSSIBLE'
+    elif COST==max_cost(L):
+        RES=max_res(L)
+    elif COST in range(L-1,2*L-1):
+        RES=BASE[:COST-L+2][::-1]+BASE[COST-L+2:]
+    else:
+        for el in permutate(BASE):
+            if cost(el)==COST:
+                RES=el; break
+    if RES!='IMPOSSIBLE':
+        RES=' '.join(str(el) for el in RES)
+    print('Case #{}: {}'.format(t+1,RES))
+","# S ✓ TLE
+def max_cost(n):
+    if n==2: return 2
+ "
+embedding_html_page.py,"from IPython.display import display,HTML
+def embedding_html_page(html_url):
+	display(HTML(""""""
+    <div style=""border:10px double white; 
+         width:550px; height:950px; overflow:auto; 
+         padding:5px; background-color:ghostwhite"">
+    <iframe src='""""""\
+    +html_url\
+    +""""""' width=""520"" height=""920""/></div>""""""))","from IPython.display import display,HTML
+def embed"
+qr2018_task3_var1.py,"def go_gopher(a):
+    k=a//3+1
+    l=k//3
+    ra=[3*i+2 for i in list(range(l))]
+    if k-1>ra[-1]:
+        ra+=[k-1]
+    c=1000
+    go_ra=[ra[j%len(ra)] for j in range(c)]
+    for i in go_ra:
+        x,y=[i-1,i,i+1],[1,2,3]
+        xy=[' '.join([str(el) for el in [xy1,xy2]]) 
+            for xy1 in x for xy2 in y]
+        flag=False
+        while xy!=[]:
+            out_xy='%d 2'%i
+            print(out_xy,flush=True)
+            in_xy=input()
+            if in_xy in xy:
+                xy.remove(in_xy)
+            elif in_xy=='0 0':
+                flag=True
+                break
+            elif in_xy=='-1 -1':
+                exit()                
+#            print(xy)
+        if flag==True:
+            break
+T=int(input())
+for i in range(T):
+    A=int(input())
+    go_gopher(A)
+","def go_gopher(a):
+    k=a//3+1
+    l=k//3
+    ra=["
+danfo_csv.py,"from IPython.core.display import display,HTML
+
+def danfo_table_csv(url,columns,header_font_size):
+    html_str=""""""<html><head><meta charset='UTF-8'>""""""+\
+    """"""<meta name='viewport' """"""+\
+    """"""content='width=device-width,initial-scale=1.0'>""""""+\
+    """"""<script src='https://cdn.jsdelivr.net/npm/""""""+\
+    """"""danfojs@0.1.1/dist/index.min.js'></script></head>""""""+\
+    """"""<div><p>&nbsp; CSV =>>> Danfo DataFrames</p>""""""+\
+    """"""<div id='div015_1'></div><script>""""""+\
+    """"""var url='""""""+url+""""""'; """"""+\
+    """"""dfd.read_csv(url)""""""+\
+    """"""   .then(df=>{df.loc({columns:""""""+str(columns)+\
+    """"""}).plot('div015_1').table({header_style:""""""+\
+    """"""{font:{size:""""""+str(header_font_size)+""""""}}})})""""""+\
+    """"""   .catch(err=>{console.log(err);})""""""+\
+    """"""</script></div></html>""""""
+    display(HTML(html_str))
+    
+def danfo_chart_csv(url,columns,line_width,title):
+    html_str=""""""<html><head><meta charset='UTF-8'>""""""+\
+    """"""<meta name='viewport' """"""+\
+    """"""content='width=device-width,initial-scale=1.0'>""""""+\
+    """"""<script src='https://cdn.jsdelivr.net/npm/""""""+\
+    """"""danfojs@0.1.1/dist/index.min.js'> </script></head>""""""+\
+    """"""<body><p>&nbsp; CSV =>>> Danfo DataFrames</p>""""""+\
+    """"""<div id='div015_2'></div><script>""""""+\
+    """"""var url='""""""+url+""""""'; """"""+\
+    """"""dfd.read_csv(url).then(df=>{var layout={""""""+\
+    """"""  title:'""""""+title+\
+    """"""',xaxis:{title:'columns'},""""""+\
+    """"""  yaxis:{title:'value'}}; """"""+\
+    """"""  df.plot('div015_2').line({""""""+\
+    """"""line:{width:""""""+str(line_width)+""""""},""""""+\
+    """"""columns:""""""+str(columns)+"""""",layout:layout})})""""""+\
+    """"""   .catch(err=>{console.log(err);})""""""+\
+    """"""</script></body></html>""""""
+    display(HTML(html_str))","from IPython.core.display import display,HTML
+
+def"
+smiley_points.py,"import numpy as np
+pi=np.pi
+X=[[[67/5,pi/2,0],[-14/5,11/7,-10],[2942/7,16/5,1],[43/5,39/10,2],[123/4,3/7,3],[10,3/5,4],
+    [39/4,15/4,5],[44/7,49/12,6],[7/2,1,7],[29/7,8/7,8],[5/4,23/6,9]]+6*[[0,0,0]],
+   [[-4019/4,pi/2,0],[-22/5,4/3,-8],[1841/6,19/7,1],[357/4,23/11,2],[106/3,4,3],[351/14,1/14,4],
+    [127/8,22/7,5],[36/5,33/7,6],[91/18,22/9,7],[23/6,1/5,9],[17/6,9/2,10]]+6*[[0,0,0]],
+   [[1198/3,pi/2,0],[-61/15,8/9,-8],[-51/5,4/3,-6],[1453/4,14/5,1],[614/7,13/6,2],[75/2,13/3,3],
+    [122/5,1/16,4],[175/11,13/4,5],[19/4,9/5,7],[5,1/2,9],[13/7,4,10]]+6*[[0,0,0]],
+   [[-13027/13,pi/2,0],[-14/3,2/5,-6],[-29/5,5/9,-5],[-37/4,1/3,-4],[3021/7,97/32,1],[179/9,34/11,2],
+    [53/5,29/10,3],[1/2,18/5,7],[11/6,16/7,8],[11/5,7/3,9],[5/6,11/5,10]]+6*[[0,0,0]],
+   [[785/2,pi/2,0],[-3/5,1/6,-10],[-23/7,2/7,-6],[-23/3,1/8,-5],[-10,1/5,-4],[2417/5,34/11,1],
+    [89/4,16/5,2],[11/5,14/5,3],[31/16,17/6,7],[20/7,23/8,8],[17/7,11/4,9]]+6*[[0,0,0]],
+   [[-1087/5,pi/2,0],[-2,4/3,-16],[-39/11,6/5,-14],[-21/4,14/9,-12],[-41/3,3/2,-6],
+    [5028/5,23/12,1],[713/14,17/5,2],[103/3,7/3,3],[258/7,13/3,4],[142/13,1,5],[179/15,9/7,7],
+    [17/3,13/3,8],[47/6,5/3,9],[90/13,22/5,10],[18/5,13/7,11],[18/5,7/5,13],[26/7,7/4,15]],
+   [[-277/3,pi/2,0],[8875/6,28/9,1]]+15*[[0,0,0]],[[-467/5,pi/2,0],[4832/3,31/10,1]]+15*[[0,0,0]]]
+Y=[[[-6393/7,pi/2,0],[-1/3,4/3,-10],[-21/22,3/5,-9],[-4,7/5,-5],[-21/4,1/4,-4],[4217/17,9/2,1],
+    [74/3,15/7,2],[32/3,11/7,3],[7/4,16/5,6],[2,13/6,7],[4/5,2/3,8]]+6*[[0,0,0]],
+   [[4843/9,pi/2,0],[-209/6,1/5,-4],[-249/8,6/5,-3],[577/2,40/9,1],[184/3,9/4,2],[83/7,2/3,5],
+    [25/3,12/5,6],[5,17/6,7],[5/3,1/7,8],[23/6,1/4,9],[5/4,5/4,10]]+6*[[0,0,0]],
+   [[5301/10,pi/2,0],[-131/4,4/5,-3],[1781/6,9/2,1],[422/7,9/4,2],[189/5,1/16,4],[79/6,8/5,5],
+    [34/3,26/9,6],[22/5,23/7,7],[35/12,2/7,8],[11/4,5/7,9],[14/5,10/3,10]]+6*[[0,0,0]],
+   [[2127/4,pi/2,0],[401,23/5,1],[118/3,7/5,2],[68/3,6/5,3],[133/8,6/5,4],[11/3,4/3,5],
+    [24/7,57/14,6],[34/7,45/11,7],[25/7,37/9,8],[1/3,19/5,9],[9/5,3/5,10]]+6*[[0,0,0]],
+   [[3688/7,pi/2,0],[13121/32,14/3,1],[44,10/7,2],[123/4,7/5,3],[15,4/3,4],[3/4,12/5,5],
+    [27/5,13/3,6],[40/7,31/7,7],[13/6,13/3,8],[6/5,6/5,9],[58/19,1,10]]+6*[[0,0,0]],
+   [[-9879/19,pi/2,0],[-19/7,8/7,-12],[-103/5,7/8,-5],[-80/9,11/7,-4],[3665/6,18/5,1],
+    [803/6,13/5,2],[441/8,9/2,3],[17/2,4/5,6],[27/5,1/3,7],[17/3,2,8],[9/5,24/7,9],
+    [15/4,26/7,10],[13/5,41/9,11],[16/17,1/5,13],[23/11,1/4,14],[7/4,25/12,15],[2/3,9/7,16]],
+   [[1105/12,pi/2,0],[5913/4,14/3,1]]+15*[[0,0,0]],[[359/4,pi/2,0],[8012/5,14/3,1]]+15*[[0,0,0]]]
+def unit_step(t):
+    if t<0: return 0
+    else: return 1
+def bf(k,t): return k[0]*np.sin(k[1]+k[2]*t)
+def us(j,t): return unit_step((31-4*j)*pi-t)*unit_step((-27+4*j)*pi+t)
+def gus(t): return unit_step(np.sign(np.sin(t/2)))
+def x(t): 
+    return np.sum([np.sum([bf(X[j][i],t) for i in range(17)])*us(j,t) 
+                   for j in range(8)])*gus(t)
+def y(t): 
+    return np.sum([np.sum([bf(Y[j][i],t) for i in range(17)])*us(j,t) 
+                   for j in range(8)])*gus(t)
+T=[np.linspace(.1**5,2*pi-.1**5,512)+2*pi*i for i in range(16)]
+XT=[[x(T[i][j]) for j in range(512)] for i in range(16)]
+YT=[[y(T[i][j]) for j in range(512)] for i in range(16)] ","import numpy as np
+pi=np.pi
+X=[[[67/5,pi/2,0],[-14"
+plotly_3dcurve.py,"import plotly.graph_objects as go
+import numpy as np
+
+a,b=np.random.randint(1,3),np.random.randint(3,5)
+c,d=np.random.randint(2,4),np.random.randint(10,12)
+e,f=np.random.randint(13,18),np.random.randint(1,3)
+t=np.linspace(0,2*np.pi,60); r=[-1,0,1]
+fx=-d*np.cos(t)-f*np.cos(b*t)+e*np.sin(a*t)
+fy=-e*np.cos(a*t)+d*np.sin(t)-f*np.sin(b*t)
+fz=d*np.cos(c*t)
+
+fig=go.Figure(data=[go.Scatter3d(z=r[k]*fz,\
+x=r[i]*fx,y=r[j]*fy,marker=dict(size=1.5)) \
+for i in range(3) for j in range(3) for k in range(3)])
+scene=dict(xaxis=dict(title='',showticklabels=False),
+           yaxis=dict(title='',showticklabels=False),
+           zaxis=dict(title='',showticklabels=False))
+fig.update_layout(title='3D Functions',autosize=False,
+                  width=500,height=500,showlegend=False,
+                  margin=dict(l=3,r=3,b=3,t=30),
+                  scene=scene,template='plotly_dark')
+fig.show()","import plotly.graph_objects as go
+import numpy as "
+multilabel_data_h5.py,"import h5py,os,pandas as pd,numpy as np
+import seaborn as sn,pylab as pl
+from IPython.display import display
+from tensorflow.keras.preprocessing import image as tkimg
+
+def images2array(files_path,img_size,
+                 preprocess=False,grayscale=False):
+    files_list=sorted(os.listdir(files_path))
+    n,img_array=len(files_list),[]
+    for i in range(n):
+        if i%round(.1*n)==0:
+            print('=>',end='',flush=True)
+        img_path=files_path+files_list[i]
+        if preprocess:
+            img=tkimg.load_img(img_path,grayscale=grayscale)
+            img=tkimg.img_to_array(img)
+            img=tkimg.smart_resize(
+                img,(img_size,img_size))
+        else:
+            img=tkimg.load_img(
+                img_path,target_size=(img_size,img_size))
+            img=tkimg.img_to_array(img)
+        img=np.expand_dims(img,axis=0)/255
+        img_array.append(img)
+    return np.array(np.vstack(img_array),dtype='float32')
+
+def labels2array(files_path):
+    files_list=sorted(os.listdir(files_path))
+    files_split=np.array([el.split('_') for el in files_list])
+    num_labels=files_split.shape[1]-1
+    labels=[files_split[:,i] for i in range(num_labels)]
+    labels=np.array(labels).astype('int32')
+    for i in range(num_labels):
+        label_set=list(set(labels[i]))
+        replace_dict=\
+        dict(zip(label_set,list(range(len(label_set)))))
+        labels[i]=[replace_dict.get(x,x) for x in labels[i]]
+    return labels
+
+def data2h5file(h5file,files_path,img_size,names,
+                preprocess=False,grayscale=False):
+    images=images2array(files_path,img_size,preprocess,grayscale)
+    labels=labels2array(files_path)
+    maxlen=max([max([len(n) for n in names[i]])
+                for i in range(len(names))])
+    names=[np.array([np.string_(name.encode('utf-8')) 
+                     for name in names[i]],
+                    dtype='S%d'%maxlen)
+           for i in range(len(names))]
+    with h5py.File(h5file,'w') as f:
+        f.create_dataset('images',data=images,compression='gzip')
+        f.create_dataset('labels',data=labels,compression='gzip')
+        for i in range(len(names)): 
+            f.create_dataset('names%d'%(i+1),data=names[i],
+                             dtype='S%d'%maxlen,compression='gzip')
+        f.close()
+    print('\nfile size: %s'%list(os.stat(h5file))[6])
+    
+def h5file2data(h5file,cmap='Pastel1'):
+    with h5py.File(h5file,'r') as f:
+        keys=list(f.keys())
+        print('file keys: '+', '.join(keys))
+        images=np.array(f[keys[0]])
+        labels=np.array(f[keys[1]])
+        names=[[el.decode('utf-8') for el in f[keys[i]]]
+               for i in range(2,len(keys))]
+        f.close()
+    N=images.shape[0]; n=int(.1*N)
+    shuffle_ids=np.arange(N)
+    np.random.RandomState(12).shuffle(shuffle_ids)
+    images=images[shuffle_ids]
+    labels=np.array([labels[i][shuffle_ids]
+                     for i in range(labels.shape[0])])
+    x_test,x_valid,x_train=\
+    images[:n],images[n:2*n],images[2*n:]
+    y_test,y_valid,y_train=\
+    labels[:,:n],labels[:,n:2*n],labels[:,2*n:]
+    print('data outputs: ')
+    df=pd.DataFrame([[x_train.shape,x_valid.shape,x_test.shape],
+                     [x_train.dtype,x_valid.dtype,x_test.dtype],
+                     [y_train.shape,y_valid.shape,y_test.shape],
+                     [y_train.dtype,y_valid.dtype,y_test.dtype]],
+                    columns=['train','valid','test'],
+                    index=['image shape','image type',
+                           'label shape','label type'])
+    display(df)
+    print('distribution of labels: ')
+    idx=['labels %d'%(i+1) for i in range(labels.shape[0])]
+    df=pd.DataFrame(labels,index=idx).T
+    for i in range(labels.shape[0]):
+        df['name %d'%(i+1)]=[names[i][l] for l in labels[i]]
+    fig=pl.figure(figsize=(10,10))    
+    for i in range(labels.shape[0]):
+        ax=fig.add_subplot(labels.shape[0],1,i+1)
+        sn.countplot(x='name %s'%(i+1),data=df,
+                     palette=cmap,alpha=.5,ax=ax)
+    pl.tight_layout(); pl.show()       
+    return [names,x_train,x_valid,x_test,
+            y_train,y_valid,y_test]
+
+def display_images(images,labels,names,n):
+    fig=pl.figure(figsize=(10,n))
+    randch=np.random.choice(
+        images.shape[0],size=n,replace=False)
+    for i,idx in enumerate(randch):
+        ax=fig.add_subplot(
+            n//3,3,i+1,xticks=[],yticks=[])
+        ax.imshow(images[idx])
+        label=[labels[:,idx]]
+        name=[names[i][labels[i][idx]]
+              for i in range(labels.shape[0])]
+        ti='{} \n {}'.format(str(label),str(name))
+        ax.set_title(ti,fontsize=10)
+    pl.tight_layout(); pl.show()","import h5py,os,pandas as pd,numpy as np
+import sea"
+display_dataframe.py,"import numpy as np,pandas as pd
+from IPython.display import display
+
+def display_dataframe(df,cmap,dhead=False,
+                      td_font_size=110,th_font_size=150):
+    style_dict={'font-size':'%d'%td_font_size+'%',
+                'font-family':'times',
+                'text-shadow':'slategray 2px 2px 2px'}
+    head_styler=(('color','darkslategray'),
+                 ('font-family','times'),
+                 ('font-size','%d'%th_font_size+'%'),
+                 ('text-shadow','slategray 2px 2px 2px'))
+    if dhead=='head': data=df.head()
+    elif dhead=='tail': data=df.tail()
+    else: data=df
+    display(data.style.set_properties(**style_dict)\
+            .background_gradient(cmap=cmap)\
+            .set_table_styles([dict(selector='th',
+                                    props=head_styler)]));
+
+def display_dataframe_example():
+    index=[chr(i) for i in range(ord('a'),ord('h')+1)]
+    columns=['&#x2654;','&#x2655;','&#x2656;',
+             '&#x2657;','&#x2658;','&#x2659;']
+    df=pd.DataFrame(np.random.randn(8,6),
+                    index=index,columns=columns)
+    cmap='bone'
+    display_dataframe(df,cmap)","import numpy as np,pandas as pd
+from IPython.displ"
+looped_curve.py,"import numpy as np,pylab as pl,random as rd
+def looped_curve(fig_size):
+    r=[-1,0,1]; th=.1+rd.random()
+    a,b,c=rd.randint(1,3),rd.randint(4,6),rd.randint(2,4)
+    d,e,f=rd.randint(9,11),rd.randint(14,16),rd.randint(1,3)
+    t=np.arange(0,2*np.pi+.5,1/10**rd.randint(1,3)) 
+    fx=-d*np.cos(t)-f*np.cos(b*t)+e*np.sin(a*t)
+    fy=-e*np.cos(a*t)+d*np.sin(t)-f*np.sin(b*t) 
+    fz=d*np.cos(c*t)
+    fig=pl.figure(figsize=(fig_size,fig_size))
+    ax=fig.gca(projection='3d')
+    for i in r:
+        for j in r:
+            for k in r:
+                col=[rd.random() for l in range(3)]
+                ax.plot(i*fx,j*fy,k*fz,c=col,linewidth=th)
+    pl.title('$\mathbb{a=%d; b=%d; c=%d; d=%d; e=%d; f=%d}$'\
+             %(a,b,c,d,e,f))
+    pl.axis('off'); pl.show()","import numpy as np,pylab as pl,random as rd
+def lo"
+plotly_3dcoordinates.py,"import plotly.graph_objects as go
+import numpy as np
+
+fpath='../input/image-examples-for-mixed-styles/'
+b=np.loadtxt(fpath+'beethoven.csv',delimiter=',',skiprows=1)
+
+fig=go.Figure(data=[go.Scatter3d(x=b[:,0],y=b[:,1],z=b[:,2],\
+mode='markers',marker=dict(size=.9,color='green')) \
+for i in range(3) for j in range(3) for k in range(3)])
+scene=dict(xaxis=dict(title='',visible=False),
+           yaxis=dict(title='',visible=False),
+           zaxis=dict(title='',visible=False))
+fig.update_layout(title='3D Coordinates',autosize=False,
+                  width=500,height=500,showlegend=False,
+                  margin=dict(l=3,r=3,b=3,t=30),
+                  scene=scene,template='plotly_dark')
+fig.show()
+","import plotly.graph_objects as go
+import numpy as "
+random_pattern01.py,"import numpy as np,pylab as pl
+
+def randi(nmin,nmax): 
+    return np.random.randint(nmin,nmax)
+
+def t(i,k,p): 
+    return np.arange(
+        (i-1)*np.pi/(2*k+2),i*np.pi/(2*k+2),1/10**p)
+    
+def x(a,b,i,k,p): 
+    return np.cos(t(i,k,p)+k*np.pi/6)+\
+           np.cos(a*t(i,k,p))/2+\
+           np.sin((a+b)*t(i,k,p))/3
+
+def y(a,b,i,k,p): 
+    return np.sin(t(i,k,p)+k*np.pi/6)+\
+           np.sin(a*t(i,k,p))/2+\
+           np.cos((a+b)*t(i,k,p))/3
+
+def mcolors(rgb,m):
+    if rgb=='r':
+        return [[1]+[np.random.randint(100,900)/1000 
+                     for j in range(2)] 
+                for i in range(m)]
+    if rgb=='g':
+        return [[np.random.randint(100,900)/1000]+\
+                 [1]+[np.random.randint(100,900)/1000] 
+                for i in range(m)]
+    if rgb=='b':
+        return [[np.random.randint(100,900)/1000 
+                 for j in range(2)]+[1] 
+                for i in range(m)]
+
+def random_pattern_plot(rgb,fig_size):      
+    a,b,p=randi(3,18),randi(10,30),5
+    cols=mcolors(rgb,24)
+  
+    pl.figure(figsize=(fig_size,fig_size))
+    ax=pl.gca()
+    for i in range(48):
+        for k in range(12): 
+            pl.scatter(x(a,b,i,k,p),
+                       y(a,b,i,k,p),
+                       s=.1**(p-1),c=[cols[k]])
+    pl.title('$\mathscr{a=%d; \; b=%d;}$'%(a,b),
+             fontsize=20)
+    pl.axis('off'); pl.show()","import numpy as np,pylab as pl
+
+def randi(nmin,nma"
+recursive_plot.py,"import numpy as np,pylab as pl
+
+def gen(f,a,b,n):
+    i=1; xyi=[0.,0.]
+    while i<=n:
+        yield xyi; i+=1; xi,yi=xyi[0],xyi[1]
+        xyi=[f(xi,yi,a,b),xi]
+
+def recursive_plot(f,a,b,n,fig_size=10,
+                   face_color='ghostwhite'):
+    xy=gen(f,a,b,n)
+    xyn=np.array([el for el in xy])
+    pl.figure(figsize=(fig_size,fig_size))
+    ax=pl.gca(); ax.set_facecolor(face_color)
+    if n>25000: ms=n*.1**6 
+    else: ms=.1
+    pl.scatter(xyn[:,0],xyn[:,1],
+               s=ms,c=[np.random.random(3)])
+    pl.tight_layout(); pl.axis('off'); pl.show()
+
+def recursive_f1(x,y,a,b):
+    return (1+.1**2*a)*abs(x)-(1+.1**5*b)*y+1","import numpy as np,pylab as pl
+
+def gen(f,a,b,n):
+"
+pictogram_photo_classify.py,"%%writefile pictogram_photo_classify.py
+import pandas as pd,numpy as np,tensorflow as tf
+import os,seaborn as sn,pylab as pl
+from IPython.display import display
+from tensorflow.keras.preprocessing \
+import image as tkimg
+from tensorflow.keras.datasets import cifar10
+from IPython.core.magic import register_line_magic
+import tensorflow_hub as th
+from tensorflow.keras.models import Sequential
+from tensorflow.keras import layers as tkl
+from tensorflow.keras import callbacks as tkc
+
+img_size1,img_size2=32,96
+cmap1,cmap2='spring','autumn'
+fw='weights.best.hdf5'
+names1=[['pictogram','contour','sketch'],
+        ['flower','bird','butterfly','tree',
+         'plane','crane','dog','horse',
+         'deer','truck','car','cat',
+         'frog','ship','fish','house']]
+names2=[['plane','car','bird','cat','deer',
+         'dog','frog','horse','ship','truck']]
+
+def images2array(files_path,img_size,
+                 preprocess=False,grayscale=False):
+    files_list=sorted(os.listdir(files_path))
+    n,img_array=len(files_list),[]
+    for i in range(n):
+        if i%round(.1*n)==0:
+            print('=>',end='',flush=True)
+        img_path=files_path+files_list[i]
+        if preprocess:
+            img=tkimg.load_img(
+                img_path,grayscale=grayscale)
+            img=tkimg.img_to_array(img)
+            img=tkimg.smart_resize(
+                img,(img_size,img_size))
+        else:
+            img=tkimg.load_img(
+                img_path,target_size=(img_size,img_size))
+            img=tkimg.img_to_array(img)
+        img=np.expand_dims(img,axis=0)/255
+        img_array.append(img)
+    return np.array(np.vstack(img_array),
+                    dtype='float32')
+
+def labels2array(files_path):
+    files_list=sorted(os.listdir(files_path))
+    files_split=np.array([el.split('_') 
+                          for el in files_list])
+    num_labels=files_split.shape[1]-1
+    labels=[files_split[:,i] 
+            for i in range(num_labels)]
+    labels=np.array(labels).astype('int32')
+    for i in range(num_labels):
+        label_set=list(set(labels[i]))
+        replace_dict=\
+        dict(zip(label_set,
+                 list(range(len(label_set)))))
+        labels[i]=[replace_dict.get(x,x) 
+                   for x in labels[i]]
+    return labels
+
+def get_data(files_path,img_size,names1,names2,
+             preprocess=False,grayscale=False):
+    images=images2array(files_path,img_size,
+                        preprocess,grayscale)
+    labels=labels2array(files_path)
+    n=len(labels[0][labels[0]==0])
+    images=images[:n]; labels=labels[1][:n]
+    cond1=np.where([l in names2[0] for l in names1[1]])[0]
+    cond2=np.where([l in cond1 for l in labels])[0]
+    images=images[cond2]; labels=labels[cond2]
+    rd=dict(zip([names1[1].index(names2[0][i])
+                 for i in range(10)],range(10)))
+    labels=[rd.get(el,el) for el in labels]
+    labels=np.array(labels,dtype='int32')
+    return images,labels
+
+def get_cifar():
+    (images,labels),(_,_)=cifar10.load_data()
+    images=np.array(images,dtype='float32')/255
+    labels=np.array(labels,dtype='int32').reshape(-1)
+    return images,labels
+
+def data2nnarrays(images,labels,num,cmap,names=names2):
+    N=num; n=int(.1*N)
+    shuffle_ids=np.arange(images.shape[0])
+    np.random.RandomState(12).shuffle(shuffle_ids)
+    shuffle_ids=shuffle_ids[:N]
+    images=images[shuffle_ids]
+    labels=labels[shuffle_ids]
+    x_test,x_valid,x_train=\
+    images[:n],images[n:2*n],images[2*n:]
+    y_test,y_valid,y_train=\
+    labels[:n],labels[n:2*n],labels[2*n:]
+    print('data outputs: ')
+    df=pd.DataFrame([[x_train.shape,x_valid.shape,x_test.shape],
+                     [x_train.dtype,x_valid.dtype,x_test.dtype],
+                     [y_train.shape,y_valid.shape,y_test.shape],
+                     [y_train.dtype,y_valid.dtype,y_test.dtype]],
+                    columns=['train','valid','test'],
+                    index=['image shape','image type',
+                           'label shape','label type'])
+    display(df)
+    print('distribution of labels: ')
+    df=pd.DataFrame(labels,columns=['label'])
+    df['name']=[names[0][l] for l in labels]
+    fig=pl.figure(figsize=(10,5))    
+    ax=fig.add_subplot(1,1,1)
+    sn.countplot(x='name',data=df,
+                 palette=cmap,alpha=.5,ax=ax)
+    pl.show()       
+    return x_train,x_valid,x_test,\
+           y_train,y_valid,y_test
+
+def display_images(images,labels,n,names=names2):
+    fig=pl.figure(figsize=(10,n//2))
+    randch=np.random.choice(
+        images.shape[0],size=n,replace=False)
+    for i,idx in enumerate(randch):
+        ax=fig.add_subplot(
+            n//5,5,i+1,xticks=[],yticks=[])
+        ax.imshow(images[idx])
+        label=labels[idx]
+        name=names[0][label]
+        ax.set_title('{} => {}'\
+                     .format(str(label),str(name)),
+                     fontsize=10)
+    pl.show()
+    
+def img_resize(x,img_size=img_size2):       
+    x=tf.image.resize(x,[img_size,img_size])
+    return x.numpy()
+
+def get_resized_data(data):
+    [rx_train,rx_valid,rx_test]=\
+    [img_resize(el) for el in data[:3]]
+    [y_train,y_valid,y_test]=data[3:]
+    print([rx_train.shape,rx_train.dtype])
+    print('Label: ',names2[0][y_valid[100]])
+    pl.figure(figsize=(1,1))
+    pl.xticks([]); pl.yticks([])
+    pl.imshow(rx_valid[100]); pl.show()
+    return rx_train,rx_valid,rx_test,\
+           y_train,y_valid,y_test
+
+def get_mixed_data(data1,data2):
+    data=[np.vstack([data1[i],data2[i]])
+          for i in range(3)]+\
+         [np.hstack([data1[i+3],data2[i+3]])
+          for i in range(3)]
+    [x_train,x_valid,x_test,
+     y_train,y_valid,y_test]=data
+    for [x,y] in [[x_train,y_train],
+                  [x_valid,y_valid],
+                  [x_test,y_test]]:
+        N=len(y); shuffle_ids=np.arange(N)
+        np.random.RandomState(23).shuffle(shuffle_ids)
+        x,y=x[shuffle_ids],y[shuffle_ids]
+    return x_train,x_valid,x_test,\
+           y_train,y_valid,y_test
+
+def cnn_model(data):
+    [x_train,x_valid,x_test,
+     y_train,y_valid,y_test]=data
+        
+    model=Sequential()
+    model.add(tkl.Conv2D(32,(5,5),padding='same',
+                         input_shape=x_train.shape[1:]))
+    model.add(tkl.Activation('relu'))
+    model.add(tkl.MaxPooling2D(pool_size=(2,2)))
+    model.add(tkl.Dropout(.25))
+    model.add(tkl.Conv2D(196,(5,5)))
+    model.add(tkl.Activation('relu'))    
+    model.add(tkl.MaxPooling2D(pool_size=(2,2)))
+    model.add(tkl.Dropout(.25))
+    model.add(tkl.GlobalAveragePooling2D())    
+    model.add(tkl.Dense(1024,activation='relu'))
+    model.add(tkl.Dropout(.5))         
+    model.add(tkl.Dense(10))
+    model.add(tkl.Activation('softmax'))
+    model.compile(loss='sparse_categorical_crossentropy',
+                  optimizer='adam',metrics=['accuracy'])
+    early_stopping=tkc.EarlyStopping(monitor='val_loss',
+                                     patience=20,verbose=2)
+    checkpointer=tkc.ModelCheckpoint(filepath=fw,verbose=2,
+                                     save_best_only=True)
+    lr_reduction=tkc.ReduceLROnPlateau(monitor='val_loss',verbose=2,
+                                       patience=5,factor=.8)
+    history=model.fit(x_train,y_train,epochs=100,
+                      batch_size=64,verbose=2,
+                      validation_data=(x_valid,y_valid),
+                      callbacks=[checkpointer,
+                                 early_stopping,
+                                 lr_reduction])
+    return model,history
+
+def hub_model(data):
+    [rx_train,rx_valid,rx_test,
+     ry_train,ry_valid,ry_test]=data
+    handle_base=""mobilenet_v2_050_96""
+    mhandle=""https://tfhub.dev/google/imagenet/{}/feature_vector/4""\
+    .format(handle_base)
+    
+    model=tf.keras.Sequential([
+        tf.keras.layers.Input((img_size2,img_size2,3),
+                              name='input'),
+        th.KerasLayer(mhandle,trainable=True),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(2048,activation='relu'),
+        tf.keras.layers.Dropout(rate=.5),
+        tf.keras.layers.Dense(10,activation='softmax')])
+    model.compile(optimizer='adam',metrics=['accuracy'],
+                  loss='sparse_categorical_crossentropy') 
+    early_stopping=tkc.EarlyStopping(monitor='val_loss',
+                                     patience=20,verbose=2)
+    checkpointer=tkc.ModelCheckpoint(filepath=fw,verbose=2,
+                                     save_best_only=True)
+    lr_reduction=tkc.ReduceLROnPlateau(monitor='val_loss',verbose=2,
+                                       patience=5,factor=.8)
+    history=model.fit(rx_train,ry_train,epochs=50,
+                      batch_size=64,verbose=2,
+                      validation_data=(rx_valid,ry_valid),
+                      callbacks=[checkpointer,
+                                 early_stopping,
+                                 lr_reduction])
+    return model,history
+
+def history_plot(fit_history,fig_size,color):
+    pl.style.use('seaborn-whitegrid')
+    keys=list(fit_history.history.keys())
+    list_history=[fit_history.history[keys[i]] 
+                  for i in range(len(keys))]
+    dfkeys=pd.DataFrame(list_history).T
+    dfkeys.columns=keys
+    fig=pl.figure(figsize=(fig_size,fig_size))
+    ax1=fig.add_subplot(311)
+    dfkeys.iloc[:,[0,2]].plot(
+        ax=ax1,color=['slategray',color])
+    ax2=fig.add_subplot(312)
+    dfkeys.iloc[:,4].plot(ax=ax2,color=color)
+    pl.legend()
+    ax3=fig.add_subplot(313)
+    dfkeys.iloc[:,[1,3]].plot(
+        ax=ax3,color=['slategray',color])
+    pl.show();","%%writefile pictogram_photo_classify.py
+import pan"
+classify_kaggle_digits.py,"import tensorflow.keras.layers as tkl
+import tensorflow.keras.callbacks as tkc
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.metrics import \
+sparse_top_k_categorical_accuracy,\
+sparse_categorical_accuracy
+from tensorflow.keras.preprocessing.image \
+import ImageDataGenerator
+from sklearn.metrics import \
+classification_report,confusion_matrix
+from IPython.display import display
+import pandas as pd,pylab as pl
+
+def sparse_top_3_categorical_accuracy(y_true,y_pred):
+    return sparse_top_k_categorical_accuracy(y_true,y_pred,k=3)
+
+def cnn_model(num_classes):
+    model=Sequential()
+    model.add(tkl.Input(shape=(28,28,1)))
+    model.add(tkl.BatchNormalization())    
+    model.add(tkl.Conv2D(32,(5,5),padding='same'))
+    model.add(tkl.LeakyReLU(alpha=.02))
+    model.add(tkl.MaxPooling2D(strides=(2,2)))
+    model.add(tkl.Dropout(.25))    
+    model.add(tkl.Conv2D(96,(5,5)))
+    model.add(tkl.LeakyReLU(alpha=.02))
+    model.add(tkl.MaxPooling2D(strides=(2,2)))
+    model.add(tkl.Dropout(.25)) 
+    model.add(tkl.GlobalMaxPooling2D())    
+    model.add(tkl.Dense(1024))
+    model.add(tkl.LeakyReLU(alpha=.02))
+    model.add(tkl.Dropout(.5))    
+    model.add(tkl.Dense(num_classes,activation='softmax'))    
+    model.compile(loss='sparse_categorical_crossentropy',
+                  optimizer='nadam', 
+                  metrics=[sparse_categorical_accuracy,
+                           sparse_top_3_categorical_accuracy])    
+    return model
+
+def model_callbacks(weights):
+    checkpoint=tkc.ModelCheckpoint(
+        filepath=weights,verbose=2,save_best_only=True)
+    lr_reduce=tkc.ReduceLROnPlateau(
+        monitor='val_loss',patience=5,verbose=2,
+        factor=.8,min_lr=.1**6)
+    estop=tkc.EarlyStopping(
+        monitor='val_loss',patience=20,verbose=2)
+    return [checkpoint,lr_reduce,estop]
+
+def model_history(cnn_model,weights,epochs,gen_epochs,
+                  x_train,y_train,x_valid,y_valid):
+    fit_callbacks=model_callbacks(weights)
+    train_history=cnn_model.fit(
+        x_train,y_train,validation_data=(x_valid,y_valid), 
+        epochs=epochs,batch_size=128,verbose=2, 
+        callbacks=fit_callbacks) 
+    data_generator=ImageDataGenerator(
+        zoom_range=.2,shear_range=.2,rotation_range=20,
+        width_shift_range=.2,height_shift_range=.2)
+    data_generator.fit(x_train)
+    generator_history=cnn_model.fit_generator(
+        data_generator.flow(x_train,y_train,batch_size=128),
+        steps_per_epoch=x_train.shape[0]//128,
+        epochs=gen_epochs,verbose=2,
+        validation_data=(x_valid,y_valid),
+        callbacks=fit_callbacks)
+    return train_history,generator_history
+
+def plot_history(model_history,start,color):
+    keys=list(model_history.history.keys())
+    list_history=[model_history.history[keys[i]] 
+                  for i in range(len(keys))]
+    dfkeys=pd.DataFrame(list_history).T
+    dfkeys.columns=keys
+    fig=pl.figure(figsize=(10,12))
+    ax1=fig.add_subplot(411)
+    dfkeys.iloc[start:,[0,3]].plot(
+        ax=ax1,color=['slategray',color])
+    ax2=fig.add_subplot(412)
+    dfkeys.iloc[start:,6].plot(ax=ax2,color=color)
+    pl.legend()
+    ax3=fig.add_subplot(413)
+    dfkeys.iloc[start:,[1,4]].plot(
+        ax=ax3,color=['slategray',color])
+    ax3=fig.add_subplot(414)
+    dfkeys.iloc[start:,[2,5]].plot(
+        ax=ax3,color=['slategray',color])
+    pl.show();
+    display(dfkeys.tail(4).T)
+    
+def model_evaluation(cnn_model,x_test,y_test,
+                     weights,color,num_test):
+    cnn_model.load_weights(weights)
+    y_test_pred=cnn_model.predict_classes(x_test)
+    pl.figure(figsize=(10,5))
+    pl.scatter(range(num_test),y_test[:num_test],
+               s=100,color='slategray')
+    pl.scatter(range(num_test),y_test_pred[:num_test],
+               s=25,color=color)
+    pl.show()
+    cnn_scores=cnn_model.evaluate(
+        x_test,y_test,verbose=0)
+    print('cnn scores: \n',(cnn_scores))
+    print('cnn error: %.2f%%'%(100-cnn_scores[1]*100))
+    print('classification report: \n')
+    print(classification_report(y_test,y_test_pred))
+    print('confusion matrix: \n')
+    print(confusion_matrix(y_test,y_test_pred))","import tensorflow.keras.layers as tkl
+import tenso"
+qr2022_task3_var1.py,"T=int(input())
+for t in range(T):
+    N=int(input())
+    S=input()
+    k=N
+    if k>4:
+        S=sorted([int(s) for s in S.split()])[::-1]
+        k=N=min([N,S[0]])
+        for i in range(N):
+            if S[i]<N-i:
+                k-=1
+    print('Case #{}: {}'.format(t+1,k))
+","T=int(input())
+for t in range(T):
+    N=int(input("
+numpy_sage.py,"from IPython.core.display import display,HTML
+import random,numpy as np
+
+def sage_list_plot(array,labels=None,precision=8,
+                   width=650,height=700,
+                   kw=.0095,kh=0.0035):
+    str_array=np.array2string(
+        array,precision=precision,separator=',',
+        suppress_small=True)
+    if labels==None: 
+        labels=[i+1 for i in range(len(array))]
+    html_str=""""""<html><head><meta charset='utf-8'>""""""+\
+    """"""<script src='https://sagecell.sagemath.org/""""""+\
+    """"""static/embedded_sagecell.js'>""""""+\
+    """"""</script><script>$(function() {""""""+\
+    """"""sagecell.makeSagecell({inputLocation:'div.plot',""""""+\
+    """"""evalButtonText:'run',linked:true}); """"""+\
+    """"""});</script></head>""""""+\
+    """"""<style>#array1.sagecell .CodeMirror-scroll {""""""+\
+    """"""min-height:3em; max-height:5em;} """"""+\
+    """""".sagecell .CodeMirror-scroll {""""""+\
+    """"""min-height:3em; max-height:11em;}</style><body>""""""+\
+    """"""<div class='plot' id='array1'><script type='text/x-sage'>""""""+\
+    """"""import numpy as np\n""""""+\
+    """"""array=np.array(""""""+str_array+"""""")\n""""""+\
+    """"""labels=""""""+str(labels)+""""""\n""""""+\
+    """"""</script></div><br/>""""""+\
+    """"""<div class='plot'><script type='text/x-sage'>""""""+\
+    """"""print('array dimensions:%s'%str(array.shape))\n""""""+\
+    """"""n=array.shape[0]\n""""""+\
+    """"""p=sum([list_plot(\n""""""+\
+    """"""    array[i],plotjoined=True,\n""""""+\
+    """"""    color=hue(i/n),marker='o',markersize=2,\n""""""+\
+    """"""    legend_label=labels[i])\n""""""+\
+    """"""       for i in range(n)])\n""""""+\
+    """"""p.show(figsize=(""""""+str(
+        (np.round(kw*width,2),np.round(kh*height,2)))+\
+    """"""),axes=False,\n""""""+\
+    """"""       frame=True,gridlines=True)""""""+\
+    """"""</script></div></body></html>""""""
+    file='sage_coderun'+str(random.uniform(0,9999999))+'.html'
+    with open(file,'w') as f:
+        f.write(html_str); f.close()
+    string=""""""<div id='html_string1'><iframe src='""""""+\
+           file+""""""' height=""""""+str(height+20)+\
+           """""" width=""""""+str(width+20)+""""""></iframe></div>""""""
+    display(HTML(string))
+    
+def sage_list_plot_min(array,labels=None,precision=8,
+                       width=650,height=450,
+                       kw=.0095,kh=.0075):
+    str_array=np.array2string(
+        array,precision=precision,separator=',',
+        suppress_small=True)
+    if labels==None: 
+        labels=[i+1 for i in range(len(array))]
+    html_str=""""""<html><head><meta charset='utf-8'>""""""+\
+    """"""<script src='https://sagecell.sagemath.org/""""""+\
+    """"""static/embedded_sagecell.js'>""""""+\
+    """"""</script><script>$(function() {""""""+\
+    """"""sagecell.makeSagecell({inputLocation:'div.plot_min',""""""+\
+    """"""evalButtonText:'run',autoeval:true,""""""+\
+    """"""template:sagecell.templates.minimal}); """"""+\
+    """"""});</script></head><body>""""""+\
+    """"""<div class='plot_min'><script type='text/x-sage'>""""""+\
+    """"""import numpy as np\n""""""+\
+    """"""array=np.array(""""""+str_array+"""""")\n""""""+\
+    """"""labels=""""""+str(labels)+""""""\n""""""+\
+    """"""print('array dimensions:%s'%str(array.shape))\n""""""+\
+    """"""n=array.shape[0]\n""""""+\
+    """"""p=sum([list_plot(\n""""""+\
+    """"""    array[i],plotjoined=True,\n""""""+\
+    """"""    color=hue(i/n),marker='o',markersize=2,\n""""""+\
+    """"""    legend_label=labels[i])\n""""""+\
+    """"""       for i in range(n)])\n""""""+\
+    """"""p.show(figsize=(""""""+str(
+        (np.round(kw*width,2),np.round(kh*height,2)))+\
+    """"""),axes=False,\n""""""+\
+    """"""       frame=True,gridlines=True)""""""+\
+    """"""</script></div></body></html>""""""
+    file='sage_coderun'+str(random.uniform(0,9999999))+'.html'
+    with open(file,'w') as f:
+        f.write(html_str); f.close()
+    string=""""""<div id='html_string2'><iframe src='""""""+\
+           file+""""""' height=""""""+str(height+20)+\
+           """""" width=""""""+str(width+20)+""""""></iframe></div>""""""
+    display(HTML(string))","from IPython.core.display import display,HTML
+impo"
+qr2021_task2_var1.py,"# S ✓ ✓ RE
+def cost(X,Y,S):
+    return X*S.count('CJ')+Y*S.count('JC')
+def cut(S):
+    while 'CC' in S:
+        S=S.replace('CC','C')
+    while 'JJ' in S:
+        S=S.replace('JJ','J')
+    return S
+def recursive_cost(X,Y,S):
+    if len(S)<2:
+        return 0
+    else:
+        if '?' not in S[:2]:
+            return cost(X,Y,S[:2])+recursive_cost(X,Y,S[1:])
+        else:
+            if (S[0]=='?'):
+                return min(recursive_cost(X,Y,'C'+S[1:]),
+                           recursive_cost(X,Y,'J'+S[1:]))
+            else:
+                return min(recursive_cost(X,Y,S[0]+'C'+S[2:]),
+                           recursive_cost(X,Y,S[0]+'J'+S[2:]))
+T=int(input())
+for t in range(T):
+    XYS=input().split()
+    X,Y,S=int(XYS[0]),int(XYS[1]),XYS[2]
+    S=cut(S)
+    if (X<0 or Y<0):
+        COST=recursive_cost(X,Y,S)
+    else:
+        COST=cost(X,Y,S.replace('?',''))
+    print('Case #{}: {}'.format(t+1,COST))
+","# S ✓ ✓ RE
+def cost(X,Y,S):
+    return X*S.count('"
+qr2018_task2_var1.py,"def trouble_sort(L,N):
+    LE,LO=[],[]
+    for i in range(N):
+        (LO,LE)[i%2==0].append(L[i])
+    LE=sorted(LE)
+    LO=sorted(LO)
+    L=sorted(L)
+    for i in range(N):
+        if i%2==0:
+            el=LE[i//2]
+        else:
+            el=LO[i//2]
+        if el!=L[i]:
+            break
+    if N-1!=i:
+        return str(i)
+    else: 
+        return 'OK'
+T=int(input())
+for t in range(T):
+    N=int(input())
+    L=list(map(int,input().split()))
+    ANS=trouble_sort(L,N)
+    print('Case #{}: {}'.format(t+1,ANS))
+","def trouble_sort(L,N):
+    LE,LO=[],[]
+    for i i"
+qr2020_task2_var2.py,"def gen_str(s):
+    s0=int(s[0])
+    yield s0*'('+s[0]
+    while s[:-1]:
+        s=s[1:]
+        s1=int(s[0])
+        c=s1>s0
+        yield c*(s1-s0)*'('+(not c)*(s0-s1)*')'+s[0]
+        s0=s1
+    yield s0*')'
+T=int(input())
+for t in range(T):
+    S=input()
+    print('Case #%d: %s'%((t+1,''.join(gen_str(S)))))
+","def gen_str(s):
+    s0=int(s[0])
+    yield s0*'('+"
+tfpreprocess_mnist.py,"import warnings; warnings.filterwarnings('ignore')
+import tensorflow as tf,numpy as np,pandas as pd
+import tensorflow_datasets as tfds
+from IPython.display import display,HTML
+pd.set_option('precision',3)
+tf.keras.backend.set_floatx('float64')
+tfds.disable_progress_bar()
+img_size=32
+buffer_size,batch_size=10000,64
+
+c1,c2,f1,f2,fs1,fs2=\
+'#11ff66','#6611ff','Wallpoet','Orbitron',20,10
+
+def dhtml(string,fontcolor=c1,font=f1,fontsize=fs1):
+    display(HTML(""""""<style>
+    @import 'https://fonts.googleapis.com/css?family=""""""\
+    +font+""""""&effect=3d-float';</style>
+    <h1 class='font-effect-3d-float' 
+    style='font-family:""""""+font+\
+    """"""; color:""""""+fontcolor+\
+    """"""; font-size:""""""+str(fontsize)+""""""px;'>
+    %s</h1>""""""%string))
+
+def load_mnist():
+    mnist=tfds.builder('mnist')
+    mnist.download_and_prepare()
+    ds=mnist.as_dataset(shuffle_files=False,
+                        split=['train','test'])
+    mnist_train,mnist_test=ds[0],ds[1]
+    dhtml(mnist.info.features['image'],c2,f2,fs2)
+    dhtml(mnist.info.features['label'],c2,f2,fs2)
+    mnist_train=mnist_train.map(
+        lambda item:(tf.image.resize(
+            tf.cast(item['image'],tf.float32),
+            [img_size,img_size])/255., 
+                     tf.cast(item['label'],tf.int32)))
+    mnist_test=mnist_test.map(
+        lambda item:(tf.image.resize(
+            tf.cast(item['image'],tf.float32),
+            [img_size,img_size])/255., 
+                     tf.cast(item['label'],tf.int32)))
+    tf.random.set_seed(123)
+    mnist_train=mnist_train.shuffle(
+        buffer_size=buffer_size,
+        reshuffle_each_iteration=False)
+    mnist_valid=mnist_train.take(buffer_size).batch(batch_size)
+    mnist_train=mnist_train.skip(buffer_size).batch(batch_size)
+    return mnist_train,mnist_valid,mnist_test
+",import warnings; warnings.filterwarnings('ignore')
+images2h5file.py,"import h5py,os,numpy as np
+from tensorflow.keras.preprocessing \
+import image as tkimg
+
+def images2array(files_path,img_size,preprocess):
+    files_list=sorted(os.listdir(files_path))
+    n,img_array=len(files_list),[]
+    for i in range(n):
+        if i%round(.1*n)==0:
+            print('=>',end='',flush=True)
+        img_path=files_path+files_list[i]
+        if preprocess=='True':
+            img=tkimg.load_img(img_path)
+            img=tkimg.img_to_array(img)
+            img=tkimg.smart_resize(
+                img,(img_size,img_size))
+        else:
+            img=tkimg.load_img(
+                img_path,target_size=(img_size,img_size))
+            img=tkimg.img_to_array(img)
+        img=np.expand_dims(img,axis=0)/255
+        img_array.append(img)
+    return np.array(np.vstack(img_array),
+                    dtype='float32')
+def labels2array(files_path):
+    files_list=sorted(os.listdir(files_path))
+    labels=[int(el[:2]) for el in files_list]
+    label_set=list(set(labels))
+    rd=dict(zip(label_set,
+                list(range(len(label_set)))))
+    labels=np.array([rd.get(x,x) for x in labels],
+                    dtype=np.int32)
+    return labels
+def images2h5file(h5file,files_path,
+                  img_size,names,preprocess='False'):
+    images=images2array(files_path,img_size,preprocess)
+    labels=labels2array(files_path)
+    maxlen=max([len(n) for n in names])
+    names=np.array([np.string_(name) 
+                    for name in names])
+    with h5py.File(h5file,'w') as f:
+        f.create_dataset('images',data=images,compression=""gzip"")
+        f.create_dataset('labels',data=labels,compression=""gzip"")
+        f.create_dataset('names',data=names,
+                         dtype='S%d'%maxlen,
+                         compression=""gzip"")
+        f.close()
+    print('\nfile size: %s'%list(os.stat(h5file))[6])","import h5py,os,numpy as np
+from tensorflow.keras.p"
+keras_model_plot12d.py,"import warnings; warnings.filterwarnings('ignore')
+import tensorflow as tf
+import tensorflow.keras.layers as tkl
+import tensorflow.keras.utils as tku
+from IPython.core.magic import register_line_magic
+from IPython.display import display
+
+@register_line_magic
+def get_model_plot1d(pars):
+    pars=pars.split()
+    num_timesteps=int(pars[0])
+    num_features=int(pars[1])
+    num_filters=int(pars[2])
+    ks=int(pars[3])
+    ps=int(pars[4])
+    model=tf.keras.Sequential()
+    model.add(tkl.InputLayer((num_timesteps,
+                              num_features),
+                             name='input'))
+    model.add(tkl.Conv1D(
+        filters=num_filters,
+        kernel_size=ks,
+        padding='same',name='conv1d',
+        activation='relu'))
+    model.add(tkl.MaxPool1D(
+        pool_size=ps,name='pool1d'))
+    display(tku.plot_model(model,show_shapes=True))
+
+@register_line_magic
+def get_model_plot2d(pars):
+    pars=pars.split()
+    img_size=int(pars[0])
+    num_channels=int(pars[1])
+    num_filters=int(pars[2])
+    ks=int(pars[3])
+    ps=int(pars[4])
+    model=tf.keras.Sequential()
+    model.add(tkl.InputLayer((img_size,img_size,
+                              num_channels),
+                             name='input'))
+    model.add(tkl.Conv2D(
+        filters=num_filters,
+        kernel_size=(ks,ks),strides=(1,1),
+        padding='same',name='conv2d',
+        activation='relu'))
+    model.add(tkl.MaxPool2D(
+        pool_size=(ps,ps),name='pool2d'))
+    display(tku.plot_model(model,show_shapes=True))
+",import warnings; warnings.filterwarnings('ignore')
+d3barh_chart.py,"from IPython.display import display,HTML
+import random
+
+def d3barh_chart(data,chart_title,width,height,
+                 color='silver',cmap='Sinebow',
+                 font_size=24,font_family='Wallpoet'):
+    html_str=""""""
+<style>
+@import 'https://fonts.googleapis.com/css?family=""""""+\
+font_family+""""""';
+#d3barchart_title {color:""""""+color+""""""; font-family:""""""+\
+font_family+""""""; font-size:""""""+str(font_size)+""""""px;}
+#d3barchart {width:98%; height:95%;}
+</style>
+<script src='https://d3js.org/d3.v6.min.js'></script>
+<div id='d3barchart'><text id='d3barchart_title'></text></div>
+<script>
+var data=""""""+str(data)+"""""";
+var tc=setInterval(function(){
+    var now=new Date().getTime();
+    var width=Math.min(window.screen.width,window.innerWidth);
+    var div=d3.select('#d3barchart');
+    div.select('#d3barchart_title')
+       .text('""""""+chart_title+""""""');
+    div.style('text-align','right')
+       .style('text-shadow','3px 3px 3px slategray')
+       .style('padding','5px')
+       .style('color',d3.interpolate""""""+cmap+""""""(now/1000000))
+       .style('background',d3.interpolate""""""+cmap+""""""(now/1000000));
+    var x=d3.scaleLinear().domain([0,d3.max(data)]).range([0,.9*width])
+    div.selectAll('div').data(data).join('div')
+       .style('background','""""""+color+""""""')
+       .style('padding','5px').style('margin','3px')
+       .style('width',d=>x(d)+'px')
+       .style('font-family','""""""+font_family+""""""')
+       .style('font-size','""""""+str(font_size)+""""""px')
+       .text(d=>d);},100);
+</script>""""""
+    file='d3barh_chart'+str(random.uniform(0,9999999))+'.html'
+    with open(file,'w') as f:
+         f.write(html_str); f.close()
+    string=""""""<div id='html_string2'><iframe src='""""""+\
+           file+""""""' height=""""""+str(height)+\
+           """""" width=""""""+str(width)+""""""></iframe></div>""""""
+    display(HTML(string))
+","from IPython.display import display,HTML
+import ra"
+qr2020_task5_var1.py,"#7pts, TLE for the last ✓
+def display_matrix(M):
+    MS=''
+    for i in range(len(M)):
+        MS+=' '.join([str(r) for r in M[i]])+'\n'
+    print(MS)
+def trace(arr):
+    arr_trace,i=0,0
+    for row in arr:
+        arr_trace+=row[i]
+        i+=1
+    return arr_trace
+def gen_permutations(arr):
+    if len(arr)<=1: yield arr
+    else:
+        for p in gen_permutations(arr[1:]):
+            for i in range(len(arr)):
+                yield p[:i]+arr[0:1]+p[i:]     
+def find_matrix0(N,S):
+    baseN=S//N
+    baseR=list(range(1,N+1))
+    baseR=baseR[baseN-1:]+baseR[:baseN-1]
+    return [baseR[i:]+baseR[:i] for i in range(N,0,-1)]
+def find_matrix_gen(N,S):
+    row=list(range(1,N+1))
+    row_gen=gen_permutations(row)
+    flag,result=False,[]
+    for row in row_gen:
+        matrix=[[row[j%len(row)] 
+                 for j in range(i,i+len(row))] 
+                for i in range(len(row))]
+        matrix_gen=gen_permutations(matrix)
+        for rows in matrix_gen:
+            if trace(rows)==S:
+                flag=True
+                result=rows
+                break
+        if flag:
+            break
+    return result
+def find_matrix1(N,S):
+    matrix=[]
+    cols={i:list(range(1,N+1)) for i in range(N)}
+    if S==N*N-2:
+        base=[N,N-1]+list(range(1,N-1))
+        r1=[N-1]+list(range(2,N-2))+[N,N-2,1]
+        r2=[k+2 if k%2==0 else k for k in range(N-3)]+[N-2,N-1,N]
+    elif S==N+2:
+        base=list(range(1,N+1))
+        r1=[2,4]+list(range(5,N))+[1,N,3]
+        r2=[4,3]+[k+2 if k%2==0 else k for k in range(4,N-1)]+[N,2,1]
+    elif S==(N-2)*3+4:
+        base=[3,2,1,4]+list(range(5,N+1))
+        r1=[2,4]+list(range(5,N))+[3,N,1]
+        r2=[4,1]+[k+2 if k%2==0 else k for k in range(4,N-1)]+[N,2,3]
+    for i in range(N-3):
+        row=base[N-i:]+base[:N-i]
+        matrix.append(row)
+    matrix.append(r1)
+    matrix.append(r2)
+    for row in matrix:
+        for k in range(N):
+            cols[k].remove(row[k])
+    matrix.append([cols[k][0] for k in range(N)])
+    return matrix
+def find_matrix2(N,S):
+    if S==N+2:
+        base=list(range(1,N+1))
+    elif S==N*N-2:
+        base=list(range(N,0,-1))
+    elif S==(N-2)*3+4:
+        base=[3,2,1,4]+list(range(5,N+1))
+    matrix=[base]
+    for i in range(1,N):
+        if i%2==1:
+            base,row=matrix[i-1],[]
+            for j in range(N//2):
+                row+=[base[2*j+1],base[2*j]]
+            matrix.append(row)
+        else:
+            matrix.append(base[-2:]+base[:-2])
+    return matrix[:N-2]+[matrix[N-1],matrix[N-2]]  
+T=int(input())
+for t in range(T): 
+    N,K=map(int,input().split())
+    cond2=(N==2) and (K==3)
+    cond3=(N==3) and (K in [4,5,7,8])
+    cond4=(N>3) and (K in [N+1,N*N-1])
+    cond=cond2 or cond3 or cond4
+    if cond:
+        print('Case #{}: IMPOSSIBLE'.format(t+1))
+    else:
+        if K%N==0:
+            M=find_matrix0(N,K)
+        elif K not in [N+2,N*N-2,(N-2)*3+4]:
+            M=find_matrix_gen(N,K)
+        else:
+            if K%2==1:
+                M=find_matrix1(N,K)
+            else:
+                M=find_matrix2(N,K)
+        print('Case #{}: POSSIBLE'.format(t+1))
+        display_matrix(M)
+","#7pts, TLE for the last ✓
+def display_matrix(M):
+ "
+circle_mandala.py,"import numpy as np, pylab as pl
+import matplotlib.patches as pt
+cos=np.cos; sin=np.sin; pi=np.pi
+
+def rotate_xy(k,x,y):
+    return np.array([[cos(i*pi/k)*x-sin(i*pi/k)*y,
+                      sin(i*pi/k)*x+cos(i*pi/k)*y] 
+                     for i in range(2*k)])
+    
+def circle_center(k,m,n):
+    return np.array([rotate_xy(n,.5+k*i,.5+k*i) 
+                     for i in range(m)])
+    
+def circle_radius(m):
+    return [np.random.randint(300,1200)/1000 
+            for i in range(m)]
+
+def cicle_color(rgb,m):
+    if rgb=='r':
+        return [[1]+[np.random.randint(100,900)/1000 
+                     for j in range(2)] 
+                for i in range(m)]
+    if rgb=='g':
+        return [[np.random.randint(100,900)/1000]+\
+                 [1]+[np.random.randint(100,900)/1000] 
+                for i in range(m)]
+    if rgb=='b':
+        return [[np.random.randint(100,900)/1000 
+                 for j in range(2)]+[1] 
+                for i in range(m)]
+
+def cicle_coef():
+    k=np.random.randint(100,900)/1000
+    m=np.random.randint(3,9) 
+    n=np.random.randint(5,15)
+    return k,m,n
+
+def circle_mandala(rgb,fig_size):
+    k,m,n=cicle_coef()
+    c=circle_center(k,m,n)
+    r=circle_radius(m)
+    l=.1+r[m-1]+c.max()
+    col=cicle_color(rgb,m)
+    fig,ax=pl.subplots(
+        figsize=(fig_size,fig_size))
+    for i in range(m):
+        for j in range(2*n):
+            ax.add_patch(
+                pt.Circle(c[i][j],r[i],
+                          alpha=.1,color=col[i]))
+            ax.add_patch(
+                pt.Circle(c[i][j],r[i],fill=False,
+                          edgecolor=col[m-i-1]))
+    pl.title('$\mathscr{k=%.3f; \ m=%d; \ n=%d}$'\
+             %(k,m,n),fontsize=18)
+    pl.axis('off'); pl.xlim(-l,l); pl.ylim(-l,l)
+    pl.show();","import numpy as np, pylab as pl
+import matplotlib."
+qr2022_task4_var2.py,"# S ✓ TLE
+def gen_permutations(arr):
+    if len(arr)<=1: yield arr
+    else:
+        for p in gen_permutations(arr[1:]):
+            for i in range(len(arr)):
+                yield p[:i]+arr[0:1]+p[i:]
+def gen_uniques(I,P,F):
+    genI=gen_permutations(I)
+    seen=set()
+    for el in genI:
+        L=[]; FS=0; FL=[]
+        for i in range(len(el)):
+            L+=[el[i]]
+            f=[F[el[i]-1]]
+            p=P[el[i]-1] 
+            while (p!=0) and (p not in L):
+                L+=[p]
+                f.append(F[p-1])
+                p=P[p-1]
+            FL+=[max(f)]
+        if frozenset(FL) not in seen:
+            yield FL
+            seen.add(frozenset(FL))
+T=int(input())
+for t in range(T):
+    N=int(input())
+    F=list(map(int,input().split()))
+    P=list(map(int,input().split()))
+    I=[i+1 for i in range(N) if i+1 not in P]
+    genF=gen_uniques(I,P,F)
+    FMAX=0
+    for el in genF:
+        FS=sum(el)
+        if FS>FMAX: FMAX=FS
+    print('Case #{}: {}'.format(t+1,FMAX))
+","# S ✓ TLE
+def gen_permutations(arr):
+    if len(ar"
+bokeh_polar_plotting.py,"import numpy as np; from bokeh.layouts import gridplot
+from bokeh.plotting import figure,show,output_file
+from IPython.display import display,HTML
+t=np.linspace(0,2*np.pi,720); 
+x=(np.cos(12*t)+np.cos(6*t))*np.cos(t)
+y=(np.cos(12*t)+np.cos(6*t))*np.sin(t)
+TOOLS='pan,wheel_zoom,box_zoom,reset,save,box_select'
+lbl1=u'ϱ = cos 12 θ + cos 6 θ'; lbl2=u'2 ϱ'
+p1=figure(title='PLotting Example 1',tools=TOOLS)
+p1.circle(x,y,legend_label=lbl1,color='#3636ff')
+p1.circle(2*x,2*y,legend_label=lbl2,color='#ff3636')
+p1.legend.title='Polar Functions'
+p2=figure(title='Plotting Example 2',tools=TOOLS)
+p2.circle(x,y,legend_label=lbl1,color='#3636ff')
+p2.line(x,y,legend_label=lbl1,color='#3636ff')
+p2.square(2*x,2*y,legend_label=lbl2,
+          fill_color=None,line_color='#ff3636')
+p2.line(2*x,2*y,legend_label=lbl2,line_color='#ff3636')
+output_file('bokeh.html',title='plotting examples')
+show(gridplot([p1,p2],ncols=2,plot_width=300,plot_height=300))
+display(HTML(""""""<div id='data'><iframe src='bokeh.html' 
+height='350' width='650'></iframe></div>""""""))
+",import numpy as np; from bokeh.layouts import grid
+ps2018_task4_var1.py,"✓ ✓ MLE
+def ceil(n):
+    return -int(-n//1)
+def floor(n):
+    return int(n//1)
+T=int(input())
+for t in range(T): 
+    N,K=map(int,input().split())
+    C={i:0 for i in range(N+1)}
+    C[N]=1; S={N}; P=0
+    while P < K:
+        X=max(S)
+        XR=ceil((X-1)/2)
+        XL=floor((X-1)/2)
+        P=P+C[X]
+        S.remove(X); S.add(XL); S.add(XR)
+ #       print(XR,XL)
+        C[XL]+=C[X]; C[XR]+=C[X]
+    print('Case #{}: {} {}'.format(t+1,XR,XL))
+","✓ ✓ MLE
+def ceil(n):
+    return -int(-n//1)
+def fl"
+many_objects2images.py,"import numpy as np,pylab as pl
+import os,zipfile,cv2
+
+def get_files(dir_name,files_pre):
+    files_list=sorted(os.listdir(dir_name))
+    input_files=[f for f in files_list 
+                 if (f[-4:]=='.jpg' and files_pre==f[:-7])]
+    return input_files
+
+def get_edges(file):
+    img=cv2.imread(file)   
+    gray_img=cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    edges=cv2.Canny(gray_img,10,110) 
+    cv2.waitKey(0)
+    return img,gray_img,edges
+
+def get_closed(edges):
+    kernel=cv2.getStructuringElement(cv2.MORPH_RECT,(7,7)) 
+    closed=cv2.morphologyEx(edges,cv2.MORPH_CLOSE,kernel) 
+    cv2.waitKey(0)
+    return closed
+
+def get_contours(gray_img,closed):
+    (contours, _)=cv2.findContours(
+        closed.copy(),cv2.RETR_EXTERNAL,
+        cv2.CHAIN_APPROX_SIMPLE)
+    for c in contours: 
+        arc=cv2.arcLength(c,True) 
+        approx_pdp=cv2.approxPolyDP(c,.02*arc,True) 
+        contours_img=cv2.drawContours(
+            gray_img,[approx_pdp],-1,(0,255,0),2) 
+    cv2.waitKey(0) 
+    return contours,contours_img
+
+def check_image(img):
+    output=True
+    gray_img=cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    edges=cv2.Canny(gray_img,10,150)        
+    kernel=cv2.getStructuringElement(cv2.MORPH_RECT,(7,7)) 
+    closed=cv2.morphologyEx(edges,cv2.MORPH_CLOSE,kernel)
+    (contours, _)=cv2.findContours(
+        closed.copy(),cv2.RETR_EXTERNAL,
+        cv2.CHAIN_APPROX_SIMPLE) 
+    cv2.waitKey(0)
+    cond1=(min(img.shape[0],img.shape[1])<30)
+    cond2=(len(contours)!=1)
+    cond3=(img.mean()<48 or img.mean()>253)
+    if (cond1 or cond2 or cond3):
+        output=False
+    return output
+
+def create_zip(img_list,contours_list,files_pre_list):
+    files_list_out=[]
+    N=len(files_pre_list)
+    for l in range(N):
+        start=files_pre_list[l].find('0')
+        file_name_zip=files_pre_list[l][start:]+'.zip'
+        idx=0
+        for i in range(len(img_list[l])):
+            contours=contours_list[l][i]
+            img=img_list[l][i]
+            for c in contours: 
+                x,y,w,h=cv2.boundingRect(c)
+                m=np.random.randint(5,21)
+                if (w>30 and w<250 and h>30 and h<250):
+                    y1=int(y*(1-.001*m))
+                    y2=int((y+h)*(1+.001*m))
+                    x1=int(x*(1-.001*m))
+                    x2=int((x+w)*(1+.001*m))
+                    new_img=img[y1:y2,x1:x2]
+                    if check_image(new_img):
+                        new_img=cv2.resize(new_img,(32,32))
+                        file_name=files_pre_list[l][start:]+\
+                                  '_%03d'%idx+'.png'
+                        cv2.imwrite(file_name,new_img)
+                        if idx==0:
+                            with zipfile.ZipFile(file_name_zip,'w') as f:
+                                f.write(file_name)
+                        else:
+                            with zipfile.ZipFile(file_name_zip,'a') as f:
+                                f.write(file_name)
+                        os.remove(file_name)
+                        idx+=1 
+        with zipfile.ZipFile(file_name_zip,'r') as f:
+            curr_file_list_out=(f.namelist())
+            f.close()
+            files_list_out+=[curr_file_list_out]
+    return files_list_out
+
+dir_name='../input/object-detection/'
+files_pre_list=['letters_01_'+'%02d'%l+'_00' 
+                for l in range(2)]
+
+def many_objects2images(dir_name=dir_name,
+                        files_pre_list=files_pre_list):
+    N=len(files_pre_list)
+    input_files_list=[]
+    input_files_list+=\
+    [get_files(dir_name,files_pre_list[l])
+     for l in range(N)]
+    img_list,gray_img_list,edges_list=[],[],[]
+    for l in range(N):
+        curr_img_list=[]
+        curr_gray_img_list=[]
+        curr_edges_list=[]
+        for i in range(len(input_files_list[l])):        
+            img,gray_img,edges=\
+            get_edges(dir_name+input_files_list[l][i])
+            curr_img_list+=[img]
+            curr_gray_img_list+=[gray_img]
+            curr_edges_list+=[edges]
+        img_list+=[curr_img_list]
+        gray_img_list+=[curr_gray_img_list]
+        edges_list+=[curr_edges_list]
+    closed_list=[]
+    for l in range(N):
+        curr_closed_list=[]
+        for i in range(len(input_files_list[l])):
+            closed=get_closed(edges_list[l][i])
+            curr_closed_list+=[closed]
+        closed_list+=[curr_closed_list] 
+    contours_list,contours_img_list=[],[]
+    for l in range(N):
+        curr_contours_list,curr_contours_img_list=[],[]
+        for i in range(len(input_files_list[l])):
+            contours,contours_img=\
+            get_contours(gray_img_list[l][i],
+                         closed_list[l][i])
+            curr_contours_list+=[contours]
+            curr_contours_img_list+=[contours_img]
+        contours_list+=[curr_contours_list]
+        contours_img_list+=[curr_contours_img_list]
+    files_list_out=create_zip(
+        img_list,contours_list,files_pre_list)
+    print('Numbers of Images in Zip Files:\n',
+          [len(files_list_out[l]) 
+           for l in range(N)])","import numpy as np,pylab as pl
+import os,zipfile,c"
+h5file2data.py,"import h5py,os,pandas as pd,numpy as np
+import seaborn as sn,pylab as pl
+from IPython.display import display,HTML
+# Crayola Colors
+c1,c2,c3,c4,c5,c6,c7,c8,c9,c10=\
+'#FF355E','#FF6037','#FF9966','#FFCC33','#FFFF66',\
+'#CCFF00','#66FF66','#50BFE6','#FF6EFF','#FF00CC'
+fs1,fs2,fs3,fs4,fs5,fs6,fs7,fs8=10,12,14,16,18,20,25,30
+f1,f2,f3,f4,f5,f6,f7=\
+'Smokum','Akronim','Wallpoet','Orbitron',\
+'Ewert','Lobster','Roboto'
+
+def dhtml(string,fontcolor=c1,font=f1,fontsize=fs7):
+    display(HTML(""""""<style>
+    @import 'https://fonts.googleapis.com/css?family=""""""\
+    +font+""""""&effect=3d-float';</style>
+    <h1 class='font-effect-3d-float' 
+    style='font-family:""""""+font+\
+    """"""; color:""""""+fontcolor+\
+    """"""; font-size:""""""+str(fontsize)+""""""px;'>
+    %s</h1>""""""%string))
+
+def h5file2data(h5file,cmap):
+    with h5py.File(h5file,'r') as f:
+        keys=list(f.keys())
+        dhtml('file keys: '+', '.join(keys))
+        images=np.array(f[keys[0]])
+        labels=np.array(f[keys[1]])
+        names=[el.decode('utf-8') 
+               for el in f[keys[2]]]
+        f.close()
+    del h5file
+    N=labels.shape[0]; n=int(.1*N)
+    shuffle_ids=np.arange(N)
+    np.random.RandomState(12).shuffle(shuffle_ids)
+    images=images[shuffle_ids]
+    labels=labels[shuffle_ids]
+    x_test,x_valid,x_train=\
+    images[:n],images[n:2*n],images[2*n:]
+    y_test,y_valid,y_train=\
+    labels[:n],labels[n:2*n],labels[2*n:]
+    dhtml('function outputs: ')
+    df=pd.DataFrame([[x_train.shape,x_valid.shape,x_test.shape],
+                     [x_train.dtype,x_valid.dtype,x_test.dtype],
+                     [y_train.shape,y_valid.shape,y_test.shape],
+                     [y_train.dtype,y_valid.dtype,y_test.dtype]],
+                    columns=['train','valid','test'],
+                    index=['image shape','image type',
+                           'label shape','label type'])
+    display(df)
+    dhtml('distribution of labels: ')
+    df=pd.DataFrame(labels,columns=['label'])
+    df['name']=[names[l] for l in labels]
+    pl.figure(figsize=(7,5))
+    sn.countplot(y='name',data=df,
+                 palette=cmap,alpha=.5)
+    pl.show()
+    return names,x_train,x_valid,x_test,\
+           y_train,y_valid,y_test
+           
+def display_images(images,labels,names,n):
+    fig=pl.figure(figsize=(10,n//2))
+    randch=np.random.choice(
+        len(labels),size=n,replace=False)
+    for i,idx in enumerate(randch):
+        ax=fig.add_subplot(
+            n//4,4,i+1,xticks=[],yticks=[])
+        ax.imshow(images[idx])
+        label=names[labels[idx]]
+        ax.set_title(""{} * {}""\
+                     .format(labels[idx],label),
+                     fontsize=10)
+    pl.show()","import h5py,os,pandas as pd,numpy as np
+import sea"
+esrgantf2_superresolution.py,"import tensorflow as tf,tensorflow_hub as hub,numpy as np
+def esrgantf2_superresolution(img_path,img_size=50):
+    model=hub.load('https://tfhub.dev/captain-pool/esrgan-tf2/1')
+    func=model.signatures[tf.saved_model.DEFAULT_SERVING_SIGNATURE_DEF_KEY]
+    func.inputs[0].set_shape([1,img_size,img_size,3])
+    converter=tf.lite.TFLiteConverter.from_concrete_functions([func])
+    converter.optimizations=[tf.lite.Optimize.DEFAULT]
+    tflite_model=converter.convert()
+    with tf.io.gfile.GFile('ESRGAN.tflite','wb') as f:
+        f.write(tflite_model)
+    esrgan_model_path='./ESRGAN.tflite'
+    img_path=tf.keras.utils.get_file(
+        'img'+str(np.random.randint(1,99999))+'.png',img_path)
+    lr=tf.io.read_file(img_path)
+    lr=tf.image.decode_jpeg(lr)
+    lr=tf.image.resize(lr,[img_size,img_size])
+    lr=tf.expand_dims(lr.numpy()[:,:,:3],axis=0)
+    lr=tf.cast(lr,tf.float32)
+    interpreter=tf.lite.Interpreter(model_path=esrgan_model_path)
+    interpreter.allocate_tensors()
+    input_details=interpreter.get_input_details()
+    output_details=interpreter.get_output_details()
+    interpreter.set_tensor(input_details[0]['index'],lr)
+    interpreter.invoke()
+    output_data=interpreter.get_tensor(output_details[0]['index'])
+    sr=tf.squeeze(output_data,axis=0)
+    sr=tf.clip_by_value(sr,0,255)
+    sr=tf.round(sr); sr=tf.cast(sr,tf.uint8)
+    lr=tf.cast(tf.squeeze(lr,axis=0),tf.uint8)
+    return lr,sr
+","import tensorflow as tf,tensorflow_hub as hub,nump"
+qr2022_task1_var1.py,"T=int(input())
+for t in range(T):
+    N=input()
+    print('Case #{}:'.format(t+1))
+    [R,C]=[int(n) for n in N.split()]
+    str1='..+-+'+(C-2)*'-+'
+    str2='..|.|'+(C-2)*'.|'
+    str3='+-+-+'+(C-2)*'-+'
+    str4='|.|.|'+(C-2)*'.|'
+    [print(el) for el in [str1,str2,str3,str4,str3]]
+    for i in range(R-2):
+        print(str4)
+        print(str3)
+","T=int(input())
+for t in range(T):
+    N=input()
+  "
+rate_map.py,"import pandas as pd,pylab as pl
+def rate_map(cmap):
+    fp='https://data.cityofnewyork.us/resource/'
+    se=pd.read_json(fp+'h7rb-945c.json')
+    fl=['graduation_rate','attendance_rate',
+        'latitude','longitude']
+    se=se[fl].dropna()
+    f,ax=pl.subplots(ncols=2,figsize=(10,5),
+                     sharey=True)
+    f=pl.gcf()
+    for i in range(2):
+        se[fl[i]]=se[fl[i]].astype('string')\
+        .str.replace('N/A','0').astype('float')
+        se.plot(kind='scatter',ax=ax[i],
+            x='longitude',y='latitude',
+            s=10,c=fl[i],alpha=.8,grid=True,
+            title=fl[i].replace('_',' '),
+            cmap=pl.get_cmap(cmap))
+        ax[i].set_facecolor('slategray')
+        cax=f.get_axes()[i+2]
+        cax.set_ylabel('')
+    pl.show()","import pandas as pd,pylab as pl
+def rate_map(cmap)"
+notebook_style.py,"from IPython.core.display import display,HTML
+
+def notebook_style(span_h_font='Ewert',
+                   span_h_color='#ff3636',
+                   prompt_font='Ewert',
+                   prompt_in_color='#ff3636',
+                   prompt_out_color='#3636ff',
+                   warn_font='Roboto',
+                   warn_color='#ff36ff',
+                   out_font='Roboto',
+                   out_color='#3636ff',
+                   background_out_color='whitesmoke',
+                   span_text_shadow=True):
+    style_str=""""""<style>""""""+\
+    """"""@import 'https://fonts.googleapis.com/css?family=""""""+\
+    prompt_font+""""""|""""""+out_font+""""""|""""""+warn_font+""""""'; """"""
+    if span_text_shadow==True:
+        style_str+=""""""span {color:black; """"""+\
+                   """"""text-shadow:4px 4px 4px #aaa;}""""""
+    style_str+=""""""div.alert {text-shadow:4px 4px 4px #aaa;}""""""
+    style_str+=""""""span.h1,span.h2,span.h3,""""""+\
+               """"""span.h4,span.h5,span.h6 """"""+\
+               """"""{color:""""""+span_h_color+""""""; """"""+\
+               """"""font-family:""""""+span_h_font+"""""";} """"""
+    style_str+=""""""div.warn {background-color:""""""+\
+               background_out_color+""""""; color:""""""+\
+               warn_color+""""""; font-size:110%; """"""+\
+               """"""font-family:""""""+warn_font+"""""";} """"""
+    for el in [""""""div.output_area pre"""""",
+               """"""div.output_stderr pre""""""
+               """"""div.output_subarea"""""",
+               """"""div.output_html"""""",
+               """"""div.output_stderr""""""]:
+        style_str+=el+""""""{background-color:""""""+\
+                   background_out_color+""""""; color:""""""+\
+                   out_color+""""""; font-size:110%; """"""+\
+                   """"""font-family:""""""+out_font+"""""";} """"""
+    style_str+=""""""div.input_prompt {color:""""""+\
+               prompt_in_color+""""""; """"""+\
+               """"""font-family:""""""+prompt_font+"""""";} """"""
+    style_str+=""""""div.output_prompt {color:""""""+\
+               prompt_out_color+""""""; """"""+\
+               """"""font-family:""""""+prompt_font+"""""";} """"""
+    style_str+="""""".cm-s-ipython span.cm-comment {color:darkslategray;} """"""
+    style_str+="""""".cm-s-ipython span.cm-def {color:#3636ff;} """"""
+    style_str+="""""".cm-s-ipython span.cm-operator {color:#ff36ff;} """"""
+    style_str+="""""".cm-s-ipython span.cm-keyword {color:darkgreen;} """"""
+    style_str+="""""".cm-s-ipython span.cm-string {color:#ff3636;} """"""
+    style_str+=""""""</style>""""""
+    display(HTML(style_str))","from IPython.core.display import display,HTML
+
+def"
+d3barchart_list.py,"from IPython.core.display import display,HTML
+import random
+
+def d3barchart_list(num_list1,num_list2,background_color='silver',
+                    width=600,height=400):
+    num_list1,num_list2=str(num_list1),str(num_list2) 
+    randi=random.randint(1,999999999)
+    css_str=""""""<style>#run_update 
+    {fill:slategray;stroke:#fff; fill-opacity:.7}</style>""""""
+    html_str=""""""<script src='https://d3js.org/d3.v6.min.js'>
+    <""""""+""""""/script><svg id='svg""""""+str(randi)+""""""' 
+    style='background-color:""""""+background_color+"""""";'></svg><br/><br/>""""""
+    scr_str=""""""<script>
+        var data=""""""+num_list1+"""""",m=20; 
+        var n=data.length,ymax=1.2*d3.max(data),
+            margin={top:m,right:m,bottom:m,left:m},
+            width=""""""+str(width)+""""""-margin.left-margin.right,
+            height=""""""+str(height)+""""""-margin.top-margin.bottom;
+        var trans='translate('+margin.left+','+margin.top+')'; 
+        var xScale=d3.scaleBand().domain(d3.range(n))
+                     .rangeRound([0,width]).paddingInner(.1),
+            yScale=d3.scaleLinear().domain([0,ymax]).range([0,height]);
+        var svg=d3.select('#svg""""""+str(randi)+""""""')
+                  .attr('width',width).attr('height',height)
+                  .attr('transform',trans); 
+        svg.selectAll('rect').data(data).enter().append('rect')
+           .attr('x',function(d,i) {return xScale(i);})
+           .attr('y',function(d) {return height-yScale(d);})
+           .attr('width',xScale.bandwidth())
+           .attr('height',function(d) {return yScale(d);})
+           .attr('fill',function(d) { 
+               return 'rgb('+Math.round(d*50/ymax)+',0,'+
+                       Math.round(d*255/ymax)+')';}); 
+        function newData() {
+            var n=data.length; 
+            while (data.length>0) {data.pop();}; 
+            for (var i=0; i<n; i++) {data.push(""""""+num_list2+""""""[i]);}; 
+            return data}; 
+        function updateBar() {
+            svg.selectAll('rect').data(data).transition().duration(3000)
+               .attr('y',function(d) {return height-yScale(d);})
+               .attr('height',function(d) {return yScale(d);})
+               .attr('fill',function(d) {
+                   return 'rgb('+Math.round(d*50/ymax)+',0,'+
+                          Math.round(d*255/ymax)+')';}); }; 
+        svg.append('circle').attr('id','run_update')
+           .attr('cx',m).attr('cy',1.25*m).attr('r',15)
+           .on('click',function() {newData(); updateBar();}); 
+        svg.append('text').text(' <<< UPDATE')
+           .attr('x',2*m).attr('y',1.25*m).attr('fill','#fff');
+    </script>""""""
+    display(HTML(css_str+html_str+scr_str))","from IPython.core.display import display,HTML
+impo"
+keras_history_plot.py,"import os,pylab as pl,pandas as pd
+from IPython.core.display import display,HTML
+
+pl.style.use('seaborn-whitegrid')
+
+def pandas_history(fit_history,csv=False):
+    keys=list(fit_history.history.keys())
+    list_history=[fit_history.history[keys[i]] 
+                  for i in range(len(keys))]
+    df_history=pd.DataFrame(list_history).T
+    df_history.columns=keys
+    if csv: 
+        df_history.to_csv('df_history.csv',
+                          index=False)
+    return df_history 
+    
+def keras_history_plot(fit_history,fig_size=10,
+                       col1='#00ff66',col2='#6600ff',
+                       start=None,end=None):
+    df_history=pandas_history(fit_history)
+    if start==None: start=0
+    if end==None: end=df_history.shape[0]
+    fig=pl.figure(figsize=(fig_size,int(1.5*fig_size)))
+    ax1=fig.add_subplot(311)
+    df_history.iloc[start:end,[0,2]].plot(
+        ax=ax1,color=[col1,col2])
+    ax2=fig.add_subplot(312)
+    df_history.iloc[start:end,[1,3]].plot(
+        ax=ax2,color=[col1,col2])
+    ax3=fig.add_subplot(313)
+    df_history.iloc[start:end,4].plot(
+        ax=ax3,color=col1)
+    pl.legend(); pl.show();","import os,pylab as pl,pandas as pd
+from IPython.co"
+amplitude_wavfile.py,"import numpy as np,pylab as pl,urllib
+from scipy.io import wavfile
+url='https://ccrma.stanford.edu/~jos/wav/'
+file='slideflute.wav'
+def amplitude_wavfile(url=url,file=file,fig_size=7,
+	                  color1='#3636ff',color2='#ff36ff'):
+    input_file=urllib.request.urlopen(url+file)
+    output_file=open(file,'wb')
+    output_file.write(input_file.read())
+    output_file.close(); input_file.close()
+    sr,wav=wavfile.read(file);
+    wav=wav.astype('float')/np.iinfo(np.int16).max
+    f,ax=pl.subplots(1,figsize=(fig_size,fig_size))
+    ax.plot(wav[:,1],c=color1,lw=.05)
+    ax.plot(wav[:,0],c=color2,lw=.05,alpha=.7)
+    ax.set_ylabel('amplitude')
+    pl.grid(); pl.show()
+amplitude_wavfile()","import numpy as np,pylab as pl,urllib
+from scipy.i"
+radial_gradient_header.py,"import random; from IPython.display import display,HTML
+from IPython.core.magic import register_line_magic
+@register_line_magic
+def radial_gradient_header(params):
+    randi=str(random.randint(1,9999999))
+    params=params.split('|'); string=params[0]
+    if len(params)==1: 
+        font_size=str(30); font_family='Ewert'
+    elif len(params)==2: 
+        font_size=params[1]; font_family='Ewert'
+    else:
+        font_size=params[1]; font_family=params[2]
+    html_str=""""""<style>@import 'https://fonts.googleapis.com/css?""""""+\
+    """"""family=""""""+font_family+""""""'; #div""""""+randi+\
+    """""" {background:white; padding:2px;}
+    .textrg {display:inline-block; font-size:""""""+font_size+\
+    """"""px; line-height:1.1; padding:5px; font-family:""""""+font_family+\
+    """""",sans-serif; text-transform:uppercase;
+       background:radial-gradient(
+           circle farthest-corner at center center,
+           orange,magenta,cyan) no-repeat;
+       -webkit-background-clip:text;
+       -webkit-text-fill-color:transparent;}</style>
+    <div id='div""""""+randi+""""""'><text class='textrg'>""""""+string+\
+    """"""</text></div>""""""
+    display(HTML(html_str))
+",import random; from IPython.display import display
+qr2018_task1_var1.py,"def damage(SC):
+    K,D,N=1,0,len(SC)
+    if 'C' not in SC:
+        D==N
+    for i in range(N):
+        if SC[i]=='S':
+            D+=K
+        else:
+            K*=2
+    return D
+def reduce_damage(SC,D):
+    C,N=0,len(SC)      
+    if damage(SC)>D:
+        while 'CS' in SC:
+            idx=SC[::-1].index('SC')
+            SC=SC[:N-idx-2]+'SC'+SC[N-idx:]
+            C+=1
+            if damage(SC)<=D:
+                break
+    return C,damage(SC)-D
+T=int(input())
+for t in range(T): 
+    [D,SC]=input().split()
+    D=int(D)
+    C,DIFF=reduce_damage(SC,D)
+    if DIFF>0:
+        print('Case #{}: IMPOSSIBLE'.format(t+1))
+    else:
+        print('Case #{}: {}'.format(t+1,C))
+","def damage(SC):
+    K,D,N=1,0,len(SC)
+    if 'C' n"
+dhtml.py,"from IPython.display import display,HTML
+# Crayola Colors
+c1,c2,c3,c4,c5,c6,c7,c8,c9,c10=\
+'#FF355E','#FF6037','#FF9966','#FFCC33','#FFFF66',\
+'#CCFF00','#66FF66','#50BFE6','#FF6EFF','#FF00CC'
+fs1,fs2,fs3,fs4,fs5,fs6,fs7,fs8=10,12,14,16,18,20,25,30
+f1,f2,f3,f4,f5,f6,f7=\
+'Smokum','Akronim','Wallpoet','Orbitron',\
+'Ewert','Lobster','Roboto'
+def dhtml(string,fontcolor=c1,font=f1,fontsize=fs7):
+    display(HTML(""""""<style>
+    @import 'https://fonts.googleapis.com/css?family=""""""\
+    +font+""""""&effect=3d-float';</style>
+    <h1 class='font-effect-3d-float' 
+    style='font-family:""""""+font+\
+    """"""; color:""""""+fontcolor+\
+    """"""; font-size:""""""+str(fontsize)+""""""px;'>
+    %s</h1>""""""%string))","from IPython.display import display,HTML
+# Crayola"
+black_white_animation.py,"import warnings; warnings.filterwarnings('ignore')
+import imageio,numpy as np,pandas as pd
+import os,h5py,seaborn as sn,pylab as pl
+from skimage.transform import resize
+from skimage import io
+from IPython.display import display,HTML
+
+def randcoord(img_size_out,img_size=1024):
+    a=(.5+.1**6*np.random.randint(1,999999))*\
+      np.random.choice([-1,1],1)[0]
+    b=np.random.randint(3,10)
+    c=.1**3*np.random.randint(1,99)*\
+      np.random.choice([-1,1],1)[0]
+    t=np.arange(0,12*np.pi,1/7200)
+    fx=np.sin(t/6)+a*np.sin(b*t)*np.cos(t)-\
+       c*np.sin(16*b*t)
+    fy=np.cos(t/6)+a*np.sin(b*t)*np.sin(t)-\
+       c*np.cos(16*b*t)
+    fx=.951*(fx-1.051*fx.min())/(fx.max()-fx.min())
+    fy=.951*(fy-1.051*fy.min())/(fy.max()-fy.min())
+    f=np.array([[fx[i],fy[i]] for i in range(len(t))])
+    return f,np.around(a,6),b,np.around(c,3)
+
+def interpolate_hypersphere(v1,v2,steps):
+    v1norm=np.linalg.norm(v1)
+    v2norm=np.linalg.norm(v2)
+    v2normalized=v2*(v1norm/v2norm)
+    vectors=[]
+    for step in range(steps):
+        interpolated=v1+(v2normalized-v1)*step/(steps-int(1))
+        interpolated_norm=np.linalg.norm(interpolated)
+        interpolated_normalized=\
+        interpolated*(v1norm/interpolated_norm)
+        vectors.append(interpolated_normalized)
+    return np.array(vectors)
+
+def create_images(coords_int,img_size_out,img_size=1024):
+    imgs=[]
+    for i in range(coords_int.shape[0]):
+        fx=coords_int[i,:,0]; fy=coords_int[i,:,1]
+        fx=np.array(np.clip(fx*img_size,0,img_size-1),dtype='int32')
+        fy=np.array(np.clip(fy*img_size,0,img_size-1),dtype='int32')
+        f=np.array([[fx[i],fy[i]] for i in range(len(fx))])
+        img=np.ones((img_size,img_size))
+        for [x,y] in f: img[y,x]=0
+        img=resize(img,(img_size_out,img_size_out))
+        imgs.append(img)
+    return np.array(imgs)
+
+def preprocess_img(
+    file1,file2,
+    file_path='../input/image-examples-for-mixed-styles/'):
+    img1=io.imread(file_path+file1)
+    img2=io.imread(file_path+file2)
+    imgbw1=np.ones(img1.shape[:2])
+    imgbw1[img1[:,:,1]<int(200)]=0
+    imgbw2=np.ones(img2.shape[:2])
+    imgbw2[img2[:,:,1]<int(200)]=0
+    coords1=np.array(np.where(imgbw1<1)).T
+    coords2=np.array(np.where(imgbw2<1)).T
+    while not coords2.shape==coords1.shape:
+        randi=np.random.randint(
+            0,coords2.shape[0]-1,
+            coords2.shape[0]-coords1.shape[0])
+        coords2=np.delete(coords2,list(randi),axis=0)
+    return coords1,coords2
+
+def create_display_gif(img_size_out=256,steps=60):
+    sh=randcoord(img_size_out)[0].shape
+    coords=np.zeros((2,sh[0],sh[1]),dtype=np.float32)
+    labels=np.zeros((2,),dtype=np.int32)
+    targets=np.zeros((2,2),dtype=np.float32)
+    for i in range(2):
+        coord,a,b,c=randcoord(img_size_out)
+        coords[i,:,:]=coord
+        labels[i],targets[i,0],targets[i,1]=b-3,a,c
+    coords_int=np.vstack(
+        [interpolate_hypersphere(coords[1],coords[0],steps),
+         interpolate_hypersphere(coords[0],coords[1],steps)])
+    imgs=create_images(coords_int,img_size_out)
+    file_name='pic.gif'
+    imageio.mimsave(file_name,imgs)
+    s1='<div id=""imgs_gif""><img src=""'
+    s2='"" height=""400"" width=""400""></img></div>'
+    display(HTML(s1+file_name+s2))
+",import warnings; warnings.filterwarnings('ignore')
+qr2021_task1_var1.py,"T=int(input())
+for t in range(T):
+    COST=0
+    I=int(input())
+    ARR=[int(n) for n in input().split()]
+    for i in range(I-1):
+        j=i+ARR[i:].index(min(ARR[i:]))
+        if i==j:
+            COST+=1 
+        else:
+            ARR=ARR[:i]+ARR[i:j+1][::-1]+ARR[j+1:]
+            COST+=j-i+1
+    print('Case #{}: {}'.format(t+1,COST))
+","T=int(input())
+for t in range(T):
+    COST=0
+    I"
+qr2020_task1_var2.py,"def check_list(arr):
+    vis=set()
+    out=0
+    for x in arr:
+        if x not in vis:
+            vis.add(x)
+        else: 
+            out=1
+            break 
+    return out
+T=int(input())
+for t in range(T): 
+    N=int(input())
+    k,r,c=0,0,0
+    M=[]
+    for i in range(N):
+        I=input().split()
+        M.append([int(i) for i in I])
+        r+=check_list(M[i])
+        for j in range(N):
+            if i==j:
+                k+=M[i][j]
+            if i==N-1: 
+                c+=check_list([M[i][j] for i in range(N)])
+    print('Case #%d: %d %d %d'%((t+1,k,r,c))) 
+","def check_list(arr):
+    vis=set()
+    out=0
+    f"
+randomgraph_shortestpath.py,"import numpy as np,networkx as nx,pylab as pl
+
+def random_graph(num_min=7,num_max=15):
+    num_nodes=np.random.randint(num_min,num_max+1)
+    letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    nodes=list(letters)[:num_nodes]
+    edges=[]
+    for i in range(num_nodes):
+        num_edges=np.random.randint(1,num_nodes-1)
+        curr_edges=sorted(np.random.choice(
+            nodes[:i]+nodes[i+1:],
+            num_edges,replace=False))
+        curr_edges=[(ce,np.random.randint(1,15))
+                    for ce in curr_edges]
+        edges+=[curr_edges]
+    return dict(zip(nodes,edges))
+
+def random_shortestpath(graph):
+    n=len(graph.keys()); rg=nx.Graph()
+    for key in graph.keys():
+        for value in graph[key]:
+           rg.add_edge(key,value[0],
+                       length=value[1])
+    [start,end]=np.random.choice(
+        n,2,replace=False)
+    start=list(graph.keys())[start]
+    end=list(graph.keys())[end]
+    shortest_path=nx.shortest_path(
+        rg,start,end,
+        weight='length')
+    shortest_path_list=[]
+    for i in range(len(shortest_path)-1):   
+        shortest_path_list.append(
+            (shortest_path[i],shortest_path[i+1]))
+    print('start: '+start+'; end: '+end)
+    print('the shortest path: ',shortest_path_list)
+    return rg,shortest_path,shortest_path_list
+
+def randomgraph_shortestpath(graph,fig_size=7):
+    rg,shortest_path,shortest_path_list=\
+    random_shortestpath(graph)
+    lengths=nx.get_edge_attributes(rg,'length')   
+    pos=nx.spring_layout(rg)
+    pl.figure(figsize=(fig_size,fig_size))
+    nx.draw(rg,pos,with_labels=True,
+            node_shape='8',node_size=1000, 
+            node_color='steelblue',
+            edge_color='silver',
+            width=5,alpha=.75)
+    nx.draw_networkx_edge_labels(
+        rg,pos,edge_labels=lengths)
+    nx.draw_networkx_edges(
+        rg,pos=pos,edgelist=shortest_path_list,
+        edge_color='#ff9966',width=10,alpha=.5)
+    pl.show();","import numpy as np,networkx as nx,pylab as pl
+
+def"
+tfpreprocess_cifar.py,"import warnings; warnings.filterwarnings('ignore')
+import tensorflow as tf,numpy as np,pandas as pd
+import tensorflow_datasets as tfds
+from IPython.display import display,HTML
+pd.set_option('precision',3)
+tf.keras.backend.set_floatx('float64')
+tfds.disable_progress_bar()
+img_size=32
+buffer_size,batch_size=10000,64
+
+c1,c2,f1,f2,fs1,fs2=\
+'#11ff66','#6611ff','Wallpoet','Orbitron',20,10
+
+def dhtml(string,fontcolor=c1,font=f1,fontsize=fs1):
+    display(HTML(""""""<style>
+    @import 'https://fonts.googleapis.com/css?family=""""""\
+    +font+""""""&effect=3d-float';</style>
+    <h1 class='font-effect-3d-float' 
+    style='font-family:""""""+font+\
+    """"""; color:""""""+fontcolor+\
+    """"""; font-size:""""""+str(fontsize)+""""""px;'>
+    %s</h1>""""""%string))
+
+def load_cifar():
+    cifar=tfds.builder('cifar10')
+    cifar.download_and_prepare()
+    ds=cifar.as_dataset(shuffle_files=False,
+                        split=['train','test'])
+    cifar_train,cifar_test=ds[0],ds[1]
+    dhtml(cifar.info.features['image'],c2,f2,fs2)
+    dhtml(cifar.info.features['label'],c2,f2,fs2)
+    cifar_train=cifar_train.map(
+        lambda item:(tf.cast(item['image'],tf.float32)/255., 
+                     tf.cast(item['label'],tf.int32)))
+    cifar_test=cifar_test.map(
+        lambda item:(tf.cast(item['image'],tf.float32)/255., 
+                      tf.cast(item['label'],tf.int32)))
+    tf.random.set_seed(123)
+    cifar_train=cifar_train.shuffle(
+        buffer_size=buffer_size,
+        reshuffle_each_iteration=False)
+    cifar_valid=cifar_train.take(buffer_size).batch(batch_size)
+    cifar_train=cifar_train.skip(buffer_size).batch(batch_size)
+    return cifar_train,cifar_valid,cifar_test   
+",import warnings; warnings.filterwarnings('ignore')
+color_left_header.py,"from IPython.display import display,HTML
+from IPython.core.magic import register_line_magic
+import random
+
+@register_line_magic
+def left_header(params):
+    params=params.split('|'); string=params[0]
+    if len(params)==1: font_size=24; font_family='Ewert'
+    elif  len(params)==2: font_size=int(params[1]); font_family='Ewert' 
+    else: font_size=int(params[1]); font_family=params[2]
+    width=650; height=font_size*2.5
+    randi=str(random.uniform(0,9999999))
+    html_str=""""""
+    <head><script src='https://d3js.org/d3.v6.min.js'></script>
+    </head><style>@import 'https://fonts.googleapis.com/css?family=""""""+\
+    font_family+""""""&effect=3d'; #colorized1 {font-family:""""""+font_family+\
+    """"""; color:white; padding-left:10px; font-size:""""""+str(font_size)+\
+    """"""px;}</style><h1 id='colorized1' class='font-effect-3d'>""""""+string+\
+    """"""</h1><script>
+    var tc=setInterval(function(){
+        var now=new Date().getTime();
+        var iddoc1=document.getElementById('colorized1');
+        iddoc1.style.color=d3.interpolateRainbow(now/20000); },1)
+    </script>""""""
+    file='d3header'+randi+'.html'
+    with open(file,'w') as f:
+         f.write(html_str); f.close()
+    string=""""""<div id='html_string""""""+randi+\
+    """"""'><iframe src='""""""+file+\
+    """"""' height=""""""+str(height)+"""""" width=""""""+str(width)+\
+    """""" style='display:block;'></iframe></div>""""""
+    display(HTML(string))
+","from IPython.display import display,HTML
+from IPyt"
+plotly_images.py,"import os,numpy as np
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+from skimage import io
+def plotly_images(file_path):
+    files=os.listdir(file_path)
+    numbers=np.random.randint(1,len(files),5)
+    fig=make_subplots(1,5); steps=[]
+    for step in np.arange(1,6,1):
+        img=io.imread(file_path+files[numbers[step-1]])
+        img=img[:,:,:3]
+        fig.add_trace(go.Image(z=img),1,step)
+        fig.data[step-1].visible=False
+    fig.data[0].visible=True
+    for i in range(len(fig.data)):
+        step=dict(method=""update"",
+                  args=[{""visible"":[False]*len(fig.data)}])
+        step[""args""][0][""visible""][i]=True
+        steps.append(step)
+    sliders=[dict(active=0,pad={""t"":5},steps=steps)]
+    fig.update_layout(width=500,height=250,
+                      sliders=sliders,
+                      template='plotly_dark',
+                      title_text=""Image Examples"",
+                      title_font=dict(size=12))
+    fig.update_xaxes(showticklabels=False)\
+    .update_yaxes(showticklabels=False)
+    return fig
+#fig.show()","import os,numpy as np
+import plotly.graph_objects "
+qr2020_task4_var1.py,"def query(string):
+    print(string,flush=True)
+    return input()    
+def update_by_pairs(i,b,inrow,complement,reverse):
+    answer1=query(str(i+1))
+    answer2=query(str(b-i))
+    if (complement==None and answer1==answer2):
+        complement=i
+    if (reverse==None and answer1!=answer2):
+        reverse=i
+    inrow=inrow[:i]+answer1+inrow[i+1:b-i-1]+answer2+inrow[b-i:]
+    return inrow,complement,reverse
+def is_complemented(string,complement):
+    if (complement==None):
+        query('1')
+    else:
+        if string[complement]!=query(str(complement+1)):
+            string=string.replace('0','*')\
+            .replace('1','0').replace('*','1')
+    return string
+def is_reversed(string,reverse):
+    if (reverse==None):
+        query('1')
+    else:
+        if string[reverse]!=query(str(reverse+1)):
+            string=string[::-1]
+    return string
+t,b=map(int,input().split())
+for case in range(t):
+    inrow,start,complement,reverse=b*'?',5,None,None
+    for i in range(start):
+        inrow,complement,reverse=\
+        update_by_pairs(i,b,inrow,complement,reverse)
+    while ('?' in inrow and start<b//2):
+        if start%4==1:
+            inrow=is_complemented(inrow,complement)
+            inrow=is_reversed(inrow,reverse)
+        inrow,complement,reverse=\
+        update_by_pairs(start,b,inrow,complement,reverse)
+        start+=1
+    answer=query(inrow)
+    if answer!='Y':  
+        exit()
+","def query(string):
+    print(string,flush=True)
+  "
+qr2019_task4_var1.py,"def dat_bae_cols(N,B,F):
+    Nb=(N-1).bit_length()
+    outcols=[format(i,'#0%db'%(Nb+2))[2:]
+             for i in range(N)]
+    incols=N*['']
+    for j in range(Nb):
+        if j>F-1:
+            break
+        outrow=''.join(
+            [outcols[i][Nb-j-1] for i in range(N)])
+        print(outrow,flush=True)
+        inrow=input()
+        for i in range(N-B):
+            incols[i]=inrow[i]+incols[i]
+    return outcols,incols
+def dat_bae_ans(N,B,F,outcols,incols):    
+    answer=[]
+    for i in range(N):
+        if outcols[i] not in incols:
+            answer.append(i)
+            if len(answer)==B:
+                break
+    return answer
+def dat_bae_fans(N,B,F,outcols,incols):    
+    answer,boolean_answer,L=[],False,16
+    K,la=(N-B)//L+1,len(answer)
+    for k in range(K+1):
+        curr_incols=incols[L*k-la:L*(k+1)-la]
+        curr_outcols=outcols[L*k:L*(k+1)]
+        for i in range(len(curr_outcols)):
+            if curr_outcols[i][-F:] not in curr_incols:
+                answer.append(L*k+i)
+                la=len(answer)
+                if la==B:
+                    booleban_answer=True
+                    break
+        if boolean_answer:
+            break
+    return answer 
+T=int(input())
+for i in range(T):
+    N,B,F=map(int,input().split())
+    outcols,incols=dat_bae_cols(N,B,F)
+    if len(outcols[0])==len(incols[0]):
+        answer=dat_bae_ans(N,B,F,outcols,incols)
+    else:
+        answer=dat_bae_fans(N,B,F,outcols,incols)
+    print(' '.join(map(str,answer)),flush=True)
+    ans=input()
+    if ans!='1':  
+        exit() 
+","def dat_bae_cols(N,B,F):
+    Nb=(N-1).bit_length()"
+qr2022_task4_var3.py,"# S ✓ ✓ TLE
+class TGraph:
+    def __init__(self,n,f,p):
+        self.N=n
+        self.P=p
+        self.F=f
+        self.G={k:[] for k in range(n)}
+        self.D={k:0 for k in range(n)}
+    def add_edges(self):
+        edges=[(el-1,i) for i,el in enumerate(self.P) if el!=0]
+        for t in edges:
+            (m,k)=t
+            if len(self.G[m])>0:
+                self.G[m].append(k)
+            else:
+                self.G[m]=[k]
+            self.D[m]+=1   
+    def topfun(self):
+        indegree=self.D
+        inits,nodes=[],[]
+        for i in range(self.N):
+            if indegree[i]==0:
+                inits.append(i)
+            else:
+                nodes.append(i)
+        fmin=[10**12]*self.N
+        fsum=sum([self.F[i] for i in inits])
+        while inits:
+            i=inits.pop(0)
+            for node in nodes:
+                if i in self.G[node]:
+                    indegree[node]-=1
+                    fmin[node]=min([fmin[node],self.F[i]])
+                if (indegree[node]==0) and (node not in inits):
+                    inits.append(node)
+                    nodes.remove(node)
+                    if self.F[node]>fmin[node]:
+                        fsum+=self.F[node]-fmin[node]
+                    self.F[node]=max([self.F[node],fmin[node]])
+        return fsum
+T=int(input())
+for t in range(T):
+    N=int(input())
+    F=list(map(int,input().split()))
+    P=list(map(int,input().split()))
+    tgraph=TGraph(N,F,P)
+    tgraph.add_edges()
+    FSUM=tgraph.topfun()
+    print('Case #{}: {}'.format(t+1,FSUM))
+","# S ✓ ✓ TLE
+class TGraph:
+    def __init__(self,n,"
+tfpreprocess_dataimage.py,"import warnings; warnings.filterwarnings('ignore')
+import mplcyberpunk,tensorflow as tf,pylab as pl
+import pandas as pd,numpy as np
+import tensorflow_datasets as tfds
+from IPython.display import display
+pd.set_option('precision',3)
+tf.keras.backend.set_floatx('float64')
+tfds.disable_progress_bar()
+pl.style.use('cyberpunk')
+
+def get2img(file_name1,file_name2,
+            file_path='../input/image-examples-for-mixed-styles/'):
+    imgtf1=tf.image.decode_image(
+        tf.io.read_file(file_path+file_name1))
+    imgtf2=tf.image.decode_image(
+        tf.io.read_file(file_path+file_name2))
+    display(pd.DataFrame(
+    [[str(imgtf1.numpy().shape),str(imgtf2.numpy().shape)],
+     [imgtf1.numpy().dtype,imgtf2.numpy().dtype],
+     [tf.rank(imgtf1).numpy(),tf.rank(imgtf2).numpy()]],
+     index=['shape','dtype','rank'],columns=['flower','cat']))
+    return imgtf1,imgtf2
+def show2img(imgtf1,imgtf2,fig_size):
+    pl.figure(figsize=(2*fig_size,fig_size))
+    pl.subplot(1,2,1); pl.imshow(imgtf1)
+    pl.subplot(1,2,2); pl.imshow(imgtf2)
+    pl.tight_layout(); pl.show()
+def bcrop(img,box):
+    return tf.image.crop_to_bounding_box(
+        img,box[0],box[1],box[2],box[3])
+def ccrop(img,c):
+    return tf.image.central_crop(img,c)
+def hflip(img):
+    return tf.image.flip_left_right(img)
+def vflip(img):
+    return tf.image.flip_up_down(img)
+def bright(img,d):
+    return tf.image.adjust_brightness(img,delta=d)
+@tf.function
+def preprocess(item,img_size,crop=.95,contrast=1.1):
+    img,lbl=item['image'],item['label']
+    img_cropped=tf.image.central_crop(img,crop)
+    img_contrast=tf.image.adjust_contrast(
+        img_cropped,contrast)
+    img_resized=tf.image.resize(
+        img_contrast,size=(img_size,img_size))
+    img_flip=tf.image\
+    .random_flip_left_right(img_resized)
+    return (img_flip/255.,tf.cast(lbl,tf.int32))
+",import warnings; warnings.filterwarnings('ignore')
+qr2021_task1_var2.py,"T=int(input())
+for t in range(T):
+    COST=0
+    I=int(input())
+    N=input()
+    N=[int(n) for n in N.split()]
+    for i in range(I-1):
+        j=i+N[i:].index(min(N[i:]))
+        if i==j:
+            COST+=1 
+        else:
+            L=[N[k] for k in range(i)]
+            L+=[N[j-k] for k in range(j-i+1)]
+            L+=[N[k] for k in range(j+1,I)]
+            COST+=j-i+1
+            N=L
+    print('Case #{}: {}'.format(t+1,COST))
+","T=int(input())
+for t in range(T):
+    COST=0
+    I"
+points2image.py,"import numpy as np,ast,cv2
+import tensorflow as tf
+
+def get_line(x1,y1,x2,y2):
+    steep=abs(y2-y1)>abs(x2-x1); rev=False
+    if steep: [x1,y1,x2,y2]=[y1,x1,y2,x2]
+    if x1>x2:
+        [x1,x2,y1,y2]=[x2,x1,y2,y1]; rev=True
+    dx=x2-x1; dy=abs(y2-y1); error=int(dx/2)
+    xy=[]; y=y1; ystep=None
+    if y1<y2: ystep=1
+    else: ystep=-1
+    for x in range(x1,x2+1):
+        if steep: xy.append([y,x])
+        else: xy.append([x,y])
+        error-=dy
+        if error<0: y+=ystep; error+=dx
+    if rev: xy.reverse()
+    return xy
+
+def get_image(data,target_size):
+    data=ast.literal_eval(data)
+    img_size=int(1.25*max(np.amax(data)))
+    img=np.zeros((img_size,img_size))
+    d=round(.1*img_size)
+    for [x,y] in data:
+        for i in range(len(x)):
+            img[y[i]+d][x[i]+d]=1
+            if (i<len(x)-1): 
+                x1,y1,x2,y2=x[i],y[i],x[i+1],y[i+1]
+            else: 
+                x1,y1,x2,y2=x[i],y[i],x[0],y[0]
+            for [xl,yl] in get_line(x1,y1,x2,y2): 
+                img[yl+d][xl+d]=1
+    img=img.reshape(img_size,img_size,1)    
+    img=tf.image.resize(
+        img,(target_size,target_size)).numpy()       
+    return np.squeeze(img)
+
+def cv_get_image(data,target_size,
+                 lw=5,time_color=True):
+    data=ast.literal_eval(data)
+    img_size=int(1.25*max(np.amax(data)))
+    img=np.zeros((img_size,img_size),dtype=np.int8)
+    d=round(.1*img_size)
+    for t,s in enumerate(data):
+        for i in range(len(s[0])-1):
+            color=255-min(t,10)*15 if time_color else 255
+            _=cv2.line(img,
+                       (s[0][i]+d,s[1][i]+d),
+                       (s[0][i+1]+d,s[1][i+1]+d),
+                       color,lw) 
+    img=img.reshape(img_size,img_size,1)    
+    img=tf.image.resize(
+        img,(target_size,target_size)).numpy()       
+    return np.squeeze(img)","import numpy as np,ast,cv2
+import tensorflow as tf"
+qr2020_task1_var1.py,"T = int(input())
+for t in range(T): 
+    N = int(input())
+    k, r, c = 0, 0, 0
+    M = []
+    for i in range(N):
+        R = input()
+        M.append([int(s) for s in R.split()])
+        if len((set(M[i]))) < N: r += 1
+        for j in range(N):
+            if i == j: k += M[i][j]
+            if i == N-1: 
+                C = [M[i][j] for i in range(N)]
+                if len((set(C))) < N: c += 1
+    print('Case #%d: %d %d %d' % ((t+1, k, r, c)))
+","T = int(input())
+for t in range(T): 
+    N = int(i"
+qr2022_task4_var4.py,"# S ✓ ✓ ✓
+class DGraph:
+    def __init__(self,n,f,p):
+        self.N=n
+        self.P=p
+        self.F=f
+        self.G={k:0 for k in range(n)}
+        self.D={k:0 for k in range(n)}
+    def add_edges(self):
+        for i,el in enumerate(self.P):
+            self.G[i]=el-1
+            if el!=0:
+                self.D[el-1]+=1 
+    def max_fun(self):
+        indegree=self.D
+        inits=[]
+        for i in range(self.N):
+            if indegree[i]==0:
+                inits.append(i)
+        fmin=[10**12]*self.N
+        fsum=sum([self.F[i] for i in inits])
+        while inits:
+            i=inits.pop(0)
+            node=self.G[i]
+            if node!=-1:
+                indegree[node]-=1
+                fmin[node]=min([fmin[node],self.F[i]])
+                if indegree[node]==0:
+                    inits.append(node)
+                    self.F[node]=max([self.F[node],fmin[node]])
+                    fsum+=self.F[node]-fmin[node]
+        return fsum
+T=int(input())
+for t in range(T):
+    N=int(input())
+    F=list(map(int,input().split()))
+    P=list(map(int,input().split()))
+    dgraph=DGraph(N,F,P)
+    dgraph.add_edges()
+    FSUM=dgraph.max_fun()
+    print('Case #{}: {}'.format(t+1,FSUM))
+","# S ✓ ✓ ✓
+class DGraph:
+    def __init__(self,n,f,"
+cmap_header.py,"from IPython.display import display,HTML
+from IPython.core.magic import register_line_magic
+import random
+#Sequential (Single-Hue,Multi-Hue),Diverging, Cyclical cmaps: 
+#Reds,Sinebow,Rainbow,Turbo,Warm,Cool,Plasma,Spectral,etc.
+@register_line_magic
+def cmap_header(params):
+    params=params.split('|'); string=params[0]
+    if len(params)==1: 
+        font_size='30'; font_family='Akronim'; cmap='Sinebow'
+    elif  len(params)==2: 
+        font_size=params[1]
+        font_family='Akronim'; cmap='Sinebow'
+    elif  len(params)==3: 
+        font_size=params[1]; font_family=params[2]
+        cmap='Sinebow'
+    else: 
+        font_size=params[1]; font_family=params[2]; cmap=params[3]
+    height=int(font_size)*2.5; randi=str(random.uniform(0,9999999))
+    html_str=""""""
+    <head><script src='https://d3js.org/d3.v6.min.js'></script>
+    </head><style>@import 'https://fonts.googleapis.com/css?family=""""""+\
+    font_family+""""""&effect=3d'; #colorized {font-family:""""""+font_family+\
+    """"""; color:white; padding-left:10px; font-size:""""""+font_size+\
+    """"""px;}</style><h1 id='colorized' class='font-effect-3d'>""""""+\
+    string+""""""</h1><script>
+    var tc=setInterval(function(){
+        var now=new Date().getTime();
+        var iddoc=document.getElementById('colorized');
+        iddoc.style.color=d3.interpolate""""""+cmap+\
+    """"""(now%(30000)/30000);},1)</script>""""""
+    file='d3header'+randi+'.html'
+    with open(file,'w') as f:
+         f.write(html_str); f.close()
+    string=""""""<div id='html_string""""""+randi+\
+    """"""' style='width:100%;'><iframe src='""""""+file+\
+    """"""' height=""""""+str(height)+""""""
+    style='display:block; width:100%;'></iframe></div>""""""
+    display(HTML(string))
+","from IPython.display import display,HTML
+from IPyt"
+qr2019_task1_var1.py,"T = int(input())
+try:
+    for i in range(T):
+        S = input()
+        A = ''
+        for j in range(1,len(S)+1):
+            if int(S[-j]) == 4:
+                A = '1' + A
+            else:
+                A = S[-j] + A
+        B = str(int(S) - int(A))
+        print('Case #{}: '.format(i+1), A, B)
+except StopIteration: pass
+","T = int(input())
+try:
+    for i in range(T):
+     "
+qr2020_task5_var3.py,"class MGraph:
+    def __init__(self,case,num,diag_sum):
+        self.T=case+1
+        self.N=num
+        self.S=diag_sum
+        self.M={i:num*[0] for i in range(num)}
+        self.D=num*[0]
+        self.XYZ=3*[0]
+        cond1=(num==2) and (diag_sum==3)
+        cond2=(num==3) and (diag_sum in [4,5,7,8])
+        cond3=(num>3) and (diag_sum in [num+1,num**2-1])
+        self.C=cond1 or cond2 or cond3
+    def find_diagonal(self):
+        if not self.C:
+            if not self.S%self.N:
+                self.D=self.N*[self.S//self.N]
+            else:
+                min_x=max(1,(self.S-2*self.N)//(self.N-2))
+                max_x=min(self.N,(self.S-2)//(self.N-2))
+                for x in range(min_x,max_x+1):
+                    for y in range(1,self.N+1):
+                        for z in range(1,self.N+1):
+                            if (self.N-2)*x+y+z==self.S \
+                            and (x==y) is (x==z):
+                                self.D=(self.N-2)*[x]+[y,z]
+                                self.XYZ=[x,y,z]
+    def latin_square(self,prefix='Case #%d: '):
+        if self.C: 
+            print(prefix%self.T+'IMPOSSIBLE')
+        else:
+            if not self.S%self.N:
+                base=list(range(1,self.N+1))
+                base=base[self.S//self.N-1:]+base[:self.S//self.N-1]
+                for i in range(self.N):
+                    self.M[i]=base[self.N-i:]+base[:self.N-i]
+            else:
+                for i in range(self.N-2):
+                    self.M[i]=i*[0]+[self.XYZ[0]]+(self.N-i-1)*[0]
+                self.M[self.N-2]=(self.N-2)*[0]+[self.XYZ[1],self.XYZ[0]]
+                self.M[self.N-1]=(self.N-2)*[0]+[self.XYZ[0],self.XYZ[2]]
+                col_set={i:{self.XYZ[0]} for i in range(self.N-2)}
+                col_set[self.N-2]={self.XYZ[0],self.XYZ[1]}
+                col_set[self.N-1]={self.XYZ[0],self.XYZ[2]}
+                base=self.XYZ
+                base+=list(set(range(1,self.N+1))-set(base))
+                for b in base:
+                    for r in range(self.N):
+                        if b not in self.M[r]:
+                            for c in [i%self.N for i in range(r,r+self.N)]:
+                                if self.M[r][c]==0 and b not in col_set[c]:
+                                    self.M[r]=self.M[r][:c]+[b]+self.M[r][c+1:]
+                                    col_set[c].add(b)
+                                    break
+            print(prefix%self.T+'POSSIBLE')
+            str_matrix=''
+            for i in range(self.N):
+                str_row=[str(m) for m in self.M[i]]
+                str_matrix+=' '.join(str_row)+'\n'
+            print(str_matrix)
+T=int(input())
+for case in range(T): 
+    num,diag_sum=map(int,input().split())
+    mg=MGraph(case,num,diag_sum)
+    mg.find_diagonal()
+    mg.latin_square()
+","class MGraph:
+    def __init__(self,case,num,diag_"
+qr2020_task4_var2.py,"class QuantumString:
+    def __init__(self,length):
+        self.B=length
+        self.R=length*'?'
+        self.Q=''
+        self.count=0
+        self.start=5
+        self.complement=None
+        self.reverse=None
+    def query(self):
+        print(self.Q,flush=True)
+        self.count+=1
+        return input()    
+    def update_by_pairs(self,i):
+        self.Q=str(i+1); b1=self.query()
+        self.Q=str(self.B-i); b2=self.query()
+        if (self.complement==None and b1==b2):
+            self.complement=i
+        if (self.reverse==None and b1!=b2):
+            self.reverse=i
+        self.R=self.R[:i]+b1+self.R[i+1:self.B-i-1]+\
+               b2+self.R[self.B-i:]
+    def is_complemented(self):
+        if (self.complement==None):
+            self.Q='1'; self.query()
+        else:
+            self.Q=str(self.complement+1)
+            if self.R[self.complement]!=self.query():
+                self.R=self.R.replace('0','*')\
+                           .replace('1','0').replace('*','1')
+    def is_reversed(self):
+        if (self.reverse==None):
+            self.Q='1'; self.query()
+        else:
+            self.Q=str(self.reverse+1)
+            if self.R[self.reverse]!=self.query():
+                self.R=self.R[::-1]
+    def find_string(self):
+        for i in range(self.start):
+            self.update_by_pairs(i)
+        while ('?' in self.R and self.start<self.B//2):
+            if self.start%4==1:
+                self.is_complemented()
+                self.is_reversed()
+            self.update_by_pairs(self.start)
+            self.start+=1
+        print(self.R,flush=True)
+        if input()!='Y':
+            exit()
+t,b=map(int,input().split())
+for case in range(t):
+    QS=QuantumString(b)
+    QS.find_string()
+","class QuantumString:
+    def __init__(self,length)"
+quivers.py,"import pylab as pl,numpy as np
+from mpl_toolkits.mplot3d import Axes3D
+def quivers(num,fig_size): 
+    t=((3*num/10)**2+2)**.5
+    cq=np.arange(0,1,.13)
+    cq=np.concatenate((cq,np.repeat(cq,2)))
+    xq=np.array([1,-1,1,-1,1,-1,1,-1])
+    yq=np.array([1,1,-1,-1,1,1,-1,-1])
+    zq=np.array([1,1,1,1,-1,-1,-1,-1])
+    f=pl.figure(figsize=(fig_size,fig_size))
+    ax=f.add_subplot(111,projection='3d')
+    for k in range(num):
+        q=ax.quiver(8*[0],8*[0],8*[0],
+                    xq,yq,3*(k+1)*zq/10,
+                    lw=5,alpha=.5,
+                    colors=pl.cm.hsv(cq))
+    ax.set_xlabel('$\mathscr{X}$',fontsize=15)
+    ax.set_ylabel('$\mathscr{Y}$',fontsize=15) 
+    ax.set_zlabel('$\mathscr{Z}$',fontsize=15)
+    ax.set_xlim(-t,t)
+    ax.set_ylim(-t,t)
+    ax.set_zlim(-t,t)
+    pl.show()","import pylab as pl,numpy as np
+from mpl_toolkits.m"
+qr2019_task4_var2.py,"def dat_bae_cols(N,B,F):
+    Nb=(N-1).bit_length()
+    outcols=[format(i,'#0%db'%(Nb+2))[2:] for i in range(N)]
+    incols=N*['']
+    for j in range(Nb):
+        if j>F-1:
+            break
+        outrow=''.join([outcols[i][Nb-j-1] for i in range(N)])
+        print(outrow,flush=True)
+        inrow=input()
+        for i in range(N-B):
+            incols[i]=inrow[i]+incols[i]
+    return outcols,incols
+def dat_bae_fans(N,B,F,outcols,incols):    
+    answer,boolean_answer,L=[],False,16
+    K,la=(N-B)//L+1,len(answer)
+    for k in range(K+1):
+        curr_incols=incols[L*k-la:L*(k+1)-la]
+        curr_outcols=outcols[L*k:L*(k+1)]
+        for i in range(len(curr_outcols)):
+            if curr_outcols[i][-F:] not in curr_incols:
+                answer.append(L*k+i)
+                la=len(answer)
+                if la==B:
+                    booleban_answer=True
+                    break
+        if boolean_answer:
+            break
+    return answer 
+T=int(input())
+for i in range(T):
+    N,B,F=map(int,input().split())
+    outcols,incols=dat_bae_cols(N,B,F)
+    answer=dat_bae_fans(N,B,F,outcols,incols)
+    print(' '.join(map(str,answer)),flush=True)
+    ans=input()
+    if ans!='1':  
+        exit() 
+","def dat_bae_cols(N,B,F):
+    Nb=(N-1).bit_length()"
+cidhtml.py,"from IPython.display import display,HTML
+import random
+
+f1,f2,f3,f4,f5,f6,f7,f8,f9=\
+'Smokum','Akronim','Wallpoet','Orbitron','Ewert',\
+'Lobster','Roboto','Miss Fajardose','Monoton'
+fs1,fs2,fs3,fs4,fs5,fs6,fs7,fs8,fs9,fs10,fs11=\
+10,12,14,16,18,20,22,24,26,28,30
+
+def chtml(string,font_family=f2,font_size=fs9,font_color='#ff36ff'):
+    css_str=""""""<style>@import """"""+\
+    """"""'https://fonts.googleapis.com/css?family=""""""+font_family+""""""'; 
+    .ch1 {color:""""""+font_color+""""""; font-family:""""""+font_family+""""""; 
+    font-size:""""""+str(font_size)+""""""px;}</style>""""""
+    h1_str=""""""<h1 class='ch1'>""""""+string+""""""</h1>""""""
+    display(HTML(css_str+h1_str))
+
+def idhtml(string,font_family=f5,
+           font_size=fs5,font_color='darkslategray'):
+    randi=random.randint(1,999999999)
+    css_str=""""""<style>@import """"""+\
+    """"""'https://fonts.googleapis.com/css?family=""""""+font_family+""""""'; 
+    #ch1_""""""+str(randi)+"""""" {font-family:""""""+font_family+""""""; 
+    color:""""""+font_color+""""""; font-size:""""""+str(font_size)+""""""px;}</style>""""""
+    h1_str=""""""<h1 id='ch1_""""""+str(randi)+""""""'>""""""+string+""""""</h1>""""""
+    scr_str=""""""<script>
+    var idc=setInterval(function() {
+        var iddoc=document.getElementById('ch1_""""""+str(randi)+""""""'), 
+            sec=Math.floor(new Date().getTime()%60000/1000); 
+        var col='rgb('+(5+Math.abs(245-8*sec))+',0,'+
+                (250-Math.abs(245-8*sec))+')';  
+        iddoc.style.color=col;}, 1000);</script>""""""
+    display(HTML(css_str+h1_str+scr_str))
+    
+def whtml(string,background_color='black',padding=2,
+          font_family='Akronim',font_size_px=int(28),
+          deg=int(120),percent=[0,33,67,100],
+          colors=['magenta','orange','cyan','purple']):
+    randi=str(random.randint(1,999999999))
+    css_str=""""""<style>@import 'https://fonts.googleapis.com/""""""+\
+    """"""css?family=""""""+font_family+""""""';</style>""""""
+    html_str=""""""<div id='col_div""""""+str(randi)+""""""' 
+    style='background:""""""+background_color+""""""; width:99%; 
+    padding:""""""+str(padding)+""""""vw;'>
+    <div style='background:linear-gradient(""""""+str(deg)+""""""deg, 
+    """"""+colors[0]+"""""" """"""+str(percent[0])+""""""%,
+    """"""+colors[1]+"""""" """"""+str(percent[1])+""""""%,
+    """"""+colors[2]+"""""" """"""+str(percent[2])+""""""%,
+    """"""+colors[3]+"""""" """"""+str(percent[3])+""""""%); 
+    font-family:""""""+font_family+""""""; font-size:""""""+str(font_size_px)+""""""px; 
+    -webkit-background-clip:text; color:transparent;'>""""""+string+""""""
+    </div></div>""""""
+    display(HTML(css_str+html_str))","from IPython.display import display,HTML
+import ra"
+load_kaggle_digits.py,"import numpy as np,pandas as pd,pylab as pl
+from IPython.display import display
+def load_kaggle_digits(k,cmap):
+    df_train=pd.read_csv(
+        '../input/digit-recognizer/train.csv')
+    df_test=pd.read_csv(
+        '../input/digit-recognizer/test.csv')
+    pixel_idx=['%s%s'%('pixel',idx) 
+               for idx in range(0,784)]
+    train_images=np.array(
+        df_train[pixel_idx].values,
+                 dtype='float32').reshape(-1,28,28,1)
+    train_images=(train_images/255)**k
+    test_images=np.array(
+        df_test[pixel_idx].values,
+                dtype='float32').reshape(-1,28,28,1)
+    test_images=(test_images/255)**k
+    train_labels=np.array(
+        df_train['label'].values,dtype='int32')
+    num_classes=len(set(train_labels))
+    N=train_labels.shape[0]; n=int(.1*N)
+    shuffle_ids=np.arange(N)
+    np.random.RandomState(123).shuffle(shuffle_ids)
+    train_images=train_images[shuffle_ids]
+    train_labels=train_labels[shuffle_ids]
+    fig=pl.figure(figsize=(10,6))
+    randch=np.random.choice(N,size=15,replace=False)
+    for i,idx in enumerate(randch):
+        ax=fig.add_subplot(3,5,i+1,xticks=[],yticks=[])
+        ax.imshow(train_images[idx].reshape(28,28),
+                  cmap=pl.get_cmap(cmap))
+        ax.set_title('%d'%train_labels[idx],
+                     fontsize=10)
+    pl.show()
+    x_test,x_valid,x_train=\
+    train_images[:n],train_images[n:2*n],train_images[2*n:]
+    y_test,y_valid,y_train=\
+    train_labels[:n],train_labels[n:2*n],train_labels[2*n:]
+    print('function outputs: \n')
+    df=pd.DataFrame(
+        [[x_train.shape,x_valid.shape,
+          x_test.shape,test_images.shape],
+         [x_train.dtype,x_valid.dtype,
+          x_test.dtype,test_images.dtype],
+         [y_train.shape,y_valid.shape,y_test.shape,np.nan],
+         [y_train.dtype,y_valid.dtype,y_test.dtype,np.nan]],
+        columns=['train','valid','test','global test'],
+        index=['image shape','image type',
+               'label shape','label type'])
+    display(df)
+    return x_train,y_train,x_valid,y_valid,\
+           x_test,y_test,test_images,num_classes","import numpy as np,pandas as pd,pylab as pl
+from I"
+qr2021_task4_var1.py,"def median_sort(N):
+    arr=[1,2]
+    for i in range(3,N+1):
+        l,r=0,len(arr)-1
+        while r>l:
+            m1,m2=l+(r-l)//3,r-(r-l)//3
+            print(arr[m1],arr[m2],i,flush=True)
+            a=int(input())
+            if a==arr[m1]: 
+                r=m1-1
+                if l==r: r+=1
+            elif a==arr[m2]: 
+                l=m2+1
+                if l==r: l-=1
+            else:
+                l,r=m1+1,m2-1
+                if l==r: l-=1                
+        arr.insert(l,i)
+    print(' '.join(map(str,arr)),flush=True)
+    answer=input()
+    if answer!='1':  
+        exit()
+T,N,Q=map(int,input().split())
+for t in range(T):
+    median_sort(N)
+","def median_sort(N):
+    arr=[1,2]
+    for i in ran"
+qr2020_task5_var2.py,"def display_matrix(M):
+    MS=''
+    for i in range(len(M)):
+        MS+=' '.join([str(r) for r in M[i]])+'\n'
+    print(MS)
+def find_matrix0(N,S):
+    baseN=S//N
+    baseR=list(range(1,N+1))
+    baseR=baseR[baseN-1:]+baseR[:baseN-1]
+    return [baseR[i:]+baseR[:i] for i in range(N,0,-1)]
+def gen_xyz(N,K):
+    min_x=max(1,(K-2*N)//(N-2))
+    max_x=min(N,(K-2)//(N-2))
+    for x in range(min_x,max_x+1):
+        for y in range(1,N+1):
+            for z in range(1,N+1):
+                if (N-2)*x+y+z==K and (x==y) is (x==z):
+                        return [x,y,z]
+def find_matrix(N,K):
+    X,Y,Z=gen_xyz(N,K)
+    M=[i*[0]+[X]+(N-i-1)*[0] for i in range(N-2)]
+    M+=[(N-2)*[0]+[Y,X]]
+    M+=[(N-2)*[0]+[X,Z]]
+    col_set={i:{X} for i in range(N-2)}
+    col_set[N-2]={X,Y}; col_set[N-1]={X,Z}
+    base=[X,Y,Z]
+    base+=list(set(range(1,N+1))-set(base))
+    for b in base:
+        for r in range(N):
+            if b not in M[r]:
+                for c in [i%N for i in range(r,r+N)]:
+                    if M[r][c]==0 and b not in col_set[c]:
+                        M[r]=M[r][:c]+[b]+M[r][c+1:]
+                        col_set[c].add(b)
+                        break
+    return M
+T=int(input())
+for t in range(T): 
+    N,K=map(int,input().split())
+    cond2=(N==2) and (K==3)
+    cond3=(N==3) and (K in [4,5,7,8])
+    cond4=(N>3) and (K in [N+1,N*N-1])
+    cond=cond2 or cond3 or cond4
+    if cond:
+        print('Case #{}: IMPOSSIBLE'.format(t+1))
+    else:
+        if K%N==0:
+            M=find_matrix0(N,K)
+        else:
+            M=find_matrix(N,K)
+        print('Case #{}: POSSIBLE'.format(t+1))
+        display_matrix(M)
+","def display_matrix(M):
+    MS=''
+    for i in rang"
+barh_chart.py,"from IPython.display import display,HTML
+
+def barh_chart(data,chart_title,width,
+               font_size=16,
+               font_family='Wallpoet',
+               background_color='#ff355e'):
+    dmax=max(data)
+    html_str=""""""<style>
+    @import 'https://fonts.googleapis.com/css?family=""""""+\
+    font_family+\
+    """"""'; .div_params {padding:5px; width:""""""+\
+    str(round(width/100*dmax))+\
+    """"""px; text-align:right; text-shadow:4px 4px 4px slategray; 
+    color:lightgray; font-size:""""""+\
+    str(font_size)+\
+    """"""px; font-family:""""""+\
+    font_family+\
+    """"""; background:linear-gradient(180deg,lightgray 0%,silver 33%,
+    slategray 67%, darkslategray 100%);}
+    .div_params_in {background:""""""+\
+    background_color+\
+    """"""; padding:5px; margin:3px;}
+    #div_h2 {text-shadow:4px 4px 4px slategray; color:""""""+\
+    background_color+""""""; font-family:""""""+font_family+\
+    """""";}</style>
+    <div class='div_params'><h2 id='div_h2'>""""""+\
+    chart_title+""""""</h2>""""""
+    for i in range(len(data)):
+        html_str+=""""""<div class='div_params_in' style='width:""""""+\
+                  str(.9*width/100*data[i])+""""""px;'>""""""+\
+                  str(data[i])+""""""</div>""""""
+    html_str+=""""""</div><br/>""""""
+    display(HTML(html_str))
+","from IPython.display import display,HTML
+
+def barh"
+ps2018_task1_var1.py,"T = int(input())
+try:
+    for i in range(T):
+        S = input()
+        S = [int(s) for s in S.split()]
+        A, B = S[0]+1, S[1]
+        N = int(input())
+        for j in range(N):
+            Q = A + (B - A) // 2
+            print(Q, flush=True)
+            Answer = input()
+            if Answer == 'WRONG_ANSWER':
+                raise StopIteration
+            elif Answer == 'CORRECT':
+                break
+            elif Answer == 'TOO_SMALL':
+                if (B - A) // 2 == 0:
+                    A = A + 1
+                else:
+                    A = A + (B - A) // 2
+            elif Answer == 'TOO_BIG':
+                if (B - A )// 2 == 0:
+                    B = B - 1
+                else:                
+                    B = B - (B - A) // 2              
+except StopIteration: pass
+","T = int(input())
+try:
+    for i in range(T):
+     "
+color_header.py,"from IPython.display import display,HTML
+from IPython.core.magic import register_line_magic
+import random,warnings; warnings.filterwarnings('ignore')
+
+@register_line_magic
+def header(string):
+    font_size=24; font_family='Ewert'
+    width=650; height=font_size*2.5
+    randi=str(random.uniform(0,9999999))
+    html_str=""""""
+    <head><script src='https://d3js.org/d3.v6.min.js'></script>
+    </head><style>@import 'https://fonts.googleapis.com/css?family=""""""+\
+    font_family+""""""&effect=3d'; #colorized1 {font-family:""""""+font_family+\
+    """"""; color:white; text-align:center; font-size:""""""+str(font_size)+\
+    """"""px;}</style><h1 id='colorized1' class='font-effect-3d'>""""""+string+\
+    """"""</h1><script>
+    var tc=setInterval(function(){
+        var now=new Date().getTime();
+        var iddoc1=document.getElementById('colorized1');
+        iddoc1.style.color=d3.interpolateSinebow(now/60000); },1)
+    </script>""""""
+    file='d3header'+randi+'.html'
+    with open(file,'w') as f:
+         f.write(html_str); f.close()
+    string=""""""<div id='html_string""""""+randi+\
+    """"""'><iframe src='""""""+file+\
+    """"""' height=""""""+str(height)+"""""" width=""""""+str(width)+\
+    """""" style='display:block;'></iframe></div>""""""
+    display(HTML(string))
+","from IPython.display import display,HTML
+from IPyt"
+qr2022_task4_var1.py,"# S ✓ MLE
+remove_circle_outline
+def permutate(l):
+    if len(l)==0: return []
+    if len(l)==1: return [l]
+    out=[]
+    for i in range(len(l)):
+        m=l[i]
+        rl=l[:i]+l[i+1:]
+        for p in permutate(rl):
+            out.append([m]+p)
+    return out
+T=int(input())
+for t in range(T):
+    N=int(input())
+    F=list(map(int,input().split()))
+    P=list(map(int,input().split()))
+    I=[i+1 for i in range(N) if i+1 not in P]
+ #   print(N,F,P); print(I)
+    C=permutate(I)
+ #   print(C[-1])
+    SMAX=0
+    for c in C:
+        L=[]; S=0
+        for i in range(len(c)):
+            L+=[c[i]]
+            f=[F[c[i]-1]]
+            p=P[c[i]-1] 
+            while (p!=0) and (p not in L):
+                L+=[p]
+                f.append(F[p-1])
+                p=P[p-1]
+            S+=max(f)
+ #           print(L,S,f)
+        if SMAX<S: 
+            SMAX=S
+    print('Case #{}: {}'.format(t+1,SMAX))
+","# S ✓ MLE
+remove_circle_outline
+def permutate(l):
+"
+artificial_image.py,"import imageio,numpy as np,pylab as pl
+from skimage.transform import resize
+from IPython.display import display,HTML
+
+def artificial_image(
+    img_size_out,num_points=7200,img_size=1024):
+    a=(.5+.1**6*np.random.randint(1,999999))*\
+      np.random.choice([-1,1],1)[0]
+    b=np.random.randint(3,10)
+    c=.1**3*np.random.randint(1,99)*\
+      np.random.choice([-1,1],1)[0]
+    t=np.arange(0,12*np.pi,1/num_points)
+    fx=np.sin(t/6)+a*np.sin(b*t)*np.cos(t)-\
+       c*np.sin(16*b*t)
+    fy=np.cos(t/6)+a*np.sin(b*t)*np.sin(t)-\
+       c*np.cos(16*b*t)
+    fx=.951*(fx-1.051*fx.min())/(fx.max()-fx.min())
+    fy=.951*(fy-1.051*fy.min())/(fy.max()-fy.min())
+    fx=np.array(np.clip(fx*img_size,0,img_size),
+                dtype='int32')
+    fy=np.array(np.clip(fy*img_size,0,img_size),
+                dtype='int32')
+    f=np.array([[fx[i],fy[i]] for i in range(len(t))])
+    img=np.ones((img_size,img_size,3))
+    randcol=.9-.8*np.random.random(3)
+    for [x,y] in f: img[y,x,:]=randcol
+    img=resize(img,(img_size_out,img_size_out))
+    return img,np.around(a,6),b,np.around(c,3),randcol
+
+def artificial_image_display(
+    img_size_out,fig_size=8,num_points=7200,img_size=1024):
+    fig=pl.figure(figsize=(fig_size,fig_size))
+    img,a,b,c,col=\
+    artificial_image(img_size_out,num_points,img_size)
+    ax=fig.add_subplot(1,1,1)
+    pl.imshow(img); pl.axis('off');
+    pl.title(str([a,b,c]),color=col)
+    pl.tight_layout(); pl.show()
+
+def artificial_image_animate(
+    img_size_out,steps,fig_size=500,num_points=7200,img_size=1024):
+    [img1,img2]=[artificial_image(
+        img_size_out,num_points,img_size)[0] for i in range(2)]
+    img1norm=np.linalg.norm(img1)
+    img2norm=np.linalg.norm(img2)
+    img2normalized=img2*(img1norm/img2norm)
+    vectors12=[]
+    for step in range(steps):
+        interpolated=img1+(img2normalized-img1)*step/(steps-int(1))
+        interpolated_norm=np.linalg.norm(interpolated)
+        interpolated_normalized=\
+        interpolated*(img1norm/interpolated_norm)
+        vectors12.append(interpolated_normalized)
+    vectors12=np.array(vectors12)
+    img1normalized=img1*(img2norm/img1norm)
+    vectors21=[]
+    for step in range(steps):
+        interpolated=img2+(img1normalized-img2)*step/(steps-int(1))
+        interpolated_norm=np.linalg.norm(interpolated)
+        interpolated_normalized=\
+        interpolated*(img2norm/interpolated_norm)
+        vectors21.append(interpolated_normalized)
+    vectors212=np.array(vectors21)
+    images=np.vstack([vectors12,vectors21])
+    file_name='pic'+str(np.random.randint(1,99999,1)[0])+'.gif'
+    imageio.mimsave(file_name,images)
+    s1='<div id=""imgs""><img src=""'
+    s2,s3,s4='"" height=""','"" width=""','""></img></div>'
+    display(HTML(s1+file_name+s2+str(fig_size)+s3+str(fig_size)+s4))","import imageio,numpy as np,pylab as pl
+from skimag"
+cnn_classify.py,"import warnings; warnings.filterwarnings('ignore')
+from IPython.display import display
+import tensorflow as tf,numpy as np
+import tensorflow.keras.layers as tkl
+import tensorflow.keras.utils as tku
+import tensorflow.keras.callbacks as tkc
+tf.keras.backend.set_floatx('float64')
+
+def cb(mw):
+    early_stopping=tkc.EarlyStopping(
+        monitor='val_loss',patience=20,verbose=2)
+    checkpointer=tkc.ModelCheckpoint(
+        filepath=mw,save_best_only=True,verbose=2,
+        save_weights_only=True,monitor='val_accuracy',mode='max')
+    lr_reduction=tkc.ReduceLROnPlateau(
+        monitor='val_loss',verbose=2,patience=10,factor=.8)
+    return [checkpointer,early_stopping,lr_reduction]
+
+def main_block_cnn(channels,img_size=32,filters=32):
+    model=tf.keras.Sequential()
+    model.add(tkl.Input(
+        (img_size,img_size,channels),name='input'))
+    model.add(tkl.Conv2D(
+        filters=filters,kernel_size=(7,7),
+        strides=(1,1),padding='same',name='conv_1'))
+    model.add(tkl.LeakyReLU(alpha=.02,name='lrelu_1'))
+    model.add(tf.keras.layers.MaxPool2D(
+        pool_size=(2,2),name='pool_1'))
+    model.add(tkl.Dropout(.25,name='drop_1'))
+    model.add(tkl.Conv2D(
+        filters=3*channels*filters,kernel_size=(7,7),
+        strides=(1,1),padding='same',name='conv_2'))
+    model.add(tkl.LeakyReLU(alpha=.02,name='lrelu_2'))
+    model.add(tf.keras.layers.MaxPool2D(
+        pool_size=(2,2),name='pool_2'))
+    model.add(tkl.Dropout(.25,name='drop_2'))
+    model.add(tkl.Conv2D(
+        filters=filters,kernel_size=(7,7),
+        strides=(1,1),padding='same',name='conv_3'))
+    model.add(tkl.LeakyReLU(alpha=.02,name='lrelu_3'))
+    model.add(tf.keras.layers.MaxPool2D(
+        pool_size=(2,2),name='pool_3'))
+    model.add(tkl.Dropout(.25,name='drop_3'))
+    return model
+
+def out_block_cnn(model,dense,num_classes,plot=True):
+    model.add(tkl.GlobalMaxPooling2D(name='gmpool'))   
+    model.add(tkl.Dense(dense,name='dense_1'))
+    model.add(tkl.LeakyReLU(alpha=.02,name='lrelu_4'))
+    model.add(tkl.Dropout(.5,name='drop_4'))
+    model.add(tkl.Dense(num_classes,name='out',
+                        activation='softmax'))
+    if plot:
+        display(tku.plot_model(model,show_shapes=True))
+    return model
+
+def compile_model(model):
+    return model.compile(
+        optimizer=tf.keras.optimizers.Adam(),
+        loss=tf.keras.losses\
+        .SparseCategoricalCrossentropy(),
+        metrics=['accuracy'])
+",import warnings; warnings.filterwarnings('ignore')
+rotated_polygon.py,"import pylab as pl
+import matplotlib.patches as pt
+import numpy as np,random as rd
+def fy(t,k,a,b,c,q,n): 
+    return np.cos(np.pi*t/n+2*k*np.pi/q)+\
+           np.cos(a*np.pi*t/n+2*k*np.pi/q)+\
+           np.cos(b*np.pi*t/n+2*k*np.pi/q)+\
+           np.cos(c*np.pi*t/n+2*k*np.pi/q)
+def fx(t,k,a,b,c,q,n): 
+    return np.sin(np.pi*t/n+2*k*np.pi/q)-\
+           np.sin(a*np.pi*t/n+2*k*np.pi/q)+\
+           np.sin(b*np.pi*t/n+2*k*np.pi/q)-\
+           np.sin(c*np.pi*t/n+2*k*np.pi/q)
+def rotated_polygon(fig_size):
+    a,b,c,q=rd.randint(5,9),rd.randint(10,14),\
+            rd.randint(15,19),2*rd.randint(3,6) 
+    n=rd.randint(5,17); yl=5.5
+    st='$\mathbb{a=%d; \; b=%d; \; c=%d;'+\
+       ' \; q=%d; \; n=%d}$'
+    L=np.array([[[fx(t,k,a,b,c,q,n),fy(t,k,a,b,c,q,n)] 
+                 for t in range(2*n)] 
+                for k in range(2*q)])
+    LT=[[[1.5*fx(t,k,a,b,c,q,n),1.2*fy(t,k,a,b,c,q,n)] 
+         for t in range(2*n)] for k in range(2*q)]
+    pl.figure(figsize=(fig_size,fig_size))
+    ax=pl.gca(); pl.axis('off')
+    for k in range(2*q):
+        col=np.array([rd.randint(100,900)/1000 
+                      for l in range(2)]+[1])
+        ax.add_patch(pt.Polygon(
+            LT[k],alpha=.1,color=col))
+        ax.add_patch(pt.Polygon(
+            L[k],fill=False,color=col/2,lw=.3))
+    pl.title(st%(a,b,c,q,n),
+             fontdict={'color':'#9911ff','fontsize':20})
+    pl.xlim(-yl,yl); pl.ylim(-yl,yl); pl.show()","import pylab as pl
+import matplotlib.patches as pt"
+sql_db.py,"import sqlite3,os,pylab as pl
+import numpy as np,sympy as sp,pandas as pd
+from IPython.core.display import display, HTML
+from IPython.core.magic import register_line_magic
+
+thp=[('font-size','15px'),('text-align','center'),
+     ('font-weight','bold'),('padding','5px 5px'),
+     ('color','white'),('background-color','slategray')]
+tdp=[('font-size','14px'),('padding','5px 5px'),
+     ('text-align','center'),('color','darkblue'),
+     ('background-color','silver')]
+style_dict=[dict(selector='th',props=thp),
+            dict(selector='td',props=tdp)]
+
+def connect2db(dbf):
+    sqlconn=None
+    try:
+        sqlconn=sqlite3.connect(dbf)
+        return sqlconn
+    except Error as err:
+        print(err)
+        if sqlconn is not None:
+            sqlconn.close()
+
+def name(**var):
+    return [x for x in var]
+
+def get_query(url,query,ftype='csv'):
+    if ftype=='csv':
+        df=pd.read_csv(url)
+    if ftype=='json':
+        df=pd.read_json(url)
+    connection=connect2db('example.db')
+    if connection is not None:
+        cursor=connection.cursor()
+    data_table=name(df=df)[0]
+    df.to_sql(data_table,
+              con=connection,
+              if_exists='replace')
+    sp.pprint(
+        r'the result of the sql query from df:'+query)
+    tr=[]; cursor.execute(query)
+    result=cursor.fetchall()
+    for r in result: 
+        tr+=[r]
+    result=pd.DataFrame.from_records(tr)
+    display(result.style.set_table_styles(style_dict))
+    if connection is not None:
+        connection.close()
+    if os.path.exists('example.db'):
+        os.remove('example.db')
+    else:
+        sp.pprint('example.db does not exist')","import sqlite3,os,pylab as pl
+import numpy as np,s"
+qr2022_task1_var2.py,"def gen_table(r,c):
+    for i in range(2*r+1):
+        for j in range(2*c+1):
+            if (i<2 and j<2):
+                yield '.'
+            else:
+                el=((j+1)%2)*((i+1)%2)*'+'+\
+                   (j%2)*((i+1)%2)*'-'+\
+                   ((j+1)%2)*(i%2)*'|'+\
+                   (j%2)*(i%2)*'.'
+                yield el
+        yield '\n'
+T=int(input())
+for t in range(T):
+    N=input()
+    [R,C]=[int(n) for n in N.split()]
+    gen=gen_table(R,C)
+    print('Case #{}:'.format(t+1))
+    print(''.join(gen))
+","def gen_table(r,c):
+    for i in range(2*r+1):
+   "
+decor_header.py,"import random; from IPython.display import display,HTML
+from IPython.core.magic import register_line_magic
+@register_line_magic
+def decor_header(params):
+    params=params.split('|'); string=params[0]
+    if len(params)==1: 
+        font_size='22'; font_family='Wallpoet'; cmap='Sinebow'
+    elif  len(params)==2: 
+        font_size=params[1]
+        font_family='Wallpoet'; cmap='Sinebow'
+    elif  len(params)==3: 
+        font_size=params[1]; font_family=params[2]
+        cmap='Sinebow'
+    else: 
+        font_size=params[1]; font_family=params[2]; cmap=params[3]
+    height=max([int(font_size)*2.5,60]) 
+    randi=str(random.uniform(0,9999999))
+    html_str=""""""
+<script src='https://d3js.org/d3.v6.min.js'></script>
+<style>
+@import 'https://fonts.googleapis.com/css?family=""""""+font_family+""""""';
+#colorized001 {
+font-family:""""""+font_family+""""""; font-size:""""""+font_size+"""""";}
+#canvas001,#canvas002 {width:10%; vertical-align:middle;}
+</style>
+<text id='colorized001'><canvas id='canvas001'></canvas>
+""""""+string+""""""
+<canvas id='canvas002'></canvas></text><br/>
+<script>
+var tc=setInterval(function() {
+    var now=(new Date().getTime()%5000)/5000;
+    var now_slow=(new Date().getTime()%100000)/100000;
+    var iddoc=document.getElementById('colorized001');
+    iddoc.style.color=d3.interpolate""""""+cmap+""""""(now);
+    var r=10,n=7;
+    var c1=document.getElementById('canvas001'); 
+    var context1=c1.getContext('2d');
+    var c2=document.getElementById('canvas002'); 
+    var context2=c2.getContext('2d');
+    c1.style.background=d3.interpolate""""""+cmap+""""""(now_slow); 
+    c2.style.background=d3.interpolate""""""+cmap+""""""(now_slow);
+    context1.strokeStyle=d3.interpolate""""""+cmap+""""""(now);    
+    context2.strokeStyle=d3.interpolate""""""+cmap+""""""(now);
+    for (var i=1; i<n; i++) {
+        context1.beginPath(); context2.beginPath();
+        for (var j=0; j<6; j++) {
+            context1.arc(60*j,r*(n+.5),i*r,0,2*Math.PI);
+            context2.arc(60*j,r*(n+.5),i*r,0,2*Math.PI); };
+        context1.stroke(); context2.stroke(); }; },1)
+</script>""""""
+    file='d3header'+randi+'.html'
+    with open(file,'w') as f:
+         f.write(html_str); f.close()
+    string=""""""<div id='html_string""""""+randi+\
+    """"""' style='width:100%;'><iframe src='""""""+file+\
+    """"""' height=""""""+str(height)+""""""
+    style='display:block; width:100%;'></iframe></div>""""""
+    display(HTML(string))
+",import random; from IPython.display import display
+rotated_leaf.py,"import numpy as np,pylab as pl
+def randi(nmin,nmax): 
+    return np.random.randint(nmin,nmax)
+def rotated_leaf(n,ms,fig_size):
+    t=np.arange(0,2*np.pi,.1**(ms+1)*2*np.pi/n)
+    a,b,c=randi(5,11),randi(12,24),randi(25,81)
+    d,m=randi(216,256),randi(100,300)
+    pl.figure(figsize=(fig_size,fig_size))
+    ax=pl.gca(); ax.set_facecolor('black')
+    for i in range(n):
+        f1=a+.9*np.cos(b*t+2*np.pi*i/n)
+        f2=1+.1*np.cos(c*t+2*np.pi*i/n)
+        f3=1+.01*np.cos(d*t+2*np.pi*i/n)
+        f4=1+np.sin(t+2*np.pi*i/n)
+        x=f1*f2*f3*f4*np.cos(t)
+        y=f1*f2*f3*f4*np.sin(t)
+        pl.scatter(x,y,s=.1**ms,
+                   c=[np.random.random(3)])
+    pl.title('$\mathscr{a=%d; \; b=%d; c=%d; \;}$'%(a,b,c)+\
+             '$\mathscr{d=%d; \; m=%d}$'%(d,m),
+             fontsize=20)
+    pl.show()","import numpy as np,pylab as pl
+def randi(nmin,nmax"
+butterfly_function.py,"import numpy as np,pylab as pl
+def col(): 
+    return [np.append([1],np.random.random(2))]
+def f(t): 
+    return np.exp(np.cos(t)**2+\
+                  np.sin(t))-3*np.cos(4*t)
+def fx(k,t): return .1*(k+1)*f(t)*np.cos(t)
+def fy(k,t): return .1*(k+1)*f(t)*np.sin(t)
+def butterfly_function(fig_size,num_lines):
+    t=np.arange(0,48*np.pi,.1**3)
+    pl.figure(figsize=(fig_size,fig_size))
+    ax=pl.gca(); ax.set_facecolor('black')
+    [pl.scatter(fx(i,t),fy(i,t),
+                s=.1**4,c=col()) 
+     for i in range(num_lines)]
+    pl.grid(c='silver',alpha=.4); pl.show()","import numpy as np,pylab as pl
+def col(): 
+    ret"
+multidigraph.py,"import networkx as nx,pylab as pl
+
+def multidigraph(edge_list,fig_size,node_color):
+    pl.figure(figsize=(int(fig_size*1.5),fig_size))
+    g=nx.MultiDiGraph();
+    g.add_edges_from(edge_list)
+    pos=nx.shell_layout(g)
+    nx.draw_networkx_edges(
+        g,pos,width=3,alpha=.6,
+        edge_color='silver',
+        arrowsize=50,arrowstyle='-|>')
+    nx.draw_networkx_nodes(
+        g,pos,node_size=2000,alpha=.7,
+        node_color=node_color,node_shape='h')
+    nx.draw_networkx_labels(
+        g,pos,font_size=25,font_weight='bold')
+    pl.axis('off'); pl.show();
+
+def multidigraph_example():
+    edge_list=[('♔','♕'),('♔','♖'),('♔','♗'),
+               ('♔','♘'),('♕','♘'),('♖','♘'),
+               ('♖','♚'),('♖','♛'),('♗','♖'),
+               ('♗','♚'),('♘','♛'),('♚','♛'),
+               ('♛','♜'),('♛','♝'),('♜','♝'),
+               ('♜','♞'),('♜','♘')]
+    fig_size=5; node_color='crimson'
+    multidigraph(edge_list,fig_size,node_color)","import networkx as nx,pylab as pl
+
+def multidigrap"
+embedding_html_string.py,"from IPython.display import display,HTML
+def embedding_html_string(html_str,width,height,num):
+    html_file=open(""file""+str(num)+"".html"",""w"")
+    html_file.write(html_str)
+    html_file.close()
+    string='''<div id=""html_string'''+str(num)+'''"">'''\
+           +'''<iframe src=""file'''+str(num)+'''.html""'''\
+           +''' height='''+str(height)\
+           +''' width='''+str(width)\
+           +'''></iframe></div>'''
+    display(HTML(string))","from IPython.display import display,HTML
+def embed"
+plotly_stackbar.py,"import pandas as pd
+import plotly.graph_objects as go
+
+values=['Fresh','Milk','Grocery','Frozen',
+        'Detergents_Paper','Delicatessen']
+customers=['Customer 1','Customer 2','Customer 3']
+data=[[26373,36423,22019,5154,4337,16523],
+      [16165,4230,7595,201,4003,57],
+      [14276,803,3045,485,100,518]]
+df=pd.DataFrame(data).T 
+df.columns=customers; df.index=values
+
+pdata=[go.Bar(name=df.columns[i],
+              x=df.index,y=df.iloc[:,i])
+       for i in range(3)]
+fig=go.Figure(pdata)
+fig.update_layout(width=500,height=500,
+                  barmode='stack',
+                  template='plotly_white')
+fig.show()","import pandas as pd
+import plotly.graph_objects as"
+ps2018_task3_var1.py,"# input the test number
+T = int(input())
+for i in range(T): 
+    S1 = input()
+    S1 = [int(s) for s in S1.split()]
+    D, N = S1[0], S1[1]
+    # the variable ""cruise control speed""
+    ccs_max = 0   
+    for j in range(N):  
+        S2 = input()
+        S2 = [int(s) for s in S2.split()]
+        K, S = S2[0], S2[1]
+        # find the average speed to not pass this horse
+        current = D / (D - K) * S
+        # update the optimal ""cruise control"" speed
+        if (ccs_max == 0 or current < ccs_max):
+            ccs_max = current 
+    print('Case #{}: '.format(i+1), ccs_max)
+","# input the test number
+T = int(input())
+for i in "
+embedding_html_svg.py,"from IPython.display import display,HTML
+def embedding_html_svg(file_name,width,height): 
+    string='<figure><embed type=""image/svg+xml"" '+\
+           'src=""'+file_name+\
+           '"" width='+str(width)+\
+           ' height='+str(height)+\
+           '/></figure>'
+    display(HTML(string))","from IPython.display import display,HTML
+def embed"
+plotly_function.py,"import plotly.graph_objects as go
+import numpy as np
+
+t=np.linspace(0,2*np.pi,3600) 
+fig=go.Figure(); steps=[]
+for step in np.arange(1,41,4):
+    f=np.cos(14*t)+np.cos(6*t)
+    fig.add_trace(go.Scatter(
+            visible=False,name='k='+str(step),
+            line=dict(color='rgb(.7,0,%f)'%(step/41),width=2),
+            x=f*np.cos(step*t),y=f*np.sin(step*t)))
+fig.data[0].visible=True
+st='x=(cos(14t)+sin(6t))cos(kt) \n'+\
+   'y=(cos(14t)+sin(6t))sin(kt)'
+for i in range(len(fig.data)):
+    step=dict(method='update',
+              args=[{'visible':[False]*len(fig.data)}])
+    step['args'][0]['visible'][i]=True
+    steps.append(step)
+sliders=[dict(active=10,pad={'t':20},steps=steps)]
+fig.update_layout(width=500,height=550,sliders=sliders,
+                  template='plotly_dark',
+                  title_text=st,title_font=dict(size=15))
+fig.show()","import plotly.graph_objects as go
+import numpy as "
+light_plots.py,"import numpy as np,pandas as pd,pylab as pl
+from IPython.core.display import display
+from sklearn.preprocessing import \
+MinMaxScaler as mms
+from lightning import Lightning
+
+def lightning_connect(connect):
+    host='https://public.lightning-viz.org'
+    if connect:
+        lgn=Lightning(ipython=True,host=host)
+    else:
+        lgn=Lightning(ipython=True,local=True)
+    return lgn
+
+def light_line(lgn,file_path,file_name,
+               lw=1,cmap='hsv',w=680,h=300):
+    series=np.loadtxt(
+        file_path+file_name,delimiter=',',skiprows=1)
+    if series.shape[0]>series.shape[1]:
+        series=series.T
+    c=np.array([pl.cm.get_cmap(cmap)(i/3)[:3]
+                for i in range(3)])
+    c=np.array(255*c,dtype='int32')
+    viz=lgn.line(series,color=c,thickness=lw,
+                 width=w,height=h)
+    display(viz)
+    
+def light_scatter(lgn,file_path,file_name,
+                  x,y,value,size,label,cmap,
+                  w=680,h=300,sep='\t'):
+    data=pd.read_csv(file_path+file_name,sep=sep)
+    size_array=data[size].values.reshape(-1,1)
+    scaler=mms(feature_range=(3,15)).fit(size_array)
+    size_array=scaler.transform(size_array)
+    viz=lgn.scatter(data[x].values,data[y].values,
+                    values=data[value].values,
+                    labels=data[label].values,
+                    size=size_array.reshape(-1),
+                    colormap=cmap,width=w,height=h)
+    display(viz)
+","import numpy as np,pandas as pd,pylab as pl
+from I"
+plotly_bar.py,"import pandas as pd
+import plotly.express as px
+
+values=['Fresh','Milk','Grocery','Frozen',
+        'Detergents_Paper','Delicatessen']
+customers=['Customer 1','Customer 2','Customer 3']
+data=[[26373,36423,22019,5154,4337,16523],
+      [16165,4230,7595,201,4003,57],
+      [14276,803,3045,485,100,518]]
+df=pd.DataFrame(data).T 
+df.columns=customers; df.index=values
+
+fig=px.bar(df,y='Customer 1',x=df.index,
+           text='Customer 1',color=df.index)
+fig.update_traces(texttemplate='%{text:d}',
+                  textposition='outside')
+fig.update_layout(width=500,height=500,
+                  showlegend=False,
+                  xaxis=dict(title=''))
+fig.show()","import pandas as pd
+import plotly.express as px
+
+v"
+qr2021_task2_var2.py,"# S ✓ ✓ ✓
+def update_state(s,s0,state):
+    curr_state={}
+    for s1,s2,xy in [('C','J',Y),('J','C',X)]:
+        if s==s2:
+            curr_state[s1]=10**12
+        elif s0==s1:
+            curr_state[s1]=state[s1]
+        elif s0==s2:
+            curr_state[s1]=state[s2]+xy
+        elif s0=='?':
+            curr_state[s1]=min(state[s1],state[s2]+xy)
+ #   print(curr_state)
+    return s,curr_state
+def cost(X,Y,S):
+    return X*S.count('CJ')+Y*S.count('JC')
+def cut(X,Y,S):
+    while 'CC' in S:
+        S=S.replace('CC','C')
+    while 'JJ' in S:
+        S=S.replace('JJ','J')
+    if (X>=0 and Y>=0):
+        S=S.replace('?','')
+    return S
+for T in range(int(input())):
+    X,Y,S=input().split()
+    X,Y=int(X),int(Y)
+    S=cut(X,Y,S)
+    if (X<0 or Y<0):
+        s0,state=S[0],{'C':0,'J':0}
+        for s in S[1:]:
+            s0,state=update_state(s,s0,state)
+        COST=min(state.values())
+    else:
+        COST=cost(X,Y,S)
+    print('Case #%d: %s' %(T+1,COST))
+","# S ✓ ✓ ✓
+def update_state(s,s0,state):
+    curr_s"
+art_img.py,"import h5py,os,tensorflow as tf
+import pandas as pd,numpy as np
+import seaborn as sn,pylab as pl
+from tensorflow.keras.preprocessing \
+import image as tkimg
+from IPython.display import display,HTML
+
+c1,f1,fs1='#FF355E','Smokum',25
+
+def dhtml(string,fontcolor=c1,font=f1,fontsize=fs1):
+    display(HTML(""""""<style>
+    @import 'https://fonts.googleapis.com/css?family=""""""\
+    +font+""""""&effect=3d-float';</style>
+    <h1 class='font-effect-3d-float' 
+    style='font-family:""""""+font+\
+    """"""; color:""""""+fontcolor+\
+    """"""; font-size:""""""+str(fontsize)+""""""px;'>
+    %s</h1>""""""%string))
+
+def del_png():
+    png_list=[el for el in os.listdir('../working')
+              if el[-4:]=='.png']
+    for f in png_list: os.remove(f)
+
+def randi(nmin,nmax): 
+    return np.random.randint(nmin,nmax)
+
+def randch(a): 
+    return np.random.choice(a,1)[0]
+
+def randcoef():
+    a=(.5+.1**6*randi(1,999999))\
+      *randch([-1,1])
+    b=randi(3,12)
+    c=.001*randi(1,99)*randch([-1,1])
+    return a,b,c
+
+def randcoord(a,b,c):
+    t=np.arange(0,16*b*np.pi,1/(1440*b))
+    fx=np.sin(t/6)+\
+       a*np.sin(b*t)*np.cos(t)-\
+       c*np.sin(16*b*t)
+    fy=np.cos(t/6)+\
+       a*np.sin(b*t)*np.sin(t)-\
+       c*np.cos(16*b*t)
+    return fx,fy
+
+def randcol():
+    return [np.random.random(3)]
+
+def img_size_display(fig_size):
+    a,b,c=randcoef()
+    dhtml('(a,b,c): %s'%str((a,b,c)))
+    fx,fy=randcoord(a,b,c)
+    pl.figure(figsize=(fig_size,fig_size))
+    pl.scatter(fx,fy,s=.1**4,c=randcol())
+    pl.axis('off')
+    pl.tight_layout(pad=.05)
+    fn='example.png'
+    pl.savefig(fn); pl.close();
+    st=""""""<img id='01' src='example.png' alt='example' """"""+\
+       """"""width='250' height='250'>""""""
+    display(HTML(st))
+    img=tkimg.load_img(fn)
+    img=tkimg.img_to_array(img)/255
+    dhtml('image shape: %s'%str(img.shape))
+    return img.shape[0]
+
+def randplot(idx,images,labels,targets,fig_size):
+    a,b,c=randcoef()
+    if (idx+1)%10==0:
+        print('*',end='',flush=True)
+    labels[idx]=b-3
+    targets[idx]=[a,c]
+    fx,fy=randcoord(a,b,c)
+    pl.figure(figsize=(fig_size,fig_size))
+    pl.scatter(fx,fy,s=.1**5,c=randcol())
+    pl.axis('off')
+    pl.tight_layout(pad=.05)
+    fn='%03d'%idx+'.png'
+    pl.savefig(fn); pl.close();
+    img=tkimg.load_img(fn)
+    img=tkimg.img_to_array(img)
+    img=np.expand_dims(img,axis=0)/255
+    images.append(img)
+    os.remove(fn)
+
+def data_file(num_images,h5f,fig_size,img_size):
+    images=[]
+    labels=np.zeros((num_images,),dtype=np.int32)
+    targets=np.zeros((num_images,2),dtype=np.float32)
+    for idx in range(num_images):
+        randplot(idx,images,labels,targets,fig_size)
+    images=np.array(np.vstack(images),
+                    dtype='float32')
+    with h5py.File(h5f,'w') as f:
+        f.create_dataset('images',data=images,
+                         compression='gzip')
+        f.create_dataset('labels',data=labels,
+                         compression='gzip')
+        f.create_dataset('targets',data=targets,
+                         compression='gzip')
+        f.close()
+    print('\nfile size: %s'%list(os.stat(h5f))[6])
+
+def h5file2data(h5list):
+    images,labels,targets=[],[],[]
+    for h5f in h5list:
+        with h5py.File(h5f,'r') as f:
+            keys=list(f.keys())
+            images.append(list(f[keys[0]]))
+            labels.append([list(f[keys[1]])])
+            targets.append(list(f[keys[2]]))
+            f.close()
+    dhtml('file keys: '+', '.join(keys))
+    images=np.vstack(images)
+    labels=np.vstack(labels).reshape(-1)
+    targets=np.vstack(targets)
+    N=labels.shape[0]; n=int(.1*N)
+    shuffle_ids=np.arange(N)
+    np.random.RandomState(12).shuffle(shuffle_ids)
+    images=images[shuffle_ids]
+    labels=labels[shuffle_ids]
+    targets=targets[shuffle_ids]
+    x_test,x_valid,x_train=\
+    images[:n],images[n:2*n],images[2*n:]
+    ly_test,ly_valid,ly_train=\
+    labels[:n],labels[n:2*n],labels[2*n:]
+    ty_test,ty_valid,ty_train=\
+    targets[:n],targets[n:2*n],targets[2*n:]
+    dhtml('distribution of labels: ')
+    df=pd.DataFrame(labels,columns=['label'])
+    df['name']=['b=%d'%(l+3) for l in labels]
+    pl.figure(figsize=(5,2.5))
+    sn.countplot(y='name',data=df,
+                 palette='autumn',alpha=.5)
+    fn='countplot.png'
+    pl.savefig(fn); pl.close();
+    st=""""""<img id='02' src='countplot.png' alt='countplot' """"""+\
+       """"""width='500' height='250'>""""""
+    display(HTML(st))
+    dhtml('function outputs: ')
+    df=pd.DataFrame([[x_train.shape,x_valid.shape,x_test.shape],
+                     [x_train.dtype,x_valid.dtype,x_test.dtype],
+                     [ly_train.shape,ly_valid.shape,ly_test.shape],
+                     [ly_train.dtype,ly_valid.dtype,ly_test.dtype],
+                     [ty_train.shape,ty_valid.shape,ty_test.shape],
+                     [ty_train.dtype,ty_valid.dtype,ty_test.dtype]],
+                    columns=['train','valid','test'],
+                    index=['image shape','image type',
+                           'label shape','label type',
+                           'target shape','target type'])
+    display(df)
+    return x_train,x_valid,x_test,\
+           ly_train,ly_valid,ly_test,\
+           ty_train,ty_valid,ty_test
+
+def checkplot(num,x,ly,ty):
+    [a,c]=ty[num]; b=ly[num]+3
+    dhtml('[num,(a,b,c)]: %s'%str([num,(a,b,c)]))
+    fx,fy=randcoord(a,b,c)
+    fig=pl.figure(figsize=(7,3.5))
+    ax=fig.add_subplot(121)
+    ax.scatter(fx,fy,s=.1**5,c=randcol())
+    ax.set_axis_off()
+    ax=fig.add_subplot(122)
+    ax.imshow(x[num])
+    ax.set_axis_off()
+    pl.savefig('checkplot.png',bbox_inches='tight')
+    pl.close();
+    st=""""""<img id='03' src='checkplot.png' alt='checkplot' """"""+\
+       """"""width='500' height='250'>""""""
+    display(HTML(st)) ","import h5py,os,tensorflow as tf
+import pandas as p"
+qr2019_task2_var1.py,"T = int(input())
+try:
+    for i in range(T):
+        L = int(input())
+        S = input()
+        W = S.replace('S','L').replace('E','S').replace('L','E')
+        print('Case #{}: '.format(i+1), W)
+except StopIteration: pass
+","T = int(input())
+try:
+    for i in range(T):
+     "
+d3scatter2d_csv.py,"from IPython.core.display import display,HTML
+import random
+
+def d3scatter2d_csv(csv_url,x='x',y='y',marker_size=3,
+                    background_color='silver',grid_color='black',
+                    width=500,height=500):
+    randi=random.randint(1,999999999)
+    css_str=""""""<style>.grid1 line,.grid1 path,.xaxis1,.yaxis1 
+    {stroke:""""""+grid_color+""""""; stroke-opacity:.5;}</style>""""""
+    html_str=""""""<script src='https://d3js.org/d3.v4.min.js'>
+    </""""""+""""""script><svg id='svg""""""+str(randi)+""""""' 
+    style='background-color:""""""+background_color+""""""'></svg><br/>""""""
+    scr_str=""""""<script>
+    var url='""""""+csv_url+""""""'; 
+    d3.csv(url,function(data) {
+        var xmin=d3.min(data,function(d) {return parseFloat(d.""""""+x+"""""");}),
+            xmax=d3.max(data,function(d) {return parseFloat(d.""""""+x+"""""");});
+        var ymin=d3.min(data,function(d) {return parseFloat(d.""""""+y+"""""");}),
+            ymax=d3.max(data,function(d) {return parseFloat(d.""""""+y+"""""");});
+        var n=data.length,m=20,margin={top:m,right:m,bottom:m,left:m},
+            width=""""""+str(width)+""""""-margin.left-margin.right,
+            height=""""""+str(height)+""""""-margin.top-margin.bottom;
+        var xScale=d3.scaleLinear()
+                     .domain([1.1*xmin,1.1*xmax]).range([0,width]),
+            yScale=d3.scaleLinear()
+                     .domain([1.1*ymin,1.1*ymax]).range([height,0]); 
+        function make_x_gridlines() {
+            return d3.axisBottom(xScale).ticks(11)}; 
+        function make_y_gridlines() { 
+            return d3.axisLeft(yScale).ticks(11)};  
+        var pointColor=d3.scaleSequential().domain([0,n]) 
+                         .interpolator(d3.interpolateRainbow);  
+        var tr1='translate('+margin.left+','+margin.top+')',
+            tr2='translate(0,'+height+')';  
+        var svg=d3.select('#svg""""""+str(randi)+""""""') 
+                  .attr('width',width+margin.left+margin.right) 
+                  .attr('height',height+margin.top+margin.bottom) 
+                  .append('g').attr('transform',tr1);  
+        svg.append('g').attr('class','xaxis1') 
+           .call(d3.axisBottom(xScale).tickSize(.5)).attr('transform',tr2);  
+        svg.append('g').attr('class','yaxis1') 
+           .call(d3.axisLeft(yScale).tickSize(.5)); 
+        svg.append('g').attr('class','grid1').attr('transform',tr2)
+           .call(make_x_gridlines().tickSize(-height).tickFormat(''));
+        svg.append('g').attr('class','grid1').call(make_y_gridlines()
+           .tickSize(-width).tickFormat(''));
+        svg.selectAll('.point').data(data).enter()
+           .append('circle').attr('class','point')
+           .attr('fill',function(d,i){return pointColor(i)})
+           .attr('r',""""""+str(marker_size)+"""""")
+           .attr('stroke','#fff')
+           .attr('stroke-width',""""""+str(.1*marker_size)+"""""")
+           .attr('cx',function(d) {return xScale(d.""""""+x+"""""")})
+           .attr('cy',function(d) {return yScale(d.""""""+y+"""""")}); 
+    });</script>""""""
+    display(HTML(css_str+html_str+scr_str))","from IPython.core.display import display,HTML
+impo"
+sage_call.py,"from IPython.core.display import display,HTML
+from IPython.core.magic import register_line_magic
+import random
+
+@register_line_magic
+def sage_autorun(code_string):
+    start_string=\
+    """"""<html><head><meta charset='utf-8'>""""""+\
+    """"""<meta name='viewport' content='width=device-width'>""""""+\
+    """"""<script src='https://sagecell.sagemath.org/static/""""""+\
+    """"""embedded_sagecell.js'></script><script>""""""+\
+    """"""$(function () {sagecell.makeSagecell({""""""+\
+    """"""inputLocation:'div.autosage',evalButtonText:'run',""""""+\
+    """"""template:sagecell.templates.minimal,autoeval:true});});""""""+\
+    """"""</script></head><style>.sagecell_output pre{""""""+\
+    """"""min-height:3em; max-height:30em;} """"""+\
+    """""".sagecell .CodeMirror-scroll {""""""+\
+    """"""min-height:3em; max-height:30em;}</style><body>""""""+\
+    """"""<div class='autosage'><script type='text/x-sage'>""""""
+    split_code_string=code_string.split('  ')
+    code_string=""""""""""""; c=0
+    for el in split_code_string:
+        if el!='':
+            code_string+=c*'  '+el+'\n'; c=0
+        else: c+=1
+    end_string=""""""</script></div></body></html>""""""
+    display(HTML(start_string+code_string+end_string))
+    
+@register_line_magic
+def sage_run(code_string):
+    start_string=\
+    """"""<html><head><meta charset='utf-8'>""""""+\
+    """"""<meta name='viewport' content='width=device-width'>""""""+\
+    """"""<script src='https://sagecell.sagemath.org/static/""""""+\
+    """"""embedded_sagecell.js'></script><script>""""""+\
+    """"""$(function () {sagecell.makeSagecell({""""""+\
+    """"""inputLocation:'div.sage',evalButtonText:'run',""""""+\
+    """"""template:sagecell.templates.minimal});});""""""+\
+    """"""</script></head><style>.sagecell_output pre{""""""+\
+    """"""min-height:3em; max-height:30em;} """"""+\
+    """""".sagecell .CodeMirror-scroll {""""""+\
+    """"""min-height:3em; max-height:30em;}</style><body>""""""+\
+    """"""<div class='sage'><script type='text/x-sage'>""""""
+    split_code_string=code_string.split('  ')
+    code_string=""""""""""""; c=0
+    for el in split_code_string:
+        if el!='':
+            code_string+=c*'  '+el+'\n'; c=0
+        else: c+=1
+    end_string=""""""</script></div></body></html>""""""
+    display(HTML(start_string+code_string+end_string))
+
+@register_line_magic
+def sage_coderun(params):
+    [width,height]=[int(el) for el in params.split()]
+    html_str=""""""<html><head><meta charset='utf-8'>""""""+\
+    """"""<script src='https://sagecell.sagemath.org/static/embedded_sagecell.js'>""""""+\
+    """"""</script><script>$(function(){""""""+\
+    """"""sagecell.makeSagecell({inputLocation:'#cell0001',""""""+\
+    """"""evalButtonText:'run'}); });</script></head>""""""+\
+    """"""<body><div id='cell0001'><script type='text/x-sage'>""""""+\
+    """"""print('You can change code lines right here and run.')""""""+\
+    """"""</script></div></body></html>""""""
+    file='sage_coderun'+str(random.uniform(0,9999999))+'.html'
+    with open(file,'w') as f:
+        f.write(html_str); f.close()
+    string=""""""<div id='html_string'><iframe src='""""""+\
+           file+""""""' height=""""""+str(height+20)+\
+           """""" width=""""""+str(width+20)+""""""></iframe></div>""""""
+    display(HTML(string))
+    
+print('Evaluation of SageMath cells is possible ')
+print('now with two additional syntax marks: ')
+print('the white space and the slash between code lines.')","from IPython.core.display import display,HTML
+from"
+qr2020_task2_var1.py,"T = int(input())
+for t in range(T): 
+    S = str(input())
+    N = [int(n) for n in S]
+#    print(N)
+    R = N[0] * '(' + str(N[0])
+    for i in range(1,len(N)):
+        if (N[i - 1] < N[i]):
+            nopen = N[i] - N[i - 1]
+ #           print('o'+str(nopen))
+            R += nopen * '(' + str(N[i])
+        elif N[i - 1] > N[i]:
+            nclose = (N[i - 1] - N[i])
+            R += nclose * ')' + str(N[i])
+ #           print('c'+str(nclose))
+        else:
+            R += str(N[i])
+    R += N[-1] * ')' 
+    print('Case #%d: %s' % ((t + 1, R)))
+","T = int(input())
+for t in range(T): 
+    S = str(i"
+qr2021_task3_var2.py,"# S ✓ ✓
+def gen_permutate(n,c):
+    if n==2:
+        if c==1:
+            return [1,2]
+        else:
+            return [2,1]
+    else:
+        base=gen_permutate(n-1,c-1)
+        base=[1]+[base[i]+1 for i in range(n-1)]
+        if c-1<=(n-1)*n//2-1:
+            return base
+        else:
+            x=c-(n-1)*n//2+1
+            return base[:x][::-1]+base[x:]
+def gen_answer(n,cost):
+    if cost<n-1 or cost>n*(n+1)//2-1:
+        return 'IMPOSSIBLE'
+    elif cost==n-1:
+        arr=list(range(1,n+1))
+        return str(arr)[1:-1].replace(',','')
+    else:
+        arr=gen_permutate(n,cost)
+        return str(arr)[1:-1].replace(',','')
+T=int(input())
+for t in range(T):
+    N,COST=map(int,input().split())
+    ANS=gen_answer(N,COST)
+    print('Case #{}: {}'.format(t+1,ANS))
+","# S ✓ ✓
+def gen_permutate(n,c):
+    if n==2:
+     "
+qr2022_task2_var2.py,"def gen_vector(v,s=10**6):
+    if sum(v)<s:
+        yield 'IMPOSSIBLE'
+    else:
+        for c in range(v[0],1,-1):
+            m=min([v[1],10**6-c])
+            y=min([v[2],10**6-c-m])
+            k=10**6-c-m-y
+            yield '%d %d %d %d'%(c,m,y,k)
+T=int(input())
+for t in range(T):
+    N=[]
+    for i in range(3):
+        N.append(list(map(int,input().split())))
+    v=[min([N[i][j] for i in range(3)]) 
+       for j in range(4)]
+    print('Case #%d: %s'%(t+1,next(gen_vector(v))))
+","def gen_vector(v,s=10**6):
+    if sum(v)<s:
+      "
+qr2019_task3_var1.py,"def eacd(a,b):
+    if b==0:
+        return a
+    else:
+        return eacd(b,a%b)
+def replace_zero(num_list,num_len,crypto_list):
+    for i in range(num_len):
+        if (crypto_list[i]==0) and (crypto_list[i+1]!=0):
+            crypto_list[i]=num_list[i]//crypto_list[i+1]
+        if (crypto_list[i]!=0) and (crypto_list[i+1]==0):
+            crypto_list[i+1]=num_list[i]//crypto_list[i]
+    return crypto_list
+def crypto_string(num_list,num_len):
+    crypto_list=(num_len+1)*[0]
+    for i in range(num_len-1):
+        if num_list[i]!=num_list[i+1]:
+            crypto_list[i+1]=eacd(num_list[i],num_list[i+1])
+    while 0 in crypto_list:
+        crypto_list=replace_zero(num_list,num_len,crypto_list)
+    prime_set=list(set(crypto_list))
+    prime_set.sort()
+    letter_set=list('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+    dl=dict(zip(prime_set,letter_set))
+    crypto_str=''
+    for i in range(num_len+1):
+        crypto_str+=dl[crypto_list[i]]
+    return crypto_str
+T=int(input())
+for t in range(T):
+    max_num,num_len=map(int,input().split())
+    num_list=list(map(int,input().split()))
+    answer=crypto_string(num_list,num_len)
+    print('Case #{}: {}'.format(t+1,answer))
+","def eacd(a,b):
+    if b==0:
+        return a
+    e"
+qr2020_task3_var1.py,"T=int(input())
+for t in range(T): 
+    N=int(input())
+    I=[input() for i in range(N)]
+    ANS=N*'O'
+    A=sorted([list(map(int,I[i].split()))+[i] 
+              for i in range(N)])
+#    print(A)
+    endC,endJ=0,0
+    for a in A:
+ #       print(a[0],a[1],a[2])
+        if endC<=a[0]:
+            ANS=ANS[:a[2]]+'C'+ANS[a[2]+1:]
+            endC=a[1]
+        elif endJ<=a[0]:
+            ANS=ANS[:a[2]]+'J'+ANS[a[2]+1:]
+            endJ=a[1]
+        else:
+            ANS='IMPOSSIBLE'
+            break
+    print('Case #{}: {}'.format(t+1,ANS)
+","T=int(input())
+for t in range(T): 
+    N=int(input"
+base_cnn_model01.py,"from tensorflow.keras.models import Sequential
+from tensorflow.keras import layers as tkl
+
+def base_cnn_model(base_conv2d,last_pool,num_classes,img_size):
+    model=Sequential()
+    model.add(tkl.Conv2D(base_conv2d,(5,5),padding='same',
+                         input_shape=(img_size,img_size,3)))
+    model.add(tkl.Activation('relu'))
+    model.add(tkl.MaxPooling2D(pool_size=(2,2)))
+    model.add(tkl.Dropout(.25))
+    model.add(tkl.Conv2D(3*base_conv2d,(5,5)))
+    model.add(tkl.Activation('relu'))    
+    model.add(tkl.MaxPooling2D(pool_size=(2,2)))
+    model.add(tkl.Dropout(.25))
+    if last_pool=='max':
+        model.add(tkl.GlobalMaxPooling2D())
+    if last_pool=='avg':
+        model.add(tkl.GlobalAveragePooling2D())
+    model.add(tkl.Dense(base_conv2d**2))
+    model.add(tkl.Activation('relu'))
+    model.add(tkl.Dropout(.5))         
+    model.add(tkl.Dense(num_classes))
+    model.add(tkl.Activation('softmax'))
+    model.compile(loss='sparse_categorical_crossentropy',
+                  optimizer='adam',metrics=['accuracy'])
+    return model","from tensorflow.keras.models import Sequential
+fro"
+tfdata2h5.py,"import numpy as np,os,h5py
+import tensorflow_datasets as tfds
+from tensorflow.keras.preprocessing \
+import image as tkimg
+
+def tfdata2h5(data_name,names,num_points,img_size):
+    ds=tfds.load(data_name,split='train',
+                 shuffle_files=True,
+                 as_supervised=True)
+    h5file=data_name+str(img_size)+'.h5'
+    images=np.zeros((num_points,img_size,img_size,3),
+                     dtype='float32')
+    labels=np.zeros((num_points,),dtype='int32')
+    i=0
+    for img,lbl in ds.take(num_points):
+        img=tkimg.smart_resize(
+                img,(img_size,img_size))
+        images[i,:]=img.numpy()/255
+        labels[i]=lbl; i+=1
+    maxlen=max([len(n) for n in names])
+    names=np.array([np.string_(name) 
+                    for name in names])
+    with h5py.File(h5file,'w') as f:
+        f.create_dataset('images',data=images,
+                         compression='gzip')
+        f.create_dataset('labels',data=labels,
+                         compression='gzip')
+        f.create_dataset('names',data=names,
+                         dtype='S%d'%maxlen,
+                         compression='gzip')
+        f.close()
+    print('\nfile size: %s'%list(os.stat(h5file))[6])
+    return h5file","import numpy as np,os,h5py
+import tensorflow_datas"
+ps2018_task2_var1.py,"T = int(input())
+A = list('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+for i in range(T):
+    N = int(input())
+    S = input()
+    S = [int(s) for s in S.split()]
+    path = ''
+    while sum(S) > 0:   
+        max_value = max(S)
+        max_index = [i for i in range(N) if S[i] == max_value]   
+        if sum(S) == 3:
+            S[max_index[0]] -= 1
+            path += A[max_index[0]] + ' '
+        elif len(max_index) == 1:
+            S[max_index[0]] -= 2
+            path += 2*A[max_index[0]] + ' '
+        elif len(max_index) > 1:
+            S[max_index[0]] -= 1
+            S[max_index[1]] -= 1        
+            path += A[max_index[0]] + A[max_index[1]] + ' '    
+    print('Case #{}: '.format(i+1), path)
+","T = int(input())
+A = list('ABCDEFGHIJKLMNOPQRSTUVW"

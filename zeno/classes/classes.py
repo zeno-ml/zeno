@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from zeno.classes.base import CamelModel, ZenoColumn
 
-from zeno.classes.slice import FilterIds, FilterPredicate, FilterPredicateGroup, Slice
+from zeno.classes.slice import FilterIds, FilterPredicateGroup, Slice
 
 
 class ZenoSettings(CamelModel):
@@ -14,9 +14,9 @@ class ZenoSettings(CamelModel):
     id_column: ZenoColumn
     label_column: ZenoColumn
     data_column: ZenoColumn
-    data_origin: str
-    metadata_columns: List[ZenoColumn]
     samples: int
+    calculate_histogram_metrics: bool
+    inference_view: bool
     totalSize: int
 
 
@@ -46,13 +46,17 @@ class MetricRequest(CamelModel):
 class TableRequest(CamelModel):
     columns: List[ZenoColumn]
     slice_range: List[int]
-    filter_predicates: List[Union[FilterPredicate, FilterPredicateGroup]]
+    filter_predicates: FilterPredicateGroup
     sort: Tuple[Union[ZenoColumn, None], bool]
     filter_ids: Optional[FilterIds] = None
 
 
 class EmbedProject2DRequest(CamelModel):
     model: str
+    column: ZenoColumn
+
+
+class ColorsProjectRequest(CamelModel):
     column: ZenoColumn
 
 

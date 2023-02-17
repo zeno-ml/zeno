@@ -1,0 +1,4 @@
+view = "code-generation"
+metadata = "code.csv"
+data_column = "code"
+label_column = "completion"

@@ -47,12 +47,11 @@
 	}
 	.meta-chip {
 		width: fit-content;
-		padding: 5px;
-		background: rgba(0, 0, 0, 0.07);
-		margin-left: 5px;
+		padding: 5px 10px;
+		background: var(--G5);
 		margin-right: 5px;
 		margin-top: 2px;
 		margin-bottom: 2px;
-		border-radius: 5px;
+		border-radius: 4px;
 	}
 </style>

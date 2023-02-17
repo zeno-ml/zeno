@@ -4,6 +4,7 @@
 	import html2pdf from "html2pdf.js";
 	import { models, reports } from "../../stores";
 	import TimeseriesReportTableRow from "./TimeseriesReportTableRow.svelte";
+	import { updateTab } from "../../util/util";
 
 	export let reportId: number;
 
@@ -13,11 +14,19 @@
 </script>
 
 <div id="container">
-	<div class="inline" style:max-width="calc(100vw - 450px)">
+	<div class="inline">
 		<h4
+			class="report-link"
+			on:keydown={() => ({})}
+			on:click={() => {
+				updateTab("report");
+			}}>
+			Reports
+		</h4>
+		<b>></b>
+		<h4
+			class="report-name"
 			contenteditable="true"
-			style:margin-right="20px"
-			style:padding="10px"
 			bind:textContent={$reports[reportId].name}>
 			{report.name}
 		</h4>
@@ -65,12 +74,27 @@
 </div>
 
 <style>
+	#container {
+		margin-left: 20px;
+	}
 	.inline {
 		display: flex;
 		flex-direction: inline;
 		align-items: center;
+		max-width: calc(100vw - 450px);
 	}
-	#container {
-		margin-left: 10px;
+	.report-link {
+		padding: 10px 18px 10px 0px;
+		width: fit-content;
+		cursor: pointer;
+	}
+	.report-link:hover {
+		color: black;
+	}
+	.report-name {
+		margin-left: 5px;
+		margin-right: 5px;
+		padding: 10px;
+		width: fit-content;
 	}
 </style>

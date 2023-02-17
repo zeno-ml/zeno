@@ -2,16 +2,10 @@
 	import Select, { Option } from "@smui/select";
 	import { VegaLite } from "svelte-vega";
 	import { getMetricsForSlices } from "../../api/slice";
-	import {
-		metric,
-		metrics,
-		model,
-		models,
-		reports,
-		slices,
-	} from "../../stores";
+	import { metric, metrics, models, reports, slices } from "../../stores";
 	import type { MetricKey } from "../../zenoservice";
 	import generateBarSpec from "./vegaSpec";
+	import { updateTab } from "../../util/util";
 
 	export let reportId: number;
 
@@ -19,7 +13,7 @@
 
 	$: report = $reports[reportId];
 
-	function getMetKeys(rep) {
+	function getMetKeys(rep, $metric) {
 		const entries: MetricKey[] = [];
 		chartEntries = [];
 		rep.reportPredicates.forEach((pred) => {
@@ -40,29 +34,28 @@
 		return entries;
 	}
 
-	$: modelResults = getMetricsForSlices(getMetKeys(report));
+	$: modelResults = getMetricsForSlices(getMetKeys(report, $metric));
 </script>
 
-<div style:margin-left="20px">
-	<h4
-		contenteditable="true"
-		style:margin-right="20px"
-		style:padding="10px"
-		style:width="fit-content"
-		bind:textContent={$reports[reportId].name}>
-		{report.name}
-	</h4>
+<div class="main">
+	<div class="inline">
+		<h4
+			class="report-link"
+			on:keydown={() => ({})}
+			on:click={() => {
+				updateTab("report");
+			}}>
+			Reports
+		</h4>
+		<b>></b>
+		<h4
+			class="report-name"
+			contenteditable="true"
+			bind:textContent={$reports[reportId].name}>
+			{report.name}
+		</h4>
+	</div>
 
-	{#if $models && $models.length > 0}
-		<Select
-			bind:value={$model}
-			label="Model"
-			style="margin-right: 20px; width: fit-content">
-			{#each $models as m}
-				<Option value={m}>{m}</Option>
-			{/each}
-		</Select>
-	{/if}
 	{#if $metrics && $metrics.length > 0}
 		<Select
 			bind:value={$metric}
@@ -74,7 +67,7 @@
 		</Select>
 	{/if}
 	<br />
-	<div style:margin-top="30px" style:width="500px">
+	<div class="model-result">
 		{#await modelResults then res}
 			{@const chartData = {
 				table: chartEntries.map((r, i) => ({
@@ -90,3 +83,33 @@
 		{/await}
 	</div>
 </div>
+
+<style>
+	.main {
+		margin-left: 20px;
+	}
+	.inline {
+		display: flex;
+		flex-direction: inline;
+		align-items: center;
+		max-width: calc(100vw - 450px);
+	}
+	.report-link {
+		padding: 10px 18px 10px 0px;
+		width: fit-content;
+		cursor: pointer;
+	}
+	.report-link:hover {
+		color: black;
+	}
+	.report-name {
+		margin-left: 5px;
+		margin-right: 5px;
+		padding: 10px;
+		width: fit-content;
+	}
+	.model-result {
+		margin-top: 30px;
+		width: 500px;
+	}
+</style>

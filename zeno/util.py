@@ -11,7 +11,7 @@ import pandas as pd
 
 from zeno.classes.base import MetadataType
 
-VIEW_MAP_URL: str = "https://raw.githubusercontent.com/zeno-ml/instance-views/main/"
+VIEW_MAP_URL: str = "https://raw.githubusercontent.com/zeno-ml/instance-views/0.2/"
 VIEWS_MAP_JSON: str = "views.json"
 
 
@@ -24,8 +24,6 @@ def read_pickle(file_name: str, cache_path: str, default):
 
 
 def getMetadataType(col: pd.Series) -> MetadataType:
-    col = col.infer_objects()
-
     try:
         datetime.datetime.fromisoformat(str(col[0]))
         return MetadataType.DATETIME
@@ -48,14 +46,26 @@ def getMetadataType(col: pd.Series) -> MetadataType:
         "int32",
         "int16",
         "int8",
+        "Int64",
+        "Int32",
+        "Int16",
+        "Int8",
         "uint64",
         "uint32",
         "uint16",
         "uint8",
+        "Uint64",
+        "Uint32",
+        "Uint16",
+        "Uint8",
         "float64",
         "float32",
         "float16",
         "float8",
+        "Float64",
+        "Float32",
+        "Float16",
+        "Float8",
     ]:
         return MetadataType.CONTINUOUS
 
@@ -99,6 +109,7 @@ def parse_testing_file(test_file: Path):
                 hasattr(func, "predict_function")
                 or hasattr(func, "distill_function")
                 or hasattr(func, "metric_function")
+                or hasattr(func, "inference_function")
             ):
                 functions.append(func)
     return functions

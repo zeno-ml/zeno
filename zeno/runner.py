@@ -14,11 +14,10 @@ import uvicorn
 from multiprocess import Process  # type: ignore
 
 from zeno.api import ZenoParameters
-from zeno.data_pipeline.zeno_backend import ZenoBackend
+from zeno.backend import ZenoBackend
 from zeno.server import get_server
 from zeno.setup import setup_zeno
 from zeno.util import is_notebook, parse_testing_file, VIEW_MAP_URL, VIEWS_MAP_JSON
-
 
 # Global variable to hold the Zeno server process.
 # This is used to kill the server when re-running in a notebook.
@@ -118,26 +117,26 @@ def parse_args(args: ZenoParameters, base_path) -> ZenoParameters:
     # Try to get view from GitHub List, if not try to read from path and copy it.
     if args.view != "":
         view_dest_path = Path(os.path.join(args.cache_path, "view.mjs"))
-        try:
-            views_res = requests.get(VIEW_MAP_URL + VIEWS_MAP_JSON)
-            views = views_res.json()
-            url = VIEW_MAP_URL + views[args.view]
-            with open(view_dest_path, "wb") as out_file:
-                content = requests.get(url, stream=True).content
-                out_file.write(content)
-        except requests.exceptions.ConnectionError:
-            view_path = Path(os.path.realpath(os.path.join(base_path, args.view)))
-            if view_path.is_file():
-                if view_dest_path.is_file():
-                    os.remove(view_dest_path)
-                shutil.copyfile(view_path, view_dest_path)
-        except KeyError:
-            print(
-                "ERROR: View not found in list or relative path."
-                " See available views at ",
-                "https://github.com/zeno-ml/instance-views/blob/main/views.json",
-            )
-            sys.exit(1)
+        view_path = Path(os.path.realpath(os.path.join(base_path, args.view)))
+        if view_path.is_file():
+            if view_dest_path.is_file():
+                os.remove(view_dest_path)
+            shutil.copyfile(view_path, view_dest_path)
+        else:
+            try:
+                views_res = requests.get(VIEW_MAP_URL + VIEWS_MAP_JSON)
+                views = views_res.json()
+                url = VIEW_MAP_URL + views[args.view]
+                with open(view_dest_path, "wb") as out_file:
+                    content = requests.get(url, stream=True).content
+                    out_file.write(content)
+            except KeyError:
+                print(
+                    "ERROR: View not found in list or relative path."
+                    " See available views at ",
+                    "https://github.com/zeno-ml/instance-views/blob/main/views.json",
+                )
+                sys.exit(1)
 
     if len(args.models) > 0:
         if Path(os.path.realpath(os.path.join(base_path, args.models[0]))).exists():
@@ -145,7 +144,7 @@ def parse_args(args: ZenoParameters, base_path) -> ZenoParameters:
                 os.path.realpath(os.path.join(base_path, m)) for m in args.models
             ]
 
-    if not args.data_path.startswith("http"):
+    if not args.data_path.startswith("http") and args.data_path != "":
         args.data_path = os.path.realpath(os.path.join(base_path, args.data_path))
 
     if args.label_path != "":

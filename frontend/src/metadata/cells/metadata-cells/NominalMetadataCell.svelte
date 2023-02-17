@@ -46,12 +46,12 @@
 	function setSelection() {
 		filterPredicates = [];
 		if (localSelection.bucket && localSelection.bucket.length > 0) {
-			localSelection.bucket.forEach((l) => {
+			localSelection.bucket.forEach((l, i) => {
 				filterPredicates.push({
 					column: col,
 					operation: "==",
 					value: l,
-					join: "|",
+					join: i === 0 ? "" : "|",
 				} as FilterPredicate);
 			});
 		} else {
@@ -67,5 +67,10 @@
 		bind:view
 		spec={nominalVegaSpec($metricRange)}
 		data={{ table: histogram.map((h) => Object.assign({}, h)) }}
-		options={{ tooltip: true, actions: false, theme: "vox" }} />
+		options={{
+			tooltip: true,
+			actions: false,
+			theme: "vox",
+			renderer: "svg",
+		}} />
 </div>

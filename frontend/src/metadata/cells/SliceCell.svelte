@@ -159,7 +159,7 @@
 			<div class="inline">
 				<div
 					class="group"
-					style:color="#6a1b9a"
+					style:color="var(--G1)"
 					on:mouseover={() => (showTooltip = true)}
 					on:mouseout={() => (showTooltip = false)}
 					on:focus={() => (showTooltip = true)}
@@ -215,7 +215,7 @@
 							{res[0].metric !== undefined ? res[0].metric.toFixed(2) : ""}
 						</span>
 						<span id="size">
-							({res[0].size})
+							({res[0].size.toLocaleString()})
 						</span>
 					{/await}
 				{/if}
@@ -264,37 +264,39 @@
 
 <style>
 	.tooltip-container {
-		background: white;
+		background: var(--G6);
 		position: absolute;
 		top: 100%;
 		max-width: 1000px;
 		width: fit-content;
-		background: white;
+		background: var(--G6);
 		z-index: 10;
 		left: 0px;
 	}
 	.tooltip {
-		background: white;
-		padding-left: 5px;
-		padding-right: 5px;
-		box-shadow: 1px 1px 3px 1px #ccc;
-		border-radius: 3px;
+		background: var(--G6);
+		padding-left: 10px;
+		padding-right: 10px;
+		box-shadow: 1px 1px 3px 1px var(--G3);
+		border-radius: 4px;
+		padding-top: 10px;
+		padding-bottom: 10px;
 	}
 	#size {
 		font-style: italic;
-		color: rgba(0, 0, 0, 0.4);
+		color: var(--G3);
 		margin-right: 10px;
 	}
 	.cell {
 		position: relative;
 		overflow: visible;
-		border: 0.5px solid #d1d1d1;
-		border-radius: 5px;
+		border: 0.5px solid var(--G4);
+		border-radius: 4px;
 		margin-top: 5px;
 		display: flex;
 		padding-left: 10px;
 		padding-right: 10px;
-		height: 36px;
+		min-height: 36px;
 	}
 	.group {
 		display: flex;
@@ -304,14 +306,14 @@
 		cursor: pointer;
 	}
 	.selected {
-		background: #f9f5ff;
+		background: var(--P3);
 	}
 	.inline {
 		display: flex;
 		flex-direction: row;
 	}
 	.in-folder {
-		padding-left: 44px;
+		margin-left: 35px;
 		margin-top: 0px;
 		margin-bottom: 0px;
 	}
@@ -319,11 +321,12 @@
 		top: 0px;
 		right: 0px;
 		z-index: 5;
-		background: white;
+		background: var(--G6);
 		margin-top: -7px;
-		border: 1px solid #e8e8e8;
+		border: 1px solid var(--G5);
 		position: absolute;
 		height: max-content;
 		display: flex;
+		border-radius: 4px;
 	}
 </style>

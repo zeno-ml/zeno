@@ -1,41 +1,42 @@
 <script lang="ts">
-	import NoEmbed from "./NoEmbed.svelte";
-	import ReglScatter from "./regl-scatter/ReglScatter.svelte";
-	import ScatterHelp from "./ScatterHelp.svelte";
-	import ScatterLegend from "./ScatterLegend.svelte";
-	import ScatterSettings from "./ScatterSettings.svelte";
-
+	import { tick } from "svelte";
 	import { BarLoader as Spinner } from "svelte-loading-spinners";
-	import { createViewComponent } from "../instance-views";
 	import {
 		model,
+		scatterColorByColumn,
 		selectionIds,
 		selectionPredicates,
 		status,
 	} from "../../stores";
-	import { createScalesWebgGLExtent } from "./regl-scatter";
-
-	import { tick } from "svelte";
 	import {
 		ZenoService,
 		type Points2D,
 		type ZenoColumn,
 	} from "../../zenoservice";
+	import type { ViewRenderFunction } from "../instance-views";
+	import { createViewComponent } from "../instance-views";
+	import NoEmbed from "./NoEmbed.svelte";
 	import type {
 		ReglScatterPointDispatch,
 		WebGLExtentScalers,
 	} from "./regl-scatter";
+	import { createScalesWebgGLExtent } from "./regl-scatter";
+	import ReglScatter from "./regl-scatter/ReglScatter.svelte";
 	import {
 		deselectPoints,
 		getIndicesFromIds,
 		getPointOpacities,
 		selectPoints,
 	} from "./scatter";
+	import ScatterHelp from "./ScatterHelp.svelte";
+	import ScatterLegend from "./ScatterLegend.svelte";
+	import ScatterSettings from "./ScatterSettings.svelte";
 
-	export let viewFunction;
+	export let viewFunction: ViewRenderFunction;
 	export let viewOptions = {};
 	export let autoResize = true;
 
+	const hoverViewOffset = 10;
 	let height = 850; // canvas dims
 	let width = 1000; // canvas dims
 	let pointSizeSlider = 3;
@@ -44,7 +45,6 @@
 	let computingPoints = false; // spinner when true
 	let pointOpacities: number[] = [];
 	// column to color scatterplot by
-	let colorByColumn: ZenoColumn = $status.completeColumns[0];
 	let runOnce = false;
 	let mounted = false;
 	let reloadedIndices: number[] = [];
@@ -58,7 +58,12 @@
 	let dehighlightPoints;
 	let highlightPoints;
 
-	$: project2DOnModelAndTransformChange($model, colorByColumn);
+	// if no coloring, just do the first one we have
+	$: if ($scatterColorByColumn === null) {
+		scatterColorByColumn.set($status.completeColumns[0]);
+	}
+	$: project2DOnModelChange($model);
+	$: changePointsColorsOnColorChange($scatterColorByColumn);
 	$: {
 		if (containerEl && autoResize) {
 			resizeScatter();
@@ -88,13 +93,26 @@
 	}
 
 	/**
+	 * Updates only the colors on color change
+	 */
+	async function changePointsColorsOnColorChange(colorByColumn: ZenoColumn) {
+		if (pointsExist(points)) {
+			const newPointColors = await ZenoService.getProjectionColors({
+				column: colorByColumn,
+			});
+
+			// update the colors and leave x, y alone
+			points.color = newPointColors.color;
+			points.domain = newPointColors.domain;
+			points.dataType = newPointColors.dataType;
+		}
+	}
+
+	/**
 	 * Main driver behind fetching the projected points and displaying
 	 * them in the scale that WebGL expects between [-1, 1]
 	 */
-	async function project2DOnModelAndTransformChange(
-		model: string,
-		colorColumn: ZenoColumn
-	) {
+	async function project2DOnModelChange(model: string) {
 		embedExists = await ZenoService.embedExists(model);
 
 		if (embedExists) {
@@ -104,7 +122,7 @@
 			// requests tsne from backend
 			points = await ZenoService.projectEmbedInto2D({
 				model,
-				column: colorColumn,
+				column: $scatterColorByColumn,
 			});
 
 			// simply scales the points between [-1, 1]
@@ -145,6 +163,10 @@
 		if (containerEl && autoResize) {
 			width = containerEl.clientWidth;
 		}
+	}
+
+	function pointsExist(points: Points2D) {
+		return points && "ids" in points && points.ids.length > 0;
 	}
 </script>
 
@@ -192,10 +214,9 @@
 						{#if pointHover !== undefined}
 							<div
 								id="hover-view"
-								style:width="{100}px"
-								style:height="{80}px"
-								style:left="{pointHover.canvasX + 5}px"
-								style:top="{pointHover.canvasY + 5}px">
+								class="no-text-highlight"
+								style:left="{pointHover.canvasX + hoverViewOffset}px"
+								style:top="{pointHover.canvasY + hoverViewOffset}px">
 								<div id="replace-view" bind:this={hoverViewDivEl} />
 							</div>
 						{/if}
@@ -220,7 +241,9 @@
 
 	<!-- settings/controls for the scatterplot -->
 	<div id="settings" class="frosted">
-		<ScatterSettings bind:colorByColumn bind:pointSizeSlider />
+		<ScatterSettings
+			bind:colorByColumn={$scatterColorByColumn}
+			bind:pointSizeSlider />
 	</div>
 	{#if points}
 		<div id="legend" class="frosted">
@@ -268,7 +291,7 @@
 		position: absolute;
 		bottom: 10px;
 		left: 10px;
-		z-index: 9;
+		z-index: 2;
 		padding: 30px;
 		box-shadow: 0px 0px 1px 1px hsla(0, 0%, 30%, 0.1);
 		border-radius: 3px;
@@ -278,10 +301,20 @@
 		bottom: 10px;
 		right: 10px;
 		width: 300px;
-		z-index: 999;
+		z-index: 2;
 		padding-left: 20px;
 		padding-top: 20px;
 		box-shadow: 0px 0px 1px 1px hsla(0, 0%, 30%, 0.1);
 		border-radius: 3px;
+	}
+
+	/* https://stackoverflow.com/questions/826782/how-to-disable-text-selection-highlighting */
+	.no-text-highlight {
+		-webkit-touch-callout: none; /* iOS Safari */
+		-webkit-user-select: none; /* Safari */
+		-khtml-user-select: none; /* Konqueror HTML */
+		-moz-user-select: none; /* Old versions of Firefox */
+		-ms-user-select: none; /* Internet Explorer/Edge */
+		user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
 	}
 </style>

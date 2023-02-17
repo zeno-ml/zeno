@@ -9,8 +9,8 @@ export type ZenoSettings = {
 	idColumn: ZenoColumn;
 	labelColumn: ZenoColumn;
 	dataColumn: ZenoColumn;
-	dataOrigin: string;
-	metadataColumns: Array<ZenoColumn>;
 	samples: number;
+	calculateHistogramMetrics: boolean;
+	inferenceView: boolean;
 	totalSize: number;
 };

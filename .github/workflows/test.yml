@@ -25,7 +25,7 @@ jobs:
           poetry config virtualenvs.path ~/.virtualenvs
 
       - name: Cache Poetry virtualenv
-        uses: actions/cache@v3.2.2
+        uses: actions/cache@v3.2.4
         id: cache-poetry
         with:
           path: ~/.virtualenvs
@@ -33,26 +33,28 @@ jobs:
           restore-keys: |
             poetry-${{ hashFiles('**/poetry.lock') }}
       - name: Install Poetry Dependencies
-        run: poetry install --no-interaction
         if: steps.cache-poetry.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction
 
       - name: Cache NPM packages
-        uses: actions/cache@v3.2.2
+        uses: actions/cache@v3.2.4
         id: cache-npm
         with:
           path: ~/frontend/node_modules
-          key: npm-${{ hashFiles('**/package.lock') }}
+          key: npm-${{ hashFiles('~/frontend/**/package.lock') }}
           restore-keys: |
-            npm-${{ hashFiles('**/package.lock') }}
+            npm-${{ hashFiles('~/frontend/**/package.lock') }}
+
       - name: Install NPM packages
+        if: steps.cache-npm.outputs.cache-hit != 'true'
         run: |
           cd frontend/
           npm i
+
       - name: Build frontend
         run: |
           cd frontend/
           npm run build
-        if: steps.cache-npm.outputs.cache-hit != 'true'
 
       - name: Lint
         run: make lint

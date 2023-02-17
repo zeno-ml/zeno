@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { mdiChartBar, mdiChartLine, mdiTable } from "@mdi/js";
+	import { mdiChartBar, mdiChartLine, mdiTable, mdiBee } from "@mdi/js";
 	import { Icon } from "@smui/button";
 	import { Svg } from "@smui/common";
 	import IconButton from "@smui/icon-button";
 	import { report as selectedReport, reports } from "../stores";
+	import { updateTab } from "../util/util";
 
 	export let report;
 	export let reportIndex;
@@ -12,12 +13,13 @@
 		table: mdiTable,
 		timeseries: mdiChartLine,
 		slicechart: mdiChartBar,
+		beeswarm: mdiBee,
 	};
 </script>
 
 <div
 	class="report {$selectedReport === reportIndex ? 'selected' : ''}"
-	on:click={() => selectedReport.set(reportIndex)}
+	on:click={() => updateTab("report/" + reportIndex)}
 	on:keydown={() => ({})}>
 	<div class="report-name">
 		<IconButton>
@@ -52,8 +54,8 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		border: 1px solid #e0e0e0;
-		border-radius: 5px;
+		border: 1px solid var(--G5);
+		border-radius: 4px;
 		margin-top: 5px;
 		margin-bottom: 5px;
 		padding-left: 10px;

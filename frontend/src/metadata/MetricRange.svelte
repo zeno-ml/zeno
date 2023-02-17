@@ -34,13 +34,13 @@
 		display: flex;
 		align-items: center;
 		margin-right: 5px;
-		color: #6a1b9a;
+		color: var(--G2);
 	}
 	#legend {
 		width: 40px;
 		height: 15px;
 		margin-left: 10px;
 		margin-right: 10px;
-		background-image: linear-gradient(to right, #decbe9, #6a1b9a);
+		background-image: linear-gradient(to right, var(--P4), var(--logo));
 	}
 </style>

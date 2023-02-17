@@ -4,6 +4,7 @@
 	import { columnHash } from "../../util/util";
 	import {
 		MetadataType,
+		ZenoColumnType,
 		type FilterPredicate,
 		type FilterPredicateGroup,
 		type ZenoColumn,
@@ -27,7 +28,7 @@
 	let filterPredicates: FilterPredicateGroup;
 	$: filterPredicates = $selections.metadata[columnHash(col)]
 		? $selections.metadata[columnHash(col)]
-		: { predicates: [], join: "&" };
+		: { predicates: [], join: "" };
 	let predicates: FilterPredicate[] = [];
 	$: predicates = filterPredicates.predicates as FilterPredicate[];
 
@@ -36,7 +37,7 @@
 			slices: mets.slices,
 			metadata: {
 				...mets.metadata,
-				[columnHash(col)]: { predicates, join: "&" },
+				[columnHash(col)]: { predicates, join: "" },
 			},
 		}));
 	}
@@ -47,7 +48,7 @@
 		<div class="info">
 			<div class="label top-text">
 				<span>
-					{col.name}
+					{col.columnType === ZenoColumnType.OUTPUT ? "output" : col.name}
 				</span>
 			</div>
 		</div>
@@ -75,6 +76,6 @@
 		align-items: center;
 		margin-left: 5px;
 		margin-bottom: 10px;
-		color: #666;
+		color: var(--G2);
 	}
 </style>
