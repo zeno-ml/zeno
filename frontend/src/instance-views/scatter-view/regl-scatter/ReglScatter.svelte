@@ -8,6 +8,7 @@
 		BOOLEAN_COLOR_SCALE,
 		CONTINUOUS_COLOR_SCALE,
 		NOMINAL_COLOR_SCALE,
+		OTHER_COLOR_SCALE,
 	} from "./colors";
 	import type {
 		ReglScatterConfig,
@@ -37,6 +38,7 @@
 		nominal: NOMINAL_COLOR_SCALE,
 		continuous: CONTINUOUS_COLOR_SCALE,
 		boolean: BOOLEAN_COLOR_SCALE,
+		other: OTHER_COLOR_SCALE,
 	};
 
 	let xScale = scaleLinear().domain(WEBGL_EXTENT); // between [-1, 1] -> canvas X

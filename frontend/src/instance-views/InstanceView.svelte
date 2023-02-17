@@ -14,8 +14,6 @@
 	} from "../stores";
 	import type { MetricKey, Slice } from "../zenoservice";
 
-	export let table;
-
 	let selected = "list";
 
 	let viewOptions = undefined;
@@ -57,7 +55,7 @@
 					sliceName: "",
 					folder: "",
 					filterPredicates: {
-						predicates: $selectionPredicates,
+						predicates: [$selectionPredicates],
 						join: "",
 					},
 				},
@@ -78,10 +76,10 @@
 </div>
 
 {#if selected === "list" && viewOptions !== undefined}
-	<ListView {currentResult} {table} {viewFunction} {viewOptions} />
+	<ListView {currentResult} {viewFunction} {viewOptions} />
 {/if}
 {#if selected === "table"}
-	<TableView {currentResult} {table} {viewFunction} {viewOptions} />
+	<TableView {currentResult} {viewFunction} {viewOptions} />
 {/if}
 {#if selected === "projection"}
 	<ScatterView {viewFunction} {viewOptions} />

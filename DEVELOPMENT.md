@@ -8,7 +8,7 @@ Zeno's backend is a Python FastAPI server (`zeno/server.py` and `zeno/runner.py`
 The FastAPI server hosts the compiled frontend files and the backend API the frontend interfaces with.
 
 For the frontend we used the compiled OpenAPI interface instead of raw `fetch` requests to interact with the backend.
-The API can be generated using the `npm run generate-api` command, which creates the `frontend/src/zenoservice` folder.
+The API can be generated using the `npm run generate-api` command, which creates the `frontend/src/zenoservice` folder (must be run while server is running).
 All the TypeScript classes used in the frontend come from the compiled OpenAPI spec, giving us a single source of truth for classes from Python.
 
 Zeno is packaged as a PyPI package `zenoml` that contains the Python backend files and the compiled frontend.

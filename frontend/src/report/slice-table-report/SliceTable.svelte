@@ -27,9 +27,13 @@
 	<Head>
 		<Row>
 			<Cell>{""}</Cell>
-			{#each $models as m}
-				<Cell>{m}</Cell>
-			{/each}
+			{#if $models.length > 0}
+				{#each $models as m}
+					<Cell>{m}</Cell>
+				{/each}
+			{:else}
+				<Cell>Metric</Cell>
+			{/if}
 		</Row>
 	</Head>
 	<Body>

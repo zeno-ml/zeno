@@ -2,13 +2,10 @@
 	import Button from "@smui/button";
 	import Paper, { Content } from "@smui/paper";
 	import Textfield from "@smui/textfield";
-	import { folders, slices } from "../../stores";
+	import { folders, showNewFolder } from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 
-	export let edit = false;
-	export let showNewFolder;
-	export let folderName = "";
-
+	let folderName = "";
 	let input;
 	let originalFolderName = folderName;
 
@@ -16,42 +13,24 @@
 		($folders.includes(folderName) && folderName !== originalFolderName) ||
 		folderName.length === 0;
 
-	$: if (showNewFolder && input) {
+	$: if ($showNewFolder && input) {
 		input.getElement().focus();
 	}
 
 	function createFolder() {
-		if (edit) {
-			folders.update((f) => {
-				f.splice(f.indexOf(originalFolderName), 1);
-				f.push(folderName);
-				slices.update((slis) => {
-					[...slis.keys()].forEach((sliKey) => {
-						let s = slis.get(sliKey);
-						if (s.folder === originalFolderName) {
-							s.folder = folderName;
-							slis.set(sliKey, s);
-						}
-					});
-					return slis;
-				});
-				return f;
-			});
-		} else {
-			folders.update((f) => {
-				f.push(folderName);
-				folderName = "";
-				return [...f];
-			});
-		}
-		showNewFolder = false;
+		folders.update((f) => {
+			f.push(folderName);
+			folderName = "";
+			return [...f];
+		});
+		showNewFolder.set(false);
 	}
 
 	function submit(e) {
-		if (showNewFolder && e.key === "Escape") {
-			showNewFolder = false;
+		if ($showNewFolder && e.key === "Escape") {
+			showNewFolder.set(false);
 		}
-		if (showNewFolder && e.key === "Enter") {
+		if ($showNewFolder && e.key === "Enter") {
 			createFolder();
 		}
 	}
@@ -62,7 +41,7 @@
 <div
 	id="paper-container"
 	use:clickOutside
-	on:click_outside={() => (showNewFolder = false)}>
+	on:click_outside={() => showNewFolder.set(false)}>
 	<Paper elevation={7}>
 		<Content style="display: flex; align-items: center;">
 			<Textfield
@@ -72,12 +51,12 @@
 			<Button
 				style="margin-left: 10px;"
 				variant="outlined"
-				on:click={() => (showNewFolder = false)}>Cancel</Button>
+				on:click={() => showNewFolder.set(false)}>Cancel</Button>
 			<Button
 				style="margin-left: 5px;"
 				variant="outlined"
 				disabled={invalidName}
-				on:click={() => createFolder()}>{edit ? "Update" : "Create"}</Button>
+				on:click={() => createFolder()}>{"Create"}</Button>
 		</Content>
 		{#if invalidName && folderName.length > 0}
 			<p style:margin-right="10px">folder already exists</p>
@@ -88,8 +67,8 @@
 <style>
 	#paper-container {
 		position: fixed;
-		left: 60px;
-		top: 10px;
+		left: 440px;
+		top: 70px;
 		z-index: 10;
 	}
 </style>

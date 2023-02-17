@@ -6,23 +6,24 @@
 	import { tick } from "svelte";
 	import { getFilteredTable } from "../api/table";
 	import {
+		model,
 		rowsPerPage,
 		selectionIds,
 		selectionPredicates,
 		settings,
 		sort,
 		status,
-		model,
 	} from "../stores";
 	import { columnHash } from "../util/util";
 	import type { ZenoColumn } from "../zenoservice";
 	import { MetadataType, ZenoColumnType } from "../zenoservice";
+	import type { ViewRenderFunction } from "./instance-views";
 
 	export let currentResult;
-	export let table;
-	export let viewFunction;
+	export let viewFunction: ViewRenderFunction;
 	export let viewOptions = {};
 
+	let table;
 	let viewDivs = {};
 	let columnHeader: ZenoColumn[] = [];
 	let body: HTMLElement;
@@ -76,7 +77,9 @@
 			$selectionIds
 		).then((res) => {
 			table = res;
-			body ? body.scrollIntoView() : "";
+			if (body) {
+				body.scrollTop = 0;
+			}
 		});
 	}
 
@@ -91,6 +94,10 @@
 	}
 
 	async function drawInstances() {
+		if (!table) {
+			return;
+		}
+
 		let obj = $status.completeColumns.find((c) => {
 			return c.columnType === ZenoColumnType.OUTPUT && c.name === $model;
 		});
@@ -132,7 +139,6 @@
 					modelColumn,
 					columnHash($settings.labelColumn),
 					columnHash($settings.dataColumn),
-					$settings.dataOrigin,
 					idHash
 				);
 			}
@@ -141,7 +147,7 @@
 </script>
 
 {#if table}
-	<div class="sample-container">
+	<div class="sample-container" bind:this={body}>
 		<table id="column-table">
 			<thead>
 				<tr>
@@ -168,7 +174,7 @@
 					{/each}
 				</tr>
 			</thead>
-			<tbody bind:this={body}>
+			<tbody>
 				{#each table as tableContent}
 					<tr>
 						{#if viewFunction}
@@ -253,8 +259,9 @@
 		padding-bottom: 5px;
 		margin-bottom: 20px;
 		margin-right: 20px;
+		top: 2px;
+		left: 0;
 		position: sticky;
-		top: 0;
 		background-color: var(--G6);
 		min-width: 70px;
 		margin-bottom: 5px;

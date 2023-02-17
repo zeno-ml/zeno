@@ -5,6 +5,6 @@
 import type { FilterPredicate } from "./FilterPredicate";
 
 export type FilterPredicateGroup = {
-	predicates: Array<FilterPredicate | FilterPredicateGroup>;
+	predicates: Array<FilterPredicateGroup | FilterPredicate>;
 	join: string;
 };

@@ -15,6 +15,17 @@ body {
 	font-size: 14px;
 }
 
+.autocomplete-input {
+	min-width: 100px;
+	background: none;
+	border-radius: 5px;
+	border: 1px solid var(--G4);
+}
+
+.autocomplete {
+	min-width: 100px !important;
+}
+
 p {
 	font-size: 14px;
 	color: var(--G2);
