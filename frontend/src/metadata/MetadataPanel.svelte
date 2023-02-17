@@ -47,9 +47,13 @@
 	import MetadataCell from "./cells/MetadataCell.svelte";
 	import SliceCell from "./cells/SliceCell.svelte";
 	import MetricRange from "./MetricRange.svelte";
+	import NewFolderPopup from "./popups/NewFolderPopup.svelte";
+	import SliceFinderPopup from "./popups/SliceFinderPopup.svelte";
+	import NewSlicePopup from "./popups/NewSlicePopup.svelte";
 
 	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
 		new InternMap([], columnHash);
+	let showSliceFinder = false;
 
 	$: res = getMetricsForSlices([
 		<MetricKey>{
@@ -222,6 +226,19 @@
 	<div id="slice-header" class="inline">
 		<h4>Slices</h4>
 		<div class="inline">
+			<div>
+				<Wrapper>
+					<IconButton on:click={() => (showSliceFinder = !showSliceFinder)}>
+						<Icon component={Svg} viewBox="0 0 24 24">
+							<path fill="black" d={mdiAssistant} />
+						</Icon>
+					</IconButton>
+					<Tooltip xPos="start">Discover underperforming slices</Tooltip>
+				</Wrapper>
+				{#if showSliceFinder}
+					<SliceFinderPopup bind:showSliceFinder />
+				{/if}
+			</div>
 			<div>
 				<Wrapper>
 					<IconButton
