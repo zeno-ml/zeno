@@ -12,6 +12,7 @@ from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
 
+from zeno.backend import ZenoBackend
 from zeno.classes.base import ZenoColumn
 from zeno.classes.classes import (
     ColorsProjectRequest,
@@ -28,7 +29,17 @@ from zeno.classes.projection import Points2D, PointsColors
 from zeno.classes.report import Report
 from zeno.classes.slice import FilterPredicateGroup, Slice, SliceMetric
 from zeno.classes.tag import Tag
-from zeno.data_pipeline.zeno_backend import ZenoBackend
+from zeno.processing.histogram_processing import (
+    filter_by_string,
+    histogram_buckets,
+    histogram_counts,
+    histogram_metrics,
+)
+from zeno.processing.projection_processing import (
+    check_embed_exists,
+    project_into_2D,
+    projection_colors,
+)
 
 
 def custom_generate_unique_id(route: APIRoute):
@@ -104,7 +115,6 @@ def get_server(zeno: ZenoBackend):
             id_column=zeno.id_column,
             label_column=zeno.label_column,
             data_column=zeno.data_column,
-            data_origin="/data/" if os.path.exists(zeno.data_path) else zeno.data_path,
             calculate_histogram_metrics=zeno.calculate_histogram_metrics,
             inference_view=True if zeno.inference_function else False,
             samples=zeno.samples,
@@ -151,11 +161,11 @@ def get_server(zeno: ZenoBackend):
         "/histograms", response_model=List[List[HistogramBucket]], tags=["zeno"]
     )
     def get_histogram_buckets(req: List[ZenoColumn]):
-        return zeno.get_histogram_buckets(req)
+        return histogram_buckets(zeno.df, req)
 
     @api_app.post("/histogram-counts", response_model=List[List[int]], tags=["zeno"])
     def calculate_histogram_counts(req: HistogramRequest):
-        return zeno.get_histogram_counts(req)
+        return histogram_counts(zeno.df, req)
 
     @api_app.post(
         "/histogram-metrics",
@@ -163,7 +173,7 @@ def get_server(zeno: ZenoBackend):
         tags=["zeno"],
     )
     def calculate_histogram_metrics(req: HistogramRequest):
-        return zeno.get_histogram_metrics(req)
+        return histogram_metrics(zeno.df, zeno.calculate_metric, req)
 
     @api_app.post("/tag", tags=["zeno"])
     def create_new_tag(req: Tag):
@@ -183,7 +193,7 @@ def get_server(zeno: ZenoBackend):
 
     @api_app.post("/string-filter", response_model=List[str], tags=["zeno"])
     def filter_string_metadata(req: StringFilterRequest):
-        filt_out = zeno.filter_string_metadata(req)
+        filt_out = filter_by_string(zeno.df, req)
         return filt_out
 
     @api_app.post("/slice-metrics", response_model=List[SliceMetric], tags=["zeno"])
@@ -195,24 +205,29 @@ def get_server(zeno: ZenoBackend):
         """Checks if embedding exists for a model.
         Returns the boolean True or False directly
         """
-        return zeno.embed_exists(model)
+        return check_embed_exists(zeno.df, model)
 
     @api_app.post("/embed-project", tags=["zeno"], response_model=Points2D)
     def project_embed_into_2D(req: EmbedProject2DRequest):
-        return zeno.project_embed_into_2D(req.model, req.column)
+        return project_into_2D(zeno.df, zeno.id_column, req.model, req.column)
 
     @api_app.post("/colors-project", tags=["zeno"], response_model=PointsColors)
     def get_projection_colors(req: ColorsProjectRequest):
-        return zeno.get_projection_colors(req.column)
+        return projection_colors(zeno.df, req.column)
 
     @api_app.post("/entry", tags=["zeno"], response_model=str)
     def get_df_row_entry(req: EntryRequest):
         try:
-            entry = zeno.df.loc[req.id, :]
+            entry = zeno.df.loc[req.id, :].copy()
             if len(req.columns) > 0:
                 entry = entry[list(map(str, req.columns))]
-            json_entry = entry.to_json()
-            return json_entry
+
+            # Add data prefix to data column depending on type of data_path.
+            entry.loc[str(zeno.data_column)] = (
+                zeno.data_prefix + entry[str(zeno.data_column)]
+            )
+
+            return entry.to_json()
         except KeyError:
             raise HTTPException(
                 status_code=404, detail=f"Entry with id={req.id} not found"

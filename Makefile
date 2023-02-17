@@ -48,3 +48,12 @@ clean:
 	@find . -type d -name '*pytest_cache*' -exec rm -rf {} +
 	@find . -type f -name "*.py[co]" -exec rm -rf {} +
 	@find . -type d -name '*.ipynb_checkpoints' -exec rm -r {} +
+
+.PHONY: publish
+publish:
+	@echo "==> 🚀 Publishing"
+	@git commit -am "chore: bump version to $(shell poetry version -s)"
+	@git tag "v$(shell poetry version -s)"
+	@make build
+	@poetry publish
+	@git push && git push --tags

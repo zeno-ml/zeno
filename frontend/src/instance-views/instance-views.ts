@@ -4,14 +4,13 @@ import { model, settings } from "../stores";
 import { columnHash } from "../util/util";
 
 // component injected into div provided
-type Component = (
+export type ViewRenderFunction = (
 	div: HTMLDivElement,
 	options: object,
 	entry: object,
 	modelColumn: string,
 	labelColumn: string,
 	dataColumn: string,
-	dataOrigin: string,
 	idColumn: string
 ) => void;
 
@@ -35,7 +34,7 @@ export function modelOutputColumnName() {
  * @returns the component as a div element
  */
 export function createViewComponent(
-	viewFunction: Component,
+	viewFunction: ViewRenderFunction,
 	entry: object,
 	options: object,
 	override?: HTMLDivElement
@@ -54,7 +53,6 @@ export function createViewComponent(
 		modelColumn,
 		columnHash(globalSettings.labelColumn),
 		columnHash(globalSettings.dataColumn),
-		globalSettings.dataOrigin,
 		columnHash(globalSettings.idColumn)
 	);
 

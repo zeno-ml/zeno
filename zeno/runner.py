@@ -14,11 +14,10 @@ import uvicorn
 from multiprocess import Process  # type: ignore
 
 from zeno.api import ZenoParameters
-from zeno.data_pipeline.zeno_backend import ZenoBackend
+from zeno.backend import ZenoBackend
 from zeno.server import get_server
 from zeno.setup import setup_zeno
 from zeno.util import is_notebook, parse_testing_file, VIEW_MAP_URL, VIEWS_MAP_JSON
-
 
 # Global variable to hold the Zeno server process.
 # This is used to kill the server when re-running in a notebook.
@@ -145,7 +144,7 @@ def parse_args(args: ZenoParameters, base_path) -> ZenoParameters:
                 os.path.realpath(os.path.join(base_path, m)) for m in args.models
             ]
 
-    if not args.data_path.startswith("http"):
+    if not args.data_path.startswith("http") and args.data_path != "":
         args.data_path = os.path.realpath(os.path.join(base_path, args.data_path))
 
     if args.label_path != "":

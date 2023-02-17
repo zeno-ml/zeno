@@ -1,10 +1,17 @@
 <script lang="ts">
 	import Select, { Option } from "@smui/select";
-	import { VegaLite } from "svelte-vega";
+	import { Vega } from "svelte-vega";
 	import { getMetricsForSlices } from "../../api/slice";
-	import { metric, metrics, models, reports, slices } from "../../stores";
+	import {
+		metric,
+		metrics,
+		model,
+		models,
+		reports,
+		slices,
+	} from "../../stores";
 	import type { MetricKey } from "../../zenoservice";
-	import generateBarSpec from "./vegaSpec";
+	import generateSpec from "./vegaSpec-beeswarm";
 	import { updateTab } from "../../util/util";
 
 	export let reportId: number;
@@ -13,28 +20,24 @@
 
 	$: report = $reports[reportId];
 
-	function getMetKeys(rep, $metric) {
+	function getMetKeys(rep, $metric, $model) {
 		const entries: MetricKey[] = [];
 		chartEntries = [];
 		rep.reportPredicates.forEach((pred) => {
-			$models.forEach((mod) => {
-				chartEntries.push({
-					slice: pred.sliceName,
-					model: mod,
-				});
-				entries.push({
-					sli: [...$slices.values()].find(
-						(s) => s.sliceName === pred.sliceName
-					),
-					metric: $metric,
-					model: mod,
-				});
+			chartEntries.push({
+				slice: pred.sliceName,
+				model: $model,
+			});
+			entries.push({
+				sli: [...$slices.values()].find((s) => s.sliceName === pred.sliceName),
+				metric: $metric,
+				model: $model,
 			});
 		});
 		return entries;
 	}
 
-	$: modelResults = getMetricsForSlices(getMetKeys(report, $metric));
+	$: modelResults = getMetricsForSlices(getMetKeys(report, $metric, $model));
 </script>
 
 <div class="main">
@@ -56,6 +59,16 @@
 		</h4>
 	</div>
 
+	{#if $models && $models.length > 0}
+		<Select
+			bind:value={$model}
+			label="Model"
+			style="margin-right: 20px; width: fit-content">
+			{#each $models as m}
+				<Option value={m}>{m}</Option>
+			{/each}
+		</Select>
+	{/if}
 	{#if $metrics && $metrics.length > 0}
 		<Select
 			bind:value={$metric}
@@ -69,17 +82,14 @@
 	<br />
 	<div class="model-result">
 		{#await modelResults then res}
-			{@const chartData = {
+			{@const data = {
 				table: chartEntries.map((r, i) => ({
-					slice: r.slice,
-					model: r.model,
-					metric: res[i].metric,
+					sli_name: r.slice,
+					size: res[i].size,
+					metric: res[i].metric.toFixed(2),
 				})),
 			}}
-			<VegaLite
-				spec={generateBarSpec($metric)}
-				data={chartData}
-				options={{ tooltip: true, theme: "vox", width: 1000, height: 300 }} />
+			<Vega {data} spec={generateSpec($metric)} />
 		{/await}
 	</div>
 </div>

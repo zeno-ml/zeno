@@ -6,7 +6,6 @@ from pandas import DataFrame
 
 from zeno.classes.base import MetadataType, ZenoColumn
 from zeno.classes.metadata import HistogramBucket
-
 from zeno.classes.slice import FilterIds, FilterPredicate, FilterPredicateGroup
 
 

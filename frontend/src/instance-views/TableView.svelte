@@ -6,23 +6,24 @@
 	import { tick } from "svelte";
 	import { getFilteredTable } from "../api/table";
 	import {
+		model,
 		rowsPerPage,
 		selectionIds,
 		selectionPredicates,
 		settings,
 		sort,
 		status,
-		model,
 	} from "../stores";
 	import { columnHash } from "../util/util";
 	import type { ZenoColumn } from "../zenoservice";
 	import { MetadataType, ZenoColumnType } from "../zenoservice";
+	import type { ViewRenderFunction } from "./instance-views";
 
 	export let currentResult;
-	export let table;
-	export let viewFunction;
+	export let viewFunction: ViewRenderFunction;
 	export let viewOptions = {};
 
+	let table;
 	let viewDivs = {};
 	let columnHeader: ZenoColumn[] = [];
 	let body: HTMLElement;
@@ -93,6 +94,10 @@
 	}
 
 	async function drawInstances() {
+		if (!table) {
+			return;
+		}
+
 		let obj = $status.completeColumns.find((c) => {
 			return c.columnType === ZenoColumnType.OUTPUT && c.name === $model;
 		});
@@ -134,7 +139,6 @@
 					modelColumn,
 					columnHash($settings.labelColumn),
 					columnHash($settings.dataColumn),
-					$settings.dataOrigin,
 					idHash
 				);
 			}
