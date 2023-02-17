@@ -1,8 +1,9 @@
-<script lang="ts">
-</script>
+<script lang="ts"></script>
 
 <main>
-	<iframe title="Gradio instance prediction UI" src="/api/gradio" />
+	<iframe
+		title="Gradio instance prediction UI"
+		src={window.location.origin + "/api/gradio"} />
 </main>
 
 <style>

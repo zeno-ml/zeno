@@ -8,7 +8,7 @@
         "build": "npm run smui-theme && vite build",
         "smui-theme": "smui-theme compile public/smui.css -i src/theme",
         "format": "npx prettier -w src",
-        "lint": "npx eslint --max-warnings=0 src; npx prettier -c src",
+        "lint": "npx eslint src --max-warnings=0 && npx prettier -c src",
         "test": "npx jest tests",
         "check": "svelte-check",
         "generate-api": "npx openapi-typescript-codegen --input http://localhost:8000/api/openapi.json --output ./src/zenoservice --client fetch; npx prettier -w ./src/zenoservice"

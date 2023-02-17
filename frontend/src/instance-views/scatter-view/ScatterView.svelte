@@ -1,39 +1,38 @@
 <script lang="ts">
-	import NoEmbed from "./NoEmbed.svelte";
-	import ReglScatter from "./regl-scatter/ReglScatter.svelte";
-	import ScatterHelp from "./ScatterHelp.svelte";
-	import ScatterLegend from "./ScatterLegend.svelte";
-	import ScatterSettings from "./ScatterSettings.svelte";
-
+	import { tick } from "svelte";
 	import { BarLoader as Spinner } from "svelte-loading-spinners";
-	import { createViewComponent } from "../instance-views";
 	import {
 		model,
+		scatterColorByColumn,
 		selectionIds,
 		selectionPredicates,
 		status,
-		scatterColorByColumn,
 	} from "../../stores";
-	import { createScalesWebgGLExtent } from "./regl-scatter";
-
-	import { tick } from "svelte";
 	import {
 		ZenoService,
 		type Points2D,
 		type ZenoColumn,
 	} from "../../zenoservice";
+	import type { ViewRenderFunction } from "../instance-views";
+	import { createViewComponent } from "../instance-views";
+	import NoEmbed from "./NoEmbed.svelte";
 	import type {
 		ReglScatterPointDispatch,
 		WebGLExtentScalers,
 	} from "./regl-scatter";
+	import { createScalesWebgGLExtent } from "./regl-scatter";
+	import ReglScatter from "./regl-scatter/ReglScatter.svelte";
 	import {
 		deselectPoints,
 		getIndicesFromIds,
 		getPointOpacities,
 		selectPoints,
 	} from "./scatter";
+	import ScatterHelp from "./ScatterHelp.svelte";
+	import ScatterLegend from "./ScatterLegend.svelte";
+	import ScatterSettings from "./ScatterSettings.svelte";
 
-	export let viewFunction;
+	export let viewFunction: ViewRenderFunction;
 	export let viewOptions = {};
 	export let autoResize = true;
 

@@ -80,7 +80,6 @@ export const folders: Writable<string[]> = folderWritable();
 export const tags: Writable<Map<string, Tag>> = writable(new Map());
 export const reports: Writable<Report[]> = reportWritable();
 
-export const filteredTable: Writable<Record<string, unknown>[]> = writable([]);
 // the ids directly selected by the user
 export const selectionIds: Writable<FilterIds> = writable({ ids: [] });
 // slices is an array of slice names,

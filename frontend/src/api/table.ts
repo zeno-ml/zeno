@@ -4,6 +4,7 @@ import type {
 	ZenoColumn,
 } from "../zenoservice";
 import { ZenoService } from "../zenoservice/";
+import { ZenoColumnType } from "./../zenoservice/models/ZenoColumnType";
 
 export async function getFilteredTable(
 	completeColumns,
@@ -14,7 +15,12 @@ export async function getFilteredTable(
 	filterIds?: FilterIds
 ) {
 	const requestedColumns = completeColumns.filter(
-		(c) => c.model === "" || c.model === model
+		(c) =>
+			c.columnType !== ZenoColumnType.EMBEDDING &&
+			((c.columnType === ZenoColumnType.OUTPUT && c.name === model) ||
+				(c.columnType === ZenoColumnType.POSTDISTILL && c.model === model) ||
+				(c.columnType !== ZenoColumnType.OUTPUT &&
+					c.columnType !== ZenoColumnType.POSTDISTILL))
 	);
 	const res = await ZenoService.getFilteredTable({
 		columns: requestedColumns,
