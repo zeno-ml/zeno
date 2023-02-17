@@ -9,12 +9,10 @@
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Paper, { Content } from "@smui/paper";
-	import { report, reports } from "../stores";
+	import { reports } from "../stores";
 	import { clickOutside } from "../util/clickOutside";
 	import ReportListRow from "./ReportListRow.svelte";
 	import { updateTab } from "../util/util";
-
-	report.set(-1);
 
 	let showNewReport = false;
 </script>
@@ -22,7 +20,13 @@
 <div id="reports-container">
 	<div class="header">
 		<h4>Reports</h4>
+	</div>
+	<div class="reports">
+		{#each $reports as rep, i}
+			<ReportListRow report={rep} reportIndex={i} />
+		{/each}
 		<div
+			class="add-reports"
 			on:click={() => (showNewReport = !showNewReport)}
 			on:keydown={() => ({})}>
 			<IconButton>
@@ -135,18 +139,12 @@
 			{/if}
 		</div>
 	</div>
-	<div class="reports">
-		{#each $reports as rep, i}
-			<ReportListRow report={rep} reportIndex={i} />
-		{/each}
-	</div>
 </div>
 
 <style>
 	#reports-container {
 		padding: 10px;
 		margin-left: 10px;
-		overflow-x: auto;
 		overflow-y: auto;
 		height: calc(100vh - 80px);
 	}
@@ -160,11 +158,24 @@
 		justify-content: space-between;
 		align-items: center;
 	}
+	.add-reports {
+		display: flex;
+		justify-content: space-around;
+		align-items: center;
+		border: 1px solid var(--G4);
+		border-radius: 4px;
+		margin: 5px 5px 5px 5px;
+		padding-left: 10px;
+		padding-right: 10px;
+		overflow: visible;
+		cursor: pointer;
+		width: 150px;
+		height: 150px;
+	}
 	.popup {
 		position: absolute;
 		z-index: 10;
 		margin-top: 10px;
-		background: var(--G6);
 	}
 	.report-entry {
 		border: 1px solid var(--G5);
@@ -174,7 +185,8 @@
 		display: flex;
 		align-items: center;
 	}
-	.report-entry:hover {
-		background: var(--P3);
+	.report-entry:hover,
+	.add-reports:hover {
+		background: #f0ebf4;
 	}
 </style>

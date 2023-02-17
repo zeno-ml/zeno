@@ -53,9 +53,10 @@
 		overflow: visible;
 		cursor: pointer;
 		width: 150px;
+		height: 150px;
 	}
 	.report:hover {
-		background: #e6deed;
+		background: #f0ebf4;
 	}
 	.report-name {
 		margin: 3px;
