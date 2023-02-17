@@ -3,7 +3,7 @@
 	import { Icon } from "@smui/button";
 	import { Svg } from "@smui/common";
 	import IconButton from "@smui/icon-button";
-	import { report as selectedReport, reports } from "../stores";
+	import { reports } from "../stores";
 	import { updateTab } from "../util/util";
 
 	export let report;
@@ -18,68 +18,51 @@
 </script>
 
 <div
-	class="report {$selectedReport === reportIndex ? 'selected' : ''}"
+	class="report"
 	on:click={() => updateTab("report/" + reportIndex)}
 	on:keydown={() => ({})}>
-	<div class="report-name">
-		<IconButton>
-			<Icon component={Svg} viewBox="0 0 24 24">
-				<path fill="black" d={iconMap[report.reportType]} />
-			</Icon>
-		</IconButton>
-		<p>{report.name}</p>
-	</div>
-
-	<div class="options">
-		<p style:margin-right="10px">{report.reportPredicates.length} slices</p>
-		<div class="group">
-			<div>
-				<IconButton
-					on:click={(e) => {
-						e.stopPropagation();
-						reports.update((reps) => {
-							reps.splice(reportIndex, 1);
-							return reps;
-						});
-					}}>
-					<Icon class="material-icons">delete_outline</Icon>
-				</IconButton>
-			</div>
-		</div>
-	</div>
+	<IconButton>
+		<Icon component={Svg} viewBox="0 0 24 24">
+			<path fill="black" d={iconMap[report.reportType]} />
+		</Icon>
+	</IconButton>
+	<p class="report-name">{report.name}</p>
+	<p class="report-slice">{report.reportPredicates.length} slices</p>
+	<IconButton
+		on:click={(e) => {
+			e.stopPropagation();
+			reports.update((reps) => {
+				reps.splice(reportIndex, 1);
+				return reps;
+			});
+		}}>
+		<Icon class="material-icons">delete_outline</Icon>
+	</IconButton>
 </div>
 
 <style>
 	.report {
 		display: flex;
+		flex-direction: column;
 		align-items: center;
-		justify-content: space-between;
-		border: 1px solid var(--G5);
+		border: 1px solid var(--G4);
 		border-radius: 4px;
-		margin-top: 5px;
-		margin-bottom: 5px;
+		margin: 5px 5px 5px 5px;
 		padding-left: 10px;
 		padding-right: 10px;
 		overflow: visible;
 		cursor: pointer;
+		width: 150px;
 	}
-	.selected {
-		background: #f9f5ff;
-	}
-	.options {
-		display: flex;
-		flex-direction: inline;
-		align-items: center;
+	.report:hover {
+		background: #e6deed;
 	}
 	.report-name {
-		display: flex;
-		align-items: center;
+		margin: 3px;
+		font-size: 16px;
+		color: black;
 	}
-	.group {
-		display: flex;
-		flex-direction: row;
-		justify-content: space-between;
-		align-items: center;
-		cursor: pointer;
+	.report-slice {
+		margin: 3px;
 	}
 </style>

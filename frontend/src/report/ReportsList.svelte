@@ -9,7 +9,6 @@
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Paper, { Content } from "@smui/paper";
-	import Ripple from "@smui/ripple";
 	import { report, reports } from "../stores";
 	import { clickOutside } from "../util/clickOutside";
 	import ReportListRow from "./ReportListRow.svelte";
@@ -128,7 +127,7 @@
 										<path fill="black" d={mdiBee} />
 									</Icon>
 								</IconButton>
-								<p>New <b>Beeswarm chart</b> report</p>
+								<p>New <b>beeswarm chart</b> report</p>
 							</div>
 						</Content>
 					</Paper>
@@ -136,16 +135,7 @@
 			{/if}
 		</div>
 	</div>
-	<div id="reports">
-		<div
-			use:Ripple={{ surface: true, color: "primary" }}
-			class={"overview " + ($report === -1 ? "selected" : "")}
-			on:keydown={() => ({})}
-			on:click={() => {
-				report.set(-1);
-			}}>
-			<p>Overview</p>
-		</div>
+	<div class="reports">
 		{#each $reports as rep, i}
 			<ReportListRow report={rep} reportIndex={i} />
 		{/each}
@@ -156,39 +146,14 @@
 	#reports-container {
 		padding: 10px;
 		margin-left: 10px;
+		overflow-x: auto;
 		overflow-y: auto;
-		min-width: 400px;
-		width: 400px;
 		height: calc(100vh - 80px);
-		border-right: 1px solid #e8e8e8;
 	}
-	.report {
+	.reports {
 		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		border-bottom: 0.5px solid rgb(224, 224, 224);
-		border-top: 0.5px solid rgb(224, 224, 224);
-		padding-left: 10px;
-		padding-right: 10px;
-	}
-	.overview {
-		display: flex;
-		align-items: center;
-		border: 1px solid var(--G5);
-		border-radius: 4px;
-		margin-top: 5px;
-		margin-bottom: 5px;
-		padding-left: 10px;
-		padding-right: 10px;
-		cursor: pointer;
-	}
-	.selected {
-		background: var(--P3);
-	}
-	.icon {
-		width: 24px;
-		height: 24px;
-		margin-right: 10px;
+		flex-wrap: wrap;
+		padding: 10px;
 	}
 	.header {
 		display: flex;
