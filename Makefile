@@ -52,7 +52,6 @@ clean:
 .PHONY: publish
 publish:
 	@echo "==> 🚀 Publishing"
-	@poetry version patch
 	@git commit -am "chore: bump version to $(shell poetry version -s)"
 	@git tag "v$(shell poetry version -s)"
 	@make build
