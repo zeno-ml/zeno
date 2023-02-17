@@ -123,6 +123,10 @@
 											reportType: "beeswarm",
 											reportPredicates: [],
 										});
+
+										let newIndex = reps.length - 1;
+										updateTab("report/" + newIndex);
+
 										return reps;
 									});
 								}}>
