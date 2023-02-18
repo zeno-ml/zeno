@@ -1,8 +1,7 @@
 import { ZenoColumnType, type ZenoColumn } from "../zenoservice";
-import { tab, report } from "../stores";
+import { tab } from "../stores";
 
 export function updateTab(t: string) {
-	report.set(-1);
 	if (t === "home") {
 		window.location.hash = "";
 	} else {

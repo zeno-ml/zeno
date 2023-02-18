@@ -50,7 +50,7 @@
 					</IconButton>
 				</div>
 				{#if showSlices}
-					<div id="slices" in:slide out:slide>
+					<div id="slices" in:slide>
 						<div class="settings">
 							{#if $metrics}
 								<Select

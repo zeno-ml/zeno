@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { reports } from "../../stores";
 	import { updateTab } from "../../util/util";
-	import Button from "@smui/button";
-	import html2pdf from "html2pdf.js";
 	export let reportId: number;
 
 	$: report = $reports[reportId];
