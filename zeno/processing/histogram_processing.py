@@ -21,10 +21,9 @@ def interquartile_range(column: pd.Series):
 def freeedman_diaconis_rule(column: pd.Series):
     IQR = interquartile_range(column)
     n = len(column)
-
-    h = 2 * IQR / (n ** (1 / 3))
-
-    return h
+    # https://www.wikiwand.com/en/Freedman%E2%80%93Diaconis_rule
+    bin_width = 2 * IQR / (n ** (1 / 3))
+    return bin_width
 
 
 def compute_optimal_num_bins(
