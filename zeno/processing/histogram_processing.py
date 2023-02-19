@@ -11,6 +11,54 @@ from zeno.classes.metadata import HistogramBucket, HistogramRequest, StringFilte
 from zeno.processing.filtering import filter_table, filter_table_single
 
 
+def interquartile_range(column: pd.Series):
+    Q1 = column.quantile(0.25)
+    Q3 = column.quantile(0.75)
+    IQR = Q3 - Q1
+    return IQR
+
+
+def freeedman_diaconis_rule(column: pd.Series):
+    IQR = interquartile_range(column)
+    n = len(column)
+
+    h = 2 * IQR / (n ** (1 / 3))
+
+    return h
+
+
+def compute_optimal_num_bins(
+    column: pd.Series, min_bins: int = 10, max_bins: int = 100
+) -> int:
+    """compute_optimal_num_bins computes the best number of bins given a column
+    this uses the [freedman diaconis rule](https://www.wikiwand.com/en/Freedman%E2%80%93Diaconis_rule)
+    which can be replaced later on for something better if we want
+
+    Args:
+        column (pd.Series): pandas column
+        min_bins (int, optional): the minimum number of bins we want. Defaults to 10.
+        max_bins (int, optional): the maximum number of bins we want. Defaults to 100.
+
+    Returns:
+        int: the optimal number of bins
+    """
+
+    # compute optimal number of bins
+    optimal_bin_width = freeedman_diaconis_rule(column)
+    if optimal_bin_width <= 0:
+        return min_bins
+    interval = column.max() - column.min()
+    optimal_num_bins = int(interval / optimal_bin_width)
+
+    # make sure the optimal is within the min and max we want
+    if optimal_num_bins > max_bins:
+        return max_bins
+    elif optimal_num_bins < min_bins:
+        return min_bins
+    else:
+        return optimal_num_bins
+
+
 def histogram_buckets(
     df: pd.DataFrame, req: List[ZenoColumn]
 ) -> List[List[HistogramBucket]]:
@@ -27,7 +75,8 @@ def histogram_buckets(
         elif col.metadata_type == MetadataType.CONTINUOUS:
             ret_hist: List[HistogramBucket] = []  # type: ignore
             df_col = df_col.fillna(0)
-            bins = np.histogram_bin_edges(df_col)
+            optimal_num_bins = compute_optimal_num_bins(df_col)
+            bins = np.histogram_bin_edges(df_col, optimal_num_bins)
             for i in range(len(bins) - 1):
                 ret_hist.append(
                     HistogramBucket(
