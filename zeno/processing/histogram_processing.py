@@ -31,7 +31,8 @@ def compute_optimal_num_bins(
     column: pd.Series, min_bins: int = 10, max_bins: int = 100
 ) -> int:
     """compute_optimal_num_bins computes the best number of bins given a column
-    this uses the [freedman diaconis rule](https://www.wikiwand.com/en/Freedman%E2%80%93Diaconis_rule)
+    this uses the
+    [freedman diaconis rule](https://www.wikiwand.com/en/Freedman%E2%80%93Diaconis_rule)
     which can be replaced later on for something better if we want
 
     Args:
