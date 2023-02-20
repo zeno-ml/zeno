@@ -1,18 +1,18 @@
 <script lang="ts">
 	import {
+		mdiBee,
 		mdiChartBar,
 		mdiChartLine,
 		mdiPlus,
 		mdiTable,
-		mdiBee,
 	} from "@mdi/js";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Paper, { Content } from "@smui/paper";
 	import { reports } from "../stores";
 	import { clickOutside } from "../util/clickOutside";
-	import ReportListRow from "./ReportListRow.svelte";
 	import { updateTab } from "../util/util";
+	import ReportListRow from "./ReportListRow.svelte";
 
 	let showNewReport = false;
 </script>
@@ -155,7 +155,6 @@
 	.reports {
 		display: flex;
 		flex-wrap: wrap;
-		padding: 10px;
 	}
 	.header {
 		display: flex;

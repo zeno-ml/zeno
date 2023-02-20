@@ -2,8 +2,8 @@
 	import { onMount } from "svelte";
 	import Router from "svelte-spa-router";
 	import Explore from "./Explore.svelte";
-	import Predict from "./Predict.svelte";
 	import Header from "./general/Header.svelte";
+	import Predict from "./Predict.svelte";
 	import Report from "./Report.svelte";
 	import ReportDetail from "./report/report-detail/ReportDetail.svelte";
 	import ReportEdit from "./report/report-detail/ReportEdit.svelte";

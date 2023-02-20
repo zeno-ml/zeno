@@ -1,5 +1,5 @@
-import { ZenoColumnType, type ZenoColumn } from "../zenoservice";
 import { tab } from "../stores";
+import { ZenoColumnType, type ZenoColumn } from "../zenoservice";
 
 export function updateTab(t: string) {
 	if (t === "home") {

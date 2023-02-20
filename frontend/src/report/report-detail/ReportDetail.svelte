@@ -4,13 +4,13 @@
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
 	import { slide } from "svelte/transition";
-	import SliceChartReport from "../slice-chart/SliceChartReport.svelte";
+	import { metric, metrics, ready, report, reports } from "../../stores";
 	import BeeswarmChartReport from "../beeswarm-chart/BeeswarmChartReport.svelte";
+	import ReportHeader from "../report-header/ReportHeader.svelte";
+	import SliceChartReport from "../slice-chart/SliceChartReport.svelte";
 	import SliceTable from "../slice-table-report/SliceTable.svelte";
 	import TableReportTable from "../table-report/TableReportTable.svelte";
 	import TimeseriesReportTable from "../timeseries-report/TimeseriesReportTable.svelte";
-	import { metric, metrics, ready, report, reports } from "../../stores";
-	import ReportHeader from "../report-header/ReportHeader.svelte";
 
 	export let params;
 
@@ -96,7 +96,6 @@
 	}
 	#report-panel {
 		width: 100%;
-		margin-left: 20px;
 	}
 	.settings {
 		margin-bottom: 10px;

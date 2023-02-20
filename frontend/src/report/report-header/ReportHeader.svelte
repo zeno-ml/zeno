@@ -26,6 +26,7 @@
 
 <style>
 	.inline {
+		margin-left: 20px;
 		display: flex;
 		flex-direction: inline;
 		align-items: center;
@@ -44,5 +45,9 @@
 		margin-right: 5px;
 		padding: 10px;
 		width: fit-content;
+	}
+	b {
+		color: var(--G2);
+		font-weight: 800;
 	}
 </style>

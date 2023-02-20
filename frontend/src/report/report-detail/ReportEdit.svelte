@@ -1,10 +1,10 @@
 <script lang="ts">
-	import SliceChartReport from "../slice-chart/SliceChartReport.svelte";
+	import { ready, report, reports } from "../../stores";
 	import BeeswarmChartReport from "../beeswarm-chart/BeeswarmChartReport.svelte";
+	import ReportHeader from "../report-header/ReportHeader.svelte";
+	import SliceChartReport from "../slice-chart/SliceChartReport.svelte";
 	import TableReportTable from "../table-report/TableReportTable.svelte";
 	import TimeseriesReportTable from "../timeseries-report/TimeseriesReportTable.svelte";
-	import { ready, report, reports } from "../../stores";
-	import ReportHeader from "../report-header/ReportHeader.svelte";
 
 	export let params;
 
