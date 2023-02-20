@@ -12,7 +12,6 @@
 	} from "../../stores";
 	import type { MetricKey } from "../../zenoservice";
 	import generateSpec from "./vegaSpec-beeswarm";
-	import { updateTab } from "../../util/util";
 
 	export let reportId: number;
 
