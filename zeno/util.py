@@ -30,7 +30,7 @@ def getMetadataType(col: pd.Series) -> MetadataType:
     except ValueError:
         pass
 
-    if col.dtype == "bool":
+    if col.dtype == "bool" or col.dtype == "boolean":
         return MetadataType.BOOLEAN
 
     try:
