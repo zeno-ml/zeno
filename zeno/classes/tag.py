@@ -2,6 +2,7 @@ from typing import List, Union
 
 from zeno.classes.base import CamelModel
 
+
 class Tag(CamelModel):
     tag_name: str
     folder: str

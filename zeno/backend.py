@@ -66,9 +66,7 @@ class ZenoBackend(object):
             "slices.pickle", self.cache_path, {}
         )
 
-        self.tags: Dict[str, Tag] = read_pickle(
-            "tags.pickle", self.cache_path, {}
-        )
+        self.tags: Dict[str, Tag] = read_pickle("tags.pickle", self.cache_path, {})
 
         if params.models and os.path.isdir(params.models[0]):
             self.model_paths = [
