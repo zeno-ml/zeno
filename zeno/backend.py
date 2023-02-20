@@ -351,7 +351,7 @@ class ZenoBackend(object):
                 for out in post_outputs:
                     self.df.loc[:, str(out[0])] = out[1]  # type: ignore
                     self.df[str(out[0])] = self.df[str(out[0])].convert_dtypes()
-                    out[0].metadata_type = getMetadataType(out[1])
+                    out[0].metadata_type = getMetadataType(self.df[str(out[0])])
                     self.complete_columns.append(out[0])
 
     def get_metrics_for_slices(
