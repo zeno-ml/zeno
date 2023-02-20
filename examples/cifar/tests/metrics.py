@@ -23,7 +23,7 @@ def f1(df, ops: ZenoOptions):
 
 @distill
 def incorrect(df, ops: ZenoOptions):
-    return (df[ops.label_column] != df[ops.output_column]).tolist()
+    return df[ops.label_column] != df[ops.output_column]
 
 
 @distill
