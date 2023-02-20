@@ -16,6 +16,7 @@
 		selections.update((sel) => ({
 			slices: [sli.sliceName],
 			metadata: sel.metadata,
+			tags: sel.tags,
 		}));
 	}}
 	on:mouseover={() => (showTooltip = true)}

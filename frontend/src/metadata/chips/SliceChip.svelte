@@ -13,7 +13,7 @@
 		on:click={() =>
 			selections.update((sel) => {
 				sel.slices.splice(sel.slices.indexOf(slice), 1);
-				return { slices: sel.slices, metadata: sel.metadata };
+				return { slices: sel.slices, metadata: sel.metadata, tags: sel.tags };
 			})}>
 		cancel
 	</TrailingIcon>

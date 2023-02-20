@@ -78,7 +78,7 @@
 										join: "",
 									};
 								});
-								return { slices: [], metadata: { ...m.metadata } };
+								return { slices: [], metadata: { ...m.metadata }, tags: [] };
 							});
 							selectionIds.set({ ids: [] });
 						}}>

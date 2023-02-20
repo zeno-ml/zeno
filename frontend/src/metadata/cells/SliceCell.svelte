@@ -54,7 +54,7 @@
 			for (let key in m.metadata) {
 				m.metadata[key] = { predicates: [], join: "&" };
 			}
-			return { slices: [], metadata: { ...m.metadata } };
+			return { slices: [], metadata: { ...m.metadata }, tags: [] };
 		});
 		slices.update((s) => {
 			s.delete(slice.sliceName);
@@ -78,7 +78,11 @@
 			$selections.slices.length === 1 &&
 			$selections.slices.includes(slice.sliceName)
 		) {
-			selections.update((s) => ({ slices: [], metadata: s.metadata }));
+			selections.update((s) => ({
+				slices: [],
+				metadata: s.metadata,
+				tags: s.tags,
+			}));
 			return;
 		}
 		if (e.shiftKey) {
@@ -88,12 +92,14 @@
 					return {
 						slices: [...sel.slices],
 						metadata: sel.metadata,
+						tags: sel.tags,
 					};
 				});
 			} else {
 				selections.update((sel) => ({
 					slices: [...sel.slices, slice.sliceName],
 					metadata: sel.metadata,
+					tags: sel.tags,
 				}));
 			}
 		} else {
@@ -102,6 +108,7 @@
 					selections.update((sel) => ({
 						slices: [slice.sliceName],
 						metadata: sel.metadata,
+						tags: sel.tags,
 					}));
 				} else {
 					selections.update((sel) => {
@@ -109,6 +116,7 @@
 						return {
 							slices: [...sel.slices],
 							metadata: sel.metadata,
+							tags: sel.tags,
 						};
 					});
 				}
@@ -116,6 +124,7 @@
 				selections.update((sel) => ({
 					slices: [slice.sliceName],
 					metadata: sel.metadata,
+					tags: sel.tags,
 				}));
 			}
 		}
