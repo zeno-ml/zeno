@@ -1,9 +1,5 @@
 <script lang="ts">
-	import {
-		mdiFolderPlusOutline,
-		mdiPlus,
-		mdiPlusCircle,
-	} from "@mdi/js";
+	import { mdiFolderPlusOutline, mdiPlus, mdiPlusCircle } from "@mdi/js";
 	import CircularProgress from "@smui/circular-progress";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";

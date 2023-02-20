@@ -165,9 +165,7 @@ export class ZenoService {
 	 * @returns any Successful Response
 	 * @throws ApiError
 	 */
-	public static deleteTag(
-		requestBody: Array<string>
-	): CancelablePromise<any> {
+	public static deleteTag(requestBody: Array<string>): CancelablePromise<any> {
 		return __request(OpenAPI, {
 			method: "DELETE",
 			url: "/tag",

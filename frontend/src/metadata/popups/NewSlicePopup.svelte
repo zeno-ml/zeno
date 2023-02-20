@@ -67,7 +67,11 @@
 				});
 				return s;
 			});
-			selections.update((sels) => ({ slices: [], metadata: sels.metadata, tags: [] }));
+			selections.update((sels) => ({
+				slices: [],
+				metadata: sels.metadata,
+				tags: [],
+			}));
 			showNewSlice.set(false);
 			sliceToEdit.set(null);
 		});
