@@ -12,7 +12,6 @@
 	} from "../../stores";
 	import type { MetricKey } from "../../zenoservice";
 	import generateSpec from "./vegaSpec-beeswarm";
-	import { updateTab } from "../../util/util";
 
 	export let reportId: number;
 
@@ -41,24 +40,6 @@
 </script>
 
 <div class="main">
-	<div class="inline">
-		<h4
-			class="report-link"
-			on:keydown={() => ({})}
-			on:click={() => {
-				updateTab("report");
-			}}>
-			Reports
-		</h4>
-		<b>></b>
-		<h4
-			class="report-name"
-			contenteditable="true"
-			bind:textContent={$reports[reportId].name}>
-			{report.name}
-		</h4>
-	</div>
-
 	{#if $models && $models.length > 0}
 		<Select
 			bind:value={$model}
@@ -97,26 +78,6 @@
 <style>
 	.main {
 		margin-left: 20px;
-	}
-	.inline {
-		display: flex;
-		flex-direction: inline;
-		align-items: center;
-		max-width: calc(100vw - 450px);
-	}
-	.report-link {
-		padding: 10px 18px 10px 0px;
-		width: fit-content;
-		cursor: pointer;
-	}
-	.report-link:hover {
-		color: black;
-	}
-	.report-name {
-		margin-left: 5px;
-		margin-right: 5px;
-		padding: 10px;
-		width: fit-content;
 	}
 	.model-result {
 		margin-top: 30px;

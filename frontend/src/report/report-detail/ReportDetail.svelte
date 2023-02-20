@@ -4,12 +4,13 @@
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
 	import { slide } from "svelte/transition";
-	import SliceChartReport from "./report/slice-chart/SliceChartReport.svelte";
-	import BeeswarmChartReport from "./report/beeswarm-chart/BeeswarmChartReport.svelte";
-	import SliceTable from "./report/slice-table-report/SliceTable.svelte";
-	import TableReportTable from "./report/table-report/TableReportTable.svelte";
-	import TimeseriesReportTable from "./report/timeseries-report/TimeseriesReportTable.svelte";
-	import { metric, metrics, ready, report, reports } from "./stores";
+	import { metric, metrics, ready, report, reports } from "../../stores";
+	import BeeswarmChartReport from "../beeswarm-chart/BeeswarmChartReport.svelte";
+	import ReportHeader from "../report-header/ReportHeader.svelte";
+	import SliceChartReport from "../slice-chart/SliceChartReport.svelte";
+	import SliceTable from "../slice-table-report/SliceTable.svelte";
+	import TableReportTable from "../table-report/TableReportTable.svelte";
+	import TimeseriesReportTable from "../timeseries-report/TimeseriesReportTable.svelte";
 
 	export let params;
 
@@ -22,6 +23,7 @@
 <main>
 	{#if $ready}
 		<div id="report-panel">
+			<ReportHeader reportId={params.id} />
 			<div id="reports">
 				{#if currentReport}
 					{#if currentReport.reportType === "timeseries"}
@@ -48,7 +50,7 @@
 					</IconButton>
 				</div>
 				{#if showSlices}
-					<div id="slices" in:slide out:slide>
+					<div id="slices" in:slide>
 						<div class="settings">
 							{#if $metrics}
 								<Select

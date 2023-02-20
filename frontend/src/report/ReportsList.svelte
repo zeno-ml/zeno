@@ -1,21 +1,18 @@
 <script lang="ts">
 	import {
+		mdiBee,
 		mdiChartBar,
 		mdiChartLine,
 		mdiPlus,
 		mdiTable,
-		mdiBee,
 	} from "@mdi/js";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Paper, { Content } from "@smui/paper";
-	import Ripple from "@smui/ripple";
-	import { report, reports } from "../stores";
+	import { reports } from "../stores";
 	import { clickOutside } from "../util/clickOutside";
-	import ReportListRow from "./ReportListRow.svelte";
 	import { updateTab } from "../util/util";
-
-	report.set(-1);
+	import ReportListRow from "./ReportListRow.svelte";
 
 	let showNewReport = false;
 </script>
@@ -23,7 +20,13 @@
 <div id="reports-container">
 	<div class="header">
 		<h4>Reports</h4>
+	</div>
+	<div class="reports">
+		{#each $reports as rep, i}
+			<ReportListRow report={rep} reportIndex={i} />
+		{/each}
 		<div
+			class="add-reports"
 			on:click={() => (showNewReport = !showNewReport)}
 			on:keydown={() => ({})}>
 			<IconButton>
@@ -120,6 +123,10 @@
 											reportType: "beeswarm",
 											reportPredicates: [],
 										});
+
+										let newIndex = reps.length - 1;
+										updateTab("report/" + newIndex);
+
 										return reps;
 									});
 								}}>
@@ -128,27 +135,13 @@
 										<path fill="black" d={mdiBee} />
 									</Icon>
 								</IconButton>
-								<p>New <b>Beeswarm chart</b> report</p>
+								<p>New <b>beeswarm chart</b> report</p>
 							</div>
 						</Content>
 					</Paper>
 				</div>
 			{/if}
 		</div>
-	</div>
-	<div id="reports">
-		<div
-			use:Ripple={{ surface: true, color: "primary" }}
-			class={"overview " + ($report === -1 ? "selected" : "")}
-			on:keydown={() => ({})}
-			on:click={() => {
-				report.set(-1);
-			}}>
-			<p>Overview</p>
-		</div>
-		{#each $reports as rep, i}
-			<ReportListRow report={rep} reportIndex={i} />
-		{/each}
 	</div>
 </div>
 
@@ -157,49 +150,35 @@
 		padding: 10px;
 		margin-left: 10px;
 		overflow-y: auto;
-		min-width: 400px;
-		width: 400px;
 		height: calc(100vh - 80px);
-		border-right: 1px solid #e8e8e8;
 	}
-	.report {
+	.reports {
 		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		border-bottom: 0.5px solid rgb(224, 224, 224);
-		border-top: 0.5px solid rgb(224, 224, 224);
-		padding-left: 10px;
-		padding-right: 10px;
-	}
-	.overview {
-		display: flex;
-		align-items: center;
-		border: 1px solid var(--G5);
-		border-radius: 4px;
-		margin-top: 5px;
-		margin-bottom: 5px;
-		padding-left: 10px;
-		padding-right: 10px;
-		cursor: pointer;
-	}
-	.selected {
-		background: var(--P3);
-	}
-	.icon {
-		width: 24px;
-		height: 24px;
-		margin-right: 10px;
+		flex-wrap: wrap;
 	}
 	.header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
 	}
+	.add-reports {
+		display: flex;
+		justify-content: space-around;
+		align-items: center;
+		border: 1px solid var(--G4);
+		border-radius: 4px;
+		margin: 5px 5px 5px 5px;
+		padding-left: 10px;
+		padding-right: 10px;
+		overflow: visible;
+		cursor: pointer;
+		width: 150px;
+		height: 150px;
+	}
 	.popup {
 		position: absolute;
 		z-index: 10;
 		margin-top: 10px;
-		background: var(--G6);
 	}
 	.report-entry {
 		border: 1px solid var(--G5);
@@ -209,7 +188,8 @@
 		display: flex;
 		align-items: center;
 	}
-	.report-entry:hover {
-		background: var(--P3);
+	.report-entry:hover,
+	.add-reports:hover {
+		background: #f0ebf4;
 	}
 </style>
