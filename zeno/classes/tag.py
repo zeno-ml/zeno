@@ -1,6 +1,6 @@
-from typing import List, Optional, Union
+from typing import List
 
-from zeno.classes.base import CamelModel, ZenoColumn
+from zeno.classes.base import CamelModel
 
 class Tag(CamelModel):
     tag_name: str
