@@ -12,7 +12,7 @@ from zeno.processing.filtering import filter_table, filter_table_single
 
 
 def histogram_buckets(
-    df: pd.DataFrame, req: List[ZenoColumn], num_bins: Union[int, str] = "auto"
+    df: pd.DataFrame, req: List[ZenoColumn], num_bins: Union[int, str] = "doane"
 ) -> List[List[HistogramBucket]]:
     """Calculate the histogram buckets for a list of columns.
 
@@ -21,7 +21,7 @@ def histogram_buckets(
         req (List[ZenoColumn]): list of columns to compute buckets for
         num_bins (Union[int, str], optional):
             estimates the best number and size of bins to use.
-            Defaults to "auto", but can be a fixed integer
+            Defaults to "doane", but can be a fixed integer
             Other options can be found
             [here](https://numpy.org/doc/stable/reference/generated/numpy.histogram_bin_edges.html)
     Returns:
