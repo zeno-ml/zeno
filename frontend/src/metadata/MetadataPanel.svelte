@@ -1,5 +1,9 @@
 <script lang="ts">
-	import { mdiFolderPlusOutline, mdiTagPlusOutline, mdiPlus, mdiPlusCircle } from "@mdi/js";
+	import {
+		mdiFolderPlusOutline,
+		mdiPlus,
+		mdiPlusCircle,
+	} from "@mdi/js";
 	import CircularProgress from "@smui/circular-progress";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
@@ -43,11 +47,11 @@
 	import MetadataCell from "./cells/MetadataCell.svelte";
 	import SliceCell from "./cells/SliceCell.svelte";
 	import MetricRange from "./MetricRange.svelte";
-  	import NewTagPopup from "./popups/NewTagPopup.svelte";
+	import NewTagPopup from "./popups/NewTagPopup.svelte";
 
 	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
 		new InternMap([], columnHash);
-	
+
 	let showNewTag = false;
 
 	$: res = getMetricsForSlices([
@@ -309,9 +313,10 @@
 					<Tooltip xPos="start">Create a new tag</Tooltip>
 				</Wrapper>
 				{#if showNewTag}
-					<NewTagPopup bind:showNewTag 
-					scrollY={document.getElementsByClassName("side-container")[0].scrollTop}
-					/>
+					<NewTagPopup
+						bind:showNewTag
+						scrollY={document.getElementsByClassName("side-container")[0]
+							.scrollTop} />
 				{/if}
 			</div>
 		</div>
