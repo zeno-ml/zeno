@@ -4,7 +4,7 @@
 	import Textfield from "@smui/textfield";
   	import type { Tag } from "src/zenoservice";
 	import { createNewTag } from "../../api/tag";
-	import { tags } from "../../stores";
+	import { tags, selectionIds } from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 
 	export let edit = false;
@@ -33,12 +33,12 @@
 			// });
 			// updating not supported yet
 		} else {
-			createNewTag(tagName).then(() => {
+			createNewTag(tagName, $selectionIds.ids).then(() => {
 				tags.update((t) => {
 					t.set(tagName, <Tag>{
 						tagName,
 						folder,
-						selectionIds: []
+						selectionIds: $selectionIds.ids
 					});
 					return t;
 				});
@@ -82,6 +82,8 @@
 		</Content>
 		{#if invalidName && tagName.length > 0}
 			<p style:margin-right="10px">tag already exists</p>
+		{:else if $selectionIds.ids.length > 0}
+			<p style:margin-right="10px">There are {$selectionIds.ids.length} instances in your tag.</p>
 		{/if}
 	</Paper>
 </div>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { mdiFolderPlusOutline, mdiTagPlusOutline, mdiPlus, mdiPlusCircle } from "@mdi/js";
+	import { mdiFolderPlusOutline, mdiTagPlusOutline, mdiPlus, mdiPlusCircle, mdiPlusOutline } from "@mdi/js";
 	import CircularProgress from "@smui/circular-progress";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
@@ -298,7 +298,12 @@
 				<Wrapper>
 					<IconButton on:click={() => (showNewTag = !showNewTag)}>
 						<Icon component={Svg} viewBox="0 0 24 24">
-							<path fill="black" d={mdiTagPlusOutline} />
+							{#if $selectionIds.ids.length > 0}
+								<path fill="#6a1a9a" d={mdiPlusCircle} />
+							{:else}
+								<path fill="black" d={mdiPlus} />
+							{/if}
+							<!-- <path fill="black" d={mdiTagPlusOutline} /> -->
 						</Icon>
 					</IconButton>
 					<Tooltip xPos="start">Create a new tag</Tooltip>
