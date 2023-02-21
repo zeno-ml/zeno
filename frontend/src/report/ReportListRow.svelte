@@ -56,7 +56,7 @@
 		height: 150px;
 	}
 	.report:hover {
-		background: #f0ebf4;
+		background: var(--P3);
 	}
 	.report-name {
 		margin: 3px;
