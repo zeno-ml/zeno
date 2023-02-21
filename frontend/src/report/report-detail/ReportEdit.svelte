@@ -44,8 +44,9 @@
 		display: flex;
 		width: 400px;
 		height: calc(100vh - 100px);
-		border: 1px solid lightgray;
+		border: 1px solid var(--G4);
 		margin-left: 20px;
+		border-radius: 10px;
 	}
 	#reports {
 		display: flex;
