@@ -46,7 +46,7 @@
 		flex-direction: column;
 		align-items: center;
 		border: 1px solid var(--G4);
-		border-radius: 4px;
+		border-radius: 10px;
 		margin: 5px 5px 5px 5px;
 		padding-left: 10px;
 		padding-right: 10px;

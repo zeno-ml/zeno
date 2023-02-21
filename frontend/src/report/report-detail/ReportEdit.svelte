@@ -39,13 +39,13 @@
 		display: flex;
 		flex-direction: column;
 		max-height: calc(100vh - 80px);
-		margin-left: 20px;
 	}
 	#edit-bar {
 		display: flex;
 		width: 400px;
 		height: calc(100vh - 100px);
 		border: 1px solid lightgray;
+		margin-left: 20px;
 	}
 	#reports {
 		display: flex;
