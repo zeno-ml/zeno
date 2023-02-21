@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { reports } from "../../stores";
 	import { updateTab } from "../../util/util";
+	import { clickOutside } from "../../util/clickOutside";
 	export let reportId: number;
 
 	$: report = $reports[reportId];
@@ -19,7 +20,12 @@
 	<h4
 		class="report-name"
 		contenteditable="true"
-		bind:textContent={$reports[reportId].name}>
+		use:clickOutside
+		on:click_outside={(e) => {
+			if (e.target instanceof HTMLElement) {
+				$reports[reportId].name = e.target.innerText;
+			}
+		}}>
 		{report.name}
 	</h4>
 </div>
