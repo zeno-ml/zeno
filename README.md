@@ -1,13 +1,27 @@
-<img src="./zeno.png" width="250px"/>
+<img src="https://zenoml.com/img/zeno.png" width="250px"/>
 
 [![PyPI version](https://badge.fury.io/py/zenoml.svg)](https://badge.fury.io/py/zenoml)
 ![Github Actions CI tests](https://github.com/zeno-ml/zeno/actions/workflows/test.yml/badge.svg)
-![Github Actions Docs build](https://github.com/zeno-ml/zenoml.com/actions/workflows/docs.yml/badge.svg)
-[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/) [![Join the chat at https://gitter.im/zeno-ml-eval/community](https://badges.gitter.im/zeno-ml-eval/community.svg)](https://gitter.im/zeno-ml-eval/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/) 
+[![DOI](https://img.shields.io/badge/doi-10.1145%2F3544548.3581268-red)](https://cabreraalex.com/paper/zeno)
+[![Join the chat at https://gitter.im/zeno-ml-eval/community](https://badges.gitter.im/zeno-ml-eval/community.svg)](https://gitter.im/zeno-ml-eval/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Zeno is a general-purpose framework for evaluating machine learning models.
 It combines a **Python API** with an **interactive UI** to allow users to discover, explore, and analyze the performance of their models across diverse use cases.
 Zeno can be used for any data type or task with [modular views](https://zenoml.com/docs/views/) for everything from object detection to audio transcription.
+
+
+### Demos
+
+
+| **Image Classification**  | **Audio Transcription** | **Image Generation** | **Sensor Data Exploration** |
+|:-------------:|:-------------:|:-------------:|:-------------:|
+| CIFAR-10  | Speech Accent Archive | DiffusionDB | MotionSense |
+|[![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://image-example.zenoml.com/)| [![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://audio-example.zenoml.com/) | [![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://zeno-ml-diffusiondb.hf.space/) | [![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://imu-example.zenoml.com/) |
+
+<br /> 
+
+https://user-images.githubusercontent.com/4563691/220689691-1ad7c184-02db-4615-b5ac-f52b8d5b8ea3.mp4
 
 ## Quickstart
 

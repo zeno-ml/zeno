@@ -84,6 +84,8 @@ def parse_toml():
             args["metadata"] = pd.read_csv(meta_path)
         elif meta_path.suffix == ".parquet":
             args["metadata"] = pd.read_parquet(meta_path)
+        elif meta_path.suffix == ".jsonl":
+            args["metadata"] = pd.read_json(meta_path, lines=True)
         else:
             print("Extension of " + meta_path.suffix + " not one of .csv or .parquet")
             sys.exit(1)
