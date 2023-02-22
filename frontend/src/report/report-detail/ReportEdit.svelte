@@ -56,31 +56,6 @@
 		border-radius: 10px;
 		padding: 10px 20px 10px 20px;
 	}
-	.chart-flex {
-		display: flex;
-		flex-direction: row;
-		flex-wrap: wrap;
-		justify-content: space-between;
-	}
-	.chart-element {
-		display: flex;
-		flex-direction: column;
-		border: 1px solid var(--G4);
-		height: 80px;
-		width: 140px;
-		border-radius: 10px;
-		align-items: center;
-		padding: 10px;
-		margin: 5px;
-	}
-	.chart-element:hover {
-		cursor: pointer;
-		background: var(--P3);
-	}
-	.chart-title {
-		margin: 5px 0px 0px 0px;
-	}
-
 	#reports {
 		display: flex;
 		flex-direction: column;
