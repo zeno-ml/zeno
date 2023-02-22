@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { reports } from "../../stores";
-	import { updateTab } from "../../util/util";
-	import { clickOutside } from "../../util/clickOutside";
+	import { reports } from "../../../stores";
+	import { updateTab } from "../../../util/util";
+	import { clickOutside } from "../../../util/clickOutside";
 	export let reportId: number;
 
 	$: report = $reports[reportId];

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { ready, report, reports } from "../../stores";
 	import BeeswarmChartReport from "../beeswarm-chart/BeeswarmChartReport.svelte";
-	import ReportHeader from "../report-header/ReportHeader.svelte";
+	import ReportHeader from "./report-header/ReportHeader.svelte";
 	import SliceChartReport from "../slice-chart/SliceChartReport.svelte";
 	import TableReportTable from "../table-report/TableReportTable.svelte";
 	import TimeseriesReportTable from "../timeseries-report/TimeseriesReportTable.svelte";
@@ -24,19 +24,51 @@
 				<div class="chart-type">
 					<h4>Chart Type</h4>
 					<div class="chart-flex">
-						<div class="chart-element">
+						<div
+							id="slicechart"
+							class="chart-element"
+							on:keydown={() => ({})}
+							on:click={(e) => {
+								if (e.currentTarget instanceof HTMLElement) {
+									currentReport.reportType = e.currentTarget.id;
+								}
+							}}>
 							<BarChart />
 							<h4 class="chart-title">Bar Chart</h4>
 						</div>
-						<div class="chart-element">
+						<div
+							id="timeseries"
+							class="chart-element"
+							on:keydown={() => ({})}
+							on:click={(e) => {
+								if (e.currentTarget instanceof HTMLElement) {
+									currentReport.reportType = e.currentTarget.id;
+								}
+							}}>
 							<LineChart />
 							<h4 class="chart-title">Line Chart</h4>
 						</div>
-						<div class="chart-element">
+						<div
+							id="table"
+							class="chart-element"
+							on:keydown={() => ({})}
+							on:click={(e) => {
+								if (e.currentTarget instanceof HTMLElement) {
+									currentReport.reportType = e.currentTarget.id;
+								}
+							}}>
 							<TableView />
 							<h4 class="chart-title">Table View</h4>
 						</div>
-						<div class="chart-element">
+						<div
+							id="beeswarm"
+							class="chart-element"
+							on:keydown={() => ({})}
+							on:click={(e) => {
+								if (e.currentTarget instanceof HTMLElement) {
+									currentReport.reportType = e.currentTarget.id;
+								}
+							}}>
 							<Beeswarm />
 							<h4 class="chart-title">Beeswarm Plot</h4>
 						</div>

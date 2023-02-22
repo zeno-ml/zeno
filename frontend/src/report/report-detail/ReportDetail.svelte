@@ -6,7 +6,7 @@
 	import { slide } from "svelte/transition";
 	import { metric, metrics, ready, report, reports } from "../../stores";
 	import BeeswarmChartReport from "../beeswarm-chart/BeeswarmChartReport.svelte";
-	import ReportHeader from "../report-header/ReportHeader.svelte";
+	import ReportHeader from "./report-header/ReportHeader.svelte";
 	import SliceChartReport from "../slice-chart/SliceChartReport.svelte";
 	import SliceTable from "../slice-table-report/SliceTable.svelte";
 	import TableReportTable from "../table-report/TableReportTable.svelte";
