@@ -6,6 +6,7 @@
 	import TableReportTable from "../table-report/TableReportTable.svelte";
 	import TimeseriesReportTable from "../timeseries-report/TimeseriesReportTable.svelte";
 	import ChartType from "./chart-type/ChartType.svelte";
+	import Encoding from "./encoding/Encoding.svelte";
 
 	export let params;
 
@@ -19,6 +20,7 @@
 		<div id="report-panel">
 			<div id="edit-bar">
 				<ChartType />
+				<Encoding />
 			</div>
 			<div id="reports">
 				{#if currentReport}
@@ -56,6 +58,7 @@
 		border-radius: 10px;
 		padding: 10px 20px 10px 20px;
 	}
+
 	#reports {
 		display: flex;
 		flex-direction: column;

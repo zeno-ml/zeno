@@ -64,6 +64,9 @@
 {/if}
 
 <style>
+	.chart-type {
+		margin-bottom: 20px;
+	}
 	.chart-flex {
 		display: flex;
 		flex-direction: row;
