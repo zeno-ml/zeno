@@ -150,9 +150,6 @@ def parse_args(args: ZenoParameters, base_path) -> ZenoParameters:
     if args.label_path != "":
         args.label_path = os.path.realpath(os.path.join(base_path, args.label_path))
 
-    if args.data_column != "" and args.id_column == "":
-        args.id_column = args.data_column
-
     return args
 
 
