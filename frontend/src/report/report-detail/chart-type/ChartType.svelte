@@ -1,67 +1,67 @@
 <script lang="ts">
-	import { reports } from "../../../stores";
+	import { ready, report, reports } from "../../../stores";
 	import Beeswarm from "./chart-icons/BeeswarmIcon.svelte";
 	import BarChart from "./chart-icons/BarChartIcon.svelte";
 	import LineChart from "./chart-icons/LineChartIcon.svelte";
 	import TableView from "./chart-icons/TableViewIcon.svelte";
-
-	export let reportId;
-	$: currentReport = $reports[reportId];
+	$: selectedchart = $reports[$report].reportType;
 </script>
 
-<div class="chart-type">
-	<h4>Chart Type</h4>
-	<div class="chart-flex">
-		<div
-			id="slicechart"
-			class="chart-element"
-			on:keydown={() => ({})}
-			on:click={(e) => {
-				if (e.currentTarget instanceof HTMLElement) {
-					currentReport.reportType = e.currentTarget.id;
-				}
-			}}>
-			<BarChart />
-			<h4 class="chart-title">Bar Chart</h4>
-		</div>
-		<div
-			id="timeseries"
-			class="chart-element"
-			on:keydown={() => ({})}
-			on:click={(e) => {
-				if (e.currentTarget instanceof HTMLElement) {
-					currentReport.reportType = e.currentTarget.id;
-				}
-			}}>
-			<LineChart />
-			<h4 class="chart-title">Line Chart</h4>
-		</div>
-		<div
-			id="table"
-			class="chart-element"
-			on:keydown={() => ({})}
-			on:click={(e) => {
-				if (e.currentTarget instanceof HTMLElement) {
-					currentReport.reportType = e.currentTarget.id;
-				}
-			}}>
-			<TableView />
-			<h4 class="chart-title">Table View</h4>
-		</div>
-		<div
-			id="beeswarm"
-			class="chart-element"
-			on:keydown={() => ({})}
-			on:click={(e) => {
-				if (e.currentTarget instanceof HTMLElement) {
-					currentReport.reportType = e.currentTarget.id;
-				}
-			}}>
-			<Beeswarm />
-			<h4 class="chart-title">Beeswarm Plot</h4>
+{#if $ready}
+	<div class="chart-type">
+		<h4>Chart Type</h4>
+		<div class="chart-flex">
+			<div
+				id="slicechart"
+				class="chart-element {selectedchart === 'slicechart' ? 'selected' : ''}"
+				on:keydown={() => ({})}
+				on:click={(e) => {
+					if (e.currentTarget instanceof HTMLElement) {
+						$reports[$report].reportType = e.currentTarget.id;
+					}
+				}}>
+				<BarChart />
+				<h4 class="chart-title">Bar Chart</h4>
+			</div>
+			<div
+				id="timeseries"
+				class="chart-element {selectedchart === 'timeseries' ? 'selected' : ''}"
+				on:keydown={() => ({})}
+				on:click={(e) => {
+					if (e.currentTarget instanceof HTMLElement) {
+						$reports[$report].reportType = e.currentTarget.id;
+					}
+				}}>
+				<LineChart />
+				<h4 class="chart-title">Line Chart</h4>
+			</div>
+			<div
+				id="table"
+				class="chart-element {selectedchart === 'table' ? 'selected' : ''}"
+				on:keydown={() => ({})}
+				on:click={(e) => {
+					if (e.currentTarget instanceof HTMLElement) {
+						$reports[$report].reportType = e.currentTarget.id;
+					}
+				}}>
+				<TableView />
+				<h4 class="chart-title">Table View</h4>
+			</div>
+			<div
+				id="beeswarm"
+				class="chart-element {selectedchart === 'beeswarm' ? 'selected' : ''}"
+				on:keydown={() => ({})}
+				on:click={(e) => {
+					if (e.currentTarget instanceof HTMLElement) {
+						$reports[$report].reportType = e.currentTarget.id;
+					}
+				}}>
+				<Beeswarm />
+				<h4 class="chart-title">Beeswarm Plot</h4>
+			</div>
 		</div>
 	</div>
-</div>
+{/if}
 
 <style>
 	.chart-flex {
@@ -83,6 +83,9 @@
 	}
 	.chart-element:hover {
 		cursor: pointer;
+		background: var(--P3);
+	}
+	.selected {
 		background: var(--P3);
 	}
 	.chart-title {

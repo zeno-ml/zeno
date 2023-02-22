@@ -18,7 +18,7 @@
 		<ReportHeader reportId={params.id} />
 		<div id="report-panel">
 			<div id="edit-bar">
-				<ChartType reportId={$report} />
+				<ChartType />
 			</div>
 			<div id="reports">
 				{#if currentReport}
