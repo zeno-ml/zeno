@@ -11,8 +11,17 @@ It combines a **Python API** with an **interactive UI** to allow users to discov
 Zeno can be used for any data type or task with [modular views](https://zenoml.com/docs/views/) for everything from object detection to audio transcription.
 
 
-https://user-images.githubusercontent.com/4563691/220689691-1ad7c184-02db-4615-b5ac-f52b8d5b8ea3.mp4
+### Demos
 
+
+| **Image Classification**  | **Audio Transcription** | **Image Generation** | **Sensor Data Exploration** |
+| ------------- | ------------- | ------------- | ------------- |
+| CIFAR-10  | Speech Accent Archive | DiffusionDB | MotionSense |
+| [![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://image-example.zenoml.com/) | [![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://audio-example.zenoml.com/) | [![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://zeno-ml-diffusiondb.hf.space/) | [![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://imu-example.zenoml.com/) |
+
+<hr /> 
+
+https://user-images.githubusercontent.com/4563691/220689691-1ad7c184-02db-4615-b5ac-f52b8d5b8ea3.mp4
 
 ## Quickstart
 
