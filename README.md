@@ -10,6 +10,10 @@ Zeno is a general-purpose framework for evaluating machine learning models.
 It combines a **Python API** with an **interactive UI** to allow users to discover, explore, and analyze the performance of their models across diverse use cases.
 Zeno can be used for any data type or task with [modular views](https://zenoml.com/docs/views/) for everything from object detection to audio transcription.
 
+
+https://user-images.githubusercontent.com/4563691/220689691-1ad7c184-02db-4615-b5ac-f52b8d5b8ea3.mp4
+
+
 ## Quickstart
 
 Install the Zeno Python package from PyPI:
