@@ -5,10 +5,7 @@
 	import SliceChartReport from "../slice-chart/SliceChartReport.svelte";
 	import TableReportTable from "../table-report/TableReportTable.svelte";
 	import TimeseriesReportTable from "../timeseries-report/TimeseriesReportTable.svelte";
-	import Beeswarm from "./chart-icons/BeeswarmIcon.svelte";
-	import BarChart from "./chart-icons/BarChartIcon.svelte";
-	import LineChart from "./chart-icons/LineChartIcon.svelte";
-	import TableView from "./chart-icons/TableViewIcon.svelte";
+	import ChartType from "./chart-type/ChartType.svelte";
 
 	export let params;
 
@@ -21,59 +18,7 @@
 		<ReportHeader reportId={params.id} />
 		<div id="report-panel">
 			<div id="edit-bar">
-				<div class="chart-type">
-					<h4>Chart Type</h4>
-					<div class="chart-flex">
-						<div
-							id="slicechart"
-							class="chart-element"
-							on:keydown={() => ({})}
-							on:click={(e) => {
-								if (e.currentTarget instanceof HTMLElement) {
-									currentReport.reportType = e.currentTarget.id;
-								}
-							}}>
-							<BarChart />
-							<h4 class="chart-title">Bar Chart</h4>
-						</div>
-						<div
-							id="timeseries"
-							class="chart-element"
-							on:keydown={() => ({})}
-							on:click={(e) => {
-								if (e.currentTarget instanceof HTMLElement) {
-									currentReport.reportType = e.currentTarget.id;
-								}
-							}}>
-							<LineChart />
-							<h4 class="chart-title">Line Chart</h4>
-						</div>
-						<div
-							id="table"
-							class="chart-element"
-							on:keydown={() => ({})}
-							on:click={(e) => {
-								if (e.currentTarget instanceof HTMLElement) {
-									currentReport.reportType = e.currentTarget.id;
-								}
-							}}>
-							<TableView />
-							<h4 class="chart-title">Table View</h4>
-						</div>
-						<div
-							id="beeswarm"
-							class="chart-element"
-							on:keydown={() => ({})}
-							on:click={(e) => {
-								if (e.currentTarget instanceof HTMLElement) {
-									currentReport.reportType = e.currentTarget.id;
-								}
-							}}>
-							<Beeswarm />
-							<h4 class="chart-title">Beeswarm Plot</h4>
-						</div>
-					</div>
-				</div>
+				<ChartType reportId={$report} />
 			</div>
 			<div id="reports">
 				{#if currentReport}
