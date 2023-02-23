@@ -4,6 +4,7 @@
 	import { clickOutside } from "../../../util/clickOutside";
 	export let reportId: number;
 
+	let editing = false;
 	$: report = $reports[reportId];
 </script>
 
@@ -20,10 +21,15 @@
 	<h4
 		class="report-name"
 		contenteditable="true"
+		on:keydown={() => ({})}
+		on:click={() => {
+			editing = true;
+		}}
 		use:clickOutside
 		on:click_outside={(e) => {
-			if (e.target instanceof HTMLElement) {
+			if (e.target instanceof HTMLElement && editing) {
 				$reports[reportId].name = e.target.innerText;
+				editing = false;
 			}
 		}}>
 		{report.name}
