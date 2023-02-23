@@ -1,8 +1,7 @@
 <script lang="ts">
-	import Select, { Option } from "@smui/select";
 	import { VegaLite } from "svelte-vega";
 	import { getMetricsForSlices } from "../../api/slice";
-	import { metric, metrics, models, reports, slices } from "../../stores";
+	import { metric, models, reports, slices } from "../../stores";
 	import type { MetricKey } from "../../zenoservice";
 	import generateBarSpec from "./vegaSpec";
 
@@ -37,17 +36,6 @@
 </script>
 
 <div class="main">
-	{#if $metrics && $metrics.length > 0}
-		<Select
-			bind:value={$metric}
-			label="Metric"
-			style="margin-right: 20px; width: fit-content">
-			{#each $metrics as m}
-				<Option value={m}>{m}</Option>
-			{/each}
-		</Select>
-	{/if}
-	<br />
 	<div class="model-result">
 		{#await modelResults then res}
 			{@const chartData = {

@@ -2,14 +2,7 @@
 	import Select, { Option } from "@smui/select";
 	import { Vega } from "svelte-vega";
 	import { getMetricsForSlices } from "../../api/slice";
-	import {
-		metric,
-		metrics,
-		model,
-		models,
-		reports,
-		slices,
-	} from "../../stores";
+	import { metric, model, models, reports, slices } from "../../stores";
 	import type { MetricKey } from "../../zenoservice";
 	import generateSpec from "./vegaSpec-beeswarm";
 
@@ -46,16 +39,6 @@
 			label="Model"
 			style="margin-right: 20px; width: fit-content">
 			{#each $models as m}
-				<Option value={m}>{m}</Option>
-			{/each}
-		</Select>
-	{/if}
-	{#if $metrics && $metrics.length > 0}
-		<Select
-			bind:value={$metric}
-			label="Metric"
-			style="margin-right: 20px; width: fit-content">
-			{#each $metrics as m}
 				<Option value={m}>{m}</Option>
 			{/each}
 		</Select>

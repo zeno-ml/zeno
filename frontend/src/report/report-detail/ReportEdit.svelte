@@ -58,7 +58,6 @@
 		border-radius: 10px;
 		padding: 10px 20px 10px 20px;
 	}
-
 	#reports {
 		display: flex;
 		flex-direction: column;

@@ -1,8 +1,11 @@
 <script lang="ts">
-	import { ready, report, reports } from "../../../stores";
+	import { ready, report, reports, metric, metrics } from "../../../stores";
 	import Select, { Option } from "@smui/select";
 	import { TrailingIcon } from "@smui/chips";
+
 	$: rep = $reports[$report];
+	$: x_axis = "slice";
+	$: y_axis = "metric";
 </script>
 
 {#if $ready}
@@ -11,45 +14,52 @@
 		<div id="encoding-flex">
 			<div class="parameters">
 				<h4 class="select-label">x</h4>
-				<Select value="slice" class="select" variant="outlined">
-					<Option value={"slice"}>slice</Option>
-					<Option value={"model"}>model</Option>
+				<Select bind:value={x_axis} class="select" variant="outlined">
+					<Option value={"slice"}>Slice</Option>
+					<Option value={"model"}>Model</Option>
 				</Select>
 			</div>
-			<div class="chips">
-				{#each rep.reportPredicates as predicate, i}
-					<div class="slice-chip">
-						{predicate.sliceName}
-						<TrailingIcon
-							class="remove material-icons"
-							on:click={() => {
-								rep.reportPredicates.splice(i, 1);
-								reports.update((reps) => {
-									reps[$report] = rep;
-									return reps;
-								});
-							}}>
-							cancel
-						</TrailingIcon>
-					</div>
-				{/each}
-			</div>
+			{#if x_axis === "slice"}
+				<div class="chips">
+					{#each rep.reportPredicates as predicate, i}
+						<div class="slice-chip">
+							{predicate.sliceName}
+							<TrailingIcon
+								class="remove material-icons"
+								on:click={() => {
+									rep.reportPredicates.splice(i, 1);
+									reports.update((reps) => {
+										reps[$report] = rep;
+										return reps;
+									});
+								}}>
+								cancel
+							</TrailingIcon>
+						</div>
+					{/each}
+				</div>
+			{/if}
 			<div class="parameters">
 				<h4 class="select-label">y</h4>
-				<Select value="accuracy" class="select" variant="outlined">
-					<Option value={"accuracy"}>accuracy</Option>
+				<Select bind:value={y_axis} class="select" variant="outlined">
+					<Option value={"metric"}>Metric</Option>
+					<Option value={"size"}>Size</Option>
 				</Select>
 			</div>
+			{#if y_axis === "metric" && $metrics && $metrics.length > 0}
+				<div class="parameters">
+					<h4 class="select-label">&nbsp;</h4>
+					<Select bind:value={$metric} class="select" variant="outlined">
+						{#each $metrics as m}
+							<Option value={m}>{m}</Option>
+						{/each}
+					</Select>
+				</div>
+			{/if}
 			<div class="parameters">
 				<h4 class="select-label">color</h4>
 				<Select class="select" variant="outlined">
 					<Option value={"color"}>color</Option>
-				</Select>
-			</div>
-			<div class="parameters">
-				<h4 class="select-label">size</h4>
-				<Select class="select" variant="outlined">
-					<Option value={"size"}>size</Option>
 				</Select>
 			</div>
 		</div>
@@ -63,7 +73,6 @@
 	* :global(.select .mdc-select__anchor) {
 		height: 30px;
 		width: 280px;
-		align-items: right;
 	}
 	#encoding-flex {
 		display: flex;
