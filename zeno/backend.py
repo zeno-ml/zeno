@@ -117,7 +117,6 @@ class ZenoBackend(object):
                 name="",
             )
 
-        # If no ID column provided and we have a data column, use data col as ID.
         if id_column != "":
             self.id_column = ZenoColumn(
                 column_type=ZenoColumnType.METADATA,
@@ -125,14 +124,8 @@ class ZenoBackend(object):
                 name=id_column,
             )
             self.df[str(self.id_column)].astype(str)
-        elif data_column != "":
-            self.id_column = ZenoColumn(
-                column_type=ZenoColumnType.METADATA,
-                metadata_type=MetadataType.OTHER,
-                name=data_column,
-            )
         else:
-            self.df.reset_index()
+            self.df.reset_index(inplace=True)
             self.id_column = ZenoColumn(
                 column_type=ZenoColumnType.METADATA,
                 metadata_type=MetadataType.OTHER,
@@ -473,10 +466,11 @@ class ZenoBackend(object):
             filt_df = filt_df.sort_values(str(req.sort[0]), ascending=req.sort[1])
         filt_df = filt_df.iloc[req.slice_range[0] : req.slice_range[1]].copy()
 
-        # Add data prefix to data column depending on type of data_path.
-        filt_df.loc[:, str(self.data_column)] = (
-            self.data_prefix + filt_df[str(self.data_column)]
-        )
+        if self.data_column.name != "":
+            # Add data prefix to data column depending on type of data_path.
+            filt_df.loc[:, str(self.data_column)] = (
+                self.data_prefix + filt_df[str(self.data_column)]
+            )
 
         return filt_df[[str(col) for col in req.columns]].to_json(orient="records")
 

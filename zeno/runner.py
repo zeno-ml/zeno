@@ -154,6 +154,12 @@ def parse_args(args: ZenoParameters, base_path) -> ZenoParameters:
     if args.label_path != "":
         args.label_path = os.path.realpath(os.path.join(base_path, args.label_path))
 
+    if args.id_column == "":
+        print(
+            "WARNING: no id_column specified, using index as id_column. If you are",
+            "using a data_column, suggest using it as id_column.",
+        )
+
     return args
 
 
