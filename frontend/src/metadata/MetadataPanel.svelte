@@ -1,11 +1,16 @@
 <script lang="ts">
-	import { mdiFolderPlusOutline, mdiPlus, mdiPlusCircle } from "@mdi/js";
+	import {
+		mdiFolderPlusOutline,
+		mdiInformationOutline,
+		mdiPlus,
+		mdiPlusCircle,
+	} from "@mdi/js";
 	import CircularProgress from "@smui/circular-progress";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
-	import { InternMap } from "internmap";
 	import { tooltip } from "@svelte-plugins/tooltips";
+	import { InternMap } from "internmap";
 	import {
 		getHistogramCounts,
 		getHistogramMetrics,
@@ -20,16 +25,16 @@
 		metrics,
 		model,
 		models,
+		requestingHistogramCounts,
 		selectionIds,
 		selectionPredicates,
 		selections,
 		settings,
+		showNewFolder,
 		showNewSlice,
 		slices,
 		sliceToEdit,
-		requestingHistogramCounts,
 		status,
-		showNewFolder,
 	} from "../stores";
 	import { columnHash } from "../util/util";
 	import {
@@ -215,7 +220,20 @@
 	</div>
 
 	<div id="slice-header" class="inline">
-		<h4>Slices</h4>
+		<div class="inline">
+			<h4>Slices</h4>
+			<div
+				class="information-tooltip"
+				use:tooltip={{
+					content: "Slices are named combinations of filters.",
+					position: "right",
+					theme: "zeno-tooltip",
+				}}>
+				<Icon component={Svg} viewBox="-6 -6 36 36">
+					<path d={mdiInformationOutline} />
+				</Icon>
+			</div>
+		</div>
 		<div class="inline">
 			<div
 				use:tooltip={{
@@ -292,6 +310,18 @@
 	<div id="metric-header" class="inline" style:margin-top="10px">
 		<div class="inline">
 			<h4>Metadata</h4>
+			<div
+				class="information-tooltip"
+				use:tooltip={{
+					content:
+						"Interactive distributions for metadata columns. Click or drag on the histograms to filter the data. Add new metadata with @distill functions.",
+					position: "right",
+					theme: "zeno-tooltip",
+				}}>
+				<Icon component={Svg} viewBox="-6 -6 36 36">
+					<path d={mdiInformationOutline} />
+				</Icon>
+			</div>
 			{#if $requestingHistogramCounts}
 				<CircularProgress
 					style="height: 15px; width: 15px; margin-left: 10px;"
@@ -397,5 +427,11 @@
 		color: var(--G3);
 		margin-right: 10px;
 		margin-left: 10px;
+	}
+	.information-tooltip {
+		width: 24px;
+		height: 24px;
+		cursor: help;
+		fill: var(--G2);
 	}
 </style>
