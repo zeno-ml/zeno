@@ -291,7 +291,7 @@
 
 	<div id="tag-header" class="inline" style:margin-top="10px">
 		<div class="inline">
-			<h4>Metadata Tags</h4>
+			<h4>Tags</h4>
 		</div>
 		<div class="inline">
 			<div>

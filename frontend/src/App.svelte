@@ -43,7 +43,6 @@
 		models.set(inits.models);
 		metrics.set(inits.metrics);
 		folders.set(inits.folders);
-		// tags.set(inits.tags);
 
 		model.set(
 			inits.models.length > 0 ? inits.models[inits.models.length - 1] : ""
