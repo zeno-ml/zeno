@@ -4,8 +4,8 @@
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
-	import Tooltip, { Wrapper } from "@smui/tooltip";
 	import { InternMap } from "internmap";
+	import { tooltip } from "@svelte-plugins/tooltips";
 	import {
 		getHistogramCounts,
 		getHistogramMetrics,
@@ -217,38 +217,42 @@
 	<div id="slice-header" class="inline">
 		<h4>Slices</h4>
 		<div class="inline">
-			<div>
-				<Wrapper>
-					<IconButton
-						on:click={() => {
-							showNewSlice.set(false);
-							showNewFolder.update((b) => !b);
-						}}>
-						<Icon component={Svg} viewBox="0 0 24 24">
-							<path fill="black" d={mdiFolderPlusOutline} />
-						</Icon>
-					</IconButton>
-					<Tooltip xPos="start">Create a new folder</Tooltip>
-				</Wrapper>
+			<div
+				use:tooltip={{
+					content: "Create a new folder.",
+					position: "left",
+					theme: "zeno-tooltip",
+				}}>
+				<IconButton
+					on:click={() => {
+						showNewSlice.set(false);
+						showNewFolder.update((b) => !b);
+					}}>
+					<Icon component={Svg} viewBox="0 0 24 24">
+						<path fill="black" d={mdiFolderPlusOutline} />
+					</Icon>
+				</IconButton>
 			</div>
-			<div>
-				<Wrapper>
-					<IconButton
-						on:click={() => {
-							sliceToEdit.set(undefined);
-							showNewSlice.update((d) => !d);
-							showNewFolder.set(false);
-						}}>
-						<Icon component={Svg} viewBox="0 0 24 24">
-							{#if $selectionPredicates.predicates.length > 0}
-								<path fill="#6a1a9a" d={mdiPlusCircle} />
-							{:else}
-								<path fill="black" d={mdiPlus} />
-							{/if}
-						</Icon>
-					</IconButton>
-					<Tooltip xPos="start">Create a new slice</Tooltip>
-				</Wrapper>
+			<div
+				use:tooltip={{
+					content: "Create a new slice.",
+					position: "left",
+					theme: "zeno-tooltip",
+				}}>
+				<IconButton
+					on:click={() => {
+						sliceToEdit.set(undefined);
+						showNewSlice.update((d) => !d);
+						showNewFolder.set(false);
+					}}>
+					<Icon component={Svg} viewBox="0 0 24 24">
+						{#if $selectionPredicates.predicates.length > 0}
+							<path fill="#6a1a9a" d={mdiPlusCircle} />
+						{:else}
+							<path fill="black" d={mdiPlus} />
+						{/if}
+					</Icon>
+				</IconButton>
 			</div>
 		</div>
 	</div>

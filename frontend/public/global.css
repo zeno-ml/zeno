@@ -60,3 +60,9 @@ table {
 .remove {
 	cursor: pointer;
 }
+
+.tooltip.zeno-tooltip {
+	--tooltip-background-color: var(--P3);
+	--tooltip-color: var(--G1);
+	--tooltip-font-family: "Open Sans", "Roboto", sans-serif;
+}
