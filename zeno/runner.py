@@ -82,6 +82,8 @@ def parse_toml():
         # Read metadata as Pandas for slicing
         if meta_path.suffix == ".csv":
             args["metadata"] = pd.read_csv(meta_path)
+        elif meta_path.suffix == ".tsv":
+            args["metadata"] = pd.read_csv(meta_path, sep="\t", header=0)
         elif meta_path.suffix == ".parquet":
             args["metadata"] = pd.read_parquet(meta_path)
         elif meta_path.suffix == ".jsonl":
