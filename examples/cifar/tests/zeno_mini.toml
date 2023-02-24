@@ -9,6 +9,7 @@ models = [
 ]
 data_path = "../../../data/CIFAR-10-images/test/"
 data_column = "id"
+id_column = "id"
 batch_size = 16
 samples = 80
 cache_path = "./.zeno_mini"
