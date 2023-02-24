@@ -41,9 +41,33 @@
 		currentPage = lastPage;
 	}
 
-	// update on page, metadata selection, slice selection, or state change.
+	// when state changes update current table view
 	$: {
 		currentPage;
+		$status.completeColumns;
+		$model;
+		$sort;
+		$selectionIds;
+		updateTable();
+	}
+
+	$: if (viewFunction) {
+		table;
+		$sort;
+		viewOptions;
+		drawInstances();
+	}
+
+	// reset page on selection change
+	selectionPredicates.subscribe(() => {
+		if (currentPage === 0) {
+			updateTable();
+		} else {
+			currentPage = 0;
+		}
+	});
+
+	function updateTable() {
 		getFilteredTable(
 			$status.completeColumns,
 			$selectionPredicates,
@@ -52,13 +76,6 @@
 			$sort,
 			$selectionIds
 		).then((res) => (table = res));
-	}
-
-	$: if (viewFunction) {
-		table;
-		$sort;
-		viewOptions;
-		drawInstances();
 	}
 
 	async function drawInstances() {
