@@ -2,7 +2,7 @@
 	import { mdiArrowDown, mdiSwapVertical } from "@mdi/js";
 	import { Icon } from "@smui/button";
 	import { Svg } from "@smui/common";
-	import Tooltip, { Wrapper } from "@smui/tooltip";
+	import { tooltip } from "@svelte-plugins/tooltips";
 	import { extent } from "d3-array";
 	import { scaleLinear, scalePoint } from "d3-scale";
 	import { select } from "d3-selection";
@@ -50,22 +50,28 @@
 
 <div class="inline">
 	{#if r[0] < -3}
-		<div class="icon">
-			<Wrapper>
-				<Icon component={Svg} viewBox="0 0 24 24">
-					<path fill="#b71c1c" d={mdiArrowDown} />
-				</Icon>
-				<Tooltip xPos="center">regression in performance</Tooltip>
-			</Wrapper>
+		<div
+			class="icon"
+			use:tooltip={{
+				content: "Regression in performance",
+				position: "left",
+				theme: "zeno-tooltip",
+			}}>
+			<Icon component={Svg} viewBox="0 0 24 24">
+				<path fill="#b71c1c" d={mdiArrowDown} />
+			</Icon>
 		</div>
 	{:else if variance > 6}
-		<div class="icon">
-			<Wrapper>
-				<Icon component={Svg} viewBox="0 0 24 24">
-					<path fill="#b71c1c" d={mdiSwapVertical} />
-				</Icon>
-				<Tooltip xPos="center">volatility in performance</Tooltip>
-			</Wrapper>
+		<div
+			class="icon"
+			use:tooltip={{
+				content: "High variance in performance.",
+				position: "left",
+				theme: "zeno-tooltip",
+			}}>
+			<Icon component={Svg} viewBox="0 0 24 24">
+				<path fill="#b71c1c" d={mdiSwapVertical} />
+			</Icon>
 		</div>
 	{:else}
 		<div style:width="18px" />

@@ -7,5 +7,6 @@ models = [
 metadata = "metadata.csv"
 data_path = "https://zenoml.s3.amazonaws.com/accents/"
 data_column = "id"
+id_column = "id"
 label_column = "label"
 port = 8123

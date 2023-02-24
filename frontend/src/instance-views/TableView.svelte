@@ -228,13 +228,13 @@
 			action="next-page"
 			title="Next page"
 			on:click={() => currentPage++}
-			disabled={currentPage === lastPage}>chevron_right</IconButton>
+			disabled={currentPage >= lastPage}>chevron_right</IconButton>
 		<IconButton
 			class="material-icons"
 			action="last-page"
 			title="Last page"
 			on:click={() => (currentPage = lastPage)}
-			disabled={currentPage === lastPage}>last_page</IconButton>
+			disabled={currentPage >= lastPage}>last_page</IconButton>
 	</Pagination>
 {/if}
 

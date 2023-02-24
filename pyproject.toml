@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "zenoml"
-version = "0.3.9"
+version = "0.3.10"
 description = "Interactive Evaluation Framework for Machine Learning"
 license = "MIT"
 authors = ["Ángel Alexander Cabrera <alex.cabrera@gmail.com>"]
@@ -17,7 +17,7 @@ include = [
 exclude = ["zeno/tests/*"]
 
 [tool.poetry.dependencies]
-fastapi = ">=0.75,<0.90"
+fastapi = ">=0.75,<0.93"
 inquirerpy = "^0.3.4"
 nest-asyncio = "^1.5.6"
 pandas = "^1.4.0"
@@ -37,9 +37,9 @@ cachetools = "^5.3.0"
 black = "^22.12.0"
 flake8 = "^6.0.0"
 httpx = "^0.23.3"
-mypy = "^0.991"
+mypy = "^1.0"
 pandas-stubs = "^1.5.3"
-pyright = "^1.1.292"
+pyright = "^1.1.295"
 python-semantic-release = "^7.33.1"
 pytest = "^7.1.1"
 usort = "^1.0.5"

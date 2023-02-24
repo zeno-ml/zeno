@@ -2,6 +2,14 @@
   "version": "2.0.0",
   "configurations": [
     {
+      "name": "zenolangchain",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": ["../example-langchain/config.toml"]
+    },
+    {
       "name": "zenoadult",
       "type": "python",
       "request": "launch",
