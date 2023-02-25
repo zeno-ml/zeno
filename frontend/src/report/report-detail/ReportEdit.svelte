@@ -17,9 +17,9 @@
 
 <main>
 	{#if $ready}
-		<ReportHeader reportId={params.id} />
 		<div id="report-panel">
 			<div id="edit-bar">
+				<ReportHeader reportId={$report} />
 				<ChartType />
 				<Encoding />
 				<Marks />
@@ -53,13 +53,16 @@
 		flex-direction: row;
 	}
 	#edit-bar {
-		width: 360px;
-		height: calc(100vh - 100px);
-		border: 1px solid var(--G4);
-		margin-left: 20px;
-		border-radius: 10px;
-		padding: 10px 20px 10px 20px;
-		overflow-y: auto;
+		height: calc(100vh - 15px);
+		width: 370px;
+		min-width: 370px;
+		max-width: 370px;
+		padding-top: 10px;
+		padding-bottom: 0px;
+		padding-left: 15px;
+		padding-right: 15px;
+		overflow-y: scroll;
+		background-color: var(--Y2);
 	}
 	#reports {
 		display: flex;

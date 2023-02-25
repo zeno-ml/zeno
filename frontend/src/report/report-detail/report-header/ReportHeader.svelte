@@ -1,65 +1,62 @@
 <script lang="ts">
+	import { mdiArrowCollapseLeft } from "@mdi/js";
 	import { reports } from "../../../stores";
 	import { updateTab } from "../../../util/util";
-	import { clickOutside } from "../../../util/clickOutside";
+	import { Svg } from "@smui/common";
+	import Textfield from "@smui/textfield";
+	import CharacterCounter from "@smui/textfield/character-counter";
 	export let reportId: number;
 
-	let editing = false;
-	$: report = $reports[reportId];
+	let ishover = false;
+	$: rep = $reports[reportId];
 </script>
 
-<div class="inline">
-	<h4
-		class="report-link"
+<div class="header-flex">
+	<div
+		class="return-link"
 		on:keydown={() => ({})}
 		on:click={() => {
 			updateTab("report");
-		}}>
-		Reports
-	</h4>
-	<b>></b>
-	<h4
-		class="report-name"
-		contenteditable="true"
-		on:keydown={() => ({})}
-		on:click={() => {
-			editing = true;
 		}}
-		use:clickOutside
-		on:click_outside={(e) => {
-			if (e.target instanceof HTMLElement && editing) {
-				$reports[reportId].name = e.target.innerText;
-				editing = false;
-			}
+		on:focus={() => ({})}
+		on:mouseover={() => {
+			ishover = true;
+		}}
+		on:blur={() => ({})}
+		on:mouseout={() => {
+			ishover = false;
 		}}>
-		{report.name}
-	</h4>
+		<Svg
+			style="width: 24px; height: 24px; padding-right: 10px"
+			viewBox="-2 -2 26 26">
+			<path fill={ishover ? "black" : "var(--G2)"} d={mdiArrowCollapseLeft} />
+		</Svg>
+		<h4 style={ishover ? "color:black" : "color:var(--G2)"}>
+			Back to Report Home
+		</h4>
+	</div>
+	<div class="report-name">
+		<Textfield
+			style="width: -webkit-fill-available"
+			variant="outlined"
+			bind:value={rep.name}
+			label="Report Name"
+			input$maxlength={15}>
+			<CharacterCounter slot="helper">0 / 15</CharacterCounter>
+		</Textfield>
+	</div>
 </div>
 
 <style>
-	.inline {
-		margin-left: 20px;
+	.header-flex {
 		display: flex;
-		flex-direction: inline;
+		flex-direction: column;
+	}
+	.return-link {
+		display: flex;
+		flex-direction: row;
 		align-items: center;
-		max-width: calc(100vw - 450px);
-	}
-	.report-link {
-		padding: 10px 18px 10px 0px;
-		width: fit-content;
 		cursor: pointer;
-	}
-	.report-link:hover {
-		color: black;
-	}
-	.report-name {
-		margin-left: 5px;
-		margin-right: 5px;
-		padding: 10px;
 		width: fit-content;
-	}
-	b {
-		color: var(--G2);
-		font-weight: 800;
 	}
 </style>
