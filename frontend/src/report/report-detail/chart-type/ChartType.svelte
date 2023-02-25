@@ -9,7 +9,7 @@
 
 {#if $ready}
 	<div class="chart-type">
-		<h4>Chart Type</h4>
+		<h4 class="edit-title">Chart Type</h4>
 		<div class="chart-flex">
 			<div
 				id="slicechart"
@@ -66,6 +66,9 @@
 <style>
 	.chart-type {
 		margin-bottom: 20px;
+	}
+	.edit-title {
+		border-bottom: 1px solid var(--G4);
 	}
 	.chart-flex {
 		display: flex;

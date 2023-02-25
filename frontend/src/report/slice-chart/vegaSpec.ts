@@ -24,6 +24,7 @@ export default function generateBarSpec(metric): VegaLiteSpec {
 					titleFontSize: 14,
 					titlePadding: 10,
 				},
+				sort: true,
 			},
 			y: {
 				title: "",

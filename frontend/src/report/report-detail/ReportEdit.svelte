@@ -7,6 +7,7 @@
 	import TimeseriesReportTable from "../timeseries-report/TimeseriesReportTable.svelte";
 	import ChartType from "./chart-type/ChartType.svelte";
 	import Encoding from "./encoding/Encoding.svelte";
+	import Marks from "./marks/Marks.svelte";
 
 	export let params;
 
@@ -21,6 +22,7 @@
 			<div id="edit-bar">
 				<ChartType />
 				<Encoding />
+				<Marks />
 			</div>
 			<div id="reports">
 				{#if currentReport}
@@ -51,12 +53,13 @@
 		flex-direction: row;
 	}
 	#edit-bar {
-		width: 350px;
+		width: 360px;
 		height: calc(100vh - 100px);
-		border: 1px solid var(--G5);
+		border: 1px solid var(--G4);
 		margin-left: 20px;
 		border-radius: 10px;
 		padding: 10px 20px 10px 20px;
+		overflow-y: auto;
 	}
 	#reports {
 		display: flex;
