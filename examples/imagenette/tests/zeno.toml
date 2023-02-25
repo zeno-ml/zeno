@@ -5,6 +5,7 @@ models = ["IMAGENET1K_V1", "IMAGENET1K_V2"]
 data_path = "../../../data/imagenette"
 data_type = "path"
 data_column = "id"
+id_column = "id"
 label_column = "label"
 batch_size = 32
 port = 8009

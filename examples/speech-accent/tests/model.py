@@ -1,6 +1,7 @@
 import math
 import os
 
+import pandas as pd
 import torch
 import whisper
 from jiwer import wer
@@ -55,6 +56,6 @@ def wer_m(df, ops: ZenoOptions):
 @metric
 def avg_wer(df, ops: ZenoOptions):
     avg = df[ops.distill_columns["wer_m"]].mean()
-    if math.isnan(avg):
+    if pd.isnull(avg) or math.isnan(avg):
         return 0
     return avg

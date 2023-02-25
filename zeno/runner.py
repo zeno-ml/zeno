@@ -82,6 +82,8 @@ def parse_toml():
         # Read metadata as Pandas for slicing
         if meta_path.suffix == ".csv":
             args["metadata"] = pd.read_csv(meta_path)
+        elif meta_path.suffix == ".tsv":
+            args["metadata"] = pd.read_csv(meta_path, sep="\t", header=0)
         elif meta_path.suffix == ".parquet":
             args["metadata"] = pd.read_parquet(meta_path)
         elif meta_path.suffix == ".jsonl":
@@ -151,6 +153,12 @@ def parse_args(args: ZenoParameters, base_path) -> ZenoParameters:
 
     if args.label_path != "":
         args.label_path = os.path.realpath(os.path.join(base_path, args.label_path))
+
+    if args.id_column == "":
+        print(
+            "WARNING: no id_column specified, using index as id_column. If you are",
+            "using a data_column, suggest using it as id_column.",
+        )
 
     return args
 

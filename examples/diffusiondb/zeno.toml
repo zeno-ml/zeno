@@ -3,6 +3,7 @@ view = "image-classification"
 metadata = "./metadata_f.parquet"
 data_path = "https://diffusiondb.m4ke.org/"
 data_column = "image_name"
+id_column = "image_name"
 label_column = "prompt"
 calculate_histogram_metrics = false
 batch_size = 100000
