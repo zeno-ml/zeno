@@ -15,7 +15,7 @@ cd GPT
 ### Install the dependencies
 
 ```bash
-pip3 install -e requirements.txt
+pip3 install -r requirements.txt
 ```
 
 ### Run with Zeno
