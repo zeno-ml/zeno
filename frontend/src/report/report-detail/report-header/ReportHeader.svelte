@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { mdiArrowCollapseLeft } from "@mdi/js";
-	import { reports } from "../../../stores";
+	import { report, reports } from "../../../stores";
 	import { updateTab } from "../../../util/util";
 	import { Svg } from "@smui/common";
 	import Textfield from "@smui/textfield";
 	import CharacterCounter from "@smui/textfield/character-counter";
-	export let reportId: number;
 
 	let ishover = false;
-	$: rep = $reports[reportId];
+	$: currReport = $reports[$report];
 </script>
 
 <div class="header-flex">
@@ -39,7 +38,7 @@
 		<Textfield
 			style="width: -webkit-fill-available"
 			variant="outlined"
-			bind:value={rep.name}
+			bind:value={currReport.name}
 			label="Report Name"
 			input$maxlength={15}>
 			<CharacterCounter slot="helper">0 / 15</CharacterCounter>

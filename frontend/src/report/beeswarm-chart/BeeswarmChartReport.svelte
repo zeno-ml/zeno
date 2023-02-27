@@ -2,15 +2,13 @@
 	import Select, { Option } from "@smui/select";
 	import { Vega } from "svelte-vega";
 	import { getMetricsForSlices } from "../../api/slice";
-	import { metric, model, models, reports, slices } from "../../stores";
+	import { metric, model, models, report, reports, slices } from "../../stores";
 	import type { MetricKey } from "../../zenoservice";
 	import generateSpec from "./vegaSpec-beeswarm";
 
-	export let reportId: number;
-
 	let chartEntries = [];
 
-	$: report = $reports[reportId];
+	$: currReport = $reports[$report];
 
 	function getMetKeys(rep, $metric, $model) {
 		const entries: MetricKey[] = [];
@@ -29,7 +27,9 @@
 		return entries;
 	}
 
-	$: modelResults = getMetricsForSlices(getMetKeys(report, $metric, $model));
+	$: modelResults = getMetricsForSlices(
+		getMetKeys(currReport, $metric, $model)
+	);
 </script>
 
 <div class="main">

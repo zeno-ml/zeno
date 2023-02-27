@@ -1,13 +1,11 @@
 <script lang="ts">
 	import DataTable, { Body, Cell, Head, Row } from "@smui/data-table";
-	import { models, reports } from "../../stores";
+	import { models, report, reports } from "../../stores";
 	import TimeseriesReportTableRow from "./TimeseriesReportTableRow.svelte";
-
-	export let reportId: number;
 
 	let table: HTMLDivElement;
 
-	$: report = $reports[reportId];
+	$: currReport = $reports[$report];
 </script>
 
 <div id="container">
@@ -26,7 +24,7 @@
 				</Row>
 			</Head>
 			<Body style="overflow: visible">
-				{#each report.reportPredicates as predicate, i}
+				{#each currReport.reportPredicates as predicate, i}
 					<TimeseriesReportTableRow {predicate} predicateIndex={i} />
 				{/each}
 			</Body>

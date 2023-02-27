@@ -19,7 +19,7 @@
 	{#if $ready}
 		<div id="report-panel">
 			<div id="edit-bar">
-				<ReportHeader reportId={$report} />
+				<ReportHeader />
 				<ChartType />
 				<Encoding />
 				<Marks />
@@ -27,13 +27,13 @@
 			<div id="reports">
 				{#if currentReport}
 					{#if currentReport.reportType === "timeseries"}
-						<TimeseriesReportTable reportId={$report} />
+						<TimeseriesReportTable />
 					{:else if currentReport.reportType === "slicechart"}
-						<SliceChartReport reportId={$report} />
+						<SliceChartReport />
 					{:else if currentReport.reportType === "beeswarm"}
-						<BeeswarmChartReport reportId={$report} />
+						<BeeswarmChartReport />
 					{:else}
-						<TableReportTable reportId={$report} />
+						<TableReportTable />
 					{/if}
 				{/if}
 			</div>

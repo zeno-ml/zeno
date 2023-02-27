@@ -1,15 +1,13 @@
 <script lang="ts">
 	import { VegaLite } from "svelte-vega";
 	import { getMetricsForSlices } from "../../api/slice";
-	import { metric, models, reports, slices } from "../../stores";
+	import { metric, models, report, reports, slices } from "../../stores";
 	import type { MetricKey } from "../../zenoservice";
 	import generateBarSpec from "./vegaSpec";
 
-	export let reportId: number;
-
 	let chartEntries = [];
 
-	$: report = $reports[reportId];
+	$: currReport = $reports[$report];
 
 	function getMetKeys(rep, $metric) {
 		const entries: MetricKey[] = [];
@@ -32,7 +30,7 @@
 		return entries;
 	}
 
-	$: modelResults = getMetricsForSlices(getMetKeys(report, $metric));
+	$: modelResults = getMetricsForSlices(getMetKeys(currReport, $metric));
 </script>
 
 <div class="main">

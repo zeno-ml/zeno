@@ -23,17 +23,17 @@
 <main>
 	{#if $ready}
 		<div id="report-panel">
-			<ReportHeader reportId={params.id} />
+			<ReportHeader />
 			<div id="reports">
 				{#if currentReport}
 					{#if currentReport.reportType === "timeseries"}
-						<TimeseriesReportTable reportId={$report} />
+						<TimeseriesReportTable />
 					{:else if currentReport.reportType === "slicechart"}
-						<SliceChartReport reportId={$report} />
+						<SliceChartReport />
 					{:else if currentReport.reportType === "beeswarm"}
-						<BeeswarmChartReport reportId={$report} />
+						<BeeswarmChartReport />
 					{:else}
-						<TableReportTable reportId={$report} />
+						<TableReportTable />
 					{/if}
 				{/if}
 			</div>
