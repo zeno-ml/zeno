@@ -9,6 +9,10 @@ class Tag(CamelModel):
     selection_ids: List[str]
 
 
-class TagMetric(CamelModel):
-    metric: Union[float, None]
-    size: int
+class TagMetricKey(CamelModel):
+    tag: Tag
+    model: str
+    metric: str
+
+# class TagMetricRequest(CamelModel):
+#     tag_metric_keys: List[TagMetricKey]

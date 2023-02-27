@@ -7,3 +7,9 @@ export type Tag = {
 	folder: string;
 	selectionIds: Array<string>;
 };
+
+export type TagMetricKey = {
+	tag: Tag;
+	model: string;
+	metric: string;
+}

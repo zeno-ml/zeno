@@ -9,7 +9,7 @@
 	import { line } from "d3-shape";
 	import { onMount } from "svelte";
 	import { models } from "../stores";
-	import type { SliceMetric } from "../zenoservice";
+	import type { GroupMetric } from "../zenoservice";
 	import { calculateStd, regression } from "./stats";
 
 	let el: HTMLDivElement;
@@ -17,7 +17,7 @@
 	let height = 30;
 	let padding = { top: 5, right: 0, bottom: 5, left: 0 };
 
-	export let res: SliceMetric[];
+	export let res: GroupMetric[];
 
 	const xScale = scalePoint()
 		.domain($models)

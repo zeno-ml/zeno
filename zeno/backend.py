@@ -19,8 +19,8 @@ from zeno.api import ZenoOptions, ZenoParameters
 from zeno.classes.base import MetadataType, ZenoColumnType
 from zeno.classes.classes import MetricKey, TableRequest, ZenoColumn
 from zeno.classes.report import Report
-from zeno.classes.slice import FilterIds, FilterPredicateGroup, Slice, SliceMetric
-from zeno.classes.tag import Tag
+from zeno.classes.slice import FilterIds, FilterPredicateGroup, Slice, GroupMetric
+from zeno.classes.tag import Tag, TagMetricKey
 from zeno.processing.data_processing import (
     postdistill_data,
     predistill_data,
@@ -356,21 +356,38 @@ class ZenoBackend(object):
         self,
         requests: List[MetricKey],
         filter_ids: Optional[FilterIds] = None,
-    ) -> List[SliceMetric]:
+    ) -> List[GroupMetric]:
         """Calculate result for each requested combination."""
 
-        return_metrics: List[SliceMetric] = []
+        return_metrics: List[GroupMetric] = []
         for metric_key in requests:
             filt_df = filter_table(
                 self.df, metric_key.sli.filter_predicates, filter_ids
             )
             if metric_key.metric == "" or self.label_column.name == "":
-                return_metrics.append(SliceMetric(metric=None, size=filt_df.shape[0]))
+                return_metrics.append(GroupMetric(metric=None, size=filt_df.shape[0]))
             else:
                 metric = self.calculate_metric(
                     filt_df, metric_key.model, metric_key.metric
                 )
-                return_metrics.append(SliceMetric(metric=metric, size=filt_df.shape[0]))
+                return_metrics.append(GroupMetric(metric=metric, size=filt_df.shape[0]))
+        return return_metrics
+
+    def get_metrics_for_tags(
+        self,
+        requests: List[TagMetricKey]
+    ) -> List[GroupMetric]:
+        
+        return_metrics: List[GroupMetric] = []
+        for tag_metric_key in requests:
+            filt_df = filter_table(self.df, None, FilterIds(ids = tag_metric_key.tag.selection_ids))
+            if tag_metric_key.metric == "" or self.label_column.name == "":
+                return_metrics.append(GroupMetric(metric=None, size=filt_df.shape[0]))
+            else:
+                metric = self.calculate_metric(
+                    filt_df, tag_metric_key.model, tag_metric_key.metric
+                )
+                return_metrics.append(GroupMetric(metric=metric, size=filt_df.shape[0]))
         return return_metrics
 
     def calculate_metric(

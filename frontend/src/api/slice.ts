@@ -1,4 +1,4 @@
-import { ZenoService, type FilterIds, type SliceMetric } from "../zenoservice";
+import { ZenoService, type FilterIds, type GroupMetric } from "../zenoservice";
 import {
 	ZenoColumnType,
 	type FilterPredicate,
@@ -58,7 +58,7 @@ export async function deleteSlice(sliceName: string) {
 export async function getMetricsForSlices(
 	metricKeys: MetricKey[],
 	filterIds?: FilterIds
-): Promise<SliceMetric[]> {
+): Promise<GroupMetric[]> {
 	if (metricKeys.length === 0) {
 		return null;
 	}

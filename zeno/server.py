@@ -27,8 +27,8 @@ from zeno.classes.classes import (
 from zeno.classes.metadata import HistogramBucket, HistogramRequest, StringFilterRequest
 from zeno.classes.projection import Points2D, PointsColors
 from zeno.classes.report import Report
-from zeno.classes.slice import FilterPredicateGroup, Slice, SliceMetric
-from zeno.classes.tag import Tag
+from zeno.classes.slice import FilterPredicateGroup, Slice, GroupMetric
+from zeno.classes.tag import Tag, TagMetricKey
 from zeno.processing.histogram_processing import (
     filter_by_string,
     histogram_buckets,
@@ -196,9 +196,13 @@ def get_server(zeno: ZenoBackend):
         filt_out = filter_by_string(zeno.df, req)
         return filt_out
 
-    @api_app.post("/slice-metrics", response_model=List[SliceMetric], tags=["zeno"])
+    @api_app.post("/slice-metrics", response_model=List[GroupMetric], tags=["zeno"])
     def get_metrics_for_slices(req: MetricRequest):
         return zeno.get_metrics_for_slices(req.metric_keys, req.filter_ids)
+
+    @api_app.post("/tag-metrics", response_model=List[GroupMetric], tags=["zeno"])
+    def get_metrics_for_tags(req: List[TagMetricKey]):
+        return zeno.get_metrics_for_tags(req)
 
     @api_app.get("/embed-exists/{model}", response_model=bool, tags=["zeno"])
     def embed_exists(model: str):

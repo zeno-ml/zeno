@@ -18,6 +18,7 @@
 		type HistogramEntry,
 	} from "../api/metadata";
 	import { getMetricsForSlices } from "../api/slice";
+	import { getMetricsForTags } from "../api/tag";
 	import {
 		folders,
 		metric,
@@ -32,6 +33,7 @@
 		settings,
 		showNewFolder,
 		showNewSlice,
+		showNewTag,
 		slices,
 		sliceToEdit,
 		status,
@@ -42,18 +44,19 @@
 		ZenoColumnType,
 		type MetricKey,
 		type Slice,
+		type Tag,
+		type TagMetricKey,
 		type ZenoColumn,
 	} from "../zenoservice";
 	import FolderCell from "./cells/FolderCell.svelte";
 	import MetadataCell from "./cells/MetadataCell.svelte";
 	import SliceCell from "./cells/SliceCell.svelte";
+  	import TagCell from "./cells/TagCell.svelte";
 	import MetricRange from "./MetricRange.svelte";
 	import NewTagPopup from "./popups/NewTagPopup.svelte";
 
 	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
 		new InternMap([], columnHash);
-
-	let showNewTag = false;
 
 	$: res = getMetricsForSlices([
 		<MetricKey>{
@@ -61,6 +64,18 @@
 				sliceName: "",
 				folder: "",
 				filterPredicates: { predicates: [], join: "" },
+			},
+			model: $model,
+			metric: $metric,
+		},
+	]);
+
+	$: tagRes = getMetricsForTags([
+		<TagMetricKey>{
+			tag: <Tag>{
+				tagName: "",
+				folder: "",
+				selectionIds: [],
 			},
 			model: $model,
 			metric: $metric,
@@ -317,7 +332,27 @@
 		</div>
 		<div class="inline">
 			<div>
-				<Wrapper>
+				<div
+				use:tooltip={{
+					content: "Create a new tag.",
+					position: "left",
+					theme: "zeno-tooltip",
+				}}>
+				<IconButton
+					on:click={() => (showNewTag.update((b) => !b))}>
+					<Icon component={Svg} viewBox="0 0 24 24">
+						{#if $selectionIds.ids.length > 0}
+							<path fill="#6a1a9a" d={mdiPlusCircle} />
+						{:else}
+							<path fill="black" d={mdiPlus} />
+						{/if}
+					</Icon>
+				</IconButton>
+			</div>
+
+
+
+				<!-- <Wrapper>
 					<IconButton on:click={() => (showNewTag = !showNewTag)}>
 						<Icon component={Svg} viewBox="0 0 24 24">
 							{#if $selectionIds.ids.length > 0}
@@ -325,7 +360,6 @@
 							{:else}
 								<path fill="black" d={mdiPlus} />
 							{/if}
-							<!-- <path fill="black" d={mdiTagPlusOutline} /> -->
 						</Icon>
 					</IconButton>
 					<Tooltip xPos="start">Create a new tag</Tooltip>
@@ -335,18 +369,21 @@
 						bind:showNewTag
 						scrollY={document.getElementsByClassName("side-container")[0]
 							.scrollTop} />
-				{/if}
+				{/if} -->
 			</div>
 		</div>
 	</div>
 
-	{#each [...$tags.values()] as tag}
+	{#each [...$tags.values()] as t}
+		<TagCell tag={t} />
+	{/each}
+	<!-- {#each [...$tags.values()] as tag}
 		<div class="inline">
 			<p>{tag.tagName}</p>
 			<p>Folder: {tag.folder}</p>
 			<p>selIds: {tag.selectionIds.length}</p>
 		</div>
-	{/each}
+	{/each} -->
 
 	<div id="metric-header" class="inline" style:margin-top="10px">
 		<div class="inline">

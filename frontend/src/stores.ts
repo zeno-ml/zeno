@@ -123,6 +123,7 @@ export const report: Writable<number> = writable(undefined);
 
 export const showNewFolder: Writable<boolean> = writable(false);
 export const showNewSlice: Writable<boolean> = writable(false);
+export const showNewTag: Writable<boolean> = writable(false);
 export const sliceToEdit: Writable<Slice> = writable(null);
 
 export const metricRange: Writable<[number, number]> = writable([

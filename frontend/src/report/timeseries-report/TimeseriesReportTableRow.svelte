@@ -4,7 +4,7 @@
 	import IconButton from "@smui/icon-button";
 	import { getMetricsForSlices } from "../../api/slice";
 	import { models, report, reports, slices } from "../../stores";
-	import type { ReportPredicate, SliceMetric } from "../../zenoservice";
+	import type { ReportPredicate, GroupMetric } from "../../zenoservice";
 	import SliceDetailsContainer from "../SliceDetailsContainer.svelte";
 	import SparkLine from "../SparkLine.svelte";
 
@@ -13,7 +13,7 @@
 
 	$: sli = $slices.get(predicate.sliceName);
 
-	let modelResults: SliceMetric[] = [];
+	let modelResults: GroupMetric[] = [];
 	$: getMetricsForSlices(
 		$models.map((m) => ({
 			sli: sli,

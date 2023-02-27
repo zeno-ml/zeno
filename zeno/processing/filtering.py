@@ -57,7 +57,7 @@ def get_filter_string(filter: FilterPredicateGroup) -> str:
 
 def filter_table(
     df,
-    filter_predicates: FilterPredicateGroup,
+    filter_predicates: Optional[FilterPredicateGroup] = None,
     filter_ids: Optional[FilterIds] = None,
 ) -> pd.DataFrame:
     # if we have ids, filter them out now!
@@ -65,11 +65,12 @@ def filter_table(
         # this is fast because the index is set to ids
         df = df.loc[filter_ids.ids]
 
-    final_filter = get_filter_string(filter_predicates)
-    if len(final_filter) > 0:
-        return df.query(final_filter)
-    else:
-        return df
+    if(filter_predicates is not None):
+        final_filter = get_filter_string(filter_predicates)
+        if len(final_filter) > 0:
+            return df.query(final_filter)
+    
+    return df
 
 
 def filter_table_single(df: DataFrame, col: ZenoColumn, bucket: HistogramBucket):

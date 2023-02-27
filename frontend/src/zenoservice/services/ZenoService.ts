@@ -12,8 +12,8 @@ import type { Points2D } from "../models/Points2D";
 import type { PointsColors } from "../models/PointsColors";
 import type { Report } from "../models/Report";
 import type { Slice } from "../models/Slice";
-import type { SliceMetric } from "../models/SliceMetric";
-import type { Tag } from "../models/Tag";
+import type { GroupMetric } from "../models/GroupMetric";
+import type { Tag, TagMetricKey } from "../models/Tag";
 import type { StringFilterRequest } from "../models/StringFilterRequest";
 import type { TableRequest } from "../models/TableRequest";
 import type { ZenoColumn } from "../models/ZenoColumn";
@@ -338,15 +338,35 @@ export class ZenoService {
 	/**
 	 * Get Metrics For Slices
 	 * @param requestBody
-	 * @returns SliceMetric Successful Response
+	 * @returns GroupMetric Successful Response
 	 * @throws ApiError
 	 */
 	public static getMetricsForSlices(
 		requestBody: MetricRequest
-	): CancelablePromise<Array<SliceMetric>> {
+	): CancelablePromise<Array<GroupMetric>> {
 		return __request(OpenAPI, {
 			method: "POST",
 			url: "/slice-metrics",
+			body: requestBody,
+			mediaType: "application/json",
+			errors: {
+				422: `Validation Error`,
+			},
+		});
+	}
+
+	/**
+	 * Get Metrics For Tags
+	 * @param requestBody
+	 * @returns GroupMetric Successful Response
+	 * @throws ApiError
+	 */
+	public static getMetricsForTags(
+		requestBody: Array<TagMetricKey>
+	): CancelablePromise<Array<GroupMetric>> {
+		return __request(OpenAPI, {
+			method: "POST",
+			url: "/tag-metrics",
 			body: requestBody,
 			mediaType: "application/json",
 			errors: {
