@@ -795,14 +795,14 @@ gitdb = ">=4.0.1,<5"
 
 [[package]]
 name = "gradio"
-version = "3.18.0"
+version = "3.19.1"
 description = "Python library for easily interacting with trained machine learning models"
 category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "gradio-3.18.0-py3-none-any.whl", hash = "sha256:de608f310584d1b16c9554015352adfa4804e6319d20a6b66e271377d2bbb31d"},
-    {file = "gradio-3.18.0.tar.gz", hash = "sha256:f66d19c651c740da6cfa2b411b0e19942579532e0ffc5c41f71a2adbf0bc5c30"},
+    {file = "gradio-3.19.1-py3-none-any.whl", hash = "sha256:05a15facc2fb8c6b572a8a5aef9266ddfa747e72563c348300a7872bd83d3b33"},
+    {file = "gradio-3.19.1.tar.gz", hash = "sha256:a9bd246a7138fa3a2fe975755ff96dafff981739243f5b935349bf6d7fa591ea"},
 ]
 
 [package.dependencies]
@@ -814,9 +814,10 @@ ffmpy = "*"
 fsspec = "*"
 httpx = "*"
 jinja2 = "*"
-markdown-it-py = {version = ">=2.0.0", extras = ["linkify", "plugins"]}
+markdown-it-py = {version = ">=2.0.0", extras = ["linkify"]}
 markupsafe = "*"
 matplotlib = "*"
+mdit-py-plugins = "<=0.3.3"
 numpy = "*"
 orjson = "*"
 pandas = "*"
@@ -1256,7 +1257,6 @@ files = [
 
 [package.dependencies]
 linkify-it-py = {version = ">=1.0,<2.0", optional = true, markers = "extra == \"linkify\""}
-mdit-py-plugins = {version = "*", optional = true, markers = "extra == \"plugins\""}
 mdurl = ">=0.1,<1.0"
 
 [package.extras]
