@@ -29,7 +29,7 @@ tomli = "^2.0.1"
 tqdm = "^4.64.0"
 uvicorn = ">=0.17.5,<0.21.0"
 websockets = "^10.2"
-opentsne = ">=0.6.2,<0.8.0"
+opentsne = "^0.7.1"
 gradio = "^3.18.0"
 cachetools = "^5.3.0"
 

@@ -5,6 +5,6 @@
 import type { ZenoColumn } from "./ZenoColumn";
 
 export type EntryRequest = {
-	id: string;
+	id: number | string;
 	columns?: Array<ZenoColumn>;
 };

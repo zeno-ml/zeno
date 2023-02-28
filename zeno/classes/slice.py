@@ -17,7 +17,7 @@ class FilterPredicateGroup(CamelModel):
 
 
 class FilterIds(CamelModel):
-    ids: List[str]
+    ids: Union[List[int], List[str]]
 
 
 class Slice(CamelModel):
