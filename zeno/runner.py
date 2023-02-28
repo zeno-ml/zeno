@@ -83,7 +83,9 @@ def parse_toml():
         if meta_path.suffix == ".csv":
             args["metadata"] = pd.read_csv(meta_path)
         elif meta_path.suffix == ".tsv":
-            args["metadata"] = pd.read_csv(meta_path, sep="\t", header=0)
+            args["metadata"] = pd.read_csv(
+                meta_path, sep="\t", header=0, quoting=3, keep_default_na=False
+            )
         elif meta_path.suffix == ".parquet":
             args["metadata"] = pd.read_parquet(meta_path)
         elif meta_path.suffix == ".jsonl":
@@ -110,6 +112,8 @@ def parse_args(args: ZenoParameters, base_path) -> ZenoParameters:
 
     if type(args) == dict:
         args = ZenoParameters.parse_obj(args)
+
+    args.metadata = args.metadata.copy()
 
     if args.cache_path == "":
         args.cache_path = os.path.realpath(os.path.join(base_path, "./.zeno_cache/"))
