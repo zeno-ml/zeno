@@ -2,9 +2,9 @@
 
 import os
 
-import inquirer
+import inquirer  # type: ignore
 import requests
-from inquirer import Path, errors
+from inquirer import errors, Path
 
 from zeno.util import VIEW_MAP_URL, VIEWS_MAP_JSON
 
