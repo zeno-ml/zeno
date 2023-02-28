@@ -3,8 +3,8 @@
 import os
 
 import requests
-from InquirerPy.resolver import prompt
-from InquirerPy.validator import PathValidator
+from InquirerPy.resolver import prompt  # type: ignore
+from InquirerPy.validator import PathValidator  # type: ignore
 
 from zeno.util import VIEW_MAP_URL, VIEWS_MAP_JSON
 

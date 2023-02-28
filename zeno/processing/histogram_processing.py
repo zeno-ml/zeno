@@ -162,9 +162,9 @@ def filter_by_string(df: pd.DataFrame, req: StringFilterRequest) -> List[str]:
     else:
         ret = col[col.str.contains(req.filter_string, case=False)].head().tolist()
         for r in ret:
-            idx = re.search(req.filter_string, r)
+            idx = re.search(req.filter_string, r)  # type: ignore
             if idx is not None:
-                idx = idx.start()
+                idx = idx.start()  # type: ignore
                 loc_str = r[idx - 20 : idx + 20]
                 if len(r) > 40 + len(req.filter_string):
                     if idx - 20 > 0:

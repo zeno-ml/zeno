@@ -18,7 +18,7 @@ exclude = ["zeno/tests/*"]
 
 [tool.poetry.dependencies]
 fastapi = ">=0.75,<0.93"
-inquirerpy = "0.3.3"
+inquirerpy = "^0.3.4"
 nest-asyncio = "^1.5.6"
 pandas = "^1.4.0"
 pathos = "^0.3.0"
