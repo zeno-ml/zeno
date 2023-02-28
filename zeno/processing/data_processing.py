@@ -109,7 +109,6 @@ def run_inference(
                 desc="Inference on " + model_name,
                 position=pos,
             ):
-
                 # Make output folder if function uses output_path
                 src = getsource(model_fn)
                 if "output_path" in src:
@@ -121,9 +120,16 @@ def run_inference(
 
                 # Check if we also get embedding
                 if type(out) == tuple and len(out) == 2:
+                    out_list = list(out)
+                    if type(out[0]) == pd.Series:
+                        out_list[0] = out[0].tolist()
+                    if type(out[1]) == pd.Series:
+                        out_list[1] = out[1].tolist()
+
                     for i, idx in enumerate(to_predict_indices[i : i + batch_size]):
-                        model_col.at[idx] = out[0][i]
-                        embedding_col.at[idx] = out[1][i]
+                        model_col.at[idx] = out_list[0][i]
+                        embedding_col.at[idx] = out_list[1][i]
+
                     embedding_col.to_pickle(str(embedding_save_path))
                     out = out[0]
                 else:
