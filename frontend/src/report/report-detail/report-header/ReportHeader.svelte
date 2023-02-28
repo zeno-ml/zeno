@@ -15,6 +15,7 @@
 		class="return-link"
 		on:keydown={() => ({})}
 		on:click={() => {
+			$reports[$report].name = currReport.name;
 			updateTab("report");
 		}}
 		on:focus={() => ({})}
