@@ -20,6 +20,7 @@ exclude = ["zeno/tests/*"]
 cachetools = "^5.3.0"
 fastapi = ">=0.75,<0.93"
 gradio = "^3.18.0"
+inquirer = "^3.1.2"
 nest-asyncio = "^1.5.6"
 opentsne = "^0.7.1"
 pandas = "^1.4.0"

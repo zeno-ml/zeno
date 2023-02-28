@@ -2,20 +2,25 @@
 
 import os
 
+import inquirer
 import requests
-from InquirerPy.resolver import prompt  # type: ignore
-from InquirerPy.validator import PathValidator  # type: ignore
+from inquirer import Path, errors
 
 from zeno.util import VIEW_MAP_URL, VIEWS_MAP_JSON
 
 TOML_TEMPLATE = """functions = "./"
 view = "{}"
 metadata = "{}"
-data_path = "{}"
 data_column = "{}"
 {}
 models = [] # Add paths to model checkpoints, passed into @model
 """
+
+
+def validate_name(_, name):
+    if len(name) == 0:
+        raise errors.ValidationError("", reason="Project name cannot be empty.")
+    return True
 
 
 def setup_zeno():
@@ -28,69 +33,51 @@ def setup_zeno():
     views = list(views_res.json().keys())
 
     questions = [
-        {
-            "type": "input",
-            "message": "Name your project/folder:",
-            "name": "name",
-            "validate": lambda r: len(r) > 0,
-            "invalid_message": "Input cannot be empty.",
-        },
-        {
-            "type": "list",
-            "message": "What type of model are you evaluating?",
-            "name": "view",
-            "choices": views,
-        },
-        {
-            "type": "filepath",
-            "message": "Path to a metadata file (CSV or Parquet):",
-            "name": "metadata",
-            "validate": PathValidator(is_file=True, message="Input is not a file"),
-            "only_files": True,
-        },
-        {
-            "type": "filepath",
-            "message": "Folder or URL with data (e.g. image folder or S3 endpoint):",
-            "name": "data_path",
-        },
-        {
-            "type": "input",
-            "message": "Name of the column in the metadata file"
-            + " with relative file paths:",
-            "name": "data_column",
-        },
-        {
-            "type": "input",
-            "message": "Name of the column in the metadata file"
-            + " with ground truth labels (OPTIONAL):",
-            "name": "label_column",
-        },
-        {
-            "type": "list",
-            "message": "Which library are you using?",
-            "name": "model_type",
-            "choices": ["None", "PyTorch", "TensorFlow", "Keras", "HuggingFace"],
-        },
-        {"type": "confirm", "message": "Confirm?", "name": "confirm"},
+        inquirer.Text(
+            "name",
+            message="Name your project/folder",
+            validate=validate_name,
+        ),
+        inquirer.List(
+            "view", message="What type of model are you evaluating", choices=views
+        ),
+        inquirer.Path(
+            "metadata",
+            message="Path to a metadata file (CSV or Parquet)",
+            path_type=Path.FILE,
+            exists=True,
+        ),
+        inquirer.Text(
+            "data_column",
+            message="Name of the column with data instances or paths"
+            + "in the metadata file",
+        ),
+        inquirer.Text(
+            "label_column",
+            message="Name of the column with labels in the metadata file",
+        ),
     ]
 
-    result = prompt(questions)
+    result = inquirer.prompt(questions)
+    if result is None:
+        return
+
     print(
         "\nCongrats! A new folder, {}, has been created with a ".format(result["name"])
         + "zeno.toml file inside. Run Zeno with the following:"
     )
     print(("\n\t cd {} \n\t zeno zeno.toml").format(result["name"]))
 
-    print("\n To set up your model, follow the instructions in model.py")
+    print(
+        "\n If your data is saved as files, e.g. images or video, please set the ",
+        "data_path option in the config file. To set up your model, follow the ",
+        "instructions in model.py",
+    )
 
     # Create new directory with zeno.toml file
     os.mkdir(str(result["name"]))
 
     # Update paths to be relative to new directory if relative to start with.
-    if os.path.exists(str(result["data_path"])) and not os.path.isabs(str("data_path")):
-        result["data_path"] = os.path.relpath(
-            str(result["data_path"]), "./" + str(result["name"])
-        )
     if not os.path.isabs(str("metadata")):
         result["metadata"] = os.path.relpath(
             str(result["metadata"]), "./" + str(result["name"])
@@ -103,7 +90,6 @@ def setup_zeno():
             TOML_TEMPLATE.format(
                 result["view"],
                 result["metadata"],
-                result["data_path"],
                 result["data_column"],
                 'label_column = "' + str(result["label_column"]) + '"'
                 if result["label_column"]
