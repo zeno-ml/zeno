@@ -1091,14 +1091,14 @@ files = [
 
 [[package]]
 name = "inquirerpy"
-version = "0.3.3"
+version = "0.3.4"
 description = "Python port of Inquirer.js (A collection of common interactive command-line user interfaces)"
 category = "main"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "InquirerPy-0.3.3-py3-none-any.whl", hash = "sha256:773ba1f1c82852e5289e9fb3956ee06ef113ec949e3614d277ce24fe7945021c"},
-    {file = "InquirerPy-0.3.3.tar.gz", hash = "sha256:29a1ace830d98730e0a2fc01b4484256491c182cdde93ad66ff602b1b510aaeb"},
+    {file = "InquirerPy-0.3.4-py3-none-any.whl", hash = "sha256:c65fdfbac1fa00e3ee4fb10679f4d3ed7a012abf4833910e63c295827fe2a7d4"},
+    {file = "InquirerPy-0.3.4.tar.gz", hash = "sha256:89d2ada0111f337483cb41ae31073108b2ec1e618a49d7110b0d7ade89fc197e"},
 ]
 
 [package.dependencies]
@@ -3432,4 +3432,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1, <=3.11" 
-content-hash = "b62a08178c707d67c3b82955c6c2b41365bb259d00666e6389899a7b1dbd1f22"
+content-hash = "2a2e5ef06e15fa85da65e63547fc0daad9aa79db08aea23e6eeab0f4e55e173d"
