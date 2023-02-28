@@ -63,7 +63,7 @@ def model(func):
     def _wrapper(*args, **kwargs):
         return func(*args, **kwargs)
 
-    _wrapper.predict_function = True
+    _wrapper.predict_function = True  # type: ignore
     return _wrapper
 
 
@@ -72,7 +72,7 @@ def distill(func):
     def _wrapper(*args, **kwargs):
         return func(*args, **kwargs)
 
-    _wrapper.distill_function = True
+    _wrapper.distill_function = True  # type: ignore
     return _wrapper
 
 
@@ -81,7 +81,7 @@ def metric(func):
     def _wrapper(*args, **kwargs):
         return func(*args, **kwargs)
 
-    _wrapper.metric_function = True
+    _wrapper.metric_function = True  # type: ignore
     return _wrapper
 
 
@@ -90,5 +90,5 @@ def inference(func):
     def _wrapper(*args, **kwargs):
         return func(*args, **kwargs)
 
-    _wrapper.inference_function = True
+    _wrapper.inference_function = True  # type: ignore
     return _wrapper
