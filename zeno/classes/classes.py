@@ -61,5 +61,5 @@ class ColorsProjectRequest(CamelModel):
 
 
 class EntryRequest(BaseModel):
-    id: str
+    id: Union[int, str]
     columns: List[ZenoColumn] = []

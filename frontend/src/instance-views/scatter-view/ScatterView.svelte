@@ -270,6 +270,7 @@
 	}
 	#hover-view {
 		position: absolute;
+		background: white;
 		z-index: 2;
 	}
 
