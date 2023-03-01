@@ -5,15 +5,16 @@
 	import IconButton from "@smui/icon-button";
 	import { reports } from "../stores";
 	import { updateTab } from "../util/util";
+	import { ReportType } from "../zenoservice";
 
 	export let report;
 	export let reportIndex;
 
 	let iconMap = {
-		table: mdiTable,
-		timeseries: mdiChartLine,
-		slicechart: mdiChartBar,
-		beeswarm: mdiBee,
+		[ReportType.TABLEVIEW]: mdiTable,
+		[ReportType.LINECHART]: mdiChartLine,
+		[ReportType.BARCHART]: mdiChartBar,
+		[ReportType.BEESWARM]: mdiBee,
 	};
 </script>
 

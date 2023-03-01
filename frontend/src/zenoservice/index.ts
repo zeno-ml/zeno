@@ -22,6 +22,8 @@ export type { MetricRequest } from "./models/MetricRequest";
 export type { Points2D } from "./models/Points2D";
 export type { PointsColors } from "./models/PointsColors";
 export type { Report } from "./models/Report";
+export { ReportType } from "./models/ReportType";
+export type { ReportEncoding } from "./models/ReportEncoding";
 export type { ReportPredicate } from "./models/ReportPredicate";
 export type { Slice } from "./models/Slice";
 export type { SliceMetric } from "./models/SliceMetric";

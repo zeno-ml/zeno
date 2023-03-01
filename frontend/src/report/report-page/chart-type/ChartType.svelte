@@ -4,7 +4,20 @@
 	import BarChart from "./chart-icons/BarChartIcon.svelte";
 	import LineChart from "./chart-icons/LineChartIcon.svelte";
 	import TableView from "./chart-icons/TableViewIcon.svelte";
+	import { ReportType } from "../../../zenoservice";
+
 	$: selectedchart = $reports[$report].reportType;
+	let idMap = {
+		barchart: ReportType.BARCHART,
+		linechart: ReportType.LINECHART,
+		table: ReportType.TABLEVIEW,
+		beeswarm: ReportType.BEESWARM,
+	};
+	function updateChartType(e) {
+		if (e.currentTarget instanceof HTMLElement) {
+			$reports[$report].reportType = idMap[e.currentTarget.id];
+		}
+	}
 </script>
 
 {#if $ready}
@@ -12,50 +25,42 @@
 		<h4 class="edit-title">Chart Type</h4>
 		<div class="chart-flex">
 			<div
-				id="slicechart"
-				class="chart-element {selectedchart === 'slicechart' ? 'selected' : ''}"
+				id="barchart"
+				class="chart-element {selectedchart === ReportType.BARCHART
+					? 'selected'
+					: ''}"
 				on:keydown={() => ({})}
-				on:click={(e) => {
-					if (e.currentTarget instanceof HTMLElement) {
-						$reports[$report].reportType = e.currentTarget.id;
-					}
-				}}>
+				on:click={updateChartType}>
 				<BarChart />
 				<h4 class="chart-title">Bar Chart</h4>
 			</div>
 			<div
-				id="timeseries"
-				class="chart-element {selectedchart === 'timeseries' ? 'selected' : ''}"
+				id="linechart"
+				class="chart-element {selectedchart === ReportType.LINECHART
+					? 'selected'
+					: ''}"
 				on:keydown={() => ({})}
-				on:click={(e) => {
-					if (e.currentTarget instanceof HTMLElement) {
-						$reports[$report].reportType = e.currentTarget.id;
-					}
-				}}>
+				on:click={updateChartType}>
 				<LineChart />
 				<h4 class="chart-title">Line Chart</h4>
 			</div>
 			<div
 				id="table"
-				class="chart-element {selectedchart === 'table' ? 'selected' : ''}"
+				class="chart-element {selectedchart === ReportType.TABLEVIEW
+					? 'selected'
+					: ''}"
 				on:keydown={() => ({})}
-				on:click={(e) => {
-					if (e.currentTarget instanceof HTMLElement) {
-						$reports[$report].reportType = e.currentTarget.id;
-					}
-				}}>
+				on:click={updateChartType}>
 				<TableView />
 				<h4 class="chart-title">Table View</h4>
 			</div>
 			<div
 				id="beeswarm"
-				class="chart-element {selectedchart === 'beeswarm' ? 'selected' : ''}"
+				class="chart-element {selectedchart === ReportType.BEESWARM
+					? 'selected'
+					: ''}"
 				on:keydown={() => ({})}
-				on:click={(e) => {
-					if (e.currentTarget instanceof HTMLElement) {
-						$reports[$report].reportType = e.currentTarget.id;
-					}
-				}}>
+				on:click={updateChartType}>
 				<Beeswarm />
 				<h4 class="chart-title">Beeswarm Plot</h4>
 			</div>

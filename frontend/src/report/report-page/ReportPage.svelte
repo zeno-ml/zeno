@@ -8,8 +8,15 @@
 	import ChartType from "./chart-type/ChartType.svelte";
 	import Encoding from "./encoding/Encoding.svelte";
 	import Marks from "./marks/Marks.svelte";
+	import { ReportType } from "../../zenoservice";
 
 	export let params;
+	const ChartMap = {
+		[ReportType.BARCHART]: SliceChartReport,
+		[ReportType.LINECHART]: TimeseriesReportTable,
+		[ReportType.TABLEVIEW]: TableReportTable,
+		[ReportType.BEESWARM]: BeeswarmChartReport,
+	};
 
 	$: report.set(params.id);
 	$: currentReport = $reports[$report];
@@ -25,17 +32,7 @@
 				<Marks />
 			</div>
 			<div id="reports">
-				{#if currentReport}
-					{#if currentReport.reportType === "timeseries"}
-						<TimeseriesReportTable />
-					{:else if currentReport.reportType === "slicechart"}
-						<SliceChartReport />
-					{:else if currentReport.reportType === "beeswarm"}
-						<BeeswarmChartReport />
-					{:else}
-						<TableReportTable />
-					{/if}
-				{/if}
+				<svelte:component this={ChartMap[currentReport.reportType]} />
 			</div>
 		</div>
 	{/if}
