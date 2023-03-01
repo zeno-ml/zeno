@@ -1,11 +1,11 @@
 <script lang="ts">
-	import ReportsList from "./report/ReportHome.svelte";
+	import ReportHome from "./report/ReportHome.svelte";
 	import { ready } from "./stores";
 </script>
 
 <main>
 	{#if $ready}
-		<ReportsList />
+		<ReportHome />
 	{/if}
 </main>
 

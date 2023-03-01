@@ -4,7 +4,7 @@
 	import IconButton, { Icon } from "@smui/icon-button";
 	import { reports } from "../stores";
 	import { updateTab } from "../util/util";
-	import ReportListRow from "./ReportHomeBlock.svelte";
+	import ReportHomeBlock from "./ReportHomeBlock.svelte";
 	import { ReportType, type ReportEncoding } from "../zenoservice";
 
 	let tmpencoding: ReportEncoding;
@@ -16,7 +16,7 @@
 	</div>
 	<div class="reports">
 		{#each $reports as rep, i}
-			<ReportListRow report={rep} reportIndex={i} />
+			<ReportHomeBlock report={rep} reportIndex={i} />
 		{/each}
 		<div
 			class="add-reports"
