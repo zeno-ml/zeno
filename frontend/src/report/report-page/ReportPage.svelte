@@ -7,7 +7,6 @@
 	import TimeseriesReportTable from "../timeseries-report/TimeseriesReportTable.svelte";
 	import ViewSelection from "./view-selection/ViewSelection.svelte";
 	import Encoding from "./encoding/Encoding.svelte";
-	import Marks from "./marks/Marks.svelte";
 	import { ChartType } from "../../zenoservice";
 
 	export let params;
@@ -29,7 +28,6 @@
 				<ReportHeader />
 				<ViewSelection />
 				<Encoding />
-				<Marks />
 			</div>
 			<div id="reports">
 				<svelte:component this={ChartMap[currentReport.type]} />

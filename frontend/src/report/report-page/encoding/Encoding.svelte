@@ -1,6 +1,15 @@
 <script lang="ts">
-	import { ready, report, reports, metric, metrics } from "../../../stores";
+	import {
+		ready,
+		report,
+		reports,
+		metric,
+		metrics,
+		models,
+	} from "../../../stores";
 	import Select, { Option } from "@smui/select";
+	import Checkbox from "@smui/checkbox";
+	import FormField from "@smui/form-field";
 	import { TrailingIcon } from "@smui/chips";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
@@ -8,7 +17,8 @@
 	import { mdiPlusBoxOutline } from "@mdi/js";
 	import { clickOutside } from "../../../util/clickOutside";
 	import SliceTable from "../../slice-table-report/SliceTable.svelte";
-
+	$: color = "model";
+	let selectedModel = [...$models];
 	$: showSlices = false;
 
 	$: rep = $reports[$report];
@@ -99,6 +109,24 @@
 						</Select>
 					</div>
 				{/if}
+			{/if}
+
+			<div class="parameters">
+				<h4 class="select-label">color</h4>
+				<Select bind:value={color} class="select" variant="outlined">
+					<Option value={"model"}>Model</Option>
+					<Option value={"slice"}>Slice</Option>
+				</Select>
+			</div>
+			{#if color === "model"}
+				<div class="models">
+					{#each $models as m}
+						<FormField>
+							<Checkbox bind:group={selectedModel} value={m} />
+							<span slot="label">{m}</span>
+						</FormField>
+					{/each}
+				</div>
 			{/if}
 		</div>
 	</div>
