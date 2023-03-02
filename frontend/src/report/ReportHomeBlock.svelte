@@ -5,16 +5,16 @@
 	import IconButton from "@smui/icon-button";
 	import { reports } from "../stores";
 	import { updateTab } from "../util/util";
-	import { ReportType } from "../zenoservice";
+	import { ChartType } from "../zenoservice";
 
 	export let report;
 	export let reportIndex;
 
 	let iconMap = {
-		[ReportType.TABLEVIEW]: mdiTable,
-		[ReportType.LINECHART]: mdiChartLine,
-		[ReportType.BARCHART]: mdiChartBar,
-		[ReportType.BEESWARM]: mdiBee,
+		[ChartType.TABLE]: mdiTable,
+		[ChartType.LINE]: mdiChartLine,
+		[ChartType.BAR]: mdiChartBar,
+		[ChartType.BEESWARM]: mdiBee,
 	};
 </script>
 
@@ -24,11 +24,13 @@
 	on:keydown={() => ({})}>
 	<IconButton>
 		<Icon component={Svg} viewBox="0 0 24 24">
-			<path fill="black" d={iconMap[report.reportType]} />
+			<path fill="black" d={iconMap[report.type]} />
 		</Icon>
 	</IconButton>
 	<p class="report-name">{report.name}</p>
-	<p class="report-slice">{report.reportPredicates.length} slices</p>
+	<p class="report-slice">
+		{report.reportPredicates ? report.reportPredicates.length : 0} slices
+	</p>
 	<IconButton
 		on:click={(e) => {
 			e.stopPropagation();

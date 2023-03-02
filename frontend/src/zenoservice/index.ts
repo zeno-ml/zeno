@@ -6,6 +6,7 @@ export { CancelablePromise, CancelError } from "./core/CancelablePromise";
 export { OpenAPI } from "./core/OpenAPI";
 export type { OpenAPIConfig } from "./core/OpenAPI";
 
+export { ChartType } from "./models/ChartType";
 export type { ColorsProjectRequest } from "./models/ColorsProjectRequest";
 export type { EmbedProject2DRequest } from "./models/EmbedProject2DRequest";
 export type { EntryRequest } from "./models/EntryRequest";
@@ -22,7 +23,6 @@ export type { MetricRequest } from "./models/MetricRequest";
 export type { Points2D } from "./models/Points2D";
 export type { PointsColors } from "./models/PointsColors";
 export type { Report } from "./models/Report";
-export { ReportType } from "./models/ReportType";
 export type { ReportEncoding } from "./models/ReportEncoding";
 export type { ReportPredicate } from "./models/ReportPredicate";
 export type { Slice } from "./models/Slice";

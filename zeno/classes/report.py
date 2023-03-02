@@ -1,13 +1,13 @@
 from enum import Enum
-from typing import List
+from typing import List, Union
 
 from zeno.classes.base import CamelModel
 
 
-class ReportType(str, Enum):
-    BARCHART = "BARCHART"
-    LINECHART = "LINECHART"
-    TABLEVIEW = "TABLEVIEW"
+class ChartType(str, Enum):
+    BAR = "BAR"
+    LINE = "LINE"
+    TABLE = "TABLE"
     BEESWARM = "BEESWARM"
 
 
@@ -23,8 +23,8 @@ class ReportEncoding(CamelModel):
 
 class Report(CamelModel):
     name: str
-    report_type: ReportType
-    report_predicates: List[ReportPredicate]
-    x_encoding: ReportEncoding
-    y_encoding: ReportEncoding
-    color_encoding: ReportEncoding
+    type: Union[ChartType, None] = None
+    report_predicates: Union[List[ReportPredicate], None] = None
+    x_encoding: Union[ReportEncoding, None] = None
+    y_encoding: Union[ReportEncoding, None] = None
+    color_encoding: Union[ReportEncoding, None] = None

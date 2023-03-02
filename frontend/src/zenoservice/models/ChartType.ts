@@ -5,9 +5,9 @@
 /**
  * An enumeration.
  */
-export enum ReportType {
-	BARCHART = "BARCHART",
-	LINECHART = "LINECHART",
-	TABLEVIEW = "TABLEVIEW",
+export enum ChartType {
+	BAR = "BAR",
+	LINE = "LINE",
+	TABLE = "TABLE",
 	BEESWARM = "BEESWARM",
 }

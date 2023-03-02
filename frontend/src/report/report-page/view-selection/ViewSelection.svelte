@@ -4,18 +4,18 @@
 	import BarChart from "./chart-icons/BarChartIcon.svelte";
 	import LineChart from "./chart-icons/LineChartIcon.svelte";
 	import TableView from "./chart-icons/TableViewIcon.svelte";
-	import { ReportType } from "../../../zenoservice";
+	import { ChartType } from "../../../zenoservice";
 
-	$: selectedchart = $reports[$report].reportType;
+	$: selectedchart = $reports[$report].type;
 	let idMap = {
-		barchart: ReportType.BARCHART,
-		linechart: ReportType.LINECHART,
-		table: ReportType.TABLEVIEW,
-		beeswarm: ReportType.BEESWARM,
+		barchart: ChartType.BAR,
+		linechart: ChartType.LINE,
+		table: ChartType.TABLE,
+		beeswarm: ChartType.BEESWARM,
 	};
 	function updateChartType(e) {
 		if (e.currentTarget instanceof HTMLElement) {
-			$reports[$report].reportType = idMap[e.currentTarget.id];
+			$reports[$report].type = idMap[e.currentTarget.id];
 		}
 	}
 </script>
@@ -26,7 +26,7 @@
 		<div class="chart-flex">
 			<div
 				id="barchart"
-				class="chart-element {selectedchart === ReportType.BARCHART
+				class="chart-element {selectedchart === ChartType.BAR
 					? 'selected'
 					: ''}"
 				on:keydown={() => ({})}
@@ -36,7 +36,7 @@
 			</div>
 			<div
 				id="linechart"
-				class="chart-element {selectedchart === ReportType.LINECHART
+				class="chart-element {selectedchart === ChartType.LINE
 					? 'selected'
 					: ''}"
 				on:keydown={() => ({})}
@@ -46,7 +46,7 @@
 			</div>
 			<div
 				id="table"
-				class="chart-element {selectedchart === ReportType.TABLEVIEW
+				class="chart-element {selectedchart === ChartType.TABLE
 					? 'selected'
 					: ''}"
 				on:keydown={() => ({})}
@@ -56,7 +56,7 @@
 			</div>
 			<div
 				id="beeswarm"
-				class="chart-element {selectedchart === ReportType.BEESWARM
+				class="chart-element {selectedchart === ChartType.BEESWARM
 					? 'selected'
 					: ''}"
 				on:keydown={() => ({})}

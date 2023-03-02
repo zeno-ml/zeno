@@ -5,9 +5,7 @@
 	import { reports } from "../stores";
 	import { updateTab } from "../util/util";
 	import ReportHomeBlock from "./ReportHomeBlock.svelte";
-	import { ReportType, type ReportEncoding } from "../zenoservice";
-
-	let tmpencoding: ReportEncoding;
+	import { ChartType } from "../zenoservice";
 </script>
 
 <div id="reports-container">
@@ -26,11 +24,11 @@
 					updateTab("report/" + reps.length);
 					reps.push({
 						name: "new report",
-						reportType: ReportType.BARCHART,
+						type: ChartType.BAR,
 						reportPredicates: [],
-						x_encoding: tmpencoding,
-						y_encoding: tmpencoding,
-						color_encoding: tmpencoding,
+						xEncoding: undefined,
+						yEncoding: undefined,
+						colorEncoding: undefined,
 					});
 					return reps;
 				});
