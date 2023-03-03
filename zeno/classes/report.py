@@ -2,6 +2,7 @@ from enum import Enum
 from typing import List, Union
 
 from zeno.classes.base import CamelModel
+from zeno.classes.slice import Slice
 
 
 class ChartType(str, Enum):
@@ -16,15 +17,17 @@ class ReportPredicate(CamelModel):
     metric: str
 
 
-class ReportEncoding(CamelModel):
-    type: str  # slice/model
-    selection: List[str]
+class Parameters(CamelModel):
+    x_encoding: str
+    y_encoding: str
+    color_encoding: str
 
 
 class Report(CamelModel):
     name: str
     type: Union[ChartType, None] = None
     report_predicates: Union[List[ReportPredicate], None] = None
-    x_encoding: Union[ReportEncoding, None] = None
-    y_encoding: Union[ReportEncoding, None] = None
-    color_encoding: Union[ReportEncoding, None] = None
+    slices: Union[List[Slice], None] = None
+    metrics: Union[List[str], str, None] = None
+    models: Union[List[str], None] = None
+    parameters: Union[Parameters, None] = None

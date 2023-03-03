@@ -2,7 +2,7 @@
 	import { mdiPlus } from "@mdi/js";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
-	import { reports } from "../stores";
+	import { reports, slices, models } from "../stores";
 	import { updateTab } from "../util/util";
 	import ReportHomeBlock from "./ReportHomeBlock.svelte";
 	import { ChartType } from "../zenoservice";
@@ -26,9 +26,14 @@
 						name: "new report",
 						type: ChartType.BAR,
 						reportPredicates: [],
-						xEncoding: undefined,
-						yEncoding: undefined,
-						colorEncoding: undefined,
+						slices: [...$slices.values()],
+						models: [...$models.values()],
+						metrics: "accuracy",
+						parameters: {
+							xEncoding: "slices",
+							yEncoding: "metrics",
+							colorEncoding: "models",
+						},
 					});
 					return reps;
 				});
