@@ -1,9 +1,9 @@
 """External API for Zeno."""
 
 import functools
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Union
 
-from pandas import DataFrame
+from pandas import DataFrame, Series
 from pydantic import BaseModel
 
 
@@ -64,34 +64,26 @@ class ZenoModelBatch:
     return value
 
     Example:
-        return ModelBatch(predictions=[], embeddings=[], times=[], confidences=[])
-
-        OR you can build it up after instantiation (which I (@xnought) greatly prefer)
-
         return ModelBatch().save_predictions([])
                            .save_embeddings([])
                            .save_other("times", [])
                            .save_other("confidences", [])
     """
 
-    def __init__(self, predictions=[], embeddings=[], **other):
-        # special returns since we use these in the frontend differently
-        # from the other
-        self._predictions = predictions
-        self._embeddings = embeddings
+    def __init__(self):
+        self._predictions: Union[List, Series, None] = None
+        self._embeddings: Union[List, Series, None] = None
+        self._other: Dict[str, Union[List, Series]] = {}
 
-        # other returns as post-distill basically with user-defined names
-        self._other = other
-
-    def save_predictions(self, predictions):
+    def save_predictions(self, predictions: Union[List, Series]):
         self._predictions = predictions
         return self
 
-    def save_embeddings(self, embeddings):
+    def save_embeddings(self, embeddings: Union[List, Series]):
         self._embeddings = embeddings
         return self
 
-    def save_other(self, column_name: str, data):
+    def save_other(self, column_name: str, data: Union[List, Series]):
         self._other[column_name] = data
         return self
 
