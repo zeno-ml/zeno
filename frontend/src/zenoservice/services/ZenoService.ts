@@ -330,6 +330,26 @@ export class ZenoService {
 	}
 
 	/**
+	 * Project Find Available Slices
+	 * @param requestBody
+	 * @returns SliceMetric Successful Response
+	 * @throws ApiError
+	 */
+	public static projectFindAvailableSlices(
+		requestBody: EmbedProject2DRequest
+	): CancelablePromise<Array<SliceMetric>> {
+		return __request(OpenAPI, {
+			method: "POST",
+			url: "/slice-finder-project",
+			body: requestBody,
+			mediaType: "application/json",
+			errors: {
+				422: `Validation Error`,
+			},
+		});
+	}
+
+	/**
 	 * Get Projection Colors
 	 * @param requestBody
 	 * @returns PointsColors Successful Response
