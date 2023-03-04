@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { ready, report, reports, metrics } from "../../../stores";
 	import Select, { Option } from "@smui/select";
-	$: currentReport = $reports[$report];
 </script>
 
 {#if ready}
 	<div class="parameters">
 		<h4 class="select-label">&nbsp;</h4>
 		<Select
-			bind:value={currentReport.metrics}
+			bind:value={$reports[$report].metrics}
 			class="select"
 			variant="outlined">
 			{#each $metrics as m}

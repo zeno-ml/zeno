@@ -29,7 +29,7 @@
 	</IconButton>
 	<p class="report-name">{report.name}</p>
 	<p class="report-slice">
-		{report.reportPredicates ? report.reportPredicates.length : 0} slices
+		{report.slices ? report.slices.length : 0} slices
 	</p>
 	<IconButton
 		on:click={(e) => {

@@ -8,7 +8,7 @@
 
 	let chartEntries = [];
 
-	$: currReport = $reports[$report];
+	$: currentReport = $reports[$report];
 
 	function getMetKeys(rep, $metric, $model) {
 		const entries: MetricKey[] = [];
@@ -28,7 +28,7 @@
 	}
 
 	$: modelResults = getMetricsForSlices(
-		getMetKeys(currReport, $metric, $model)
+		getMetKeys(currentReport, $metric, $model)
 	);
 </script>
 

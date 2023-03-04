@@ -46,10 +46,7 @@
 							e.stopPropagation();
 							reports.update((reps) => {
 								let rep = reps[$report];
-								rep.reportPredicates.push({
-									sliceName: sli.sliceName,
-									metric: $metric,
-								});
+								rep.slices.push(sli);
 								reps[$report] = rep;
 								return reps;
 							});

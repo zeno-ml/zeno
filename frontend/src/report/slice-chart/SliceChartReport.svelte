@@ -1,36 +1,43 @@
 <script lang="ts">
 	import { VegaLite } from "svelte-vega";
 	import { getMetricsForSlices } from "../../api/slice";
-	import { metric, models, report, reports, slices } from "../../stores";
+	import { report, reports } from "../../stores";
 	import type { MetricKey } from "../../zenoservice";
 	import generateBarSpec from "./vegaSpec";
 
+	$: currentReport = $reports[$report];
 	let chartEntries = [];
+	let selectedModels = [];
+	let selectMetrics = "";
+	let selectSlices = [];
+	let parameters = {};
 
-	$: currReport = $reports[$report];
-
-	function getMetKeys(rep, $metric) {
-		const entries: MetricKey[] = [];
+	function getMetKeys(rep) {
+		const metricKeys: MetricKey[] = [];
 		chartEntries = [];
-		rep.reportPredicates.forEach((pred) => {
-			$models.forEach((mod) => {
+		selectedModels = rep.models;
+		selectMetrics = rep.metrics;
+		selectSlices = rep.slices;
+		parameters = rep.parameters;
+
+		selectSlices.forEach((slice) => {
+			selectedModels.forEach((mod) => {
 				chartEntries.push({
-					slice: pred.sliceName,
+					slice: slice.sliceName,
 					model: mod,
+					metric: selectMetrics,
 				});
-				entries.push({
-					sli: [...$slices.values()].find(
-						(s) => s.sliceName === pred.sliceName
-					),
-					metric: $metric,
+				metricKeys.push({
+					sli: slice,
+					metric: <string>selectMetrics,
 					model: mod,
 				});
 			});
 		});
-		return entries;
+		return metricKeys;
 	}
 
-	$: modelResults = getMetricsForSlices(getMetKeys(currReport, $metric));
+	$: modelResults = getMetricsForSlices(getMetKeys(currentReport));
 </script>
 
 <div class="main">
@@ -38,13 +45,13 @@
 		{#await modelResults then res}
 			{@const chartData = {
 				table: chartEntries.map((r, i) => ({
-					slice: r.slice,
-					model: r.model,
-					metric: res[i].metric,
+					slices: r.slice,
+					models: r.model,
+					metrics: res[i].metric,
 				})),
 			}}
 			<VegaLite
-				spec={generateBarSpec($metric)}
+				spec={generateBarSpec(parameters, selectMetrics)}
 				data={chartData}
 				options={{ tooltip: true, theme: "vox", width: 1000, height: 300 }} />
 		{/await}

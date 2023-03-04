@@ -5,7 +5,7 @@
 
 	let table: HTMLDivElement;
 
-	$: currReport = $reports[$report];
+	$: currentReport = $reports[$report];
 </script>
 
 <div id="container">
@@ -23,7 +23,7 @@
 				</Row>
 			</Head>
 			<Body style="overflow: visible">
-				{#each currReport.reportPredicates as predicate, i}
+				{#each currentReport.reportPredicates as predicate, i}
 					<TableReportTableRow {predicate} predicateIndex={i} />
 				{/each}
 			</Body>

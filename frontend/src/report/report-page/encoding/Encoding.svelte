@@ -5,7 +5,6 @@
 	import MetricsEncoding from "./MetricsEncoding.svelte";
 	import ModelsEncoding from "./ModelsEncoding.svelte";
 
-	$: parameters = $reports[$report].parameters;
 	const EncodingMap = {
 		slices: SlicesEncoding,
 		metrics: MetricsEncoding,
@@ -20,37 +19,44 @@
 			<div class="parameters">
 				<h4 class="select-label">x</h4>
 				<Select
-					bind:value={parameters.xEncoding}
+					bind:value={$reports[$report].parameters.xEncoding}
 					class="select"
 					variant="outlined">
 					<Option value={"slices"}>slices</Option>
 					<Option value={"models"}>models</Option>
+					<Option value={"metrics"}>metrics</Option>
 				</Select>
 			</div>
-			<svelte:component this={EncodingMap[parameters.xEncoding]} />
+			<svelte:component
+				this={EncodingMap[$reports[$report].parameters.xEncoding]} />
 
 			<div class="parameters">
 				<h4 class="select-label">y</h4>
 				<Select
-					bind:value={parameters.yEncoding}
+					bind:value={$reports[$report].parameters.yEncoding}
 					class="select"
 					variant="outlined">
+					<Option value={"slices"}>slices</Option>
+					<Option value={"models"}>models</Option>
 					<Option value={"metrics"}>metrics</Option>
 				</Select>
 			</div>
-			<svelte:component this={EncodingMap[parameters.yEncoding]} />
+			<svelte:component
+				this={EncodingMap[$reports[$report].parameters.yEncoding]} />
 
 			<div class="parameters">
 				<h4 class="select-label">color</h4>
 				<Select
-					bind:value={parameters.colorEncoding}
+					bind:value={$reports[$report].parameters.colorEncoding}
 					class="select"
 					variant="outlined">
-					<Option value={"models"}>models</Option>
 					<Option value={"slices"}>slices</Option>
+					<Option value={"models"}>models</Option>
+					<Option value={"metrics"}>metrics</Option>
 				</Select>
 			</div>
-			<svelte:component this={EncodingMap[parameters.colorEncoding]} />
+			<svelte:component
+				this={EncodingMap[$reports[$report].parameters.colorEncoding]} />
 		</div>
 	</div>
 {/if}
