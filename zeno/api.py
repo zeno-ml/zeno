@@ -58,6 +58,44 @@ class ZenoParameters(BaseModel):
         arbitrary_types_allowed = True
 
 
+class ZenoModelBatch:
+    """ZenoModelBatch
+    Save the results from a batch of predictions from the @model decorator callback
+    return value
+
+    Example:
+        return ModelBatch(predictions=[], embeddings=[], times=[], confidences=[])
+
+        OR you can build it up after instantiation (which I (@xnought) greatly prefer)
+
+        return ModelBatch().save_predictions([])
+                           .save_embeddings([])
+                           .save_other("times", [])
+                           .save_other("confidences", [])
+    """
+
+    def __init__(self, predictions=[], embeddings=[], **other):
+        # special returns since we use these in the frontend differently
+        # from the other
+        self._predictions = predictions
+        self._embeddings = embeddings
+
+        # other returns as post-distill basically with user-defined names
+        self._other = other
+
+    def save_predictions(self, predictions):
+        self._predictions = predictions
+        return self
+
+    def save_embeddings(self, embeddings):
+        self._embeddings = embeddings
+        return self
+
+    def save_other(self, column_name: str, data):
+        self._other[column_name] = data
+        return self
+
+
 def model(func):
     @functools.wraps(func)
     def _wrapper(*args, **kwargs):
