@@ -10,6 +10,8 @@
 	import { mdiPlus, mdiClose } from "@mdi/js";
 	import { Pagination } from "@smui/data-table";
 	import { settings } from "../../stores";
+	import type { SliceMetric } from "../../zenoservice/models/SliceMetric";
+	import { ZenoService } from "../../zenoservice";
 
 	export let showSliceFinder;
 
@@ -71,6 +73,20 @@
 		}
 	}
 	slice_data_generator();
+
+	// TODO: remove it after everything else's done
+	export async function testGETAbility() {
+		const sets = await ZenoService.getSettings();
+		console.log(sets);
+		console.log("AAAAA\n");
+	}
+
+	export async function testPOSTAbility() {
+		const sets = await ZenoService.projectFindAvailableSlices({ id: "1" });
+		console.log(sets);
+		console.log("AAAAA\n");
+	}
+	//const sets = await ZenoService.projectFindAvailableSlice();
 </script>
 
 <svelte:window on:keydown={submit} />
@@ -87,6 +103,11 @@
 		<div class="inline">
 			<h4 class="title">SUGGESTED SLICES</h4>
 			<IconButton on:click={() => (showSliceFinder = false)}>
+				<Icon component={Svg} viewBox="0 0 24 24">
+					<path fill="#6a1b9a" d={mdiClose} />
+				</Icon>
+			</IconButton>
+			<IconButton on:click={() => testPOSTAbility()}>
 				<Icon component={Svg} viewBox="0 0 24 24">
 					<path fill="#6a1b9a" d={mdiClose} />
 				</Icon>

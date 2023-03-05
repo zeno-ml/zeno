@@ -19,6 +19,7 @@ from zeno.classes.classes import (
     EmbedProject2DRequest,
     EntryRequest,
     MetricRequest,
+    SliceFinderRequest,
     StatusResponse,
     TableRequest,
     ZenoSettings,
@@ -198,9 +199,10 @@ def get_server(zeno: ZenoBackend):
     def project_embed_into_2D(req: EmbedProject2DRequest):
         return project_into_2D(zeno.df, zeno.id_column, req.model, req.column)
 
-    @api_app.post("/slice-finder-project", tags=["zeno"], response_model=List[SliceMetric])
-    def project_find_available_slices(req: EmbedProject2DRequest):
-        return None#project_into_2D(zeno.df, zeno.id_column, req.model, req.column)
+    @api_app.post("/slice-finder-project", tags=["zeno"],
+                  response_model=str)   # response_model=List[SliceMetric]
+    def project_find_available_slices(req: SliceFinderRequest):
+        return "Hello slices!"  # TODO: ADD SOMETHING HERE
 
     @api_app.post("/colors-project", tags=["zeno"], response_model=PointsColors)
     def get_projection_colors(req: ColorsProjectRequest):

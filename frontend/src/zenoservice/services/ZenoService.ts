@@ -12,6 +12,7 @@ import type { Points2D } from "../models/Points2D";
 import type { PointsColors } from "../models/PointsColors";
 import type { Report } from "../models/Report";
 import type { Slice } from "../models/Slice";
+import type { SliceFinderRequest } from "../models/SliceFinderRequest";
 import type { SliceMetric } from "../models/SliceMetric";
 import type { StringFilterRequest } from "../models/StringFilterRequest";
 import type { TableRequest } from "../models/TableRequest";
@@ -332,12 +333,12 @@ export class ZenoService {
 	/**
 	 * Project Find Available Slices
 	 * @param requestBody
-	 * @returns SliceMetric Successful Response
+	 * @returns string Successful Response
 	 * @throws ApiError
 	 */
 	public static projectFindAvailableSlices(
-		requestBody: EmbedProject2DRequest
-	): CancelablePromise<Array<SliceMetric>> {
+		requestBody: SliceFinderRequest
+	): CancelablePromise<string> {
 		return __request(OpenAPI, {
 			method: "POST",
 			url: "/slice-finder-project",
