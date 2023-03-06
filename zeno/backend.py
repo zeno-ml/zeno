@@ -508,7 +508,4 @@ class ZenoBackend(object):
         return out[0]
 
     def slice_finder(self, req):
-        print(req)
-        print("BBBBBB\n")
-        slice_finder = Slicefinder()
         return "Hello Slices!"

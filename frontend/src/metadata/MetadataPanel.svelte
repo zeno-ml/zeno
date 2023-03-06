@@ -47,9 +47,7 @@
 	import MetadataCell from "./cells/MetadataCell.svelte";
 	import SliceCell from "./cells/SliceCell.svelte";
 	import MetricRange from "./MetricRange.svelte";
-	import NewFolderPopup from "./popups/NewFolderPopup.svelte";
 	import SliceFinderPopup from "./popups/SliceFinderPopup.svelte";
-	import NewSlicePopup from "./popups/NewSlicePopup.svelte";
 
 	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
 		new InternMap([], columnHash);
