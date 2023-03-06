@@ -5,9 +5,11 @@ import logging
 import os
 import pickle
 import sys
+import sliceline
 import threading
 from inspect import getsource
 from pathlib import Path
+from sliceline.slicefinder import Slicefinder
 from typing import Callable, Dict, List, Optional, Union
 
 import pandas as pd
@@ -504,3 +506,9 @@ class ZenoBackend(object):
         if type(out) == tuple and len(out) == 2:
             return out[0][0]
         return out[0]
+
+    def slice_finder(self, req):
+        print(req)
+        print("BBBBBB\n")
+        slice_finder = Slicefinder()
+        return "Hello Slices!"

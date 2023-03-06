@@ -202,7 +202,7 @@ def get_server(zeno: ZenoBackend):
     @api_app.post("/slice-finder-project", tags=["zeno"],
                   response_model=str)   # response_model=List[SliceMetric]
     def project_find_available_slices(req: SliceFinderRequest):
-        return "Hello slices!"  # TODO: ADD SOMETHING HERE
+        return zeno.slice_finder(req)  # TODO: ADD SOMETHING HERE
 
     @api_app.post("/colors-project", tags=["zeno"], response_model=PointsColors)
     def get_projection_colors(req: ColorsProjectRequest):

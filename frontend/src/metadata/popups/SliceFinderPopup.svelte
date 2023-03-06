@@ -75,11 +75,6 @@
 	slice_data_generator();
 
 	// TODO: remove it after everything else's done
-	export async function testGETAbility() {
-		const sets = await ZenoService.getSettings();
-		console.log(sets);
-		console.log("AAAAA\n");
-	}
 
 	export async function testPOSTAbility() {
 		const sets = await ZenoService.projectFindAvailableSlices({ id: "1" });
