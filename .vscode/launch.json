@@ -2,23 +2,6 @@
   "version": "2.0.0",
   "configurations": [
     {
-      "name": "zenocritique",
-      "type": "python",
-      "request": "launch",
-      "cwd": "${workspaceFolder}",
-      "module": "zeno",
-      "args": ["config.toml"],
-      "envFile": "${workspaceFolder}/.env"
-    },
-    {
-      "name": "zenolangchain",
-      "type": "python",
-      "request": "launch",
-      "cwd": "${workspaceFolder}",
-      "module": "zeno",
-      "args": ["../example-langchain/config.toml"]
-    },
-    {
       "name": "zenoadult",
       "type": "python",
       "request": "launch",
@@ -48,7 +31,7 @@
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "module": "zeno",
-      "args": ["~/dev-research/22-zeno/examples/cifar/tests/zeno.toml"]
+      "args": ["./examples/cifar/tests/zeno.toml"]
     },
     {
       "name": "zenocifarnomodel",
@@ -67,20 +50,12 @@
       "args": ["examples/coco-tagging/tests/zeno.toml"]
     },
     {
-      "name": "zenodov",
-      "type": "python",
-      "request": "launch",
-      "cwd": "${workspaceFolder}",
-      "module": "zeno",
-      "args": ["../direction-of-voice/zeno/zeno.toml"]
-    },
-    {
       "name": "zenomotionsense",
       "type": "python",
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "module": "zeno",
-      "args": ["examples/motionsense/zeno.toml"]
+      "args": ["./examples/motionsense/zeno.toml"]
     },
     {
       "name": "zenococo",
@@ -88,7 +63,7 @@
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "module": "zeno",
-      "args": ["examples/coco/tests/zeno.toml"]
+      "args": ["./examples/coco/tests/zeno.toml"]
     },
     {
       "name": "zenoreviews",
