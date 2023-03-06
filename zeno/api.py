@@ -1,7 +1,7 @@
 """External API for Zeno."""
 
 import functools
-from typing import Callable, Dict, List, Union
+from typing import Callable, Dict, List, Union, Optional
 
 from pandas import DataFrame, Series
 from pydantic import BaseModel
@@ -64,28 +64,18 @@ class ZenoModelBatch:
     return value
 
     Example:
-        return ModelBatch().save_predictions([])
-                           .save_embeddings([])
-                           .save_other("times", [])
-                           .save_other("confidences", [])
+        return ModelBatch(predictions=[], embeddings=[], times_ms=[], confidences=[])
     """
 
-    def __init__(self):
-        self._predictions: Union[List, Series, None] = None
-        self._embeddings: Union[List, Series, None] = None
-        self._other: Dict[str, Union[List, Series]] = {}
-
-    def save_predictions(self, predictions: Union[List, Series]):
-        self._predictions = predictions
-        return self
-
-    def save_embeddings(self, embeddings: Union[List, Series]):
-        self._embeddings = embeddings
-        return self
-
-    def save_other(self, column_name: str, data: Union[List, Series]):
-        self._other[column_name] = data
-        return self
+    def __init__(
+        self,
+        predictions: Union[List, Series],
+        embeddings: Optional[Union[List, Series]] = None,
+        **other: Dict[str, Union[List, Series]]
+    ):
+        self.predictions = predictions
+        self.embeddings = embeddings
+        self.other = other
 
 
 def model(func):
