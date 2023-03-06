@@ -15,12 +15,8 @@
 		model,
 		metric,
 	} from "../../stores";
-	import {
-		getMetricsForSlices,
-		deleteSlice,
-		createNewSlice,
-	} from "../../api/slice";
-	import type { MetricKey, Slice } from "../../zenoservice";
+	import { getMetricsForSlices, deleteSlice } from "../../api/slice";
+	import { ZenoService, type MetricKey, type Slice } from "../../zenoservice";
 
 	export let slice: Slice;
 	export let inFolder = false;
@@ -136,12 +132,17 @@
 	}}
 	on:keydown={() => ({})}
 	on:dragend={(ev) => {
+		// If dragged out of a folder, remove from the folder it was in.
 		if (ev.dataTransfer.dropEffect === "none") {
 			slices.update((sls) => {
 				const sli = sls.get(slice.sliceName);
 				sli.folder = "";
 				sls.set(slice.sliceName, sli);
-				createNewSlice(sli.sliceName, sli.filterPredicates);
+				ZenoService.createNewSlice({
+					sliceName: sli.sliceName,
+					filterPredicates: sli.filterPredicates,
+					folder: sli.folder,
+				});
 				return sls;
 			});
 		}
