@@ -2,6 +2,15 @@
   "version": "2.0.0",
   "configurations": [
     {
+      "name": "zenocritique",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": ["config.toml"],
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
       "name": "zenolangchain",
       "type": "python",
       "request": "launch",
@@ -39,7 +48,7 @@
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "module": "zeno",
-      "args": ["./examples/cifar/tests/zeno.toml"]
+      "args": ["~/dev-research/22-zeno/examples/cifar/tests/zeno.toml"]
     },
     {
       "name": "zenocifarnomodel",
