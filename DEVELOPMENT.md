@@ -23,8 +23,15 @@ After cloning the repository:
 
 You should now be able to run `poetry run zeno`
 
-To run the CIFAR-10 example:
+## Examples
 
+The various standard examples for Zeno are in the [examples GitHub repo](https://github.com/zeno-ml/examples).
+
+First, clone that repository into this one: `git clone https://github.com/zeno-ml/examples`
+
+Then, to set up the CIFAR example:
+
+- `cd examples/`
 - `mkdir data; cd data; git clone https://github.com/YoongiKim/CIFAR-10-images`
 - `source ./.venv/bin/activate` (Windows OS command: `.\.venv\Scripts\activate`)
 - `pip install Pillow torch torchvision`
