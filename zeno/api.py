@@ -122,7 +122,7 @@ class InferenceReturn(BaseModel):
     """
 
     input_components: List[IOComponent]
-    output_components: IOComponent
+    output_component: IOComponent
     input_columns: List[str]
 
     class Config:

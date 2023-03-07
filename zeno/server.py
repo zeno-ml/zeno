@@ -85,7 +85,7 @@ def get_server(zeno: ZenoBackend):
                 ),
                 *inference_return.input_components,
             ],
-            outputs=inference_return.output_components,
+            outputs=inference_return.output_component,
             css="""
                     :root {
                     --button-primary-background-base: #6a1b9a;
