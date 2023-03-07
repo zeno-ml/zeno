@@ -1,14 +1,6 @@
-examples/models/cifar/cif
-examples/breast_cancer_data
-examples/face-generation
-data/
 .zeno_cache/
 node_modules/
-*.pt
-coco-tagging.csv
-model10/
-model20/
-model30/
+examples/
 
 *.parquet
 

@@ -91,20 +91,6 @@ class ZenoBackend(object):
         )
 
     def __setup_dataframe(self, id_column: str, data_column: str, label_column: str):
-        if id_column != "":
-            self.id_column = ZenoColumn(
-                column_type=ZenoColumnType.METADATA,
-                metadata_type=getMetadataType(self.df[id_column]),
-                name=id_column,
-            )
-        else:
-            self.df.reset_index(inplace=True)
-            self.id_column = ZenoColumn(
-                column_type=ZenoColumnType.METADATA,
-                metadata_type=MetadataType.OTHER,
-                name="index",
-            )
-
         if data_column != "":
             self.data_column = ZenoColumn(
                 column_type=ZenoColumnType.METADATA,
@@ -131,12 +117,27 @@ class ZenoBackend(object):
                 name="",
             )
 
-        self.df[str(self.id_column)].astype(str)
-        self.df.set_index(str(self.id_column), inplace=True)
-        self.df[str(self.id_column)] = self.df.index
+        if id_column != "":
+            self.id_column = ZenoColumn(
+                column_type=ZenoColumnType.METADATA,
+                metadata_type=MetadataType.OTHER,
+                name=id_column,
+            )
+            self.df[str(self.id_column)].astype(str)
+        else:
+            self.df.reset_index(inplace=True)
+            self.id_column = ZenoColumn(
+                column_type=ZenoColumnType.METADATA,
+                metadata_type=MetadataType.OTHER,
+                name="index",
+            )
 
         self.columns: List[ZenoColumn] = []
         self.complete_columns: List[ZenoColumn] = []
+
+        self.df.set_index(str(self.id_column), inplace=True, drop=False)
+        # Set index name to None to prevent name overlaps w/ columns.
+        self.df.index.name = None
         for metadata_col in self.df.columns:
             col = ZenoColumn(
                 column_type=ZenoColumnType.METADATA,
@@ -346,7 +347,7 @@ class ZenoBackend(object):
                 for out in post_outputs:
                     self.df.loc[:, str(out[0])] = out[1]  # type: ignore
                     self.df[str(out[0])] = self.df[str(out[0])].convert_dtypes()
-                    out[0].metadata_type = getMetadataType(out[1])
+                    out[0].metadata_type = getMetadataType(self.df[str(out[0])])
                     self.complete_columns.append(out[0])
 
     def get_metrics_for_slices(
@@ -465,10 +466,11 @@ class ZenoBackend(object):
             filt_df = filt_df.sort_values(str(req.sort[0]), ascending=req.sort[1])
         filt_df = filt_df.iloc[req.slice_range[0] : req.slice_range[1]].copy()
 
-        # Add data prefix to data column depending on type of data_path.
-        filt_df.loc[:, str(self.data_column)] = (
-            self.data_prefix + filt_df[str(self.data_column)]
-        )
+        if self.data_column.name != "":
+            # Add data prefix to data column depending on type of data_path.
+            filt_df.loc[:, str(self.data_column)] = (
+                self.data_prefix + filt_df[str(self.data_column)]
+            )
 
         return filt_df[[str(col) for col in req.columns]].to_json(orient="records")
 

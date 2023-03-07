@@ -50,20 +50,12 @@
       "args": ["examples/coco-tagging/tests/zeno.toml"]
     },
     {
-      "name": "zenodov",
-      "type": "python",
-      "request": "launch",
-      "cwd": "${workspaceFolder}",
-      "module": "zeno",
-      "args": ["../direction-of-voice/zeno/zeno.toml"]
-    },
-    {
       "name": "zenomotionsense",
       "type": "python",
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "module": "zeno",
-      "args": ["examples/motionsense/zeno.toml"]
+      "args": ["./examples/motionsense/zeno.toml"]
     },
     {
       "name": "zenococo",
@@ -71,7 +63,7 @@
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "module": "zeno",
-      "args": ["examples/coco/tests/zeno.toml"]
+      "args": ["./examples/coco/tests/zeno.toml"]
     },
     {
       "name": "zenoreviews",

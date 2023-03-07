@@ -7,7 +7,7 @@ export type Points2D = {
 	y: Array<number>;
 	color: Array<number>;
 	opacity: Array<number>;
-	ids: Array<string>;
+	ids: Array<number> | Array<string>;
 	domain: Array<number | string>;
 	dataType: string;
 };

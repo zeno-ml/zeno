@@ -4,14 +4,13 @@
 		mdiChartBoxOutline,
 		mdiCompassOutline,
 		mdiGithub,
+		mdiHomeOutline,
 		mdiPlusCircleOutline,
 	} from "@mdi/js";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
-	import Tooltip, { Wrapper } from "@smui/tooltip";
-
+	import { tooltip } from "@svelte-plugins/tooltips";
 	import { location } from "svelte-spa-router";
-
 	import { settings, tab } from "../stores";
 	import { updateTab } from "../util/util";
 
@@ -35,72 +34,98 @@
 		</a>
 		<div id="tabs">
 			{#if $settings && $settings.inferenceView}
-				<Wrapper>
-					<div
-						class="item {$tab === 'predict' ? 'selected' : ''}"
-						on:keydown={() => ({})}
-						on:click={() => updateTab("predict")}>
-						<div class="icon">
-							<Icon component={Svg} viewBox="0 0 24 24">
-								<path
-									fill={$tab === "predict" ? "#6a1b9a" : "black"}
-									d={mdiPlusCircleOutline} />
-							</Icon>
-						</div>
+				<div
+					class="item {$tab === 'predict' ? 'selected' : ''}"
+					on:keydown={() => ({})}
+					on:click={() => updateTab("predict")}
+					use:tooltip={{
+						content: "Test your model with your own inputs.",
+						position: "right",
+						theme: "zeno-tooltip",
+					}}>
+					<div class="icon">
+						<Icon component={Svg} viewBox="0 0 24 24">
+							<path
+								fill={$tab === "predict" ? "#6a1b9a" : "black"}
+								d={mdiPlusCircleOutline} />
+						</Icon>
 					</div>
-					<Tooltip xPos="end">Test your model with your own inputs.</Tooltip>
-				</Wrapper>
+				</div>
 			{/if}
-			<Wrapper>
-				<div
-					class="item {$tab === 'explore' ? 'selected' : ''}"
-					on:keydown={() => ({})}
-					on:click={() => updateTab("explore")}>
-					<div class="icon">
-						<Icon component={Svg} viewBox="0 0 24 24">
-							<path
-								fill={$tab === "explore" ? "#6a1b9a" : "black"}
-								d={mdiCompassOutline} />
-						</Icon>
-					</div>
+			<div
+				class="item {$tab === 'explore' ? 'selected' : ''}"
+				on:keydown={() => ({})}
+				on:click={() => updateTab("explore")}
+				use:tooltip={{
+					content: "Explore your data and model outputs.",
+					position: "right",
+					theme: "zeno-tooltip",
+				}}>
+				<div class="icon">
+					<Icon component={Svg} viewBox="0 0 24 24">
+						<path
+							fill={$tab === "explore" ? "#6a1b9a" : "black"}
+							d={mdiCompassOutline} />
+					</Icon>
 				</div>
-				<Tooltip xPos="end">Explore your data and create slices</Tooltip>
-			</Wrapper>
-			<Wrapper>
-				<div
-					class="item {$tab === 'report' ? 'selected' : ''}"
-					on:keydown={() => ({})}
-					on:click={() => updateTab("report")}>
-					<div class="icon">
-						<Icon component={Svg} viewBox="0 0 24 24">
-							<path
-								fill={$tab === "report" ? "#6a1b9a" : "black"}
-								d={mdiChartBoxOutline} />
-						</Icon>
-					</div>
+			</div>
+			<div
+				class="item {$tab === 'report' ? 'selected' : ''}"
+				on:keydown={() => ({})}
+				on:click={() => updateTab("report")}
+				use:tooltip={{
+					content: "Create reports from your slices and metrics.",
+					position: "right",
+					theme: "zeno-tooltip",
+				}}>
+				<div class="icon">
+					<Icon component={Svg} viewBox="0 0 24 24">
+						<path
+							fill={$tab === "report" ? "#6a1b9a" : "black"}
+							d={mdiChartBoxOutline} />
+					</Icon>
 				</div>
-				<Tooltip xPos="end">Create reports of your slices</Tooltip>
-			</Wrapper>
+			</div>
 		</div>
 	</div>
 
 	<div class="icons">
-		<Wrapper>
+		<div
+			use:tooltip={{
+				content: "Learn more about Zeno.",
+				position: "right",
+				theme: "zeno-tooltip",
+			}}>
+			<IconButton href="http://zenoml.com/">
+				<Icon component={Svg} viewBox="0 0 24 24">
+					<path fill="black" d={mdiHomeOutline} />
+				</Icon>
+			</IconButton>
+		</div>
+		<div
+			use:tooltip={{
+				content: "Explore the documentation.",
+				position: "right",
+				theme: "zeno-tooltip",
+			}}>
 			<IconButton href="http://zenoml.com/docs/intro/">
 				<Icon component={Svg} viewBox="0 0 24 24">
 					<path fill="black" d={mdiApi} />
 				</Icon>
 			</IconButton>
-			<Tooltip xPos="end" yPos="above">Read the documentation</Tooltip>
-		</Wrapper>
-		<Wrapper>
+		</div>
+		<div
+			use:tooltip={{
+				content: "See the code on GitHub.",
+				position: "right",
+				theme: "zeno-tooltip",
+			}}>
 			<IconButton href="https://github.com/zeno-ml/zeno">
 				<Icon component={Svg} viewBox="0 0 24 24">
 					<path fill="black" d={mdiGithub} />
 				</Icon>
 			</IconButton>
-			<Tooltip xPos="end" yPos="above">See the code on GitHub</Tooltip>
-		</Wrapper>
+		</div>
 	</div>
 </header>
 

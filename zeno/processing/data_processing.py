@@ -22,7 +22,9 @@ def predistill_data(
     pos: int,
 ) -> Tuple[ZenoColumn, pd.Series]:
     col_hash = str(column)
-    col = df[col_hash]
+
+    # To prevent SettingWithCopyWarning
+    col = df[col_hash].copy()
 
     save_path = Path(cache_path, col_hash + ".pickle")
     to_predict_indices = col.loc[pd.isna(col)].index
@@ -67,8 +69,8 @@ def run_inference(
     )
     model_hash = str(model_col_obj)
     embedding_hash = str(embedding_col_obj)
-    model_col = df[model_hash]
-    embedding_col = df[embedding_hash]
+    model_col = df[model_hash].copy()
+    embedding_col = df[embedding_hash].copy()
 
     model_save_path = Path(cache_path, model_hash + ".pickle")
     embedding_save_path = Path(cache_path, embedding_hash + ".pickle")
@@ -95,7 +97,7 @@ def run_inference(
                 embedding_col.to_pickle(str(embedding_save_path))
                 out = out[0]
             else:
-                model_col[to_predict_indices] = out
+                model_col.loc[to_predict_indices] = out
 
             model_col.to_pickle(str(model_save_path))
 
@@ -107,7 +109,6 @@ def run_inference(
                 desc="Inference on " + model_name,
                 position=pos,
             ):
-
                 # Make output folder if function uses output_path
                 src = getsource(model_fn)
                 if "output_path" in src:
@@ -119,9 +120,16 @@ def run_inference(
 
                 # Check if we also get embedding
                 if type(out) == tuple and len(out) == 2:
+                    out_list = list(out)
+                    if type(out[0]) == pd.Series:
+                        out_list[0] = out[0].tolist()
+                    if type(out[1]) == pd.Series:
+                        out_list[1] = out[1].tolist()
+
                     for i, idx in enumerate(to_predict_indices[i : i + batch_size]):
-                        model_col.at[idx] = out[0][i]
-                        embedding_col.at[idx] = out[1][i]
+                        model_col.at[idx] = out_list[0][i]
+                        embedding_col.at[idx] = out_list[1][i]
+
                     embedding_col.to_pickle(str(embedding_save_path))
                     out = out[0]
                 else:
@@ -147,7 +155,7 @@ def postdistill_data(
         model=model,
     )
     col_hash = str(col_obj)
-    col = df[col_hash]
+    col = df[col_hash].copy()
 
     output_obj = ZenoColumn(
         column_type=ZenoColumnType.OUTPUT,

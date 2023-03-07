@@ -15,7 +15,7 @@ class Points2D(CamelModel):
     y: List[float]
     color: List[int]
     opacity: List[int]
-    ids: List[str]
+    ids: Union[List[int], List[str]]
     domain: List[Union[int, float, str]]
     # "nominal" or "continuous" or "boolean"
     data_type: str

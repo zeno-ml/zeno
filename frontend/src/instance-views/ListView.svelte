@@ -36,14 +36,40 @@
 	$: idHash = columnHash($settings.idColumn);
 	$: start = currentPage * $rowsPerPage;
 	$: end = Math.min(start + $rowsPerPage, $settings.totalSize);
-	$: lastPage = Math.max(Math.ceil($settings.totalSize / $rowsPerPage) - 1, 0);
+	$: currentResult.then((r) => {
+		lastPage = Math.max(Math.ceil(r[0].size / $rowsPerPage) - 1, 0);
+	});
 	$: if (currentPage > lastPage) {
 		currentPage = lastPage;
 	}
 
-	// update on page, metadata selection, slice selection, or state change.
+	// when state changes update current table view
 	$: {
 		currentPage;
+		$status.completeColumns;
+		$model;
+		$sort;
+		$selectionIds;
+		updateTable();
+	}
+
+	$: if (viewFunction) {
+		table;
+		$sort;
+		viewOptions;
+		drawInstances();
+	}
+
+	// reset page on selection change
+	selectionPredicates.subscribe(() => {
+		if (currentPage === 0) {
+			updateTable();
+		} else {
+			currentPage = 0;
+		}
+	});
+
+	function updateTable() {
 		getFilteredTable(
 			$status.completeColumns,
 			$selectionPredicates,
@@ -52,13 +78,6 @@
 			$sort,
 			$selectionIds
 		).then((res) => (table = res));
-	}
-
-	$: if (viewFunction) {
-		table;
-		$sort;
-		viewOptions;
-		drawInstances();
 	}
 
 	async function drawInstances() {
@@ -140,13 +159,13 @@
 			action="next-page"
 			title="Next page"
 			on:click={() => currentPage++}
-			disabled={currentPage === lastPage}>chevron_right</IconButton>
+			disabled={currentPage >= lastPage}>chevron_right</IconButton>
 		<IconButton
 			class="material-icons"
 			action="last-page"
 			title="Last page"
 			on:click={() => (currentPage = lastPage)}
-			disabled={currentPage === lastPage}>last_page</IconButton>
+			disabled={currentPage >= lastPage}>last_page</IconButton>
 	</Pagination>
 {/if}
 

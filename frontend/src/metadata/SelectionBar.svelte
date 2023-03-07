@@ -100,16 +100,16 @@
 	<div class="options">
 		<div>
 			{#await currentResult then r}
-				{#if r && r[0].metric !== undefined && r[0].metric !== null}
-					<span class="metric">
-						{$metric ? $metric + ":" : ""}
-					</span>
-					{#if r}
+				{#if r}
+					{#if r[0].metric !== undefined && r[0].metric !== null}
+						<span class="metric">
+							{$metric ? $metric + ":" : ""}
+						</span>
 						<span class="metric-value">
 							{r[0].metric.toFixed(2)}
 						</span>
-						<span id="size">({r[0].size.toLocaleString()} instances)</span>
 					{/if}
+					<span id="size">({r[0].size.toLocaleString()} instances)</span>
 				{/if}
 			{/await}
 		</div>

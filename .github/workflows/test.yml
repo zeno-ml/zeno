@@ -18,14 +18,13 @@ jobs:
           python-version: 3.9
 
       - name: Install Poetry
-        uses: snok/install-poetry@v1.3
-      - name: Set Poetry config
-        run: |
-          poetry config virtualenvs.in-project false
-          poetry config virtualenvs.path ~/.virtualenvs
+        uses: snok/install-poetry@v1.3.3
+        with:
+          virtualenvs-in-project: true
+          virtualenvs-path: ~/.virtualenvs
 
       - name: Cache Poetry virtualenv
-        uses: actions/cache@v3.2.4
+        uses: actions/cache@v3.2.6
         id: cache-poetry
         with:
           path: ~/.virtualenvs
@@ -34,10 +33,10 @@ jobs:
             poetry-${{ hashFiles('**/poetry.lock') }}
       - name: Install Poetry Dependencies
         if: steps.cache-poetry.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction
+        run: poetry install --no-interaction --no-root
 
       - name: Cache NPM packages
-        uses: actions/cache@v3.2.4
+        uses: actions/cache@v3.2.6
         id: cache-npm
         with:
           path: ~/frontend/node_modules

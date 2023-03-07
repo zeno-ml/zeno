@@ -129,14 +129,14 @@
 					value: points.color,
 				})
 				.then(() => {
-					scatterPtr.select(
-						points.ids.reduce((acc, currVal, i) => {
-							if ($selectionIds.ids.includes(currVal)) {
-								acc.push(i);
-							}
-							return acc;
-						}, [])
-					);
+					let selIds = $selectionIds.ids as unknown[];
+					let selectedPoints = [];
+					points.ids.forEach((id: number | string, i) => {
+						if (selIds.includes(id)) {
+							selectedPoints.push(i);
+						}
+					});
+					scatterPtr.select(selectedPoints);
 				});
 		}
 	}

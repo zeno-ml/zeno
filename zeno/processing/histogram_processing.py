@@ -12,9 +12,22 @@ from zeno.processing.filtering import filter_table, filter_table_single
 
 
 def histogram_buckets(
-    df: pd.DataFrame, req: List[ZenoColumn]
+    df: pd.DataFrame, req: List[ZenoColumn], num_bins: Union[int, str] = "doane"
 ) -> List[List[HistogramBucket]]:
-    """Calculate the histogram buckets for a list of columns."""
+    """Calculate the histogram buckets for a list of columns.
+
+    Args:
+        df (pd.DataFrame): main dataframe from zeno backend
+        req (List[ZenoColumn]): list of columns to compute buckets for
+        num_bins (Union[int, str], optional):
+            estimates the best number and size of bins to use.
+            Defaults to "doane", but can be a fixed integer
+            Other options can be found
+            [here](https://numpy.org/doc/stable/reference/generated/numpy.histogram_bin_edges.html)
+    Returns:
+        List[List[HistogramBucket]]: for each zeno column return a list of buckets
+    """
+
     res: List[List[HistogramBucket]] = []
     for col in req:
         df_col = df[str(col)]
@@ -27,7 +40,7 @@ def histogram_buckets(
         elif col.metadata_type == MetadataType.CONTINUOUS:
             ret_hist: List[HistogramBucket] = []  # type: ignore
             df_col = df_col.fillna(0)
-            bins = np.histogram_bin_edges(df_col)
+            bins = np.histogram_bin_edges(df_col, bins=num_bins)
             for i in range(len(bins) - 1):
                 ret_hist.append(
                     HistogramBucket(
@@ -121,7 +134,7 @@ def histogram_metrics(
         for b in r.buckets:
             df_filt = filter_table_single(filt_df, col, b)
             metric = metric_fn(df_filt, req.model, req.metric)
-            if metric is None or isnan(metric):
+            if metric is None or pd.isna(metric) or isnan(metric):
                 loc_ret.append(None)
             else:
                 loc_ret.append(metric)
@@ -149,9 +162,9 @@ def filter_by_string(df: pd.DataFrame, req: StringFilterRequest) -> List[str]:
     else:
         ret = col[col.str.contains(req.filter_string, case=False)].head().tolist()
         for r in ret:
-            idx = re.search(req.filter_string, r)
+            idx = re.search(req.filter_string, r)  # type: ignore
             if idx is not None:
-                idx = idx.start()
+                idx = idx.start()  # type: ignore
                 loc_str = r[idx - 20 : idx + 20]
                 if len(r) > 40 + len(req.filter_string):
                     if idx - 20 > 0:

@@ -211,16 +211,16 @@
 								highlightPoints = reglScatterplot.select;
 								mounted = true;
 							}} />
-						{#if pointHover !== undefined}
-							<div
-								id="hover-view"
-								class="no-text-highlight"
-								style:left="{pointHover.canvasX + hoverViewOffset}px"
-								style:top="{pointHover.canvasY + hoverViewOffset}px">
-								<div id="replace-view" bind:this={hoverViewDivEl} />
-							</div>
-						{/if}
 					</div>
+					{#if pointHover !== undefined}
+						<div
+							id="hover-view"
+							class="no-text-highlight"
+							style:left="{pointHover.canvasX + hoverViewOffset}px"
+							style:top="{pointHover.canvasY + hoverViewOffset}px">
+							<div id="replace-view" bind:this={hoverViewDivEl} />
+						</div>
+					{/if}
 				{/if}
 			{:else}
 				<!--  Loading bar -->
@@ -270,7 +270,8 @@
 	}
 	#hover-view {
 		position: absolute;
-		z-index: 2;
+		background: white;
+		z-index: 10;
 	}
 
 	.overlay {

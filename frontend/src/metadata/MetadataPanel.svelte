@@ -1,6 +1,7 @@
 <script lang="ts">
 	import {
 		mdiFolderPlusOutline,
+		mdiInformationOutline,
 		mdiPlus,
 		mdiPlusCircle,
 		mdiAssistant,
@@ -9,6 +10,7 @@
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
+	import { tooltip } from "@svelte-plugins/tooltips";
 	import Tooltip, { Wrapper } from "@smui/tooltip";
 	import { InternMap } from "internmap";
 	import {
@@ -25,16 +27,16 @@
 		metrics,
 		model,
 		models,
+		requestingHistogramCounts,
 		selectionIds,
 		selectionPredicates,
 		selections,
 		settings,
+		showNewFolder,
 		showNewSlice,
 		slices,
 		sliceToEdit,
-		requestingHistogramCounts,
 		status,
-		showNewFolder,
 	} from "../stores";
 	import { columnHash } from "../util/util";
 	import {
@@ -222,7 +224,6 @@
 	</div>
 
 	<div id="slice-header" class="inline">
-		<h4>Slices</h4>
 		<div class="inline">
 			<div>
 				<Wrapper>
@@ -251,24 +252,56 @@
 					<Tooltip xPos="start">Create a new folder</Tooltip>
 				</Wrapper>
 			</div>
-			<div>
-				<Wrapper>
-					<IconButton
-						on:click={() => {
-							sliceToEdit.set(undefined);
-							showNewSlice.update((d) => !d);
-							showNewFolder.set(false);
-						}}>
-						<Icon component={Svg} viewBox="0 0 24 24">
-							{#if $selectionPredicates.predicates.length > 0}
-								<path fill="#6a1a9a" d={mdiPlusCircle} />
-							{:else}
-								<path fill="black" d={mdiPlus} />
-							{/if}
-						</Icon>
-					</IconButton>
-					<Tooltip xPos="start">Create a new slice</Tooltip>
-				</Wrapper>
+			<h4>Slices</h4>
+			<div
+				class="information-tooltip"
+				use:tooltip={{
+					content: "Slices are named combinations of filters.",
+					position: "right",
+					theme: "zeno-tooltip",
+				}}>
+				<Icon component={Svg} viewBox="-6 -6 36 36">
+					<path d={mdiInformationOutline} />
+				</Icon>
+			</div>
+		</div>
+		<div class="inline">
+			<div
+				use:tooltip={{
+					content: "Create a new folder.",
+					position: "left",
+					theme: "zeno-tooltip",
+				}}>
+				<IconButton
+					on:click={() => {
+						showNewSlice.set(false);
+						showNewFolder.update((b) => !b);
+					}}>
+					<Icon component={Svg} viewBox="0 0 24 24">
+						<path fill="black" d={mdiFolderPlusOutline} />
+					</Icon>
+				</IconButton>
+			</div>
+			<div
+				use:tooltip={{
+					content: "Create a new slice.",
+					position: "left",
+					theme: "zeno-tooltip",
+				}}>
+				<IconButton
+					on:click={() => {
+						sliceToEdit.set(undefined);
+						showNewSlice.update((d) => !d);
+						showNewFolder.set(false);
+					}}>
+					<Icon component={Svg} viewBox="0 0 24 24">
+						{#if $selectionPredicates.predicates.length > 0}
+							<path fill="#6a1a9a" d={mdiPlusCircle} />
+						{:else}
+							<path fill="black" d={mdiPlus} />
+						{/if}
+					</Icon>
+				</IconButton>
 			</div>
 		</div>
 	</div>
@@ -308,6 +341,18 @@
 	<div id="metric-header" class="inline" style:margin-top="10px">
 		<div class="inline">
 			<h4>Metadata</h4>
+			<div
+				class="information-tooltip"
+				use:tooltip={{
+					content:
+						"Interactive distributions for metadata columns. Click or drag on the histograms to filter the data. Add new metadata with @distill functions.",
+					position: "right",
+					theme: "zeno-tooltip",
+				}}>
+				<Icon component={Svg} viewBox="-6 -6 36 36">
+					<path d={mdiInformationOutline} />
+				</Icon>
+			</div>
 			{#if $requestingHistogramCounts}
 				<CircularProgress
 					style="height: 15px; width: 15px; margin-left: 10px;"
@@ -413,5 +458,11 @@
 		color: var(--G3);
 		margin-right: 10px;
 		margin-left: 10px;
+	}
+	.information-tooltip {
+		width: 24px;
+		height: 24px;
+		cursor: help;
+		fill: var(--G2);
 	}
 </style>

@@ -39,17 +39,6 @@ function setModelForMetricKeys(metricKeys: MetricKey[]) {
 		return key;
 	});
 }
-export async function createNewSlice(
-	sliceName: string,
-	predicateGroup: FilterPredicateGroup,
-	folder = ""
-) {
-	await ZenoService.createNewSlice({
-		sliceName: sliceName,
-		folder,
-		filterPredicates: predicateGroup,
-	});
-}
 
 export async function deleteSlice(sliceName: string) {
 	await ZenoService.deleteSlice([sliceName]);
@@ -59,8 +48,11 @@ export async function getMetricsForSlices(
 	metricKeys: MetricKey[],
 	filterIds?: FilterIds
 ): Promise<SliceMetric[]> {
-	if (metricKeys.length === 0 || metricKeys[0].metric === undefined) {
+	if (metricKeys.length === 0) {
 		return null;
+	}
+	if (metricKeys[0].metric === undefined) {
+		metricKeys = metricKeys.map((k) => ({ ...k, metric: "" }));
 	}
 	if (metricKeys[0].model === undefined) {
 		metricKeys = metricKeys.map((k) => ({ ...k, model: "" }));

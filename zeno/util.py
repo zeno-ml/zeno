@@ -11,7 +11,7 @@ import pandas as pd
 
 from zeno.classes.base import MetadataType
 
-VIEW_MAP_URL: str = "https://raw.githubusercontent.com/zeno-ml/instance-views/0.2/"
+VIEW_MAP_URL: str = "https://raw.githubusercontent.com/zeno-ml/instance-views/0.3/"
 VIEWS_MAP_JSON: str = "views.json"
 
 
@@ -30,7 +30,7 @@ def getMetadataType(col: pd.Series) -> MetadataType:
     except ValueError:
         pass
 
-    if col.dtype == "bool":
+    if col.dtype == "bool" or col.dtype == "boolean":
         return MetadataType.BOOLEAN
 
     try:

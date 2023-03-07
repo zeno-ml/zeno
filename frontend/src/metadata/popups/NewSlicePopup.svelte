@@ -2,16 +2,22 @@
 	import Button from "@smui/button";
 	import Paper, { Content } from "@smui/paper";
 	import Textfield from "@smui/textfield";
-	import { createNewSlice } from "../../api/slice";
 	import { selections, showNewSlice, slices, sliceToEdit } from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
-	import type { FilterPredicateGroup, Slice } from "../../zenoservice";
+	import {
+		ZenoService,
+		type FilterPredicateGroup,
+		type Slice,
+	} from "../../zenoservice";
 	import FilterGroupEntry from "./FilterGroupEntry.svelte";
 
 	let sliceName = "";
 	let folder = "";
 	let predicateGroup: FilterPredicateGroup = { predicates: [], join: "" };
 	let nameInput;
+
+	// Track original name when editing to delete old slice.
+	let originalName = "";
 
 	$: if ($showNewSlice && nameInput) {
 		nameInput.getElement().focus();
@@ -25,6 +31,7 @@
 			sliceName = $sliceToEdit.sliceName;
 			predicateGroup = $sliceToEdit.filterPredicates;
 			folder = $sliceToEdit.folder;
+			originalName = sliceName;
 			return;
 		}
 
@@ -58,7 +65,20 @@
 			sliceName = "Slice " + $slices.size;
 		}
 
-		createNewSlice(sliceName, predicateGroup).then(() => {
+		if ($sliceToEdit && originalName !== sliceName) {
+			ZenoService.deleteSlice([originalName]).then(() => {
+				slices.update((s) => {
+					s.delete(originalName);
+					return s;
+				});
+			});
+		}
+
+		ZenoService.createNewSlice({
+			sliceName,
+			filterPredicates: predicateGroup,
+			folder: folder,
+		}).then(() => {
 			slices.update((s) => {
 				s.set(sliceName, <Slice>{
 					sliceName,
@@ -104,20 +124,22 @@
 			? 'overflow-y: scroll'
 			: 'overflow-y: show'}">
 		<Content>
-			{#if !$sliceToEdit}
-				<Textfield
-					bind:value={sliceName}
-					label="Slice Name"
-					bind:this={nameInput} />
-			{:else}
-				<p>{sliceName}</p>
-			{/if}
+			<Textfield
+				bind:value={sliceName}
+				label="Slice Name"
+				bind:this={nameInput} />
 			<FilterGroupEntry
 				index={-1}
 				deletePredicate={() => deletePredicate(-1)}
 				bind:predicateGroup />
 			<div id="submit">
-				<Button variant="outlined" on:click={createSlice}>
+				<Button
+					variant="outlined"
+					on:click={createSlice}
+					disabled={(!$sliceToEdit && $slices.has(sliceName)) ||
+						($sliceToEdit &&
+							originalName !== sliceName &&
+							$slices.has(sliceName))}>
 					{$sliceToEdit ? "Update Slice" : "Create Slice"}
 				</Button>
 				<Button
@@ -126,7 +148,7 @@
 					on:click={() => showNewSlice.set(false)}>
 					cancel
 				</Button>
-				{#if $slices.has(sliceName) && $sliceToEdit === null}
+				{#if (!$sliceToEdit && $slices.has(sliceName)) || ($sliceToEdit && originalName !== sliceName && $slices.has(sliceName))}
 					<p style:margin-right="10px" style:color="red">
 						slice already exists
 					</p>
