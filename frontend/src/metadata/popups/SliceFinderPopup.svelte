@@ -9,9 +9,7 @@
 	import { clickOutside } from "../../util/clickOutside";
 	import { mdiPlus, mdiClose } from "@mdi/js";
 	import { Pagination } from "@smui/data-table";
-	import { settings } from "../../stores";
-
-	export let showSliceFinder;
+	import { settings, showSliceFinder } from "../../stores";
 
 	let currentResult;
 	let currentPage = 1;
@@ -38,8 +36,8 @@
 	}
 
 	function submit(e) {
-		if (showSliceFinder && e.key === "Escape") {
-			showSliceFinder = false;
+		if ($showSliceFinder && e.key === "Escape") {
+			$showSliceFinder = false;
 		}
 	}
 
@@ -82,11 +80,11 @@
 	style="justify-content: flex-start;"
 	transition:fade
 	use:clickOutside
-	on:click_outside={() => (showSliceFinder = false)}>
+	on:click_outside={() => ($showSliceFinder = false)}>
 	<Paper elevation={7}>
 		<div class="inline">
 			<h4 class="title">SUGGESTED SLICES</h4>
-			<IconButton on:click={() => (showSliceFinder = false)}>
+			<IconButton on:click={() => ($showSliceFinder = false)}>
 				<Icon component={Svg} viewBox="0 0 24 24">
 					<path fill="#6a1b9a" d={mdiClose} />
 				</Icon>

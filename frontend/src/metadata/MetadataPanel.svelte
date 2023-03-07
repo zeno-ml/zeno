@@ -33,6 +33,7 @@
 		settings,
 		showNewFolder,
 		showNewSlice,
+		showSliceFinder,
 		slices,
 		sliceToEdit,
 		status,
@@ -48,11 +49,9 @@
 	import MetadataCell from "./cells/MetadataCell.svelte";
 	import SliceCell from "./cells/SliceCell.svelte";
 	import MetricRange from "./MetricRange.svelte";
-	import SliceFinderPopup from "./popups/SliceFinderPopup.svelte";
 
 	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
 		new InternMap([], columnHash);
-	let showSliceFinder = false;
 
 	$: res = getMetricsForSlices([
 		<MetricKey>{
@@ -244,14 +243,15 @@
 					position: "bottom",
 					theme: "zeno-tooltip",
 				}}>
-				<IconButton on:click={() => (showSliceFinder = !showSliceFinder)}>
+				<IconButton
+					on:click={() => {
+						showNewFolder.set(false);
+						showSliceFinder.update((c) => !c);
+					}}>
 					<Icon component={Svg} viewBox="0 0 24 24">
 						<path fill="black" d={mdiAssistant} />
 					</Icon>
 				</IconButton>
-				{#if showSliceFinder}
-					<SliceFinderPopup bind:showSliceFinder />
-				{/if}
 			</div>
 			<div
 				use:tooltip={{
@@ -263,6 +263,7 @@
 					on:click={() => {
 						showNewSlice.set(false);
 						showNewFolder.update((b) => !b);
+						showSliceFinder.set(false);
 					}}>
 					<Icon component={Svg} viewBox="0 0 24 24">
 						<path fill="black" d={mdiFolderPlusOutline} />
@@ -280,6 +281,7 @@
 						sliceToEdit.set(undefined);
 						showNewSlice.update((d) => !d);
 						showNewFolder.set(false);
+						showSliceFinder.set(false);
 					}}>
 					<Icon component={Svg} viewBox="0 0 24 24">
 						{#if $selectionPredicates.predicates.length > 0}

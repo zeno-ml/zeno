@@ -3,7 +3,14 @@
 	import MetadataPanel from "./metadata/MetadataPanel.svelte";
 	import NewFolderPopup from "./metadata/popups/NewFolderPopup.svelte";
 	import NewSlicePopup from "./metadata/popups/NewSlicePopup.svelte";
-	import { ready, showNewFolder, showNewSlice, status } from "./stores";
+	import SliceFinderPopup from "./metadata/popups/SliceFinderPopup.svelte";
+	import {
+		ready,
+		showNewFolder,
+		showNewSlice,
+		showSliceFinder,
+		status,
+	} from "./stores";
 </script>
 
 {#if $ready && $status.completeColumns.length > 0}
@@ -13,6 +20,9 @@
 	{/if}
 	{#if $showNewFolder}
 		<NewFolderPopup />
+	{/if}
+	{#if $showSliceFinder}
+		<SliceFinderPopup />
 	{/if}
 	<div class="container">
 		<MetadataPanel />
