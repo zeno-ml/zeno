@@ -238,20 +238,6 @@
 					<SliceFinderPopup bind:showSliceFinder />
 				{/if}
 			</div>
-			<div>
-				<Wrapper>
-					<IconButton
-						on:click={() => {
-							showNewSlice.set(false);
-							showNewFolder.update((b) => !b);
-						}}>
-						<Icon component={Svg} viewBox="0 0 24 24">
-							<path fill="black" d={mdiFolderPlusOutline} />
-						</Icon>
-					</IconButton>
-					<Tooltip xPos="start">Create a new folder</Tooltip>
-				</Wrapper>
-			</div>
 			<h4>Slices</h4>
 			<div
 				class="information-tooltip"
