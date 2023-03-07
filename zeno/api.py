@@ -1,9 +1,11 @@
-"""External API for Zeno."""
+"""External API for Zeno. Includes decorator functions, return types, and options."""
 
 import functools
-from typing import Callable, Dict, List
+from typing import Any, Callable, Dict, List, Union
 
-from pandas import DataFrame
+from gradio import Blocks
+from numpy.typing import NDArray
+from pandas import DataFrame, Series
 from pydantic import BaseModel
 
 
@@ -20,7 +22,8 @@ class ZenoOptions(BaseModel):
         data_path (str): Path to directory with data files.
         label_path (str): Path to directory with label files.
         output_path (str): Path to directory with a given model's output.
-        distill_columns (map[str, str]): Map from distiller name to distill column.
+        distill_columns (map[str, str]): Map from distill function name to
+        distill column.
     """
 
     id_column: str
@@ -58,7 +61,84 @@ class ZenoParameters(BaseModel):
         arbitrary_types_allowed = True
 
 
-def model(func):
+class ModelReturn(BaseModel):
+    """Return type for model functions.
+
+    Args:
+        model_output (Series | List): Model output for each sample.
+        embedding (Series | List[List[float]] | List[NDArray] | NDArray | None):
+        High-dimensional embedding for each sample. Optional.
+        other_returns (Dict[str, Series | List] | None): Other returns from the model
+        to be shown as metadata columns in the UI.
+    """
+
+    model_output: Union[Series, List[Any]]
+    embedding: Union[Series, List[List[float]], List[NDArray], NDArray, None] = None
+    other_returns: Union[Dict[str, Union[Series, List[Any]]], None] = None
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
+class DistillReturn(BaseModel):
+    """Return type for distill functions
+
+    Args:
+        distill_output (Series | List): Distill outputs for each sample.
+    """
+
+    distill_output: Union[Series, List[Any]]
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
+class MetricReturn(BaseModel):
+    """Return type for metric functions.
+
+    Args:
+        metric (float): average metric over subset of data
+        variance (float): variance of metric over subset of data
+    """
+
+    # Float metric value
+    metric: float
+    # Variance of the metric for the given data
+    variance: Union[float, None] = None
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
+class InferenceReturn(BaseModel):
+    """Return type for inference UI functions.
+    Take a look at the Gradio documentation for details.
+
+    Args:
+        input_components (List[Blocks]): List of input components.
+        output_components (Blocks): Output component.
+        input_columns (List[str]): List of input column names matching the
+        input components.
+    """
+
+    input_components: List[Blocks]
+    output_components: Blocks
+    input_columns: List[str]
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
+def model(func: Callable[[str], Callable[[DataFrame, ZenoOptions], ModelReturn]]):
+    """Decorator function for model functions.
+
+    Args:
+        func (Callable[[str], Callable[[DataFrame, ZenoOptions], ModelReturn]]):
+        A function that that takes a model name and returns a model function, which
+        itself returns a function that takes a DataFrame and ZenoOptions and returns a
+        ModelReturn.
+    """
+
     @functools.wraps(func)
     def _wrapper(*args, **kwargs):
         return func(*args, **kwargs)
@@ -67,7 +147,14 @@ def model(func):
     return _wrapper
 
 
-def distill(func):
+def distill(func: Callable[[DataFrame, ZenoOptions], DistillReturn]):
+    """Deocrator function for distill functions.
+
+    Args:
+        func (Callable[[DataFrame, ZenoOptions], DistillReturn]):
+        A function that takes a DataFrame and ZenoOptions and returns a DistillReturn.
+    """
+
     @functools.wraps(func)
     def _wrapper(*args, **kwargs):
         return func(*args, **kwargs)
@@ -76,7 +163,15 @@ def distill(func):
     return _wrapper
 
 
-def metric(func):
+def metric(func: Callable[[DataFrame, ZenoOptions], MetricReturn]):
+    """Decorator function for metric functions.
+
+    Args:
+        func (Callable[[DataFrame, ZenoOptions], MetricReturn]):
+            A metric function that takes a DataFrame and ZenoOptions and
+            returns a MetricReturn with an average metric value and optional variance.
+    """
+
     @functools.wraps(func)
     def _wrapper(*args, **kwargs):
         return func(*args, **kwargs)
@@ -85,7 +180,14 @@ def metric(func):
     return _wrapper
 
 
-def inference(func):
+def inference(func: Callable[[ZenoOptions], InferenceReturn]):
+    """A decorator function for inference UI using Gradio.
+
+    Args:
+        func (Callable[[ZenoOptions], InferenceReturn]): function that returns a set of
+        Gradio components and input columns to scaffold an inference UI.
+    """
+
     @functools.wraps(func)
     def _wrapper(*args, **kwargs):
         return func(*args, **kwargs)

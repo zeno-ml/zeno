@@ -1,12 +1,27 @@
-from zeno.api import distill, inference, metric, model, ZenoOptions, ZenoParameters
+from zeno.api import (
+    DistillReturn,
+    InferenceReturn,
+    MetricReturn,
+    ModelReturn,
+    ZenoOptions,
+    ZenoParameters,
+    distill,
+    inference,
+    metric,
+    model,
+)
 from zeno.runner import zeno
 
 __all__ = [
-    "model",
-    "distill",
-    "metric",
-    "inference",
+    "DistillReturn",
+    "InferenceReturn",
+    "MetricReturn",
+    "ModelReturn",
     "ZenoOptions",
     "ZenoParameters",
+    "distill",
+    "inference",
+    "metric",
+    "model",
     "zeno",
 ]
