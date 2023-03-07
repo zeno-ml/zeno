@@ -1,11 +1,13 @@
 <script lang="ts">
 	import DataTable, { Body, Cell, Head, Row } from "@smui/data-table";
-	import { models, report, reports } from "../../stores";
+	import { report, reports } from "../../stores";
 	import TableReportTableRow from "./TableReportTableRow.svelte";
 
 	let table: HTMLDivElement;
 
 	$: currentReport = $reports[$report];
+	$: selectModels = currentReport.models;
+	$: selectSlices = currentReport.slices;
 </script>
 
 <div id="container">
@@ -17,14 +19,14 @@
 						Slice
 					</Cell>
 					<Cell>Metric</Cell>
-					{#each $models as m}
+					{#each selectModels as m}
 						<Cell>{m}</Cell>
 					{/each}
 				</Row>
 			</Head>
 			<Body style="overflow: visible">
-				{#each currentReport.reportPredicates as predicate, i}
-					<TableReportTableRow {predicate} predicateIndex={i} />
+				{#each selectSlices as slice, i}
+					<TableReportTableRow {slice} sliceIndex={i} />
 				{/each}
 			</Body>
 		</DataTable>

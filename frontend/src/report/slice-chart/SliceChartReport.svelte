@@ -6,30 +6,25 @@
 	import generateBarSpec from "./vegaSpec";
 
 	$: currentReport = $reports[$report];
+	$: selectMetrics = currentReport.metrics;
+	$: parameters = currentReport.parameters;
+
 	let chartEntries = [];
-	let selectedModels = [];
-	let selectMetrics = "";
-	let selectSlices = [];
-	let parameters = {};
 
 	function getMetKeys(rep) {
 		const metricKeys: MetricKey[] = [];
 		chartEntries = [];
-		selectedModels = rep.models;
-		selectMetrics = rep.metrics;
-		selectSlices = rep.slices;
-		parameters = rep.parameters;
 
-		selectSlices.forEach((slice) => {
-			selectedModels.forEach((mod) => {
+		rep.slices.forEach((slice) => {
+			rep.models.forEach((mod) => {
 				chartEntries.push({
 					slice: slice.sliceName,
 					model: mod,
-					metric: selectMetrics,
+					metric: rep.metrics,
 				});
 				metricKeys.push({
 					sli: slice,
-					metric: <string>selectMetrics,
+					metric: <string>rep.metrics,
 					model: mod,
 				});
 			});
