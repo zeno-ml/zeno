@@ -3,7 +3,7 @@
 import functools
 from typing import Any, Callable, Dict, List, Union
 
-from gradio import Blocks
+from gradio.interface import IOComponent  # type: ignore
 from numpy.typing import NDArray
 from pandas import DataFrame, Series
 from pydantic import BaseModel
@@ -121,8 +121,8 @@ class InferenceReturn(BaseModel):
         input components.
     """
 
-    input_components: List[Blocks]
-    output_components: Blocks
+    input_components: List[IOComponent]
+    output_components: IOComponent
     input_columns: List[str]
 
     class Config:

@@ -72,7 +72,7 @@ class ZenoBackend(object):
         self.inference_function: Optional[
             Callable[[ZenoOptions], InferenceReturn]
         ] = None
-        self.gradio_input_columns: List = []
+        self.gradio_input_columns: List[str] = []
 
         self.status: str = "Initializing"
         self.folders: List[str] = read_pickle("folders.pickle", self.cache_path, [])
