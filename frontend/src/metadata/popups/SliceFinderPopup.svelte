@@ -200,8 +200,6 @@
 		top: 8vh;
 		z-index: 10;
 		min-width: 70vw;
-		padding-left: 10vw;
-		padding-top: 3vh;
 	}
 	.title {
 		text-align: left;

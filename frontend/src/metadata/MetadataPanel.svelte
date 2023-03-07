@@ -241,7 +241,7 @@
 			<div
 				use:tooltip={{
 					content: "Discover underperforming slices.",
-					position: "left",
+					position: "bottom",
 					theme: "zeno-tooltip",
 				}}>
 				<IconButton on:click={() => (showSliceFinder = !showSliceFinder)}>
