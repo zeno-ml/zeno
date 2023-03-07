@@ -40,6 +40,9 @@ from zeno.processing.projection_processing import (
     project_into_2D,
     projection_colors,
 )
+from zeno.processing.slice_finder import (
+    slice_finder
+)
 
 
 def custom_generate_unique_id(route: APIRoute):
@@ -203,7 +206,7 @@ def get_server(zeno: ZenoBackend):
         "/slice-finder-project", tags=["zeno"], response_model=str
     )  # response_model=List[SliceMetric]
     def project_find_available_slices(req: SliceFinderRequest):
-        return zeno.slice_finder(req)  # TODO: ADD SOMETHING HERE
+        return slice_finder(req)  # TODO: ADD SOMETHING HERE
 
     @api_app.post("/colors-project", tags=["zeno"], response_model=PointsColors)
     def get_projection_colors(req: ColorsProjectRequest):

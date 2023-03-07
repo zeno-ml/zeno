@@ -506,6 +506,3 @@ class ZenoBackend(object):
         if type(out) == tuple and len(out) == 2:
             return out[0][0]
         return out[0]
-
-    def slice_finder(self, req):
-        return "Hello Slices!"
