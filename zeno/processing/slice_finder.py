@@ -1,2 +1,2 @@
-def slice_finder(self, req):
+def slice_finder(req):
     return "Hello Slices!"
