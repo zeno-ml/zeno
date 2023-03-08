@@ -97,13 +97,11 @@ class MetricReturn(BaseModel):
     """Return type for metric functions.
 
     Args:
-        metric (float): average metric over subset of data
-        variance (float): variance of metric over subset of data
+        metric (float): Average metric over subset of data
+        variance (float): Variance of metric over subset of data
     """
 
-    # Float metric value
     metric: float
-    # Variance of the metric for the given data
     variance: Union[float, None] = None
 
     class Config:
@@ -184,7 +182,7 @@ def inference(func: Callable[[ZenoOptions], InferenceReturn]):
     """A decorator function for inference UI using Gradio.
 
     Args:
-        func (Callable[[ZenoOptions], InferenceReturn]): function that returns a set of
+        func (Callable[[ZenoOptions], InferenceReturn]): Function that returns a set of
         Gradio components and input columns to scaffold an inference UI.
     """
 
