@@ -72,7 +72,9 @@
 					labelField="label"
 					searchable={false}
 					on:change={(e) => {
-						refreshParams(e, "x");
+						if (e.detail.label !== parameters.xEncoding) {
+							refreshParams(e, "x");
+						}
 					}} />
 			</div>
 			<svelte:component this={EncodingMap[parameters.xEncoding]} />
@@ -88,27 +90,31 @@
 						labelField="label"
 						searchable={false}
 						on:change={(e) => {
-							refreshParams(e, "y");
+							if (e.detail.label !== parameters.yEncoding) {
+								refreshParams(e, "y");
+							}
 						}} />
 				</div>
 				<svelte:component this={EncodingMap[parameters.yEncoding]} />
 			{/if}
 
-			<div class="parameters">
-				<h4 class="select-label">
-					{chartType !== ChartType.TABLE ? "color" : "metrics"}
-				</h4>
-				<Svelecte
-					style="width: 260px; height: 30px; flex:none;"
-					value={parameters.colorEncoding}
-					options={optionMap[chartType].color}
-					valueField="label"
-					labelField="label"
-					searchable={false}
-					on:change={(e) => {
-						refreshParams(e, "color");
-					}} />
-			</div>
+			{#if chartType !== ChartType.TABLE}
+				<div class="parameters">
+					<h4 class="select-label">color</h4>
+					<Svelecte
+						style="width: 260px; height: 30px; flex:none;"
+						value={parameters.colorEncoding}
+						options={optionMap[chartType].color}
+						valueField="label"
+						labelField="label"
+						searchable={false}
+						on:change={(e) => {
+							if (e.detail.label !== parameters.colorEncoding) {
+								refreshParams(e, "color");
+							}
+						}} />
+				</div>
+			{/if}
 			<svelte:component this={EncodingMap[parameters.colorEncoding]} />
 		</div>
 	</div>
