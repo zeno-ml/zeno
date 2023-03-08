@@ -11,11 +11,17 @@ from pathlib import Path
 from typing import Callable, Dict, List, Optional, Union
 
 import pandas as pd
-from gradio import Blocks  # type: ignore
 from pandas import DataFrame  # type: ignore
 from pathos.multiprocessing import ProcessingPool as Pool  # type: ignore
 
-from zeno.api import ZenoOptions, ZenoParameters
+from zeno.api import (
+    DistillReturn,
+    InferenceReturn,
+    MetricReturn,
+    ModelReturn,
+    ZenoOptions,
+    ZenoParameters,
+)
 from zeno.classes.base import MetadataType, ZenoColumnType
 from zeno.classes.classes import MetricKey, TableRequest, ZenoColumn
 from zeno.classes.report import Report
@@ -51,12 +57,22 @@ class ZenoBackend(object):
             self.data_prefix = "/data/"
         self.done_running_inference = False
 
-        self.predistill_functions: Dict[str, Callable] = {}
-        self.postdistill_functions: Dict[str, Callable] = {}
-        self.metric_functions: Dict[str, Callable] = {}
-        self.predict_function: Optional[Callable] = None
-        self.inference_function: Optional[Blocks] = None
-        self.gradio_input_columns: List = []
+        self.predistill_functions: Dict[
+            str, Callable[[DataFrame, ZenoOptions], DistillReturn]
+        ] = {}
+        self.postdistill_functions: Dict[
+            str, Callable[[DataFrame, ZenoOptions], DistillReturn]
+        ] = {}
+        self.metric_functions: Dict[
+            str, Callable[[DataFrame, ZenoOptions], MetricReturn]
+        ] = {}
+        self.predict_function: Optional[
+            Callable[[str], Callable[[DataFrame, ZenoOptions], ModelReturn]]
+        ] = None
+        self.inference_function: Optional[
+            Callable[[ZenoOptions], InferenceReturn]
+        ] = None
+        self.gradio_input_columns: List[str] = []
 
         self.status: str = "Initializing"
         self.folders: List[str] = read_pickle("folders.pickle", self.cache_path, [])
@@ -426,7 +442,7 @@ class ZenoBackend(object):
                 }
             )
 
-        return self.metric_functions[metric](df, local_ops)
+        return self.metric_functions[metric](df, local_ops).metric
 
     def set_folders(self, folders: List[str]):
         if not self.editable:
@@ -502,7 +518,4 @@ class ZenoBackend(object):
         temp_df.loc[0] = args[1:]  # type: ignore
         out = model_fn(temp_df, self.zeno_options)
 
-        # If the output gets embeddings too, only get the output.
-        if type(out) == tuple and len(out) == 2:
-            return out[0][0]
-        return out[0]
+        return out.model_output
