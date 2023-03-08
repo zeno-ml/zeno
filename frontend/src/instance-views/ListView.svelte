@@ -70,6 +70,9 @@
 	});
 
 	function updateTable() {
+		if (start === undefined || end === undefined) {
+			return;
+		}
 		getFilteredTable(
 			$status.completeColumns,
 			$selectionPredicates,
