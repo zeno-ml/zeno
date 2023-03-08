@@ -3,7 +3,7 @@
 	import Select, { Option } from "@smui/select";
 </script>
 
-{#if ready}
+{#if $ready}
 	<div class="parameters">
 		<h4 class="select-label">&nbsp;</h4>
 		<Select
@@ -20,7 +20,7 @@
 <style>
 	* :global(.select .mdc-select__anchor) {
 		height: 30px;
-		width: 280px;
+		width: 260px;
 	}
 	.parameters {
 		display: flex;

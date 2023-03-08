@@ -21,10 +21,7 @@
 					class="remove material-icons"
 					on:click={() => {
 						currentReport.slices.splice(i, 1);
-						reports.update((reps) => {
-							reps[$report] = currentReport;
-							return reps;
-						});
+						$reports[$report] = currentReport;
 					}}>
 					cancel
 				</TrailingIcon>

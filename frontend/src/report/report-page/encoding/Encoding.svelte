@@ -1,15 +1,61 @@
 <script lang="ts">
 	import { ready, report, reports } from "../../../stores";
-	import Select, { Option } from "@smui/select";
 	import SlicesEncoding from "./SlicesEncoding.svelte";
 	import MetricsEncoding from "./MetricsEncoding.svelte";
 	import ModelsEncoding from "./ModelsEncoding.svelte";
+	import { ChartType } from "../../../zenoservice";
+	import Svelecte from "svelecte";
 
 	const EncodingMap = {
 		slices: SlicesEncoding,
 		metrics: MetricsEncoding,
 		models: ModelsEncoding,
 	};
+
+	const optionMap = {
+		// bar chart select option dropdown
+		[ChartType.BAR]: {
+			x: ["slices", "models"],
+			y: ["metrics"],
+			color: ["slices", "models"],
+		},
+		// table view select option dropdown
+		[ChartType.TABLE]: {
+			x: ["slices", "models"],
+			y: ["slices", "models"],
+			color: ["metrics"],
+		},
+	};
+	$: currentReport = $reports[$report];
+	$: chartType = currentReport.type;
+	$: parameters = currentReport.parameters;
+
+	function refreshParams(e, currentParam) {
+		// bar chart exclusive combination
+		let label = e.detail.label;
+		if (chartType === ChartType.BAR) {
+			let paramExcluMap = { slices: "models", models: "slices" };
+			if (currentParam === "x") {
+				parameters.xEncoding = label;
+				parameters.colorEncoding = paramExcluMap[label];
+			} else if (currentParam === "color") {
+				parameters.colorEncoding = label;
+				parameters.xEncoding = paramExcluMap[label];
+			}
+		}
+		// table view exclusive combination
+		else if (chartType === ChartType.TABLE) {
+			let paramExcluMap = { slices: "models", models: "slices" };
+			if (currentParam === "x") {
+				parameters.xEncoding = label;
+				parameters.yEncoding = paramExcluMap[label];
+			} else if (currentParam === "y") {
+				parameters.yEncoding = label;
+				parameters.xEncoding = paramExcluMap[label];
+			}
+		}
+		$reports[$report] = currentReport;
+	}
 </script>
 
 {#if $ready}
@@ -18,54 +64,57 @@
 		<div id="encoding-flex">
 			<div class="parameters">
 				<h4 class="select-label">x</h4>
-				<Select
-					bind:value={$reports[$report].parameters.xEncoding}
-					class="select"
-					variant="outlined">
-					<Option value={"slices"}>slices</Option>
-					<Option value={"models"}>models</Option>
-					<Option value={"metrics"}>metrics</Option>
-				</Select>
+				<Svelecte
+					style="width: 260px; height: 30px; flex:none"
+					value={parameters.xEncoding}
+					options={optionMap[chartType].x}
+					valueField="label"
+					labelField="label"
+					searchable={false}
+					on:change={(e) => {
+						refreshParams(e, "x");
+					}} />
 			</div>
-			<svelte:component
-				this={EncodingMap[$reports[$report].parameters.xEncoding]} />
+			<svelte:component this={EncodingMap[parameters.xEncoding]} />
+
+			{#if chartType !== ChartType.BEESWARM}
+				<div class="parameters">
+					<h4 class="select-label">y</h4>
+					<Svelecte
+						style="width: 260px; height: 30px; flex:none"
+						value={parameters.yEncoding}
+						options={optionMap[chartType].y}
+						valueField="label"
+						labelField="label"
+						searchable={false}
+						on:change={(e) => {
+							refreshParams(e, "y");
+						}} />
+				</div>
+				<svelte:component this={EncodingMap[parameters.yEncoding]} />
+			{/if}
 
 			<div class="parameters">
-				<h4 class="select-label">y</h4>
-				<Select
-					bind:value={$reports[$report].parameters.yEncoding}
-					class="select"
-					variant="outlined">
-					<Option value={"slices"}>slices</Option>
-					<Option value={"models"}>models</Option>
-					<Option value={"metrics"}>metrics</Option>
-				</Select>
+				<h4 class="select-label">
+					{chartType !== ChartType.TABLE ? "color" : "metrics"}
+				</h4>
+				<Svelecte
+					style="width: 260px; height: 30px; flex:none;"
+					value={parameters.colorEncoding}
+					options={optionMap[chartType].color}
+					valueField="label"
+					labelField="label"
+					searchable={false}
+					on:change={(e) => {
+						refreshParams(e, "color");
+					}} />
 			</div>
-			<svelte:component
-				this={EncodingMap[$reports[$report].parameters.yEncoding]} />
-
-			<div class="parameters">
-				<h4 class="select-label">color</h4>
-				<Select
-					bind:value={$reports[$report].parameters.colorEncoding}
-					class="select"
-					variant="outlined">
-					<Option value={"slices"}>slices</Option>
-					<Option value={"models"}>models</Option>
-					<Option value={"metrics"}>metrics</Option>
-				</Select>
-			</div>
-			<svelte:component
-				this={EncodingMap[$reports[$report].parameters.colorEncoding]} />
+			<svelte:component this={EncodingMap[parameters.colorEncoding]} />
 		</div>
 	</div>
 {/if}
 
 <style>
-	* :global(.select .mdc-select__anchor) {
-		height: 30px;
-		width: 280px;
-	}
 	.edit-type {
 		border-bottom: 1px solid var(--G4);
 	}

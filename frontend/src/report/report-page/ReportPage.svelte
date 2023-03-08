@@ -10,6 +10,7 @@
 	import { ChartType } from "../../zenoservice";
 
 	export let params;
+
 	const ChartMap = {
 		[ChartType.BAR]: SliceChartReport,
 		[ChartType.LINE]: TimeseriesReportTable,

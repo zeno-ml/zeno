@@ -19,7 +19,7 @@
 		rep.models.forEach((mod) => {
 			metricKeys.push({
 				sli: slice,
-				metric: <string>rep.metrics,
+				metric: rep.metrics,
 				model: mod,
 			});
 		});
