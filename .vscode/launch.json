@@ -2,7 +2,23 @@
   "version": "2.0.0",
   "configurations": [
     {
-      "name": "zenoadult",
+      "name": "zeno_cifar",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": ["./examples/cifar/config.toml"]
+    },
+    {
+      "name": "zeno_imagenette",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": ["./examples/imagenette/config.toml"]
+    },
+    {
+      "name": "zeno_adult",
       "type": "python",
       "request": "launch",
       "cwd": "${workspaceFolder}",
@@ -10,95 +26,39 @@
       "args": ["./examples/adult/config.toml"]
     },
     {
-      "name": "zenoimagenet",
+      "name": "zeno_motionsense",
       "type": "python",
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "module": "zeno",
-      "args": ["./examples/imagenet/tests/zeno.toml"]
+      "args": ["./examples/motionsense/config.toml"]
     },
     {
-      "name": "zenoimagenette",
+      "name": "zeno_reviews",
       "type": "python",
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "module": "zeno",
-      "args": ["./examples/imagenette/tests/zeno.toml"]
+      "args": ["./examples/reviews/config.toml"]
     },
     {
-      "name": "zenocifar",
+      "name": "zeno_diffusion",
       "type": "python",
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "module": "zeno",
-      "args": ["./examples/cifar/tests/zeno.toml"]
+      "args": ["./examples/diffusiondb/config.toml"]
     },
     {
-      "name": "zenocifarnomodel",
+      "name": "zeno_accent",
       "type": "python",
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "module": "zeno",
-      "args": ["./examples/cifar/zeno_no_model.toml"]
+      "args": ["./examples/speech-accent/config.toml"]
     },
     {
-      "name": "zenococotagging",
-      "type": "python",
-      "request": "launch",
-      "cwd": "${workspaceFolder}",
-      "module": "zeno",
-      "args": ["examples/coco-tagging/tests/zeno.toml"]
-    },
-    {
-      "name": "zenomotionsense",
-      "type": "python",
-      "request": "launch",
-      "cwd": "${workspaceFolder}",
-      "module": "zeno",
-      "args": ["./examples/motionsense/zeno.toml"]
-    },
-    {
-      "name": "zenococo",
-      "type": "python",
-      "request": "launch",
-      "cwd": "${workspaceFolder}",
-      "module": "zeno",
-      "args": ["./examples/coco/tests/zeno.toml"]
-    },
-    {
-      "name": "zenoreviews",
-      "type": "python",
-      "request": "launch",
-      "cwd": "${workspaceFolder}",
-      "module": "zeno",
-      "args": ["./examples/reviews/tests/zeno.toml"]
-    },
-    {
-      "name": "zenofsdd",
-      "type": "python",
-      "request": "launch",
-      "cwd": "${workspaceFolder}",
-      "module": "zeno",
-      "args": ["./examples/fsdd/tests/zeno.toml"]
-    },
-    {
-      "name": "zenodiffusion",
-      "type": "python",
-      "request": "launch",
-      "cwd": "${workspaceFolder}",
-      "module": "zeno",
-      "args": ["./examples/diffusiondb/zeno.toml"]
-    },
-    {
-      "name": "zenoaccent",
-      "type": "python",
-      "request": "launch",
-      "cwd": "${workspaceFolder}",
-      "module": "zeno",
-      "args": ["./examples/speech-accent/zeno.toml"]
-    },
-    {
-      "name": "zenosegment",
+      "name": "zeno_segment",
       "type": "python",
       "request": "launch",
       "cwd": "${workspaceFolder}",
@@ -106,7 +66,7 @@
       "args": ["./examples/segmentation/tests/zeno.toml"]
     },
     {
-      "name": "zenocancer",
+      "name": "zeno_cancer",
       "type": "python",
       "request": "launch",
       "cwd": "${workspaceFolder}",

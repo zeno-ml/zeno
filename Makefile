@@ -1,4 +1,4 @@
-all: lint typecheck test 
+all: lint typecheck test clean
 
 .PHONY: install
 install:
