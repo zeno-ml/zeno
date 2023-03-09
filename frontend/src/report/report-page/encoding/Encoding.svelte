@@ -25,15 +25,21 @@
 			y: ["slices", "models"],
 			color: ["metrics"],
 		},
+		// line chart select option dropdown
+		[ChartType.LINE]: {
+			x: ["slices", "models"],
+			y: ["metrics"],
+			color: ["slices", "models"],
+		},
 	};
 	$: currentReport = $reports[$report];
 	$: chartType = currentReport.type;
 	$: parameters = currentReport.parameters;
 
 	function refreshParams(e, currentParam) {
-		// bar chart exclusive combination
+		// bar/line chart exclusive combination
 		let label = e.detail.label;
-		if (chartType === ChartType.BAR) {
+		if (chartType === ChartType.BAR || chartType === ChartType.LINE) {
 			let paramExcluMap = { slices: "models", models: "slices" };
 			if (currentParam === "x") {
 				parameters.xEncoding = label;

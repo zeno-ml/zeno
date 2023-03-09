@@ -23,16 +23,12 @@ export default function generateBarSpec(
 	};
 	const spec = {
 		$schema: "https://vega.github.io/schema/vega-lite/v5.json",
-		description: "A simple bar chart with embedded data.",
-		autosize: "fit",
+		description: "A simple line chart with embedded data.",
 		width: {
-			step: 30,
+			step: 160,
 		},
 		data: {
 			name: "table",
-		},
-		mark: {
-			type: "bar",
 		},
 		encoding: {
 			x: {
@@ -58,20 +54,45 @@ export default function generateBarSpec(
 				},
 				sort: null,
 			},
-			xOffset: {
-				field: color_encode,
-				sort: null,
-			},
-			yOffset: {
-				field: color_encode,
-				sort: null,
-			},
 			color: {
-				field: color_encode,
-				sort: null,
-				scale: { scheme: "purples" },
+				condition: {
+					param: "hover",
+					field: color_encode,
+					scale: { scheme: "purples" },
+				},
+				value: "grey",
 			},
+			opacity: { condition: { param: "hover", value: 1 }, value: 0.1 },
 		},
+		layer: [
+			{
+				params: [
+					{
+						name: "hover",
+						select: {
+							type: "point",
+							fields: [color_encode],
+							on: "mouseover",
+						},
+					},
+				],
+				mark: {
+					type: "line",
+					strokeWidth: 8,
+					stroke: "transparent",
+				},
+			},
+			{
+				mark: {
+					type: "line",
+					strokeWidth: 4,
+				},
+			},
+			{
+				layer: [{ mark: { type: "circle", size: 50 } }],
+			},
+		],
+		config: { view: { stroke: null } },
 	};
 
 	return spec as VegaLiteSpec;

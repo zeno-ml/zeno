@@ -4,7 +4,7 @@
 	import ReportHeader from "./report-header/ReportHeader.svelte";
 	import SliceChartReport from "../slice-chart/SliceChartReport.svelte";
 	import TableReportTable from "../table-report/TableReportTable.svelte";
-	import TimeseriesReportTable from "../timeseries-report/TimeseriesReportTable.svelte";
+	import LineChartReport from "../line-chart/LineChartReport.svelte";
 	import ViewSelection from "./view-selection/ViewSelection.svelte";
 	import Encoding from "./encoding/Encoding.svelte";
 	import { ChartType } from "../../zenoservice";
@@ -13,7 +13,7 @@
 
 	const ChartMap = {
 		[ChartType.BAR]: SliceChartReport,
-		[ChartType.LINE]: TimeseriesReportTable,
+		[ChartType.LINE]: LineChartReport,
 		[ChartType.TABLE]: TableReportTable,
 		[ChartType.BEESWARM]: BeeswarmChartReport,
 	};
