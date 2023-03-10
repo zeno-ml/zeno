@@ -29,14 +29,16 @@
 		beeswarm: {
 			type: ChartType.BEESWARM,
 			xEncoding: "metrics",
-			yEncoding: "slices",
-			colorEncoding: "models",
+			yEncoding: "models",
+			colorEncoding: "slices",
 		},
 	};
 
 	function updateChart(e) {
 		if (e.currentTarget instanceof HTMLElement) {
-			if ($reports[$report].type !== defaultMap[e.currentTarget.id].type) {
+			let newType = $reports[$report].type;
+			let oldType = defaultMap[e.currentTarget.id].type;
+			if (newType !== oldType) {
 				currentReport.type = defaultMap[e.currentTarget.id].type;
 				currentReport.parameters.xEncoding =
 					defaultMap[e.currentTarget.id].xEncoding;

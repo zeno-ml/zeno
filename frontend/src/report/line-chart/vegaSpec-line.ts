@@ -25,7 +25,7 @@ export default function generateBarSpec(
 		$schema: "https://vega.github.io/schema/vega-lite/v5.json",
 		description: "A simple line chart with embedded data.",
 		width: {
-			step: 160,
+			step: 150,
 		},
 		data: {
 			name: "table",
@@ -59,6 +59,7 @@ export default function generateBarSpec(
 					param: "hover",
 					field: color_encode,
 					scale: { scheme: "purples" },
+					sort: null,
 				},
 				value: "grey",
 			},

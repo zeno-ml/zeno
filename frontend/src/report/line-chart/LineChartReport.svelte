@@ -3,7 +3,7 @@
 	import { getMetricsForSlices } from "../../api/slice";
 	import { report, reports } from "../../stores";
 	import type { MetricKey } from "../../zenoservice";
-	import generateBarSpec from "./vegaLineSpec";
+	import generateBarSpec from "./vegaSpec-line";
 
 	$: currentReport = $reports[$report];
 	$: selectMetrics = currentReport.metrics;
@@ -20,7 +20,6 @@
 				chartEntries.push({
 					slice: slice.sliceName,
 					model: mod,
-					metric: rep.metrics,
 				});
 				metricKeys.push({
 					sli: slice,

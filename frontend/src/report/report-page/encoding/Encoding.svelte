@@ -31,6 +31,12 @@
 			y: ["metrics"],
 			color: ["slices", "models"],
 		},
+		// beeswarm chart select option dropdown
+		[ChartType.BEESWARM]: {
+			x: ["metrics"],
+			y: ["models"],
+			color: ["slices"],
+		},
 	};
 	$: currentReport = $reports[$report];
 	$: chartType = currentReport.type;
@@ -85,24 +91,22 @@
 			</div>
 			<svelte:component this={EncodingMap[parameters.xEncoding]} />
 
-			{#if chartType !== ChartType.BEESWARM}
-				<div class="parameters">
-					<h4 class="select-label">y</h4>
-					<Svelecte
-						style="width: 260px; height: 30px; flex:none"
-						value={parameters.yEncoding}
-						options={optionMap[chartType].y}
-						valueField="label"
-						labelField="label"
-						searchable={false}
-						on:change={(e) => {
-							if (e.detail.label !== parameters.yEncoding) {
-								refreshParams(e, "y");
-							}
-						}} />
-				</div>
-				<svelte:component this={EncodingMap[parameters.yEncoding]} />
-			{/if}
+			<div class="parameters">
+				<h4 class="select-label">y</h4>
+				<Svelecte
+					style="width: 260px; height: 30px; flex:none"
+					value={parameters.yEncoding}
+					options={optionMap[chartType].y}
+					valueField="label"
+					labelField="label"
+					searchable={false}
+					on:change={(e) => {
+						if (e.detail.label !== parameters.yEncoding) {
+							refreshParams(e, "y");
+						}
+					}} />
+			</div>
+			<svelte:component this={EncodingMap[parameters.yEncoding]} />
 
 			{#if chartType !== ChartType.TABLE}
 				<div class="parameters">
