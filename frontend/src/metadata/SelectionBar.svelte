@@ -22,7 +22,7 @@
 
 	let CHOICES =
 		$settings.view !== ""
-			? ["list", "table", "projection"]
+			? ["list", "table", "comparison", "projection"]
 			: ["table", "projection"];
 
 	let optionsDiv: HTMLDivElement;

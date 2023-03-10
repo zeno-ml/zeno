@@ -2,6 +2,7 @@
 	import { onMount } from "svelte";
 	import SelectionBar from "../metadata/SelectionBar.svelte";
 	import ListView from "./ListView.svelte";
+	import ComparisonView from "./ComparisonView.svelte";
 	import TableView from "./TableView.svelte";
 	import ScatterView from "./scatter-view/ScatterView.svelte";
 	import { getMetricsForSlices } from "../api/slice";
@@ -77,6 +78,9 @@
 
 {#if selected === "list" && viewOptions !== undefined}
 	<ListView {currentResult} {viewFunction} {viewOptions} />
+{/if}
+{#if selected === "comparison" && viewOptions !== undefined}
+	<ComparisonView {currentResult} {viewFunction} {viewOptions} />
 {/if}
 {#if selected === "table"}
 	<TableView {currentResult} {viewFunction} {viewOptions} />
