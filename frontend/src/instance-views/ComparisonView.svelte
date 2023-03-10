@@ -3,12 +3,13 @@
 	import { Pagination } from "@smui/data-table";
 	import IconButton from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
+	import Svelecte from "svelecte";
 	import { tick } from "svelte";
 	import { getFilteredTable } from "../api/table";
 	import {
+		comparisonModels,
 		model,
 		models,
-		comparisonModels,
 		rowsPerPage,
 		selectionIds,
 		selectionPredicates,
@@ -18,7 +19,6 @@
 	} from "../stores";
 	import { columnHash } from "../util/util";
 	import { ZenoColumnType } from "../zenoservice";
-	import Svelecte from "svelecte";
 	import type { ViewRenderFunction } from "./instance-views";
 
 	export let currentResult;
@@ -91,7 +91,7 @@
 		Promise.all(proms).then((res) => {
 			[$model, ...$comparisonModels].forEach((mod, i) => {
 				tables[mod] = res[i];
-				viewDivs[mod] = {};
+				viewDivs[mod] = [];
 			});
 			tables = tables;
 			if (instanceContainer) {
@@ -113,20 +113,8 @@
 			});
 			let modelColumn = obj ? columnHash(obj) : "";
 
-			let ids = tables[mod].map((inst) => inst[idHash]);
-			viewDivs[mod] = Object.fromEntries(
-				ids
-					.map(
-						(key) =>
-							!!Object.getOwnPropertyDescriptor(viewDivs[mod], key) && [
-								key,
-								viewDivs[mod][key],
-							]
-					)
-					.filter(Boolean)
-			);
-			tables[mod].forEach((inst, i) => {
-				let div = viewDivs[mod][inst[idHash]];
+			tables[mod].forEach((_, i) => {
+				let div = viewDivs[mod][i];
 				if (div) {
 					viewFunction(
 						div,
@@ -151,17 +139,28 @@
 	multiple
 	placeholder="Select models to compare" />
 
-<div class="columns" bind:this={instanceContainer}>
-	{#each [$model, ...$comparisonModels] as mod}
-		<div class="sample-container">
-			<h5 class="sticky">{mod}</h5>
-			{#if tables[mod]}
-				{#each tables[mod] as inst (inst[idHash])}
-					<div class="instance" bind:this={viewDivs[mod][inst[idHash]]} />
+<div class="table-container" bind:this={instanceContainer}>
+	{#if tables[$model]}
+		<table>
+			<thead>
+				{#each [$model, ...$comparisonModels] as mod}
+					<th>{mod}</th>
 				{/each}
-			{/if}
-		</div>
-	{/each}
+			</thead>
+			<tbody>
+				{#each [...Array($rowsPerPage).keys()] as rowId (tables[$model][rowId] ? tables[$model][rowId][idHash] : rowId)}
+					<tr>
+						{#each [$model, ...$comparisonModels] as mod}
+							{#if viewDivs[mod]}
+								<td>
+									<div bind:this={viewDivs[mod][rowId]} />
+								</td>
+							{/if}
+						{/each}
+					</tr>
+				{/each}</tbody>
+		</table>
+	{/if}
 </div>
 
 <Pagination slot="paginate" class="pagination">
@@ -174,9 +173,9 @@
 		</Select>
 	</svelte:fragment>
 	<svelte:fragment slot="total">
-		{start + 1}-{end} of {#await currentResult then r}{r
-				? r[0].size
-				: ""}{/await}
+		{start + 1}-{#await currentResult then r}
+			{Math.min(end, r ? r[0].size : end)} of
+			{r ? r[0].size : ""}{/await}
 	</svelte:fragment>
 
 	<IconButton
@@ -206,35 +205,27 @@
 </Pagination>
 
 <style>
-	.sample-container {
-		align-content: baseline;
-		border-bottom: 1px solid rgb(224, 224, 224);
-		display: flex;
-		flex-direction: column;
-		padding-right: 10px;
-		padding-left: 10px;
-		border-right: 1px solid rgb(224, 224, 224);
-		height: fit-content;
+	table {
+		margin-top: 5px;
 	}
-	.columns {
-		height: calc(100vh - 205px);
-		display: flex;
-		width: min-content;
-		overflow-y: auto;
-		flex-direction: row;
-		width: 100%;
+	td {
+		vertical-align: top;
 	}
-	.sticky {
+	thead th {
+		text-align: left;
+		border-bottom: 1px solid var(--G5);
+		padding-bottom: 5px;
+		top: 2px;
+		left: 0;
 		position: sticky;
-		top: 0;
-		padding-bottom: 10px;
-		padding-top: 10px;
-		border-bottom: 1px solid rgb(224, 224, 224);
-		margin: 0px;
+		background-color: var(--G6);
+		min-width: 70px;
+		padding-right: 1.6vw;
+		cursor: pointer;
 	}
-	.instance {
-		margin-right: 5px;
-		margin-top: 2.5px;
-		margin-bottom: 2.5px;
+	.table-container {
+		max-width: calc(100vw - 450px);
+		max-height: calc(100vh - 205px);
+		overflow: scroll;
 	}
 </style>

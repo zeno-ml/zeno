@@ -94,7 +94,7 @@
 	}
 
 	async function drawInstances() {
-		if (!table) {
+		if (!table || !viewFunction) {
 			return;
 		}
 
@@ -112,25 +112,9 @@
 					c.columnType === ZenoColumnType.PREDISTILL ||
 					c.columnType === ZenoColumnType.POSTDISTILL)
 		);
-		let ids = table.map((inst) => inst[idHash]);
 
-		if (!viewFunction) {
-			return;
-		}
-
-		viewDivs = Object.fromEntries(
-			ids
-				.map(
-					(key) =>
-						!!Object.getOwnPropertyDescriptor(viewDivs, key) && [
-							key,
-							viewDivs[key],
-						]
-				)
-				.filter(Boolean)
-		);
-		table.forEach((inst, i) => {
-			let div = viewDivs[inst[idHash]];
+		table.forEach((_, i) => {
+			let div = viewDivs[i];
 			if (div) {
 				viewFunction(
 					div,
@@ -175,11 +159,11 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each table as tableContent}
+				{#each table as tableContent, i (tableContent[idHash])}
 					<tr>
 						{#if viewFunction}
 							<td>
-								<div bind:this={viewDivs[tableContent[idHash]]} />
+								<div bind:this={viewDivs[i]} />
 							</td>
 						{/if}
 						{#each columnHeader as header}
@@ -206,9 +190,9 @@
 			</Select>
 		</svelte:fragment>
 		<svelte:fragment slot="total">
-			{start + 1}-{end} of {#await currentResult then r}{r
-					? r[0].size
-					: ""}{/await}
+			{start + 1}-{#await currentResult then r}
+				{Math.min(end, r ? r[0].size : end)} of
+				{r ? r[0].size : ""}{/await}
 		</svelte:fragment>
 
 		<IconButton
