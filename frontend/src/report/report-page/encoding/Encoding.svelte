@@ -44,7 +44,6 @@
 
 	async function refreshParams(e, currentParam) {
 		// bar/line chart exclusive combination
-		console.log(e);
 		let label = e.detail.label;
 		if (chartType === ChartType.BAR || chartType === ChartType.LINE) {
 			let paramExcluMap = { slices: "models", models: "slices" };

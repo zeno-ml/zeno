@@ -51,8 +51,8 @@
 		</div>
 	</Cell>
 	<Cell>{selectMetrics}</Cell>
-	{#if modelResults}
-		{#await modelResults then res}
+	{#await modelResults then res}
+		{#if res}
 			{#each res as r}
 				<Cell>
 					<p>
@@ -60,8 +60,8 @@
 					</p>
 				</Cell>
 			{/each}
-		{/await}
-	{/if}
+		{/if}
+	{/await}
 </Row>
 
 <style>
