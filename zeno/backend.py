@@ -22,7 +22,7 @@ from zeno.api import (
     ZenoOptions,
     ZenoParameters,
 )
-from zeno.classes.base import MetadataType, ZenoColumnType
+from zeno.classes.base import DataProcessingReturn, MetadataType, ZenoColumnType
 from zeno.classes.classes import MetricKey, TableRequest, ZenoColumn
 from zeno.classes.report import Report
 from zeno.classes.slice import FilterIds, FilterPredicateGroup, Slice, SliceMetric
@@ -228,6 +228,21 @@ class ZenoBackend(object):
         self.status = "Done processing"
         print(self.status)
 
+    def __set_data_processing_returns(self, rets: List[List[DataProcessingReturn]]):
+        """Update DataFrame with new columns from processing functions.
+
+        Args:
+            rets (List[List[DataProcessingReturn]]): List of returns from decorated
+            functions.
+        """
+        for ret in rets:
+            for out in ret:
+                c_hash = str(out.column)
+                self.df.loc[:, c_hash] = out.output
+                self.df[c_hash] = self.df[c_hash].convert_dtypes()
+                out.column.metadata_type = getMetadataType(self.df[c_hash])
+                self.complete_columns.append(out.column)
+
     def __predistill(self) -> None:
         """Run distilling functions not dependent on model outputs."""
 
@@ -262,11 +277,7 @@ class ZenoBackend(object):
                     [self.batch_size] * len(predistill_to_run),
                     range(len(predistill_to_run)),
                 )
-                for out in predistill_outputs:
-                    self.df.loc[:, str(out[0])] = out[1]
-                    self.df[str(out[0])] = self.df[str(out[0])].convert_dtypes()
-                    out[0].metadata_type = getMetadataType(self.df[str(out[0])])
-                    self.complete_columns.append(out[0])
+                self.__set_data_processing_returns(predistill_outputs)
 
     def __inference(self):
         """Run models on instances."""
@@ -314,14 +325,7 @@ class ZenoBackend(object):
                     [self.batch_size] * len(models_to_run),
                     range(len(models_to_run)),
                 )
-                for out in inference_outputs:
-                    self.df.loc[:, str(out[0])] = out[2]
-                    self.df[str(out[0])] = self.df[str(out[0])].convert_dtypes()
-                    # If we get an embedding, add it to DataFrame.
-                    if not out[3].isnull().values.any():  # type: ignore
-                        self.df.loc[:, str(out[1])] = out[3]
-                    out[0].metadata_type = getMetadataType(self.df[str(out[0])])
-                    self.complete_columns.append(out[0])
+                self.__set_data_processing_returns(inference_outputs)
 
     def __postdistill(self) -> None:
         """Run distill functions dependent on model outputs."""
@@ -360,11 +364,7 @@ class ZenoBackend(object):
                     [self.batch_size] * len(postdistill_to_run),
                     range(len(postdistill_to_run)),
                 )
-                for out in post_outputs:
-                    self.df.loc[:, str(out[0])] = out[1]  # type: ignore
-                    self.df[str(out[0])] = self.df[str(out[0])].convert_dtypes()
-                    out[0].metadata_type = getMetadataType(self.df[str(out[0])])
-                    self.complete_columns.append(out[0])
+            self.__set_data_processing_returns(post_outputs)
 
     def get_metrics_for_slices(
         self,

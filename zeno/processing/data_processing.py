@@ -3,13 +3,13 @@
 import os
 from inspect import getsource
 from pathlib import Path
-from typing import Callable, Tuple
+from typing import Callable, List
 
 import pandas as pd
 from tqdm import trange
 
 from zeno.api import DistillReturn, ModelReturn, ZenoOptions
-from zeno.classes.base import ZenoColumn, ZenoColumnType
+from zeno.classes.base import DataProcessingReturn, ZenoColumn, ZenoColumnType
 
 
 def predistill_data(
@@ -20,7 +20,7 @@ def predistill_data(
     df: pd.DataFrame,
     batch_size: int,
     pos: int,
-) -> Tuple[ZenoColumn, pd.Series]:
+) -> List[DataProcessingReturn]:
     col_hash = str(column)
 
     # To prevent SettingWithCopyWarning
@@ -45,7 +45,7 @@ def predistill_data(
                 out = fn(df.loc[to_predict_indices[i : i + batch_size]], options)
                 col.loc[to_predict_indices[i : i + batch_size]] = out.distill_output
                 col.to_pickle(str(save_path))
-    return (column, col)
+    return [DataProcessingReturn(column=column, output=col)]
 
 
 def run_inference(
@@ -56,7 +56,7 @@ def run_inference(
     df: pd.DataFrame,
     batch_size: int,
     pos: int,
-) -> Tuple[ZenoColumn, ZenoColumn, pd.Series, pd.Series]:
+) -> List[DataProcessingReturn]:
     model_name = os.path.basename(model_path).split(".")[0]
 
     model_col_obj = ZenoColumn(
@@ -126,7 +126,12 @@ def run_inference(
 
                 model_col.to_pickle(str(model_save_path))
 
-    return (model_col_obj, embedding_col_obj, model_col, embedding_col)
+    ret = [DataProcessingReturn(column=model_col_obj, output=model_col)]
+
+    if not embedding_col.isnull().values.any():  # type: ignore
+        ret.append(DataProcessingReturn(column=embedding_col_obj, output=embedding_col))
+
+    return ret
 
 
 def postdistill_data(
@@ -137,7 +142,7 @@ def postdistill_data(
     df: pd.DataFrame,
     batch_size: int,
     pos: int,
-):
+) -> List[DataProcessingReturn]:
     col_obj = ZenoColumn(
         column_type=ZenoColumnType.POSTDISTILL,
         name=fn.__name__,
@@ -179,4 +184,4 @@ def postdistill_data(
                 out = fn(df.loc[to_predict_indices[i : i + batch_size]], local_options)
                 col.loc[to_predict_indices[i : i + batch_size]] = out.distill_output
                 col.to_pickle(str(save_path))
-    return (col_obj, col)
+    return [DataProcessingReturn(column=col_obj, output=col)]
