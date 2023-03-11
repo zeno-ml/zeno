@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ready, report, reports } from "../../../stores";
+	import { report, reports } from "../../../stores";
 	import SlicesEncoding from "./SlicesEncoding.svelte";
 	import MetricsEncoding from "./MetricsEncoding.svelte";
 	import ModelsEncoding from "./ModelsEncoding.svelte";
@@ -8,42 +8,43 @@
 
 	const EncodingMap = {
 		slices: SlicesEncoding,
-		metrics: MetricsEncoding,
 		models: ModelsEncoding,
+		metrics: MetricsEncoding,
 	};
 
 	const optionMap = {
 		// bar chart select option dropdown
 		[ChartType.BAR]: {
-			x: ["slices", "models"],
-			y: ["metrics"],
-			color: ["slices", "models"],
+			x: [{ label: "slices" }, { label: "models" }],
+			y: [{ label: "metrics" }],
+			color: [{ label: "slices" }, { label: "models" }],
 		},
 		// table view select option dropdown
 		[ChartType.TABLE]: {
-			x: ["slices", "models"],
-			y: ["slices", "models"],
-			color: ["metrics"],
+			x: [{ label: "slices" }, { label: "models" }],
+			y: [{ label: "slices" }, { label: "models" }],
+			color: [{ label: "metrics" }],
 		},
 		// line chart select option dropdown
 		[ChartType.LINE]: {
-			x: ["slices", "models"],
-			y: ["metrics"],
-			color: ["slices", "models"],
+			x: [{ label: "slices" }, { label: "models" }],
+			y: [{ label: "metrics" }],
+			color: [{ label: "slices" }, { label: "models" }],
 		},
 		// beeswarm chart select option dropdown
 		[ChartType.BEESWARM]: {
-			x: ["metrics"],
-			y: ["models"],
-			color: ["slices"],
+			x: [{ label: "metrics" }],
+			y: [{ label: "models" }],
+			color: [{ label: "slices" }],
 		},
 	};
 	$: currentReport = $reports[$report];
 	$: chartType = currentReport.type;
 	$: parameters = currentReport.parameters;
 
-	function refreshParams(e, currentParam) {
+	async function refreshParams(e, currentParam) {
 		// bar/line chart exclusive combination
+		console.log(e);
 		let label = e.detail.label;
 		if (chartType === ChartType.BAR || chartType === ChartType.LINE) {
 			let paramExcluMap = { slices: "models", models: "slices" };
@@ -70,65 +71,57 @@
 	}
 </script>
 
-{#if $ready}
-	<div id="encoding">
-		<h4 class="edit-type">Encoding</h4>
-		<div id="encoding-flex">
-			<div class="parameters">
-				<h4 class="select-label">x</h4>
-				<Svelecte
-					style="width: 260px; height: 30px; flex:none"
-					value={parameters.xEncoding}
-					options={optionMap[chartType].x}
-					valueField="label"
-					labelField="label"
-					searchable={false}
-					on:change={(e) => {
-						if (e.detail.label !== parameters.xEncoding) {
-							refreshParams(e, "x");
-						}
-					}} />
-			</div>
-			<svelte:component this={EncodingMap[parameters.xEncoding]} />
-
-			<div class="parameters">
-				<h4 class="select-label">y</h4>
-				<Svelecte
-					style="width: 260px; height: 30px; flex:none"
-					value={parameters.yEncoding}
-					options={optionMap[chartType].y}
-					valueField="label"
-					labelField="label"
-					searchable={false}
-					on:change={(e) => {
-						if (e.detail.label !== parameters.yEncoding) {
-							refreshParams(e, "y");
-						}
-					}} />
-			</div>
-			<svelte:component this={EncodingMap[parameters.yEncoding]} />
-
-			{#if chartType !== ChartType.TABLE}
-				<div class="parameters">
-					<h4 class="select-label">color</h4>
-					<Svelecte
-						style="width: 260px; height: 30px; flex:none;"
-						value={parameters.colorEncoding}
-						options={optionMap[chartType].color}
-						valueField="label"
-						labelField="label"
-						searchable={false}
-						on:change={(e) => {
-							if (e.detail.label !== parameters.colorEncoding) {
-								refreshParams(e, "color");
-							}
-						}} />
-				</div>
-			{/if}
-			<svelte:component this={EncodingMap[parameters.colorEncoding]} />
+<div id="encoding">
+	<h4 class="edit-type">Encoding</h4>
+	<div id="encoding-flex">
+		<div class="parameters">
+			<h4 class="select-label">x</h4>
+			<Svelecte
+				style="width: 260px; height: 30px; flex:none"
+				value={parameters.xEncoding}
+				options={optionMap[chartType].x}
+				searchable={false}
+				on:change={(e) => {
+					if (e.detail.label !== parameters.xEncoding) {
+						refreshParams(e, "x");
+					}
+				}} />
 		</div>
+		<svelte:component this={EncodingMap[parameters.xEncoding]} />
+
+		<div class="parameters">
+			<h4 class="select-label">y</h4>
+			<Svelecte
+				style="width: 260px; height: 30px; flex:none"
+				value={parameters.yEncoding}
+				options={optionMap[chartType].y}
+				searchable={false}
+				on:change={(e) => {
+					if (e.detail.label !== parameters.yEncoding) {
+						refreshParams(e, "y");
+					}
+				}} />
+		</div>
+		<svelte:component this={EncodingMap[parameters.yEncoding]} />
+
+		{#if chartType !== ChartType.TABLE}
+			<div class="parameters">
+				<h4 class="select-label">color</h4>
+				<Svelecte
+					style="width: 260px; height: 30px; flex:none;"
+					value={parameters.colorEncoding}
+					options={optionMap[chartType].color}
+					searchable={false}
+					on:change={(e) => {
+						if (e.detail.label !== parameters.colorEncoding) {
+							refreshParams(e, "color");
+						}
+					}} />
+			</div>
+		{/if}
+		<svelte:component this={EncodingMap[parameters.colorEncoding]} />
 	</div>
-{/if}
+</div>
 
 <style>
 	.edit-type {

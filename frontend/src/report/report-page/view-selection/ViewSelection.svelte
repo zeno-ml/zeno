@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ready, report, reports } from "../../../stores";
+	import { report, reports } from "../../../stores";
 	import Beeswarm from "./chart-icons/BeeswarmIcon.svelte";
 	import BarChart from "./chart-icons/BarChartIcon.svelte";
 	import LineChart from "./chart-icons/LineChartIcon.svelte";
@@ -52,53 +52,51 @@
 	}
 </script>
 
-{#if $ready}
-	<div class="chart-type">
-		<h4 class="edit-title">Chart Type</h4>
-		<div class="chart-flex">
-			<div
-				id="barchart"
-				class="chart-element {$reports[$report].type === ChartType.BAR
-					? 'selected'
-					: ''}"
-				on:keydown={() => ({})}
-				on:click={updateChart}>
-				<BarChart />
-				<h4 class="chart-title">Bar Chart</h4>
-			</div>
-			<div
-				id="linechart"
-				class="chart-element {$reports[$report].type === ChartType.LINE
-					? 'selected'
-					: ''}"
-				on:keydown={() => ({})}
-				on:click={updateChart}>
-				<LineChart />
-				<h4 class="chart-title">Line Chart</h4>
-			</div>
-			<div
-				id="table"
-				class="chart-element {$reports[$report].type === ChartType.TABLE
-					? 'selected'
-					: ''}"
-				on:keydown={() => ({})}
-				on:click={updateChart}>
-				<TableView />
-				<h4 class="chart-title">Table View</h4>
-			</div>
-			<div
-				id="beeswarm"
-				class="chart-element {$reports[$report].type === ChartType.BEESWARM
-					? 'selected'
-					: ''}"
-				on:keydown={() => ({})}
-				on:click={updateChart}>
-				<Beeswarm />
-				<h4 class="chart-title">Beeswarm Plot</h4>
-			</div>
+<div class="chart-type">
+	<h4 class="edit-title">Chart Type</h4>
+	<div class="chart-flex">
+		<div
+			id="barchart"
+			class="chart-element {$reports[$report].type === ChartType.BAR
+				? 'selected'
+				: ''}"
+			on:keydown={() => ({})}
+			on:click={updateChart}>
+			<BarChart />
+			<h4 class="chart-title">Bar Chart</h4>
+		</div>
+		<div
+			id="linechart"
+			class="chart-element {$reports[$report].type === ChartType.LINE
+				? 'selected'
+				: ''}"
+			on:keydown={() => ({})}
+			on:click={updateChart}>
+			<LineChart />
+			<h4 class="chart-title">Line Chart</h4>
+		</div>
+		<div
+			id="table"
+			class="chart-element {$reports[$report].type === ChartType.TABLE
+				? 'selected'
+				: ''}"
+			on:keydown={() => ({})}
+			on:click={updateChart}>
+			<TableView />
+			<h4 class="chart-title">Table View</h4>
+		</div>
+		<div
+			id="beeswarm"
+			class="chart-element {$reports[$report].type === ChartType.BEESWARM
+				? 'selected'
+				: ''}"
+			on:keydown={() => ({})}
+			on:click={updateChart}>
+			<Beeswarm />
+			<h4 class="chart-title">Beeswarm Plot</h4>
 		</div>
 	</div>
-{/if}
+</div>
 
 <style>
 	.chart-type {

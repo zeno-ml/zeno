@@ -1,30 +1,30 @@
 <script lang="ts">
-	import { ready, report, reports, metrics } from "../../../stores";
-	import Select, { Option } from "@smui/select";
+	import { report, reports, metrics } from "../../../stores";
 	import { ChartType } from "../../../zenoservice";
+	import Svelecte from "svelecte";
+	let options = [];
+	$metrics.forEach((m) => {
+		options.push({ label: m });
+	});
 </script>
 
-{#if $ready}
-	<div class="parameters">
-		<h4 class="select-label">
-			{$reports[$report].type !== ChartType.TABLE ? "" : "metrics"}
-		</h4>
-		<Select
-			bind:value={$reports[$report].metrics}
-			class="select"
-			variant="outlined">
-			{#each $metrics as m}
-				<Option value={m}>{m}</Option>
-			{/each}
-		</Select>
-	</div>
-{/if}
+<div class="parameters">
+	<h4 class="select-label">
+		{$reports[$report].type !== ChartType.TABLE ? "" : "metrics"}
+	</h4>
+	<Svelecte
+		style="width: 260px; height: 30px; flex:none;"
+		value={$reports[$report].metrics}
+		{options}
+		searchable={false}
+		on:change={(e) => {
+			if (e.detail.label !== $reports[$report].metrics) {
+				$reports[$report].metrics = e.detail.label;
+			}
+		}} />
+</div>
 
 <style>
-	* :global(.select .mdc-select__anchor) {
-		height: 30px;
-		width: 260px;
-	}
 	.parameters {
 		display: flex;
 		flex-direction: row;

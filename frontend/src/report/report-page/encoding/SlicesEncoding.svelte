@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ready, report, reports, metric, metrics } from "../../../stores";
+	import { report, reports, metric, metrics } from "../../../stores";
 	import Select, { Option } from "@smui/select";
 	import { TrailingIcon } from "@smui/chips";
 	import { Svg } from "@smui/common";
@@ -12,55 +12,53 @@
 	$: currentReport = $reports[$report];
 </script>
 
-{#if $ready}
-	<div class="chips">
-		{#each currentReport.slices as slice, i}
-			<div class="slice-chip">
-				{slice.sliceName}
-				<TrailingIcon
-					class="remove material-icons"
-					on:click={() => {
-						currentReport.slices.splice(i, 1);
-						$reports[$report] = currentReport;
-					}}>
-					cancel
-				</TrailingIcon>
-			</div>
-		{/each}
-	</div>
-	<div on:click={() => (showSlices = !showSlices)} on:keydown={() => ({})}>
-		<IconButton>
-			<Icon component={Svg} viewBox="0 0 24 24">
-				<path fill="var(--P2)" d={mdiPlusBoxOutline} />
-			</Icon>
-		</IconButton>
-	</div>
-	{#if showSlices}
-		<div
-			class="popup"
-			use:clickOutside
-			on:click_outside={() => (showSlices = false)}>
-			<Paper elevation={7}>
-				<Content>
-					<div id="slices">
-						<div class="settings">
-							{#if $metrics}
-								<Select
-									bind:value={$metric}
-									label="Metric"
-									style="margin-right: 20px;">
-									{#each $metrics as m}
-										<Option value={m}>{m}</Option>
-									{/each}
-								</Select>
-							{/if}
-						</div>
-						<SliceTable />
-					</div>
-				</Content>
-			</Paper>
+<div class="chips">
+	{#each currentReport.slices as slice, i}
+		<div class="slice-chip">
+			{slice.sliceName}
+			<TrailingIcon
+				class="remove material-icons"
+				on:click={() => {
+					currentReport.slices.splice(i, 1);
+					$reports[$report] = currentReport;
+				}}>
+				cancel
+			</TrailingIcon>
 		</div>
-	{/if}
+	{/each}
+</div>
+<div on:click={() => (showSlices = !showSlices)} on:keydown={() => ({})}>
+	<IconButton>
+		<Icon component={Svg} viewBox="0 0 24 24">
+			<path fill="var(--P2)" d={mdiPlusBoxOutline} />
+		</Icon>
+	</IconButton>
+</div>
+{#if showSlices}
+	<div
+		class="popup"
+		use:clickOutside
+		on:click_outside={() => (showSlices = false)}>
+		<Paper elevation={7}>
+			<Content>
+				<div id="slices">
+					<div class="settings">
+						{#if $metrics}
+							<Select
+								bind:value={$metric}
+								label="Metric"
+								style="margin-right: 20px;">
+								{#each $metrics as m}
+									<Option value={m}>{m}</Option>
+								{/each}
+							</Select>
+						{/if}
+					</div>
+					<SliceTable />
+				</div>
+			</Content>
+		</Paper>
+	</div>
 {/if}
 
 <style>
