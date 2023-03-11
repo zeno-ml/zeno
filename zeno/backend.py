@@ -254,8 +254,8 @@ class ZenoBackend(object):
             save_path = Path(self.cache_path, str(predistill_column) + ".pickle")
 
             load_series(self.df, predistill_column, save_path)
-            predistill_hash = str(predistill_column)
 
+            predistill_hash = str(predistill_column)
             if self.df[predistill_hash].isnull().any():
                 predistill_to_run.append(predistill_column)
             else:
