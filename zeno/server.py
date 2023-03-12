@@ -12,6 +12,8 @@ from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
 
+from zeno import MetricReturn
+
 from zeno.backend import ZenoBackend
 from zeno.classes.base import ZenoColumn
 from zeno.classes.classes import (
@@ -40,9 +42,7 @@ from zeno.processing.projection_processing import (
     project_into_2D,
     projection_colors,
 )
-from zeno.processing.slice_finder import (
-    slice_finder
-)
+from zeno.processing.slice_finder import slice_finder
 
 
 def custom_generate_unique_id(route: APIRoute):
@@ -200,11 +200,11 @@ def get_server(zeno: ZenoBackend):
     def project_embed_into_2D(req: EmbedProject2DRequest):
         return project_into_2D(zeno.df, zeno.id_column, req.model, req.column)
 
-    @api_app.post(
-        "/slice-finder-project", tags=["zeno"], response_model=str
-    )  # response_model=List[SliceMetric]
+    @api_app.post("/slice-finder-project", tags=["zeno"], response_model=MetricReturn)
     def project_find_available_slices(req: SliceFinderRequest):
-        return slice_finder(req)  # TODO: ADD SOMETHING HERE
+        return slice_finder(
+            zeno.df, req, zeno.zeno_options, zeno.metric_functions, zeno.columns
+        )
 
     @api_app.post("/colors-project", tags=["zeno"], response_model=PointsColors)
     def get_projection_colors(req: ColorsProjectRequest):

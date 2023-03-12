@@ -8,6 +8,7 @@ import type { FilterPredicateGroup } from "../models/FilterPredicateGroup";
 import type { HistogramBucket } from "../models/HistogramBucket";
 import type { HistogramRequest } from "../models/HistogramRequest";
 import type { MetricRequest } from "../models/MetricRequest";
+import type { MetricReturn } from "../models/MetricReturn";
 import type { Points2D } from "../models/Points2D";
 import type { PointsColors } from "../models/PointsColors";
 import type { Report } from "../models/Report";
@@ -333,12 +334,12 @@ export class ZenoService {
 	/**
 	 * Project Find Available Slices
 	 * @param requestBody
-	 * @returns string Successful Response
+	 * @returns MetricReturn Successful Response
 	 * @throws ApiError
 	 */
 	public static projectFindAvailableSlices(
 		requestBody: SliceFinderRequest
-	): CancelablePromise<string> {
+	): CancelablePromise<MetricReturn> {
 		return __request(OpenAPI, {
 			method: "POST",
 			url: "/slice-finder-project",

@@ -10,6 +10,8 @@
 	import { mdiPlus, mdiClose } from "@mdi/js";
 	import { Pagination } from "@smui/data-table";
 	import { settings, showSliceFinder } from "../../stores";
+	import { ZenoService } from "../../zenoservice";
+	import { model } from "../../stores";
 
 	let currentResult;
 	let currentPage = 1;
@@ -23,8 +25,8 @@
 	let minimumSize = "10";
 	let depths = ["10", "20", "30", "50"];
 	let depth = "10";
-	let sliceFinderMetricss = ["accuracy", "f1", "recall"];
-	let sliceFinderMetrics = "accuracy";
+	let sliceFinderMetrics = ["accuracy", "f1", "recall"];
+	let sliceFinderMetric = "accuracy";
 	let orderBys = ["ascending", "descending"];
 	let orderBy = "ascending";
 
@@ -33,6 +35,17 @@
 	$: lastPage = 10000;
 	$: if (showSliceFinder && input) {
 		input.getElement().focus();
+	}
+
+	export async function testPOSTAbility() {
+		const sets = await ZenoService.projectFindAvailableSlices({
+			id: "1",
+			orderBy: orderBy,
+			sliceFinderMetric: sliceFinderMetric,
+			minimumSize: minimumSize,
+			depth: depth,
+			model: $model,
+		});
 	}
 
 	function submit(e) {
@@ -89,6 +102,11 @@
 					<path fill="#6a1b9a" d={mdiClose} />
 				</Icon>
 			</IconButton>
+			<IconButton on:click={() => testPOSTAbility()}>
+				<Icon component={Svg} viewBox="0 0 24 24">
+					<path fill="#6a1b9a" d={mdiClose} />
+				</Icon>
+			</IconButton>
 		</div>
 		<div class="metrics">
 			<Select
@@ -111,10 +129,10 @@
 			</Select>
 			<Select
 				class="select"
-				bind:value={sliceFinderMetrics}
+				bind:value={sliceFinderMetric}
 				label="Metric"
 				style="width: 170px">
-				{#each sliceFinderMetricss as m}
+				{#each sliceFinderMetrics as m}
 					<Option value={m}>{m}</Option>
 				{/each}
 			</Select>
