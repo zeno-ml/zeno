@@ -95,20 +95,8 @@
 
 		await tick();
 
-		let ids = table.map((inst) => inst[idHash]);
-		viewDivs = Object.fromEntries(
-			ids
-				.map(
-					(key) =>
-						!!Object.getOwnPropertyDescriptor(viewDivs, key) && [
-							key,
-							viewDivs[key],
-						]
-				)
-				.filter(Boolean)
-		);
-		table.forEach((inst, i) => {
-			let div = viewDivs[inst[idHash]];
+		table.forEach((_, i) => {
+			let div = viewDivs[i];
 			if (div) {
 				viewFunction(
 					div,
@@ -126,8 +114,8 @@
 
 {#if table}
 	<div class="container sample-container">
-		{#each table as inst (inst[idHash])}
-			<div class="instance" bind:this={viewDivs[inst[idHash]]} />
+		{#each table as inst, i (inst[idHash])}
+			<div class="instance" bind:this={viewDivs[i]} />
 		{/each}
 	</div>
 	<Pagination slot="paginate" class="pagination">
@@ -140,9 +128,9 @@
 			</Select>
 		</svelte:fragment>
 		<svelte:fragment slot="total">
-			{start + 1}-{end} of {#await currentResult then r}{r
-					? r[0].size
-					: ""}{/await}
+			{start + 1}-{#await currentResult then r}
+				{Math.min(end, r ? r[0].size : end)} of
+				{r ? r[0].size : ""}{/await}
 		</svelte:fragment>
 
 		<IconButton

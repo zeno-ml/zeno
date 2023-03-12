@@ -3,13 +3,13 @@
 import os
 from inspect import getsource
 from pathlib import Path
-from typing import Callable, Tuple
+from typing import Callable, List
 
 import pandas as pd
 from tqdm import trange
 
 from zeno.api import DistillReturn, ModelReturn, ZenoOptions
-from zeno.classes.base import ZenoColumn, ZenoColumnType
+from zeno.classes.base import DataProcessingReturn, ZenoColumn, ZenoColumnType
 
 
 def predistill_data(
@@ -20,7 +20,7 @@ def predistill_data(
     df: pd.DataFrame,
     batch_size: int,
     pos: int,
-) -> Tuple[ZenoColumn, pd.Series]:
+) -> List[DataProcessingReturn]:
     col_hash = str(column)
 
     # To prevent SettingWithCopyWarning
@@ -30,22 +30,17 @@ def predistill_data(
     to_predict_indices = col.loc[pd.isna(col)].index
 
     if len(to_predict_indices) > 0:
-        if len(to_predict_indices) < batch_size:
-            out = fn(df.loc[to_predict_indices], options)
-            col.loc[to_predict_indices] = out.distill_output
+        for i in trange(
+            0,
+            len(to_predict_indices),
+            batch_size,
+            desc="preprocessing " + fn.__name__,
+            position=pos,
+        ):
+            out = fn(df.loc[to_predict_indices[i : i + batch_size]], options)
+            col.loc[to_predict_indices[i : i + batch_size]] = out.distill_output
             col.to_pickle(str(save_path))
-        else:
-            for i in trange(
-                0,
-                len(to_predict_indices),
-                batch_size,
-                desc="preprocessing " + fn.__name__,
-                position=pos,
-            ):
-                out = fn(df.loc[to_predict_indices[i : i + batch_size]], options)
-                col.loc[to_predict_indices[i : i + batch_size]] = out.distill_output
-                col.to_pickle(str(save_path))
-    return (column, col)
+    return [DataProcessingReturn(column=column, output=col)]
 
 
 def run_inference(
@@ -56,7 +51,7 @@ def run_inference(
     df: pd.DataFrame,
     batch_size: int,
     pos: int,
-) -> Tuple[ZenoColumn, ZenoColumn, pd.Series, pd.Series]:
+) -> List[DataProcessingReturn]:
     model_name = os.path.basename(model_path).split(".")[0]
 
     model_col_obj = ZenoColumn(
@@ -87,46 +82,32 @@ def run_inference(
             os.makedirs(file_cache_path, exist_ok=True)
             options = options.copy(update={"output_path": file_cache_path})
 
-        if len(to_predict_indices) < batch_size:
-            out = model_fn(df.loc[to_predict_indices], options)
+        for i in trange(
+            0,
+            len(to_predict_indices),
+            batch_size,
+            desc="Inference on " + model_name,
+            position=pos,
+        ):
+            out = model_fn(df.loc[to_predict_indices[i : i + batch_size]], options)
 
             # Check if we also get embedding
             if out.embedding is not None:
-                # Loop for setting since setting with loc and NDArray can cause issues.
-                for i, idx in enumerate(to_predict_indices):
+                for i, idx in enumerate(to_predict_indices[i : i + batch_size]):
                     model_col.at[idx] = out.model_output[i]
                     embedding_col.at[idx] = out.embedding[i]
+
                 embedding_col.to_pickle(str(embedding_save_path))
             else:
-                model_col.loc[to_predict_indices] = out.model_output
+                model_col.loc[to_predict_indices[i : i + batch_size]] = out.model_output
 
             model_col.to_pickle(str(model_save_path))
 
-        else:
-            for i in trange(
-                0,
-                len(to_predict_indices),
-                batch_size,
-                desc="Inference on " + model_name,
-                position=pos,
-            ):
-                out = model_fn(df.loc[to_predict_indices[i : i + batch_size]], options)
+    ret = [DataProcessingReturn(column=model_col_obj, output=model_col)]
+    if not embedding_col.isnull().values.any():  # type: ignore
+        ret.append(DataProcessingReturn(column=embedding_col_obj, output=embedding_col))
 
-                # Check if we also get embedding
-                if out.embedding is not None:
-                    for i, idx in enumerate(to_predict_indices[i : i + batch_size]):
-                        model_col.at[idx] = out.model_output[i]
-                        embedding_col.at[idx] = out.embedding[i]
-
-                    embedding_col.to_pickle(str(embedding_save_path))
-                else:
-                    model_col.loc[
-                        to_predict_indices[i : i + batch_size]
-                    ] = out.model_output
-
-                model_col.to_pickle(str(model_save_path))
-
-    return (model_col_obj, embedding_col_obj, model_col, embedding_col)
+    return ret
 
 
 def postdistill_data(
@@ -137,7 +118,7 @@ def postdistill_data(
     df: pd.DataFrame,
     batch_size: int,
     pos: int,
-):
+) -> List[DataProcessingReturn]:
     col_obj = ZenoColumn(
         column_type=ZenoColumnType.POSTDISTILL,
         name=fn.__name__,
@@ -164,19 +145,15 @@ def postdistill_data(
     )
 
     if len(to_predict_indices) > 0:
-        if len(to_predict_indices) < batch_size:
-            out = fn(df.loc[to_predict_indices], local_options)
-            col.loc[to_predict_indices] = out.distill_output
+        for i in trange(
+            0,
+            len(to_predict_indices),
+            batch_size,
+            desc="postprocessing " + fn.__name__ + " on " + model,
+            position=pos,
+        ):
+            out = fn(df.loc[to_predict_indices[i : i + batch_size]], local_options)
+            col.loc[to_predict_indices[i : i + batch_size]] = out.distill_output
             col.to_pickle(str(save_path))
-        else:
-            for i in trange(
-                0,
-                len(to_predict_indices),
-                batch_size,
-                desc="postprocessing " + fn.__name__ + " on " + model,
-                position=pos,
-            ):
-                out = fn(df.loc[to_predict_indices[i : i + batch_size]], local_options)
-                col.loc[to_predict_indices[i : i + batch_size]] = out.distill_output
-                col.to_pickle(str(save_path))
-    return (col_obj, col)
+
+    return [DataProcessingReturn(column=col_obj, output=col)]
