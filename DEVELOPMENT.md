@@ -51,7 +51,7 @@ You should now be able to see a live version of zeno on `localhost:8000` in your
 
 **MacOS Note**
 
-If you are using MacBook Pro/Macbook Air with M1 chip and is experiencing error logs 
+If you are using MacBook Pro/Macbook Air with M1 chip and is experiencing error logs while running the backend server
 ```
 objc[29381]: +[NSMutableString initialize] may have been in progress in another thread when fork() was called.
 ```
