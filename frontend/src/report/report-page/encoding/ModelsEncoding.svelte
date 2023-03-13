@@ -18,7 +18,6 @@
 		{value}
 		{options}
 		multiple={true}
-		max="4"
 		on:change={(e) => {
 			let m = [];
 			e.detail.forEach((ed) => {
