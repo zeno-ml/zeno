@@ -14,7 +14,7 @@ exclude = ["zeno/tests/*"]
 
 [tool.poetry.dependencies]
 cachetools = "^5.3.0"
-fastapi = ">=0.75,<0.93"
+fastapi = ">=0.75,<0.95"
 gradio = "^3.18.0"
 inquirer = "^3.1.2"
 nest-asyncio = "^1.5.6"
