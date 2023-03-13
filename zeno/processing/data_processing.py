@@ -137,7 +137,7 @@ def run_inference(
     ret = [DataProcessingReturn(column=model_col_obj, output=model_col)]
     if not embedding_col.isnull().values.any():  # type: ignore
         ret.append(DataProcessingReturn(column=embedding_col_obj, output=embedding_col))
-    for k, v in other_return_cols.items():
+    for k, v in other_return_cols.items():  # type: ignore
         ret.append(
             DataProcessingReturn(
                 column=v,
