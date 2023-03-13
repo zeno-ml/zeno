@@ -3,13 +3,14 @@
 import os
 from inspect import getsource
 from pathlib import Path
-from typing import Callable, List
+from typing import Callable, Dict, List
 
 import pandas as pd
 from tqdm import trange
 
 from zeno.api import DistillReturn, ModelReturn, ZenoOptions
 from zeno.classes.base import DataProcessingReturn, ZenoColumn, ZenoColumnType
+from zeno.util import load_series
 
 
 def predistill_data(
@@ -40,6 +41,7 @@ def predistill_data(
             out = fn(df.loc[to_predict_indices[i : i + batch_size]], options)
             col.loc[to_predict_indices[i : i + batch_size]] = out.distill_output
             col.to_pickle(str(save_path))
+
     return [DataProcessingReturn(column=column, output=col)]
 
 
@@ -72,6 +74,7 @@ def run_inference(
 
     to_predict_indices = model_col.loc[pd.isna(model_col)].index
 
+    other_return_cols: Dict[str, ZenoColumn] = {}
     if len(to_predict_indices) > 0:
         model_fn = fn(model_path)
 
@@ -93,19 +96,54 @@ def run_inference(
 
             # Check if we also get embedding
             if out.embedding is not None:
-                for i, idx in enumerate(to_predict_indices[i : i + batch_size]):
-                    model_col.at[idx] = out.model_output[i]
-                    embedding_col.at[idx] = out.embedding[i]
+                for j, idx in enumerate(to_predict_indices[i : i + batch_size]):
+                    model_col.at[idx] = out.model_output[j]
+                    embedding_col.at[idx] = out.embedding[j]
 
                 embedding_col.to_pickle(str(embedding_save_path))
             else:
                 model_col.loc[to_predict_indices[i : i + batch_size]] = out.model_output
+
+            if out.other_returns is not None:
+                for k, v in out.other_returns.items():
+                    if i == 0:
+                        postdistill_col_obj = ZenoColumn(
+                            column_type=ZenoColumnType.POSTDISTILL,
+                            name=k,
+                            model=model_name,
+                        )
+                        other_return_cols[k] = postdistill_col_obj
+                        postdistill_hash = str(postdistill_col_obj)
+                        if postdistill_hash not in df.columns:
+                            load_series(
+                                df,
+                                postdistill_col_obj,
+                                Path(cache_path, postdistill_hash + ".pickle"),
+                            )
+
+                    postdistill_col_obj = other_return_cols[k]
+                    postdistill_hash = str(postdistill_col_obj)
+                    postdistill_col = df[postdistill_hash].copy()
+                    postdistill_col.loc[
+                        to_predict_indices[i : i + batch_size]
+                    ] = out.other_returns[k]
+                    postdistill_save_path = Path(
+                        cache_path, postdistill_hash + ".pickle"
+                    )
+                    postdistill_col.to_pickle(str(postdistill_save_path))
 
             model_col.to_pickle(str(model_save_path))
 
     ret = [DataProcessingReturn(column=model_col_obj, output=model_col)]
     if not embedding_col.isnull().values.any():  # type: ignore
         ret.append(DataProcessingReturn(column=embedding_col_obj, output=embedding_col))
+    for k, v in other_return_cols.items():
+        ret.append(
+            DataProcessingReturn(
+                column=v,
+                output=df[str(v)],
+            )
+        )
 
     return ret
 
