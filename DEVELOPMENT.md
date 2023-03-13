@@ -23,8 +23,15 @@ After cloning the repository:
 
 You should now be able to run `poetry run zeno`
 
-To run the CIFAR-10 example:
+## Examples
 
+The various standard examples for Zeno are in the [examples GitHub repo](https://github.com/zeno-ml/examples).
+
+First, clone that repository into this one: `git clone https://github.com/zeno-ml/examples`
+
+Then, to set up the CIFAR example:
+
+- `cd examples/`
 - `mkdir data; cd data; git clone https://github.com/YoongiKim/CIFAR-10-images`
 - `source ./.venv/bin/activate` (Windows OS command: `.\.venv\Scripts\activate`)
 - `pip install Pillow torch torchvision`
@@ -41,6 +48,21 @@ You should now be able to see a live version of zeno on `localhost:8000` in your
 
 - If `make` command is not working, install `gnuwin32` following the [`instructions`](https://superuser.com/a/1634350) to make it works.
 - If encountering `ModuleNotFoundError: No module named “cifar_model”`, add `zeno/examples/cifar/tests` path to `.venv/Lib/site-packages/zenoml.pth` file.
+
+**MacOS Note**
+
+If you are using MacBook Pro/Macbook Air with M1 chip and is experiencing error logs while running the backend server
+```
+objc[29381]: +[NSMutableString initialize] may have been in progress in another thread when fork() was called.
+```
+, please add 
+```
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+```
+at the end of the ~/.zprofile file, and do 
+```
+source ~/.zprofile
+```
 
 ## Contributing
 

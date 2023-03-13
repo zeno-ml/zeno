@@ -71,19 +71,22 @@ def parse_toml():
         print("ERROR: Failed to read TOML configuration file.")
         sys.exit(1)
 
-    base_path = os.path.dirname(os.path.abspath(sys.argv[1]))
+    # Change working directory to the directory of the config file.
+    os.chdir(os.path.dirname(os.path.abspath(sys.argv[1])))
 
     if "metadata" not in args:
         print("ERROR: Must have 'metadata' entry which must be a CSV or Parquet file.")
         sys.exit(1)
     else:
-        meta_path = Path(os.path.realpath(os.path.join(base_path, args["metadata"])))
+        meta_path = Path(os.path.realpath(args["metadata"]))
 
         # Read metadata as Pandas for slicing
         if meta_path.suffix == ".csv":
             args["metadata"] = pd.read_csv(meta_path)
         elif meta_path.suffix == ".tsv":
-            args["metadata"] = pd.read_csv(meta_path, sep="\t", header=0)
+            args["metadata"] = pd.read_csv(
+                meta_path, sep="\t", header=0, quoting=3, keep_default_na=False
+            )
         elif meta_path.suffix == ".parquet":
             args["metadata"] = pd.read_parquet(meta_path)
         elif meta_path.suffix == ".jsonl":
@@ -93,7 +96,7 @@ def parse_toml():
             sys.exit(1)
 
     if "functions" in args:
-        fn_path = Path(os.path.realpath(os.path.join(base_path, args["functions"])))
+        fn_path = Path(os.path.realpath(args["functions"]))
         if os.path.isfile(fn_path):
             args["functions"] = parse_testing_file(fn_path)
         elif os.path.exists(fn_path):
@@ -103,25 +106,27 @@ def parse_toml():
                 fns = fns + parse_testing_file(f)
             args["functions"] = fns
 
-    zeno(ZenoParameters(**args), base_path)
+    zeno(ZenoParameters(**args))
 
 
-def parse_args(args: ZenoParameters, base_path) -> ZenoParameters:
+def parse_args(args: ZenoParameters) -> ZenoParameters:
 
     if type(args) == dict:
         args = ZenoParameters.parse_obj(args)
 
+    args.metadata = args.metadata.copy()
+
     if args.cache_path == "":
-        args.cache_path = os.path.realpath(os.path.join(base_path, "./.zeno_cache/"))
+        args.cache_path = "./.zeno_cache/"
     else:
-        args.cache_path = os.path.realpath(os.path.join(base_path, args.cache_path))
+        args.cache_path = args.cache_path
 
     os.makedirs(args.cache_path, exist_ok=True)
 
     # Try to get view from GitHub List, if not try to read from path and copy it.
     if args.view != "":
         view_dest_path = Path(os.path.join(args.cache_path, "view.mjs"))
-        view_path = Path(os.path.realpath(os.path.join(base_path, args.view)))
+        view_path = Path(args.view)
         if view_path.is_file():
             if view_dest_path.is_file():
                 os.remove(view_dest_path)
@@ -142,18 +147,6 @@ def parse_args(args: ZenoParameters, base_path) -> ZenoParameters:
                 )
                 sys.exit(1)
 
-    if len(args.models) > 0:
-        if Path(os.path.realpath(os.path.join(base_path, args.models[0]))).exists():
-            args.models = [
-                os.path.realpath(os.path.join(base_path, m)) for m in args.models
-            ]
-
-    if not args.data_path.startswith("http") and args.data_path != "":
-        args.data_path = os.path.realpath(os.path.join(base_path, args.data_path))
-
-    if args.label_path != "":
-        args.label_path = os.path.realpath(os.path.join(base_path, args.label_path))
-
     if args.id_column == "":
         print(
             "WARNING: no id_column specified, using index as id_column. If you are",
@@ -172,10 +165,10 @@ def run_zeno(args: ZenoParameters):
     uvicorn.run(app, host=args.host, port=args.port, log_level="error")
 
 
-def zeno(args: Union[ZenoParameters, dict], base_path="./"):
+def zeno(args: Union[ZenoParameters, dict]):
     if isinstance(args, dict):
         args = ZenoParameters.parse_obj(args)
-    args = parse_args(args, base_path)
+    args = parse_args(args)
 
     if args.serve:
         global ZENO_SERVER_PROCESS

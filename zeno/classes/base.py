@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Optional
 
+from pandas import Series
 from pydantic import BaseModel
 
 
@@ -51,3 +52,13 @@ class ZenoColumn(CamelModel):
 
     def __hash__(self):
         return hash(str(self))
+
+
+class DataProcessingReturn(BaseModel):
+    """Return type for data processing functions."""
+
+    column: ZenoColumn
+    output: Series
+
+    class Config:
+        arbitrary_types_allowed = True

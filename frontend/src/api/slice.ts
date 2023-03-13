@@ -39,17 +39,6 @@ function setModelForMetricKeys(metricKeys: MetricKey[]) {
 		return key;
 	});
 }
-export async function createNewSlice(
-	sliceName: string,
-	predicateGroup: FilterPredicateGroup,
-	folder = ""
-) {
-	await ZenoService.createNewSlice({
-		sliceName: sliceName,
-		folder,
-		filterPredicates: predicateGroup,
-	});
-}
 
 export async function deleteSlice(sliceName: string) {
 	await ZenoService.deleteSlice([sliceName]);

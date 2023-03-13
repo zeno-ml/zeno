@@ -75,10 +75,8 @@ def get_server(zeno: ZenoBackend):
     # If an inference function is provided, mount the gradio app.
     if zeno.inference_function:
         # The input_columns should map to the input_components.
-        input_components, output_components, input_columns = zeno.inference_function(
-            zeno.zeno_options
-        )
-        zeno.gradio_input_columns = input_columns
+        inference_return = zeno.inference_function(zeno.zeno_options)
+        zeno.gradio_input_columns = inference_return.input_columns
 
         gradio_app = gr.Interface(
             fn=zeno.single_inference,
@@ -86,9 +84,9 @@ def get_server(zeno: ZenoBackend):
                 gr.components.Dropdown(
                     zeno.model_names, value=zeno.model_names[0], label="Model"
                 ),
-                *input_components,
+                *inference_return.input_components,
             ],
-            outputs=output_components,
+            outputs=inference_return.output_component,
             css="""
                     :root {
                     --button-primary-background-base: #6a1b9a;

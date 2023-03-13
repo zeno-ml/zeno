@@ -134,7 +134,7 @@ def histogram_metrics(
         for b in r.buckets:
             df_filt = filter_table_single(filt_df, col, b)
             metric = metric_fn(df_filt, req.model, req.metric)
-            if metric is None or isnan(metric):
+            if metric is None or pd.isna(metric) or isnan(metric):
                 loc_ret.append(None)
             else:
                 loc_ret.append(metric)
@@ -162,9 +162,9 @@ def filter_by_string(df: pd.DataFrame, req: StringFilterRequest) -> List[str]:
     else:
         ret = col[col.str.contains(req.filter_string, case=False)].head().tolist()
         for r in ret:
-            idx = re.search(req.filter_string, r)
+            idx = re.search(req.filter_string, r)  # type: ignore
             if idx is not None:
-                idx = idx.start()
+                idx = idx.start()  # type: ignore
                 loc_str = r[idx - 20 : idx + 20]
                 if len(r) > 40 + len(req.filter_string):
                     if idx - 20 > 0:

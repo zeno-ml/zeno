@@ -1,5 +1,0 @@
-view = "image-classification"
-metadata = "./cifar_pred.csv"
-data_path = "../../data/CIFAR-10-images/test/"
-data_column = "id"
-id_column = "id"

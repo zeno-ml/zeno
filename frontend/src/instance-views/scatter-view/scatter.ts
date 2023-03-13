@@ -2,7 +2,10 @@ import type { FilterPredicateGroup, Points2D } from "../../zenoservice";
 import { getFilteredIds } from "../../api/table";
 import { selectionIds } from "../../stores";
 
-export function getIndicesFromIds(allIds: string[], filterIds: string[]) {
+export function getIndicesFromIds(
+	allIds: string[] | number[],
+	filterIds: string[] | number[]
+) {
 	const index = new Map();
 	allIds.forEach((id, i) => {
 		index.set(id, i);
@@ -16,7 +19,7 @@ export function getIndicesFromIds(allIds: string[], filterIds: string[]) {
  * @todo make this native to the filter predicates somehow
  * right now I just consider it separate
  */
-export function selectPoints(e: CustomEvent<number[]>, points: Points2D) {
+export function selectPoints(e: CustomEvent, points: Points2D) {
 	const selectedIndices = e.detail;
 	const selectedIds = selectedIndices.map((index) => points.ids[index]);
 	selectionIds.set({ ids: selectedIds });

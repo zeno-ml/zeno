@@ -1,9 +1,0 @@
-functions = "./"
-view = "zenoml_image_classification"
-metadata = "../imagenet_val_str.csv"
-models = ["resnet", "resnet+clip"]
-data_path = "../../../data/imagenet/val"
-data_column = "id"
-data_type = "path"
-batch_size = 32
-port = 8000

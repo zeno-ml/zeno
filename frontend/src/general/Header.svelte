@@ -4,6 +4,7 @@
 		mdiChartBoxOutline,
 		mdiCompassOutline,
 		mdiGithub,
+		mdiHomeOutline,
 		mdiPlusCircleOutline,
 	} from "@mdi/js";
 	import { Svg } from "@smui/common";
@@ -89,6 +90,18 @@
 	</div>
 
 	<div class="icons">
+		<div
+			use:tooltip={{
+				content: "Learn more about Zeno.",
+				position: "right",
+				theme: "zeno-tooltip",
+			}}>
+			<IconButton href="http://zenoml.com/">
+				<Icon component={Svg} viewBox="0 0 24 24">
+					<path fill="black" d={mdiHomeOutline} />
+				</Icon>
+			</IconButton>
+		</div>
 		<div
 			use:tooltip={{
 				content: "Explore the documentation.",
