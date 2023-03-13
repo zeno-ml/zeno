@@ -1,9 +1,0 @@
-view = "image_classification"
-metadata = "../coco-tagging.csv"
-functions = "./"
-data_path = "/Users/acabrera/dev/data/coco-2017/val2017"
-id_column = "file_name"
-data_column = "file_name"
-label_column = "label"
-batch_size = 16
-port = 8001

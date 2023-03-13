@@ -66,6 +66,8 @@ export const models: Writable<string[]> = writable([]);
 export const model: Writable<string> = writable(undefined);
 export const metric: Writable<string> = writable(undefined);
 
+export const comparisonModels: Writable<string[]> = writable([]);
+
 // [column, ascending]
 export const sort: Writable<[ZenoColumn, boolean]> = writable([
 	undefined,

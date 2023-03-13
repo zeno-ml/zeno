@@ -5,7 +5,7 @@
 	import { slide } from "svelte/transition";
 	import { folders, slices } from "../../stores";
 	import SliceCell from "./SliceCell.svelte";
-	import { createNewSlice } from "../../api/slice";
+	import { ZenoService } from "../../zenoservice";
 
 	export let folder: string;
 
@@ -34,7 +34,11 @@
 			const sli = sls.get(data);
 			sli.folder = folder;
 			sls.set(data, sli);
-			createNewSlice(sli.sliceName, sli.filterPredicates, folder);
+			ZenoService.createNewSlice({
+				sliceName: sli.sliceName,
+				filterPredicates: sli.filterPredicates,
+				folder: folder,
+			});
 			return sls;
 		});
 	}}>
