@@ -3,7 +3,7 @@
 	import { Icon } from "@smui/button";
 	import IconButton from "@smui/icon-button";
 	import { report, reports } from "../../stores";
-	import SliceDetailsContainer from "../SliceDetailsContainer.svelte";
+	import SliceDetailsContainer from "./SliceDetailsContainer.svelte";
 	import TableReportSliceRow from "./TableReportSliceRow.svelte";
 	import TableReportModelRow from "./TableReportModelRow.svelte";
 

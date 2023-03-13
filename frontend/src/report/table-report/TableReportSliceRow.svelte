@@ -5,7 +5,7 @@
 	import { getMetricsForSlices } from "../../api/slice";
 	import { report, reports } from "../../stores";
 	import type { Slice, MetricKey } from "../../zenoservice";
-	import SliceDetailsContainer from "../SliceDetailsContainer.svelte";
+	import SliceDetailsContainer from "./SliceDetailsContainer.svelte";
 
 	export let sliceIndex: number;
 	export let slice: Slice;
