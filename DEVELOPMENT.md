@@ -49,6 +49,21 @@ You should now be able to see a live version of zeno on `localhost:8000` in your
 - If `make` command is not working, install `gnuwin32` following the [`instructions`](https://superuser.com/a/1634350) to make it works.
 - If encountering `ModuleNotFoundError: No module named “cifar_model”`, add `zeno/examples/cifar/tests` path to `.venv/Lib/site-packages/zenoml.pth` file.
 
+**MacOS Note**
+
+If you are using MacBook Pro/Macbook Air with M1 chip and is experiencing error logs while running the backend server
+```
+objc[29381]: +[NSMutableString initialize] may have been in progress in another thread when fork() was called.
+```
+, please add 
+```
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+```
+at the end of the ~/.zprofile file, and do 
+```
+source ~/.zprofile
+```
+
 ## Contributing
 
 Pull requests are welcome for any bug fixes or features.
