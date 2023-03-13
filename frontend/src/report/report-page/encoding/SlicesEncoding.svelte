@@ -6,6 +6,7 @@
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Paper, { Content } from "@smui/paper";
 	import { mdiPlusBoxOutline } from "@mdi/js";
+	import { tooltip } from "@svelte-plugins/tooltips";
 	import { clickOutside } from "../../../util/clickOutside";
 	import SliceTable from "../../slice-table-report/SliceTable.svelte";
 	$: showSlices = false;
@@ -26,14 +27,22 @@
 			</TrailingIcon>
 		</div>
 	{/each}
+	<div
+		use:tooltip={{
+			content: "add slices",
+			position: "right",
+			theme: "zeno-tooltip",
+		}}
+		on:click={() => (showSlices = !showSlices)}
+		on:keydown={() => ({})}>
+		<IconButton>
+			<Icon component={Svg} viewBox="0 0 24 24">
+				<path fill="var(--G3)" d={mdiPlusBoxOutline} />
+			</Icon>
+		</IconButton>
+	</div>
 </div>
-<div on:click={() => (showSlices = !showSlices)} on:keydown={() => ({})}>
-	<IconButton>
-		<Icon component={Svg} viewBox="0 0 24 24">
-			<path fill="var(--P2)" d={mdiPlusBoxOutline} />
-		</Icon>
-	</IconButton>
-</div>
+
 {#if showSlices}
 	<div
 		class="popup"

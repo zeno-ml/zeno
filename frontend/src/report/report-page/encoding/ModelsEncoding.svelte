@@ -39,4 +39,8 @@
 	.select-label {
 		margin: 5px;
 	}
+	:global(.svelecte-control .has-multiSelection .sv-item) {
+		--sv-item-selected-bg: var(--P3);
+		--sv-item-btn-bg: var(--P3);
+	}
 </style>
