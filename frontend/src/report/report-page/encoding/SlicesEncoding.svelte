@@ -9,7 +9,6 @@
 		}
 		options.push({ value: i, label: s.sliceName });
 	});
-	console.log(value, options);
 </script>
 
 <div class="parameters">

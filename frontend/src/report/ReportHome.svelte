@@ -25,7 +25,6 @@
 					reps.push({
 						name: "new report",
 						type: ChartType.BAR,
-						reportPredicates: [],
 						slices: [...$slices.values()],
 						models: [...$models.values()],
 						metrics: "accuracy",

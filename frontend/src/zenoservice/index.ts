@@ -24,7 +24,6 @@ export type { Parameters } from "./models/Parameters";
 export type { Points2D } from "./models/Points2D";
 export type { PointsColors } from "./models/PointsColors";
 export type { Report } from "./models/Report";
-export type { ReportPredicate } from "./models/ReportPredicate";
 export type { Slice } from "./models/Slice";
 export type { SliceMetric } from "./models/SliceMetric";
 export type { StringFilterRequest } from "./models/StringFilterRequest";

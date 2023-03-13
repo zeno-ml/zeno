@@ -26,7 +26,6 @@ class Parameters(CamelModel):
 class Report(CamelModel):
     name: str
     type: Union[ChartType, None] = None
-    report_predicates: Union[List[ReportPredicate], None] = None
     slices: Union[List[Slice], None] = None
     metrics: Union[List[str], str, None] = None
     models: Union[List[str], None] = None
