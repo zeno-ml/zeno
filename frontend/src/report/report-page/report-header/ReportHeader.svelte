@@ -7,7 +7,7 @@
 	import CharacterCounter from "@smui/textfield/character-counter";
 
 	let ishover = false;
-	$: currReport = $reports[$report];
+	$: currentReport = $reports[$report];
 </script>
 
 <div class="header-flex">
@@ -15,7 +15,7 @@
 		class="return-link"
 		on:keydown={() => ({})}
 		on:click={() => {
-			$reports[$report].name = currReport.name;
+			$reports[$report].name = currentReport.name;
 			updateTab("report");
 		}}
 		on:focus={() => ({})}
@@ -39,7 +39,7 @@
 		<Textfield
 			style="width: -webkit-fill-available"
 			variant="outlined"
-			bind:value={currReport.name}
+			bind:value={currentReport.name}
 			label="Report Name"
 			input$maxlength={15}>
 			<CharacterCounter slot="helper">0 / 15</CharacterCounter>

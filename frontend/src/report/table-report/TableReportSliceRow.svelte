@@ -3,39 +3,45 @@
 	import { Cell, Row } from "@smui/data-table";
 	import IconButton from "@smui/icon-button";
 	import { getMetricsForSlices } from "../../api/slice";
-	import { models, report, reports, slices } from "../../stores";
-	import type { ReportPredicate } from "../../zenoservice";
+	import { report, reports } from "../../stores";
+	import type { Slice, MetricKey } from "../../zenoservice";
 	import SliceDetailsContainer from "../SliceDetailsContainer.svelte";
 
-	export let predicateIndex: number;
-	export let predicate: ReportPredicate;
+	export let sliceIndex: number;
+	export let slice: Slice;
 
-	let modelResults = [];
+	$: currentReport = $reports[$report];
+	$: selectMetrics = currentReport.metrics;
+	$: selectSlices = currentReport.slices;
 
-	$: sli = $slices.get(predicate.sliceName);
-	$: getMetricsForSlices(
-		$models.map((m) => ({
-			sli: sli,
-			metric: predicate.metric,
-			model: m,
-		}))
-	).then((arr) => (modelResults = arr));
+	function getMetKeys(rep) {
+		const metricKeys: MetricKey[] = [];
+		rep.models.forEach((mod) => {
+			metricKeys.push({
+				sli: slice,
+				metric: rep.metrics,
+				model: mod,
+			});
+		});
+		return metricKeys;
+	}
+
+	$: modelResults = getMetricsForSlices(getMetKeys(currentReport));
 </script>
 
 <Row style="overflow: visible">
 	<Cell class="sticky" style="left: 0px; border-right: 1px solid #e8e8e8">
 		<div class="inline">
-			{#if sli}
-				<SliceDetailsContainer {sli} />
+			{#if slice}
+				<SliceDetailsContainer sli={slice} />
 			{/if}
 			<div class="group">
 				<IconButton
 					on:click={(e) => {
 						e.stopPropagation();
-						let rep = $reports[$report];
-						rep.reportPredicates.splice(predicateIndex, 1);
+						selectSlices.splice(sliceIndex, 1);
 						reports.update((reps) => {
-							reps[$report] = rep;
+							reps[$report] = currentReport;
 							return reps;
 						});
 					}}>
@@ -44,14 +50,18 @@
 			</div>
 		</div>
 	</Cell>
-	<Cell>{predicate.metric}</Cell>
-	{#each modelResults as r}
-		<Cell>
-			<p>
-				{r.metric.toFixed(2)}
-			</p>
-		</Cell>
-	{/each}
+	<Cell>{selectMetrics}</Cell>
+	{#await modelResults then res}
+		{#if res}
+			{#each res as r}
+				<Cell>
+					<p>
+						{r.metric.toFixed(2)}
+					</p>
+				</Cell>
+			{/each}
+		{/if}
+	{/await}
 </Row>
 
 <style>
