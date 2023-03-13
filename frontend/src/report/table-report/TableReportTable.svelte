@@ -7,11 +7,13 @@
 	import TableReportSliceRow from "./TableReportSliceRow.svelte";
 	import TableReportModelRow from "./TableReportModelRow.svelte";
 
-	let table: HTMLDivElement;
 	const rowMap = {
 		slices: TableReportSliceRow,
 		models: TableReportModelRow,
 	};
+
+	let table: HTMLDivElement;
+
 	$: currentReport = $reports[$report];
 	$: selectModels = currentReport.models;
 	$: selectSlices = currentReport.slices;

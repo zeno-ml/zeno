@@ -7,6 +7,7 @@
 	import CharacterCounter from "@smui/textfield/character-counter";
 
 	let ishover = false;
+
 	$: currentReport = $reports[$report];
 </script>
 

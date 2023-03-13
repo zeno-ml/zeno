@@ -6,7 +6,6 @@
 	import TableView from "./chart-icons/TableViewIcon.svelte";
 	import { ChartType } from "../../../zenoservice";
 
-	$: currentReport = $reports[$report];
 	const defaultMap = {
 		barchart: {
 			type: ChartType.BAR,
@@ -33,6 +32,8 @@
 			colorEncoding: "slices",
 		},
 	};
+
+	$: currentReport = $reports[$report];
 
 	function updateChart(e) {
 		if (e.currentTarget instanceof HTMLElement) {

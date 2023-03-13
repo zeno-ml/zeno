@@ -38,6 +38,7 @@
 			color: [{ label: "slices" }],
 		},
 	};
+
 	$: currentReport = $reports[$report];
 	$: chartType = currentReport.type;
 	$: parameters = currentReport.parameters;

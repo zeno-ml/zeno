@@ -14,6 +14,8 @@
 	$: selectMetrics = currentReport.metrics;
 	$: selectSlices = currentReport.slices;
 
+	$: modelResults = getMetricsForSlices(getMetKeys(currentReport));
+
 	function getMetKeys(rep) {
 		const metricKeys: MetricKey[] = [];
 		rep.models.forEach((mod) => {
@@ -25,8 +27,6 @@
 		});
 		return metricKeys;
 	}
-
-	$: modelResults = getMetricsForSlices(getMetKeys(currentReport));
 </script>
 
 <Row style="overflow: visible">
