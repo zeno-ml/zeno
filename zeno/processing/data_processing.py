@@ -113,17 +113,16 @@ def run_inference(
                             model=model_name,
                         )
                         other_return_cols[k] = postdistill_col_obj
-                        postdistill_hash = str(postdistill_col_obj)
-                        if postdistill_hash not in df.columns:
+                        if str(postdistill_col_obj) not in df.columns:
                             load_series(
                                 df,
                                 postdistill_col_obj,
-                                Path(cache_path, postdistill_hash + ".pickle"),
+                                Path(cache_path, str(postdistill_col_obj) + ".pickle"),
                             )
 
                     postdistill_col_obj = other_return_cols[k]
                     postdistill_hash = str(postdistill_col_obj)
-                    postdistill_col = df[postdistill_hash].copy()
+                    postdistill_col = df[postdistill_hash].copy(deep=False)
                     postdistill_col.loc[
                         to_predict_indices[i : i + batch_size]
                     ] = out.other_returns[k]
@@ -138,12 +137,7 @@ def run_inference(
     if not embedding_col.isnull().values.any():  # type: ignore
         ret.append(DataProcessingReturn(column=embedding_col_obj, output=embedding_col))
     for k, v in other_return_cols.items():  # type: ignore
-        ret.append(
-            DataProcessingReturn(
-                column=v,
-                output=df[str(v)],
-            )
-        )
+        ret.append(DataProcessingReturn(column=v, output=df[str(v)]))
 
     return ret
 
