@@ -2,10 +2,15 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { ReportPredicate } from "./ReportPredicate";
+import type { ChartType } from "./ChartType";
+import type { Parameters } from "./Parameters";
+import type { Slice } from "./Slice";
 
 export type Report = {
 	name: string;
-	reportType: string;
-	reportPredicates: Array<ReportPredicate>;
+	type?: ChartType;
+	slices?: Array<Slice>;
+	metrics?: Array<string> | string;
+	models?: Array<string>;
+	parameters?: Parameters;
 };

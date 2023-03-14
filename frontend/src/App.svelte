@@ -5,8 +5,7 @@
 	import Header from "./general/Header.svelte";
 	import Predict from "./Predict.svelte";
 	import Report from "./Report.svelte";
-	import ReportDetail from "./report/report-detail/ReportDetail.svelte";
-	import ReportEdit from "./report/report-detail/ReportEdit.svelte";
+	import ReportPage from "./report/report-page/ReportPage.svelte";
 
 	import {
 		folders,
@@ -30,8 +29,7 @@
 		"/predict/": Predict,
 		"/explore/": Explore,
 		"/report/": Report,
-		"/report/:id": ReportDetail,
-		"/report/:id/edit": ReportEdit,
+		"/report/:id": ReportPage,
 		"*": Explore,
 	};
 

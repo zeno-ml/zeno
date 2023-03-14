@@ -5,15 +5,16 @@
 	import IconButton from "@smui/icon-button";
 	import { reports } from "../stores";
 	import { updateTab } from "../util/util";
+	import { ChartType } from "../zenoservice";
 
 	export let report;
 	export let reportIndex;
 
 	let iconMap = {
-		table: mdiTable,
-		timeseries: mdiChartLine,
-		slicechart: mdiChartBar,
-		beeswarm: mdiBee,
+		[ChartType.TABLE]: mdiTable,
+		[ChartType.LINE]: mdiChartLine,
+		[ChartType.BAR]: mdiChartBar,
+		[ChartType.BEESWARM]: mdiBee,
 	};
 </script>
 
@@ -23,11 +24,13 @@
 	on:keydown={() => ({})}>
 	<IconButton>
 		<Icon component={Svg} viewBox="0 0 24 24">
-			<path fill="black" d={iconMap[report.reportType]} />
+			<path fill="black" d={iconMap[report.type]} />
 		</Icon>
 	</IconButton>
 	<p class="report-name">{report.name}</p>
-	<p class="report-slice">{report.reportPredicates.length} slices</p>
+	<p class="report-slice">
+		{report.slices ? report.slices.length : 0} slices
+	</p>
 	<IconButton
 		on:click={(e) => {
 			e.stopPropagation();
@@ -46,7 +49,7 @@
 		flex-direction: column;
 		align-items: center;
 		border: 1px solid var(--G4);
-		border-radius: 4px;
+		border-radius: 10px;
 		margin: 5px 5px 5px 5px;
 		padding-left: 10px;
 		padding-right: 10px;
@@ -56,7 +59,7 @@
 		height: 150px;
 	}
 	.report:hover {
-		background: #f0ebf4;
+		background: var(--P3);
 	}
 	.report-name {
 		margin: 3px;
