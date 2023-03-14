@@ -107,20 +107,19 @@
 		if (metadataHistograms.size === 0) {
 			return;
 		}
+		selections.set({ metadata: {}, slices: [] });
 		getHistograms($status.completeColumns, model).then((res) => {
-			getHistogramCounts(res, null, $selectionIds).then((res) => {
+			getHistogramCounts(res, null, null).then((res) => {
 				if (res === undefined) {
 					return;
 				}
 				metadataHistograms = res;
-				getHistogramMetrics(res, null, model, $metric, $selectionIds).then(
-					(res) => {
-						if (res === undefined) {
-							return;
-						}
-						metadataHistograms = res;
+				getHistogramMetrics(res, null, model, $metric, null).then((res) => {
+					if (res === undefined) {
+						return;
 					}
-				);
+					metadataHistograms = res;
+				});
 			});
 		});
 	});

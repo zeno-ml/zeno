@@ -7,6 +7,7 @@
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "module": "zeno",
+      "subProcess": true,
       "args": ["./examples/cifar/config.toml"]
     },
     {
