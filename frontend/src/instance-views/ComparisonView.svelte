@@ -65,6 +65,14 @@
 		drawInstances();
 	}
 
+	model.subscribe(() => {
+		if ($comparisonModels.includes($model)) {
+			$comparisonModels = $comparisonModels.filter((m) => m !== $model);
+			tables[$model] = [];
+			viewDivs[$model] = [];
+		}
+	});
+
 	// reset page on selection change
 	selectionPredicates.subscribe(() => {
 		if (currentPage === 0) {
@@ -89,10 +97,12 @@
 			);
 		});
 		Promise.all(proms).then((res) => {
+			const localDivs = {};
 			[$model, ...$comparisonModels].forEach((mod, i) => {
 				tables[mod] = res[i];
-				viewDivs[mod] = [];
+				localDivs[mod] = [];
 			});
+			viewDivs = localDivs;
 			tables = tables;
 			if (instanceContainer) {
 				instanceContainer.scrollTop = 0;
