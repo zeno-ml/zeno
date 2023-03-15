@@ -31,9 +31,6 @@ export default function generateBarSpec(
 		data: {
 			name: "table",
 		},
-		mark: {
-			type: "bar",
-		},
 		encoding: {
 			x: {
 				title: paramMap[x_encode].title,
@@ -62,15 +59,47 @@ export default function generateBarSpec(
 				field: color_encode,
 				sort: null,
 			},
-			yOffset: {
-				field: color_encode,
-				sort: null,
+			fillOpacity: {
+				condition: { param: "highlight", value: 1 },
+				value: 0.2,
 			},
-			color: {
-				field: color_encode,
-				sort: null,
-				scale: { scheme: "purples" },
+		},
+		layer: [
+			{
+				params: [
+					{
+						name: "highlight",
+						select: { type: "point", on: "mouseover" },
+					},
+				],
+				mark: {
+					type: "bar",
+					tooltip: {
+						signal:
+							"{'slice_name': datum.slices,'size': datum.size, 'metric': datum.metrics, 'model': datum.models}",
+					},
+					cursor: "pointer",
+				},
+				encoding: {
+					color: {
+						field: color_encode,
+						sort: null,
+						scale: { scheme: "purples" },
+					},
+				},
 			},
+			{
+				mark: {
+					type: "text",
+					style: "label",
+				},
+				encoding: {
+					text: { field: y_encode, type: paramMap[y_encode].type },
+				},
+			},
+		],
+		config: {
+			style: { label: { align: "center", dy: -5 } },
 		},
 	};
 

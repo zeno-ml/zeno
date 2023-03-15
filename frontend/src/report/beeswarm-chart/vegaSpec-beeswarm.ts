@@ -95,7 +95,7 @@ export default function generateSpec(selectMetrics): VisualizationSpec {
 						zindex: { value: 1 },
 						tooltip: {
 							signal:
-								"{'name': datum.sli_name, 'size': datum.size, 'metric': datum.metric, 'model': datum.model}",
+								"{'slice_name': datum.sli_name, 'size': datum.size, 'metric': datum.metric, 'model': datum.model}",
 						},
 					},
 				},
