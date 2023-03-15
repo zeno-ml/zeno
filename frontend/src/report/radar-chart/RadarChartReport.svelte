@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { VegaLite } from "svelte-vega";
+	import { Vega } from "svelte-vega";
 	import { getMetricsForSlices } from "../../api/slice";
 	import { report, reports } from "../../stores";
 	import type { MetricKey } from "../../zenoservice";
-	import generateSpec from "./vegaSpec-line";
+	import generateSpec from "./vegaSpec-radar";
 
 	$: currentReport = $reports[$report];
 	$: selectMetrics = currentReport.metrics;
@@ -41,17 +41,13 @@
 				table: chartEntries.map((r, i) => ({
 					slices: r.slice,
 					models: r.model,
-					metrics: res[i].metric,
+					metrics: res[i].metric.toFixed(2),
 				})),
 			}}
-			<VegaLite
+			<Vega
 				spec={generateSpec(parameters, selectMetrics)}
 				data={chartData}
-				options={{
-					tooltip: true,
-					width: 1000,
-					height: 300,
-				}} />
+				options={{ tooltip: true, width: 800, height: 800 }} />
 		{/await}
 	</div>
 </div>
@@ -59,8 +55,5 @@
 <style>
 	.main {
 		margin-left: 20px;
-	}
-	.model-result {
-		margin-top: 30px;
 	}
 </style>
