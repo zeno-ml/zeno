@@ -66,7 +66,7 @@ You can pass a list of decorated function references directly Zeno as you add mo
 
 ## Citation
 
-Please reference our [CHI'22 paper](https://cabreraalex.com/zeno.pdf)
+Please reference our [CHI'23 paper](https://cabreraalex.com/zeno.pdf)
 
 ```bibtex
 @inproceedings{cabrera23zeno,
