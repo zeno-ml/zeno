@@ -506,7 +506,7 @@ class ZenoBackend(object):
             filt_df = filt_df.sort_values(str(req.sort[0]), ascending=req.sort[1])
         filt_df = filt_df.iloc[req.slice_range[0] : req.slice_range[1]].copy()
 
-        if self.data_column.name != "":
+        if self.data_prefix != "":
             # Add data prefix to data column depending on type of data_path.
             filt_df.loc[:, str(self.data_column)] = (
                 self.data_prefix + filt_df[str(self.data_column)]
