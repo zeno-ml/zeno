@@ -132,7 +132,12 @@ export const metricRangeColorScale: Readable<(n: number) => string> = derived(
 	[metricRange],
 	([$metricRange]) => {
 		const [min, max] = $metricRange;
-		return (n) => colorScale((n - min) / (max - min));
+		return (n) => {
+			if (max - min === 0) {
+				return colorScale(0.5);
+			}
+			return colorScale((n - min) / (max - min));
+		};
 	}
 );
 
