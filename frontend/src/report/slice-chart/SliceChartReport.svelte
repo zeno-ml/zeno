@@ -41,13 +41,14 @@
 				table: chartEntries.map((r, i) => ({
 					slices: r.slice,
 					models: r.model,
-					metrics: res[i].metric,
+					size: res[i].size,
+					metrics: res[i].metric.toFixed(2),
 				})),
 			}}
 			<VegaLite
 				spec={generateBarSpec(parameters, selectMetrics)}
 				data={chartData}
-				options={{ tooltip: true, width: 1000, height: 300 }} />
+				options={{ tooltip: true, width: 1000, height: 500 }} />
 		{/await}
 	</div>
 </div>

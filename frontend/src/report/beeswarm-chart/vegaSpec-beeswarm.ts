@@ -65,6 +65,7 @@ export default function generateSpec(selectMetrics): VisualizationSpec {
 				scale: "xscale",
 			},
 		],
+
 		legends: [
 			{
 				type: "symbol",
@@ -72,6 +73,7 @@ export default function generateSpec(selectMetrics): VisualizationSpec {
 				fill: "color",
 			},
 		],
+
 		marks: [
 			{
 				name: "nodes",
@@ -82,6 +84,7 @@ export default function generateSpec(selectMetrics): VisualizationSpec {
 						fill: { scale: "color", field: "sli_name" },
 						xfocus: { scale: "xscale", field: "metric", band: 0.5 },
 						yfocus: { signal: "cy" },
+						cursor: { value: "pointer" },
 					},
 					update: {
 						size: { scale: "sizescale", field: "size" },
@@ -95,7 +98,7 @@ export default function generateSpec(selectMetrics): VisualizationSpec {
 						zindex: { value: 1 },
 						tooltip: {
 							signal:
-								"{'name': datum.sli_name, 'size': datum.size, 'metric': datum.metric, 'model': datum.model}",
+								"{'slice_name': datum.sli_name, 'size': datum.size, 'metric': datum.metric, 'model': datum.model}",
 						},
 					},
 				},

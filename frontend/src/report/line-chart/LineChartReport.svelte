@@ -41,7 +41,8 @@
 				table: chartEntries.map((r, i) => ({
 					slices: r.slice,
 					models: r.model,
-					metrics: res[i].metric,
+					size: res[i].size,
+					metrics: res[i].metric.toFixed(2),
 				})),
 			}}
 			<VegaLite
@@ -50,7 +51,7 @@
 				options={{
 					tooltip: true,
 					width: 1000,
-					height: 300,
+					height: 400,
 				}} />
 		{/await}
 	</div>
