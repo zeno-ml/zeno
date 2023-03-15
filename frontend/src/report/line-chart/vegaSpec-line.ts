@@ -65,6 +65,7 @@ export default function generateBarSpec(
 			},
 			opacity: { condition: { param: "hover", value: 1 }, value: 0.1 },
 		},
+
 		layer: [
 			{
 				params: [
@@ -78,22 +79,38 @@ export default function generateBarSpec(
 					},
 				],
 				mark: {
-					type: "line",
-					strokeWidth: 8,
-					stroke: "transparent",
+					type: "circle",
+					size: 100,
+					tooltip: {
+						signal:
+							"{'slice_name': datum.slices, 'size': datum.size, 'metric': datum.metrics, 'model': datum.models}",
+					},
+					cursor: "pointer",
 				},
 			},
 			{
 				mark: {
 					type: "line",
-					strokeWidth: 4,
 				},
 			},
 			{
-				layer: [{ mark: { type: "circle", size: 50 } }],
+				transform: [{ filter: { param: "hover", empty: false } }],
+				mark: {
+					type: "text",
+					style: "label",
+				},
+				encoding: {
+					text: {
+						field: y_encode,
+						type: paramMap[y_encode].type,
+					},
+					color: { value: "black" },
+				},
 			},
 		],
-		config: { view: { stroke: null } },
+		config: {
+			style: { label: { dy: -13, dx: -2 } },
+		},
 	};
 
 	return spec as VegaLiteSpec;
