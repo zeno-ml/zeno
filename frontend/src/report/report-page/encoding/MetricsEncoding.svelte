@@ -13,7 +13,7 @@
 		{$reports[$report].type !== ChartType.TABLE ? "" : "metrics"}
 	</h4>
 	<Svelecte
-		style="width: 260px; height: 30px; flex:none;"
+		style="width: 280px; flex:none;"
 		value={$reports[$report].metrics}
 		{options}
 		searchable={false}

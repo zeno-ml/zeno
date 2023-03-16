@@ -116,7 +116,7 @@
 		display: flex;
 		flex-direction: column;
 		border: 1px solid var(--G4);
-		height: 80px;
+		height: 60px;
 		width: 140px;
 		border-radius: 10px;
 		align-items: center;
