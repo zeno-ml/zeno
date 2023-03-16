@@ -23,7 +23,7 @@
 				reports.update((reps) => {
 					updateTab("report/" + reps.length);
 					reps.push({
-						name: "Bar Chart Report",
+						name: "Bar Chart",
 						type: ChartType.BAR,
 						slices: [...$slices.values()],
 						models: [...$models.values()],
@@ -75,8 +75,8 @@
 		padding-right: 10px;
 		overflow: visible;
 		cursor: pointer;
-		width: 150px;
-		height: 150px;
+		width: 250px;
+		height: 100px;
 	}
 	.add-reports:hover {
 		background: #f0ebf4;

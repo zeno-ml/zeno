@@ -8,28 +8,28 @@
 
 	const defaultMap = {
 		barchart: {
-			name: "Bar Chart Report",
+			name: "Bar Chart",
 			type: ChartType.BAR,
 			xEncoding: "slices",
 			yEncoding: "metrics",
 			colorEncoding: "models",
 		},
 		table: {
-			name: "Table View Report",
+			name: "Table View",
 			type: ChartType.TABLE,
 			xEncoding: "models",
 			yEncoding: "slices",
 			colorEncoding: "metrics",
 		},
 		linechart: {
-			name: "Line Chart Report",
+			name: "Line Chart",
 			type: ChartType.LINE,
 			xEncoding: "slices",
 			yEncoding: "metrics",
 			colorEncoding: "models",
 		},
 		beeswarm: {
-			name: "Beeswarm Plot Report",
+			name: "Beeswarm Plot",
 			type: ChartType.BEESWARM,
 			xEncoding: "metrics",
 			yEncoding: "models",
