@@ -69,9 +69,7 @@
 			model: $model,
 			metric: $metric,
 		}
-	], 
-	$tagIds,
-	$selectionIds
+	]
 	);
 
 	$: tagRes = getMetricsForTags([

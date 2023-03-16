@@ -12,6 +12,6 @@ export type MetricRequest = {
 
 export type CombineMetricRequest = {
 	metricKeys: Array<MetricKey>;
-	tagIds: FilterIds;
+	tagIds?: FilterIds;
 	filterIds?: FilterIds;
 }

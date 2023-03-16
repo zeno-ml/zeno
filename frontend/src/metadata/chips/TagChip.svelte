@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { TrailingIcon } from "@smui/chips";
 
-	import { selections } from "../../stores";
+	import { selections, tagIds, tags } from "../../stores";
 	import removeTagIdsfromTagIds from "../cells/TagCell.svelte"
 	export let tag;
 </script>
@@ -12,11 +12,20 @@
 		class="remove material-icons"
 		on:click={() =>
 			{
-				// removeTagIdsfromTagIds(tag.tagName)
+				// updating tagIds when tag removed
+				let s = new Set()
+				$tagIds.ids.forEach(id => s.add(id))
+				$tags.get(tag).selectionIds.ids.forEach(id => s.delete(id))
+				let finalArray = []
+				s.forEach(id => finalArray.push(id))
+				tagIds.set({ids: finalArray})
+
 				selections.update((sel) => {
 					sel.tags.splice(sel.tags.indexOf(tag), 1);
 					return { slices: sel.slices, metadata: sel.metadata, tags: sel.tags };
-				})
+				});
+
+
 			}
 			}>
 		cancel
