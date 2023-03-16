@@ -12,19 +12,19 @@
 		class="remove material-icons"
 		on:click={() =>
 			{
-				// updating tagIds when tag removed
-				let s = new Set()
-				$tagIds.ids.forEach(id => s.add(id))
-				$tags.get(tag).selectionIds.ids.forEach(id => s.delete(id))
-				let finalArray = []
-				s.forEach(id => finalArray.push(id))
-				tagIds.set({ids: finalArray})
-
+				
 				selections.update((sel) => {
 					sel.tags.splice(sel.tags.indexOf(tag), 1);
 					return { slices: sel.slices, metadata: sel.metadata, tags: sel.tags };
 				});
 
+				let s = new Set()
+				//this is to catch for the case when you have intersections between tags
+				//must come after selections is updated
+				$selections.tags.forEach(tag => $tags.get(tag).selectionIds.ids.forEach(id => s.add(id)))
+				let finalArray = []
+				s.forEach(id => finalArray.push(id))
+				tagIds.set({ids: finalArray})
 
 			}
 			}>
