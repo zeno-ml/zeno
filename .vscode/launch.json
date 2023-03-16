@@ -7,6 +7,7 @@
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "module": "zeno",
+      "subProcess": true,
       "args": ["./examples/cifar/config.toml"]
     },
     {
@@ -72,6 +73,14 @@
       "cwd": "${workspaceFolder}",
       "module": "zeno",
       "args": ["./examples/breast_cancer_data/breast_cancer/zeno.toml"]
+    },
+    {
+      "name": "zeno_openai_eval",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "module": "zeno",
+      "args": ["./examples/openai-eval/config.toml"]
     }
   ]
 }

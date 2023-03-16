@@ -1,6 +1,7 @@
 """Primary backend for Zeno. Handles all data processing and caching."""
 
 import asyncio
+import glob
 import logging
 import os
 import pickle
@@ -315,6 +316,24 @@ class ZenoBackend(object):
                 model_column.metadata_type = getMetadataType(self.df[model_hash])
                 self.complete_columns.append(model_column)
 
+                # Check if there were saved postdistill columns:
+                for f in glob.glob(
+                    os.path.join(
+                        self.cache_path, "POSTDISTILL*" + model_name + ".pickle"
+                    )
+                ):
+                    name = os.path.basename(f).split(model_name)[0][11:]
+                    col = ZenoColumn(
+                        column_type=ZenoColumnType.POSTDISTILL,
+                        name=name,
+                        model=model_name,
+                    )
+                    series = pd.read_pickle(f)
+                    self.df.loc[:, str(col)] = series
+                    self.df[str(col)] = self.df[str(col)].convert_dtypes()
+                    col.metadata_type = getMetadataType(self.df[str(col)])
+                    self.complete_columns.append(col)
+
         if len(models_to_run) > 0:
             with Pool() as pool:
                 inference_outputs = pool.map(
@@ -343,6 +362,11 @@ class ZenoBackend(object):
                 }
             )
             col_hash = str(col_name)
+
+            # If we already loaded in inference, skip.
+            if col_hash in self.df.columns:
+                continue
+
             save_path = Path(self.cache_path, col_hash + ".pickle")
 
             load_series(self.df, col_name, save_path)
@@ -541,7 +565,7 @@ class ZenoBackend(object):
             filt_df = filt_df.sort_values(str(req.sort[0]), ascending=req.sort[1])
         filt_df = filt_df.iloc[req.slice_range[0] : req.slice_range[1]].copy()
 
-        if self.data_column.name != "":
+        if self.data_prefix != "":
             # Add data prefix to data column depending on type of data_path.
             filt_df.loc[:, str(self.data_column)] = (
                 self.data_prefix + filt_df[str(self.data_column)]

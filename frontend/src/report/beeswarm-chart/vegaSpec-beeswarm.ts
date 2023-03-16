@@ -1,5 +1,5 @@
 import type { VisualizationSpec } from "vega-embed";
-export default function generateSpec(metric): VisualizationSpec {
+export default function generateSpec(selectMetrics): VisualizationSpec {
 	const spec = {
 		$schema: "https://vega.github.io/schema/vega/v5.json",
 		description:
@@ -50,13 +50,27 @@ export default function generateSpec(metric): VisualizationSpec {
 				},
 				range: [80, 800],
 			},
+			{
+				name: "color",
+				type: "ordinal",
+				domain: { data: "table", field: "sli_name" },
+				range: { scheme: "bluepurple" },
+			},
 		],
 
 		axes: [
 			{
-				title: "",
+				title: selectMetrics,
 				orient: "bottom",
 				scale: "xscale",
+			},
+		],
+
+		legends: [
+			{
+				type: "symbol",
+				title: "Slice Color",
+				fill: "color",
 			},
 		],
 
@@ -67,9 +81,10 @@ export default function generateSpec(metric): VisualizationSpec {
 				from: { data: "table" },
 				encode: {
 					enter: {
-						fill: { value: "purple" },
+						fill: { scale: "color", field: "sli_name" },
 						xfocus: { scale: "xscale", field: "metric", band: 0.5 },
 						yfocus: { signal: "cy" },
+						cursor: { value: "pointer" },
 					},
 					update: {
 						size: { scale: "sizescale", field: "size" },
@@ -78,12 +93,12 @@ export default function generateSpec(metric): VisualizationSpec {
 						zindex: { value: 0 },
 					},
 					hover: {
-						stroke: { value: "purple" },
+						stroke: { value: "black" },
 						strokeWidth: { value: 3 },
 						zindex: { value: 1 },
 						tooltip: {
 							signal:
-								"{'name': datum.sli_name, 'size': datum.size, 'metric': datum.metric}",
+								"{'slice_name': datum.sli_name, 'size': datum.size, 'metric': datum.metric, 'model': datum.model}",
 						},
 					},
 				},
@@ -106,8 +121,6 @@ export default function generateSpec(metric): VisualizationSpec {
 			},
 		],
 	};
-
-	spec.axes[0].title = metric;
 
 	return spec as VisualizationSpec;
 }

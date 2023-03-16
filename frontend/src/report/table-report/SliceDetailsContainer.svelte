@@ -1,8 +1,8 @@
 <script lang="ts">
-	import SliceDetails from "../general/SliceDetails.svelte";
-	import { selections } from "../stores";
-	import { updateTab } from "../util/util";
-	import type { Slice } from "../zenoservice";
+	import SliceDetails from "../../general/SliceDetails.svelte";
+	import { selections } from "../../stores";
+	import { updateTab } from "../../util/util";
+	import type { Slice } from "../../zenoservice";
 
 	export let sli: Slice;
 

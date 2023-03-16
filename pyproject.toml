@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "zenoml"
-version = "0.4.1"
+version = "0.4.4"
 description = "Interactive Evaluation Framework for Machine Learning"
 license = "MIT"
 authors = ["Ángel Alexander Cabrera <alex.cabrera@gmail.com>"]
@@ -14,7 +14,7 @@ exclude = ["zeno/tests/*"]
 
 [tool.poetry.dependencies]
 cachetools = "^5.3.0"
-fastapi = ">=0.75,<0.93"
+fastapi = ">=0.75,<0.95"
 gradio = "^3.18.0"
 inquirer = "^3.1.2"
 nest-asyncio = "^1.5.6"
@@ -26,7 +26,7 @@ requests = "^2.28.1"
 setuptools = "*"
 tomli = "^2.0.1"
 tqdm = "^4.64.0"
-uvicorn = ">=0.17.5,<0.21.0"
+uvicorn = ">=0.17.5,<0.22.0"
 websockets = "^10.2"
 
 [tool.poetry.dev-dependencies]
@@ -35,8 +35,8 @@ flake8 = "^6.0.0"
 httpx = "^0.23.3"
 mypy = "^1.0"
 pandas-stubs = "^1.5.3"
-pyright = "^1.1.295"
-pytest = "^7.1.1"
+pyright = "^1.1.298"
+pytest = "^7.2.2"
 types-cachetools = "^5.3.0.0"
 types-requests = "^2.28.11"
 types-setuptools = ">=65.4,<68.0"
