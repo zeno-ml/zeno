@@ -76,7 +76,9 @@
 				on:click={() => createTag()}>{"Create"}</Button>
 		</Content>
 		{#if invalidName && tagName.length > 0}
-			<p style:margin-right="10px">folder already exists</p>
+			<p style:margin-right="10px">tag already exists</p>
+		{:else if $selectionIds.ids.length > 0}
+			<p style:margin-right="10px">{$selectionIds.ids.length} instances selected</p>
 		{/if}
 	</Paper>
 </div>
