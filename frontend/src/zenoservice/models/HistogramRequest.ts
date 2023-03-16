@@ -11,6 +11,6 @@ export type HistogramRequest = {
 	filterPredicates?: FilterPredicateGroup;
 	model?: string;
 	metric?: string;
-	tagIds: FilterIds;
+	tagIds?: FilterIds;
 	filterIds?: FilterIds;
 };

@@ -63,7 +63,7 @@ let histogramCountRequest: CancelablePromise<Array<Array<number>>> = null;
 export async function getHistogramCounts(
 	histograms: InternMap<ZenoColumn, HistogramEntry[]>,
 	filterPredicates: FilterPredicateGroup,
-	tagIds: FilterIds,
+	tagIds?: FilterIds,
 	filterIds?: FilterIds
 ): Promise<number[][]> {
 	const columnRequests = [...histograms.entries()].map(([k, v]) => ({
