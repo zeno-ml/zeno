@@ -58,12 +58,18 @@ def get_filter_string(filter: FilterPredicateGroup) -> str:
 def filter_table(
     df,
     filter_predicates: Optional[FilterPredicateGroup] = None,
-    filter_ids: Optional[FilterIds] = None,
+    list_ids_first: Optional[FilterIds] = None,
+    list_ids_second: Optional[FilterIds] = None
 ) -> pd.DataFrame:
+    allIndicies = []
+    if(list_ids_first is not None and len(list_ids_first.ids) > 0):
+        allIndicies += list_ids_first.ids
+    if(list_ids_second is not None and len(list_ids_second.ids) > 0):
+        allIndicies += list_ids_second.ids
     # if we have ids, filter them out now!
-    if filter_ids is not None and len(filter_ids.ids) > 0:
+    if (len(allIndicies) > 0):
         #make sure the ids we are querying exist
-        existingIds = df.index.intersection(filter_ids.ids)
+        existingIds = df.index.intersection(allIndicies)
         # this is fast because the index is set to ids
         df = df.loc[existingIds]
 

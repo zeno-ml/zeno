@@ -424,10 +424,7 @@ class ZenoBackend(object):
         return_metrics: List[GroupMetric] = []
         for metric_key in requests:
             filt_df = filter_table(
-                self.df, metric_key.sli.filter_predicates, filter_ids
-            )
-            filt_df = filter_table(
-                filt_df, metric_key.sli.filter_predicates, tag_ids
+                self.df, metric_key.sli.filter_predicates, tag_ids, filter_ids
             )
             if metric_key.metric == "" or self.label_column.name == "":
                 return_metrics.append(GroupMetric(metric=None, size=filt_df.shape[0]))
@@ -559,8 +556,7 @@ class ZenoBackend(object):
 
     def get_filtered_table(self, req: TableRequest):
         """Return filtered table from list of filter predicates."""
-        filt_df = filter_table(self.df, req.filter_predicates, req.filter_ids)
-        filt_df = filter_table(filt_df, req.filter_predicates, req.tag_ids)
+        filt_df = filter_table(self.df, req.filter_predicates, req.filter_ids, req.tag_ids)
         if req.sort[0]:
             filt_df = filt_df.sort_values(str(req.sort[0]), ascending=req.sort[1])
         filt_df = filt_df.iloc[req.slice_range[0] : req.slice_range[1]].copy()
