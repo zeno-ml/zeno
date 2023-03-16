@@ -65,6 +65,10 @@
 		margin: 3px;
 		font-size: 16px;
 		color: black;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		max-width: 100%;
+		white-space: nowrap;
 	}
 	.report-slice {
 		margin: 3px;

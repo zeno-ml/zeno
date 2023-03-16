@@ -23,7 +23,7 @@
 				reports.update((reps) => {
 					updateTab("report/" + reps.length);
 					reps.push({
-						name: "new report",
+						name: "Bar Chart Report",
 						type: ChartType.BAR,
 						slices: [...$slices.values()],
 						models: [...$models.values()],

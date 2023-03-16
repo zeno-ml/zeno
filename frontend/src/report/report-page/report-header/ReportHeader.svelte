@@ -42,8 +42,8 @@
 			variant="outlined"
 			bind:value={currentReport.name}
 			label="Report Name"
-			input$maxlength={15}>
-			<CharacterCounter slot="helper">0 / 15</CharacterCounter>
+			input$maxlength={30}>
+			<CharacterCounter slot="helper">0 / 30</CharacterCounter>
 		</Textfield>
 	</div>
 </div>
