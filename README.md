@@ -4,7 +4,7 @@
 ![Github Actions CI tests](https://github.com/zeno-ml/zeno/actions/workflows/test.yml/badge.svg)
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/) 
 [![DOI](https://img.shields.io/badge/doi-10.1145%2F3544548.3581268-red)](https://cabreraalex.com/paper/zeno)
-[![Join the chat at https://gitter.im/zeno-ml-eval/community](https://badges.gitter.im/zeno-ml-eval/community.svg)](https://gitter.im/zeno-ml-eval/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Discord](https://img.shields.io/discord/1086004954872950834)](https://discord.gg/QcqyCXBX)
 
 Zeno is a general-purpose framework for evaluating machine learning models.
 It combines a **Python API** with an **interactive UI** to allow users to discover, explore, and analyze the performance of their models across diverse use cases.
@@ -86,4 +86,4 @@ Please reference our [CHI'23 paper](https://arxiv.org/pdf/2302.04732.pdf)
 
 ## Community
 
-Chat with us on our [Gitter channel](https://gitter.im/zeno-ml-eval/community) or leave an issue on this repository if you run into any issues or have a request!
+Chat with us on our [Discord channel](https://discord.gg/QcqyCXBX) or leave an issue on this repository if you run into any issues or have a request!
