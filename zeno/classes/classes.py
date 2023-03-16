@@ -52,9 +52,11 @@ class TableRequest(CamelModel):
     tag_ids: FilterIds
     filter_ids: Optional[FilterIds] = None
 
+
 class PlotRequest(CamelModel):
     filter_predicates: FilterPredicateGroup
     tag_ids: FilterIds
+
 
 class EmbedProject2DRequest(CamelModel):
     model: str

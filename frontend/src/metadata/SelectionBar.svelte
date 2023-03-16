@@ -15,7 +15,7 @@
 	import IdsChip from "./chips/IdsChip.svelte";
 	import MetadataChip from "./chips/MetadataChip.svelte";
 	import SliceChip from "./chips/SliceChip.svelte";
-  	import TagChip from "./chips/TagChip.svelte";
+	import TagChip from "./chips/TagChip.svelte";
 
 	export let currentResult;
 	export let selected = "list";
@@ -86,7 +86,7 @@
 								return { slices: [], metadata: { ...m.metadata }, tags: [] };
 							});
 							selectionIds.set({ ids: [] });
-							tagIds.set({ids: []})
+							tagIds.set({ ids: [] });
 						}}>
 						clear all
 					</span>

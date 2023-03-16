@@ -8,7 +8,10 @@ import type { FilterIds } from "../models/FilterIds";
 import type { FilterPredicateGroup } from "../models/FilterPredicateGroup";
 import type { HistogramBucket } from "../models/HistogramBucket";
 import type { HistogramRequest } from "../models/HistogramRequest";
-import type { CombineMetricRequest, MetricRequest } from "../models/MetricRequest";
+import type {
+	CombineMetricRequest,
+	MetricRequest,
+} from "../models/MetricRequest";
 import type { Points2D } from "../models/Points2D";
 import type { PointsColors } from "../models/PointsColors";
 import type { Report } from "../models/Report";
@@ -186,7 +189,7 @@ export class ZenoService {
 	 * @throws ApiError
 	 */
 	public static getFilteredIds(
-		requestBody: PlotRequest,
+		requestBody: PlotRequest
 	): CancelablePromise<string> {
 		return __request(OpenAPI, {
 			method: "POST",
@@ -357,7 +360,6 @@ export class ZenoService {
 		});
 	}
 
-
 	/**
 	 * Get Metrics For Slices and Tags
 	 * @param requestBody
@@ -377,7 +379,6 @@ export class ZenoService {
 			},
 		});
 	}
-
 
 	/**
 	 * Get Metrics For Tags

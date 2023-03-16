@@ -1,4 +1,8 @@
-import type { FilterIds, FilterPredicateGroup, Points2D } from "../../zenoservice";
+import type {
+	FilterIds,
+	FilterPredicateGroup,
+	Points2D,
+} from "../../zenoservice";
 import { getFilteredIds } from "../../api/table";
 import { selectionIds } from "../../stores";
 
@@ -34,12 +38,13 @@ export function deselectPoints() {
 export async function getPointOpacities(
 	selectionPredicates: FilterPredicateGroup,
 	points: Points2D,
-	tagIds: FilterIds = {ids: []},
+	tagIds: FilterIds = { ids: [] },
 	{ fullOpacity = 1, partialOpacity = 0.15 } = {}
 ) {
-	console.log(tagIds.ids.length)
-	let filteredIds = (await getFilteredIds(selectionPredicates, tagIds)) as string[];
-	console.log(filteredIds.length)
+	const filteredIds = (await getFilteredIds(
+		selectionPredicates,
+		tagIds
+	)) as string[];
 	const filteredIdsIndex = new Map(filteredIds.map((id, index) => [id, index]));
 	if (filteredIds.length > 0) {
 		return points.ids.map((id) =>

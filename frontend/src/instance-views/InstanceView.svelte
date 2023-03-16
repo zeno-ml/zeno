@@ -5,7 +5,7 @@
 	import ComparisonView from "./ComparisonView.svelte";
 	import TableView from "./TableView.svelte";
 	import ScatterView from "./scatter-view/ScatterView.svelte";
-	import { getMetricsForSlices, getMetricsForSlicesAndTags } from "../api/slice";
+	import { getMetricsForSlicesAndTags } from "../api/slice";
 	import {
 		selectionIds,
 		selectionPredicates,
@@ -50,23 +50,6 @@
 		}
 	});
 
-	// $: currentResult = getMetricsForSlices(
-	// 	[
-	// 		<MetricKey>{
-	// 			sli: <Slice>{
-	// 				sliceName: "",
-	// 				folder: "",
-	// 				filterPredicates: {
-	// 					predicates: [$selectionPredicates],
-	// 					join: "",
-	// 				},
-	// 			},
-	// 			model: $model,
-	// 			metric: $metric,
-	// 		},
-	// 	],
-	// 	$selectionIds
-	// );
 	$: currentResult = getMetricsForSlicesAndTags(
 		[
 			<MetricKey>{

@@ -37,7 +37,10 @@ export async function getFilteredTable(
 /**
  * Gets a list of ids from the filter predicates only
  */
-export async function getFilteredIds(filterPredicates: FilterPredicateGroup, tagIds: FilterIds = {ids: []}) {
-	const res = await ZenoService.getFilteredIds({filterPredicates, tagIds});
+export async function getFilteredIds(
+	filterPredicates: FilterPredicateGroup,
+	tagIds: FilterIds = { ids: [] }
+) {
+	const res = await ZenoService.getFilteredIds({ filterPredicates, tagIds });
 	return JSON.parse(res);
 }

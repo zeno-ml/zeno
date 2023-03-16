@@ -1,7 +1,6 @@
-from typing import List, Union
-
 from zeno.classes.base import CamelModel
 from zeno.classes.slice import FilterIds
+
 
 class Tag(CamelModel):
     tag_name: str
@@ -13,6 +12,7 @@ class TagMetricKey(CamelModel):
     tag: Tag
     model: str
     metric: str
+
 
 # class TagMetricRequest(CamelModel):
 #     tag_metric_keys: List[TagMetricKey]

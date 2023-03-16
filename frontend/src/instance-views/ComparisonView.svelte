@@ -16,7 +16,7 @@
 		settings,
 		sort,
 		status,
-		tagIds
+		tagIds,
 	} from "../stores";
 	import { columnHash } from "../util/util";
 	import { ZenoColumnType } from "../zenoservice";

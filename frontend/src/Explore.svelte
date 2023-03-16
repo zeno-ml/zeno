@@ -4,7 +4,13 @@
 	import NewFolderPopup from "./metadata/popups/NewFolderPopup.svelte";
 	import NewSlicePopup from "./metadata/popups/NewSlicePopup.svelte";
 	import NewTagPopup from "./metadata/popups/NewTagPopup.svelte";
-	import { ready, showNewFolder, showNewSlice, showNewTag, status } from "./stores";
+	import {
+		ready,
+		showNewFolder,
+		showNewSlice,
+		showNewTag,
+		status,
+	} from "./stores";
 </script>
 
 {#if $ready && $status.completeColumns.length > 0}

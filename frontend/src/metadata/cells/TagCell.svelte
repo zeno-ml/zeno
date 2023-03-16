@@ -1,26 +1,16 @@
 <script lang="ts">
 	import { mdiPencilOutline, mdiDotsHorizontal } from "@mdi/js";
-	import Button, { Label } from "@smui/button";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import { Svg } from "@smui/common";
-	import Dialog, { Actions, Content, Title, InitialFocus } from "@smui/dialog";
 	import {
 		status,
-		showNewTag,
 		selections,
-		selectionIds,
 		tags,
 		tagIds,
-		sliceToEdit,
-		reports,
 		model,
 		metric,
 	} from "../../stores";
-	import {
-		getMetricsForTags,
-		deleteTag,
-		createNewTag,
-	} from "../../api/tag";
+	import { getMetricsForTags, deleteTag } from "../../api/tag";
 	import type { TagMetricKey, Tag } from "../../zenoservice";
 
 	export let tag: Tag;
@@ -64,27 +54,29 @@
 		deleteTag(tag.tagName);
 	}
 
-	function removeTagIdsFromTagIds(tagName) {
-		let s = new Set()
+	function updateTagIdsAfterRemove() {
+		let s = new Set();
 		//$tagIds.ids.forEach(id => s.add(id))
 
 		//loop through all selectedTags and re-add their IDs (assumes that the selections.tags will already be updated)
 		//this is to catch for the case when you have intersections between tags
-		$selections.tags.forEach(tag => $tags.get(tag).selectionIds.ids.forEach(id => s.add(id)))
+		$selections.tags.forEach((tag) =>
+			$tags.get(tag).selectionIds.ids.forEach((id) => s.add(id))
+		);
 		//$tags.get(tagName).selectionIds.ids.forEach(id => s.delete(id))
-		let finalArray = []
-		s.forEach(id => finalArray.push(id))
-		tagIds.set({ids: finalArray})
+		let finalArray = [];
+		s.forEach((id) => finalArray.push(id));
+		tagIds.set({ ids: finalArray });
 	}
 
 	function addTagIdsToTagIds(tagName) {
-		let s = new Set()
-		$tagIds.ids.forEach(id => s.add(id))
+		let s = new Set();
+		$tagIds.ids.forEach((id) => s.add(id));
 
-		$tags.get(tagName).selectionIds.ids.forEach(id => s.add(id))
-		let finalArray = []
-		s.forEach(id => finalArray.push(id))
-		tagIds.set({ids: finalArray})
+		$tags.get(tagName).selectionIds.ids.forEach((id) => s.add(id));
+		let finalArray = [];
+		s.forEach((id) => finalArray.push(id));
+		tagIds.set({ ids: finalArray });
 	}
 
 	function setSelected(e) {
@@ -98,7 +90,7 @@
 				metadata: s.metadata,
 				tags: [],
 			}));
-			removeTagIdsFromTagIds(tag.tagName);
+			updateTagIdsAfterRemove();
 			return;
 		}
 		if (e.shiftKey) {
@@ -111,7 +103,7 @@
 						tags: [...sel.tags],
 					};
 				});
-				removeTagIdsFromTagIds(tag.tagName);
+				updateTagIdsAfterRemove();
 			} else {
 				selections.update((sel) => ({
 					slices: sel.slices,
@@ -128,20 +120,20 @@
 						metadata: sel.metadata,
 						tags: [tag.tagName],
 					}));
-					console.log("heheh")
-					tagIds.set({ids: []})
-					addTagIdsToTagIds(tag.tagName)
+					console.log("heheh");
+					tagIds.set({ ids: [] });
+					addTagIdsToTagIds(tag.tagName);
 				} else {
 					selections.update((sel) => {
 						sel.tags.splice(sel.tags.indexOf(tag.tagName), 1);
-						console.log(sel.tags)
+						console.log(sel.tags);
 						return {
 							slices: sel.slices,
 							metadata: sel.metadata,
 							tags: [...sel.tags],
 						};
 					});
-					removeTagIdsFromTagIds(tag.tagName)
+					updateTagIdsAfterRemove();
 				}
 			} else {
 				selections.update((sel) => ({
@@ -149,10 +141,8 @@
 					metadata: sel.metadata,
 					tags: [tag.tagName],
 				}));
-				tagIds.set({ids: []})
-				addTagIdsToTagIds(tag.tagName)
-				console.log(tag.tagName)
-				console.log($selections.tags)
+				tagIds.set({ ids: [] });
+				addTagIdsToTagIds(tag.tagName);
 			}
 		}
 	}
@@ -170,9 +160,8 @@
 		ev.dataTransfer.setData("text/plain", tag.tagName);
 		ev.dataTransfer.dropEffect = "copy";
 	}}
-	on:keydown={() => ({})}
-    >
-    <!-- add this back in once decide to do with tagFolders
+	on:keydown={() => ({})}>
+	<!-- add this back in once decide to do with tagFolders
         on:dragend={(ev) => {
 		if (ev.dataTransfer.dropEffect === "none") {
 			slices.update((sls) => {
@@ -215,8 +204,7 @@
 							on:click={(e) => {
 								e.stopPropagation();
 								showOptions = false;
-                                removeTag();
-								
+								removeTag();
 							}}>
 							<Icon class="material-icons">delete_outline</Icon>
 						</IconButton>
@@ -224,7 +212,7 @@
 							on:click={(e) => {
 								e.stopPropagation();
 								showOptions = false;
-                                // ADD EDIT TAG STUFF HERE
+								// ADD EDIT TAG STUFF HERE
 								// sliceToEdit.set(slice);
 								// showNewSlice.set(true);
 							}}>
@@ -266,27 +254,7 @@
 	</div>
 </div>
 
-
 <style>
-	.tooltip-container {
-		background: var(--G6);
-		position: absolute;
-		top: 100%;
-		max-width: 1000px;
-		width: fit-content;
-		background: var(--G6);
-		z-index: 10;
-		left: 0px;
-	}
-	.tooltip {
-		background: var(--G6);
-		padding-left: 10px;
-		padding-right: 10px;
-		box-shadow: 1px 1px 3px 1px var(--G3);
-		border-radius: 4px;
-		padding-top: 10px;
-		padding-bottom: 10px;
-	}
 	#size {
 		font-style: italic;
 		color: var(--G3);

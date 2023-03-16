@@ -25,6 +25,7 @@ class Slice(CamelModel):
     folder: str
     filter_predicates: FilterPredicateGroup
 
+
 # Used for slices or tags
 class GroupMetric(CamelModel):
     metric: Union[float, None]

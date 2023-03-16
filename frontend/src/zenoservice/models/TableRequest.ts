@@ -11,6 +11,6 @@ export type TableRequest = {
 	sliceRange: Array<number>;
 	filterPredicates: FilterPredicateGroup;
 	sort: Array<any>;
-	tagIds: FilterIds,
+	tagIds: FilterIds;
 	filterIds?: FilterIds;
 };

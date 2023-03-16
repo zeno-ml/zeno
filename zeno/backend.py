@@ -26,7 +26,7 @@ from zeno.api import (
 from zeno.classes.base import DataProcessingReturn, MetadataType, ZenoColumnType
 from zeno.classes.classes import MetricKey, PlotRequest, TableRequest, ZenoColumn
 from zeno.classes.report import Report
-from zeno.classes.slice import FilterIds, FilterPredicateGroup, Slice, GroupMetric
+from zeno.classes.slice import FilterIds, GroupMetric, Slice
 from zeno.classes.tag import Tag, TagMetricKey
 from zeno.processing.data_processing import (
     postdistill_data,
@@ -435,11 +435,8 @@ class ZenoBackend(object):
                 return_metrics.append(GroupMetric(metric=metric, size=filt_df.shape[0]))
         return return_metrics
 
-    def get_metrics_for_tags(
-        self,
-        requests: List[TagMetricKey]
-    ) -> List[GroupMetric]:
-        
+    def get_metrics_for_tags(self, requests: List[TagMetricKey]) -> List[GroupMetric]:
+
         return_metrics: List[GroupMetric] = []
         for tag_metric_key in requests:
             filt_df = filter_table(self.df, None, tag_metric_key.tag.selection_ids)
@@ -552,11 +549,15 @@ class ZenoBackend(object):
             pickle.dump(self.slices, f)
 
     def get_filtered_ids(self, req: PlotRequest):
-        return filter_table(self.df, req.filter_predicates, req.tag_ids)[str(self.id_column)].to_json(orient="records")
+        return filter_table(self.df, req.filter_predicates, req.tag_ids)[
+            str(self.id_column)
+        ].to_json(orient="records")
 
     def get_filtered_table(self, req: TableRequest):
         """Return filtered table from list of filter predicates."""
-        filt_df = filter_table(self.df, req.filter_predicates, req.filter_ids, req.tag_ids)
+        filt_df = filter_table(
+            self.df, req.filter_predicates, req.filter_ids, req.tag_ids
+        )
         if req.sort[0]:
             filt_df = filt_df.sort_values(str(req.sort[0]), ascending=req.sort[1])
         filt_df = filt_df.iloc[req.slice_range[0] : req.slice_range[1]].copy()

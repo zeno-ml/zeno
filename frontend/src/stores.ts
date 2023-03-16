@@ -83,7 +83,7 @@ export const tags: Writable<Map<string, Tag>> = writable(new Map());
 export const reports: Writable<Report[]> = reportWritable();
 
 // the tag ids selected by the user
-export const tagIds: Writable<FilterIds> = writable({ids: []})
+export const tagIds: Writable<FilterIds> = writable({ ids: [] });
 
 // the ids directly selected by the user
 export const selectionIds: Writable<FilterIds> = writable({ ids: [] });

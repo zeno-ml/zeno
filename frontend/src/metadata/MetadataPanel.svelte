@@ -17,7 +17,7 @@
 		getHistograms,
 		type HistogramEntry,
 	} from "../api/metadata";
-	import { getMetricsForSlices, getMetricsForSlicesAndTags } from "../api/slice";
+	import { getMetricsForSlicesAndTags } from "../api/slice";
 	import { getMetricsForTags } from "../api/tag";
 	import {
 		folders,
@@ -38,7 +38,7 @@
 		sliceToEdit,
 		status,
 		tags,
-		tagIds
+		tagIds,
 	} from "../stores";
 	import { columnHash } from "../util/util";
 	import {
@@ -52,9 +52,8 @@
 	import FolderCell from "./cells/FolderCell.svelte";
 	import MetadataCell from "./cells/MetadataCell.svelte";
 	import SliceCell from "./cells/SliceCell.svelte";
-  	import TagCell from "./cells/TagCell.svelte";
+	import TagCell from "./cells/TagCell.svelte";
 	import MetricRange from "./MetricRange.svelte";
-	import NewTagPopup from "./popups/NewTagPopup.svelte";
 
 	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
 		new InternMap([], columnHash);
@@ -68,16 +67,15 @@
 			},
 			model: $model,
 			metric: $metric,
-		}
-	]
-	);
+		},
+	]);
 
 	$: tagRes = getMetricsForTags([
 		<TagMetricKey>{
 			tag: <Tag>{
 				tagName: "",
 				folder: "",
-				selectionIds: {ids: []},
+				selectionIds: { ids: [] },
 			},
 			model: $model,
 			metric: $metric,
@@ -92,13 +90,18 @@
 					return;
 				}
 				metadataHistograms = res;
-				getHistogramMetrics(res, null, $model, $metric, $tagIds, $selectionIds).then(
-					(res) => {
-						if (res !== undefined) {
-							metadataHistograms = res;
-						}
+				getHistogramMetrics(
+					res,
+					null,
+					$model,
+					$metric,
+					$tagIds,
+					$selectionIds
+				).then((res) => {
+					if (res !== undefined) {
+						metadataHistograms = res;
 					}
-				);
+				});
 			});
 		});
 	});
@@ -129,19 +132,21 @@
 		if (metadataHistograms.size === 0) {
 			return;
 		}
-		selections.set({ metadata: {}, slices: [], tags: []});
+		selections.set({ metadata: {}, slices: [], tags: [] });
 		getHistograms($status.completeColumns, model).then((res) => {
 			getHistogramCounts(res, null, null, null).then((res) => {
 				if (res === undefined) {
 					return;
 				}
 				metadataHistograms = res;
-				getHistogramMetrics(res, null, model, $metric, null, null).then((res) => {
-					if (res === undefined) {
-						return;
+				getHistogramMetrics(res, null, model, $metric, null, null).then(
+					(res) => {
+						if (res === undefined) {
+							return;
+						}
+						metadataHistograms = res;
 					}
-					metadataHistograms = res;
-				});
+				);
 			});
 		});
 	});
@@ -347,9 +352,8 @@
 					m.metadata[key] = { predicates: [], join: "" };
 				});
 				return { slices: [], metadata: { ...m.metadata }, tags: [] };
-			}
-			);
-			tagIds.set({ids: []});
+			});
+			tagIds.set({ ids: [] });
 		}}>
 		<div class="inline">All instances</div>
 
@@ -379,24 +383,21 @@
 		<div class="inline">
 			<div>
 				<div
-				use:tooltip={{
-					content: "Create a new tag.",
-					position: "left",
-					theme: "zeno-tooltip",
-				}}>
-				<IconButton
-					on:click={() => (showNewTag.update((b) => !b))}>
-					<Icon component={Svg} viewBox="0 0 24 24">
-						{#if $selectionIds.ids.length > 0}
-							<path fill="#6a1a9a" d={mdiPlusCircle} />
-						{:else}
-							<path fill="black" d={mdiPlus} />
-						{/if}
-					</Icon>
-				</IconButton>
-			</div>
-
-
+					use:tooltip={{
+						content: "Create a new tag.",
+						position: "left",
+						theme: "zeno-tooltip",
+					}}>
+					<IconButton on:click={() => showNewTag.update((b) => !b)}>
+						<Icon component={Svg} viewBox="0 0 24 24">
+							{#if $selectionIds.ids.length > 0}
+								<path fill="#6a1a9a" d={mdiPlusCircle} />
+							{:else}
+								<path fill="black" d={mdiPlus} />
+							{/if}
+						</Icon>
+					</IconButton>
+				</div>
 
 				<!-- <Wrapper>
 					<IconButton on:click={() => (showNewTag = !showNewTag)}>

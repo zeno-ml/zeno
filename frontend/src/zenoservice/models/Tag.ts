@@ -14,4 +14,4 @@ export type TagMetricKey = {
 	tag: Tag;
 	model: string;
 	metric: string;
-}
+};
