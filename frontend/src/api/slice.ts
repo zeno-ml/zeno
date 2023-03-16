@@ -67,3 +67,29 @@ export async function getMetricsForSlices(
 		});
 	}
 }
+
+export async function getMetricsForSlicesAndTags(
+	metricKeys: MetricKey[],
+	tagIds: FilterIds,
+	filterIds?: FilterIds
+): Promise<GroupMetric[]> {
+	if (metricKeys.length === 0) {
+		return null;
+	}
+	if (metricKeys[0].metric === undefined) {
+		metricKeys = metricKeys.map((k) => ({ ...k, metric: "" }));
+	}
+	if (metricKeys[0].model === undefined) {
+		metricKeys = metricKeys.map((k) => ({ ...k, model: "" }));
+	}
+	// Update model in predicates if slices are dependent on postdistill columns.
+	metricKeys = setModelForMetricKeys(metricKeys);
+
+	if (metricKeys.length > 0) {
+		return await ZenoService.getMetricsForSlicesAndTags({
+			metricKeys,
+			tagIds,
+			filterIds,
+		});
+	}
+}

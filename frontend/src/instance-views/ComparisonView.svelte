@@ -16,6 +16,7 @@
 		settings,
 		sort,
 		status,
+		tagIds
 	} from "../stores";
 	import { columnHash } from "../util/util";
 	import { ZenoColumnType } from "../zenoservice";
@@ -55,6 +56,7 @@
 		$model;
 		$sort;
 		$selectionIds;
+		$tagIds;
 		updateTable();
 	}
 
@@ -85,6 +87,7 @@
 				mod,
 				[start, end],
 				$sort,
+				$tagIds,
 				$selectionIds
 			);
 		});

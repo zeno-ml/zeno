@@ -17,7 +17,7 @@
 		getHistograms,
 		type HistogramEntry,
 	} from "../api/metadata";
-	import { getMetricsForSlices } from "../api/slice";
+	import { getMetricsForSlices, getMetricsForSlicesAndTags } from "../api/slice";
 	import { getMetricsForTags } from "../api/tag";
 	import {
 		folders,
@@ -37,7 +37,8 @@
 		slices,
 		sliceToEdit,
 		status,
-		tags
+		tags,
+		tagIds
 	} from "../stores";
 	import { columnHash } from "../util/util";
 	import {
@@ -58,7 +59,7 @@
 	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
 		new InternMap([], columnHash);
 
-	$: res = getMetricsForSlices([
+	$: res = getMetricsForSlicesAndTags([
 		<MetricKey>{
 			sli: <Slice>{
 				sliceName: "",
@@ -67,15 +68,18 @@
 			},
 			model: $model,
 			metric: $metric,
-		},
-	]);
+		}
+	], 
+	$tagIds,
+	$selectionIds
+	);
 
 	$: tagRes = getMetricsForTags([
 		<TagMetricKey>{
 			tag: <Tag>{
 				tagName: "",
 				folder: "",
-				selectionIds: [],
+				selectionIds: {ids: []},
 			},
 			model: $model,
 			metric: $metric,
@@ -85,12 +89,12 @@
 	// Get histogram buckets, counts, and metrics when columns update.
 	status.subscribe((s) => {
 		getHistograms(s.completeColumns, $model).then((res) => {
-			getHistogramCounts(res, null, $selectionIds).then((res) => {
+			getHistogramCounts(res, null, $tagIds, $selectionIds).then((res) => {
 				if (res === undefined) {
 					return;
 				}
 				metadataHistograms = res;
-				getHistogramMetrics(res, null, $model, $metric, $selectionIds).then(
+				getHistogramMetrics(res, null, $model, $metric, $tagIds, $selectionIds).then(
 					(res) => {
 						if (res !== undefined) {
 							metadataHistograms = res;
@@ -112,6 +116,7 @@
 			null,
 			$model,
 			metric,
+			$tagIds,
 			$selectionIds
 		).then((res) => {
 			if (res === undefined) {
@@ -127,12 +132,12 @@
 			return;
 		}
 		getHistograms($status.completeColumns, model).then((res) => {
-			getHistogramCounts(res, null, $selectionIds).then((res) => {
+			getHistogramCounts(res, null, $tagIds, $selectionIds).then((res) => {
 				if (res === undefined) {
 					return;
 				}
 				metadataHistograms = res;
-				getHistogramMetrics(res, null, model, $metric, $selectionIds).then(
+				getHistogramMetrics(res, null, model, $metric, $tagIds, $selectionIds).then(
 					(res) => {
 						if (res === undefined) {
 							return;
@@ -155,6 +160,7 @@
 				predicates: [$selectionPredicates],
 				join: "",
 			},
+			$tagIds,
 			selectionIds
 		).then((res) => {
 			if (res === undefined) {
@@ -170,7 +176,46 @@
 				},
 				$model,
 				$metric,
+				$tagIds,
 				selectionIds
+			).then((res) => {
+				if (res === undefined) {
+					return;
+				}
+				metadataHistograms = res;
+			});
+		});
+	});
+
+	// when the tag Ids change, update the histograms
+	tagIds.subscribe((tIds) => {
+		if (metadataHistograms.size === 0) {
+			return;
+		}
+		getHistogramCounts(
+			metadataHistograms,
+			{
+				predicates: [$selectionPredicates],
+				join: "",
+			},
+			tIds,
+			$selectionIds
+		).then((res) => {
+			if (res === undefined) {
+				return;
+			}
+
+			metadataHistograms = res;
+			getHistogramMetrics(
+				res,
+				{
+					predicates: [$selectionPredicates],
+					join: "",
+				},
+				$model,
+				$metric,
+				tIds,
+				$selectionIds
 			).then((res) => {
 				if (res === undefined) {
 					return;
@@ -191,6 +236,7 @@
 				predicates: [sels],
 				join: "&",
 			},
+			$tagIds,
 			$selectionIds
 		).then((res) => {
 			if (res === undefined) {
@@ -206,6 +252,7 @@
 				},
 				$model,
 				$metric,
+				$tagIds,
 				$selectionIds
 			).then((res) => {
 				if (res === undefined) {
@@ -303,7 +350,9 @@
 					m.metadata[key] = { predicates: [], join: "" };
 				});
 				return { slices: [], metadata: { ...m.metadata }, tags: [] };
-			});
+			}
+			);
+			tagIds.set({ids: []});
 		}}>
 		<div class="inline">All instances</div>
 

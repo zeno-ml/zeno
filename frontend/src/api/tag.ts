@@ -1,9 +1,9 @@
 import type { TagMetricKey } from "src/zenoservice/models/Tag";
-import { ZenoService, type GroupMetric } from "../zenoservice";
+import { ZenoService, type FilterIds, type GroupMetric } from "../zenoservice";
 
 export async function createNewTag(
 	tagName: string,
-	selectionIds = [],
+	selectionIds = {ids: []},
 	folder = ""
 ) {
 	await ZenoService.createNewTag({

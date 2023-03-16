@@ -9,11 +9,13 @@
 		selections,
 		settings,
 		status,
+		tagIds,
 	} from "../stores";
 	import type { FilterPredicate } from "../zenoservice";
 	import IdsChip from "./chips/IdsChip.svelte";
 	import MetadataChip from "./chips/MetadataChip.svelte";
 	import SliceChip from "./chips/SliceChip.svelte";
+  	import TagChip from "./chips/TagChip.svelte";
 
 	export let currentResult;
 	export let selected = "list";
@@ -54,7 +56,7 @@
 <div style:width="100%">
 	<div class="between">
 		<div class="chips">
-			{#if $selections.slices.length + filters.length === 0 && $selectionIds.ids.length === 0}
+			{#if $selections.slices.length + $selections.tags.length + filters.length === 0 && $selectionIds.ids.length === 0}
 				<p>Filter with the metadata distributions.</p>
 			{:else}
 				{#each $selections.slices as slice}
@@ -63,10 +65,13 @@
 				{#each filters as [hash, chip]}
 					<MetadataChip {hash} {chip} />
 				{/each}
+				{#each $selections.tags as tag}
+					<TagChip {tag} />
+				{/each}
 				{#if $selectionIds.ids.length > 0}
 					<IdsChip />
 				{/if}
-				{#if $selectionPredicates.predicates.length > 0 || $selectionIds.ids.length > 0}
+				{#if $selectionPredicates.predicates.length > 0 || $tagIds.ids.length > 0 || $selectionIds.ids.length > 0}
 					<span
 						class="clear"
 						on:keydown={() => ({})}
@@ -81,6 +86,7 @@
 								return { slices: [], metadata: { ...m.metadata }, tags: [] };
 							});
 							selectionIds.set({ ids: [] });
+							tagIds.set({ids: []})
 						}}>
 						clear all
 					</span>

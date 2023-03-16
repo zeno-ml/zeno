@@ -4,10 +4,11 @@
 import type { ColorsProjectRequest } from "../models/ColorsProjectRequest";
 import type { EmbedProject2DRequest } from "../models/EmbedProject2DRequest";
 import type { EntryRequest } from "../models/EntryRequest";
+import type { FilterIds } from "../models/FilterIds";
 import type { FilterPredicateGroup } from "../models/FilterPredicateGroup";
 import type { HistogramBucket } from "../models/HistogramBucket";
 import type { HistogramRequest } from "../models/HistogramRequest";
-import type { MetricRequest } from "../models/MetricRequest";
+import type { CombineMetricRequest, MetricRequest } from "../models/MetricRequest";
 import type { Points2D } from "../models/Points2D";
 import type { PointsColors } from "../models/PointsColors";
 import type { Report } from "../models/Report";
@@ -23,6 +24,7 @@ import type { ZenoVariables } from "../models/ZenoVariables";
 import type { CancelablePromise } from "../core/CancelablePromise";
 import { OpenAPI } from "../core/OpenAPI";
 import { request as __request } from "../core/request";
+import type { PlotRequest } from "../models/PlotRequest";
 
 export class ZenoService {
 	/**
@@ -184,7 +186,7 @@ export class ZenoService {
 	 * @throws ApiError
 	 */
 	public static getFilteredIds(
-		requestBody: FilterPredicateGroup
+		requestBody: PlotRequest,
 	): CancelablePromise<string> {
 		return __request(OpenAPI, {
 			method: "POST",
@@ -354,6 +356,28 @@ export class ZenoService {
 			},
 		});
 	}
+
+
+	/**
+	 * Get Metrics For Slices and Tags
+	 * @param requestBody
+	 * @returns GroupMetric Successful Response
+	 * @throws ApiError
+	 */
+	public static getMetricsForSlicesAndTags(
+		requestBody: CombineMetricRequest
+	): CancelablePromise<Array<GroupMetric>> {
+		return __request(OpenAPI, {
+			method: "POST",
+			url: "/slice-tag-metrics",
+			body: requestBody,
+			mediaType: "application/json",
+			errors: {
+				422: `Validation Error`,
+			},
+		});
+	}
+
 
 	/**
 	 * Get Metrics For Tags

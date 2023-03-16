@@ -13,6 +13,7 @@
 		settings,
 		sort,
 		status,
+		tagIds,
 	} from "../stores";
 	import { columnHash } from "../util/util";
 	import type { ZenoColumn } from "../zenoservice";
@@ -74,6 +75,7 @@
 			$model,
 			[start, end],
 			$sort,
+			$tagIds,
 			$selectionIds
 		).then((res) => {
 			table = res;

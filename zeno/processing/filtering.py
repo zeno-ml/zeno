@@ -62,8 +62,10 @@ def filter_table(
 ) -> pd.DataFrame:
     # if we have ids, filter them out now!
     if filter_ids is not None and len(filter_ids.ids) > 0:
+        #make sure the ids we are querying exist
+        existingIds = df.index.intersection(filter_ids.ids)
         # this is fast because the index is set to ids
-        df = df.loc[filter_ids.ids]
+        df = df.loc[existingIds]
 
     if(filter_predicates is not None):
         final_filter = get_filter_string(filter_predicates)

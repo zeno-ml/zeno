@@ -19,6 +19,7 @@ export type { HTTPValidationError } from "./models/HTTPValidationError";
 export { MetadataType } from "./models/MetadataType";
 export type { MetricKey } from "./models/MetricKey";
 export type { MetricRequest } from "./models/MetricRequest";
+export type { PlotRequest } from "./models/PlotRequest";
 export type { Points2D } from "./models/Points2D";
 export type { PointsColors } from "./models/PointsColors";
 export type { Report } from "./models/Report";

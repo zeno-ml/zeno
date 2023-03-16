@@ -19,6 +19,7 @@ from zeno.classes.classes import (
     EmbedProject2DRequest,
     EntryRequest,
     MetricRequest,
+    PlotRequest,
     StatusResponse,
     TableRequest,
     ZenoSettings,
@@ -148,7 +149,7 @@ def get_server(zeno: ZenoBackend):
         zeno.set_reports(reqs)
 
     @api_app.post("/filtered-ids", response_model=str, tags=["zeno"])
-    def get_filtered_ids(req: FilterPredicateGroup):
+    def get_filtered_ids(req: PlotRequest):
         return zeno.get_filtered_ids(req)
 
     @api_app.post("/filtered-table", response_model=str, tags=["zeno"])
@@ -197,6 +198,10 @@ def get_server(zeno: ZenoBackend):
     @api_app.post("/slice-metrics", response_model=List[GroupMetric], tags=["zeno"])
     def get_metrics_for_slices(req: MetricRequest):
         return zeno.get_metrics_for_slices(req.metric_keys, req.filter_ids)
+    
+    @api_app.post("/slice-tag-metrics", response_model=List[GroupMetric], tags=["zeno"])
+    def get_metrics_for_slices_and_tags(req: MetricRequest):
+        return zeno.get_metrics_for_slices_and_tags(req.metric_keys, req.tag_ids, req.filter_ids)
 
     @api_app.post("/tag-metrics", response_model=List[GroupMetric], tags=["zeno"])
     def get_metrics_for_tags(req: List[TagMetricKey]):

@@ -9,3 +9,9 @@ export type MetricRequest = {
 	metricKeys: Array<MetricKey>;
 	filterIds?: FilterIds;
 };
+
+export type CombineMetricRequest = {
+	metricKeys: Array<MetricKey>;
+	tagIds: FilterIds;
+	filterIds?: FilterIds;
+}

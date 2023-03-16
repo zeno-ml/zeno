@@ -10,9 +10,11 @@
 		rowsPerPage,
 		selectionIds,
 		selectionPredicates,
+		selections,
 		settings,
 		sort,
 		status,
+		tagIds,
 	} from "../stores";
 	import { columnHash } from "../util/util";
 	import { ZenoColumnType } from "../zenoservice";
@@ -47,8 +49,10 @@
 	$: {
 		currentPage;
 		$status.completeColumns;
+		$selections.tags;
 		$model;
 		$sort;
+		$tagIds;
 		$selectionIds;
 		updateTable();
 	}
@@ -73,12 +77,20 @@
 		if (start === undefined || end === undefined) {
 			return;
 		}
+		// let s = new Set()
+		// $selectionIds.ids.forEach(id => s.add(id))
+		// $selections.tags.forEach(tagName => $tags.get(tagName).selectionIds.ids.forEach(id => s.add(id)))
+		// let finalArray = []
+		// s.forEach(id => finalArray.push(id))
+		//selectionIds.set({ids: finalArray})
+
 		getFilteredTable(
 			$status.completeColumns,
 			$selectionPredicates,
 			$model,
 			[start, end],
 			$sort,
+			$tagIds,
 			$selectionIds
 		).then((res) => (table = res));
 	}

@@ -23,7 +23,7 @@ from zeno.api import (
     ZenoParameters,
 )
 from zeno.classes.base import DataProcessingReturn, MetadataType, ZenoColumnType
-from zeno.classes.classes import MetricKey, TableRequest, ZenoColumn
+from zeno.classes.classes import MetricKey, PlotRequest, TableRequest, ZenoColumn
 from zeno.classes.report import Report
 from zeno.classes.slice import FilterIds, FilterPredicateGroup, Slice, GroupMetric
 from zeno.classes.tag import Tag, TagMetricKey
@@ -389,6 +389,31 @@ class ZenoBackend(object):
                 return_metrics.append(GroupMetric(metric=metric, size=filt_df.shape[0]))
         return return_metrics
 
+    def get_metrics_for_slices_and_tags(
+        self,
+        requests: List[MetricKey],
+        tag_ids: Optional[FilterIds] = None,
+        filter_ids: Optional[FilterIds] = None,
+    ) -> List[GroupMetric]:
+        """Calculate result for each requested combination."""
+
+        return_metrics: List[GroupMetric] = []
+        for metric_key in requests:
+            filt_df = filter_table(
+                self.df, metric_key.sli.filter_predicates, filter_ids
+            )
+            filt_df = filter_table(
+                filt_df, metric_key.sli.filter_predicates, tag_ids
+            )
+            if metric_key.metric == "" or self.label_column.name == "":
+                return_metrics.append(GroupMetric(metric=None, size=filt_df.shape[0]))
+            else:
+                metric = self.calculate_metric(
+                    filt_df, metric_key.model, metric_key.metric
+                )
+                return_metrics.append(GroupMetric(metric=metric, size=filt_df.shape[0]))
+        return return_metrics
+
     def get_metrics_for_tags(
         self,
         requests: List[TagMetricKey]
@@ -396,7 +421,7 @@ class ZenoBackend(object):
         
         return_metrics: List[GroupMetric] = []
         for tag_metric_key in requests:
-            filt_df = filter_table(self.df, None, FilterIds(ids = tag_metric_key.tag.selection_ids))
+            filt_df = filter_table(self.df, None, tag_metric_key.tag.selection_ids)
             if tag_metric_key.metric == "" or self.label_column.name == "":
                 return_metrics.append(GroupMetric(metric=None, size=filt_df.shape[0]))
             else:
@@ -505,12 +530,13 @@ class ZenoBackend(object):
         with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
             pickle.dump(self.slices, f)
 
-    def get_filtered_ids(self, req: FilterPredicateGroup):
-        return filter_table(self.df, req)[str(self.id_column)].to_json(orient="records")
+    def get_filtered_ids(self, req: PlotRequest):
+        return filter_table(self.df, req.filter_predicates, req.tag_ids)[str(self.id_column)].to_json(orient="records")
 
     def get_filtered_table(self, req: TableRequest):
         """Return filtered table from list of filter predicates."""
         filt_df = filter_table(self.df, req.filter_predicates, req.filter_ids)
+        filt_df = filter_table(filt_df, req.filter_predicates, req.tag_ids)
         if req.sort[0]:
             filt_df = filt_df.sort_values(str(req.sort[0]), ascending=req.sort[1])
         filt_df = filt_df.iloc[req.slice_range[0] : req.slice_range[1]].copy()

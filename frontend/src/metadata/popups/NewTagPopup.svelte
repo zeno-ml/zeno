@@ -25,12 +25,12 @@
 			tagName = "Tag " + $tags.size;
 		}
 
-		createNewTag(tagName, $selectionIds.ids).then(() => {
+		createNewTag(tagName, $selectionIds).then(() => {
 			tags.update((t) => {
 				t.set(tagName, <Tag>{
 					tagName,
 					folder,
-					selectionIds: $selectionIds.ids,
+					selectionIds: $selectionIds,
 				});
 				return t;
 			});

@@ -40,6 +40,7 @@ class MetricKey(CamelModel):
 
 class MetricRequest(CamelModel):
     metric_keys: List[MetricKey]
+    tag_ids: Optional[FilterIds] = None
     filter_ids: Optional[FilterIds] = None
 
 
@@ -48,8 +49,12 @@ class TableRequest(CamelModel):
     slice_range: List[int]
     filter_predicates: FilterPredicateGroup
     sort: Tuple[Union[ZenoColumn, None], bool]
+    tag_ids: FilterIds
     filter_ids: Optional[FilterIds] = None
 
+class PlotRequest(CamelModel):
+    filter_predicates: FilterPredicateGroup
+    tag_ids: FilterIds
 
 class EmbedProject2DRequest(CamelModel):
     model: str

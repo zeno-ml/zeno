@@ -8,7 +8,9 @@
 		status,
 		showNewTag,
 		selections,
+		selectionIds,
 		tags,
+		tagIds,
 		sliceToEdit,
 		reports,
 		model,
@@ -62,6 +64,26 @@
 		deleteTag(tag.tagName);
 	}
 
+	function removeTagIdsFromTagIds(tagName) {
+		let s = new Set()
+		$tagIds.ids.forEach(id => s.add(id))
+
+		$tags.get(tagName).selectionIds.ids.forEach(id => s.delete(id))
+		let finalArray = []
+		s.forEach(id => finalArray.push(id))
+		tagIds.set({ids: finalArray})
+	}
+
+	function addTagIdsToTagIds(tagName) {
+		let s = new Set()
+		$tagIds.ids.forEach(id => s.add(id))
+
+		$tags.get(tagName).selectionIds.ids.forEach(id => s.add(id))
+		let finalArray = []
+		s.forEach(id => finalArray.push(id))
+		tagIds.set({ids: finalArray})
+	}
+
 	function setSelected(e) {
 		// Imitate selections in Vega bar charts.
 		if (
@@ -73,6 +95,7 @@
 				metadata: s.metadata,
 				tags: [],
 			}));
+			removeTagIdsFromTagIds(tag.tagName);
 			return;
 		}
 		if (e.shiftKey) {
@@ -85,12 +108,14 @@
 						tags: [...sel.tags],
 					};
 				});
+				removeTagIdsFromTagIds(tag.tagName);
 			} else {
 				selections.update((sel) => ({
 					slices: sel.slices,
 					metadata: sel.metadata,
 					tags: [...sel.tags, tag.tagName],
 				}));
+				addTagIdsToTagIds(tag.tagName);
 			}
 		} else {
 			if ($selections.tags.includes(tag.tagName)) {
@@ -100,15 +125,20 @@
 						metadata: sel.metadata,
 						tags: [tag.tagName],
 					}));
+					console.log("heheh")
+					tagIds.set({ids: []})
+					addTagIdsToTagIds(tag.tagName)
 				} else {
 					selections.update((sel) => {
 						sel.tags.splice(sel.tags.indexOf(tag.tagName), 1);
+						console.log(sel.tags)
 						return {
 							slices: sel.slices,
 							metadata: sel.metadata,
 							tags: [...sel.tags],
 						};
 					});
+					removeTagIdsFromTagIds(tag.tagName)
 				}
 			} else {
 				selections.update((sel) => ({
@@ -116,6 +146,10 @@
 					metadata: sel.metadata,
 					tags: [tag.tagName],
 				}));
+				tagIds.set({ids: []})
+				addTagIdsToTagIds(tag.tagName)
+				console.log(tag.tagName)
+				console.log($selections.tags)
 			}
 		}
 	}
@@ -274,7 +308,7 @@
 		cursor: pointer;
 	}
 	.selected {
-		background: var(--P3);
+		background: var(--N2);
 	}
 	.inline {
 		display: flex;
