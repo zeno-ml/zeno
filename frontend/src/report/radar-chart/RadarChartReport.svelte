@@ -44,8 +44,9 @@
 					metrics: res[i].metric.toFixed(2),
 				})),
 			}}
+			<h4>{selectMetrics}</h4>
 			<Vega
-				spec={generateSpec(parameters, selectMetrics)}
+				spec={generateSpec(parameters)}
 				data={chartData}
 				options={{ tooltip: true, width: 800, height: 800 }} />
 		{/await}
@@ -55,5 +56,11 @@
 <style>
 	.main {
 		margin-left: 20px;
+	}
+	.model-result {
+		margin-top: 30px;
+	}
+	.model-result h4 {
+		margin: 0px;
 	}
 </style>

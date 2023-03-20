@@ -1,27 +1,48 @@
 import type { VisualizationSpec } from "vega-embed";
 
-export default function generateSpec(
-	parameters,
-	selectMetrics
-): VisualizationSpec {
+export default function generateSpec(parameters): VisualizationSpec {
 	const x_encode = parameters.xEncoding;
 	const y_encode = parameters.yEncoding;
 	const color_encode = parameters.colorEncoding;
 	const datum_x = "datum." + x_encode;
 	const datum_y = "datum." + y_encode;
+	const datum_color = "datum." + color_encode;
 
 	const spec = {
 		$schema: "https://vega.github.io/schema/vega/v5.json",
 		description:
 			"A radar chart example, showing multiple dimensions in a radial layout.",
-		signals: [{ name: "radius", update: "width / 2" }],
 		autosize: { type: "none", contains: "padding" },
-		title: selectMetrics,
-		padding: 70,
-		data: [
+		padding: 60,
+
+		signals: [
+			{ name: "radius", update: "width / 2.3" },
 			{
-				name: "table",
+				name: "hover",
+				value: {},
+				on: [
+					{
+						events: "@category-line:mouseover",
+						update: datum_color,
+					},
+					{
+						events: "@category-line:mouseout",
+						update: "{}",
+					},
+					{
+						events: "@value-text:mouseover",
+						update: "datum." + datum_color,
+					},
+					{
+						events: "@value-text:mouseout",
+						update: "{}",
+					},
+				],
 			},
+		],
+
+		data: [
+			{ name: "table" },
 			{
 				name: "points",
 				source: "table",
@@ -70,7 +91,7 @@ export default function generateSpec(
 			{
 				type: "group",
 				name: "categories",
-				zindex: 1,
+				zindex: 0.5,
 				from: {
 					facet: { data: "table", name: "facet", groupby: [color_encode] },
 				},
@@ -98,10 +119,22 @@ export default function generateSpec(
 										datum_x +
 										"))",
 								},
-								stroke: { scale: "color", field: color_encode },
-								strokeWidth: { value: 2 },
+							},
+							update: {
+								stroke: [
+									{ test: datum_color + "=== hover", value: "black" },
+									{ scale: "color", field: color_encode },
+								],
+								strokeWidth: [
+									{ test: datum_color + "=== hover", value: 2 },
+									{ value: 1 },
+								],
+								strokeOpacity: [
+									{ test: datum_color + "=== hover", value: 0.8 },
+									{ value: 0.4 },
+								],
 								fill: { scale: "color", field: color_encode },
-								fillOpacity: { value: 0.1 },
+								fillOpacity: { value: 0.2 },
 							},
 						},
 					},
@@ -111,12 +144,23 @@ export default function generateSpec(
 						from: { data: "category-line" },
 						encode: {
 							enter: {
-								x: { signal: "datum.x" },
-								y: { signal: "datum.y" },
-								text: { signal: "datum." + datum_y },
+								x: { field: "x" },
+								y: { field: "y" },
+							},
+							update: {
 								align: { value: "center" },
 								baseline: { value: "middle" },
+								text: { signal: "datum." + datum_y },
 								fill: { value: "black" },
+								fontSize: [
+									{ test: "datum." + datum_color + "=== hover", value: 13 },
+									{ value: 12 },
+								],
+								fontWeight: { value: "bold" },
+								fillOpacity: [
+									{ test: "datum." + datum_color + "=== hover", value: 1 },
+									{ value: 0.4 },
+								],
 							},
 						},
 					},
@@ -135,6 +179,7 @@ export default function generateSpec(
 						y2: { signal: "radius * sin(scale('angular', " + datum_x + "))" },
 						stroke: { value: "lightgray" },
 						strokeWidth: { value: 2 },
+						strokeOpacity: { value: 0.7 },
 					},
 				},
 			},
@@ -146,7 +191,7 @@ export default function generateSpec(
 				encode: {
 					enter: {
 						x: {
-							signal: "(radius + 5) * cos(scale('angular', " + datum_x + "))",
+							signal: "(radius + 15) * cos(scale('angular', " + datum_x + "))",
 						},
 						y: {
 							signal: "(radius + 5) * sin(scale('angular', " + datum_x + "))",
@@ -175,6 +220,7 @@ export default function generateSpec(
 							},
 						],
 						fill: { value: "black" },
+						fontSize: { value: 12 },
 						fontWeight: { value: "bold" },
 					},
 				},
@@ -190,6 +236,7 @@ export default function generateSpec(
 						y: { field: "y2" },
 						stroke: { value: "lightgray" },
 						strokeWidth: { value: 2 },
+						strokeOpacity: { value: 0.7 },
 					},
 				},
 			},
