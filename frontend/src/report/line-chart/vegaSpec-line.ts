@@ -1,9 +1,6 @@
 import type { VegaLiteSpec } from "svelte-vega";
 
-export default function generateBarSpec(
-	parameters,
-	selectMetrics
-): VegaLiteSpec {
+export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 	const x_encode = parameters.xEncoding;
 	const y_encode = parameters.yEncoding;
 	const color_encode = parameters.colorEncoding;

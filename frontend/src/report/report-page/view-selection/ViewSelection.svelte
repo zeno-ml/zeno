@@ -8,28 +8,24 @@
 
 	const defaultMap = {
 		barchart: {
-			name: "Bar Chart",
 			type: ChartType.BAR,
 			xEncoding: "slices",
 			yEncoding: "metrics",
 			colorEncoding: "models",
 		},
 		table: {
-			name: "Table View",
 			type: ChartType.TABLE,
 			xEncoding: "models",
 			yEncoding: "slices",
 			colorEncoding: "metrics",
 		},
 		linechart: {
-			name: "Line Chart",
 			type: ChartType.LINE,
 			xEncoding: "slices",
 			yEncoding: "metrics",
 			colorEncoding: "models",
 		},
 		beeswarm: {
-			name: "Beeswarm Plot",
 			type: ChartType.BEESWARM,
 			xEncoding: "metrics",
 			yEncoding: "models",
@@ -44,7 +40,6 @@
 			let newType = $reports[$report].type;
 			let oldType = defaultMap[e.currentTarget.id].type;
 			if (newType !== oldType) {
-				currentReport.name = defaultMap[e.currentTarget.id].name;
 				currentReport.type = defaultMap[e.currentTarget.id].type;
 				currentReport.parameters.xEncoding =
 					defaultMap[e.currentTarget.id].xEncoding;
