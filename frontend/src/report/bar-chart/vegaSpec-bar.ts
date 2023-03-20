@@ -56,14 +56,21 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 				field: color_encode,
 				sort: null,
 			},
-			fillOpacity: { value: 0.8 },
+			fillOpacity: {
+				condition: { param: "highlight", value: 1, empty: false },
+				value: 0.8,
+			},
 		},
 		layer: [
 			{
 				params: [
 					{
 						name: "highlight",
-						select: { type: "point", on: "mouseover" },
+						select: {
+							type: "point",
+							field: y_encode,
+							on: "mouseover",
+						},
 					},
 				],
 				mark: {
@@ -75,6 +82,7 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 				},
 				encoding: {
 					color: {
+						param: "hover",
 						field: color_encode,
 						sort: null,
 						scale: { scheme: "category20" },

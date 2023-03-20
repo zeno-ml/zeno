@@ -1,18 +1,14 @@
 <script lang="ts">
-	import { Icon } from "@smui/button";
 	import { Cell, Row } from "@smui/data-table";
-	import IconButton from "@smui/icon-button";
 	import { getMetricsForSlices } from "../../api/slice";
 	import { report, reports } from "../../stores";
 	import type { Slice, MetricKey } from "../../zenoservice";
 	import SliceDetailsContainer from "./SliceDetailsContainer.svelte";
 
-	export let sliceIndex: number;
 	export let slice: Slice;
 
 	$: currentReport = $reports[$report];
 	$: selectMetrics = currentReport.metrics;
-	$: selectSlices = currentReport.slices;
 
 	$: modelResults = getMetricsForSlices(getMetKeys(currentReport));
 
@@ -35,19 +31,6 @@
 			{#if slice}
 				<SliceDetailsContainer sli={slice} />
 			{/if}
-			<div class="group">
-				<IconButton
-					on:click={(e) => {
-						e.stopPropagation();
-						selectSlices.splice(sliceIndex, 1);
-						reports.update((reps) => {
-							reps[$report] = currentReport;
-							return reps;
-						});
-					}}>
-					<Icon class="material-icons">delete_outline</Icon>
-				</IconButton>
-			</div>
 		</div>
 	</Cell>
 	<Cell>{selectMetrics}</Cell>
@@ -74,13 +57,5 @@
 		left: 0px;
 		background: var(--G6);
 		z-index: 0;
-	}
-	.group {
-		margin-left: 10px;
-		display: flex;
-		flex-direction: row;
-		justify-content: space-between;
-		align-items: center;
-		cursor: pointer;
 	}
 </style>

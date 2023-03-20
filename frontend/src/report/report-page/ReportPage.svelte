@@ -61,8 +61,14 @@
 		background-color: var(--Y2);
 	}
 	#reports {
+		width: 100%;
+		height: calc(100vh - 15px);
+		overflow-y: scroll;
 		display: flex;
 		flex-direction: column;
-		padding: 20px;
+		padding-top: 10px;
+		padding-bottom: 0px;
+		padding-left: 15px;
+		padding-right: 15px;
 	}
 </style>

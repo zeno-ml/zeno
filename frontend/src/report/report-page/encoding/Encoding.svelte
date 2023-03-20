@@ -134,7 +134,7 @@
 		border-bottom: 1px solid var(--G4);
 	}
 	#encoding {
-		margin-bottom: 20px;
+		margin-bottom: 50px;
 	}
 	#encoding-flex {
 		display: flex;

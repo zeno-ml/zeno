@@ -3,7 +3,7 @@
 	import Beeswarm from "./chart-icons/BeeswarmIcon.svelte";
 	import BarChart from "./chart-icons/BarChartIcon.svelte";
 	import LineChart from "./chart-icons/LineChartIcon.svelte";
-	import TableView from "./chart-icons/TableViewIcon.svelte";
+	import Table from "./chart-icons/TableIcon.svelte";
 	import { ChartType } from "../../../zenoservice";
 
 	const defaultMap = {
@@ -83,8 +83,8 @@
 				: ''}"
 			on:keydown={() => ({})}
 			on:click={updateChart}>
-			<TableView />
-			<h4 class="chart-title">Table View</h4>
+			<Table />
+			<h4 class="chart-title">Table</h4>
 		</div>
 		<div
 			id="beeswarm"
