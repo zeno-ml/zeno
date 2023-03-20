@@ -58,7 +58,7 @@ export default function generateBarSpec(
 				condition: {
 					param: "hover",
 					field: color_encode,
-					scale: { scheme: "purples" },
+					scale: { scheme: "category20" },
 					sort: null,
 				},
 				value: "grey",
@@ -85,7 +85,6 @@ export default function generateBarSpec(
 						signal:
 							"{'slice_name': datum.slices, 'size': datum.size, 'metric': datum.metrics, 'model': datum.models}",
 					},
-					cursor: "pointer",
 				},
 			},
 			{

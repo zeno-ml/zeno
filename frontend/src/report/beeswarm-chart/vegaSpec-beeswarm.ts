@@ -54,7 +54,7 @@ export default function generateSpec(selectMetrics): VisualizationSpec {
 				name: "color",
 				type: "ordinal",
 				domain: { data: "table", field: "sli_name" },
-				range: { scheme: "bluepurple" },
+				range: { scheme: "category20" },
 			},
 		],
 

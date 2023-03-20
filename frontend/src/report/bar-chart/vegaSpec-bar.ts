@@ -1,9 +1,6 @@
 import type { VegaLiteSpec } from "svelte-vega";
 
-export default function generateBarSpec(
-	parameters,
-	selectMetrics
-): VegaLiteSpec {
+export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 	const x_encode = parameters.xEncoding;
 	const y_encode = parameters.yEncoding;
 	const color_encode = parameters.colorEncoding;
@@ -59,10 +56,7 @@ export default function generateBarSpec(
 				field: color_encode,
 				sort: null,
 			},
-			fillOpacity: {
-				condition: { param: "highlight", value: 1 },
-				value: 0.2,
-			},
+			fillOpacity: { value: 0.8 },
 		},
 		layer: [
 			{
@@ -78,13 +72,12 @@ export default function generateBarSpec(
 						signal:
 							"{'slice_name': datum.slices,'size': datum.size, 'metric': datum.metrics, 'model': datum.models}",
 					},
-					cursor: "pointer",
 				},
 				encoding: {
 					color: {
 						field: color_encode,
 						sort: null,
-						scale: { scheme: "purples" },
+						scale: { scheme: "category20" },
 					},
 				},
 			},
