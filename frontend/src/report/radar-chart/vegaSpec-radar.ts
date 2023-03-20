@@ -13,7 +13,7 @@ export default function generateSpec(parameters): VisualizationSpec {
 		description:
 			"A radar chart example, showing multiple dimensions in a radial layout.",
 		autosize: { type: "none", contains: "padding" },
-		padding: 60,
+		padding: { left: 80, right: 60, top: 60, bottom: 100 },
 
 		signals: [
 			{ name: "radius", update: "width / 2.3" },
@@ -79,7 +79,18 @@ export default function generateSpec(parameters): VisualizationSpec {
 				range: { scheme: "category10" },
 			},
 		],
-
+		legends: [
+			{
+				type: "symbol",
+				title: "Color",
+				fill: "color",
+				direction: "horizontal",
+				orient: "top",
+				offset: 130,
+				titleFontSize: 12,
+				labelFontSize: 12,
+			},
+		],
 		encode: {
 			enter: {
 				x: { signal: "radius" },

@@ -37,6 +37,12 @@
 			y: [{ label: "models" }],
 			color: [{ label: "slices" }],
 		},
+		// radar chart select option dropdown
+		[ChartType.RADAR]: {
+			x: [{ label: "slices" }, { label: "models" }],
+			y: [{ label: "metrics" }],
+			color: [{ label: "slices" }, { label: "models" }],
+		},
 	};
 
 	$: currentReport = $reports[$report];
@@ -46,7 +52,11 @@
 	async function refreshParams(e, currentParam) {
 		// bar/line chart exclusive combination
 		let label = e.detail.label;
-		if (chartType === ChartType.BAR || chartType === ChartType.LINE) {
+		if (
+			chartType === ChartType.BAR ||
+			chartType === ChartType.LINE ||
+			chartType === ChartType.RADAR
+		) {
 			let paramExcluMap = { slices: "models", models: "slices" };
 			if (currentParam === "x") {
 				parameters.xEncoding = label;

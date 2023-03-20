@@ -48,7 +48,7 @@
 			<Vega
 				spec={generateSpec(parameters)}
 				data={chartData}
-				options={{ tooltip: true, width: 800, height: 800 }} />
+				options={{ tooltip: true, width: 700, height: 600 }} />
 		{/await}
 	</div>
 </div>

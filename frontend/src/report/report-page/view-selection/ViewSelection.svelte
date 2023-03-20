@@ -31,6 +31,12 @@
 			yEncoding: "models",
 			colorEncoding: "slices",
 		},
+		radar: {
+			type: ChartType.RADAR,
+			xEncoding: "slices",
+			yEncoding: "metrics",
+			colorEncoding: "models",
+		},
 	};
 
 	$: currentReport = $reports[$report];
@@ -95,6 +101,16 @@
 			on:click={updateChart}>
 			<Beeswarm />
 			<h4 class="chart-title">Beeswarm Plot</h4>
+		</div>
+		<div
+			id="radar"
+			class="chart-element {$reports[$report].type === ChartType.RADAR
+				? 'selected'
+				: ''}"
+			on:keydown={() => ({})}
+			on:click={updateChart}>
+			<Beeswarm />
+			<h4 class="chart-title">Radar Chart</h4>
 		</div>
 	</div>
 </div>
