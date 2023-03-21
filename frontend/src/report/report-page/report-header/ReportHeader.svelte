@@ -4,7 +4,6 @@
 	import { updateTab } from "../../../util/util";
 	import { Svg } from "@smui/common";
 	import Textfield from "@smui/textfield";
-	import CharacterCounter from "@smui/textfield/character-counter";
 
 	let ishover = false;
 
@@ -41,10 +40,7 @@
 			style="width: -webkit-fill-available"
 			variant="outlined"
 			bind:value={currentReport.name}
-			label="Report Name"
-			input$maxlength={15}>
-			<CharacterCounter slot="helper">0 / 15</CharacterCounter>
-		</Textfield>
+			label="Report Name" />
 	</div>
 </div>
 

@@ -3,7 +3,7 @@
 	import { getMetricsForSlices } from "../../api/slice";
 	import { report, reports } from "../../stores";
 	import type { MetricKey } from "../../zenoservice";
-	import generateBarSpec from "./vegaSpec-line";
+	import generateSpec from "./vegaSpec-line";
 
 	$: currentReport = $reports[$report];
 	$: selectMetrics = currentReport.metrics;
@@ -46,7 +46,7 @@
 				})),
 			}}
 			<VegaLite
-				spec={generateBarSpec(parameters, selectMetrics)}
+				spec={generateSpec(parameters, selectMetrics)}
 				data={chartData}
 				options={{
 					tooltip: true,

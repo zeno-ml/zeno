@@ -74,52 +74,58 @@
 <div id="encoding">
 	<h4 class="edit-type">Encoding</h4>
 	<div id="encoding-flex">
-		<div class="parameters">
-			<h4 class="select-label">x</h4>
-			<Svelecte
-				style="width: 260px; height: 30px; flex:none"
-				value={parameters.xEncoding}
-				options={optionMap[chartType].x}
-				searchable={false}
-				on:change={(e) => {
-					if (e.detail.label !== parameters.xEncoding) {
-						refreshParams(e, "x");
-					}
-				}} />
-		</div>
-		<svelte:component this={EncodingMap[parameters.xEncoding]} />
-
-		<div class="parameters">
-			<h4 class="select-label">y</h4>
-			<Svelecte
-				style="width: 260px; height: 30px; flex:none"
-				value={parameters.yEncoding}
-				options={optionMap[chartType].y}
-				searchable={false}
-				on:change={(e) => {
-					if (e.detail.label !== parameters.yEncoding) {
-						refreshParams(e, "y");
-					}
-				}} />
-		</div>
-		<svelte:component this={EncodingMap[parameters.yEncoding]} />
-
-		{#if chartType !== ChartType.TABLE}
+		<div class="encoding-section">
 			<div class="parameters">
-				<h4 class="select-label">color</h4>
+				<h4 class="select-label">x</h4>
 				<Svelecte
-					style="width: 260px; height: 30px; flex:none;"
-					value={parameters.colorEncoding}
-					options={optionMap[chartType].color}
+					style="width: 280px; height: 30px; flex:none"
+					value={parameters.xEncoding}
+					options={optionMap[chartType].x}
 					searchable={false}
 					on:change={(e) => {
-						if (e.detail.label !== parameters.colorEncoding) {
-							refreshParams(e, "color");
+						if (e.detail.label !== parameters.xEncoding) {
+							refreshParams(e, "x");
 						}
 					}} />
 			</div>
-		{/if}
-		<svelte:component this={EncodingMap[parameters.colorEncoding]} />
+			<svelte:component this={EncodingMap[parameters.xEncoding]} />
+		</div>
+
+		<div class="encoding-section">
+			<div class="parameters">
+				<h4 class="select-label">y</h4>
+				<Svelecte
+					style="width: 280px; height: 30px; flex:none"
+					value={parameters.yEncoding}
+					options={optionMap[chartType].y}
+					searchable={false}
+					on:change={(e) => {
+						if (e.detail.label !== parameters.yEncoding) {
+							refreshParams(e, "y");
+						}
+					}} />
+			</div>
+			<svelte:component this={EncodingMap[parameters.yEncoding]} />
+		</div>
+
+		<div class="encoding-section">
+			{#if chartType !== ChartType.TABLE}
+				<div class="parameters">
+					<h4 class="select-label">color</h4>
+					<Svelecte
+						style="width: 280px; height: 30px; flex:none;"
+						value={parameters.colorEncoding}
+						options={optionMap[chartType].color}
+						searchable={false}
+						on:change={(e) => {
+							if (e.detail.label !== parameters.colorEncoding) {
+								refreshParams(e, "color");
+							}
+						}} />
+				</div>
+			{/if}
+			<svelte:component this={EncodingMap[parameters.colorEncoding]} />
+		</div>
 	</div>
 </div>
 
@@ -128,11 +134,14 @@
 		border-bottom: 1px solid var(--G4);
 	}
 	#encoding {
-		margin-bottom: 20px;
+		margin-bottom: 50px;
 	}
 	#encoding-flex {
 		display: flex;
 		flex-direction: column;
+	}
+	.encoding-section {
+		margin-bottom: 10px;
 	}
 	.parameters {
 		display: flex;
