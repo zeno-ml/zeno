@@ -23,7 +23,7 @@
 				});
 				metricKeys.push({
 					sli: slice,
-					metric: rep.metrics[0],
+					metric: selectMetrics,
 					model: mod,
 				});
 			});

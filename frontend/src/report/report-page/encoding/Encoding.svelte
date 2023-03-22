@@ -1,49 +1,66 @@
 <script lang="ts">
 	import { report, reports } from "../../../stores";
-	import SlicesEncoding from "./SlicesEncodingMultiChoice.svelte";
-	import MetricsEncoding from "./MetricsEncodingDropdown.svelte";
-	import ModelsEncoding from "./ModelsEncodingMultiChoice.svelte";
+	import SlicesEncodingDropdown from "./SlicesEncodingDropdown.svelte";
+	import SlicesEncodingMultiChoice from "./SlicesEncodingMultiChoice.svelte";
+	import MetricsEncodingDropdown from "./MetricsEncodingDropdown.svelte";
+	import MetricsEncodingMultiChoice from "./MetricsEncodingMultiChoice.svelte";
+	import ModelsEncodingDropdown from "./ModelsEncodingDropdown.svelte";
+	import ModelsEncodingMultiChoice from "./ModelsEncodingMultiChoice.svelte";
 	import { ChartType } from "../../../zenoservice";
 	import Svelecte from "svelecte";
 
 	const EncodingMap = {
-		slices: SlicesEncoding,
-		models: ModelsEncoding,
-		metrics: MetricsEncoding,
+		slices: {
+			fixed: SlicesEncodingDropdown,
+			multi: SlicesEncodingMultiChoice,
+		},
+		metrics: {
+			fixed: MetricsEncodingDropdown,
+			multi: MetricsEncodingMultiChoice,
+		},
+		models: {
+			fixed: ModelsEncodingDropdown,
+			multi: ModelsEncodingMultiChoice,
+		},
 	};
 
+	// initial settings
 	const optionMap = {
 		// bar chart select option dropdown
 		[ChartType.BAR]: {
 			x: [{ label: "slices" }, { label: "models" }],
 			y: [{ label: "metrics" }],
 			color: [{ label: "slices" }, { label: "models" }],
+			fixed_dimension: "y",
 		},
 		// table view select option dropdown
 		[ChartType.TABLE]: {
 			x: [{ label: "slices" }, { label: "models" }],
 			y: [{ label: "slices" }, { label: "models" }],
 			color: [{ label: "metrics" }],
+			fixed_dimension: "color",
 		},
 		// line chart select option dropdown
 		[ChartType.LINE]: {
 			x: [{ label: "slices" }, { label: "models" }],
 			y: [{ label: "metrics" }],
 			color: [{ label: "slices" }, { label: "models" }],
+			fixed_dimension: "y",
 		},
 		// beeswarm chart select option dropdown
 		[ChartType.BEESWARM]: {
 			x: [{ label: "metrics" }],
 			y: [{ label: "models" }],
 			color: [{ label: "slices" }],
+			fixed_dimension: "y",
 		},
 	};
-
-	let fixed_dimension = 2;
 
 	$: currentReport = $reports[$report];
 	$: chartType = currentReport.type;
 	$: parameters = currentReport.parameters;
+
+	$: fixed_dimension = optionMap[chartType].fixed_dimension;
 
 	function refreshParams(e, currentParam) {
 		// bar/line chart exclusive combination
@@ -95,10 +112,16 @@
 					type="radio"
 					bind:group={fixed_dimension}
 					name="fixed_dimension"
-					value={1} />
+					value={"x"}
+					disabled={chartType === ChartType.BAR ||
+						chartType === ChartType.LINE ||
+						chartType === ChartType.TABLE} />
 				<span> Fix this dimension (Dropdown)</span>
 			</label>
-			<svelte:component this={EncodingMap[parameters.xEncoding]} />
+			<svelte:component
+				this={fixed_dimension === "x"
+					? EncodingMap[parameters.xEncoding].fixed
+					: EncodingMap[parameters.xEncoding].multi} />
 		</div>
 
 		<div class="encoding-section">
@@ -120,37 +143,43 @@
 					type="radio"
 					bind:group={fixed_dimension}
 					name="fixed_dimension"
-					value={2} />
+					value={"y"} />
 				<span> Fix this dimension (Dropdown)</span>
 			</label>
-			<svelte:component this={EncodingMap[parameters.yEncoding]} />
+			<svelte:component
+				this={fixed_dimension === "y"
+					? EncodingMap[parameters.yEncoding].fixed
+					: EncodingMap[parameters.yEncoding].multi} />
 		</div>
 
 		<div class="encoding-section">
-			{#if chartType !== ChartType.TABLE}
-				<div class="parameters">
-					<h4>color</h4>
-					<Svelecte
-						style="width: 280px; height: 30px; flex:none;"
-						value={parameters.colorEncoding}
-						options={optionMap[chartType].color}
-						searchable={false}
-						on:change={(e) => {
-							if (e.detail.label !== parameters.colorEncoding) {
-								refreshParams(e, "color");
-							}
-						}} />
-				</div>
-			{/if}
+			<div class="parameters">
+				<h4>{chartType === ChartType.TABLE ? "layer" : "color"}</h4>
+				<Svelecte
+					style="width: 280px; height: 30px; flex:none;"
+					value={parameters.colorEncoding}
+					options={optionMap[chartType].color}
+					searchable={false}
+					on:change={(e) => {
+						if (e.detail.label !== parameters.colorEncoding) {
+							refreshParams(e, "color");
+						}
+					}} />
+			</div>
 			<label>
 				<input
 					type="radio"
 					bind:group={fixed_dimension}
 					name="fixed_dimension"
-					value={3} />
+					value={"color"}
+					disabled={chartType === ChartType.BAR ||
+						chartType === ChartType.LINE} />
 				<span> Fix this dimension (Dropdown)</span>
 			</label>
-			<svelte:component this={EncodingMap[parameters.colorEncoding]} />
+			<svelte:component
+				this={fixed_dimension === "color"
+					? EncodingMap[parameters.colorEncoding].fixed
+					: EncodingMap[parameters.colorEncoding].multi} />
 		</div>
 	</div>
 </div>
