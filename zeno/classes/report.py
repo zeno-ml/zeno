@@ -27,6 +27,6 @@ class Report(CamelModel):
     name: str
     type: Union[ChartType, None] = None
     slices: Union[List[Slice], None] = None
-    metrics: Union[List[str], str, None] = None
+    metrics: Union[List[str], None] = None
     models: Union[List[str], None] = None
     parameters: Union[Parameters, None] = None

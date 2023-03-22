@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { report, reports } from "../../../stores";
-	import SlicesEncoding from "./SlicesEncoding.svelte";
-	import MetricsEncoding from "./MetricsEncoding.svelte";
-	import ModelsEncoding from "./ModelsEncoding.svelte";
+	import SlicesEncoding from "./SlicesEncodingMultiChoice.svelte";
+	import MetricsEncoding from "./MetricsEncodingDropdown.svelte";
+	import ModelsEncoding from "./ModelsEncodingMultiChoice.svelte";
 	import { ChartType } from "../../../zenoservice";
 	import Svelecte from "svelecte";
 
@@ -39,11 +39,13 @@
 		},
 	};
 
+	let fixed_dimension = 2;
+
 	$: currentReport = $reports[$report];
 	$: chartType = currentReport.type;
 	$: parameters = currentReport.parameters;
 
-	async function refreshParams(e, currentParam) {
+	function refreshParams(e, currentParam) {
 		// bar/line chart exclusive combination
 		let label = e.detail.label;
 		if (chartType === ChartType.BAR || chartType === ChartType.LINE) {
@@ -76,7 +78,7 @@
 	<div id="encoding-flex">
 		<div class="encoding-section">
 			<div class="parameters">
-				<h4 class="select-label">x</h4>
+				<h4>x</h4>
 				<Svelecte
 					style="width: 280px; height: 30px; flex:none"
 					value={parameters.xEncoding}
@@ -88,12 +90,20 @@
 						}
 					}} />
 			</div>
+			<label>
+				<input
+					type="radio"
+					bind:group={fixed_dimension}
+					name="fixed_dimension"
+					value={1} />
+				<span> Fix this dimension (Dropdown)</span>
+			</label>
 			<svelte:component this={EncodingMap[parameters.xEncoding]} />
 		</div>
 
 		<div class="encoding-section">
 			<div class="parameters">
-				<h4 class="select-label">y</h4>
+				<h4>y</h4>
 				<Svelecte
 					style="width: 280px; height: 30px; flex:none"
 					value={parameters.yEncoding}
@@ -105,13 +115,21 @@
 						}
 					}} />
 			</div>
+			<label>
+				<input
+					type="radio"
+					bind:group={fixed_dimension}
+					name="fixed_dimension"
+					value={2} />
+				<span> Fix this dimension (Dropdown)</span>
+			</label>
 			<svelte:component this={EncodingMap[parameters.yEncoding]} />
 		</div>
 
 		<div class="encoding-section">
 			{#if chartType !== ChartType.TABLE}
 				<div class="parameters">
-					<h4 class="select-label">color</h4>
+					<h4>color</h4>
 					<Svelecte
 						style="width: 280px; height: 30px; flex:none;"
 						value={parameters.colorEncoding}
@@ -124,6 +142,14 @@
 						}} />
 				</div>
 			{/if}
+			<label>
+				<input
+					type="radio"
+					bind:group={fixed_dimension}
+					name="fixed_dimension"
+					value={3} />
+				<span> Fix this dimension (Dropdown)</span>
+			</label>
 			<svelte:component this={EncodingMap[parameters.colorEncoding]} />
 		</div>
 	</div>
@@ -141,7 +167,16 @@
 		flex-direction: column;
 	}
 	.encoding-section {
-		margin-bottom: 10px;
+		margin-bottom: 15px;
+	}
+	.encoding-section label {
+		padding-left: 60px;
+	}
+	.encoding-section input {
+		vertical-align: middle;
+	}
+	.encoding-section label span {
+		vertical-align: middle;
 	}
 	.parameters {
 		display: flex;
@@ -149,7 +184,7 @@
 		justify-content: space-between;
 		padding: 10px;
 	}
-	.select-label {
+	.parameters h4 {
 		margin: 5px;
 	}
 </style>

@@ -6,7 +6,7 @@
 	import generateSpec from "./vegaSpec-line";
 
 	$: currentReport = $reports[$report];
-	$: selectMetrics = currentReport.metrics;
+	$: selectMetrics = currentReport.metrics[0];
 	$: parameters = currentReport.parameters;
 
 	let chartEntries = [];
@@ -23,7 +23,7 @@
 				});
 				metricKeys.push({
 					sli: slice,
-					metric: rep.metrics,
+					metric: rep.metrics[0],
 					model: mod,
 				});
 			});

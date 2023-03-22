@@ -2,7 +2,7 @@
 	import { mdiPlus } from "@mdi/js";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
-	import { reports, slices, models } from "../stores";
+	import { reports, slices, models, metrics } from "../stores";
 	import { updateTab } from "../util/util";
 	import ReportHomeBlock from "./ReportHomeBlock.svelte";
 	import { ChartType } from "../zenoservice";
@@ -27,7 +27,7 @@
 						type: ChartType.BAR,
 						slices: [...$slices.values()],
 						models: [...$models.values()],
-						metrics: "accuracy",
+						metrics: [...$metrics.values()],
 						parameters: {
 							xEncoding: "slices",
 							yEncoding: "metrics",

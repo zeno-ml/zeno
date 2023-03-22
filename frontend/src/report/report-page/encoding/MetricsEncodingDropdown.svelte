@@ -4,7 +4,9 @@
 	import Svelecte from "svelecte";
 	let options = [];
 	$metrics.forEach((m) => {
-		options.push({ label: m });
+		if ($reports[$report].metrics.includes(m)) {
+			options.push({ label: m });
+		}
 	});
 </script>
 
@@ -14,12 +16,15 @@
 	</h4>
 	<Svelecte
 		style="width: 280px; flex:none;"
-		value={$reports[$report].metrics}
+		value={$reports[$report].metrics[0]}
 		{options}
 		searchable={false}
 		on:change={(e) => {
-			if (e.detail.label !== $reports[$report].metrics) {
-				$reports[$report].metrics = e.detail.label;
+			if (e.detail.label !== $reports[$report].metrics[0]) {
+				let tmpMetrics = $reports[$report].metrics;
+				tmpMetrics.splice(tmpMetrics.indexOf(e.detail.label), 1);
+				tmpMetrics.unshift(e.detail.label);
+				$reports[$report].metrics = tmpMetrics;
 			}
 		}} />
 </div>

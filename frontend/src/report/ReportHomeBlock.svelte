@@ -104,7 +104,7 @@
 	<p class="report-slice">
 		{report.slices ? report.slices.length : 0} slices,
 		{report.models ? report.models.length : 0} models,
-		{report.metrics}
+		{report.metrics ? report.metrics.length : 0} metrics
 	</p>
 </div>
 

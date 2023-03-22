@@ -10,7 +10,7 @@ export type Report = {
 	name: string;
 	type?: ChartType;
 	slices?: Array<Slice>;
-	metrics?: Array<string> | string;
+	metrics?: Array<string>;
 	models?: Array<string>;
 	parameters?: Parameters;
 };
