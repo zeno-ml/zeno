@@ -5,6 +5,7 @@
 		mdiChartLine,
 		mdiTable,
 		mdiDotsVertical,
+		mdiRadar,
 	} from "@mdi/js";
 
 	import { Icon } from "@smui/button";
@@ -25,6 +26,7 @@
 		[ChartType.LINE]: mdiChartLine,
 		[ChartType.BAR]: mdiChartBar,
 		[ChartType.BEESWARM]: mdiBee,
+		[ChartType.RADAR]: mdiRadar,
 	};
 </script>
 

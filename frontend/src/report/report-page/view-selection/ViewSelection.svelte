@@ -4,6 +4,8 @@
 	import BarChart from "./chart-icons/BarChartIcon.svelte";
 	import LineChart from "./chart-icons/LineChartIcon.svelte";
 	import Table from "./chart-icons/TableIcon.svelte";
+	import Radar from "./chart-icons/RadarChartIcon.svelte";
+
 	import { ChartType } from "../../../zenoservice";
 
 	const defaultMap = {
@@ -113,7 +115,7 @@
 				: ''}"
 			on:keydown={() => ({})}
 			on:click={updateChart}>
-			<Beeswarm />
+			<Radar />
 			<h4 class="chart-title">Radar Chart</h4>
 		</div>
 	</div>
