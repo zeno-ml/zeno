@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Cell, Row } from "@smui/data-table";
 	import { getMetricsForSlices } from "../../api/slice";
-	import { slices } from "../../stores";
 	import type { MetricKey } from "../../zenoservice";
 	import SliceDetailsContainer from "./SliceDetailsContainer.svelte";
 
@@ -18,7 +17,7 @@
 			if (parameters.yEncoding === "slices") {
 				rep.models.forEach((mod) => {
 					metricKeys.push({
-						sli: $slices.get(row),
+						sli: row,
 						metric: rep.metrics[0],
 						model: mod,
 					});
@@ -60,7 +59,7 @@
 		<Cell class="sticky" style="left: 0px; border-right: 1px solid #e8e8e8">
 			<div class="inline">
 				{#if parameters.yEncoding === "slices"}
-					<SliceDetailsContainer sli={$slices.get(row)} />
+					<SliceDetailsContainer sli={row} />
 				{:else if parameters.yEncoding === "models"}
 					{row}
 				{/if}

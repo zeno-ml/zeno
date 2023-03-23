@@ -46,8 +46,8 @@
 		// beeswarm chart select option dropdown
 		[ChartType.BEESWARM]: {
 			x: [{ label: "metrics" }],
-			y: [{ label: "models" }],
-			color: [{ label: "slices" }],
+			y: [{ label: "slices" }, { label: "models" }],
+			color: [{ label: "slices" }, { label: "models" }],
 		},
 	};
 
@@ -57,7 +57,7 @@
 	$: fixed_dimension = currentReport.fixedDimension;
 
 	function refreshParams(e, currentParam) {
-		// bar/line chart exclusive combination
+		// bar&line chart exclusive combination
 		let label = e.detail.label;
 		if (chartType === ChartType.BAR || chartType === ChartType.LINE) {
 			let paramExcluMap = { slices: "models", models: "slices" };
@@ -78,6 +78,17 @@
 			} else if (currentParam === "y") {
 				parameters.yEncoding = label;
 				parameters.xEncoding = paramExcluMap[label];
+			}
+		}
+		// beeswarm exclusive combination
+		else if (chartType === ChartType.BEESWARM) {
+			let paramExcluMap = { slices: "models", models: "slices" };
+			if (currentParam === "y") {
+				parameters.yEncoding = label;
+				parameters.colorEncoding = paramExcluMap[label];
+			} else if (currentParam === "color") {
+				parameters.colorEncoding = label;
+				parameters.yEncoding = paramExcluMap[label];
 			}
 		}
 		$reports[$report] = currentReport;
@@ -167,7 +178,8 @@
 					name="fixed_dimension"
 					value={"color"}
 					disabled={chartType === ChartType.BAR ||
-						chartType === ChartType.LINE} />
+						chartType === ChartType.LINE ||
+						chartType === ChartType.BEESWARM} />
 				<span> Fix this dimension (Dropdown)</span>
 			</label>
 			<svelte:component

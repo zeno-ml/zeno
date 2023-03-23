@@ -45,7 +45,7 @@
 					{#if parameters.yEncoding === "slices"}
 						{#each selectSlices as slice}
 							<TableReportRow
-								row={slice.sliceName}
+								row={slice}
 								{fixed_dimension}
 								{parameters}
 								{currentReport} />
