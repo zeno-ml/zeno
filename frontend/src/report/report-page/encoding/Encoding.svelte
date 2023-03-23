@@ -24,43 +24,37 @@
 		},
 	};
 
-	// initial settings
 	const optionMap = {
 		// bar chart select option dropdown
 		[ChartType.BAR]: {
 			x: [{ label: "slices" }, { label: "models" }],
 			y: [{ label: "metrics" }],
 			color: [{ label: "slices" }, { label: "models" }],
-			fixed_dimension: "y",
-		},
-		// table view select option dropdown
-		[ChartType.TABLE]: {
-			x: [{ label: "slices" }, { label: "models" }],
-			y: [{ label: "slices" }, { label: "models" }],
-			color: [{ label: "metrics" }],
-			fixed_dimension: "color",
 		},
 		// line chart select option dropdown
 		[ChartType.LINE]: {
 			x: [{ label: "slices" }, { label: "models" }],
 			y: [{ label: "metrics" }],
 			color: [{ label: "slices" }, { label: "models" }],
-			fixed_dimension: "y",
+		},
+		// table view select option dropdown
+		[ChartType.TABLE]: {
+			x: [{ label: "slices" }, { label: "models" }],
+			y: [{ label: "slices" }, { label: "models" }],
+			color: [{ label: "metrics" }],
 		},
 		// beeswarm chart select option dropdown
 		[ChartType.BEESWARM]: {
 			x: [{ label: "metrics" }],
 			y: [{ label: "models" }],
 			color: [{ label: "slices" }],
-			fixed_dimension: "y",
 		},
 	};
 
 	$: currentReport = $reports[$report];
 	$: chartType = currentReport.type;
 	$: parameters = currentReport.parameters;
-
-	$: fixed_dimension = optionMap[chartType].fixed_dimension;
+	$: fixed_dimension = currentReport.fixedDimension;
 
 	function refreshParams(e, currentParam) {
 		// bar/line chart exclusive combination
@@ -110,7 +104,7 @@
 			<label>
 				<input
 					type="radio"
-					bind:group={fixed_dimension}
+					bind:group={$reports[$report].fixedDimension}
 					name="fixed_dimension"
 					value={"x"}
 					disabled={chartType === ChartType.BAR ||
@@ -141,7 +135,7 @@
 			<label>
 				<input
 					type="radio"
-					bind:group={fixed_dimension}
+					bind:group={$reports[$report].fixedDimension}
 					name="fixed_dimension"
 					value={"y"} />
 				<span> Fix this dimension (Dropdown)</span>
@@ -169,7 +163,7 @@
 			<label>
 				<input
 					type="radio"
-					bind:group={fixed_dimension}
+					bind:group={$reports[$report].fixedDimension}
 					name="fixed_dimension"
 					value={"color"}
 					disabled={chartType === ChartType.BAR ||

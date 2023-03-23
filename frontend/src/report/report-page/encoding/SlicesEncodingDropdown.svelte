@@ -18,7 +18,6 @@
 		{options}
 		searchable={false}
 		on:change={(e) => {
-			console.log($reports[$report].slices);
 			if (e.detail.label !== selectSliceName) {
 				let tmpSlices = $reports[$report].slices;
 				tmpSlices = tmpSlices.filter((p) => p.sliceName !== e.detail.label);

@@ -12,24 +12,28 @@
 			xEncoding: "slices",
 			yEncoding: "metrics",
 			colorEncoding: "models",
-		},
-		table: {
-			type: ChartType.TABLE,
-			xEncoding: "models",
-			yEncoding: "slices",
-			colorEncoding: "metrics",
+			fixedDimension: "y",
 		},
 		linechart: {
 			type: ChartType.LINE,
 			xEncoding: "slices",
 			yEncoding: "metrics",
 			colorEncoding: "models",
+			fixedDimension: "y",
+		},
+		table: {
+			type: ChartType.TABLE,
+			xEncoding: "models",
+			yEncoding: "slices",
+			colorEncoding: "metrics",
+			fixedDimension: "color",
 		},
 		beeswarm: {
 			type: ChartType.BEESWARM,
 			xEncoding: "metrics",
 			yEncoding: "models",
 			colorEncoding: "slices",
+			fixedDimension: "y",
 		},
 	};
 
@@ -37,9 +41,7 @@
 
 	function updateChart(e) {
 		if (e.currentTarget instanceof HTMLElement) {
-			let newType = $reports[$report].type;
-			let oldType = defaultMap[e.currentTarget.id].type;
-			if (newType !== oldType) {
+			if ($reports[$report].type !== defaultMap[e.currentTarget.id].type) {
 				currentReport.type = defaultMap[e.currentTarget.id].type;
 				currentReport.parameters.xEncoding =
 					defaultMap[e.currentTarget.id].xEncoding;
@@ -47,6 +49,8 @@
 					defaultMap[e.currentTarget.id].yEncoding;
 				currentReport.parameters.colorEncoding =
 					defaultMap[e.currentTarget.id].colorEncoding;
+				currentReport.fixedDimension =
+					defaultMap[e.currentTarget.id].fixedDimension;
 				$reports[$report] = currentReport;
 			}
 		}

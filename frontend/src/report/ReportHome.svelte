@@ -33,6 +33,7 @@
 							yEncoding: "metrics",
 							colorEncoding: "models",
 						},
+						fixedDimension: "y",
 					});
 					return reps;
 				});

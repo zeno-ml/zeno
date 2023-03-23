@@ -30,3 +30,4 @@ class Report(CamelModel):
     metrics: Union[List[str], None] = None
     models: Union[List[str], None] = None
     parameters: Union[Parameters, None] = None
+    fixed_dimension: Union[str, None] = None
