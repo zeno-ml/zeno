@@ -10,6 +10,7 @@ class ChartType(str, Enum):
     LINE = "LINE"
     TABLE = "TABLE"
     BEESWARM = "BEESWARM"
+    RADAR = "RADAR"
 
 
 class ReportPredicate(CamelModel):
