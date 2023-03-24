@@ -23,7 +23,33 @@
 			multi: ModelsEncodingMultiChoice,
 		},
 	};
-
+	const labelMap = {
+		[ChartType.BAR]: {
+			x: "x",
+			y: "y",
+			color: "color",
+		},
+		[ChartType.LINE]: {
+			x: "x",
+			y: "y",
+			color: "color",
+		},
+		[ChartType.TABLE]: {
+			x: "x",
+			y: "y",
+			color: "layer",
+		},
+		[ChartType.BEESWARM]: {
+			x: "x",
+			y: "y",
+			color: "color",
+		},
+		[ChartType.RADAR]: {
+			x: "axis",
+			y: "layer",
+			color: "fixed",
+		},
+	};
 	const optionMap = {
 		// bar chart select option dropdown
 		[ChartType.BAR]: {
@@ -51,9 +77,9 @@
 		},
 		// radar chart select option dropdown
 		[ChartType.RADAR]: {
-			x: [{ label: "slices" }, { label: "models" }],
-			y: [{ label: "metrics" }],
-			color: [{ label: "slices" }, { label: "models" }],
+			x: [{ label: "slices" }, { label: "models" }, { label: "metrics" }],
+			y: [{ label: "slices" }, { label: "models" }],
+			color: [{ label: "slices" }, { label: "models" }, { label: "metrics" }],
 		},
 	};
 
@@ -63,14 +89,10 @@
 	$: fixed_dimension = currentReport.fixedDimension;
 
 	function refreshParams(e, currentParam) {
-		// bar&line chart exclusive combination
 		let label = e.detail.label;
-		if (
-			chartType === ChartType.BAR ||
-			chartType === ChartType.LINE ||
-			chartType === ChartType.RADAR
-		) {
-			let paramExcluMap = { slices: "models", models: "slices" };
+		let paramExcluMap = { slices: "models", models: "slices" };
+		// bar&line chart exclusive combination
+		if (chartType === ChartType.BAR || chartType === ChartType.LINE) {
 			if (currentParam === "x") {
 				parameters.xEncoding = label;
 				parameters.colorEncoding = paramExcluMap[label];
@@ -81,7 +103,6 @@
 		}
 		// table view exclusive combination
 		else if (chartType === ChartType.TABLE) {
-			let paramExcluMap = { slices: "models", models: "slices" };
 			if (currentParam === "x") {
 				parameters.xEncoding = label;
 				parameters.yEncoding = paramExcluMap[label];
@@ -92,13 +113,40 @@
 		}
 		// beeswarm exclusive combination
 		else if (chartType === ChartType.BEESWARM) {
-			let paramExcluMap = { slices: "models", models: "slices" };
 			if (currentParam === "y") {
 				parameters.yEncoding = label;
 				parameters.colorEncoding = paramExcluMap[label];
 			} else if (currentParam === "color") {
 				parameters.colorEncoding = label;
 				parameters.yEncoding = paramExcluMap[label];
+			}
+		}
+		// radar exclusive combination
+		else if (chartType === ChartType.RADAR) {
+			console.log;
+			if (currentParam === "x") {
+				parameters.xEncoding = label;
+				if (label === "metrics") {
+					parameters.colorEncoding = paramExcluMap[parameters.yEncoding];
+				} else {
+					parameters.colorEncoding = "metrics";
+					parameters.yEncoding = paramExcluMap[label];
+				}
+			} else if (currentParam === "y") {
+				parameters.yEncoding = label;
+				if (parameters.xEncoding === "metrics") {
+					parameters.colorEncoding = paramExcluMap[label];
+				} else if (parameters.colorEncoding === "metrics") {
+					parameters.xEncoding = paramExcluMap[label];
+				}
+			} else if (currentParam === "color") {
+				parameters.colorEncoding = label;
+				if (label === "metrics") {
+					parameters.xEncoding = paramExcluMap[parameters.yEncoding];
+				} else {
+					parameters.xEncoding = "metrics";
+					parameters.yEncoding = paramExcluMap[label];
+				}
 			}
 		}
 		$reports[$report] = currentReport;
@@ -110,7 +158,7 @@
 	<div id="encoding-flex">
 		<div class="encoding-section">
 			<div class="parameters">
-				<h4>x</h4>
+				<h4>{labelMap[chartType].x}</h4>
 				<Svelecte
 					style="width: 280px; height: 30px; flex:none"
 					value={parameters.xEncoding}
@@ -130,7 +178,8 @@
 					value={"x"}
 					disabled={chartType === ChartType.BAR ||
 						chartType === ChartType.LINE ||
-						chartType === ChartType.TABLE} />
+						chartType === ChartType.TABLE ||
+						chartType === ChartType.RADAR} />
 				<span> Fix this dimension (Dropdown)</span>
 			</label>
 			<svelte:component
@@ -141,7 +190,7 @@
 
 		<div class="encoding-section">
 			<div class="parameters">
-				<h4>y</h4>
+				<h4>{labelMap[chartType].y}</h4>
 				<Svelecte
 					style="width: 280px; height: 30px; flex:none"
 					value={parameters.yEncoding}
@@ -158,7 +207,8 @@
 					type="radio"
 					bind:group={$reports[$report].fixedDimension}
 					name="fixed_dimension"
-					value={"y"} />
+					value={"y"}
+					disabled={chartType === ChartType.RADAR} />
 				<span> Fix this dimension (Dropdown)</span>
 			</label>
 			<svelte:component
@@ -169,7 +219,7 @@
 
 		<div class="encoding-section">
 			<div class="parameters">
-				<h4>{chartType === ChartType.TABLE ? "layer" : "color"}</h4>
+				<h4>{labelMap[chartType].color}</h4>
 				<Svelecte
 					style="width: 280px; height: 30px; flex:none;"
 					value={parameters.colorEncoding}

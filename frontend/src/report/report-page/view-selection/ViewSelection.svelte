@@ -39,9 +39,10 @@
 		},
 		radar: {
 			type: ChartType.RADAR,
-			xEncoding: "slices",
-			yEncoding: "metrics",
+			xEncoding: "metrics",
+			yEncoding: "slices",
 			colorEncoding: "models",
+			fixedDimension: "color",
 		},
 	};
 
