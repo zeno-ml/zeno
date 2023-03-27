@@ -11,4 +11,5 @@ export enum ChartType {
 	TABLE = "TABLE",
 	BEESWARM = "BEESWARM",
 	RADAR = "RADAR",
+	HEATMAP = "HEATMAP",
 }

@@ -49,6 +49,11 @@
 			y: "layer",
 			color: "fixed",
 		},
+		[ChartType.HEATMAP]: {
+			x: "axis",
+			y: "layer",
+			color: "value",
+		},
 	};
 	const optionMap = {
 		// bar chart select option dropdown
@@ -80,6 +85,12 @@
 			x: [{ label: "slices" }, { label: "models" }, { label: "metrics" }],
 			y: [{ label: "slices" }, { label: "models" }],
 			color: [{ label: "slices" }, { label: "models" }, { label: "metrics" }],
+		},
+		// heat map select option dropdown
+		[ChartType.HEATMAP]: {
+			x: [{ label: "slices" }],
+			y: [{ label: "models" }],
+			color: [{ label: "metrics" }],
 		},
 	};
 
@@ -170,18 +181,16 @@
 						}
 					}} />
 			</div>
-			<label>
-				<input
-					type="radio"
-					bind:group={$reports[$report].fixedDimension}
-					name="fixed_dimension"
-					value={"x"}
-					disabled={chartType === ChartType.BAR ||
-						chartType === ChartType.LINE ||
-						chartType === ChartType.TABLE ||
-						chartType === ChartType.RADAR} />
-				<span> Fix this dimension (Dropdown)</span>
-			</label>
+			{#if chartType === ChartType.BEESWARM}
+				<label>
+					<input
+						type="radio"
+						bind:group={$reports[$report].fixedDimension}
+						name="fixed_dimension"
+						value={"x"} />
+					<span> Fix this dimension (Dropdown)</span>
+				</label>
+			{/if}
 			<svelte:component
 				this={fixed_dimension === "x"
 					? EncodingMap[parameters.xEncoding].fixed
@@ -202,15 +211,16 @@
 						}
 					}} />
 			</div>
-			<label>
-				<input
-					type="radio"
-					bind:group={$reports[$report].fixedDimension}
-					name="fixed_dimension"
-					value={"y"}
-					disabled={chartType === ChartType.RADAR} />
-				<span> Fix this dimension (Dropdown)</span>
-			</label>
+			{#if chartType === ChartType.BEESWARM || chartType === ChartType.TABLE}
+				<label>
+					<input
+						type="radio"
+						bind:group={$reports[$report].fixedDimension}
+						name="fixed_dimension"
+						value={"y"} />
+					<span> Fix this dimension (Dropdown)</span>
+				</label>
+			{/if}
 			<svelte:component
 				this={fixed_dimension === "y"
 					? EncodingMap[parameters.yEncoding].fixed
@@ -231,17 +241,16 @@
 						}
 					}} />
 			</div>
-			<label>
-				<input
-					type="radio"
-					bind:group={$reports[$report].fixedDimension}
-					name="fixed_dimension"
-					value={"color"}
-					disabled={chartType === ChartType.BAR ||
-						chartType === ChartType.LINE ||
-						chartType === ChartType.BEESWARM} />
-				<span> Fix this dimension (Dropdown)</span>
-			</label>
+			{#if chartType === ChartType.TABLE}
+				<label>
+					<input
+						type="radio"
+						bind:group={$reports[$report].fixedDimension}
+						name="fixed_dimension"
+						value={"color"} />
+					<span> Fix this dimension (Dropdown)</span>
+				</label>
+			{/if}
 			<svelte:component
 				this={fixed_dimension === "color"
 					? EncodingMap[parameters.colorEncoding].fixed

@@ -5,6 +5,7 @@
 	import LineChart from "./chart-icons/LineChartIcon.svelte";
 	import Table from "./chart-icons/TableIcon.svelte";
 	import Radar from "./chart-icons/RadarChartIcon.svelte";
+	import HeatMap from "./chart-icons/HeatMapIcon.svelte";
 
 	import { ChartType } from "../../../zenoservice";
 
@@ -42,6 +43,13 @@
 			xEncoding: "metrics",
 			yEncoding: "slices",
 			colorEncoding: "models",
+			fixedDimension: "color",
+		},
+		heatmap: {
+			type: ChartType.HEATMAP,
+			xEncoding: "slices",
+			yEncoding: "models",
+			colorEncoding: "metrics",
 			fixedDimension: "color",
 		},
 	};
@@ -118,6 +126,16 @@
 			on:click={updateChart}>
 			<Radar />
 			<h4 class="chart-title">Radar Chart</h4>
+		</div>
+		<div
+			id="heatmap"
+			class="chart-element {$reports[$report].type === ChartType.HEATMAP
+				? 'selected'
+				: ''}"
+			on:keydown={() => ({})}
+			on:click={updateChart}>
+			<HeatMap />
+			<h4 class="chart-title">Heat Map</h4>
 		</div>
 	</div>
 </div>
