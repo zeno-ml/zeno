@@ -50,9 +50,9 @@
 			color: "fixed",
 		},
 		[ChartType.HEATMAP]: {
-			x: "axis",
-			y: "layer",
-			color: "value",
+			x: "x",
+			y: "y",
+			color: "color",
 		},
 	};
 	const optionMap = {
@@ -88,8 +88,8 @@
 		},
 		// heat map select option dropdown
 		[ChartType.HEATMAP]: {
-			x: [{ label: "slices" }],
-			y: [{ label: "models" }],
+			x: [{ label: "slices" }, { label: "models" }],
+			y: [{ label: "slices" }, { label: "models" }],
 			color: [{ label: "metrics" }],
 		},
 	};
@@ -113,7 +113,7 @@
 			}
 		}
 		// table view exclusive combination
-		else if (chartType === ChartType.TABLE) {
+		else if (chartType === ChartType.TABLE || chartType === ChartType.HEATMAP) {
 			if (currentParam === "x") {
 				parameters.xEncoding = label;
 				parameters.yEncoding = paramExcluMap[label];
@@ -134,7 +134,6 @@
 		}
 		// radar exclusive combination
 		else if (chartType === ChartType.RADAR) {
-			console.log;
 			if (currentParam === "x") {
 				parameters.xEncoding = label;
 				if (label === "metrics") {

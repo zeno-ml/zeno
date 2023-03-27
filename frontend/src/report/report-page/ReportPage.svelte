@@ -6,6 +6,7 @@
 	import TableReportTable from "../table-report/TableReportTable.svelte";
 	import LineChartReport from "../line-chart/LineChartReport.svelte";
 	import RadarChartReport from "../radar-chart/RadarChartReport.svelte";
+	import HeatMapReport from "../heatmap-chart/HeatMapReport.svelte";
 	import ViewSelection from "./view-selection/ViewSelection.svelte";
 	import Encoding from "./encoding/Encoding.svelte";
 	import { ChartType } from "../../zenoservice";
@@ -18,6 +19,7 @@
 		[ChartType.TABLE]: TableReportTable,
 		[ChartType.BEESWARM]: BeeswarmChartReport,
 		[ChartType.RADAR]: RadarChartReport,
+		[ChartType.HEATMAP]: HeatMapReport,
 	};
 
 	$: report.set(params.id);
