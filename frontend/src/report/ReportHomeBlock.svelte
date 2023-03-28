@@ -6,6 +6,7 @@
 		mdiTable,
 		mdiDotsVertical,
 		mdiRadar,
+		mdiViewGrid,
 	} from "@mdi/js";
 
 	import { Icon } from "@smui/button";
@@ -27,6 +28,7 @@
 		[ChartType.BAR]: mdiChartBar,
 		[ChartType.BEESWARM]: mdiBee,
 		[ChartType.RADAR]: mdiRadar,
+		[ChartType.HEATMAP]: mdiViewGrid,
 	};
 </script>
 

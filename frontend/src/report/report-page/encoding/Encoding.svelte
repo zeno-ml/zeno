@@ -113,7 +113,7 @@
 			}
 		}
 		// table view exclusive combination
-		else if (chartType === ChartType.TABLE || chartType === ChartType.HEATMAP) {
+		else if (chartType === ChartType.TABLE) {
 			if (currentParam === "x") {
 				parameters.xEncoding = label;
 				parameters.yEncoding = paramExcluMap[label];
@@ -159,6 +159,20 @@
 				}
 			}
 		}
+		// heat map exclusive combination
+		else if (chartType === ChartType.HEATMAP) {
+			if (currentParam === "x") {
+				parameters.xEncoding = label;
+				if (label === "models") {
+					parameters.yEncoding = paramExcluMap[label];
+				}
+			} else if (currentParam === "y") {
+				parameters.yEncoding = label;
+				if (label === "models") {
+					parameters.xEncoding = paramExcluMap[label];
+				}
+			}
+		}
 		$reports[$report] = currentReport;
 	}
 </script>
@@ -190,10 +204,12 @@
 					<span> Fix this dimension (Dropdown)</span>
 				</label>
 			{/if}
-			<svelte:component
-				this={fixed_dimension === "x"
-					? EncodingMap[parameters.xEncoding].fixed
-					: EncodingMap[parameters.xEncoding].multi} />
+			{#if chartType !== ChartType.HEATMAP || parameters.xEncoding !== parameters.yEncoding}
+				<svelte:component
+					this={fixed_dimension === "x"
+						? EncodingMap[parameters.xEncoding].fixed
+						: EncodingMap[parameters.xEncoding].multi} />
+			{/if}
 		</div>
 
 		<div class="encoding-section">
@@ -225,6 +241,20 @@
 					? EncodingMap[parameters.yEncoding].fixed
 					: EncodingMap[parameters.yEncoding].multi} />
 		</div>
+
+		{#if chartType === ChartType.HEATMAP && parameters.xEncoding === parameters.yEncoding}
+			<div class="encoding-section">
+				<div class="parameters">
+					<h4>fixed</h4>
+					<Svelecte
+						style="width: 280px; height: 30px; flex:none;"
+						value={"models"}
+						options={[{ label: "models" }]}
+						searchable={false} />
+				</div>
+				<ModelsEncodingDropdown />
+			</div>
+		{/if}
 
 		<div class="encoding-section">
 			<div class="parameters">
