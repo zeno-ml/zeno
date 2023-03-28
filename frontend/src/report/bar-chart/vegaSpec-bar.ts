@@ -82,7 +82,6 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 				},
 				encoding: {
 					color: {
-						param: "hover",
 						field: color_encode,
 						sort: null,
 						scale: { scheme: "category20" },

@@ -40,6 +40,7 @@
 			{@const chartData = {
 				table: chartEntries.map((r, i) => ({
 					slices: r.slice,
+					size: res[i].size,
 					metrics: res[i].metric.toFixed(2),
 					models: r.model,
 				})),
