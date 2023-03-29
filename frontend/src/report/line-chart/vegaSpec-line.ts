@@ -85,6 +85,16 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 				},
 			},
 			{
+				params: [
+					{
+						name: "hover_line",
+						select: {
+							type: "point",
+							fields: [color_encode],
+							on: "mouseover",
+						},
+					},
+				],
 				mark: {
 					type: "line",
 				},

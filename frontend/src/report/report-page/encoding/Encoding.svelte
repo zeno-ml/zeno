@@ -303,7 +303,7 @@
 		margin-bottom: 15px;
 	}
 	.encoding-section label {
-		padding-left: 60px;
+		padding-left: 59px;
 	}
 	.encoding-section input {
 		vertical-align: middle;
