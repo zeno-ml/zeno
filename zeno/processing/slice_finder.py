@@ -53,7 +53,7 @@ def slice_finder(df, req, zeno_options, metric_functions, columns):
 
     # df_trans = pd.DataFrame(clf[0].transform(X), columns=clf[0].get_feature_names_out())
 
-    result = metric_functions["accuracy"](df, local_ops)
+    result = metric_functions[req.sliceFinderMetric](df, local_ops)
 
     # print(updated_df)
 
@@ -86,6 +86,6 @@ def slice_finder(df, req, zeno_options, metric_functions, columns):
 
     # X_trans = slice_finder.transform(X)
 
-    # print(result)
+    print(result)
     # print(type(result))
     return {"metric": result.metric, "variance": result.variance}
