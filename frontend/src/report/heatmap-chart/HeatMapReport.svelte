@@ -40,14 +40,19 @@
 						slice_1: sli_1.sliceName,
 						slice_2: sli_2.sliceName,
 					});
-					let first_slice_pred = { ...sli_1.filterPredicates.predicates[0] };
-					let sec_slice_pred = { ...sli_2.filterPredicates.predicates[0] };
-					sec_slice_pred.join = "&";
+
+					let sli_1_pred = [...sli_1.filterPredicates.predicates];
+					let sli_2_pred = [...sli_2.filterPredicates.predicates];
+					let sec_slice_pred_col_0 = {
+						...sli_2.filterPredicates.predicates[0],
+					};
+					sec_slice_pred_col_0.join = "&";
+					sli_2_pred[0] = sec_slice_pred_col_0;
 					let combined_slice = <Slice>{
 						sliceName: "",
 						folder: "",
 						filterPredicates: {
-							predicates: [first_slice_pred, sec_slice_pred],
+							predicates: sli_1_pred.concat(sli_2_pred),
 							join: "",
 						},
 					};
