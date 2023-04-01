@@ -24,7 +24,7 @@ jobs:
           virtualenvs-path: ~/.virtualenvs
 
       - name: Cache Poetry virtualenv
-        uses: actions/cache@v3.2.6
+        uses: actions/cache@v3.3.1
         id: cache-poetry
         with:
           path: ~/.virtualenvs
@@ -36,7 +36,7 @@ jobs:
         run: poetry install --no-interaction --no-root
 
       - name: Cache NPM packages
-        uses: actions/cache@v3.2.6
+        uses: actions/cache@v3.3.1
         id: cache-npm
         with:
           path: ~/frontend/node_modules
