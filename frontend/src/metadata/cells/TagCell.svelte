@@ -56,14 +56,11 @@
 
 	function updateTagIdsAfterRemove() {
 		let s = new Set();
-		//$tagIds.ids.forEach(id => s.add(id))
-
 		//loop through all selectedTags and re-add their IDs (assumes that the selections.tags will already be updated)
 		//this is to catch for the case when you have intersections between tags
 		$selections.tags.forEach((tag) =>
 			$tags.get(tag).selectionIds.ids.forEach((id) => s.add(id))
 		);
-		//$tags.get(tagName).selectionIds.ids.forEach(id => s.delete(id))
 		let finalArray = [];
 		s.forEach((id) => finalArray.push(id));
 		tagIds.set({ ids: finalArray });
@@ -120,7 +117,6 @@
 						metadata: sel.metadata,
 						tags: [tag.tagName],
 					}));
-					console.log("heheh");
 					tagIds.set({ ids: [] });
 					addTagIdsToTagIds(tag.tagName);
 				} else {

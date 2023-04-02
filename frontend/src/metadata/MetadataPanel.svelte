@@ -399,24 +399,6 @@
 					</IconButton>
 				</div>
 
-				<!-- <Wrapper>
-					<IconButton on:click={() => (showNewTag = !showNewTag)}>
-						<Icon component={Svg} viewBox="0 0 24 24">
-							{#if $selectionIds.ids.length > 0}
-								<path fill="#6a1a9a" d={mdiPlusCircle} />
-							{:else}
-								<path fill="black" d={mdiPlus} />
-							{/if}
-						</Icon>
-					</IconButton>
-					<Tooltip xPos="start">Create a new tag</Tooltip>
-				</Wrapper>
-				{#if showNewTag}
-					<NewTagPopup
-						bind:showNewTag
-						scrollY={document.getElementsByClassName("side-container")[0]
-							.scrollTop} />
-				{/if} -->
 			</div>
 		</div>
 	</div>
@@ -424,13 +406,6 @@
 	{#each [...$tags.values()] as t}
 		<TagCell tag={t} />
 	{/each}
-	<!-- {#each [...$tags.values()] as tag}
-		<div class="inline">
-			<p>{tag.tagName}</p>
-			<p>Folder: {tag.folder}</p>
-			<p>selIds: {tag.selectionIds.length}</p>
-		</div>
-	{/each} -->
 
 	<div id="metric-header" class="inline" style:margin-top="10px">
 		<div class="inline">

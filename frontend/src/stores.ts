@@ -82,12 +82,12 @@ export const folders: Writable<string[]> = folderWritable();
 export const tags: Writable<Map<string, Tag>> = writable(new Map());
 export const reports: Writable<Report[]> = reportWritable();
 
-// the tag ids selected by the user
+// The tag ids selected by the user.
 export const tagIds: Writable<FilterIds> = writable({ ids: [] });
 
-// the ids directly selected by the user
+// The ids directly selected by the user.
 export const selectionIds: Writable<FilterIds> = writable({ ids: [] });
-// slices is an array of slice names,
+// Slices is an array of slice names,
 // metadata is an object where keys are column names and values are FilterPredicateGroups
 export const selections: Writable<{
 	metadata: Record<string, FilterPredicateGroup>;
