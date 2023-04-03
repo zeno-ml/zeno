@@ -3,12 +3,7 @@ import type { VegaLiteSpec } from "svelte-vega";
 export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 	const x_encode = parameters.xEncoding;
 	const y_encode = parameters.yEncoding;
-	const color_encode = parameters.colorEncoding;
 	const paramMap = {
-		metrics: {
-			type: "quantitative",
-			title: selectMetrics,
-		},
 		models: {
 			type: "nominal",
 			title: "models",
@@ -29,8 +24,8 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 				joinaggregate: [
 					{
 						op: "average",
-						field: color_encode,
-						as: "mean_color",
+						field: selectMetrics !== "size" ? "metrics" : "size",
+						as: "mean_metrics",
 					},
 				],
 			},
@@ -65,7 +60,7 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 						name: "hover",
 						select: {
 							type: "point",
-							field: color_encode,
+							field: selectMetrics !== "size" ? "metrics" : "size",
 							on: "mouseover",
 						},
 					},
@@ -74,14 +69,16 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 					type: "rect",
 					tooltip: {
 						signal:
-							"{'slice_name': datum.slices,'size': datum.size, 'metric': datum.metrics, 'model': datum.models}",
+							"{'slice_name': datum.slices,'size': datum.size, " +
+							(selectMetrics !== "size" ? selectMetrics : "accuracy") +
+							": datum.metrics, 'model': datum.models}",
 					},
 				},
 				encoding: {
 					color: {
-						title: paramMap[color_encode].title,
-						field: color_encode,
-						type: paramMap[color_encode].type,
+						title: selectMetrics,
+						field: selectMetrics !== "size" ? "metrics" : "size",
+						type: "quantitative",
 						scale: { scheme: "purples" },
 					},
 					fillOpacity: {
@@ -100,12 +97,15 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 				mark: { type: "text", fontSize: 12 },
 				encoding: {
 					text: {
-						field: color_encode,
-						type: paramMap[color_encode].type,
+						field: selectMetrics !== "size" ? "metrics" : "size",
+						type: "quantitative",
 					},
 					color: {
 						condition: {
-							test: "datum." + color_encode + "< datum.mean_color",
+							test:
+								selectMetrics !== "size"
+									? "datum.metrics < datum.mean_metrics"
+									: "datum.size < datum.mean_metrics",
 							value: "black",
 						},
 						value: "white",

@@ -12,7 +12,7 @@ export default function generateSliceVsSliceSpec(selectMetrics): VegaLiteSpec {
 				joinaggregate: [
 					{
 						op: "average",
-						field: "metrics",
+						field: selectMetrics !== "size" ? "metrics" : "size",
 						as: "mean_metrics",
 					},
 				],
@@ -58,13 +58,15 @@ export default function generateSliceVsSliceSpec(selectMetrics): VegaLiteSpec {
 					type: "rect",
 					tooltip: {
 						signal:
-							"{'slice': datum.slice_1 + ' & ' + datum.slice_2,'size': datum.size, 'metric': datum.metrics, 'model': datum.models}",
+							"{'slice': datum.slice_1 + ' & ' + datum.slice_2,'size': datum.size, " +
+							(selectMetrics !== "size" ? selectMetrics : "accuracy") +
+							": datum.metrics, 'model': datum.models}",
 					},
 				},
 				encoding: {
 					color: {
 						title: selectMetrics,
-						field: "metrics",
+						field: selectMetrics !== "size" ? "metrics" : "size",
 						type: "quantitative",
 						scale: { scheme: "purples" },
 					},
@@ -84,12 +86,15 @@ export default function generateSliceVsSliceSpec(selectMetrics): VegaLiteSpec {
 				mark: { type: "text", fontSize: 12 },
 				encoding: {
 					text: {
-						field: "metrics",
+						field: selectMetrics !== "size" ? "metrics" : "size",
 						type: "quantitative",
 					},
 					color: {
 						condition: {
-							test: "datum.metrics < datum.mean_metrics",
+							test:
+								selectMetrics !== "size"
+									? "datum.metrics < datum.mean_metrics"
+									: "datum.size < datum.mean_metrics",
 							value: "black",
 						},
 						value: "white",

@@ -62,8 +62,6 @@ export const generateSpec: VisualizationSpec = {
 			zero: true,
 			nice: false,
 			domain: { data: "table", field: "value" },
-			domainMin: 0,
-			domainMax: 100,
 		},
 		{
 			name: "color",

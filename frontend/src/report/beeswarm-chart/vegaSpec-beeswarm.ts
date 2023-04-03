@@ -50,7 +50,7 @@ export default function generateSpec(parameters, xLabel): VisualizationSpec {
 				name: "xscale",
 				domain: {
 					data: "table",
-					field: x_encode,
+					field: xLabel !== "size" ? x_encode : "size",
 				},
 				range: "width",
 				nice: true,
@@ -97,7 +97,11 @@ export default function generateSpec(parameters, xLabel): VisualizationSpec {
 				encode: {
 					enter: {
 						fill: { scale: "color", field: color_encode },
-						xfocus: { scale: "xscale", field: x_encode, band: 0.5 },
+						xfocus: {
+							scale: "xscale",
+							field: xLabel !== "size" ? x_encode : "size",
+							band: 0.5,
+						},
 						yfocus: { signal: "cy" },
 					},
 					update: {
@@ -112,7 +116,9 @@ export default function generateSpec(parameters, xLabel): VisualizationSpec {
 						zindex: { value: 1 },
 						tooltip: {
 							signal:
-								"{'slice_name': datum.slices, 'size': datum.size, 'metric': datum.metrics, 'model': datum.models}",
+								"{'slice_name': datum.slices,'size': datum.size, " +
+								(xLabel !== "size" ? xLabel : "accuracy") +
+								": datum.metrics, 'model': datum.models}",
 						},
 					},
 				},

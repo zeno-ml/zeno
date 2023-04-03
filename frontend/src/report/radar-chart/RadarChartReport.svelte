@@ -91,7 +91,10 @@
 			{@const chartData = {
 				table: chartEntries.map((r, i) => ({
 					key: r.key,
-					value: res[i].metric.toFixed(2),
+					value:
+						r.key === "size" || fixedName === "size"
+							? res[i].size
+							: res[i].metric.toFixed(2),
 					category: r.category,
 				})),
 			}}

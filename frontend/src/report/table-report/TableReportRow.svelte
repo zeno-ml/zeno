@@ -79,15 +79,16 @@
 		<Cell>{row}</Cell>
 	{/if}
 	{#await modelResults then res}
-		{#if res}
-			{#each res as r}
-				<Cell>
-					<p>
-						{r.metric.toFixed(2)}
-					</p>
-				</Cell>
-			{/each}
-		{/if}
+		{#each res as r}
+			<Cell>
+				<p>
+					{row === "size" ||
+					(fixed_dimension === "color" && currentReport.metrics[0] === "size")
+						? r.size
+						: r.metric.toFixed(2)}
+				</p>
+			</Cell>
+		{/each}
 	{/await}
 </Row>
 
