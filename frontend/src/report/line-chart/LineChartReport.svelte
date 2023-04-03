@@ -23,7 +23,7 @@
 				});
 				metricKeys.push({
 					sli: slice,
-					metric: selectMetrics,
+					metric: selectMetrics !== "size" ? selectMetrics : "accuracy",
 					model: mod,
 				});
 			});

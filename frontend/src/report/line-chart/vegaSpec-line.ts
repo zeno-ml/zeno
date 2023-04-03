@@ -42,7 +42,7 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 			},
 			y: {
 				title: paramMap[y_encode].title,
-				field: y_encode,
+				field: selectMetrics !== "size" ? y_encode : "size",
 				type: paramMap[y_encode].type,
 				axis: {
 					labelFontSize: 14,
@@ -80,7 +80,9 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 					size: 100,
 					tooltip: {
 						signal:
-							"{'slice_name': datum.slices, 'size': datum.size, 'metric': datum.metrics, 'model': datum.models}",
+							"{'slice_name': datum.slices,'size': datum.size, " +
+							(selectMetrics !== "size" ? selectMetrics : "accuracy") +
+							": datum.metrics, 'model': datum.models}",
 					},
 				},
 			},
@@ -107,7 +109,7 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 				},
 				encoding: {
 					text: {
-						field: y_encode,
+						field: selectMetrics !== "size" ? y_encode : "size",
 						type: paramMap[y_encode].type,
 					},
 					color: { value: "black" },

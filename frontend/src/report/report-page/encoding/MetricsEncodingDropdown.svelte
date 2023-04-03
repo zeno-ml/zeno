@@ -2,7 +2,7 @@
 	import { report, reports, metrics } from "../../../stores";
 	import Svelecte from "svelecte";
 	let options = [];
-	$metrics.forEach((m) => {
+	[...$metrics.values(), "size"].forEach((m) => {
 		if ($reports[$report].metrics.includes(m)) {
 			options.push({ label: m });
 		}

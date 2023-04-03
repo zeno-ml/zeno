@@ -27,7 +27,7 @@
 						type: ChartType.BAR,
 						slices: [...$slices.values()],
 						models: [...$models.values()],
-						metrics: [...$metrics.values()],
+						metrics: [...$metrics.values(), "size"],
 						parameters: {
 							xEncoding: "slices",
 							yEncoding: "metrics",
