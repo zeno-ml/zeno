@@ -7,7 +7,8 @@
 	import generateSliceVsSliceSpec from "./vegaSpec-heatmap_slice_vs_slice";
 
 	$: currentReport = $reports[$report];
-	$: selectMetrics = currentReport.metrics[0];
+	$: selectMetric = currentReport.metrics[0];
+	$: selectModel = currentReport.models[0];
 	$: parameters = currentReport.parameters;
 
 	let chartEntries = [];
@@ -25,7 +26,7 @@
 					});
 					metricKeys.push({
 						sli: slice,
-						metric: selectMetrics,
+						metric: selectMetric,
 						model: mod,
 					});
 				});
@@ -33,7 +34,6 @@
 		}
 		// slice vs slice
 		else {
-			let selectModel = rep.models[0];
 			rep.slices.forEach((sli_1) => {
 				rep.slices.forEach((sli_2) => {
 					chartEntries.push({
@@ -58,7 +58,7 @@
 					};
 					metricKeys.push({
 						sli: combined_slice,
-						metric: selectMetrics,
+						metric: selectMetric,
 						model: selectModel,
 					});
 				});
@@ -83,7 +83,7 @@
 					})),
 				}}
 				<VegaLite
-					spec={generateSpec(parameters, selectMetrics)}
+					spec={generateSpec(parameters, selectMetric)}
 					data={chartData}
 					options={{ tooltip: true }} />
 			{/await}
@@ -98,8 +98,9 @@
 						models: r.model,
 					})),
 				}}
+				<h4>{selectModel}</h4>
 				<VegaLite
-					spec={generateSliceVsSliceSpec(selectMetrics)}
+					spec={generateSliceVsSliceSpec(selectMetric)}
 					data={chartData}
 					options={{ tooltip: true }} />
 			{/await}

@@ -125,7 +125,7 @@
 		padding-right: 10px;
 		overflow: visible;
 		cursor: pointer;
-		width: 250px;
+		width: 225px;
 		height: 100px;
 	}
 	.report:hover {

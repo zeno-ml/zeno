@@ -10,7 +10,7 @@
 
 <div id="reports-container">
 	<div class="header">
-		<h4>Reports</h4>
+		<h3>Reports</h3>
 	</div>
 	<div class="reports">
 		{#each $reports as rep, i}
@@ -76,7 +76,7 @@
 		padding-right: 10px;
 		overflow: visible;
 		cursor: pointer;
-		width: 250px;
+		width: 225px;
 		height: 100px;
 	}
 	.add-reports:hover {
