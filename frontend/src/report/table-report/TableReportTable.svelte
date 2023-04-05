@@ -11,7 +11,7 @@
 	$: selectMetrics = currentReport.metrics;
 	$: selectSlices = currentReport.slices;
 	$: parameters = currentReport.parameters;
-	$: fixed_dimension = currentReport.fixedDimension;
+	$: fixed_dimension = currentReport.parameters.fixedDimension;
 </script>
 
 <div id="container">

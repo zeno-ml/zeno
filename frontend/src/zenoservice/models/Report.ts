@@ -13,5 +13,4 @@ export type Report = {
 	metrics?: Array<string>;
 	models?: Array<string>;
 	parameters?: Parameters;
-	fixedDimension?: string;
 };

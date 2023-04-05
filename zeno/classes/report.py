@@ -14,15 +14,12 @@ class ChartType(str, Enum):
     HEATMAP = "HEATMAP"
 
 
-class ReportPredicate(CamelModel):
-    slice_name: str
-    metric: str
-
-
 class Parameters(CamelModel):
     x_encoding: str
     y_encoding: str
     color_encoding: str
+    fixed_dimension: str
+    second_slices: List[Slice]
 
 
 class Report(CamelModel):
@@ -32,4 +29,3 @@ class Report(CamelModel):
     metrics: Union[List[str], None] = None
     models: Union[List[str], None] = None
     parameters: Union[Parameters, None] = None
-    fixed_dimension: Union[str, None] = None

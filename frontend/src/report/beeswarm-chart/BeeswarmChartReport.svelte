@@ -7,7 +7,7 @@
 
 	$: currentReport = $reports[$report];
 	$: parameters = currentReport.parameters;
-	$: fixed_dimension = currentReport.fixedDimension;
+	$: fixed_dimension = currentReport.parameters.fixedDimension;
 
 	let yEntries = [];
 	let chartEntries = [];

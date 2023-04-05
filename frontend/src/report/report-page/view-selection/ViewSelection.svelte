@@ -66,7 +66,7 @@
 					defaultMap[e.currentTarget.id].yEncoding;
 				currentReport.parameters.colorEncoding =
 					defaultMap[e.currentTarget.id].colorEncoding;
-				currentReport.fixedDimension =
+				currentReport.parameters.fixedDimension =
 					defaultMap[e.currentTarget.id].fixedDimension;
 				$reports[$report] = currentReport;
 			}

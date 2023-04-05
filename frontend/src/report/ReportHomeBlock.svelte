@@ -90,7 +90,6 @@
 											models: report.models,
 											metrics: report.metrics,
 											parameters: report.parameters,
-											fixedDimension: report.fixedDimension,
 										});
 										return reps;
 									});

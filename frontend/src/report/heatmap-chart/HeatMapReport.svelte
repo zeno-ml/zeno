@@ -35,7 +35,7 @@
 		// slice vs slice
 		else {
 			rep.slices.forEach((sli_1) => {
-				rep.slices.forEach((sli_2) => {
+				rep.parameters.secondSlices.forEach((sli_2) => {
 					chartEntries.push({
 						slice_1: sli_1.sliceName,
 						slice_2: sli_2.sliceName,

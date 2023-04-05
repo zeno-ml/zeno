@@ -2,6 +2,7 @@
 	import { report, reports } from "../../../stores";
 	import SlicesEncodingDropdown from "./SlicesEncodingDropdown.svelte";
 	import SlicesEncodingMultiChoice from "./SlicesEncodingMultiChoice.svelte";
+	import SecondSlicesEncoding from "./SecondSlicesEncoding.svelte";
 	import MetricsEncodingDropdown from "./MetricsEncodingDropdown.svelte";
 	import MetricsEncodingMultiChoice from "./MetricsEncodingMultiChoice.svelte";
 	import ModelsEncodingDropdown from "./ModelsEncodingDropdown.svelte";
@@ -97,7 +98,7 @@
 	$: currentReport = $reports[$report];
 	$: chartType = currentReport.type;
 	$: parameters = currentReport.parameters;
-	$: fixed_dimension = currentReport.fixedDimension;
+	$: fixed_dimension = currentReport.parameters.fixedDimension;
 
 	function refreshParams(e, currentParam) {
 		let label = e.detail.label;
@@ -180,6 +181,7 @@
 <div id="encoding">
 	<h4 class="edit-type">Encoding</h4>
 	<div id="encoding-flex">
+		<!-- x encoding start -->
 		<div class="encoding-section">
 			<div class="parameters">
 				<h4>{labelMap[chartType].x}</h4>
@@ -198,20 +200,20 @@
 				<label>
 					<input
 						type="radio"
-						bind:group={$reports[$report].fixedDimension}
+						bind:group={$reports[$report].parameters.fixedDimension}
 						name="fixed_dimension"
 						value={"x"} />
 					<span> Fix this dimension (Dropdown)</span>
 				</label>
 			{/if}
-			{#if chartType !== ChartType.HEATMAP || parameters.xEncoding !== parameters.yEncoding}
-				<svelte:component
-					this={fixed_dimension === "x"
-						? EncodingMap[parameters.xEncoding].fixed
-						: EncodingMap[parameters.xEncoding].multi} />
-			{/if}
+			<svelte:component
+				this={fixed_dimension === "x"
+					? EncodingMap[parameters.xEncoding].fixed
+					: EncodingMap[parameters.xEncoding].multi} />
 		</div>
+		<!-- x encoding end-->
 
+		<!-- y encoding -->
 		<div class="encoding-section">
 			<div class="parameters">
 				<h4>{labelMap[chartType].y}</h4>
@@ -230,18 +232,24 @@
 				<label>
 					<input
 						type="radio"
-						bind:group={$reports[$report].fixedDimension}
+						bind:group={$reports[$report].parameters.fixedDimension}
 						name="fixed_dimension"
 						value={"y"} />
 					<span> Fix this dimension (Dropdown)</span>
 				</label>
 			{/if}
-			<svelte:component
-				this={fixed_dimension === "y"
-					? EncodingMap[parameters.yEncoding].fixed
-					: EncodingMap[parameters.yEncoding].multi} />
+			{#if chartType === ChartType.HEATMAP && parameters.xEncoding === parameters.yEncoding}
+				<SecondSlicesEncoding />
+			{:else}
+				<svelte:component
+					this={fixed_dimension === "y"
+						? EncodingMap[parameters.yEncoding].fixed
+						: EncodingMap[parameters.yEncoding].multi} />
+			{/if}
 		</div>
+		<!-- y encoding end-->
 
+		<!-- heatmap slice vs slice fix model-->
 		{#if chartType === ChartType.HEATMAP && parameters.xEncoding === parameters.yEncoding}
 			<div class="encoding-section">
 				<div class="parameters">
@@ -256,6 +264,7 @@
 			</div>
 		{/if}
 
+		<!-- color encoding start-->
 		<div class="encoding-section">
 			<div class="parameters">
 				<h4>{labelMap[chartType].color}</h4>
@@ -274,7 +283,7 @@
 				<label>
 					<input
 						type="radio"
-						bind:group={$reports[$report].fixedDimension}
+						bind:group={$reports[$report].parameters.fixedDimension}
 						name="fixed_dimension"
 						value={"color"} />
 					<span> Fix this dimension (Dropdown)</span>
@@ -285,6 +294,7 @@
 					? EncodingMap[parameters.colorEncoding].fixed
 					: EncodingMap[parameters.colorEncoding].multi} />
 		</div>
+		<!-- color encoding end-->
 	</div>
 </div>
 

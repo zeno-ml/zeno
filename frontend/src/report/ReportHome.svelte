@@ -32,8 +32,9 @@
 							xEncoding: "slices",
 							yEncoding: "metrics",
 							colorEncoding: "models",
+							fixedDimension: "y",
+							secondSlices: [],
 						},
-						fixedDimension: "y",
 					});
 					return reps;
 				});
