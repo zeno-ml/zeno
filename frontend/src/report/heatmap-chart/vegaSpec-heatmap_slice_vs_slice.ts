@@ -29,6 +29,7 @@ export default function generateSliceVsSliceSpec(selectMetrics): VegaLiteSpec {
 					titleFontSize: 14,
 					titlePadding: 10,
 				},
+				sort: "ascending",
 			},
 			y: {
 				title: "slices",

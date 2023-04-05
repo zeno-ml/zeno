@@ -33,7 +33,7 @@
 							yEncoding: "metrics",
 							colorEncoding: "models",
 							fixedDimension: "y",
-							secondSlices: [],
+							secondSlices: [...$slices.values()],
 						},
 					});
 					return reps;
