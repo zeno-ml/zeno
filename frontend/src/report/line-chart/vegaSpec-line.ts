@@ -24,6 +24,7 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 		width: {
 			step: 150,
 		},
+		padding: { top: 20 },
 		data: {
 			name: "table",
 		},

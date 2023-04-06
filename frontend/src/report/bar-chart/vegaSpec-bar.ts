@@ -96,7 +96,10 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 					style: "label",
 				},
 				encoding: {
-					text: { field: y_encode, type: paramMap[y_encode].type },
+					text: {
+						field: selectMetrics !== "size" ? y_encode : "size",
+						type: paramMap[y_encode].type,
+					},
 				},
 			},
 		],
