@@ -238,7 +238,7 @@
 					<span> Fix this dimension (Dropdown)</span>
 				</label>
 			{/if}
-			{#if chartType === ChartType.HEATMAP && parameters.xEncoding === parameters.yEncoding}
+			{#if chartType === ChartType.HEATMAP && parameters.yEncoding === "slices"}
 				<SecondSlicesEncoding />
 			{:else}
 				<svelte:component

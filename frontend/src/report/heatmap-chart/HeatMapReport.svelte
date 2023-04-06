@@ -18,7 +18,13 @@
 		chartEntries = [];
 		// slice vs model
 		if (parameters.xEncoding !== parameters.yEncoding) {
-			rep.slices.forEach((slice) => {
+			// decide which slice list to use
+			let slices =
+				parameters.xEncoding === "slices"
+					? rep.slices
+					: rep.parameters.secondSlices;
+
+			slices.forEach((slice) => {
 				rep.models.forEach((mod) => {
 					chartEntries.push({
 						slice: slice.sliceName,
