@@ -150,6 +150,10 @@ def get_server(zeno: ZenoBackend):
     def get_filtered_table(req: TableRequest):
         return zeno.get_filtered_table(req)
 
+    @api_app.get("/refresh", tags=["zeno"])
+    def refresh_data():
+        zeno.initial_setup(zeno.params)
+
     @api_app.post(
         "/histograms", response_model=List[List[HistogramBucket]], tags=["zeno"]
     )

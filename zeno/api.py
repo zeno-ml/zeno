@@ -39,9 +39,9 @@ class ZenoOptions(BaseModel):
 class ZenoParameters(BaseModel):
     """Options passed to the backend processing pipeline."""
 
-    metadata: DataFrame
+    metadata: Union[DataFrame, str]
+    functions: Union[List[Callable], str] = []
     view: str = ""
-    functions: List[Callable] = []
     models: List[str] = []
     id_column: str = ""
     data_column: str = ""

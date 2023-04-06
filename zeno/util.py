@@ -6,6 +6,7 @@ from contextlib import contextmanager
 from importlib import util
 from inspect import getmembers, isfunction
 from pathlib import Path
+from typing import Callable, List, Union
 
 import pandas as pd
 
@@ -94,7 +95,33 @@ def add_to_path(p):
         sys.path = old_path
 
 
-def parse_testing_file(test_file: Path):
+def read_metadata(meta: Union[str, pd.DataFrame]) -> pd.DataFrame:
+    """Return DataFrame or try to read it from file"""
+    if type(meta) is pd.DataFrame:
+        return meta
+    elif type(meta) is str:
+        meta_path = Path(os.path.realpath(meta))
+
+        if meta_path.suffix == ".csv":
+            return pd.read_csv(meta_path)
+        elif meta_path.suffix == ".tsv":
+            return pd.read_csv(
+                meta_path, sep="\t", header=0, quoting=3, keep_default_na=False
+            )
+        elif meta_path.suffix == ".parquet":
+            return pd.read_parquet(meta_path)
+        elif meta_path.suffix == ".jsonl":
+            return pd.read_json(meta_path, lines=True)
+
+    print(
+        "ERROR: Failed to read metadata file "
+        + meta
+        + "\n Should be one of .csv, .jsonl, or .parquet"
+    )
+    sys.exit(1)
+
+
+def load_function(test_file: Path) -> List[Callable]:
     # To allow relative imports in test files,
     # add their directory to path temporarily.
     with add_to_path(os.path.dirname(os.path.abspath(test_file))):
@@ -103,7 +130,7 @@ def parse_testing_file(test_file: Path):
         spec.loader.exec_module(test_module)  # type: ignore
 
     functions = []
-    for func_name, func in getmembers(test_module):
+    for _, func in getmembers(test_module):
         if isfunction(func):
             if (
                 hasattr(func, "predict_function")
@@ -113,6 +140,22 @@ def parse_testing_file(test_file: Path):
             ):
                 functions.append(func)
     return functions
+
+
+def read_functions(fns: Union[List[Callable], str]) -> List[Callable]:
+    if type(fns) is list:
+        return fns
+    elif type(fns) is str:
+        fn_path = Path(os.path.realpath(fns))
+        if os.path.isfile(fn_path):
+            return load_function(fn_path)
+        elif os.path.exists(fn_path):
+            # Add directory with tests to path for relative imports.
+            fns = []
+            for f in list(fn_path.rglob("*.py")):
+                fns = fns + load_function(f)
+            return fns
+    return []
 
 
 def is_notebook() -> bool:

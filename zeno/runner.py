@@ -6,7 +6,6 @@ import sys
 from pathlib import Path
 from typing import Union
 
-import pandas as pd
 import pkg_resources
 import requests
 import tomli
@@ -17,7 +16,7 @@ from zeno.api import ZenoParameters
 from zeno.backend import ZenoBackend
 from zeno.server import get_server
 from zeno.setup import setup_zeno
-from zeno.util import is_notebook, parse_testing_file, VIEW_MAP_URL, VIEWS_MAP_JSON
+from zeno.util import is_notebook, VIEW_MAP_URL, VIEWS_MAP_JSON
 
 # Global variable to hold the Zeno server process.
 # This is used to kill the server when re-running in a notebook.
@@ -59,66 +58,30 @@ def command_line():
     if sys.argv[1] == "init" or sys.argv[1] == "i":
         setup_zeno()
     else:
-        parse_toml()
+        args = {}
+        try:
+            with open(sys.argv[1], "rb") as f:
+                args = tomli.load(f)
+        except Exception:
+            print("ERROR: Failed to read TOML configuration file.")
+            sys.exit(1)
 
+        # Change working directory to the directory of the config file.
+        os.chdir(os.path.dirname(os.path.abspath(sys.argv[1])))
 
-def parse_toml():
-    args = {}
-    try:
-        with open(sys.argv[1], "rb") as f:
-            args = tomli.load(f)
-    except Exception:
-        print("ERROR: Failed to read TOML configuration file.")
-        sys.exit(1)
-
-    # Change working directory to the directory of the config file.
-    os.chdir(os.path.dirname(os.path.abspath(sys.argv[1])))
-
-    if "metadata" not in args:
-        print("ERROR: Must have 'metadata' entry which must be a CSV or Parquet file.")
-        sys.exit(1)
-    else:
-        meta_path = Path(os.path.realpath(args["metadata"]))
-
-        # Read metadata as Pandas for slicing
-        if meta_path.suffix == ".csv":
-            args["metadata"] = pd.read_csv(meta_path)
-        elif meta_path.suffix == ".tsv":
-            args["metadata"] = pd.read_csv(
-                meta_path, sep="\t", header=0, quoting=3, keep_default_na=False
-            )
-        elif meta_path.suffix == ".parquet":
-            args["metadata"] = pd.read_parquet(meta_path)
-        elif meta_path.suffix == ".jsonl":
-            args["metadata"] = pd.read_json(meta_path, lines=True)
-        else:
+        if "metadata" not in args:
             print(
-                "Extension of "
-                + meta_path.suffix
-                + " not one of .csv, .jsonl, or .parquet"
+                "ERROR: Must have 'metadata' entry which must be a CSV or Parquet file."
             )
             sys.exit(1)
 
-    if "functions" in args:
-        fn_path = Path(os.path.realpath(args["functions"]))
-        if os.path.isfile(fn_path):
-            args["functions"] = parse_testing_file(fn_path)
-        elif os.path.exists(fn_path):
-            # Add directory with tests to path for relative imports.
-            fns = []
-            for f in list(fn_path.rglob("*.py")):
-                fns = fns + parse_testing_file(f)
-            args["functions"] = fns
-
-    zeno(ZenoParameters(**args))
+        zeno(ZenoParameters(**args))
 
 
 def parse_args(args: ZenoParameters) -> ZenoParameters:
 
     if type(args) == dict:
         args = ZenoParameters.parse_obj(args)
-
-    args.metadata = args.metadata.copy()
 
     if args.cache_path == "":
         args.cache_path = "./.zeno_cache/"

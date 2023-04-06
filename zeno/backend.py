@@ -33,15 +33,22 @@ from zeno.processing.data_processing import (
     run_inference,
 )
 from zeno.processing.filtering import filter_table
-from zeno.util import getMetadataType, load_series, read_pickle
+from zeno.util import (
+    getMetadataType,
+    load_series,
+    read_functions,
+    read_metadata,
+    read_pickle,
+)
 
 
 class ZenoBackend(object):
     def __init__(self, params: ZenoParameters):
         logging.basicConfig(level=logging.INFO)
 
-        self.df = params.metadata
-        self.tests = params.functions
+        self.params = params
+        self.metadata = params.metadata
+        self.functions = params.functions
         self.batch_size = params.batch_size
         self.data_path = params.data_path
         self.label_path = params.label_path
@@ -50,6 +57,12 @@ class ZenoBackend(object):
         self.samples = params.samples
         self.view = params.view
         self.calculate_histogram_metrics = params.calculate_histogram_metrics
+
+        self.initial_setup(params)
+
+    def initial_setup(self, params: ZenoParameters):
+        self.df = read_metadata(self.metadata)
+        self.tests = read_functions(self.functions)
 
         self.data_prefix = ""
         if self.data_path.startswith("http"):
