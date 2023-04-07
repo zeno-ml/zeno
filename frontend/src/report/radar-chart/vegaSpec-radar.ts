@@ -113,20 +113,15 @@ export const generateSpec: VisualizationSpec = {
 							},
 						},
 						update: {
-							stroke: [
-								{ test: "datum.category === hover", value: "black" },
-								{ scale: "color", field: "category" },
-							],
+							stroke: [{ scale: "color", field: "category" }],
 							strokeWidth: [
-								{ test: "datum.category === hover", value: 2 },
-								{ value: 1 },
+								{ test: "datum.category === hover", value: 5 },
+								{ value: 3 },
 							],
 							strokeOpacity: [
 								{ test: "datum.category === hover", value: 0.8 },
 								{ value: 0.4 },
 							],
-							fill: { scale: "color", field: "category" },
-							fillOpacity: { value: 0.2 },
 						},
 					},
 				},
@@ -145,7 +140,7 @@ export const generateSpec: VisualizationSpec = {
 							text: { signal: "datum.datum.value" },
 							fill: { value: "black" },
 							fontSize: [
-								{ test: "datum.datum.category === hover", value: 13 },
+								{ test: "datum.datum.category === hover", value: 14 },
 								{ value: 12 },
 							],
 							fontWeight: { value: "bold" },
@@ -183,7 +178,7 @@ export const generateSpec: VisualizationSpec = {
 			encode: {
 				enter: {
 					x: { signal: "(radius + 5) * cos(scale('angular', datum.key))" },
-					y: { signal: "(radius + 5) * sin(scale('angular', datum.key))" },
+					y: { signal: "(radius + 10) * sin(scale('angular', datum.key))" },
 					text: { field: "key" },
 					align: [
 						{
