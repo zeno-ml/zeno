@@ -48,7 +48,7 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 				axis: {
 					labelFontSize: 14,
 					titleFontSize: 14,
-					titlePadding: 10,
+					titlePadding: 20,
 				},
 				sort: null,
 			},

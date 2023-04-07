@@ -24,10 +24,11 @@ export default function generateSliceVsSliceSpec(selectMetrics): VegaLiteSpec {
 				field: "slice_1",
 				type: "nominal",
 				axis: {
-					labelAngle: 45,
+					labelAngle: -45,
 					labelFontSize: 14,
 					titleFontSize: 14,
 					titlePadding: 10,
+					orient: "top",
 				},
 				sort: "ascending",
 			},
@@ -40,7 +41,7 @@ export default function generateSliceVsSliceSpec(selectMetrics): VegaLiteSpec {
 					titleFontSize: 14,
 					titlePadding: 10,
 				},
-				sort: "descending",
+				sort: "ascending",
 			},
 		},
 		layer: [

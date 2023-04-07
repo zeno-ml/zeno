@@ -36,9 +36,10 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 				field: x_encode,
 				type: paramMap[x_encode].type,
 				axis: {
-					labelAngle: 45,
+					labelAngle: -20,
 					labelFontSize: 14,
 					titleFontSize: 14,
+					orient: "top",
 					titlePadding: 10,
 				},
 			},
