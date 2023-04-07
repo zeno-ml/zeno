@@ -74,3 +74,9 @@ class SliceFinderRequest(BaseModel):
     depth: str
     columns: List[ZenoColumn] = []
     model: str
+
+
+class SliceFinderMetricReturn(BaseModel):
+    metric: float
+    list_of_trained_elements: List[object]
+    slices_of_interest: List[List[object]]

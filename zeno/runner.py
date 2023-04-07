@@ -110,7 +110,6 @@ def parse_toml():
 
 
 def parse_args(args: ZenoParameters) -> ZenoParameters:
-
     if type(args) == dict:
         args = ZenoParameters.parse_obj(args)
 

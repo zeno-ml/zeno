@@ -384,7 +384,6 @@ class ZenoBackend(object):
                 metric = self.calculate_metric(
                     filt_df, metric_key.model, metric_key.metric
                 )
-                # print(metric)
                 return_metrics.append(SliceMetric(metric=metric, size=filt_df.shape[0]))
         return return_metrics
 

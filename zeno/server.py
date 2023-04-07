@@ -12,7 +12,7 @@ from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
 
-from zeno import MetricReturn
+from zeno import MetricReturn, SliceFinderMetricReturn
 
 from zeno.backend import ZenoBackend
 from zeno.classes.base import ZenoColumn
@@ -200,7 +200,8 @@ def get_server(zeno: ZenoBackend):
     def project_embed_into_2D(req: EmbedProject2DRequest):
         return project_into_2D(zeno.df, zeno.id_column, req.model, req.column)
 
-    @api_app.post("/slice-finder-project", tags=["zeno"], response_model=MetricReturn)
+    @api_app.post("/slice-finder-project", tags=["zeno"],
+                  response_model=SliceFinderMetricReturn)
     def project_find_available_slices(req: SliceFinderRequest):
         return slice_finder(
             zeno.df, req, zeno.zeno_options, zeno.metric_functions, zeno.columns

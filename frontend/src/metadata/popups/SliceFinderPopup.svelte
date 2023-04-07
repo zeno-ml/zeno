@@ -46,6 +46,7 @@
 			depth: depth,
 			model: $model,
 		});
+		console.log(sets)
 	}
 
 	function submit(e) {

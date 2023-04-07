@@ -98,11 +98,21 @@ class MetricReturn(BaseModel):
 
     Args:
         metric (float): Average metric over subset of data
-        variance (float): Variance of metric over subset of data
+        error_rate (float) Error Rate of metric over subset of data
     """
 
     metric: float
-    variance: Union[float, None] = None
+    error_rate: Union[List[float], None] = None
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
+class SliceFinderMetricReturn(BaseModel):
+
+    metric: float
+    list_of_trained_elements: Union[List[object], None] = None
+    slices_of_interest: Union[List[List[object]], None] = None
 
     class Config:
         arbitrary_types_allowed = True
@@ -167,7 +177,7 @@ def metric(func: Callable[[DataFrame, ZenoOptions], MetricReturn]):
     Args:
         func (Callable[[DataFrame, ZenoOptions], MetricReturn]):
             A metric function that takes a DataFrame and ZenoOptions and
-            returns a MetricReturn with an average metric value and optional variance.
+            returns a MetricReturn with an average metric value and optional error rate.
     """
 
     @functools.wraps(func)
