@@ -7,6 +7,7 @@
 	import MetricsEncodingMultiChoice from "./MetricsEncodingMultiChoice.svelte";
 	import ModelsEncodingDropdown from "./ModelsEncodingDropdown.svelte";
 	import ModelsEncodingMultiChoice from "./ModelsEncodingMultiChoice.svelte";
+	import FixDimension from "./FixDimension.svelte";
 	import { ChartType } from "../../../zenoservice";
 	import Svelecte from "svelecte";
 
@@ -197,14 +198,7 @@
 					}} />
 			</div>
 			{#if chartType === ChartType.BEESWARM}
-				<label>
-					<input
-						type="radio"
-						bind:group={$reports[$report].parameters.fixedDimension}
-						name="fixed_dimension"
-						value={"x"} />
-					<span> Fix this dimension (Dropdown)</span>
-				</label>
+				<FixDimension value={"x"} />
 			{/if}
 			<svelte:component
 				this={fixed_dimension === "x"
@@ -229,14 +223,7 @@
 					}} />
 			</div>
 			{#if chartType === ChartType.BEESWARM || chartType === ChartType.TABLE}
-				<label>
-					<input
-						type="radio"
-						bind:group={$reports[$report].parameters.fixedDimension}
-						name="fixed_dimension"
-						value={"y"} />
-					<span> Fix this dimension (Dropdown)</span>
-				</label>
+				<FixDimension value={"y"} />
 			{/if}
 			{#if chartType === ChartType.HEATMAP && parameters.yEncoding === "slices"}
 				<SecondSlicesEncoding />
@@ -280,14 +267,7 @@
 					}} />
 			</div>
 			{#if chartType === ChartType.TABLE}
-				<label>
-					<input
-						type="radio"
-						bind:group={$reports[$report].parameters.fixedDimension}
-						name="fixed_dimension"
-						value={"color"} />
-					<span> Fix this dimension (Dropdown)</span>
-				</label>
+				<FixDimension value={"color"} />
 			{/if}
 			<svelte:component
 				this={fixed_dimension === "color"
@@ -312,15 +292,6 @@
 	}
 	.encoding-section {
 		margin-bottom: 15px;
-	}
-	.encoding-section label {
-		padding-left: 59px;
-	}
-	.encoding-section input {
-		vertical-align: middle;
-	}
-	.encoding-section label span {
-		vertical-align: middle;
 	}
 	.parameters {
 		display: flex;
