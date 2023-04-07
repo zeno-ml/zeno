@@ -40,11 +40,11 @@
 				});
 			}}
 			on:keydown={() => ({})}>
-			<IconButton>
-				<Icon component={Svg} viewBox="0 0 24 24">
+			<div class="add-button">
+				<Icon style="outline:none" component={Svg} viewBox="0 0 24 24">
 					<path fill="black" d={mdiPlus} />
 				</Icon>
-			</IconButton>
+			</div>
 		</div>
 	</div>
 </div>
@@ -82,5 +82,10 @@
 	}
 	.add-reports:hover {
 		background: #f0ebf4;
+	}
+	.add-button {
+		width: 24px;
+		height: 24px;
+		margin: 14px;
 	}
 </style>
