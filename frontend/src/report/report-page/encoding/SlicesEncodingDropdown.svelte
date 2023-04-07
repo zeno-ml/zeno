@@ -2,12 +2,21 @@
 	import { report, reports, slices } from "../../../stores";
 	import Svelecte from "svelecte";
 	let options = [];
-	$slices.forEach((s) => {
-		if ($reports[$report].slices.some((rs) => rs.sliceName === s.sliceName)) {
-			options.push({ label: s.sliceName });
+	let selectSliceName = "";
+	function initialSettings() {
+		// restore all value when fixing dimension with empty options
+		if ($reports[$report].slices.length === 0) {
+			$reports[$report].slices = [...$slices.values()];
 		}
-	});
-	$: selectSliceName = $reports[$report].slices[0].sliceName;
+		// prepare options
+		$slices.forEach((s) => {
+			if ($reports[$report].slices.some((rs) => rs.sliceName === s.sliceName)) {
+				options.push({ label: s.sliceName });
+			}
+		});
+		selectSliceName = $reports[$report].slices[0].sliceName;
+	}
+	$: initialSettings();
 </script>
 
 <div class="parameters">

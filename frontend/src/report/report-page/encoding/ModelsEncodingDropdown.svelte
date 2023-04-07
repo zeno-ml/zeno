@@ -2,11 +2,19 @@
 	import { report, reports, models } from "../../../stores";
 	import Svelecte from "svelecte";
 	let options = [];
-	$models.forEach((m) => {
-		if ($reports[$report].models.includes(m)) {
-			options.push({ label: m });
+	function initialSettings() {
+		// restore all value when fixing dimension with empty options
+		if ($reports[$report].models.length === 0) {
+			$reports[$report].models = $models;
 		}
-	});
+		// prepare options
+		$models.forEach((m) => {
+			if ($reports[$report].models.includes(m)) {
+				options.push({ label: m });
+			}
+		});
+	}
+	$: initialSettings();
 </script>
 
 <div class="parameters">
