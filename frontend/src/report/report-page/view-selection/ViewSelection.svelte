@@ -14,43 +14,43 @@
 			type: ChartType.BAR,
 			xEncoding: "slices",
 			yEncoding: "metrics",
-			colorEncoding: "models",
+			zEncoding: "models",
 			fixedDimension: "y",
 		},
 		linechart: {
 			type: ChartType.LINE,
 			xEncoding: "slices",
 			yEncoding: "metrics",
-			colorEncoding: "models",
+			zEncoding: "models",
 			fixedDimension: "y",
 		},
 		table: {
 			type: ChartType.TABLE,
 			xEncoding: "models",
 			yEncoding: "slices",
-			colorEncoding: "metrics",
-			fixedDimension: "color",
+			zEncoding: "metrics",
+			fixedDimension: "z",
 		},
 		beeswarm: {
 			type: ChartType.BEESWARM,
 			xEncoding: "metrics",
 			yEncoding: "models",
-			colorEncoding: "slices",
+			zEncoding: "slices",
 			fixedDimension: "y",
 		},
 		radar: {
 			type: ChartType.RADAR,
 			xEncoding: "metrics",
 			yEncoding: "slices",
-			colorEncoding: "models",
-			fixedDimension: "color",
+			zEncoding: "models",
+			fixedDimension: "z",
 		},
 		heatmap: {
 			type: ChartType.HEATMAP,
 			xEncoding: "slices",
 			yEncoding: "models",
-			colorEncoding: "metrics",
-			fixedDimension: "color",
+			zEncoding: "metrics",
+			fixedDimension: "z",
 		},
 	};
 
@@ -64,8 +64,8 @@
 					defaultMap[e.currentTarget.id].xEncoding;
 				currentReport.parameters.yEncoding =
 					defaultMap[e.currentTarget.id].yEncoding;
-				currentReport.parameters.colorEncoding =
-					defaultMap[e.currentTarget.id].colorEncoding;
+				currentReport.parameters.zEncoding =
+					defaultMap[e.currentTarget.id].zEncoding;
 				currentReport.parameters.fixedDimension =
 					defaultMap[e.currentTarget.id].fixedDimension;
 				$reports[$report] = currentReport;

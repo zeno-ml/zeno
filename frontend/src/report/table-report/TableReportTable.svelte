@@ -22,7 +22,7 @@
 					<Cell class="sticky" style="border-right: 1px solid #e8e8e8">
 						{parameters.yEncoding}
 					</Cell>
-					<Cell>{parameters.colorEncoding}</Cell>
+					<Cell>{parameters.zEncoding}</Cell>
 					{#if parameters.xEncoding === "slices"}
 						{#each selectSlices as slice}
 							<Cell>
@@ -41,7 +41,7 @@
 				</Row>
 			</Head>
 			<Body style="overflow: visible">
-				{#if fixed_dimension === "color"}
+				{#if fixed_dimension === "z"}
 					{#if parameters.yEncoding === "slices"}
 						{#each selectSlices as slice}
 							<TableReportRow

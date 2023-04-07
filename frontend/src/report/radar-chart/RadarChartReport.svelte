@@ -47,7 +47,7 @@
 					});
 				});
 			}
-		} else if (parameters.colorEncoding === "metrics") {
+		} else if (parameters.zEncoding === "metrics") {
 			fixedName = rep.metrics[0];
 			if (parameters.yEncoding === "slices") {
 				rep.models.forEach((mod) => {

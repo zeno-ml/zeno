@@ -29,32 +29,32 @@
 		[ChartType.BAR]: {
 			x: "x",
 			y: "y",
-			color: "color",
+			z: "color",
 		},
 		[ChartType.LINE]: {
 			x: "x",
 			y: "y",
-			color: "color",
+			z: "color",
 		},
 		[ChartType.TABLE]: {
 			x: "x",
 			y: "y",
-			color: "layer",
+			z: "layer",
 		},
 		[ChartType.BEESWARM]: {
 			x: "x",
 			y: "y",
-			color: "color",
+			z: "color",
 		},
 		[ChartType.RADAR]: {
 			x: "axis",
 			y: "layer",
-			color: "fixed",
+			z: "fixed",
 		},
 		[ChartType.HEATMAP]: {
 			x: "x",
 			y: "y",
-			color: "color",
+			z: "color",
 		},
 	};
 	const optionMap = {
@@ -62,37 +62,37 @@
 		[ChartType.BAR]: {
 			x: [{ label: "slices" }, { label: "models" }],
 			y: [{ label: "metrics" }],
-			color: [{ label: "slices" }, { label: "models" }],
+			z: [{ label: "slices" }, { label: "models" }],
 		},
 		// line chart select option dropdown
 		[ChartType.LINE]: {
 			x: [{ label: "slices" }, { label: "models" }],
 			y: [{ label: "metrics" }],
-			color: [{ label: "slices" }, { label: "models" }],
+			z: [{ label: "slices" }, { label: "models" }],
 		},
 		// table view select option dropdown
 		[ChartType.TABLE]: {
 			x: [{ label: "slices" }, { label: "models" }],
 			y: [{ label: "slices" }, { label: "models" }],
-			color: [{ label: "metrics" }],
+			z: [{ label: "metrics" }],
 		},
 		// beeswarm chart select option dropdown
 		[ChartType.BEESWARM]: {
 			x: [{ label: "metrics" }],
 			y: [{ label: "slices" }, { label: "models" }],
-			color: [{ label: "slices" }, { label: "models" }],
+			z: [{ label: "slices" }, { label: "models" }],
 		},
 		// radar chart select option dropdown
 		[ChartType.RADAR]: {
 			x: [{ label: "slices" }, { label: "models" }, { label: "metrics" }],
 			y: [{ label: "slices" }, { label: "models" }],
-			color: [{ label: "slices" }, { label: "models" }, { label: "metrics" }],
+			z: [{ label: "slices" }, { label: "models" }, { label: "metrics" }],
 		},
 		// heat map select option dropdown
 		[ChartType.HEATMAP]: {
 			x: [{ label: "slices" }, { label: "models" }],
 			y: [{ label: "slices" }, { label: "models" }],
-			color: [{ label: "metrics" }],
+			z: [{ label: "metrics" }],
 		},
 	};
 
@@ -108,9 +108,9 @@
 		if (chartType === ChartType.BAR || chartType === ChartType.LINE) {
 			if (currentParam === "x") {
 				parameters.xEncoding = label;
-				parameters.colorEncoding = paramExcluMap[label];
+				parameters.zEncoding = paramExcluMap[label];
 			} else if (currentParam === "color") {
-				parameters.colorEncoding = label;
+				parameters.zEncoding = label;
 				parameters.xEncoding = paramExcluMap[label];
 			}
 		}
@@ -128,9 +128,9 @@
 		else if (chartType === ChartType.BEESWARM) {
 			if (currentParam === "y") {
 				parameters.yEncoding = label;
-				parameters.colorEncoding = paramExcluMap[label];
+				parameters.zEncoding = paramExcluMap[label];
 			} else if (currentParam === "color") {
-				parameters.colorEncoding = label;
+				parameters.zEncoding = label;
 				parameters.yEncoding = paramExcluMap[label];
 			}
 		}
@@ -139,20 +139,20 @@
 			if (currentParam === "x") {
 				parameters.xEncoding = label;
 				if (label === "metrics") {
-					parameters.colorEncoding = paramExcluMap[parameters.yEncoding];
+					parameters.zEncoding = paramExcluMap[parameters.yEncoding];
 				} else {
-					parameters.colorEncoding = "metrics";
+					parameters.zEncoding = "metrics";
 					parameters.yEncoding = paramExcluMap[label];
 				}
 			} else if (currentParam === "y") {
 				parameters.yEncoding = label;
 				if (parameters.xEncoding === "metrics") {
-					parameters.colorEncoding = paramExcluMap[label];
-				} else if (parameters.colorEncoding === "metrics") {
+					parameters.zEncoding = paramExcluMap[label];
+				} else if (parameters.zEncoding === "metrics") {
 					parameters.xEncoding = paramExcluMap[label];
 				}
 			} else if (currentParam === "color") {
-				parameters.colorEncoding = label;
+				parameters.zEncoding = label;
 				if (label === "metrics") {
 					parameters.xEncoding = paramExcluMap[parameters.yEncoding];
 				} else {
@@ -254,25 +254,25 @@
 		<!-- color encoding start-->
 		<div class="encoding-section">
 			<div class="parameters">
-				<h4>{labelMap[chartType].color}</h4>
+				<h4>{labelMap[chartType].z}</h4>
 				<Svelecte
 					style="width: 280px; height: 30px; flex:none;"
-					value={parameters.colorEncoding}
-					options={optionMap[chartType].color}
+					value={parameters.zEncoding}
+					options={optionMap[chartType].z}
 					searchable={false}
 					on:change={(e) => {
-						if (e.detail.label !== parameters.colorEncoding) {
+						if (e.detail.label !== parameters.zEncoding) {
 							refreshParams(e, "color");
 						}
 					}} />
 			</div>
 			{#if chartType === ChartType.TABLE}
-				<FixDimension value={"color"} />
+				<FixDimension value={"z"} />
 			{/if}
 			<svelte:component
-				this={fixed_dimension === "color"
-					? EncodingMap[parameters.colorEncoding].fixed
-					: EncodingMap[parameters.colorEncoding].multi} />
+				this={fixed_dimension === "z"
+					? EncodingMap[parameters.zEncoding].fixed
+					: EncodingMap[parameters.zEncoding].multi} />
 		</div>
 		<!-- color encoding end-->
 	</div>

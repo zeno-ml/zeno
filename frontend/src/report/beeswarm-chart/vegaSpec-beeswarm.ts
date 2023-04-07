@@ -1,7 +1,7 @@
 import type { VisualizationSpec } from "vega-embed";
 export default function generateSpec(parameters, xLabel): VisualizationSpec {
 	const x_encode = parameters.xEncoding;
-	const color_encode = parameters.colorEncoding;
+	const z_encode = parameters.zEncoding;
 
 	const paramMap = {
 		models: {
@@ -67,7 +67,7 @@ export default function generateSpec(parameters, xLabel): VisualizationSpec {
 			{
 				name: "color",
 				type: "ordinal",
-				domain: { data: "table", field: color_encode },
+				domain: { data: "table", field: z_encode },
 				range: { scheme: "category20" },
 			},
 		],
@@ -75,7 +75,8 @@ export default function generateSpec(parameters, xLabel): VisualizationSpec {
 		axes: [
 			{
 				title: xLabel,
-				titleFontSize: 12,
+				titleFontSize: 13,
+				titlePadding: 10,
 				orient: "bottom",
 				scale: "xscale",
 			},
@@ -84,7 +85,7 @@ export default function generateSpec(parameters, xLabel): VisualizationSpec {
 		legends: [
 			{
 				type: "symbol",
-				title: paramMap[color_encode].title,
+				title: paramMap[z_encode].title,
 				fill: "color",
 			},
 		],
@@ -96,7 +97,7 @@ export default function generateSpec(parameters, xLabel): VisualizationSpec {
 				from: { data: "table" },
 				encode: {
 					enter: {
-						fill: { scale: "color", field: color_encode },
+						fill: { scale: "color", field: z_encode },
 						xfocus: {
 							scale: "xscale",
 							field: xLabel !== "size" ? x_encode : "size",

@@ -17,7 +17,7 @@ class ChartType(str, Enum):
 class Parameters(CamelModel):
     x_encoding: str
     y_encoding: str
-    color_encoding: str
+    z_encoding: str
     fixed_dimension: str
     second_slices: List[Slice]
 

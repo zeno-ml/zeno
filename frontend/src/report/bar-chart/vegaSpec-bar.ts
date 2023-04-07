@@ -3,7 +3,7 @@ import type { VegaLiteSpec } from "svelte-vega";
 export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 	const x_encode = parameters.xEncoding;
 	const y_encode = parameters.yEncoding;
-	const color_encode = parameters.colorEncoding;
+	const z_encode = parameters.zEncoding;
 	const paramMap = {
 		metrics: {
 			type: "quantitative",
@@ -53,7 +53,7 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 				sort: null,
 			},
 			xOffset: {
-				field: color_encode,
+				field: z_encode,
 				sort: null,
 			},
 			fillOpacity: {
@@ -84,7 +84,7 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 				},
 				encoding: {
 					color: {
-						field: color_encode,
+						field: z_encode,
 						sort: null,
 						scale: { scheme: "category20" },
 					},

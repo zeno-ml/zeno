@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { mdiPlus } from "@mdi/js";
 	import { Svg } from "@smui/common";
-	import IconButton, { Icon } from "@smui/icon-button";
+	import { Icon } from "@smui/icon-button";
 	import { reports, slices, models, metrics } from "../stores";
 	import { updateTab } from "../util/util";
 	import ReportHomeBlock from "./ReportHomeBlock.svelte";
@@ -31,7 +31,7 @@
 						parameters: {
 							xEncoding: "slices",
 							yEncoding: "metrics",
-							colorEncoding: "models",
+							zEncoding: "models",
 							fixedDimension: "y",
 							secondSlices: [...$slices.values()],
 						},

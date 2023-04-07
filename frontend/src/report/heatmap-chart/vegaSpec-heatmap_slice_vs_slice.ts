@@ -24,7 +24,7 @@ export default function generateSliceVsSliceSpec(selectMetrics): VegaLiteSpec {
 				field: "slice_1",
 				type: "nominal",
 				axis: {
-					labelAngle: -45,
+					labelAngle: -20,
 					labelFontSize: 14,
 					titleFontSize: 14,
 					titlePadding: 10,

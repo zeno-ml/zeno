@@ -3,7 +3,7 @@ import type { VegaLiteSpec } from "svelte-vega";
 export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 	const x_encode = parameters.xEncoding;
 	const y_encode = parameters.yEncoding;
-	const color_encode = parameters.colorEncoding;
+	const z_encode = parameters.zEncoding;
 	const paramMap = {
 		metrics: {
 			type: "quantitative",
@@ -55,7 +55,7 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 			color: {
 				condition: {
 					param: "hover",
-					field: color_encode,
+					field: z_encode,
 					scale: { scheme: "category20" },
 					sort: null,
 				},
@@ -71,7 +71,7 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 						name: "hover",
 						select: {
 							type: "point",
-							fields: [color_encode],
+							fields: [z_encode],
 							on: "mouseover",
 						},
 					},
@@ -93,7 +93,7 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 						name: "hover_line",
 						select: {
 							type: "point",
-							fields: [color_encode],
+							fields: [z_encode],
 							on: "mouseover",
 						},
 					},

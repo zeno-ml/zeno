@@ -13,7 +13,7 @@
 
 	function getMetKeys(rep) {
 		const metricKeys: MetricKey[] = [];
-		if (fixed_dimension === "color") {
+		if (fixed_dimension === "z") {
 			if (parameters.yEncoding === "slices") {
 				rep.models.forEach((mod) => {
 					metricKeys.push({
@@ -55,7 +55,7 @@
 </script>
 
 <Row style="overflow: visible">
-	{#if fixed_dimension === "color"}
+	{#if fixed_dimension === "z"}
 		<Cell class="sticky" style="left: 0px; border-right: 1px solid #e8e8e8">
 			<div class="inline">
 				{#if parameters.yEncoding === "slices"}
@@ -83,7 +83,7 @@
 			<Cell>
 				<p>
 					{row === "size" ||
-					(fixed_dimension === "color" && currentReport.metrics[0] === "size")
+					(fixed_dimension === "z" && currentReport.metrics[0] === "size")
 						? r.size
 						: r.metric.toFixed(2)}
 				</p>
