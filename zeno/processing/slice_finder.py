@@ -42,7 +42,7 @@ def slice_finder(df, req, zeno_options, metric_functions, columns):
                                                     exclude=[
                                                              "object"]).columns.tolist()
     
-    all_categorical_data.insert(0, "label")
+    #all_categorical_data.insert(0, "label")
     # print(all_categorical_data)
     all_categorical_data.remove("POSTDISTILLincorrectcifar_net_20")
 
@@ -60,7 +60,7 @@ def slice_finder(df, req, zeno_options, metric_functions, columns):
 
     updated_df = updated_df[all_categorical_data]
 
-    # print(updated_df.dtypes)
+    print(updated_df.dtypes)
 
     # slice finder code logic
 

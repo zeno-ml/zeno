@@ -7,7 +7,7 @@
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
 	import { clickOutside } from "../../util/clickOutside";
-	import { mdiPlus, mdiClose } from "@mdi/js";
+	import { mdiPlus, mdiClose, mdiMonitorAccount } from "@mdi/js";
 	import { Pagination } from "@smui/data-table";
 	import { settings, showSliceFinder } from "../../stores";
 	import { ZenoService } from "../../zenoservice";
@@ -103,11 +103,6 @@
 					<path fill="#6a1b9a" d={mdiClose} />
 				</Icon>
 			</IconButton>
-			<IconButton on:click={() => testPOSTAbility()}>
-				<Icon component={Svg} viewBox="0 0 24 24">
-					<path fill="#6a1b9a" d={mdiClose} />
-				</Icon>
-			</IconButton>
 		</div>
 		<div class="metrics">
 			<Select
@@ -146,6 +141,12 @@
 					<Option value={m}>{m}</Option>
 				{/each}
 			</Select>
+
+		<IconButton on:click={() => testPOSTAbility()}>
+			<Icon component={Svg} viewBox="0 0 24 24">
+				<path fill="#6a1b9a" d={mdiMonitorAccount} />
+			</Icon>
+		</IconButton>
 			{#each slice_data as element}
 				<div class="allSlices">
 					{#each element.predicate as pred}
