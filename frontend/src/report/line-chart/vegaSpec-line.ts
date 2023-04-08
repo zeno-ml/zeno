@@ -3,7 +3,7 @@ import type { VegaLiteSpec } from "svelte-vega";
 export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 	const x_encode = parameters.xEncoding;
 	const y_encode = parameters.yEncoding;
-	const color_encode = parameters.colorEncoding;
+	const z_encode = parameters.zEncoding;
 	const paramMap = {
 		metrics: {
 			type: "quantitative",
@@ -24,6 +24,7 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 		width: {
 			step: 150,
 		},
+		padding: { top: 20 },
 		data: {
 			name: "table",
 		},
@@ -42,19 +43,19 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 			},
 			y: {
 				title: paramMap[y_encode].title,
-				field: y_encode,
+				field: selectMetrics !== "size" ? y_encode : "size",
 				type: paramMap[y_encode].type,
 				axis: {
 					labelFontSize: 14,
 					titleFontSize: 14,
-					titlePadding: 10,
+					titlePadding: 20,
 				},
 				sort: null,
 			},
 			color: {
 				condition: {
 					param: "hover",
-					field: color_encode,
+					field: z_encode,
 					scale: { scheme: "category20" },
 					sort: null,
 				},
@@ -70,7 +71,7 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 						name: "hover",
 						select: {
 							type: "point",
-							fields: [color_encode],
+							fields: [z_encode],
 							on: "mouseover",
 						},
 					},
@@ -80,11 +81,23 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 					size: 100,
 					tooltip: {
 						signal:
-							"{'slice_name': datum.slices, 'size': datum.size, 'metric': datum.metrics, 'model': datum.models}",
+							"{'slice_name': datum.slices,'size': datum.size, " +
+							(selectMetrics !== "size" ? selectMetrics : "accuracy") +
+							": datum.metrics, 'model': datum.models}",
 					},
 				},
 			},
 			{
+				params: [
+					{
+						name: "hover_line",
+						select: {
+							type: "point",
+							fields: [z_encode],
+							on: "mouseover",
+						},
+					},
+				],
 				mark: {
 					type: "line",
 				},
@@ -97,7 +110,7 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 				},
 				encoding: {
 					text: {
-						field: y_encode,
+						field: selectMetrics !== "size" ? y_encode : "size",
 						type: paramMap[y_encode].type,
 					},
 					color: { value: "black" },
