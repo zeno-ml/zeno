@@ -5,6 +5,8 @@
 		mdiChartLine,
 		mdiTable,
 		mdiDotsVertical,
+		mdiRadar,
+		mdiViewGrid,
 	} from "@mdi/js";
 
 	import { Icon } from "@smui/button";
@@ -25,6 +27,8 @@
 		[ChartType.LINE]: mdiChartLine,
 		[ChartType.BAR]: mdiChartBar,
 		[ChartType.BEESWARM]: mdiBee,
+		[ChartType.RADAR]: mdiRadar,
+		[ChartType.HEATMAP]: mdiViewGrid,
 	};
 </script>
 
@@ -104,7 +108,7 @@
 	<p class="report-slice">
 		{report.slices ? report.slices.length : 0} slices,
 		{report.models ? report.models.length : 0} models,
-		{report.metrics}
+		{report.metrics ? report.metrics.length : 0} metrics
 	</p>
 </div>
 
@@ -120,7 +124,7 @@
 		padding-right: 10px;
 		overflow: visible;
 		cursor: pointer;
-		width: 250px;
+		width: 225px;
 		height: 100px;
 	}
 	.report:hover {

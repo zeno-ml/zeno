@@ -10,23 +10,22 @@ class ChartType(str, Enum):
     LINE = "LINE"
     TABLE = "TABLE"
     BEESWARM = "BEESWARM"
-
-
-class ReportPredicate(CamelModel):
-    slice_name: str
-    metric: str
+    RADAR = "RADAR"
+    HEATMAP = "HEATMAP"
 
 
 class Parameters(CamelModel):
     x_encoding: str
     y_encoding: str
-    color_encoding: str
+    z_encoding: str
+    fixed_dimension: str
+    second_slices: List[Slice]
 
 
 class Report(CamelModel):
     name: str
     type: Union[ChartType, None] = None
     slices: Union[List[Slice], None] = None
-    metrics: Union[List[str], str, None] = None
+    metrics: Union[List[str], None] = None
     models: Union[List[str], None] = None
     parameters: Union[Parameters, None] = None
