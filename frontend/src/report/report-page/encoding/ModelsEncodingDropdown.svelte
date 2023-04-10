@@ -9,9 +9,7 @@
 		}
 		// prepare options
 		$models.forEach((m) => {
-			if ($reports[$report].models.includes(m)) {
-				options.push({ label: m });
-			}
+			options.push({ label: m });
 		});
 	}
 	$: initialSettings();
@@ -27,7 +25,9 @@
 		on:change={(e) => {
 			if (e.detail.label !== $reports[$report].models[0]) {
 				let tmpModels = $reports[$report].models;
-				tmpModels.splice(tmpModels.indexOf(e.detail.label), 1);
+				if (tmpModels.includes(e.detail.label)) {
+					tmpModels.splice(tmpModels.indexOf(e.detail.label), 1);
+				}
 				tmpModels.unshift(e.detail.label);
 				$reports[$report].models = tmpModels;
 			}

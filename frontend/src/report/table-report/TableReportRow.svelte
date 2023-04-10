@@ -79,16 +79,18 @@
 		<Cell>{row}</Cell>
 	{/if}
 	{#await modelResults then res}
-		{#each res as r}
-			<Cell>
-				<p>
-					{row === "size" ||
-					(fixed_dimension === "z" && currentReport.metrics[0] === "size")
-						? r.size
-						: r.metric.toFixed(2)}
-				</p>
-			</Cell>
-		{/each}
+		{#if res}
+			{#each res as r}
+				<Cell>
+					<p>
+						{row === "size" ||
+						(fixed_dimension === "z" && currentReport.metrics[0] === "size")
+							? r.size
+							: r.metric.toFixed(2)}
+					</p>
+				</Cell>
+			{/each}
+		{/if}
 	{/await}
 </Row>
 
