@@ -2700,14 +2700,14 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
 name = "usort"
-version = "1.0.5"
+version = "1.0.6"
 description = "A small, safe import sorter"
 category = "dev"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "usort-1.0.5-py3-none-any.whl", hash = "sha256:d40afa981f03737d8d74f5a1a850f15741182a811df885085adcf893274c044b"},
-    {file = "usort-1.0.5.tar.gz", hash = "sha256:8fed013e458890778bd72d347aa75b3c0ee530b5ae9d78624ad9749a29878fdd"},
+    {file = "usort-1.0.6-py3-none-any.whl", hash = "sha256:81c69a4a6a750824834b18019a2e325ea38d7ae944cca4d98f15e62a27ca1f27"},
+    {file = "usort-1.0.6.tar.gz", hash = "sha256:b30a212f196d8f7b624e8c70ff0b11a6de4b1e1f21cc4fa75adf1689367e807a"},
 ]
 
 [package.dependencies]
@@ -2937,4 +2937,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1, <=3.11"
-content-hash = "a881d9b0d37a8e511b9c05bbc9b0d38869892b6365002ef10724e432cfde5907"
+content-hash = "08efcf68d48c18f40b9d1946e24d96d08bc63c26923350e6334087c94782db73"
