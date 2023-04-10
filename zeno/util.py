@@ -1,15 +1,19 @@
 import datetime
 import os
 import pickle
+import shutil
 import sys
 from contextlib import contextmanager
 from importlib import util
 from inspect import getmembers, isfunction
 from pathlib import Path
-from typing import Callable, List, Union
+from typing import Any, Callable, Dict, List, Union
 
 import pandas as pd
+import requests
+import tomli
 
+from zeno.api import ZenoParameters
 from zeno.classes.base import MetadataType
 
 VIEW_MAP_URL: str = "https://raw.githubusercontent.com/zeno-ml/instance-views/0.3/"
@@ -95,11 +99,75 @@ def add_to_path(p):
         sys.path = old_path
 
 
+def read_config(args: Union[str, Dict, ZenoParameters]) -> ZenoParameters:
+    params: ZenoParameters
+
+    if isinstance(args, str):
+        path = os.path.abspath(args)
+        try:
+            with open(path, "rb") as f:
+                args_dict = tomli.load(f)
+        except Exception:
+            print("ERROR: Failed to read TOML configuration file.")
+            sys.exit(1)
+
+        params = ZenoParameters.parse_obj(args_dict)
+        params.config_file = path
+
+        # Change working directory to the directory of the config file.
+        os.chdir(os.path.dirname(path))
+
+    elif isinstance(args, dict):
+        params = ZenoParameters.parse_obj(args)
+    elif isinstance(args, ZenoParameters):
+        params = args
+    else:
+        sys.exit(1)
+
+    if params.cache_path == "":
+        params.cache_path = "./.zeno_cache/"
+    else:
+        params.cache_path = params.cache_path
+    os.makedirs(params.cache_path, exist_ok=True)
+
+    # Try to get view from GitHub List, if not try to read from path and copy it.
+    if params.view != "":
+        view_dest_path = Path(os.path.join(params.cache_path, "view.mjs"))
+        view_path = Path(params.view)
+        if view_path.is_file():
+            if view_dest_path.is_file():
+                os.remove(view_dest_path)
+            shutil.copyfile(view_path, view_dest_path)
+        else:
+            try:
+                views_res = requests.get(VIEW_MAP_URL + VIEWS_MAP_JSON)
+                views = views_res.json()
+                url = VIEW_MAP_URL + views[params.view]
+                with open(view_dest_path, "wb") as out_file:
+                    content = requests.get(url, stream=True).content
+                    out_file.write(content)
+            except KeyError:
+                print(
+                    "ERROR: View not found in list or relative path."
+                    " See available views at ",
+                    "https://github.com/zeno-ml/instance-views/blob/main/views.json",
+                )
+                sys.exit(1)
+
+    if params.id_column == "":
+        print(
+            "WARNING: no id_column specified, using index as id_column. If you are",
+            "using a data_column, suggest using it as id_column.",
+        )
+
+    return params
+
+
 def read_metadata(meta: Union[str, pd.DataFrame]) -> pd.DataFrame:
     """Return DataFrame or try to read it from file"""
-    if type(meta) is pd.DataFrame:
+    if isinstance(meta, pd.DataFrame):
         return meta
-    elif type(meta) is str:
+    elif isinstance(meta, str):
         meta_path = Path(os.path.realpath(meta))
 
         if meta_path.suffix == ".csv":
@@ -121,7 +189,7 @@ def read_metadata(meta: Union[str, pd.DataFrame]) -> pd.DataFrame:
     sys.exit(1)
 
 
-def load_function(test_file: Path) -> List[Callable]:
+def load_function(test_file: Path) -> List[Callable[..., Any]]:
     # To allow relative imports in test files,
     # add their directory to path temporarily.
     with add_to_path(os.path.dirname(os.path.abspath(test_file))):
@@ -129,7 +197,7 @@ def load_function(test_file: Path) -> List[Callable]:
         test_module = util.module_from_spec(spec)  # type: ignore
         spec.loader.exec_module(test_module)  # type: ignore
 
-    functions = []
+    functions: List[Callable[..., Any]] = []
     for _, func in getmembers(test_module):
         if isfunction(func):
             if (
@@ -143,9 +211,9 @@ def load_function(test_file: Path) -> List[Callable]:
 
 
 def read_functions(fns: Union[List[Callable], str]) -> List[Callable]:
-    if type(fns) is list:
+    if isinstance(fns, list):
         return fns
-    elif type(fns) is str:
+    elif isinstance(fns, str):
         fn_path = Path(os.path.realpath(fns))
         if os.path.isfile(fn_path):
             return load_function(fn_path)

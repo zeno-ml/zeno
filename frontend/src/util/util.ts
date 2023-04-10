@@ -1,5 +1,42 @@
-import { tab } from "../stores";
 import { ZenoColumnType, type ZenoColumn } from "../zenoservice";
+import {
+	folders,
+	metric,
+	metrics,
+	model,
+	models,
+	ready,
+	reports,
+	rowsPerPage,
+	settings,
+	slices,
+	tab,
+} from "../stores";
+import { ZenoService } from "../zenoservice";
+
+export async function getInitialData() {
+	const sets = await ZenoService.getSettings();
+	settings.set(sets);
+	rowsPerPage.set(sets.samples);
+
+	const inits = await ZenoService.getInitialInfo();
+	models.set(inits.models);
+	metrics.set(inits.metrics);
+	folders.set(inits.folders);
+
+	model.set(
+		inits.models.length > 0 ? inits.models[inits.models.length - 1] : ""
+	);
+	metric.set(inits.metrics.length > 0 ? inits.metrics[0] : "");
+
+	const slicesRes = await ZenoService.getSlices();
+	slices.set(new Map(Object.entries(slicesRes)));
+
+	const reportsRes = await ZenoService.getReports();
+	reports.set(reportsRes);
+
+	ready.set(true);
+}
 
 export function updateTab(t: string) {
 	if (t === "home") {

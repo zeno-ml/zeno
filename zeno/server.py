@@ -39,6 +39,7 @@ from zeno.processing.projection_processing import (
     project_into_2D,
     projection_colors,
 )
+from zeno.util import read_config
 
 
 def custom_generate_unique_id(route: APIRoute):
@@ -152,7 +153,11 @@ def get_server(zeno: ZenoBackend):
 
     @api_app.get("/refresh", tags=["zeno"])
     def refresh_data():
-        zeno.initial_setup(zeno.params)
+        if zeno.params.config_file:
+            zeno.params = read_config(zeno.params.config_file)
+        zeno.done_running_inference = False
+        zeno.initial_setup()
+        zeno.start_processing()
 
     @api_app.post(
         "/histograms", response_model=List[List[HistogramBucket]], tags=["zeno"]

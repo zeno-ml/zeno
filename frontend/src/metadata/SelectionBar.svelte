@@ -92,7 +92,7 @@
 		</div>
 		<div class="status inline">
 			{#if runningAnalysis}
-				<span>{@html $status.status}</span>
+				<span style="margin-right: 10px">{@html $status.status}</span>
 				<CircularProgress
 					class="status-circle"
 					style="height: 32px; width: 32px; margin-right:20px"
@@ -100,7 +100,10 @@
 			{:else}
 				<div
 					on:keydown={() => ({})}
-					on:click={() => ZenoService.refreshData()}
+					on:click={() =>
+						ZenoService.refreshData().then(() => {
+							location.reload();
+						})}
 					use:tooltip={{
 						content: "Refresh data & functions",
 						position: "left",

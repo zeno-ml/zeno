@@ -43,24 +43,23 @@ from zeno.util import (
 
 
 class ZenoBackend(object):
-    def __init__(self, params: ZenoParameters):
+    def __init__(self, args: ZenoParameters):
         logging.basicConfig(level=logging.INFO)
+        self.params = args
+        self.initial_setup()
 
-        self.params = params
-        self.metadata = params.metadata
-        self.functions = params.functions
-        self.batch_size = params.batch_size
-        self.data_path = params.data_path
-        self.label_path = params.label_path
-        self.cache_path = params.cache_path
-        self.editable = params.editable
-        self.samples = params.samples
-        self.view = params.view
-        self.calculate_histogram_metrics = params.calculate_histogram_metrics
+    def initial_setup(self) -> None:
+        self.metadata = self.params.metadata
+        self.functions = self.params.functions
+        self.batch_size = self.params.batch_size
+        self.data_path = self.params.data_path
+        self.label_path = self.params.label_path
+        self.cache_path = self.params.cache_path
+        self.editable = self.params.editable
+        self.samples = self.params.samples
+        self.view = self.params.view
+        self.calculate_histogram_metrics = self.params.calculate_histogram_metrics
 
-        self.initial_setup(params)
-
-    def initial_setup(self, params: ZenoParameters):
         self.df = read_metadata(self.metadata)
         self.tests = read_functions(self.functions)
 
@@ -95,16 +94,17 @@ class ZenoBackend(object):
             "slices.pickle", self.cache_path, {}
         )
 
-        if params.models and os.path.isdir(params.models[0]):
+        if self.params.models and os.path.isdir(self.params.models[0]):
             self.model_paths = [
-                os.path.join(params.models[0], m) for m in os.listdir(params.models[0])
+                os.path.join(self.params.models[0], m)
+                for m in os.listdir(self.params.models[0])
             ]
         else:
-            self.model_paths = params.models  # type: ignore
+            self.model_paths = self.params.models  # type: ignore
         self.model_names = [os.path.basename(p).split(".")[0] for p in self.model_paths]
 
         self.__setup_dataframe(
-            params.id_column, params.data_column, params.label_column
+            self.params.id_column, self.params.data_column, self.params.label_column
         )
         self.__parse_test_functions(self.tests)
 
@@ -412,9 +412,16 @@ class ZenoBackend(object):
 
         return_metrics: List[SliceMetric] = []
         for metric_key in requests:
-            filt_df = filter_table(
-                self.df, metric_key.sli.filter_predicates, filter_ids
-            )
+
+            # If we refresh, might not have columns for a slice.
+            try:
+                filt_df = filter_table(
+                    self.df, metric_key.sli.filter_predicates, filter_ids
+                )
+            except pd.errors.UndefinedVariableError:
+                return_metrics.append(SliceMetric(metric=None, size=0))
+                continue
+
             if metric_key.metric == "" or self.label_column.name == "":
                 return_metrics.append(SliceMetric(metric=None, size=filt_df.shape[0]))
             else:
