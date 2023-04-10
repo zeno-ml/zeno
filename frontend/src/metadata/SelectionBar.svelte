@@ -1,6 +1,9 @@
 <script lang="ts">
-	import Button, { Group } from "@smui/button";
+	import { mdiRefresh } from "@mdi/js";
+	import Button, { Group, Icon } from "@smui/button";
 	import CircularProgress from "@smui/circular-progress";
+	import { Svg } from "@smui/common";
+	import { tooltip } from "@svelte-plugins/tooltips";
 	import { onMount } from "svelte";
 	import {
 		metric,
@@ -10,7 +13,7 @@
 		settings,
 		status,
 	} from "../stores";
-	import type { FilterPredicate } from "../zenoservice";
+	import { ZenoService, type FilterPredicate } from "../zenoservice";
 	import IdsChip from "./chips/IdsChip.svelte";
 	import MetadataChip from "./chips/MetadataChip.svelte";
 	import SliceChip from "./chips/SliceChip.svelte";
@@ -89,11 +92,29 @@
 		</div>
 		<div class="status inline">
 			{#if runningAnalysis}
+				<span style="margin-right: 10px">{@html $status.status}</span>
 				<CircularProgress
 					class="status-circle"
 					style="height: 32px; width: 32px; margin-right:20px"
 					indeterminate />
-				<span>{@html $status.status}</span>
+			{:else}
+				<div
+					on:keydown={() => ({})}
+					on:click={() =>
+						ZenoService.refreshData().then(() => {
+							location.reload();
+						})}
+					use:tooltip={{
+						content: "Refresh data & functions",
+						position: "left",
+						theme: "zeno-tooltip",
+					}}>
+					<div class="icon">
+						<Icon component={Svg} viewBox="0 0 24 24">
+							<path d={mdiRefresh} />
+						</Icon>
+					</div>
+				</div>
 			{/if}
 		</div>
 	</div>
@@ -134,6 +155,11 @@
 <style>
 	p {
 		margin: 0px;
+	}
+	.icon {
+		cursor: pointer;
+		width: 24px;
+		height: 24px;
 	}
 	.between {
 		padding-top: 10px;

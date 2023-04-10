@@ -151,6 +151,18 @@ export class ZenoService {
 	}
 
 	/**
+	 * Refresh Data
+	 * @returns any Successful Response
+	 * @throws ApiError
+	 */
+	public static refreshData(): CancelablePromise<any> {
+		return __request(OpenAPI, {
+			method: "GET",
+			url: "/refresh",
+		});
+	}
+
+	/**
 	 * Get Histogram Buckets
 	 * @param requestBody
 	 * @returns HistogramBucket Successful Response
