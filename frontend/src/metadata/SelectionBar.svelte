@@ -110,7 +110,7 @@
 						theme: "zeno-tooltip",
 					}}>
 					<div class="icon">
-						<Icon component={Svg} viewBox="0 0 24 24">
+						<Icon style="outline:none" component={Svg} viewBox="0 0 24 24">
 							<path d={mdiRefresh} />
 						</Icon>
 					</div>

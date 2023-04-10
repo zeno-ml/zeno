@@ -228,7 +228,7 @@
 					position: "right",
 					theme: "zeno-tooltip",
 				}}>
-				<Icon component={Svg} viewBox="-6 -6 36 36">
+				<Icon style="outline:none" component={Svg} viewBox="-6 -6 36 36">
 					<path d={mdiInformationOutline} />
 				</Icon>
 			</div>
@@ -317,7 +317,7 @@
 					position: "right",
 					theme: "zeno-tooltip",
 				}}>
-				<Icon component={Svg} viewBox="-6 -6 36 36">
+				<Icon style="outline:none" component={Svg} viewBox="-6 -6 36 36">
 					<path d={mdiInformationOutline} />
 				</Icon>
 			</div>
@@ -369,9 +369,9 @@
 	}
 	.side-container {
 		height: calc(100vh - 15px);
-		width: 350px;
-		min-width: 350px;
-		max-width: 350px;
+		width: 360px;
+		min-width: 360px;
+		max-width: 360px;
 		padding-top: 10px;
 		padding-bottom: 0px;
 		padding-left: 15px;
