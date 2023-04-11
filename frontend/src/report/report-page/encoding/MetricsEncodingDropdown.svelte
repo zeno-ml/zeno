@@ -9,9 +9,7 @@
 		}
 		// prepare options
 		[...$metrics.values(), "size"].forEach((m) => {
-			if ($reports[$report].metrics.includes(m)) {
-				options.push({ label: m });
-			}
+			options.push({ label: m });
 		});
 	}
 	$: initialSettings();
@@ -27,7 +25,9 @@
 		on:change={(e) => {
 			if (e.detail.label !== $reports[$report].metrics[0]) {
 				let tmpMetrics = $reports[$report].metrics;
-				tmpMetrics.splice(tmpMetrics.indexOf(e.detail.label), 1);
+				if (tmpMetrics.includes(e.detail.label)) {
+					tmpMetrics.splice(tmpMetrics.indexOf(e.detail.label), 1);
+				}
 				tmpMetrics.unshift(e.detail.label);
 				$reports[$report].metrics = tmpMetrics;
 			}

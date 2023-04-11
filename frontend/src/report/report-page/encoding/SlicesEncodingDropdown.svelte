@@ -10,9 +10,7 @@
 		}
 		// prepare options
 		$slices.forEach((s) => {
-			if ($reports[$report].slices.some((rs) => rs.sliceName === s.sliceName)) {
-				options.push({ label: s.sliceName });
-			}
+			options.push({ label: s.sliceName });
 		});
 		selectSliceName = $reports[$report].slices[0].sliceName;
 	}
