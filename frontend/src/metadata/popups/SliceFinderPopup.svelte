@@ -9,7 +9,7 @@
 	import { clickOutside } from "../../util/clickOutside";
 	import { mdiPlus, mdiClose, mdiMonitorAccount } from "@mdi/js";
 	import { Pagination } from "@smui/data-table";
-	import { settings, showSliceFinder } from "../../stores";
+	import { showSliceFinder } from "../../stores";
 	import { ZenoService } from "../../zenoservice";
 	import { model } from "../../stores";
 
@@ -17,36 +17,41 @@
 	let currentPage = 1;
 	let input;
 	let slice_data = [];
-	let sampleOptions = [5, 15, 30, 60, 100, $settings.samples].sort(
-		(a, b) => a - b
-	);
+	let sampleOptions = [5, 10, 20].sort((a, b) => a - b);
 	// dummy data for presenting frontend UI
-	let minimumSizes = ["10", "20", "30", "50"];
-	let minimumSize = "10";
-	let depths = ["10", "20", "30", "50"];
-	let depth = "10";
+	let minimumSizes = ["2", "3", "5", "7"];
+	let minimumSize = "5";
+	let max_ls = ["4", "5", "6", "8"];
+	let max_l = "5";
 	let sliceFinderMetrics = ["accuracy", "f1", "recall"];
 	let sliceFinderMetric = "accuracy";
 	let orderBys = ["ascending", "descending"];
 	let orderBy = "ascending";
 
 	$: start = 0;
-	$: end = 10000;
-	$: lastPage = 10000;
+	$: end = 10;
+	$: lastPage = 10;
 	$: if (showSliceFinder && input) {
 		input.getElement().focus();
 	}
 
-	export async function testPOSTAbility() {
+	export async function activateSliceFinder() {
+		document.getElementById("generate-slices").innerHTML =
+			"Generating Slices...";
 		const sets = await ZenoService.projectFindAvailableSlices({
 			id: "1",
 			orderBy: orderBy,
 			sliceFinderMetric: sliceFinderMetric,
 			minimumSize: minimumSize,
-			depth: depth,
+			depth: max_l,
 			model: $model,
 		});
-		console.log(sets)
+		console.log(sets);
+		document.getElementById("generate-slices").innerHTML = "";
+		slice_data_generator(
+			sets.list_of_trained_elements,
+			sets.slices_of_interest
+		);
 	}
 
 	function submit(e) {
@@ -55,31 +60,48 @@
 		}
 	}
 
-	function slice_data_generator() {
-		let predicateList = [
-			"brightness > 100",
-			"blue_count > 2",
-			"number_of_cats > 5",
-			"number_of_bugs < 1",
-			"number_of_rabbits == 11",
-		];
-		for (let i = 0; i < 5; i++) {
-			let predicate = [];
-			predicate.push(
-				predicateList[Math.floor(Math.random() * predicateList.length)]
-			);
-			predicate.push(
-				predicateList[Math.floor(Math.random() * predicateList.length)]
-			);
-			predicate.push(
-				predicateList[Math.floor(Math.random() * predicateList.length)]
-			);
-			let data = {
-				predicate: predicate,
-				number_1: Math.floor(Math.random() * 180),
-				number_2: Math.floor(Math.random() * 10) / 10,
-			};
-			slice_data.push(data);
+	function slice_data_generator(predicateList = [], slices_of_interest = []) {
+		// demo page
+		slice_data = [];
+		if (predicateList.length === 0) {
+			predicateList = [
+				"Welcome to the Slice Finder Screen! Click on the Button on the upperright corner to begin!",
+			];
+
+			for (let i = 0; i < 1; i++) {
+				let predicate = [];
+				predicate.push(
+					predicateList[Math.floor(Math.random() * predicateList.length)]
+				);
+				let data = {
+					predicate: predicate,
+					number_1: 0,
+					number_2: 0,
+				};
+				slice_data.push(data);
+			}
+		} else {
+			start = 0;
+			end = slices_of_interest.length;
+			slice_data = [];
+			for (let i = 0; i < slices_of_interest.length; i++) {
+				let predicate = [];
+				for (let j = 0; j < predicateList.length; j++) {
+					if (slices_of_interest[i][j] === null) {
+						continue;
+					}
+					predicate.push(predicateList[j] + "=" + slices_of_interest[i][j]);
+				}
+				let data = {
+					predicate: predicate,
+					number_1: 0,
+					number_2: 0,
+				};
+				slice_data.push(data);
+			}
+			if (orderBy === "descending") {
+				slice_data.reverse();
+			}
 		}
 	}
 	slice_data_generator();
@@ -116,10 +138,10 @@
 			</Select>
 			<Select
 				class="select"
-				bind:value={depth}
-				label="Depth"
+				bind:value={max_l}
+				label="Max Lattice Level"
 				style="width: 170px">
-				{#each depths as m}
+				{#each max_ls as m}
 					<Option value={m}>{m}</Option>
 				{/each}
 			</Select>
@@ -142,11 +164,13 @@
 				{/each}
 			</Select>
 
-		<IconButton on:click={() => testPOSTAbility()}>
-			<Icon component={Svg} viewBox="0 0 24 24">
-				<path fill="#6a1b9a" d={mdiMonitorAccount} />
-			</Icon>
-		</IconButton>
+			<IconButton on:click={() => activateSliceFinder()}>
+				<Icon component={Svg} viewBox="0 0 24 24">
+					<path fill="#6a1b9a" d={mdiMonitorAccount} />
+				</Icon>
+			</IconButton>
+			<span id="generate-slices" />
+
 			{#each slice_data as element}
 				<div class="allSlices">
 					{#each element.predicate as pred}

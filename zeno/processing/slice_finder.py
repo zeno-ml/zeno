@@ -4,8 +4,10 @@ import pandas as pd
 import numpy as np
 
 def slice_finder(df, req, zeno_options, metric_functions, columns):
-    # start testing if the backend will work
+    # setting up config important for the next steps
 
+    minimum_size = int(req.minimumSize)
+    
     output_col = ZenoColumn(
         column_type=ZenoColumnType.OUTPUT,
         name=req.model,
@@ -64,11 +66,13 @@ def slice_finder(df, req, zeno_options, metric_functions, columns):
 
     # slice finder code logic
 
-    slice_finder = Slicefinder(alpha=0.99, k=7)
+    slice_finder = Slicefinder(alpha=0.99, k=minimum_size, max_l=(int)(req.depth))
 
     slice_finder.fit(updated_df, errors)
 
     print(slice_finder.top_slices_)
+
+    print(slice_finder.average_error_)
 
     # X_trans = slice_finder.transform(X)
 
