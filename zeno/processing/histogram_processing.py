@@ -153,9 +153,9 @@ def filter_by_string(df: pd.DataFrame, req: StringFilterRequest) -> List[str]:
             loc_str = r[0 if idx < 20 else idx - 20 : idx + 20]
             if len(r) > 40 + len(req.filter_string):
                 if idx - 20 > 0:
-                    loc_str = loc_str + "..."
-                if idx + 20 < len(r):
                     loc_str = "..." + loc_str
+                if idx + 20 < len(r):
+                    loc_str = loc_str + "..."
             short_ret.append(loc_str)
     else:
         try:
@@ -177,8 +177,8 @@ def filter_by_string(df: pd.DataFrame, req: StringFilterRequest) -> List[str]:
                 loc_str = r[0 if idx < 20 else idx - 20 : idx + 20]
                 if len(r) > 40 + len(req.filter_string):
                     if idx - 20 > 0:
-                        loc_str = loc_str + "..."
-                    if idx + 20 < len(r):
                         loc_str = "..." + loc_str
+                    if idx + 20 < len(r):
+                        loc_str = loc_str + "..."
                 short_ret.append(loc_str)
     return short_ret
