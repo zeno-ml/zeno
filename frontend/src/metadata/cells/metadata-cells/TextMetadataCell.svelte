@@ -70,27 +70,26 @@
 		bind:text={regex}
 		placeholder={"Search"}
 		noResultsText={"No results"}
-		createText={""}
 		hideArrow={true}
 		searchFunction={searchItems}
 		showLoadingIndicator={true}
 		cleanUserText={false}
 		ignoreAccents={false}
-		create={true}
+		localFiltering={false}
 		delay={200} />
 	<div id="options">
 		<div
 			class="option option-left"
 			style:background={selectionType === "string" ? "var(--G5)" : ""}
-			on:click={() => (selectionType = "string")}
-			on:keydown={() => (selectionType = "regex")}>
+			on:keydown={() => ({})}
+			on:click={() => (selectionType = "string")}>
 			abc
 		</div>
 		<div
 			class="option option-right"
 			style:background={selectionType === "regex" ? "var(--G5)" : ""}
-			on:click={() => (selectionType = "regex")}
-			on:keydown={() => (selectionType = "regex")}>
+			on:keydown={() => ({})}
+			on:click={() => (selectionType = "regex")}>
 			.*
 		</div>
 	</div>
