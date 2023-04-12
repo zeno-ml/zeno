@@ -232,6 +232,7 @@
 		min-width: 70px;
 		padding-right: 1.6vw;
 		cursor: pointer;
+		font-weight: 600;
 	}
 	.table-container {
 		max-width: calc(100vw - 450px);

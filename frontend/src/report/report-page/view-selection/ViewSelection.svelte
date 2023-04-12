@@ -115,7 +115,7 @@
 			on:keydown={() => ({})}
 			on:click={updateChart}>
 			<Beeswarm />
-			<h4 class="chart-title">Beeswarm Plot</h4>
+			<h4 class="chart-title">Beeswarm</h4>
 		</div>
 		<div
 			id="radar"
@@ -157,8 +157,9 @@
 		display: flex;
 		flex-direction: column;
 		border: 1px solid var(--G4);
+		background: white;
 		height: 60px;
-		width: 140px;
+		width: 90px;
 		border-radius: 10px;
 		align-items: center;
 		padding: 10px;
@@ -173,5 +174,6 @@
 	}
 	.chart-title {
 		margin: 5px 0px 0px 0px;
+		font-weight: 500;
 	}
 </style>

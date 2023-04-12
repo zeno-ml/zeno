@@ -3,7 +3,7 @@
 	import { Svg } from "@smui/common";
 </script>
 
-<Svg style="width: 140px; height: 80px" viewBox="3 0 45 45" fill="var(--G4)">
+<Svg style="width: 140px; height: 80px" viewBox="3 0 45 45" fill="var(--G3)">
 	<path
 		d="M46.5,2h-41C4.7,2,4,2.7,4,3.5v5C4,9.3,4.7,10,5.5,10h41c0.8,0,1.5-0.7,1.5-1.5v-5C48,2.7,47.3,2,46.5,2z" />
 

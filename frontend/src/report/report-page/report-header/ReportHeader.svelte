@@ -55,5 +55,6 @@
 		align-items: center;
 		cursor: pointer;
 		width: fit-content;
+		margin-bottom: 5px;
 	}
 </style>

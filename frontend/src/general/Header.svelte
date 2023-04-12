@@ -156,6 +156,7 @@
 	.icon {
 		width: 24px;
 		height: 24px;
+		fill: var(--G1);
 	}
 	.icons {
 		margin: 0px auto;

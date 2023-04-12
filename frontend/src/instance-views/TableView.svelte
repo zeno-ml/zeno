@@ -251,6 +251,7 @@
 		margin-bottom: 5px;
 		padding-right: 1.6vw;
 		cursor: pointer;
+		font-weight: 600;
 	}
 	td {
 		padding-right: 15px;

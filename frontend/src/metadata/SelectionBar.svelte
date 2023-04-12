@@ -160,6 +160,7 @@
 		cursor: pointer;
 		width: 24px;
 		height: 24px;
+		fill: var(--G1);
 	}
 	.between {
 		padding-top: 10px;
