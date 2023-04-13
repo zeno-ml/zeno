@@ -26,3 +26,5 @@ class StringFilterRequest(CamelModel):
     column: ZenoColumn
     filter_string: str
     selection_type: str
+    case_match: bool
+    whole_word_match: bool

@@ -8,4 +8,6 @@ export type StringFilterRequest = {
 	column: ZenoColumn;
 	filterString: string;
 	selectionType: string;
+	caseMatch: boolean;
+	wholeWordMatch: boolean;
 };

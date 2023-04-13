@@ -3,6 +3,8 @@
 	import { TrailingIcon } from "@smui/chips";
 	import { Label } from "@smui/common";
 	import AutoComplete from "simple-svelte-autocomplete";
+	import MatchWholeWordIcon from "./static/MatchWholeWordIcon.svelte";
+	import RegexIcon from "./static/RegexIcon.svelte";
 	import {
 		ZenoService,
 		type FilterPredicate,
@@ -13,17 +15,21 @@
 	export let filterPredicates: FilterPredicate[];
 	export let updatePredicates;
 
-	let regex = "";
+	let searchString = "";
 	let selectionType = "string";
-	let valid = true;
+	let regexValid = true;
+	let caseMatch = false;
+	let wholeWordMatch = false;
+	let refresh = 0;
+	let noResultsText = "No results";
 
 	$: {
-		valid = true;
+		regexValid = true;
 		if (selectionType === "regex") {
 			try {
-				new RegExp(regex);
+				new RegExp(searchString);
 			} catch (e) {
-				valid = false;
+				regexValid = false;
 			}
 		}
 	}
@@ -32,21 +38,22 @@
 		filterPredicates.push({
 			column: col,
 			operation: "match",
-			value: regex,
+			value: searchString,
 			join: "",
 		});
 		if (filterPredicates.length > 1) {
 			filterPredicates[filterPredicates.length - 1].join = "|";
 		}
 		updatePredicates(filterPredicates);
-		regex = "";
 	}
 
 	async function searchItems(input: string) {
 		if (selectionType === "regex") {
 			try {
-				new RegExp(regex);
+				new RegExp(input);
+				noResultsText = "No results";
 			} catch (e) {
+				noResultsText = "Invalid Regex!";
 				return [];
 			}
 		}
@@ -56,52 +63,88 @@
 				column: col,
 				filterString: input,
 				selectionType: selectionType,
+				caseMatch: caseMatch,
+				wholeWordMatch: wholeWordMatch,
 			});
-
 			return res;
 		} catch (e) {
 			return [];
 		}
 	}
+
+	function optionClick(e) {
+		if (e.currentTarget instanceof HTMLElement) {
+			let id = e.currentTarget.id;
+			if (id === "caseMatch") {
+				caseMatch = !caseMatch;
+			} else if (id === "wholeWordMatch") {
+				wholeWordMatch = !wholeWordMatch;
+			} else {
+				if (selectionType === "regex") {
+					selectionType = "string";
+					noResultsText = "No results";
+					regexValid = true;
+				} else {
+					selectionType = "regex";
+				}
+			}
+		}
+		refresh++;
+	}
 </script>
 
 <div class="container">
-	<AutoComplete
-		bind:text={regex}
-		placeholder={"Search"}
-		noResultsText={"No results"}
-		hideArrow={true}
-		searchFunction={searchItems}
-		showLoadingIndicator={true}
-		cleanUserText={false}
-		ignoreAccents={false}
-		localFiltering={false}
-		delay={200} />
-	<div id="options">
+	<div class="search-bar">
+		{#key refresh}
+			<AutoComplete
+				id="autoinput"
+				bind:text={searchString}
+				placeholder={"Search"}
+				{noResultsText}
+				hideArrow={true}
+				searchFunction={searchItems}
+				cleanUserText={false}
+				ignoreAccents={false}
+				localFiltering={false}
+				delay={200}>
+				<div slot="no-results" let:noResultsText>
+					<span style:color={regexValid ? "" : "#B71C1C"}>{noResultsText}</span>
+				</div>
+			</AutoComplete>
+		{/key}
 		<div
-			class="option option-left"
-			style:background={selectionType === "string" ? "var(--G5)" : ""}
+			id="caseMatch"
+			class="search-option"
+			style:background={caseMatch ? "var(--P2)" : ""}
 			on:keydown={() => ({})}
-			on:click={() => (selectionType = "string")}>
-			abc
+			on:click={optionClick}>
+			Aa
 		</div>
 		<div
-			class="option option-right"
-			style:background={selectionType === "regex" ? "var(--G5)" : ""}
+			id="wholeWordMatch"
+			class="search-option"
+			style:background={wholeWordMatch ? "var(--P2)" : ""}
 			on:keydown={() => ({})}
-			on:click={() => (selectionType = "regex")}>
-			.*
+			on:click={optionClick}>
+			<svelte:component this={MatchWholeWordIcon} />
+		</div>
+		<div
+			id="typeSelection"
+			class="search-option"
+			style:background={selectionType === "regex" ? "var(--P2)" : ""}
+			on:keydown={() => ({})}
+			on:click={optionClick}>
+			<svelte:component this={RegexIcon} />
 		</div>
 	</div>
-
-	<Button style="margin-left: 10px;" variant="outlined" on:click={setSelection}>
+	<Button
+		style="margin-left: 10px; height: 33.5px"
+		variant="outlined"
+		on:click={setSelection}>
 		<Label>Set</Label>
 	</Button>
-	<p />
 </div>
-{#if !valid}
-	<p style="margin-right: 10px; color: #B71C1C">Invalid regex</p>
-{/if}
+
 <div class="chips">
 	{#each filterPredicates as pred}
 		<div class="meta-chip">
@@ -124,32 +167,27 @@
 </div>
 
 <style>
-	#options {
-		display: flex;
-		flex-direction: row;
-		margin-left: 10px;
-	}
-	.option {
-		padding: 6px 10px;
-		border: 0.5px solid var(--G4);
-		width: fit-content;
-		cursor: pointer;
-	}
-	.option:hover {
-		background: var(--G4);
-	}
-	.option-left {
-		margin-right: -1px;
-		border-radius: 5px 0px 0px 5px;
-		border-right: 1px solid var(--G4);
-	}
-	.option-right {
-		border-radius: 0px 5px 5px 0px;
-	}
 	.container {
 		display: flex;
 		align-items: center;
 		margin-left: 5px;
+	}
+	.search-bar {
+		display: flex;
+		align-items: center;
+		width: 250px;
+		border: 1px solid var(--G4);
+		border-radius: 5px;
+	}
+	.search-option {
+		margin-right: 1px;
+		padding: 2px 2px;
+		border-radius: 5px;
+		width: fit-content;
+		cursor: pointer;
+	}
+	.search-option:hover {
+		background: var(--G5);
 	}
 	.chips {
 		display: flex;
