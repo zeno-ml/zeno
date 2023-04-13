@@ -3,6 +3,7 @@
 	import { TrailingIcon } from "@smui/chips";
 	import { Label } from "@smui/common";
 	import AutoComplete from "simple-svelte-autocomplete";
+	import { tooltip } from "@svelte-plugins/tooltips";
 	import MatchWholeWordIcon from "./static/MatchWholeWordIcon.svelte";
 	import RegexIcon from "./static/RegexIcon.svelte";
 	import {
@@ -22,7 +23,12 @@
 	let wholeWordMatch = false;
 	let refresh = 0;
 	let noResultsText = "No results";
+	let results = [];
+	let showEmptyError = false;
 
+	let blur = function (ev) {
+		ev.target.blur();
+	};
 	$: {
 		regexValid = true;
 		if (selectionType === "regex") {
@@ -35,9 +41,15 @@
 	}
 
 	function setSelection() {
+		if (!searchString || results.length === 0) {
+			showEmptyError = true;
+			return;
+		}
+		showEmptyError = false;
+
 		filterPredicates.push({
 			column: col,
-			operation: "match",
+			operation: selectionType === "regex" ? "match (regex)" : "match",
 			value: searchString,
 			join: "",
 		});
@@ -54,21 +66,23 @@
 				noResultsText = "No results";
 			} catch (e) {
 				noResultsText = "Invalid Regex!";
-				return [];
+				results = [];
+				return results;
 			}
 		}
 
 		try {
-			let res = await ZenoService.filterStringMetadata({
+			results = await ZenoService.filterStringMetadata({
 				column: col,
 				filterString: input,
 				selectionType: selectionType,
 				caseMatch: caseMatch,
 				wholeWordMatch: wholeWordMatch,
 			});
-			return res;
+			return results;
 		} catch (e) {
-			return [];
+			results = [];
+			return results;
 		}
 	}
 
@@ -106,7 +120,8 @@
 				cleanUserText={false}
 				ignoreAccents={false}
 				localFiltering={false}
-				delay={200}>
+				delay={200}
+				onFocus={() => (showEmptyError = false)}>
 				<div slot="no-results" let:noResultsText>
 					<span style:color={regexValid ? "" : "#B71C1C"}>{noResultsText}</span>
 				</div>
@@ -117,7 +132,12 @@
 			class="search-option"
 			style:background={caseMatch ? "var(--P2)" : ""}
 			on:keydown={() => ({})}
-			on:click={optionClick}>
+			on:click={optionClick}
+			use:tooltip={{
+				content: "Match Case",
+				theme: "zeno-tooltip",
+				autoPosition: true,
+			}}>
 			Aa
 		</div>
 		<div
@@ -125,7 +145,12 @@
 			class="search-option"
 			style:background={wholeWordMatch ? "var(--P2)" : ""}
 			on:keydown={() => ({})}
-			on:click={optionClick}>
+			on:click={optionClick}
+			use:tooltip={{
+				content: "Match Whole Word",
+				theme: "zeno-tooltip",
+				autoPosition: true,
+			}}>
 			<svelte:component this={MatchWholeWordIcon} />
 		</div>
 		<div
@@ -133,23 +158,36 @@
 			class="search-option"
 			style:background={selectionType === "regex" ? "var(--P2)" : ""}
 			on:keydown={() => ({})}
-			on:click={optionClick}>
+			on:click={optionClick}
+			use:tooltip={{
+				content: "Use Regular Expression",
+				theme: "zeno-tooltip",
+				autoPosition: true,
+			}}>
 			<svelte:component this={RegexIcon} />
 		</div>
 	</div>
+
 	<Button
 		style="margin-left: 10px; height: 33.5px"
 		variant="outlined"
-		on:click={setSelection}>
+		on:click={setSelection}
+		on:mouseleave={blur}
+		on:focusout={blur}>
 		<Label>Set</Label>
 	</Button>
 </div>
+{#if showEmptyError}
+	<p style="margin-left:10px; color: red;">Error: The ID entered is invalid</p>
+{/if}
 
 <div class="chips">
 	{#each filterPredicates as pred}
 		<div class="meta-chip">
 			<span>
+				{pred.operation === "match (regex)" ? "/" : ""}
 				{pred.value}
+				{pred.operation === "match (regex)" ? "/" : ""}
 			</span>
 			<TrailingIcon
 				class="remove material-icons"
