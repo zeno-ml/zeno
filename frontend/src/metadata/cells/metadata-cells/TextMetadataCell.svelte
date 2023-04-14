@@ -168,7 +168,7 @@
 		</div>
 	</div>
 	<Button
-		style="margin-left: 10px; height: 30px"
+		style="margin-left: 10px; height: 32px"
 		variant="outlined"
 		on:click={setSelection}
 		on:mouseleave={blur}
