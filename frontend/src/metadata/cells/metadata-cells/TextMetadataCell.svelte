@@ -130,7 +130,7 @@
 		<div
 			id="caseMatch"
 			class="search-option"
-			style:background={caseMatch ? "var(--P3)" : ""}
+			style:background={caseMatch ? "var(--P2)" : ""}
 			on:keydown={() => ({})}
 			on:click={optionClick}
 			use:tooltip={{
@@ -143,7 +143,7 @@
 		<div
 			id="wholeWordMatch"
 			class="search-option"
-			style:background={wholeWordMatch ? "var(--P3)" : ""}
+			style:background={wholeWordMatch ? "var(--P2)" : ""}
 			on:keydown={() => ({})}
 			on:click={optionClick}
 			use:tooltip={{
@@ -156,7 +156,7 @@
 		<div
 			id="typeSelection"
 			class="search-option"
-			style:background={selectionType === "regex" ? "var(--P3)" : ""}
+			style:background={selectionType === "regex" ? "var(--P2)" : ""}
 			on:keydown={() => ({})}
 			on:click={optionClick}
 			use:tooltip={{
@@ -213,11 +213,19 @@
 		margin-left: 10px;
 		display: flex;
 		align-items: center;
+		border: 1px solid
+			var(--mdc-outlined-button-outline-color, rgba(0, 0, 0, 0.12));
+		border-radius: var(
+			--mdc-outlined-button-container-shape,
+			var(--mdc-shape-small, 4px)
+		);
 	}
 	.search-option {
 		display: flex;
 		align-items: center;
 		padding: 2px 3px;
+		padding-left: 6px;
+		padding-right: 6px;
 		height: 26px;
 		cursor: pointer;
 	}
