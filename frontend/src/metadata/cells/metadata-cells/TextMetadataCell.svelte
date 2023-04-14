@@ -108,29 +108,29 @@
 </script>
 
 <div class="container">
-	<div class="search-bar">
-		{#key refresh}
-			<AutoComplete
-				id="autoinput"
-				bind:text={searchString}
-				placeholder={"Search"}
-				{noResultsText}
-				hideArrow={true}
-				searchFunction={searchItems}
-				cleanUserText={false}
-				ignoreAccents={false}
-				localFiltering={false}
-				delay={200}
-				onFocus={() => (showEmptyError = false)}>
-				<div slot="no-results" let:noResultsText>
-					<span style:color={regexValid ? "" : "#B71C1C"}>{noResultsText}</span>
-				</div>
-			</AutoComplete>
-		{/key}
+	{#key refresh}
+		<AutoComplete
+			id="autoinput"
+			bind:text={searchString}
+			placeholder={"Search"}
+			{noResultsText}
+			hideArrow={true}
+			searchFunction={searchItems}
+			cleanUserText={false}
+			ignoreAccents={false}
+			localFiltering={false}
+			delay={200}
+			onFocus={() => (showEmptyError = false)}>
+			<div slot="no-results" let:noResultsText>
+				<span style:color={regexValid ? "" : "red"}>{noResultsText}</span>
+			</div>
+		</AutoComplete>
+	{/key}
+	<div class="option-box">
 		<div
 			id="caseMatch"
 			class="search-option"
-			style:background={caseMatch ? "var(--P2)" : ""}
+			style:background={caseMatch ? "var(--P3)" : ""}
 			on:keydown={() => ({})}
 			on:click={optionClick}
 			use:tooltip={{
@@ -143,7 +143,7 @@
 		<div
 			id="wholeWordMatch"
 			class="search-option"
-			style:background={wholeWordMatch ? "var(--P2)" : ""}
+			style:background={wholeWordMatch ? "var(--P3)" : ""}
 			on:keydown={() => ({})}
 			on:click={optionClick}
 			use:tooltip={{
@@ -156,7 +156,7 @@
 		<div
 			id="typeSelection"
 			class="search-option"
-			style:background={selectionType === "regex" ? "var(--P2)" : ""}
+			style:background={selectionType === "regex" ? "var(--P3)" : ""}
 			on:keydown={() => ({})}
 			on:click={optionClick}
 			use:tooltip={{
@@ -167,9 +167,8 @@
 			<svelte:component this={RegexIcon} />
 		</div>
 	</div>
-
 	<Button
-		style="margin-left: 10px; height: 33.5px"
+		style="margin-left: 10px; height: 30px"
 		variant="outlined"
 		on:click={setSelection}
 		on:mouseleave={blur}
@@ -210,22 +209,20 @@
 		align-items: center;
 		margin-left: 5px;
 	}
-	.search-bar {
+	.option-box {
+		margin-left: 10px;
 		display: flex;
 		align-items: center;
-		width: 250px;
-		border: 1px solid var(--G4);
-		border-radius: 5px;
 	}
 	.search-option {
-		margin-right: 1px;
-		padding: 2px 2px;
-		border-radius: 5px;
-		width: fit-content;
+		display: flex;
+		align-items: center;
+		padding: 2px 3px;
+		height: 26px;
 		cursor: pointer;
 	}
 	.search-option:hover {
-		background: var(--G5);
+		background: var(--Y1);
 	}
 	.chips {
 		display: flex;

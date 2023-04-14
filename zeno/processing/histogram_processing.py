@@ -153,7 +153,7 @@ def filter_by_string(df: pd.DataFrame, req: StringFilterRequest) -> List[str]:
 
     # string search
     if type == "string":
-        col = df[str(col_type)]
+        col = df[str(col_type)].dropna().astype(str)
 
         if not case_match:
             col = col.str.lower()
