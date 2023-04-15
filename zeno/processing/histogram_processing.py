@@ -144,32 +144,56 @@ def histogram_metrics(
 
 def filter_by_string(df: pd.DataFrame, req: StringFilterRequest) -> List[str]:
     """Filter the table based on a string filter request."""
-    col = df[str(req.column)].astype(str)
-
     short_ret: List[str] = []
-    if req.selection_type == "string":
-        ret = [i for i in col if req.filter_string in i]
+    type = req.selection_type
+    keyword = req.filter_string
+    col_type = req.column
+    case_match = req.case_match
+    whole_word_match = req.whole_word_match
+
+    # string search
+    if type == "string":
+        col = df[str(col_type)].dropna().astype(str)
+
+        if not case_match:
+            col = col.str.lower()
+            keyword = keyword.lower()
+
+        if not whole_word_match:
+            ret = [i for i in col if keyword in i]
+        else:
+            ret = [i for i in col if keyword == i]
 
         for r in ret[0:5]:
-            idx = r.find(req.filter_string)
-            loc_str = r[idx - 20 : idx + 20]
-            if len(r) > 40 + len(req.filter_string):
+            idx = r.find(keyword)
+            loc_str = r[0 if idx < 20 else idx - 20 : idx + 20]
+            if len(r) > 40 + len(keyword):
                 if idx - 20 > 0:
-                    loc_str = loc_str + "..."
-                if idx + 20 < len(r):
                     loc_str = "..." + loc_str
+                if idx + 20 < len(r):
+                    loc_str = loc_str + "..."
             short_ret.append(loc_str)
+
+    # regex search
     else:
-        ret = col[col.str.contains(req.filter_string, case=False)].head().tolist()
+        flag = 0 if case_match else re.IGNORECASE
+        keyword = f"\\b{keyword}\\b" if whole_word_match else keyword
+        try:
+            query_string = f"{col_type}.str.contains(r'{keyword}', flags=@flag)"
+            ret = df.query(query_string)[str(col_type)].head().tolist()
+        except Exception as e:
+            print("Invalid Regex Error: ", e)
+            return short_ret
+
         for r in ret:
-            idx = re.search(req.filter_string, r)  # type: ignore
+            idx = re.search(keyword, r, flags=flag)  # type: ignore
             if idx is not None:
                 idx = idx.start()  # type: ignore
-                loc_str = r[idx - 20 : idx + 20]
-                if len(r) > 40 + len(req.filter_string):
+                loc_str = r[0 if idx < 20 else idx - 20 : idx + 20]
+                if len(r) > 40 + len(keyword):
                     if idx - 20 > 0:
-                        loc_str = loc_str + "..."
-                    if idx + 20 < len(r):
                         loc_str = "..." + loc_str
+                    if idx + 20 < len(r):
+                        loc_str = loc_str + "..."
                 short_ret.append(loc_str)
     return short_ret

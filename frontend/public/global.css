@@ -19,7 +19,13 @@ body {
 	min-width: 100px;
 	background: none;
 	border-radius: 5px;
-	border: 1px solid var(--G4);
+	border: 1px solid var(--G3);
+	color: var(--G2);
+}
+
+.autocomplete-input:focus {
+	background: white;
+	color: black;
 }
 
 .autocomplete {
