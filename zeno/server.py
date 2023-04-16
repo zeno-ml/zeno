@@ -153,6 +153,9 @@ def get_server(zeno: ZenoBackend):
 
     @api_app.get("/refresh", tags=["zeno"])
     def refresh_data():
+        if not zeno.editable:
+            return
+
         if zeno.params.config_file:
             zeno.params = read_config(zeno.params.config_file)
         zeno.done_running_inference = False
