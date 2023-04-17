@@ -8,6 +8,7 @@
 	import ReportPage from "./report/report-page/ReportPage.svelte";
 	import { selections, status } from "./stores";
 	import { columnHash, getInitialData } from "./util/util";
+	import { OpenAPI } from "./zenoservice";
 
 	const routes = {
 		"/": Explore,
@@ -17,6 +18,9 @@
 		"/report/:id": ReportPage,
 		"*": Explore,
 	};
+
+	OpenAPI.BASE =
+		location.protocol + "//" + location.host + location.pathname + "api";
 
 	status.subscribe((stat) => {
 		let tempSelections = {};
