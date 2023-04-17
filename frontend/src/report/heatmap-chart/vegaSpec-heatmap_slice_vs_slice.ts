@@ -30,7 +30,7 @@ export default function generateSliceVsSliceSpec(selectMetrics): VegaLiteSpec {
 					titlePadding: 10,
 					orient: "top",
 				},
-				sort: "ascending",
+				sort: null,
 			},
 			y: {
 				title: "slices",
@@ -41,7 +41,7 @@ export default function generateSliceVsSliceSpec(selectMetrics): VegaLiteSpec {
 					titleFontSize: 14,
 					titlePadding: 10,
 				},
-				sort: "ascending",
+				sort: null,
 			},
 		},
 		layer: [

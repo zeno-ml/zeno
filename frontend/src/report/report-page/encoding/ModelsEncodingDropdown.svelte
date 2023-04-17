@@ -5,7 +5,7 @@
 	function initialSettings() {
 		// restore all value when fixing dimension with empty options
 		if ($reports[$report].models.length === 0) {
-			$reports[$report].models = $models;
+			$reports[$report].models = [$models[0]];
 		}
 		// prepare options
 		$models.forEach((m) => {

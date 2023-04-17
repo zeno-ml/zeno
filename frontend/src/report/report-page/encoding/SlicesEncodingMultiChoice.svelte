@@ -3,11 +3,18 @@
 	import Svelecte from "svelecte";
 	let options = [];
 	let value = [];
-	$slices.forEach((s, i) => {
-		if ($reports[$report].slices.some((rs) => rs.sliceName === s.sliceName)) {
-			value.push(i);
-		}
+	let index = 0;
+
+	$reports[$report].slices.forEach((s, i) => {
+		value.push(i);
 		options.push({ value: i, label: s.sliceName });
+		index = i;
+	});
+	$slices.forEach((s) => {
+		if (!$reports[$report].slices.find((rs) => rs.sliceName === s.sliceName)) {
+			options.push({ value: index + 1, label: s.sliceName });
+			index += 1;
+		}
 	});
 </script>
 

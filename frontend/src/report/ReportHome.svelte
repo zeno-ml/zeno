@@ -33,7 +33,7 @@
 							yEncoding: "metrics",
 							zEncoding: "models",
 							fixedDimension: "y",
-							secondSlices: [...$slices.values()],
+							secondSlices: [...Array.from($slices.values()).slice(0, 2)],
 						},
 					});
 					console.log(reps);

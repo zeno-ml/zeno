@@ -4,9 +4,9 @@
 	let options = [];
 	let selectSliceName = "";
 	function initialSettings() {
-		// restore all value when fixing dimension with empty options
+		// restore default first value when fixing dimension with empty options
 		if ($reports[$report].slices.length === 0) {
-			$reports[$report].slices = [...$slices.values()];
+			$reports[$report].slices = [...Array.from($slices.values()).slice(0, 1)];
 		}
 		// prepare options
 		$slices.forEach((s) => {

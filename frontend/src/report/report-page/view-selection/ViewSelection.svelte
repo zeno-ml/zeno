@@ -163,7 +163,7 @@
 		border-radius: 10px;
 		align-items: center;
 		padding: 10px;
-		margin: 5px;
+		margin: 2px;
 	}
 	.chart-element:hover {
 		cursor: pointer;

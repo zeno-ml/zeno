@@ -5,7 +5,7 @@
 	function initialSettings() {
 		// restore all value when fixing dimension with empty options
 		if ($reports[$report].metrics.length === 0) {
-			$reports[$report].metrics = [...$metrics.values(), "size"];
+			$reports[$report].metrics = [$metrics[0]];
 		}
 		// prepare options
 		[...$metrics.values(), "size"].forEach((m) => {

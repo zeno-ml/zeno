@@ -3,11 +3,17 @@
 	import Svelecte from "svelecte";
 	let options = [];
 	let value = [];
-	$models.forEach((m, i) => {
-		if ($reports[$report].models.includes(m)) {
-			value.push(i);
-		}
+	let index = 0;
+
+	$reports[$report].models.forEach((m, i) => {
+		value.push(i);
 		options.push({ value: i, label: m });
+		index = i;
+	});
+	$models.forEach((m, i) => {
+		if (!$reports[$report].models.includes(m)) {
+			options.push({ value: index + i + 1, label: m });
+		}
 	});
 </script>
 
