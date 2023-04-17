@@ -14,10 +14,10 @@ Zeno can be used for any data type or task with [modular views](https://zenoml.c
 ### Demos
 
 
-| **Image Classification**  | **Audio Transcription** | **Image Generation** | **Sensor Data Exploration** |
-|:-------------:|:-------------:|:-------------:|:-------------:|
-| CIFAR-10  | Speech Accent Archive | DiffusionDB | MotionSense |
-|[![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://image-example.zenoml.com/)| [![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://audio-example.zenoml.com/) | [![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://zeno-ml-diffusiondb.hf.space/) | [![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://imu-example.zenoml.com/) |
+| **Image Classification**  | **Audio Transcription** | **Image Generation** | **Dataset Chatbot** | **Sensor Classification**
+|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
+| Imagenette  | Speech Accent Archive | DiffusionDB | LangChain + Notion | MotionSense
+|[![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://zeno-ml-imagenette.hf.space/)| [![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://zeno-ml-audio-transcription.hf.space/) | [![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://zeno-ml-diffusiondb.hf.space/) | [![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://zeno-ml-langchain-qa.hf.space/) | [![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://zeno-ml-imu-classification.hf.space)
 
 <br /> 
 
