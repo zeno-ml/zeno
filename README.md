@@ -18,6 +18,7 @@ Zeno can be used for any data type or task with [modular views](https://zenoml.c
 |:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
 | Imagenette  | Speech Accent Archive | DiffusionDB | LangChain + Notion | MotionSense
 |[![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://zeno-ml-imagenette.hf.space/)| [![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://zeno-ml-audio-transcription.hf.space/) | [![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://zeno-ml-diffusiondb.hf.space/) | [![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://zeno-ml-langchain-qa.hf.space/) | [![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://zeno-ml-imu-classification.hf.space)
+| [code](https://huggingface.co/spaces/zeno-ml/imagenette/tree/main) | [code](https://huggingface.co/spaces/zeno-ml/audio-transcription/tree/main) | [code](https://huggingface.co/spaces/zeno-ml/diffusiondb/tree/main) | [code](https://huggingface.co/spaces/zeno-ml/audio-transcription/tree/main) | [code](https://huggingface.co/spaces/zeno-ml/imu-classification/tree/main) |
 
 <br /> 
 
