@@ -3,7 +3,10 @@
 	import Beeswarm from "./chart-icons/BeeswarmIcon.svelte";
 	import BarChart from "./chart-icons/BarChartIcon.svelte";
 	import LineChart from "./chart-icons/LineChartIcon.svelte";
-	import TableView from "./chart-icons/TableViewIcon.svelte";
+	import Table from "./chart-icons/TableIcon.svelte";
+	import Radar from "./chart-icons/RadarChartIcon.svelte";
+	import HeatMap from "./chart-icons/HeatMapIcon.svelte";
+
 	import { ChartType } from "../../../zenoservice";
 
 	const defaultMap = {
@@ -11,25 +14,43 @@
 			type: ChartType.BAR,
 			xEncoding: "slices",
 			yEncoding: "metrics",
-			colorEncoding: "models",
-		},
-		table: {
-			type: ChartType.TABLE,
-			xEncoding: "models",
-			yEncoding: "slices",
-			colorEncoding: "metrics",
+			zEncoding: "models",
+			fixedDimension: "y",
 		},
 		linechart: {
 			type: ChartType.LINE,
 			xEncoding: "slices",
 			yEncoding: "metrics",
-			colorEncoding: "models",
+			zEncoding: "models",
+			fixedDimension: "y",
+		},
+		table: {
+			type: ChartType.TABLE,
+			xEncoding: "models",
+			yEncoding: "slices",
+			zEncoding: "metrics",
+			fixedDimension: "z",
 		},
 		beeswarm: {
 			type: ChartType.BEESWARM,
 			xEncoding: "metrics",
 			yEncoding: "models",
-			colorEncoding: "slices",
+			zEncoding: "slices",
+			fixedDimension: "y",
+		},
+		radar: {
+			type: ChartType.RADAR,
+			xEncoding: "metrics",
+			yEncoding: "slices",
+			zEncoding: "models",
+			fixedDimension: "z",
+		},
+		heatmap: {
+			type: ChartType.HEATMAP,
+			xEncoding: "slices",
+			yEncoding: "models",
+			zEncoding: "metrics",
+			fixedDimension: "z",
 		},
 	};
 
@@ -37,16 +58,16 @@
 
 	function updateChart(e) {
 		if (e.currentTarget instanceof HTMLElement) {
-			let newType = $reports[$report].type;
-			let oldType = defaultMap[e.currentTarget.id].type;
-			if (newType !== oldType) {
+			if ($reports[$report].type !== defaultMap[e.currentTarget.id].type) {
 				currentReport.type = defaultMap[e.currentTarget.id].type;
 				currentReport.parameters.xEncoding =
 					defaultMap[e.currentTarget.id].xEncoding;
 				currentReport.parameters.yEncoding =
 					defaultMap[e.currentTarget.id].yEncoding;
-				currentReport.parameters.colorEncoding =
-					defaultMap[e.currentTarget.id].colorEncoding;
+				currentReport.parameters.zEncoding =
+					defaultMap[e.currentTarget.id].zEncoding;
+				currentReport.parameters.fixedDimension =
+					defaultMap[e.currentTarget.id].fixedDimension;
 				$reports[$report] = currentReport;
 			}
 		}
@@ -83,8 +104,8 @@
 				: ''}"
 			on:keydown={() => ({})}
 			on:click={updateChart}>
-			<TableView />
-			<h4 class="chart-title">Table View</h4>
+			<Table />
+			<h4 class="chart-title">Table</h4>
 		</div>
 		<div
 			id="beeswarm"
@@ -94,7 +115,27 @@
 			on:keydown={() => ({})}
 			on:click={updateChart}>
 			<Beeswarm />
-			<h4 class="chart-title">Beeswarm Plot</h4>
+			<h4 class="chart-title">Beeswarm</h4>
+		</div>
+		<div
+			id="radar"
+			class="chart-element {$reports[$report].type === ChartType.RADAR
+				? 'selected'
+				: ''}"
+			on:keydown={() => ({})}
+			on:click={updateChart}>
+			<Radar />
+			<h4 class="chart-title">Radar Chart</h4>
+		</div>
+		<div
+			id="heatmap"
+			class="chart-element {$reports[$report].type === ChartType.HEATMAP
+				? 'selected'
+				: ''}"
+			on:keydown={() => ({})}
+			on:click={updateChart}>
+			<HeatMap />
+			<h4 class="chart-title">Heat Map</h4>
 		</div>
 	</div>
 </div>
@@ -116,8 +157,9 @@
 		display: flex;
 		flex-direction: column;
 		border: 1px solid var(--G4);
-		height: 80px;
-		width: 140px;
+		background: white;
+		height: 60px;
+		width: 90px;
 		border-radius: 10px;
 		align-items: center;
 		padding: 10px;
@@ -132,5 +174,6 @@
 	}
 	.chart-title {
 		margin: 5px 0px 0px 0px;
+		font-weight: 500;
 	}
 </style>

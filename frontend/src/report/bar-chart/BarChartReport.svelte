@@ -3,10 +3,10 @@
 	import { getMetricsForSlices } from "../../api/slice";
 	import { report, reports } from "../../stores";
 	import type { MetricKey } from "../../zenoservice";
-	import generateBarSpec from "./vegaSpec-bar";
+	import generateSpec from "./vegaSpec-bar";
 
 	$: currentReport = $reports[$report];
-	$: selectMetrics = currentReport.metrics;
+	$: selectMetrics = currentReport.metrics[0];
 	$: parameters = currentReport.parameters;
 
 	let chartEntries = [];
@@ -23,7 +23,7 @@
 				});
 				metricKeys.push({
 					sli: slice,
-					metric: rep.metrics,
+					metric: selectMetrics,
 					model: mod,
 				});
 			});
@@ -46,7 +46,7 @@
 				})),
 			}}
 			<VegaLite
-				spec={generateBarSpec(parameters, selectMetrics)}
+				spec={generateSpec(parameters, selectMetrics)}
 				data={chartData}
 				options={{ tooltip: true, width: 1000, height: 500 }} />
 		{/await}

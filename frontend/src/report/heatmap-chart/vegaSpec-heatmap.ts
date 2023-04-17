@@ -3,12 +3,7 @@ import type { VegaLiteSpec } from "svelte-vega";
 export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 	const x_encode = parameters.xEncoding;
 	const y_encode = parameters.yEncoding;
-	const z_encode = parameters.zEncoding;
 	const paramMap = {
-		metrics: {
-			type: "quantitative",
-			title: selectMetrics,
-		},
 		models: {
 			type: "nominal",
 			title: "models",
@@ -20,50 +15,45 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 	};
 	const spec = {
 		$schema: "https://vega.github.io/schema/vega-lite/v5.json",
-		description: "A simple line chart with embedded data.",
-		width: {
-			step: 150,
-		},
-		padding: { top: 20 },
+		autosize: "fit",
 		data: {
 			name: "table",
 		},
+		transform: [
+			{
+				joinaggregate: [
+					{
+						op: "average",
+						field: selectMetrics !== "size" ? "metrics" : "size",
+						as: "mean_metrics",
+					},
+				],
+			},
+		],
 		encoding: {
 			x: {
 				title: paramMap[x_encode].title,
 				field: x_encode,
 				type: paramMap[x_encode].type,
 				axis: {
-					labelAngle: 45,
+					labelAngle: -20,
 					labelFontSize: 14,
 					titleFontSize: 14,
+					orient: "top",
 					titlePadding: 10,
 				},
-				sort: null,
 			},
 			y: {
 				title: paramMap[y_encode].title,
-				field: selectMetrics !== "size" ? y_encode : "size",
+				field: y_encode,
 				type: paramMap[y_encode].type,
 				axis: {
 					labelFontSize: 14,
 					titleFontSize: 14,
-					titlePadding: 20,
+					titlePadding: 10,
 				},
-				sort: null,
 			},
-			color: {
-				condition: {
-					param: "hover",
-					field: z_encode,
-					scale: { scheme: "category20" },
-					sort: null,
-				},
-				value: "grey",
-			},
-			opacity: { condition: { param: "hover", value: 1 }, value: 0.1 },
 		},
-
 		layer: [
 			{
 				params: [
@@ -71,14 +61,13 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 						name: "hover",
 						select: {
 							type: "point",
-							fields: [z_encode],
+							field: selectMetrics !== "size" ? "metrics" : "size",
 							on: "mouseover",
 						},
 					},
 				],
 				mark: {
-					type: "circle",
-					size: 100,
+					type: "rect",
 					tooltip: {
 						signal:
 							"{'slice_name': datum.slices,'size': datum.size, " +
@@ -86,41 +75,53 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 							": datum.metrics, 'model': datum.models}",
 					},
 				},
-			},
-			{
-				params: [
-					{
-						name: "hover_line",
-						select: {
-							type: "point",
-							fields: [z_encode],
-							on: "mouseover",
-						},
+				encoding: {
+					color: {
+						title: selectMetrics,
+						field: selectMetrics !== "size" ? "metrics" : "size",
+						type: "quantitative",
+						scale: { scheme: "purples" },
 					},
-				],
-				mark: {
-					type: "line",
+					fillOpacity: {
+						condition: [
+							{
+								param: "hover",
+								empty: false,
+								value: 1,
+							},
+						],
+						value: 0.7,
+					},
 				},
 			},
 			{
-				transform: [{ filter: { param: "hover", empty: false } }],
-				mark: {
-					type: "text",
-					style: "label",
-				},
+				mark: { type: "text", fontSize: 12 },
 				encoding: {
 					text: {
-						field: selectMetrics !== "size" ? y_encode : "size",
-						type: paramMap[y_encode].type,
+						field: selectMetrics !== "size" ? "metrics" : "size",
+						type: "quantitative",
 					},
-					color: { value: "black" },
+					color: {
+						condition: {
+							test:
+								selectMetrics !== "size"
+									? "datum.metrics < datum.mean_metrics"
+									: "datum.size < datum.mean_metrics",
+							value: "black",
+						},
+						value: "white",
+					},
 				},
 			},
 		],
 		config: {
-			style: { label: { dy: -13, dx: -2 } },
+			rect: { cornerRadius: 5 },
+			axis: { ticks: false, labelPadding: 15, domain: false },
+			view: {
+				strokeWidth: 0,
+				step: 70,
+			},
 		},
 	};
-
 	return spec as VegaLiteSpec;
 }

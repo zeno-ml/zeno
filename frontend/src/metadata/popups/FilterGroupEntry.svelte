@@ -49,7 +49,7 @@
 			</IconButton>
 		{/if}
 	</div>
-	<div class="{index === -1 ? 'no-bg' : 'bg'} main ">
+	<div class="{index === -1 ? 'no-bg' : 'bg'} main">
 		<ul use:autoAnimate>
 			{#each predicateGroup.predicates as p, i}
 				{#if !("predicates" in p)}

@@ -1,12 +1,9 @@
 import type { VegaLiteSpec } from "svelte-vega";
 
-export default function generateBarSpec(
-	parameters,
-	selectMetrics
-): VegaLiteSpec {
+export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 	const x_encode = parameters.xEncoding;
 	const y_encode = parameters.yEncoding;
-	const color_encode = parameters.colorEncoding;
+	const z_encode = parameters.zEncoding;
 	const paramMap = {
 		metrics: {
 			type: "quantitative",
@@ -46,22 +43,22 @@ export default function generateBarSpec(
 			},
 			y: {
 				title: paramMap[y_encode].title,
-				field: y_encode,
+				field: selectMetrics !== "size" ? y_encode : "size",
 				type: paramMap[y_encode].type,
 				axis: {
 					labelFontSize: 14,
 					titleFontSize: 14,
-					titlePadding: 10,
+					titlePadding: 20,
 				},
 				sort: null,
 			},
 			xOffset: {
-				field: color_encode,
+				field: z_encode,
 				sort: null,
 			},
 			fillOpacity: {
-				condition: { param: "highlight", value: 1 },
-				value: 0.2,
+				condition: { param: "highlight", value: 1, empty: false },
+				value: 0.8,
 			},
 		},
 		layer: [
@@ -69,22 +66,27 @@ export default function generateBarSpec(
 				params: [
 					{
 						name: "highlight",
-						select: { type: "point", on: "mouseover" },
+						select: {
+							type: "point",
+							field: y_encode,
+							on: "mouseover",
+						},
 					},
 				],
 				mark: {
 					type: "bar",
 					tooltip: {
 						signal:
-							"{'slice_name': datum.slices,'size': datum.size, 'metric': datum.metrics, 'model': datum.models}",
+							"{'slice_name': datum.slices,'size': datum.size, " +
+							(selectMetrics !== "size" ? selectMetrics : "accuracy") +
+							": datum.metrics, 'model': datum.models}",
 					},
-					cursor: "pointer",
 				},
 				encoding: {
 					color: {
-						field: color_encode,
+						field: z_encode,
 						sort: null,
-						scale: { scheme: "purples" },
+						scale: { scheme: "category20" },
 					},
 				},
 			},
@@ -94,7 +96,10 @@ export default function generateBarSpec(
 					style: "label",
 				},
 				encoding: {
-					text: { field: y_encode, type: paramMap[y_encode].type },
+					text: {
+						field: selectMetrics !== "size" ? y_encode : "size",
+						type: paramMap[y_encode].type,
+					},
 				},
 			},
 		],

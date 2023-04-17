@@ -6,36 +6,109 @@
 	import generateSpec from "./vegaSpec-beeswarm";
 
 	$: currentReport = $reports[$report];
-	$: selectMetrics = currentReport.metrics;
+	$: parameters = currentReport.parameters;
+	$: fixed_dimension = currentReport.parameters.fixedDimension;
 
-	let modelEntries = [];
+	let yEntries = [];
 	let chartEntries = [];
 
 	function getMetKeys(rep) {
 		const metricKeys: MetricKey[] = [];
 		let res_index = 0;
-
-		modelEntries = [];
-		rep.models.forEach((mod) => {
-			chartEntries = [];
-			rep.slices.forEach((slice) => {
-				chartEntries.push({
-					slice: slice.sliceName,
-					metric: rep.metrics,
-					index: res_index,
+		yEntries = [];
+		if (fixed_dimension === "x") {
+			if (parameters.yEncoding === "models") {
+				rep.models.forEach((mod) => {
+					chartEntries = [];
+					rep.slices.forEach((slice) => {
+						chartEntries.push({
+							slice: slice.sliceName,
+							metric: rep.metrics[0],
+							index: res_index,
+						});
+						metricKeys.push({
+							sli: slice,
+							metric: rep.metrics[0],
+							model: mod,
+						});
+						res_index++;
+					});
+					yEntries.push({
+						yName: mod,
+						chartData: chartEntries,
+						xLabel: rep.metrics[0],
+					});
 				});
-				metricKeys.push({
-					sli: slice,
-					metric: rep.metrics,
-					model: mod,
+			} else if (parameters.yEncoding === "slices") {
+				rep.slices.forEach((slice) => {
+					chartEntries = [];
+					rep.models.forEach((mod) => {
+						chartEntries.push({
+							model: mod,
+							metric: rep.metrics[0],
+							index: res_index,
+						});
+						metricKeys.push({
+							sli: slice,
+							metric: rep.metrics[0],
+							model: mod,
+						});
+						res_index++;
+					});
+					yEntries.push({
+						yName: slice.sliceName,
+						chartData: chartEntries,
+						xLabel: rep.metrics[0],
+					});
 				});
-				res_index++;
-			});
-			modelEntries.push({
-				modelName: mod,
-				chartData: chartEntries,
-			});
-		});
+			}
+		} else if (fixed_dimension === "y") {
+			if (parameters.yEncoding === "models") {
+				rep.metrics.forEach((metric) => {
+					chartEntries = [];
+					rep.slices.forEach((slice) => {
+						chartEntries.push({
+							slice: slice.sliceName,
+							metric: rep.metrics[0],
+							index: res_index,
+						});
+						metricKeys.push({
+							sli: slice,
+							metric: metric,
+							model: rep.models[0],
+						});
+						res_index++;
+					});
+					yEntries.push({
+						yName: rep.models[0],
+						chartData: chartEntries,
+						xLabel: metric,
+					});
+				});
+			} else if (parameters.yEncoding === "slices") {
+				rep.metrics.forEach((metric) => {
+					chartEntries = [];
+					rep.models.forEach((mod) => {
+						chartEntries.push({
+							model: mod,
+							metric: rep.metrics[0],
+							index: res_index,
+						});
+						metricKeys.push({
+							sli: rep.slices[0],
+							metric: metric,
+							model: mod,
+						});
+						res_index++;
+					});
+					yEntries.push({
+						yName: rep.slices[0].sliceName,
+						chartData: chartEntries,
+						xLabel: metric,
+					});
+				});
+			}
+		}
 		return metricKeys;
 	}
 
@@ -45,18 +118,18 @@
 <div class="main">
 	<div class="model-result">
 		{#await modelResults then res}
-			{#each modelEntries as { modelName, chartData }}
+			{#each yEntries as { yName, chartData, xLabel }}
 				{@const data = {
 					table: chartData.map((r) => ({
-						sli_name: r.slice,
-						model: modelName,
+						slices: parameters.yEncoding === "slices" ? yName : r.slice,
+						models: parameters.yEncoding === "models" ? yName : r.model,
 						size: res[r.index].size,
-						metric: res[r.index].metric.toFixed(2),
+						metrics: res[r.index].metric.toFixed(2),
 					})),
 				}}
-				<h4>{modelName}</h4>
+				<h4>{yName}</h4>
 				<Vega
-					spec={generateSpec(selectMetrics)}
+					spec={generateSpec(parameters, xLabel)}
 					{data}
 					options={{
 						tooltip: true,

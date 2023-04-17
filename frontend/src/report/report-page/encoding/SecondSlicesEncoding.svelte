@@ -4,7 +4,11 @@
 	let options = [];
 	let value = [];
 	$slices.forEach((s, i) => {
-		if ($reports[$report].slices.some((rs) => rs.sliceName === s.sliceName)) {
+		if (
+			$reports[$report].parameters.secondSlices.some(
+				(rs) => rs.sliceName === s.sliceName
+			)
+		) {
 			value.push(i);
 		}
 		options.push({ value: i, label: s.sliceName });
@@ -14,7 +18,7 @@
 <div class="parameters">
 	<h4 class="select-label">&nbsp;</h4>
 	<Svelecte
-		style="width: 260px; flex:none;"
+		style="width: 280px; flex:none;"
 		{value}
 		{options}
 		multiple={true}
@@ -23,7 +27,7 @@
 			e.detail.forEach((ed) => {
 				s.push($slices.get(ed.label));
 			});
-			$reports[$report].slices = s;
+			$reports[$report].parameters.secondSlices = s;
 		}}
 		placeholder="Select Slices..." />
 </div>

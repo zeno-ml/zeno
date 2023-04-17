@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { mdiPlus } from "@mdi/js";
 	import { Svg } from "@smui/common";
-	import IconButton, { Icon } from "@smui/icon-button";
-	import { reports, slices, models } from "../stores";
+	import { Icon } from "@smui/icon-button";
+	import { reports, slices, models, metrics } from "../stores";
 	import { updateTab } from "../util/util";
 	import ReportHomeBlock from "./ReportHomeBlock.svelte";
 	import { ChartType } from "../zenoservice";
@@ -10,7 +10,7 @@
 
 <div id="reports-container">
 	<div class="header">
-		<h4>Reports</h4>
+		<h3>Reports</h3>
 	</div>
 	<div class="reports">
 		{#each $reports as rep, i}
@@ -23,26 +23,28 @@
 				reports.update((reps) => {
 					updateTab("report/" + reps.length);
 					reps.push({
-						name: "new report",
+						name: "New Report",
 						type: ChartType.BAR,
 						slices: [...$slices.values()],
 						models: [...$models.values()],
-						metrics: "accuracy",
+						metrics: [...$metrics.values(), "size"],
 						parameters: {
 							xEncoding: "slices",
 							yEncoding: "metrics",
-							colorEncoding: "models",
+							zEncoding: "models",
+							fixedDimension: "y",
+							secondSlices: [...$slices.values()],
 						},
 					});
 					return reps;
 				});
 			}}
 			on:keydown={() => ({})}>
-			<IconButton>
-				<Icon component={Svg} viewBox="0 0 24 24">
+			<div class="add-button">
+				<Icon style="outline:none" component={Svg} viewBox="0 0 24 24">
 					<path fill="black" d={mdiPlus} />
 				</Icon>
-			</IconButton>
+			</div>
 		</div>
 	</div>
 </div>
@@ -75,10 +77,15 @@
 		padding-right: 10px;
 		overflow: visible;
 		cursor: pointer;
-		width: 150px;
-		height: 150px;
+		width: 225px;
+		height: 100px;
 	}
 	.add-reports:hover {
 		background: #f0ebf4;
+	}
+	.add-button {
+		width: 24px;
+		height: 24px;
+		margin: 14px;
 	}
 </style>

@@ -4,7 +4,7 @@
 ![Github Actions CI tests](https://github.com/zeno-ml/zeno/actions/workflows/test.yml/badge.svg)
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/) 
 [![DOI](https://img.shields.io/badge/doi-10.1145%2F3544548.3581268-red)](https://cabreraalex.com/paper/zeno)
-[![Join the chat at https://gitter.im/zeno-ml-eval/community](https://badges.gitter.im/zeno-ml-eval/community.svg)](https://gitter.im/zeno-ml-eval/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Discord](https://img.shields.io/discord/1086004954872950834)](https://discord.gg/km62pDKAkE)
 
 Zeno is a general-purpose framework for evaluating machine learning models.
 It combines a **Python API** with an **interactive UI** to allow users to discover, explore, and analyze the performance of their models across diverse use cases.
@@ -14,10 +14,11 @@ Zeno can be used for any data type or task with [modular views](https://zenoml.c
 ### Demos
 
 
-| **Image Classification**  | **Audio Transcription** | **Image Generation** | **Sensor Data Exploration** |
-|:-------------:|:-------------:|:-------------:|:-------------:|
-| CIFAR-10  | Speech Accent Archive | DiffusionDB | MotionSense |
-|[![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://image-example.zenoml.com/)| [![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://audio-example.zenoml.com/) | [![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://zeno-ml-diffusiondb.hf.space/) | [![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://imu-example.zenoml.com/) |
+| **Image Classification**  | **Audio Transcription** | **Image Generation** | **Dataset Chatbot** | **Sensor Classification**
+|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
+| Imagenette  | Speech Accent Archive | DiffusionDB | LangChain + Notion | MotionSense
+|[![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://zeno-ml-imagenette.hf.space/)| [![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://zeno-ml-audio-transcription.hf.space/) | [![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://zeno-ml-diffusiondb.hf.space/) | [![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://zeno-ml-langchain-qa.hf.space/) | [![Try with Zeno](https://zenoml.com/img/zeno-badge.svg)](https://zeno-ml-imu-classification.hf.space)
+| [code](https://huggingface.co/spaces/zeno-ml/imagenette/tree/main) | [code](https://huggingface.co/spaces/zeno-ml/audio-transcription/tree/main) | [code](https://huggingface.co/spaces/zeno-ml/diffusiondb/tree/main) | [code](https://huggingface.co/spaces/zeno-ml/audio-transcription/tree/main) | [code](https://huggingface.co/spaces/zeno-ml/imu-classification/tree/main) |
 
 <br /> 
 
@@ -86,4 +87,4 @@ Please reference our [CHI'23 paper](https://arxiv.org/pdf/2302.04732.pdf)
 
 ## Community
 
-Chat with us on our [Gitter channel](https://gitter.im/zeno-ml-eval/community) or leave an issue on this repository if you run into any issues or have a request!
+Chat with us on our [Discord channel](https://discord.gg/km62pDKAkE) or leave an issue on this repository if you run into any issues or have a request!

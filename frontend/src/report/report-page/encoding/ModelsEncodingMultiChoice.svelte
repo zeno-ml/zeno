@@ -14,7 +14,7 @@
 <div class="parameters">
 	<h4 class="select-label">&nbsp;</h4>
 	<Svelecte
-		style="width: 260px; flex:none;"
+		style="width: 280px; flex:none;"
 		{value}
 		{options}
 		multiple={true}

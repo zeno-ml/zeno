@@ -29,7 +29,13 @@
 		{:else}
 			{chip[0].column.name}
 			{"=="}
-			{chip.map((c) => c.value).join(" | ")}
+			{chip
+				.map((c) => {
+					return c.operation === "match (regex)"
+						? "/" + c.value + "/"
+						: c.value;
+				})
+				.join(" | ")}
 		{/if}
 	</span>
 	<TrailingIcon

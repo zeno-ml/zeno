@@ -220,7 +220,9 @@
 				{#if result}
 					{#await result then res}
 						<span style:margin-right="10px">
-							{res[0].metric !== undefined ? res[0].metric.toFixed(2) : ""}
+							{res[0].metric !== undefined && res[0].metric !== null
+								? res[0].metric.toFixed(2)
+								: ""}
 						</span>
 						<span id="size">
 							({res[0].size.toLocaleString()})

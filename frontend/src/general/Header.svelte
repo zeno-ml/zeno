@@ -62,7 +62,7 @@
 					theme: "zeno-tooltip",
 				}}>
 				<div class="icon">
-					<Icon component={Svg} viewBox="0 0 24 24">
+					<Icon style="outline:none" component={Svg} viewBox="0 0 24 24">
 						<path
 							fill={$tab === "explore" ? "#6a1b9a" : "black"}
 							d={mdiCompassOutline} />
@@ -79,7 +79,7 @@
 					theme: "zeno-tooltip",
 				}}>
 				<div class="icon">
-					<Icon component={Svg} viewBox="0 0 24 24">
+					<Icon style="outline:none" component={Svg} viewBox="0 0 24 24">
 						<path
 							fill={$tab === "report" ? "#6a1b9a" : "black"}
 							d={mdiChartBoxOutline} />
@@ -156,6 +156,7 @@
 	.icon {
 		width: 24px;
 		height: 24px;
+		fill: var(--G1);
 	}
 	.icons {
 		margin: 0px auto;
