@@ -21,7 +21,6 @@
 		style="width: 280px; flex:none;"
 		value={$reports[$report].metrics[0]}
 		{options}
-		searchable={false}
 		on:change={(e) => {
 			if (e.detail.label !== $reports[$report].metrics[0]) {
 				let tmpMetrics = $reports[$report].metrics;

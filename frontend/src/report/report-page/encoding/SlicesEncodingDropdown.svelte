@@ -23,7 +23,6 @@
 		style="width: 280px; flex:none;"
 		value={selectSliceName}
 		{options}
-		searchable={false}
 		on:change={(e) => {
 			if (e.detail.label !== selectSliceName) {
 				let tmpSlices = $reports[$report].slices;
