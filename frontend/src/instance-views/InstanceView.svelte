@@ -71,7 +71,7 @@
 	);
 
 	// change selected to table if a tag is edited
-	$ : selected = $editId !== undefined ? "table" : selected;
+	$: selected = $editId !== undefined ? "table" : selected;
 </script>
 
 <div class="heading">
@@ -82,7 +82,7 @@
 		bind:viewOptions />
 </div>
 {#if $editId !== undefined}
-	<TableView {currentResult} {viewFunction} {viewOptions} />	
+	<TableView {currentResult} {viewFunction} {viewOptions} />
 {:else}
 	{#if selected === "list" && viewOptions !== undefined}
 		<ListView {currentResult} {viewFunction} {viewOptions} />

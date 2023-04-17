@@ -88,7 +88,7 @@ export const tagIds: Writable<FilterIds> = writable({ ids: [] });
 // tag name to edit
 export const editId: Writable<string> = writable(undefined);
 
-export const editedIds: Writable<any[]> = writable([]);
+export const editedIds: Writable<string[] | number[]> = writable([]);
 
 // The ids directly selected by the user.
 export const selectionIds: Writable<FilterIds> = writable({ ids: [] });

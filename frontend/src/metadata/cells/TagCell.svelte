@@ -209,7 +209,7 @@
 							on:click={(e) => {
 								e.stopPropagation();
 								showOptions = false;
-								editId.set(tag.tagName)
+								editId.set(tag.tagName);
 							}}>
 							<Icon component={Svg} viewBox="0 0 24 24">
 								<path fill="black" d={mdiPencilOutline} />

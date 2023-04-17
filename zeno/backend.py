@@ -124,13 +124,13 @@ class ZenoBackend(object):
 
     def __setup_dataframe(self, id_column: str, data_column: str, label_column: str):
         if data_column != "":
-            if(data_column != id_column):
+            if data_column != id_column:
                 self.data_column = ZenoColumn(
                     column_type=ZenoColumnType.METADATA,
                     metadata_type=getMetadataType(self.df[data_column]),
                     name=data_column,
                 )
-            else: #make sure id and data column are different
+            else:  # make sure id and data column are different
                 self.df["data"] = self.df[data_column]
                 self.data_column = ZenoColumn(
                     column_type=ZenoColumnType.METADATA,
@@ -157,7 +157,7 @@ class ZenoBackend(object):
                 name="",
             )
 
-        if id_column != "": 
+        if id_column != "":
             self.id_column = ZenoColumn(
                 column_type=ZenoColumnType.METADATA,
                 metadata_type=MetadataType.OTHER,
@@ -429,7 +429,7 @@ class ZenoBackend(object):
                     self.df, metric_key.sli.filter_predicates, filter_ids
                 )
             except pd.errors.UndefinedVariableError:
-                return_metrics.append(SliceMetric(metric=None, size=0))
+                return_metrics.append(GroupMetric(metric=None, size=0))
                 continue
 
             if metric_key.metric == "" or self.label_column.name == "":

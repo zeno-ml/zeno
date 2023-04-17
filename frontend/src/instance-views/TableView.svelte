@@ -32,12 +32,11 @@
 	let viewDivs = {};
 	let columnHeader: ZenoColumn[] = [];
 	let body: HTMLElement;
-	let currentTagIds = []; 
+	let currentTagIds = [];
 
 	let currentPage = 0;
 	let end = 0;
 	let lastPage = 0;
-	let dummy = false;
 
 	let sampleOptions = [5, 15, 30, 60, 100, $settings.samples].sort(
 		(a, b) => a - b
@@ -55,9 +54,12 @@
 
 	if ($editId !== undefined) {
 		currentTagIds = $tags.get($editId).selectionIds.ids;
-	} 
+	}
 
-	$ : {currentTagIds; editedIds.set(currentTagIds);}
+	$: {
+		currentTagIds;
+		editedIds.set(currentTagIds);
+	}
 
 	// update on page, metadata selection, slice selection, or state change.
 	$: {
@@ -65,8 +67,7 @@
 		$selectionPredicates;
 		$model;
 		$sort;
-		$editId,
-		currentPage;
+		$editId, currentPage;
 		updateTable();
 	}
 
@@ -180,7 +181,12 @@
 				{#each table as tableContent, i (tableContent[idHash])}
 					<tr>
 						{#if $editId !== undefined}
-							<td><Checkbox bind:group={currentTagIds} value={String(tableContent[columnHash($settings.idColumn)])}/></td>
+							<td
+								><Checkbox
+									bind:group={currentTagIds}
+									value={String(
+										tableContent[columnHash($settings.idColumn)]
+									)} /></td>
 						{/if}
 						{#if viewFunction}
 							<td>

@@ -29,8 +29,7 @@
 	export let optionsFunction;
 	export let viewOptions;
 
-	let CHOICES; 
-		
+	let CHOICES;
 
 	let optionsDiv: HTMLDivElement;
 	let mounted = false;
@@ -40,11 +39,12 @@
 		optionsFunction(optionsDiv, (opts) => (viewOptions = opts));
 	}
 
-	$ : CHOICES = $editId === undefined 
-		? ($settings.view !== ""
-			? ["list", "table", "comparison", "projection"]
-			: ["table", "projection"]) 
-		: ["table"];
+	$: CHOICES =
+		$editId === undefined
+			? $settings.view !== ""
+				? ["list", "table", "comparison", "projection"]
+				: ["table", "projection"]
+			: ["table"];
 
 	$: filters = Object.entries($selections.metadata)
 		.filter(([, value]) => value.predicates.length > 0)
@@ -164,19 +164,19 @@
 					{/each}
 				</Group>
 			{:else}
-			
-				<div class="inline" style="margin-right: 10px"> 
-					<p style="margin: auto; margin-right: 10px">Editing</p> 
+				<div class="inline" style="margin-right: 10px">
+					<p style="margin: auto; margin-right: 10px">Editing</p>
 					<div class="meta-chip">{$editId}</div>
 				</div>
-				<Button style="background-color: var(--N1)"
-				on:click={() => {
-					createNewTag($editId, {ids: $editedIds}).then(() => {
+				<Button
+					style="background-color: var(--N1)"
+					on:click={() => {
+						createNewTag($editId, { ids: $editedIds }).then(() => {
 							tags.update((t) => {
 								t.set($editId, {
 									tagName: $editId,
 									folder: "",
-									selectionIds: {ids: $editedIds},
+									selectionIds: { ids: $editedIds },
 								});
 								return t;
 							});
@@ -194,10 +194,8 @@
 							s.forEach((id) => finalArray.push(id));
 							tagIds.set({ ids: finalArray });
 						});
-				}}>Done</Button>
-			
+					}}>Done</Button>
 			{/if}
-
 		</div>
 	</div>
 </div>
