@@ -4,28 +4,30 @@
 	import { onMount } from "svelte";
 	import {
 		metric,
+		editId,
+		editedIds,
 		selectionIds,
 		selectionPredicates,
 		selections,
 		settings,
 		status,
 		tagIds,
+		tags,
 	} from "../stores";
 	import type { FilterPredicate } from "../zenoservice";
 	import IdsChip from "./chips/IdsChip.svelte";
 	import MetadataChip from "./chips/MetadataChip.svelte";
 	import SliceChip from "./chips/SliceChip.svelte";
 	import TagChip from "./chips/TagChip.svelte";
+	import { createNewTag } from "../api/tag";
 
 	export let currentResult;
 	export let selected = "list";
 	export let optionsFunction;
 	export let viewOptions;
 
-	let CHOICES =
-		$settings.view !== ""
-			? ["list", "table", "comparison", "projection"]
-			: ["table", "projection"];
+	let CHOICES; 
+		
 
 	let optionsDiv: HTMLDivElement;
 	let mounted = false;
@@ -34,6 +36,12 @@
 	$: if (mounted && optionsDiv && optionsFunction) {
 		optionsFunction(optionsDiv, (opts) => (viewOptions = opts));
 	}
+
+	$ : CHOICES = $editId === undefined 
+		? ($settings.view !== ""
+			? ["list", "table", "comparison", "projection"]
+			: ["table", "projection"]) 
+		: ["table"];
 
 	$: filters = Object.entries($selections.metadata)
 		.filter(([, value]) => value.predicates.length > 0)
@@ -120,19 +128,55 @@
 			{/await}
 		</div>
 		<div class="inline">
-			{#if optionsFunction}
-				<div style:margin-right="20px" bind:this={optionsDiv} />
+			{#if $editId === undefined}
+				{#if optionsFunction}
+					<div style:margin-right="20px" bind:this={optionsDiv} />
+				{/if}
+				<Group>
+					{#each CHOICES as choice}
+						<Button
+							style="background-color: {selected === choice
+								? 'var(--G5)'
+								: 'var(--G6)'}"
+							variant="outlined"
+							on:click={() => (selected = choice)}>{choice}</Button>
+					{/each}
+				</Group>
+			{:else}
+			
+				<div class="inline" style="margin-right: 10px"> 
+					<p style="margin: auto; margin-right: 10px">Editing</p> 
+					<div class="meta-chip">{$editId}</div>
+				</div>
+				<Button style="background-color: var(--N1)"
+				on:click={() => {
+					createNewTag($editId, {ids: $editedIds}).then(() => {
+							tags.update((t) => {
+								t.set($editId, {
+									tagName: $editId,
+									folder: "",
+									selectionIds: {ids: $editedIds},
+								});
+								return t;
+							});
+							editId.set(undefined);
+							editedIds.set([]);
+
+							// update tag IDs if a selected tag was edited
+							let s = new Set();
+							//this is to catch for the case when you have intersections between tags
+							//must come after selections is updated
+							$selections.tags.forEach((tag) =>
+								$tags.get(tag).selectionIds.ids.forEach((id) => s.add(id))
+							);
+							let finalArray = [];
+							s.forEach((id) => finalArray.push(id));
+							tagIds.set({ ids: finalArray });
+						});
+				}}>Done</Button>
+			
 			{/if}
-			<Group>
-				{#each CHOICES as choice}
-					<Button
-						style="background-color: {selected === choice
-							? 'var(--G5)'
-							: 'var(--G6'}"
-						variant="outlined"
-						on:click={() => (selected = choice)}>{choice}</Button>
-				{/each}
-			</Group>
+
 		</div>
 	</div>
 </div>
@@ -197,5 +241,16 @@
 	.inline {
 		display: flex;
 		align-items: center;
+	}
+	.meta-chip {
+		padding: 5px 10px;
+		background: var(--N2);
+		margin-left: 5px;
+		margin-right: 5px;
+		margin-top: 2px;
+		margin-bottom: 2px;
+		border-radius: 4px;
+		width: fit-content;
+		margin: auto;
 	}
 </style>

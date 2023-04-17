@@ -7,6 +7,7 @@
 	import ScatterView from "./scatter-view/ScatterView.svelte";
 	import { getMetricsForSlicesAndTags } from "../api/slice";
 	import {
+		editId,
 		selectionIds,
 		selectionPredicates,
 		tagIds,
@@ -68,6 +69,9 @@
 		$tagIds,
 		$selectionIds
 	);
+
+	// change selected to table if a tag is edited
+	$ : selected = $editId !== undefined ? "table" : selected;
 </script>
 
 <div class="heading">
@@ -77,18 +81,21 @@
 		{currentResult}
 		bind:viewOptions />
 </div>
-
-{#if selected === "list" && viewOptions !== undefined}
-	<ListView {currentResult} {viewFunction} {viewOptions} />
-{/if}
-{#if selected === "comparison" && viewOptions !== undefined}
-	<ComparisonView {currentResult} {viewFunction} {viewOptions} />
-{/if}
-{#if selected === "table"}
-	<TableView {currentResult} {viewFunction} {viewOptions} />
-{/if}
-{#if selected === "projection"}
-	<ScatterView {viewFunction} {viewOptions} />
+{#if $editId !== undefined}
+	<TableView {currentResult} {viewFunction} {viewOptions} />	
+{:else}
+	{#if selected === "list" && viewOptions !== undefined}
+		<ListView {currentResult} {viewFunction} {viewOptions} />
+	{/if}
+	{#if selected === "comparison" && viewOptions !== undefined}
+		<ComparisonView {currentResult} {viewFunction} {viewOptions} />
+	{/if}
+	{#if selected === "table"}
+		<TableView {currentResult} {viewFunction} {viewOptions} />
+	{/if}
+	{#if selected === "projection"}
+		<ScatterView {viewFunction} {viewOptions} />
+	{/if}
 {/if}
 
 <style>

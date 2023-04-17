@@ -85,6 +85,11 @@ export const reports: Writable<Report[]> = reportWritable();
 // The tag ids selected by the user.
 export const tagIds: Writable<FilterIds> = writable({ ids: [] });
 
+// tag name to edit
+export const editId: Writable<string> = writable(undefined);
+
+export const editedIds: Writable<any[]> = writable([]);
+
 // The ids directly selected by the user.
 export const selectionIds: Writable<FilterIds> = writable({ ids: [] });
 // Slices is an array of slice names,

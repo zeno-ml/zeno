@@ -3,6 +3,7 @@
 	import IconButton, { Icon } from "@smui/icon-button";
 	import { Svg } from "@smui/common";
 	import {
+		editId,
 		status,
 		selections,
 		tags,
@@ -208,9 +209,7 @@
 							on:click={(e) => {
 								e.stopPropagation();
 								showOptions = false;
-								// ADD EDIT TAG STUFF HERE
-								// sliceToEdit.set(slice);
-								// showNewSlice.set(true);
+								editId.set(tag.tagName)
 							}}>
 							<Icon component={Svg} viewBox="0 0 24 24">
 								<path fill="black" d={mdiPencilOutline} />

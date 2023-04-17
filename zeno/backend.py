@@ -111,11 +111,19 @@ class ZenoBackend(object):
 
     def __setup_dataframe(self, id_column: str, data_column: str, label_column: str):
         if data_column != "":
-            self.data_column = ZenoColumn(
-                column_type=ZenoColumnType.METADATA,
-                metadata_type=getMetadataType(self.df[data_column]),
-                name=data_column,
-            )
+            if(data_column != id_column):
+                self.data_column = ZenoColumn(
+                    column_type=ZenoColumnType.METADATA,
+                    metadata_type=getMetadataType(self.df[data_column]),
+                    name=data_column,
+                )
+            else: #make sure id and data column are different
+                self.df["data"] = self.df[data_column]
+                self.data_column = ZenoColumn(
+                    column_type=ZenoColumnType.METADATA,
+                    metadata_type=getMetadataType(self.df["data"]),
+                    name="data",
+                )
         else:
             self.data_column = ZenoColumn(
                 column_type=ZenoColumnType.METADATA,
@@ -136,7 +144,7 @@ class ZenoBackend(object):
                 name="",
             )
 
-        if id_column != "":
+        if id_column != "": 
             self.id_column = ZenoColumn(
                 column_type=ZenoColumnType.METADATA,
                 metadata_type=MetadataType.OTHER,
@@ -561,13 +569,11 @@ class ZenoBackend(object):
         if req.sort[0]:
             filt_df = filt_df.sort_values(str(req.sort[0]), ascending=req.sort[1])
         filt_df = filt_df.iloc[req.slice_range[0] : req.slice_range[1]].copy()
-
         if self.data_prefix != "":
             # Add data prefix to data column depending on type of data_path.
             filt_df.loc[:, str(self.data_column)] = (
                 self.data_prefix + filt_df[str(self.data_column)]
             )
-
         return filt_df[[str(col) for col in req.columns]].to_json(orient="records")
 
     def single_inference(self, *args):

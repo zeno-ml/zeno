@@ -379,6 +379,17 @@
 	<div id="tag-header" class="inline" style:margin-top="10px">
 		<div class="inline">
 			<h4>Tags</h4>
+			<div
+				class="information-tooltip"
+				use:tooltip={{
+					content: "Tags are named combinations of instances of data.",
+					position: "right",
+					theme: "zeno-tooltip",
+				}}>
+				<Icon component={Svg} viewBox="-6 -6 36 36">
+					<path d={mdiInformationOutline} />
+				</Icon>
+			</div>
 		</div>
 		<div class="inline">
 			<div>
