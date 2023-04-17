@@ -102,7 +102,11 @@
 			<Vega
 				spec={generateSpec}
 				data={chartData}
-				options={{ tooltip: true, width: 800, height: 700 }} />
+				options={{
+					actions: { source: false, editor: false, compiled: false },
+					width: 800,
+					height: 700,
+				}} />
 		{/await}
 	</div>
 </div>

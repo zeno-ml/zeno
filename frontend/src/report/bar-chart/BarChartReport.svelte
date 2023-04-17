@@ -48,7 +48,11 @@
 			<VegaLite
 				spec={generateSpec(parameters, selectMetrics)}
 				data={chartData}
-				options={{ tooltip: true, width: 1000, height: 500 }} />
+				options={{
+					actions: { source: false, editor: false, compiled: false },
+					width: 1000,
+					height: 500,
+				}} />
 		{/await}
 	</div>
 </div>
