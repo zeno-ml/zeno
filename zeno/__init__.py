@@ -10,7 +10,7 @@ from zeno.api import (
     ZenoOptions,
     ZenoParameters,
 )
-from zeno.runner import zeno
+from zeno.runner import zeno, get_server
 
 __all__ = [
     "DistillReturn",
@@ -19,6 +19,7 @@ __all__ = [
     "ModelReturn",
     "ZenoOptions",
     "ZenoParameters",
+    "get_server",
     "distill",
     "inference",
     "metric",

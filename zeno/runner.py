@@ -59,6 +59,7 @@ def command_line():
 def run_zeno(params: ZenoParameters):
     zeno = ZenoBackend(params)
     app = get_server(zeno)
+
     zeno.start_processing()
 
     print(
