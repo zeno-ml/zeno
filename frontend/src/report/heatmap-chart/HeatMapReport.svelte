@@ -93,6 +93,9 @@
 					data={chartData}
 					options={{
 						actions: { source: false, editor: false, compiled: false },
+						scaleFactor: {
+							png: 3,
+						},
 					}} />
 			{/await}
 		{:else}
@@ -112,6 +115,9 @@
 					data={chartData}
 					options={{
 						actions: { source: false, editor: false, compiled: false },
+						scaleFactor: {
+							png: 3,
+						},
 					}} />
 			{/await}
 		{/if}
