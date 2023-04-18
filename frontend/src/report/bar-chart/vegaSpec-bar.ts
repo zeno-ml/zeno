@@ -21,7 +21,7 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 	const spec = {
 		$schema: "https://vega.github.io/schema/vega-lite/v5.json",
 		description: "A simple bar chart with embedded data.",
-		autosize: "fit",
+		autosize: "pad",
 		width: {
 			step: 30,
 		},

@@ -21,11 +21,11 @@
 			on:click={(e) => {
 				e.stopPropagation();
 				reports.update((reps) => {
-					updateTab("report/" + reps.length);
+					updateTab("report/" + reps.length + "/new");
 					reps.push({
 						name: "New Report",
 						type: ChartType.BAR,
-						slices: [...$slices.values()],
+						slices: [...Array.from($slices.values()).slice(0, 2)],
 						models: [...$models.values()],
 						metrics: [...$metrics.values(), "size"],
 						parameters: {
@@ -33,7 +33,7 @@
 							yEncoding: "metrics",
 							zEncoding: "models",
 							fixedDimension: "y",
-							secondSlices: [...$slices.values()],
+							secondSlices: [...Array.from($slices.values()).slice(0, 2)],
 						},
 					});
 					return reps;

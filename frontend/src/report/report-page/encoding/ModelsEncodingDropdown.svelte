@@ -5,7 +5,7 @@
 	function initialSettings() {
 		// restore all value when fixing dimension with empty options
 		if ($reports[$report].models.length === 0) {
-			$reports[$report].models = $models;
+			$reports[$report].models = [$models[0]];
 		}
 		// prepare options
 		$models.forEach((m) => {
@@ -21,7 +21,6 @@
 		style="width: 280px; flex:none;"
 		value={$reports[$report].models[0]}
 		{options}
-		searchable={false}
 		on:change={(e) => {
 			if (e.detail.label !== $reports[$report].models[0]) {
 				let tmpModels = $reports[$report].models;

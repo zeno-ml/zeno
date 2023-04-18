@@ -42,6 +42,7 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 					orient: "top",
 					titlePadding: 10,
 				},
+				sort: null,
 			},
 			y: {
 				title: paramMap[y_encode].title,
@@ -52,6 +53,7 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 					titleFontSize: 14,
 					titlePadding: 10,
 				},
+				sort: null,
 			},
 		},
 		layer: [
