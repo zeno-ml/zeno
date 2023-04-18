@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from "svelte";
 	import { ready, report, reports } from "../../stores";
 	import BeeswarmChartReport from "../beeswarm-chart/BeeswarmChartReport.svelte";
 	import EditHeader from "./report-header/EditHeader.svelte";
@@ -13,7 +14,8 @@
 	import { ChartType } from "../../zenoservice";
 
 	export let params;
-	let isReportEdit = true;
+
+	let isReportEdit = false;
 
 	const ChartMap = {
 		[ChartType.BAR]: BarChartReport,
@@ -23,6 +25,11 @@
 		[ChartType.RADAR]: RadarChartReport,
 		[ChartType.HEATMAP]: HeatMapReport,
 	};
+	onMount(() => {
+		if (window.location.href.split("/").slice(-2, -1)[0] === "new") {
+			isReportEdit = true;
+		}
+	});
 
 	$: report.set(params.id);
 	$: currentReport = $reports[$report];

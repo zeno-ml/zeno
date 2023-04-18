@@ -21,7 +21,7 @@
 			on:click={(e) => {
 				e.stopPropagation();
 				reports.update((reps) => {
-					updateTab("report/" + reps.length);
+					updateTab("report/" + reps.length + "/new");
 					reps.push({
 						name: "New Report",
 						type: ChartType.BAR,
@@ -36,7 +36,6 @@
 							secondSlices: [...Array.from($slices.values()).slice(0, 2)],
 						},
 					});
-					console.log(reps);
 					return reps;
 				});
 			}}

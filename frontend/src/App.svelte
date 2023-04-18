@@ -15,6 +15,7 @@
 		"/explore/": Explore,
 		"/report/": Report,
 		"/report/:id": ReportPage,
+		"/report/:id/new": ReportPage,
 		"*": Explore,
 	};
 
