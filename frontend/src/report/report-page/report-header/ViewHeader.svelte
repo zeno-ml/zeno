@@ -3,14 +3,17 @@
 	import { report, reports } from "../../../stores";
 	import { updateTab } from "../../../util/util";
 	import { Svg } from "@smui/common";
-	import Textfield from "@smui/textfield";
+	import Button, { Label } from "@smui/button";
+	export let isReportEdit;
 
 	let ishover = false;
-
+	let blur = function (ev) {
+		ev.target.blur();
+	};
 	$: currentReport = $reports[$report];
 </script>
 
-<div class="header-flex">
+<div class="header">
 	<div
 		class="return-link"
 		on:keydown={() => ({})}
@@ -35,26 +38,43 @@
 			Back to Report Home
 		</h4>
 	</div>
-	<div class="report-name">
-		<Textfield
-			style="width: -webkit-fill-available"
-			variant="outlined"
-			bind:value={currentReport.name}
-			label="Report Name" />
+	<div class="title-flex">
+		<h2 style="margin:0px 20px 0px 0px; color: var(--G2)">
+			{currentReport.name}
+		</h2>
+		<Button
+			style="width: 24px; height: 24px;background-color:var(--G5)"
+			on:mouseleave={blur}
+			on:focusout={blur}
+			on:click={() => (isReportEdit = !isReportEdit)}>
+			<Label>{isReportEdit ? "View" : "Edit"}</Label>
+		</Button>
 	</div>
 </div>
 
 <style>
-	.header-flex {
+	.header {
+		width: calc(50vw);
 		display: flex;
 		flex-direction: column;
+		width: 353px;
+		min-width: 353px;
+		max-width: 353px;
+		padding-top: 10px;
+		padding-bottom: 0px;
+		padding-left: 15px;
+		padding-right: 15px;
 	}
+
 	.return-link {
 		display: flex;
-		flex-direction: row;
 		align-items: center;
 		cursor: pointer;
 		width: fit-content;
 		margin-bottom: 5px;
+	}
+	.title-flex {
+		display: flex;
+		align-items: center;
 	}
 </style>
