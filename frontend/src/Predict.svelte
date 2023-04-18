@@ -3,7 +3,11 @@
 <main>
 	<iframe
 		title="Gradio instance prediction UI"
-		src={window.location.origin + "/api/gradio"} />
+		src={location.protocol +
+			"//" +
+			location.host +
+			location.pathname +
+			"api/gradio"} />
 </main>
 
 <style>
