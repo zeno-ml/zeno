@@ -110,7 +110,9 @@
 				(c.model === "" || c.model === $model) &&
 				(c.columnType === ZenoColumnType.METADATA ||
 					c.columnType === ZenoColumnType.PREDISTILL ||
-					c.columnType === ZenoColumnType.POSTDISTILL)
+					c.columnType === ZenoColumnType.POSTDISTILL) &&
+				$settings.dataColumn.name !== c.name &&
+				$settings.labelColumn.name !== c.name
 		);
 
 		table.forEach((_, i) => {
@@ -244,7 +246,6 @@
 		margin-bottom: 20px;
 		margin-right: 20px;
 		top: 2px;
-		left: 0;
 		position: sticky;
 		background-color: var(--G6);
 		min-width: 70px;
@@ -252,6 +253,7 @@
 		padding-right: 1.6vw;
 		cursor: pointer;
 		font-weight: 600;
+		z-index: 10;
 	}
 	td {
 		padding-right: 15px;

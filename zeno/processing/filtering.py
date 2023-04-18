@@ -30,13 +30,17 @@ def get_filter_string(filter: FilterPredicateGroup) -> str:
             if f.operation == "match":
                 filt = (
                     filt
-                    + "{} (`{}`.str.contains('{}', na=False, regex=False))".format(
+                    + "{} (`{}`.astype('string').str.contains('{}', na=False,".format(
                         f.join, f.column, f.value
                     )
+                    + "regex=False, case=False))"
                 )
             elif f.operation == "match (regex)":
-                filt = filt + "{} (`{}`.str.contains('{}', na=False))".format(
-                    f.join, f.column, f.value
+                filt = (
+                    filt
+                    + "{} (`{}`.astype('string').str.contains('{}', na=False))".format(
+                        f.join, f.column, f.value
+                    )
                 )
             else:
                 try:
@@ -67,7 +71,7 @@ def filter_table(
 
     final_filter = get_filter_string(filter_predicates)
     if len(final_filter) > 0:
-        return df.query(final_filter)
+        return df.query(final_filter, engine="python")
     else:
         return df
 
