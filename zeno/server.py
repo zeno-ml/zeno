@@ -7,7 +7,7 @@ import asyncio
 import os
 from typing import Dict, List, Union
 
-import gradio as gr  # type: ignore
+import gradio as gr
 from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
@@ -36,7 +36,7 @@ from zeno.processing.histogram_processing import (
 )
 from zeno.processing.projection_processing import (
     check_embed_exists,
-    project_into_2D,
+    project_into_2d,
     projection_colors,
 )
 from zeno.util import read_config
@@ -116,7 +116,7 @@ def get_server(zeno: ZenoBackend):
             calculate_histogram_metrics=zeno.calculate_histogram_metrics,
             inference_view=True if zeno.inference_function else False,
             samples=zeno.samples,
-            totalSize=zeno.df.shape[0],
+            total_size=zeno.df.shape[0],
         )
 
     @api_app.get("/initialize", response_model=ZenoVariables, tags=["zeno"])
@@ -205,8 +205,8 @@ def get_server(zeno: ZenoBackend):
         return check_embed_exists(zeno.df, model)
 
     @api_app.post("/embed-project", tags=["zeno"], response_model=Points2D)
-    def project_embed_into_2D(req: EmbedProject2DRequest):
-        return project_into_2D(zeno.df, zeno.id_column, req.model, req.column)
+    def project_embed_into_2d(req: EmbedProject2DRequest):
+        return project_into_2d(zeno.df, zeno.id_column, req.model, req.column)
 
     @api_app.post("/colors-project", tags=["zeno"], response_model=PointsColors)
     def get_projection_colors(req: ColorsProjectRequest):

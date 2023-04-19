@@ -11,14 +11,12 @@ lint:
 	@echo "==> 👕 Linting"
 	@poetry check
 	@poetry run black zeno/
-	@poetry run usort format zeno/
-	@poetry run flake8 zeno --statistics
+	@poetry run ruff check zeno/
 	@cd frontend && npm run lint
 
 .PHONY: typecheck
 typecheck:
 	@echo "==> ✅ Type checks"
-	@poetry run mypy -p zeno 
 	@poetry run pyright zeno 
 	@cd frontend && npm run check
 
@@ -43,7 +41,6 @@ build:
 clean:
 	@rm -rf dist
 	@rm -rf ./.zeno_cache
-	@find . -type d -name '.mypy_cache' -exec rm -rf {} +
 	@find . -type d -name '__pycache__' -exec rm -rf {} +
 	@find . -type d -name '*pytest_cache*' -exec rm -rf {} +
 	@find . -type f -name "*.py[co]" -exec rm -rf {} +

@@ -28,7 +28,7 @@ def read_pickle(file_name: str, cache_path: str, default):
         return default
 
 
-def getMetadataType(col: pd.Series) -> MetadataType:
+def get_metadata_type(col: pd.Series) -> MetadataType:
     try:
         datetime.datetime.fromisoformat(str(col[0]))
         return MetadataType.DATETIME
@@ -80,7 +80,7 @@ def getMetadataType(col: pd.Series) -> MetadataType:
 def load_series(df, col_name, save_path):
     try:
         series = pd.read_pickle(save_path)
-        col_name.metadata_type = getMetadataType(series)
+        col_name.metadata_type = get_metadata_type(series)
         df.loc[:, str(col_name)] = series
     except FileNotFoundError:
         df.loc[:, str(col_name)] = pd.Series([pd.NA] * df.shape[0], index=df.index)
@@ -228,7 +228,7 @@ def read_functions(fns: Union[List[Callable], str]) -> List[Callable]:
 
 def is_notebook() -> bool:
     try:
-        from IPython import get_ipython  # type: ignore
+        from IPython import get_ipython
 
         shell = get_ipython().__class__.__name__
         if shell == "ZMQInteractiveShell":

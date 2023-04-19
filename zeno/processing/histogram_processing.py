@@ -38,7 +38,7 @@ def histogram_buckets(
                 ret_hist.append(HistogramBucket(bucket=k))
             res.append(ret_hist)
         elif col.metadata_type == MetadataType.CONTINUOUS:
-            ret_hist: List[HistogramBucket] = []  # type: ignore
+            ret_hist: List[HistogramBucket] = []
             df_col = df_col.fillna(0)
             bins = np.histogram_bin_edges(df_col, bins=num_bins)
             for i in range(len(bins) - 1):
@@ -186,9 +186,9 @@ def filter_by_string(df: pd.DataFrame, req: StringFilterRequest) -> List[str]:
             return short_ret
 
         for r in ret:
-            idx = re.search(keyword, r, flags=flag)  # type: ignore
+            idx = re.search(keyword, r, flags=flag)
             if idx is not None:
-                idx = idx.start()  # type: ignore
+                idx = idx.start()
                 loc_str = r[0 if idx < 20 else idx - 20 : idx + 20]
                 if len(r) > 40 + len(keyword):
                     if idx - 20 > 0:

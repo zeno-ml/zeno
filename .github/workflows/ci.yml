@@ -1,4 +1,4 @@
-name: tests
+name: ci
 
 on:
   push:
@@ -7,7 +7,40 @@ on:
   pull_request:
 
 jobs:
-  test:
+  lint-ts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install modules
+        run: cd frontend && npm i
+      - name: TS linting
+        run: npm run lint
+
+  format-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: psf/black@stable
+        with:
+          options: "--check --verbose"
+          src: "zeno/"
+
+  lint-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: jpetrucciani/ruff-check@main
+        with:
+          path: "zeno/"
+
+  typecheck-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: jakebailey/pyright-action@v1
+        with:
+          working-directory: "zeno/"
+
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -54,9 +87,3 @@ jobs:
         run: |
           cd frontend/
           npm run build
-
-      - name: Lint
-        run: make lint
-
-      - name: Check types
-        run: make typecheck

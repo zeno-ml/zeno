@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from zeno import distill, zeno, ZenoOptions
+from zeno import ZenoOptions, distill, zeno
 
 
 @distill
@@ -11,7 +11,7 @@ def add_one(df, ops: ZenoOptions):
 
 @pytest.fixture()
 def zeno_client():
-    df = pd.DataFrame(
+    test_df = pd.DataFrame(
         [
             {"id": "gp", "label": "gas pump", "path": "gas_pump.JPEG"},
             {"id": "par", "label": "parachute", "path": "parachute.JPEG"},
@@ -22,7 +22,7 @@ def zeno_client():
     zen = zeno(
         {
             "view": "image-classification",
-            "metadata": df,
+            "metadata": test_df,
             "data_path": "./imgs/",
             "data_column": "path",
             "id_column": "id",
