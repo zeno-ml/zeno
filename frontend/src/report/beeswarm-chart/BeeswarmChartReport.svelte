@@ -135,6 +135,9 @@
 						actions: { source: false, editor: false, compiled: false },
 						width: 800,
 						height: 100,
+						scaleFactor: {
+							png: 3,
+						},
 					}} />
 			{/each}
 		{/await}

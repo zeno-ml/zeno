@@ -106,6 +106,9 @@
 					actions: { source: false, editor: false, compiled: false },
 					width: 800,
 					height: 700,
+					scaleFactor: {
+						png: 3,
+					},
 				}} />
 		{/await}
 	</div>
