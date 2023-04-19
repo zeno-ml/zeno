@@ -409,7 +409,6 @@ class ZenoBackend(object):
 
         return_metrics: List[SliceMetric] = []
         for metric_key in requests:
-
             # If we refresh, might not have columns for a slice.
             try:
                 filt_df = filter_table(
@@ -435,7 +434,6 @@ class ZenoBackend(object):
             return None
 
         if model is not None:
-
             output_col = ZenoColumn(
                 column_type=ZenoColumnType.OUTPUT,
                 name=model,
