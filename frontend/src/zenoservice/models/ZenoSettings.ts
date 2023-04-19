@@ -11,6 +11,5 @@ export type ZenoSettings = {
 	dataColumn: ZenoColumn;
 	samples: number;
 	calculateHistogramMetrics: boolean;
-	inferenceView: boolean;
 	totalSize: number;
 };
