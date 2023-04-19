@@ -3,10 +3,10 @@ from typing import List
 import numpy as np
 import pandas as pd
 from cachetools import cached
-from sklearn import preprocessing  # type: ignore
+from sklearn import preprocessing
 
 from zeno.classes.base import MetadataType, ZenoColumn, ZenoColumnType
-from zeno.classes.projection import Points2D, PointsColors  # type: ignore
+from zeno.classes.projection import Points2D, PointsColors
 
 
 def check_embed_exists(df: pd.DataFrame, model: str):
@@ -15,7 +15,7 @@ def check_embed_exists(df: pd.DataFrame, model: str):
     """
     embed_column = ZenoColumn(name=model, column_type=ZenoColumnType.EMBEDDING)
     exists = str(embed_column) in df.columns
-    return exists and not df[str(embed_column)].isnull().any()
+    return exists and not df[str(embed_column)].isna().any()
 
 
 @cached(cache={}, key=lambda _, model: model)
@@ -30,16 +30,16 @@ def run_tsne(df: pd.DataFrame, model: str) -> np.ndarray:
         np.ndarray: 2D projection of the embedding.
     """
 
-    from openTSNE import TSNE  # type: ignore
+    from openTSNE import TSNE
 
     embed_col = ZenoColumn(column_type=ZenoColumnType.EMBEDDING, name=model)
 
     embed = df[str(embed_col)].to_numpy()
     embed = np.stack(embed, axis=0)  # type: ignore
 
-    ALL_AVAILABLE_PROCESSORS = -1
-    DEFAULT_ITERATIONS = 400
-    tsne = TSNE(n_jobs=ALL_AVAILABLE_PROCESSORS, n_iter=DEFAULT_ITERATIONS)
+    all_available_processors = -1
+    default_iterations = 400
+    tsne = TSNE(n_jobs=all_available_processors, n_iter=default_iterations)
     projection = tsne.fit(embed)
 
     return projection
@@ -85,7 +85,7 @@ def projection_colors(df: pd.DataFrame, column: ZenoColumn) -> PointsColors:
     )
 
 
-def project_into_2D(
+def project_into_2d(
     df: pd.DataFrame, id_column: ZenoColumn, model: str, column: ZenoColumn
 ) -> Points2D:
     """If the embedding exists, will use t-SNE to project into 2D."""

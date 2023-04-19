@@ -18,31 +18,17 @@ Zeno is packaged as a PyPI package `zenoml` that contains the Python backend fil
 After cloning the repository:
 
 - Install [`Poetry`](https://python-poetry.org/docs/master/#installing-with-the-official-installer), [`nodejs`](https://nodejs.org/en/download/) and use [`VSCode`](https://code.visualstudio.com/) as your editor.
-- `poetry config virtualenvs.in-project true`
 - `make install`
 
+We suggest you install the following VSCode extensions:
+
+- [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+- [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+- [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
+- [Ruff](https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff)
+- [Svelte for VSCode](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode)
+
 You should now be able to run `poetry run zeno`
-
-## Examples
-
-The various standard examples for Zeno are in the [examples GitHub repo](https://github.com/zeno-ml/examples).
-
-First, clone that repository into this one: `git clone https://github.com/zeno-ml/examples`
-
-Then, to set up the CIFAR example:
-
-- `cd examples/`
-- `mkdir data; cd data; git clone https://github.com/YoongiKim/CIFAR-10-images`
-- `source ./.venv/bin/activate` (Windows OS command: `.\.venv\Scripts\activate`)
-- `pip install Pillow torch torchvision`
-- `poetry run zeno ./examples/cifar/tests/zeno.toml`
-  - For debugging, you can use the "Run and Debug" sidebar in VSCode (a play button with a bug icon), and run the `zenocifar` configuration.
-
-In a different terminal window, run the following command to serve the frontend code:
-
-- `cd frontend; npm run dev`
-
-You should now be able to see a live version of zeno on `localhost:8000` in your browser.
 
 **Windows OS Note**
 
@@ -52,17 +38,43 @@ You should now be able to see a live version of zeno on `localhost:8000` in your
 **MacOS Note**
 
 If you are using MacBook Pro/Macbook Air with M1 chip and is experiencing error logs while running the backend server
+
 ```
 objc[29381]: +[NSMutableString initialize] may have been in progress in another thread when fork() was called.
 ```
-, please add 
+
+, please add
+
 ```
 export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 ```
-at the end of the ~/.zprofile file, and do 
+
+at the end of the ~/.zprofile file, and do
+
 ```
 source ~/.zprofile
 ```
+
+## Examples
+
+The various standard examples for Zeno are in the [examples GitHub repo](https://github.com/zeno-ml/examples).
+
+First, clone that repository into this one: `git clone https://github.com/zeno-ml/examples`
+
+Then, to set up the CIFAR example:
+
+- `source ./.venv/bin/activate` (Windows OS command: `.\.venv\Scripts\activate`)
+- `cd examples/cifar`
+- `mkdir data; cd data; git clone https://github.com/YoongiKim/CIFAR-10-images`
+- `pip install Pillow torch torchvision`
+- `poetry run zeno ./examples/cifar/tests/zeno.toml`
+  - For debugging, you can use the "Run and Debug" sidebar in VSCode (a play button with a bug icon), and run the `zenocifar` configuration.
+
+In a different terminal window, run the following command to serve the frontend code:
+
+- `cd frontend; npm run dev`
+
+You should now be able to see a live version of zeno on `localhost:8000` in your browser.
 
 ## Contributing
 
@@ -77,6 +89,9 @@ For commit messages and pull request titles, use the [Conventional Commits Stand
 ## Making a release
 
 - Run `poetry version patch` to update version number in `pyproject.toml`
+
+Then either run `make publish` or the following steps:
+
 - Run `git commit -am "chore: bump version to $(poetry version -s)"` to commit the version bump and add a tag with `git tag "v$(poetry version -s)"`.
 - Run `make build` to build the frontend and backend w/ Poetry.
 - Test the library by installing it locally with `pip install dist/zenoml-$(poetry version -s).tar.gz`.

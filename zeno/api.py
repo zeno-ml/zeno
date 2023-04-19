@@ -3,7 +3,7 @@
 import functools
 from typing import Any, Callable, Dict, List, Union
 
-from gradio.interface import IOComponent  # type: ignore
+from gradio.interface import IOComponent
 from numpy.typing import NDArray
 from pandas import DataFrame, Series
 from pydantic import BaseModel
