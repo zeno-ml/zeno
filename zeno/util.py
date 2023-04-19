@@ -204,7 +204,6 @@ def load_function(test_file: Path) -> List[Callable[..., Any]]:
                 hasattr(func, "predict_function")
                 or hasattr(func, "distill_function")
                 or hasattr(func, "metric_function")
-                or hasattr(func, "inference_function")
             ):
                 functions.append(func)
     return functions

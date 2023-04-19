@@ -5,13 +5,12 @@
 		mdiCompassOutline,
 		mdiGithub,
 		mdiHomeOutline,
-		mdiPlusCircleOutline,
 	} from "@mdi/js";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import { tooltip } from "@svelte-plugins/tooltips";
 	import { location } from "svelte-spa-router";
-	import { settings, tab } from "../stores";
+	import { tab } from "../stores";
 	import { updateTab } from "../util/util";
 
 	location.subscribe((d) => {
@@ -33,25 +32,6 @@
 				alt="Square spiral logo next to 'Zeno'" />
 		</a>
 		<div id="tabs">
-			{#if $settings && $settings.inferenceView}
-				<div
-					class="item {$tab === 'predict' ? 'selected' : ''}"
-					on:keydown={() => ({})}
-					on:click={() => updateTab("predict")}
-					use:tooltip={{
-						content: "Test your model with your own inputs.",
-						position: "right",
-						theme: "zeno-tooltip",
-					}}>
-					<div class="icon">
-						<Icon component={Svg} viewBox="0 0 24 24">
-							<path
-								fill={$tab === "predict" ? "#6a1b9a" : "black"}
-								d={mdiPlusCircleOutline} />
-						</Icon>
-					</div>
-				</div>
-			{/if}
 			<div
 				class="item {$tab === 'explore' ? 'selected' : ''}"
 				on:keydown={() => ({})}

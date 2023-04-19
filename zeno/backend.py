@@ -17,7 +17,6 @@ from pathos.multiprocessing import ProcessingPool as Pool
 
 from zeno.api import (
     DistillReturn,
-    InferenceReturn,
     MetricReturn,
     ModelReturn,
     ZenoOptions,
@@ -81,9 +80,6 @@ class ZenoBackend(object):
         ] = {}
         self.predict_function: Optional[
             Callable[[str], Callable[[DataFrame, ZenoOptions], ModelReturn]]
-        ] = None
-        self.inference_function: Optional[
-            Callable[[ZenoOptions], InferenceReturn]
         ] = None
         self.gradio_input_columns: List[str] = []
 
@@ -193,12 +189,6 @@ class ZenoBackend(object):
                     self.predistill_functions[test_fn.__name__] = test_fn
             if hasattr(test_fn, "metric_function"):
                 self.metric_functions[test_fn.__name__] = test_fn
-            if hasattr(test_fn, "inference_function"):
-                if self.inference_function is None:
-                    self.inference_function = test_fn
-                else:
-                    print("ERROR: Multiple model functions found, can only have one")
-                    sys.exit(1)
 
     def start_processing(self):
         """Parse testing files, distill, and run inference."""
@@ -528,33 +518,3 @@ class ZenoBackend(object):
             )
 
         return filt_df[[str(col) for col in req.columns]].to_json(orient="records")
-
-    def single_inference(self, *args):
-        """Run inference from Gradio inputs.
-        The first input to args is the model, while the rest are dynamic inputs
-        corresponding to the columns defined in self.gradio_input_columns.
-
-        Returns:
-            any: output of the selected model.
-        """
-        if not self.predict_function:
-            return
-
-        # Get prediction function for selected model.
-        model_fn = self.predict_function(args[0])
-
-        # Get the columns that correspond to the inputs.
-        metadata_cols = [
-            c for c in self.columns if c.column_type == ZenoColumnType.METADATA
-        ]
-        metadata_cols_names = [c.name for c in metadata_cols]
-        cols = []
-        for c in self.gradio_input_columns:
-            if c in metadata_cols_names:
-                cols.append(str(metadata_cols[metadata_cols_names.index(c)]))
-
-        temp_df = pd.DataFrame(columns=cols)
-        temp_df.loc[0] = args[1:]  # type: ignore
-        out = model_fn(temp_df, self.zeno_options)
-
-        return out.model_output

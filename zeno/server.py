@@ -7,7 +7,6 @@ import asyncio
 import os
 from typing import Dict, List, Union
 
-import gradio as gr
 from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
@@ -72,40 +71,6 @@ def get_server(zeno: ZenoBackend):
         name="base",
     )
 
-    # If an inference function is provided, mount the gradio app.
-    if zeno.inference_function:
-        # The input_columns should map to the input_components.
-        inference_return = zeno.inference_function(zeno.zeno_options)
-        zeno.gradio_input_columns = inference_return.input_columns
-
-        gradio_app = gr.Interface(
-            fn=zeno.single_inference,
-            inputs=[
-                gr.components.Dropdown(
-                    zeno.model_names, value=zeno.model_names[0], label="Model"
-                ),
-                *inference_return.input_components,
-            ],
-            outputs=inference_return.output_component,
-            css="""
-                    :root {
-                    --button-primary-background-base: #6a1b9a;
-                    --button-primary-background-hover: #d2bae9;
-                    --button-primary-text-color-base: white;
-                    --button-primary-text-color-hover: white;
-                    --button-primary-border-color-hover: #6a1b9a;
-                    --button-primary-border-color: #6a1b9a;
-                    }
-                """,
-            allow_flagging="never",
-            analytics_enabled=False,
-        )
-        api_app = gr.mount_gradio_app(
-            app=api_app,
-            blocks=gradio_app,
-            path="/gradio",
-        )
-
     @api_app.get("/settings", response_model=ZenoSettings, tags=["zeno"])
     def get_settings():
         return ZenoSettings(
@@ -114,7 +79,6 @@ def get_server(zeno: ZenoBackend):
             label_column=zeno.label_column,
             data_column=zeno.data_column,
             calculate_histogram_metrics=zeno.calculate_histogram_metrics,
-            inference_view=True if zeno.inference_function else False,
             samples=zeno.samples,
             total_size=zeno.df.shape[0],
         )
