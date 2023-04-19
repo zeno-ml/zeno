@@ -10,7 +10,7 @@ install:
 lint:
 	@echo "==> 👕 Linting"
 	@poetry check
-	@poetry run black zeno/
+	@poetry run black --check zeno/
 	@poetry run ruff check zeno/
 	@cd frontend && npm run lint
 
