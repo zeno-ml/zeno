@@ -30,13 +30,17 @@ def get_filter_string(filter: FilterPredicateGroup) -> str:
             if f.operation == "match":
                 filt = (
                     filt
-                    + "{} (`{}`.str.contains('{}', na=False, regex=False))".format(
+                    + "{} (`{}`.astype('string').str.contains('{}', na=False,".format(
                         f.join, f.column, f.value
                     )
+                    + "regex=False, case=False))"
                 )
             elif f.operation == "match (regex)":
-                filt = filt + "{} (`{}`.str.contains('{}', na=False))".format(
-                    f.join, f.column, f.value
+                filt = (
+                    filt
+                    + "{} (`{}`.astype('string').str.contains('{}', na=False))".format(
+                        f.join, f.column, f.value
+                    )
                 )
             else:
                 try:
@@ -56,20 +60,20 @@ def get_filter_string(filter: FilterPredicateGroup) -> str:
 
 
 def filter_table(
-    df,
+    main_df,
     filter_predicates: FilterPredicateGroup,
     filter_ids: Optional[FilterIds] = None,
 ) -> pd.DataFrame:
     # if we have ids, filter them out now!
     if filter_ids is not None and len(filter_ids.ids) > 0:
         # this is fast because the index is set to ids
-        df = df.loc[filter_ids.ids]
+        main_df = main_df.loc[filter_ids.ids]
 
     final_filter = get_filter_string(filter_predicates)
     if len(final_filter) > 0:
-        return df.query(final_filter)
+        return main_df.query(final_filter, engine="python")
     else:
-        return df
+        return main_df
 
 
 def filter_table_single(df: DataFrame, col: ZenoColumn, bucket: HistogramBucket):

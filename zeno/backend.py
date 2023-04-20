@@ -12,12 +12,11 @@ from pathlib import Path
 from typing import Callable, Dict, List, Optional, Union
 
 import pandas as pd
-from pandas import DataFrame  # type: ignore
-from pathos.multiprocessing import ProcessingPool as Pool  # type: ignore
+from pandas import DataFrame
+from pathos.multiprocessing import ProcessingPool as Pool
 
 from zeno.api import (
     DistillReturn,
-    InferenceReturn,
     MetricReturn,
     ModelReturn,
     ZenoOptions,
@@ -34,7 +33,7 @@ from zeno.processing.data_processing import (
 )
 from zeno.processing.filtering import filter_table
 from zeno.util import (
-    getMetadataType,
+    get_metadata_type,
     load_series,
     read_functions,
     read_metadata,
@@ -82,9 +81,6 @@ class ZenoBackend(object):
         self.predict_function: Optional[
             Callable[[str], Callable[[DataFrame, ZenoOptions], ModelReturn]]
         ] = None
-        self.inference_function: Optional[
-            Callable[[ZenoOptions], InferenceReturn]
-        ] = None
         self.gradio_input_columns: List[str] = []
 
         self.status: str = "Initializing"
@@ -100,7 +96,7 @@ class ZenoBackend(object):
                 for m in os.listdir(self.params.models[0])
             ]
         else:
-            self.model_paths = self.params.models  # type: ignore
+            self.model_paths = self.params.models
         self.model_names = [os.path.basename(p).split(".")[0] for p in self.model_paths]
 
         self.__setup_dataframe(
@@ -124,7 +120,7 @@ class ZenoBackend(object):
         if data_column != "":
             self.data_column = ZenoColumn(
                 column_type=ZenoColumnType.METADATA,
-                metadata_type=getMetadataType(self.df[data_column]),
+                metadata_type=get_metadata_type(self.df[data_column]),
                 name=data_column,
             )
         else:
@@ -137,7 +133,7 @@ class ZenoBackend(object):
         if label_column != "":
             self.label_column = ZenoColumn(
                 column_type=ZenoColumnType.METADATA,
-                metadata_type=getMetadataType(self.df[label_column]),
+                metadata_type=get_metadata_type(self.df[label_column]),
                 name=label_column,
             )
         else:
@@ -155,7 +151,7 @@ class ZenoBackend(object):
             )
             self.df[str(self.id_column)].astype(str)
         else:
-            self.df.reset_index(inplace=True)
+            self.df = self.df.reset_index()
             self.id_column = ZenoColumn(
                 column_type=ZenoColumnType.METADATA,
                 metadata_type=MetadataType.OTHER,
@@ -165,13 +161,13 @@ class ZenoBackend(object):
         self.columns: List[ZenoColumn] = []
         self.complete_columns: List[ZenoColumn] = []
 
-        self.df.set_index(str(self.id_column), inplace=True, drop=False)
+        self.df = self.df.set_index(str(self.id_column), drop=False)
         # Set index name to None to prevent name overlaps w/ columns.
         self.df.index.name = None
         for metadata_col in self.df.columns:
             col = ZenoColumn(
                 column_type=ZenoColumnType.METADATA,
-                metadata_type=getMetadataType(self.df[metadata_col]),
+                metadata_type=get_metadata_type(self.df[metadata_col]),
                 name=str(metadata_col),
             )
             self.columns.append(col)
@@ -193,12 +189,6 @@ class ZenoBackend(object):
                     self.predistill_functions[test_fn.__name__] = test_fn
             if hasattr(test_fn, "metric_function"):
                 self.metric_functions[test_fn.__name__] = test_fn
-            if hasattr(test_fn, "inference_function"):
-                if self.inference_function is None:
-                    self.inference_function = test_fn  # type: ignore
-                else:
-                    print("ERROR: Multiple model functions found, can only have one")
-                    sys.exit(1)
 
     def start_processing(self):
         """Parse testing files, distill, and run inference."""
@@ -254,7 +244,7 @@ class ZenoBackend(object):
                 c_hash = str(out.column)
                 self.df.loc[:, c_hash] = out.output
                 self.df[c_hash] = self.df[c_hash].convert_dtypes()
-                out.column.metadata_type = getMetadataType(self.df[c_hash])
+                out.column.metadata_type = get_metadata_type(self.df[c_hash])
                 self.complete_columns.append(out.column)
 
     def __predistill(self) -> None:
@@ -270,11 +260,11 @@ class ZenoBackend(object):
             load_series(self.df, predistill_column, save_path)
 
             predistill_hash = str(predistill_column)
-            if self.df[predistill_hash].isnull().any():
+            if self.df[predistill_hash].isna().any():
                 predistill_to_run.append(predistill_column)
             else:
                 self.df[predistill_hash] = self.df[predistill_hash].convert_dtypes()
-                predistill_column.metadata_type = getMetadataType(
+                predistill_column.metadata_type = get_metadata_type(
                     self.df[predistill_hash]
                 )
                 self.complete_columns.append(predistill_column)
@@ -317,14 +307,11 @@ class ZenoBackend(object):
             load_series(self.df, model_column, model_save_path)
             load_series(self.df, embedding_column, embedding_save_path)
 
-            if (
-                self.df[model_hash].isnull().any()
-                or self.df[embedding_hash].isnull().any()
-            ):
+            if self.df[model_hash].isna().any() or self.df[embedding_hash].isna().any():
                 models_to_run.append(model_path)
             else:
                 self.df[model_hash] = self.df[model_hash].convert_dtypes()
-                model_column.metadata_type = getMetadataType(self.df[model_hash])
+                model_column.metadata_type = get_metadata_type(self.df[model_hash])
                 self.complete_columns.append(model_column)
 
                 # Check if there were saved postdistill columns:
@@ -342,7 +329,7 @@ class ZenoBackend(object):
                     series = pd.read_pickle(f)
                     self.df.loc[:, str(col)] = series
                     self.df[str(col)] = self.df[str(col)].convert_dtypes()
-                    col.metadata_type = getMetadataType(self.df[str(col)])
+                    col.metadata_type = get_metadata_type(self.df[str(col)])
                     self.complete_columns.append(col)
 
         if len(models_to_run) > 0:
@@ -382,11 +369,11 @@ class ZenoBackend(object):
 
             load_series(self.df, col_name, save_path)
 
-            if self.df[col_hash].isnull().any():
+            if self.df[col_hash].isna().any():
                 postdistill_to_run.append(col_name)
             else:
                 self.df[col_hash] = self.df[col_hash].convert_dtypes()
-                col_name.metadata_type = getMetadataType(self.df[col_hash])
+                col_name.metadata_type = get_metadata_type(self.df[col_hash])
                 self.complete_columns.append(col_name)
 
         if len(postdistill_to_run) > 0:
@@ -412,7 +399,6 @@ class ZenoBackend(object):
 
         return_metrics: List[SliceMetric] = []
         for metric_key in requests:
-
             # If we refresh, might not have columns for a slice.
             try:
                 filt_df = filter_table(
@@ -438,7 +424,6 @@ class ZenoBackend(object):
             return None
 
         if model is not None:
-
             output_col = ZenoColumn(
                 column_type=ZenoColumnType.OUTPUT,
                 name=model,
@@ -533,33 +518,3 @@ class ZenoBackend(object):
             )
 
         return filt_df[[str(col) for col in req.columns]].to_json(orient="records")
-
-    def single_inference(self, *args):
-        """Run inference from Gradio inputs.
-        The first input to args is the model, while the rest are dynamic inputs
-        corresponding to the columns defined in self.gradio_input_columns.
-
-        Returns:
-            any: output of the selected model.
-        """
-        if not self.predict_function:
-            return
-
-        # Get prediction function for selected model.
-        model_fn = self.predict_function(args[0])
-
-        # Get the columns that correspond to the inputs.
-        metadata_cols = [
-            c for c in self.columns if c.column_type == ZenoColumnType.METADATA
-        ]
-        metadata_cols_names = [c.name for c in metadata_cols]
-        cols = []
-        for c in self.gradio_input_columns:
-            if c in metadata_cols_names:
-                cols.append(str(metadata_cols[metadata_cols_names.index(c)]))
-
-        temp_df = pd.DataFrame(columns=cols)
-        temp_df.loc[0] = args[1:]  # type: ignore
-        out = model_fn(temp_df, self.zeno_options)
-
-        return out.model_output

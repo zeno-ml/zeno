@@ -5,7 +5,6 @@ from typing import List, Optional, Tuple, Union
 from pydantic import BaseModel
 
 from zeno.classes.base import CamelModel, ZenoColumn
-
 from zeno.classes.slice import FilterIds, FilterPredicateGroup, Slice
 
 
@@ -16,8 +15,7 @@ class ZenoSettings(CamelModel):
     data_column: ZenoColumn
     samples: int
     calculate_histogram_metrics: bool
-    inference_view: bool
-    totalSize: int
+    total_size: int
 
 
 class ZenoVariables(CamelModel):

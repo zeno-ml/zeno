@@ -19,6 +19,8 @@
 
 	overrideItemIdKeyNameBeforeInitialisingDndZones("value");
 
+	let isReportEdit = false;
+
 	const ChartMap = {
 		[ChartType.BAR]: BarChartReport,
 		[ChartType.LINE]: LineChartReport,
