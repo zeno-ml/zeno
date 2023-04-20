@@ -28,6 +28,10 @@ body {
 	color: black;
 }
 
+.has-multiSelection {
+	outline: var(--sv-border-color) solid 1px !important;
+}
+
 .autocomplete {
 	min-width: 100px !important;
 }
