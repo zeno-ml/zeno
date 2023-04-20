@@ -56,12 +56,12 @@
 	.select-label {
 		margin: 5px;
 	}
-	:global(.svelecte-control .has-multiSelection .sv-item) {
+
+	:global(#dnd-action-dragged-el .sv-item) {
 		--sv-item-selected-bg: var(--P3);
 		--sv-item-btn-bg: var(--P3);
 	}
-	:global(.dnd-action-dragged-el) {
-		--sv-item-selected-bg: var(--P3);
-		--sv-item-btn-bg: var(--P3);
+	:global(div[role="listitem"]) {
+		outline: none;
 	}
 </style>
