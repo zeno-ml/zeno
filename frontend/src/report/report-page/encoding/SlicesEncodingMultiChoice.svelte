@@ -1,30 +1,41 @@
 <script lang="ts">
 	import { report, reports, slices } from "../../../stores";
 	import Svelecte from "svelecte";
+	import { dndzone } from "svelte-dnd-action";
 	let options = [];
 	let value = [];
-	let index = 0;
 
+	// initial options
+	[...$slices.values()].forEach((s, i) => {
+		options[i] = { value: i, label: s.sliceName };
+	});
 	$reports[$report].slices.forEach((s, i) => {
-		value.push(i);
-		options.push({ value: i, label: s.sliceName });
-		index = i;
+		value[i] = options.find((o) => o.label === s.sliceName).value;
 	});
-	$slices.forEach((s) => {
-		if (!$reports[$report].slices.find((rs) => rs.sliceName === s.sliceName)) {
-			options.push({ value: index + 1, label: s.sliceName });
-			index += 1;
+
+	function updateDragOrder(val) {
+		// check if all elements are numbers (dndzone's place holder)
+		if (!val.some((i) => !Number.isInteger(i))) {
+			let tmp = [];
+			// align by drag order
+			val.forEach((v, i) => {
+				tmp[i] = $slices.get(options[v].label);
+			});
+			$reports[$report].slices = tmp;
 		}
-	});
+	}
+
+	$: updateDragOrder(value);
 </script>
 
 <div class="parameters">
 	<h4 class="select-label">&nbsp;</h4>
 	<Svelecte
 		style="width: 280px; flex:none;"
-		{value}
+		bind:value
 		{options}
-		multiple={true}
+		{dndzone}
+		multiple
 		on:change={(e) => {
 			let s = [];
 			e.detail.forEach((ed) => {
@@ -45,8 +56,12 @@
 	.select-label {
 		margin: 5px;
 	}
-	:global(.svelecte-control .has-multiSelection .sv-item) {
+
+	:global(#dnd-action-dragged-el .sv-item) {
 		--sv-item-selected-bg: var(--P3);
 		--sv-item-btn-bg: var(--P3);
+	}
+	:global(div[role="listitem"]) {
+		outline: none;
 	}
 </style>
