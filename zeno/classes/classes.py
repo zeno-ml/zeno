@@ -69,11 +69,11 @@ class SliceFinderRequest(BaseModel):
     id: str
     model: str
     orderBy: str
-    sliceFinderMetric: str
     minimumSize: str
     depth: str
     columns: List[ZenoColumn] = []
     model: str
+    columnName: str
 
 
 class SliceFinderMetricReturn(BaseModel):

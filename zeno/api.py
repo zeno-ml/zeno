@@ -112,7 +112,7 @@ class SliceFinderMetricReturn(BaseModel):
 
     metric: float
     list_of_trained_elements: Union[List[object], None] = None
-    slices_of_interest: Union[List[List[object]], None] = None
+    slices_of_interest: Union[List[object], None] = None
 
     class Config:
         arbitrary_types_allowed = True

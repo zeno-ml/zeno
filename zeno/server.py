@@ -42,7 +42,7 @@ from zeno.processing.projection_processing import (
     project_into_2D,
     projection_colors,
 )
-from zeno.processing.slice_finder import slice_finder
+from zeno.processing.slice_finder import slice_finder, get_column_name_with_summary
 
 
 def custom_generate_unique_id(route: APIRoute):
@@ -204,8 +204,13 @@ def get_server(zeno: ZenoBackend):
                   response_model=SliceFinderMetricReturn)
     def project_find_available_slices(req: SliceFinderRequest):
         return slice_finder(
-            zeno.df, req, zeno.zeno_options, zeno.metric_functions, zeno.columns
+            zeno.df, req, zeno.zeno_options, zeno.postdistill_functions, zeno.columns
         )
+    
+    
+    @api_app.get("/get-columns-with-summary", tags=["zeno"])
+    def get_columns_with_summary():
+        return get_column_name_with_summary(zeno.df, zeno.columns)
 
     @api_app.post("/colors-project", tags=["zeno"], response_model=PointsColors)
     def get_projection_colors(req: ColorsProjectRequest):

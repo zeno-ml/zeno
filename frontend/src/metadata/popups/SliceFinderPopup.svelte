@@ -1,17 +1,20 @@
 <script lang="ts">
 	import Paper from "@smui/paper";
+	import { beforeUpdate, afterUpdate } from "svelte";
 	import { fade } from "svelte/transition";
 	import { Label } from "@smui/common";
 	import Chip from "@smui/chips";
 	import { Svg } from "@smui/common";
+	import { selections, showNewSlice, slices, sliceToEdit } from "../../stores";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
 	import { clickOutside } from "../../util/clickOutside";
-	import { mdiPlus, mdiClose, mdiMonitorAccount } from "@mdi/js";
+	import { mdiPlus, mdiClose } from "@mdi/js";
 	import { Pagination } from "@smui/data-table";
 	import { showSliceFinder } from "../../stores";
 	import { ZenoService } from "../../zenoservice";
 	import { model } from "../../stores";
+	import Button from "@smui/button";
 
 	let currentResult;
 	let currentPage = 1;
@@ -19,14 +22,17 @@
 	let slice_data = [];
 	let sampleOptions = [5, 10, 20].sort((a, b) => a - b);
 	// dummy data for presenting frontend UI
-	let minimumSizes = ["2", "3", "5", "7"];
+	let minimumSizes = ["2", "3", "5", "7", "9"];
 	let minimumSize = "5";
 	let max_ls = ["4", "5", "6", "8"];
 	let max_l = "5";
-	let sliceFinderMetrics = ["accuracy", "f1", "recall"];
-	let sliceFinderMetric = "accuracy";
+	let sliceFinderKeys = [""];
+	let sliceFinderKey = "";
 	let orderBys = ["ascending", "descending"];
 	let orderBy = "ascending";
+
+	let sets;
+	$: dataframeKeyValuePair = {};
 
 	$: start = 0;
 	$: end = 10;
@@ -35,16 +41,31 @@
 		input.getElement().focus();
 	}
 
+	export async function addSliceAtIndex(index) {
+		let slice = sets.slices_of_interest[index];
+		console.log(slice);
+
+		ZenoService.createNewSlice(slice).then(() => {
+			slices.update((s) => {
+				s.set(slice.sliceName, slice);
+				return s;
+			});
+			selections.update((sels) => ({ slices: [], metadata: sels.metadata }));
+			showNewSlice.set(false);
+			sliceToEdit.set(null);
+		});
+	}
+
 	export async function activateSliceFinder() {
 		document.getElementById("generate-slices").innerHTML =
 			"Generating Slices...";
-		const sets = await ZenoService.projectFindAvailableSlices({
+		sets = await ZenoService.projectFindAvailableSlices({
 			id: "1",
 			orderBy: orderBy,
-			sliceFinderMetric: sliceFinderMetric,
 			minimumSize: minimumSize,
 			depth: max_l,
 			model: $model,
+			columnName: sliceFinderKey ? sliceFinderKey : "",
 		});
 		console.log(sets);
 		document.getElementById("generate-slices").innerHTML = "";
@@ -60,6 +81,14 @@
 		}
 	}
 
+	export async function get_all_valid_columns() {
+		dataframeKeyValuePair = await ZenoService.getColumnsWithSummary();
+		sliceFinderKeys = Object.keys(dataframeKeyValuePair);
+		sliceFinderKeys = sliceFinderKeys;
+		console.log(dataframeKeyValuePair);
+		sliceFinderKey = Object.keys(dataframeKeyValuePair)[0];
+	}
+
 	function slice_data_generator(predicateList = [], slices_of_interest = []) {
 		// demo page
 		slice_data = [];
@@ -70,32 +99,39 @@
 
 			for (let i = 0; i < 1; i++) {
 				let predicate = [];
-				predicate.push(
-					predicateList[Math.floor(Math.random() * predicateList.length)]
-				);
+				predicate.push(predicateList[0]);
 				let data = {
 					predicate: predicate,
 					number_1: 0,
 					number_2: 0,
+					index: i,
 				};
 				slice_data.push(data);
 			}
 		} else {
 			start = 0;
 			end = slices_of_interest.length;
+			console.log(slices_of_interest);
 			slice_data = [];
 			for (let i = 0; i < slices_of_interest.length; i++) {
 				let predicate = [];
-				for (let j = 0; j < predicateList.length; j++) {
-					if (slices_of_interest[i][j] === null) {
-						continue;
-					}
-					predicate.push(predicateList[j] + "=" + slices_of_interest[i][j]);
+				console.log(slices_of_interest);
+
+				let predicates_store =
+					slices_of_interest[i].filterPredicates.predicates;
+				for (let k = 0; k < predicates_store.length; k++) {
+					predicate.push(
+						predicates_store[k].column.name +
+							predicates_store[k].operation +
+							predicates_store[k].value
+					);
 				}
+				//}
 				let data = {
 					predicate: predicate,
 					number_1: 0,
 					number_2: 0,
+					index: i,
 				};
 				slice_data.push(data);
 			}
@@ -104,6 +140,8 @@
 			}
 		}
 	}
+
+	get_all_valid_columns();
 	slice_data_generator();
 </script>
 
@@ -147,10 +185,10 @@
 			</Select>
 			<Select
 				class="select"
-				bind:value={sliceFinderMetric}
-				label="Metric"
+				bind:value={sliceFinderKey}
+				label="Metric Column 1"
 				style="width: 170px">
-				{#each sliceFinderMetrics as m}
+				{#each sliceFinderKeys as m}
 					<Option value={m}>{m}</Option>
 				{/each}
 			</Select>
@@ -164,11 +202,7 @@
 				{/each}
 			</Select>
 
-			<IconButton on:click={() => activateSliceFinder()}>
-				<Icon component={Svg} viewBox="0 0 24 24">
-					<path fill="#6a1b9a" d={mdiMonitorAccount} />
-				</Icon>
-			</IconButton>
+			<Button on:click={() => activateSliceFinder()}>Generate Slices</Button>
 			<span id="generate-slices" />
 
 			{#each slice_data as element}
@@ -180,7 +214,10 @@
 							</Label></Chip>
 					{/each}
 					<span>
-						<IconButton class="rightElement" style="margin-top:-6px;">
+						<IconButton
+							class="rightElement"
+							style="margin-top:-6px;"
+							on:click={() => addSliceAtIndex(element.index)}>
 							<Icon component={Svg} viewBox="0 0 24 24">
 								<path fill="#6a1b9a" d={mdiPlus} />
 							</Icon>

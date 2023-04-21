@@ -352,6 +352,18 @@ export class ZenoService {
 	}
 
 	/**
+	 * Get Columns With Summary
+	 * @returns any Successful Response
+	 * @throws ApiError
+	 */
+	public static getColumnsWithSummary(): CancelablePromise<any> {
+		return __request(OpenAPI, {
+			method: "GET",
+			url: "/get-columns-with-summary",
+		});
+	}
+
+	/**
 	 * Get Projection Colors
 	 * @param requestBody
 	 * @returns PointsColors Successful Response
