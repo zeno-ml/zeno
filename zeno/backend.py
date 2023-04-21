@@ -54,6 +54,7 @@ class ZenoBackend(object):
         self.data_path = self.params.data_path
         self.label_path = self.params.label_path
         self.cache_path = self.params.cache_path
+        self.multiprocessing = self.params.multiprocessing
         self.editable = self.params.editable
         self.samples = self.params.samples
         self.view = self.params.view
@@ -212,7 +213,9 @@ class ZenoBackend(object):
                     )
                 )
 
-        self.__thread = threading.Thread(target=asyncio.run, args=(self.__process(),))
+        self.__thread = threading.Thread(
+            target=asyncio.run, args=(self.__process(),), daemon=True
+        )
         self.__thread.start()
 
     async def __process(self):
@@ -270,18 +273,37 @@ class ZenoBackend(object):
                 self.complete_columns.append(predistill_column)
 
         if len(predistill_to_run) > 0:
-            with Pool() as pool:
-                predistill_outputs = pool.map(
-                    predistill_data,
-                    [self.predistill_functions[col.name] for col in predistill_to_run],
-                    [col for col in predistill_to_run],
-                    [self.zeno_options] * len(predistill_to_run),
-                    [self.cache_path] * len(predistill_to_run),
-                    [self.df] * len(predistill_to_run),
-                    [self.batch_size] * len(predistill_to_run),
-                    range(len(predistill_to_run)),
-                )
-                self.__set_data_processing_returns(predistill_outputs)
+            if self.multiprocessing:
+                with Pool() as pool:
+                    predistill_outputs = pool.map(
+                        predistill_data,
+                        [
+                            self.predistill_functions[col.name]
+                            for col in predistill_to_run
+                        ],
+                        [col for col in predistill_to_run],
+                        [self.zeno_options] * len(predistill_to_run),
+                        [self.cache_path] * len(predistill_to_run),
+                        [self.df] * len(predistill_to_run),
+                        [self.batch_size] * len(predistill_to_run),
+                        range(len(predistill_to_run)),
+                    )
+                    self.__set_data_processing_returns(predistill_outputs)
+            else:
+                predistill_outputs = []
+                for i, predistill in enumerate(predistill_to_run):
+                    predistill_outputs.append(
+                        predistill_data(
+                            self.predistill_functions[predistill.name],
+                            predistill,
+                            self.zeno_options,
+                            self.cache_path,
+                            self.df,
+                            self.batch_size,
+                            i,
+                        )
+                    )
+            self.__set_data_processing_returns(predistill_outputs)
 
     def __inference(self):
         """Run models on instances."""
@@ -333,18 +355,36 @@ class ZenoBackend(object):
                     self.complete_columns.append(col)
 
         if len(models_to_run) > 0:
-            with Pool() as pool:
-                inference_outputs = pool.map(
-                    run_inference,
-                    [self.predict_function] * len(models_to_run),
-                    [self.zeno_options] * len(models_to_run),
-                    [m for m in models_to_run],
-                    [self.cache_path] * len(models_to_run),
-                    [self.df] * len(models_to_run),
-                    [self.batch_size] * len(models_to_run),
-                    range(len(models_to_run)),
-                )
-                self.__set_data_processing_returns(inference_outputs)
+            if self.predict_function is None:
+                return
+
+            if self.multiprocessing:
+                with Pool() as pool:
+                    inference_outputs = pool.map(
+                        run_inference,
+                        [self.predict_function] * len(models_to_run),
+                        [self.zeno_options] * len(models_to_run),
+                        [m for m in models_to_run],
+                        [self.cache_path] * len(models_to_run),
+                        [self.df] * len(models_to_run),
+                        [self.batch_size] * len(models_to_run),
+                        range(len(models_to_run)),
+                    )
+            else:
+                inference_outputs = []
+                for i, model_path in enumerate(models_to_run):
+                    inference_outputs.append(
+                        run_inference(
+                            self.predict_function,
+                            self.zeno_options,
+                            model_path,
+                            self.cache_path,
+                            self.df,
+                            self.batch_size,
+                            i,
+                        )
+                    )
+            self.__set_data_processing_returns(inference_outputs)
 
     def __postdistill(self) -> None:
         """Run distill functions dependent on model outputs."""
@@ -377,17 +417,35 @@ class ZenoBackend(object):
                 self.complete_columns.append(col_name)
 
         if len(postdistill_to_run) > 0:
-            with Pool() as pool:
-                post_outputs = pool.map(
-                    postdistill_data,
-                    [self.postdistill_functions[e.name] for e in postdistill_to_run],
-                    [e.model for e in postdistill_to_run],
-                    [self.zeno_options] * len(postdistill_to_run),
-                    [self.cache_path] * len(postdistill_to_run),
-                    [self.df] * len(postdistill_to_run),
-                    [self.batch_size] * len(postdistill_to_run),
-                    range(len(postdistill_to_run)),
-                )
+            if self.multiprocessing:
+                with Pool() as pool:
+                    post_outputs = pool.map(
+                        postdistill_data,
+                        [
+                            self.postdistill_functions[e.name]
+                            for e in postdistill_to_run
+                        ],
+                        [e.model for e in postdistill_to_run],
+                        [self.zeno_options] * len(postdistill_to_run),
+                        [self.cache_path] * len(postdistill_to_run),
+                        [self.df] * len(postdistill_to_run),
+                        [self.batch_size] * len(postdistill_to_run),
+                        range(len(postdistill_to_run)),
+                    )
+            else:
+                post_outputs = []
+                for i, postdistill in enumerate(postdistill_to_run):
+                    post_outputs.append(
+                        postdistill_data(
+                            self.postdistill_functions[postdistill.name],
+                            postdistill.model if postdistill.model else "",
+                            self.zeno_options,
+                            self.cache_path,
+                            self.df,
+                            self.batch_size,
+                            i,
+                        )
+                    )
             self.__set_data_processing_returns(post_outputs)
 
     def get_metrics_for_slices(
