@@ -53,6 +53,7 @@ class ZenoParameters(BaseModel):
     cache_path: str = ""
     calculate_histogram_metrics = True
     editable: bool = True
+    multiprocessing: bool = True
     serve: bool = True
     samples: int = 30
     port: int = 8000
