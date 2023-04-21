@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { mdiPencilOutline, mdiDotsHorizontal } from "@mdi/js";
 	import Button, { Label } from "@smui/button";
+	import Paper from "@smui/paper";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import { Svg } from "@smui/common";
 	import Dialog, { Actions, Content, Title, InitialFocus } from "@smui/dialog";
@@ -172,40 +173,52 @@
 						id="options-container"
 						on:mouseleave={() => (showOptions = false)}
 						on:blur={() => (showOptions = false)}>
-						<IconButton
-							on:click={(e) => {
-								e.stopPropagation();
-								showOptions = false;
-								$reports.forEach((r) => {
-									let hasSlice = false;
-									r.slices.forEach((p) => {
-										if (p.sliceName === slice.sliceName) {
-											hasSlice = true;
+						<Paper style="padding: 3px 0px;" elevation={7}>
+							<Content>
+								<div
+									class="option"
+									on:keydown={() => ({})}
+									on:click={(e) => {
+										e.stopPropagation();
+										showOptions = false;
+										$reports.forEach((r) => {
+											let hasSlice = false;
+											r.slices.forEach((p) => {
+												if (p.sliceName === slice.sliceName) {
+													hasSlice = true;
+												}
+											});
+											if (hasSlice) {
+												relatedReports++;
+											}
+										});
+										if (relatedReports > 0) {
+											confirmDelete = true;
+										} else {
+											removeSlice();
 										}
-									});
-									if (hasSlice) {
-										relatedReports++;
-									}
-								});
-								if (relatedReports > 0) {
-									confirmDelete = true;
-								} else {
-									removeSlice();
-								}
-							}}>
-							<Icon class="material-icons">delete_outline</Icon>
-						</IconButton>
-						<IconButton
-							on:click={(e) => {
-								e.stopPropagation();
-								showOptions = false;
-								sliceToEdit.set(slice);
-								showNewSlice.set(true);
-							}}>
-							<Icon component={Svg} viewBox="0 0 24 24">
-								<path fill="black" d={mdiPencilOutline} />
-							</Icon>
-						</IconButton>
+									}}>
+									<Icon style="font-size: 18px;" class="material-icons"
+										>delete_outline</Icon
+									>&nbsp;
+									<span>Remove</span>
+								</div>
+								<div
+									class="option"
+									on:keydown={() => ({})}
+									on:click={(e) => {
+										e.stopPropagation();
+										showOptions = false;
+										sliceToEdit.set(slice);
+										showNewSlice.set(true);
+									}}>
+									<Icon style="font-size: 18px;" class="material-icons"
+										>edit</Icon
+									>&nbsp;
+									<span>Edit</span>
+								</div>
+							</Content>
+						</Paper>
 					</div>
 				{/if}
 				{#if result}
@@ -322,12 +335,21 @@
 		top: 0px;
 		right: 0px;
 		z-index: 5;
-		background: var(--G6);
-		margin-top: -7px;
-		border: 1px solid var(--G5);
+		margin-top: -12px;
 		position: absolute;
-		height: max-content;
+	}
+	.option {
 		display: flex;
-		border-radius: 4px;
+		flex-direction: row;
+		align-items: center;
+		cursor: pointer;
+		width: 68px;
+		padding: 1px 6px;
+	}
+	.option span {
+		font-size: 12px;
+	}
+	.option:hover {
+		background: var(--G5);
 	}
 </style>
