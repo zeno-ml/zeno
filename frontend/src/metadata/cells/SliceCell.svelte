@@ -1,22 +1,23 @@
 <script lang="ts">
 	import { mdiDotsHorizontal } from "@mdi/js";
 	import Button, { Label } from "@smui/button";
-	import Paper from "@smui/paper";
-	import IconButton, { Icon } from "@smui/icon-button";
 	import { Svg } from "@smui/common";
-	import Dialog, { Actions, Content, Title, InitialFocus } from "@smui/dialog";
+	import Dialog, { Actions, Content, InitialFocus, Title } from "@smui/dialog";
+	import IconButton, { Icon } from "@smui/icon-button";
+	import Paper from "@smui/paper";
+	import { deleteSlice, getMetricsForSlices } from "../../api/slice";
 	import SliceDetails from "../../general/SliceDetails.svelte";
 	import {
-		status,
-		showNewSlice,
-		selections,
-		slices,
-		sliceToEdit,
-		reports,
-		model,
 		metric,
+		model,
+		reports,
+		selections,
+		showNewSlice,
+		sliceToEdit,
+		slices,
+		status,
 	} from "../../stores";
-	import { getMetricsForSlices, deleteSlice } from "../../api/slice";
+	import { clickOutside } from "../../util/clickOutside";
 	import { ZenoService, type MetricKey, type Slice } from "../../zenoservice";
 
 	export let slice: Slice;
@@ -171,8 +172,8 @@
 				{#if showOptions}
 					<div
 						id="options-container"
-						on:mouseleave={() => (showOptions = false)}
-						on:blur={() => (showOptions = false)}>
+						use:clickOutside
+						on:click_outside={() => (showOptions = !showOptions)}>
 						<Paper style="padding: 3px 0px;" elevation={7}>
 							<Content>
 								<div
@@ -335,8 +336,8 @@
 		top: 0px;
 		right: 0px;
 		z-index: 5;
-		margin-top: -12px;
 		position: absolute;
+		margin-top: 35px;
 	}
 	.option {
 		display: flex;
