@@ -90,6 +90,15 @@ class ZenoBackend(object):
         self.slices: Dict[str, Slice] = read_pickle(
             "slices.pickle", self.cache_path, {}
         )
+        if "All Instances" not in self.slices:
+            orig_slices = self.slices
+            all_instance = Slice(
+                slice_name="All Instances",
+                folder="",
+                filter_predicates=FilterPredicateGroup(predicates=[], join=""),
+            )
+            self.slices = {"All Instances": all_instance}
+            self.slices.update(orig_slices)
 
         if self.params.models and os.path.isdir(self.params.models[0]):
             self.model_paths = [
