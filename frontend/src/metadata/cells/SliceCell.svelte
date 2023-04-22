@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { mdiPencilOutline, mdiDotsHorizontal } from "@mdi/js";
+	import { mdiDotsHorizontal } from "@mdi/js";
 	import Button, { Label } from "@smui/button";
 	import Paper from "@smui/paper";
 	import IconButton, { Icon } from "@smui/icon-button";
@@ -343,7 +343,7 @@
 		flex-direction: row;
 		align-items: center;
 		cursor: pointer;
-		width: 68px;
+		width: 73px;
 		padding: 1px 6px;
 	}
 	.option span {
