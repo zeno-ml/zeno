@@ -76,6 +76,11 @@
 									inFolder.forEach((slice) => {
 										slice.folder = "";
 										sls.set(slice.sliceName, slice);
+										ZenoService.createNewSlice({
+											sliceName: slice.sliceName,
+											filterPredicates: slice.filterPredicates,
+											folder: slice.folder,
+										});
 									});
 									return sls;
 								});
