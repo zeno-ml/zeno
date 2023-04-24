@@ -2,10 +2,12 @@
 	import { mdiChevronDown, mdiDotsHorizontal, mdiChevronUp } from "@mdi/js";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import { Svg } from "@smui/common";
+	import Paper, { Content } from "@smui/paper";
 	import { slide } from "svelte/transition";
 	import { folders, slices } from "../../stores";
 	import SliceCell from "./SliceCell.svelte";
 	import { ZenoService } from "../../zenoservice";
+	import { clickOutside } from "../../util/clickOutside";
 
 	export let folder: string;
 
@@ -47,7 +49,7 @@
 			style="width: 24px; height: 24px; cursor: pointer; margin-right: 10px;"
 			on:keydown={() => ({})}
 			on:click={() => (expandFolder = !expandFolder)}>
-			<Icon component={Svg} viewBox="0 0 24 24">
+			<Icon style="outline:none" component={Svg} viewBox="0 0 24 24">
 				<path fill="black" d={expandFolder ? mdiChevronDown : mdiChevronUp} />
 			</Icon>
 		</div>
@@ -57,29 +59,38 @@
 		{#if showOptions}
 			<div
 				id="options-container"
-				on:mouseleave={() => (showOptions = false)}
-				on:blur={() => (showOptions = false)}>
-				<IconButton
-					on:click={(e) => {
-						e.stopPropagation();
-						showOptions = false;
-						slices.update((sls) => {
-							let inFolder = [...sls.values()].filter(
-								(d) => d.folder === folder
-							);
-							inFolder.forEach((slice) => {
-								slice.folder = "";
-								sls.set(slice.sliceName, slice);
-							});
-							return sls;
-						});
-						folders.update((folders) => {
-							folders.splice(folders.indexOf(folder), 1);
-							return folders;
-						});
-					}}>
-					<Icon class="material-icons">delete_outline</Icon>
-				</IconButton>
+				use:clickOutside
+				on:click_outside={() => (showOptions = !showOptions)}>
+				<Paper style="padding: 3px 0px;" elevation={7}>
+					<Content>
+						<div
+							class="option"
+							on:keydown={() => ({})}
+							on:click={(e) => {
+								e.stopPropagation();
+								showOptions = false;
+								slices.update((sls) => {
+									let inFolder = [...sls.values()].filter(
+										(d) => d.folder === folder
+									);
+									inFolder.forEach((slice) => {
+										slice.folder = "";
+										sls.set(slice.sliceName, slice);
+									});
+									return sls;
+								});
+								folders.update((folders) => {
+									folders.splice(folders.indexOf(folder), 1);
+									return folders;
+								});
+							}}>
+							<Icon style="font-size: 18px;" class="material-icons"
+								>delete_outline</Icon
+							>&nbsp;
+							<span>Remove</span>
+						</div>
+					</Content>
+				</Paper>
 			</div>
 		{/if}
 		<div style:margin-right="10px">
@@ -129,13 +140,22 @@
 		top: 0px;
 		right: 0px;
 		z-index: 5;
-		background: var(--G6);
-		margin-top: -7px;
-		border: 1px solid var(--G5);
 		position: absolute;
-		height: max-content;
+		margin-top: 35px;
+	}
+	.option {
 		display: flex;
-		border-radius: 4px;
+		flex-direction: row;
+		align-items: center;
+		cursor: pointer;
+		width: 73px;
+		padding: 1px 6px;
+	}
+	.option span {
+		font-size: 12px;
+	}
+	.option:hover {
+		background: var(--G5);
 	}
 	.expanded {
 		margin-bottom: 0px;
