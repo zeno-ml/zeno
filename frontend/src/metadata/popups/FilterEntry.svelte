@@ -43,6 +43,7 @@
 			bind:value={predicate.column}
 			placeholder={"Column"}
 			valueAsObject={true}
+			valueField={"name"}
 			options={$status.completeColumns.filter(
 				(d) =>
 					d.model === $model ||
