@@ -235,7 +235,10 @@
 					{/await}
 				{/if}
 				<div class="inline" style:cursor="pointer">
-					<div style:width="36px">
+					<div
+						style:width="36px"
+						use:clickOutside
+						on:click_outside={() => (hovering = false)}>
 						{#if hovering}
 							<IconButton
 								size="button"
