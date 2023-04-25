@@ -28,6 +28,7 @@
 					predicate = predicate;
 				}}
 				resetOnBlur={false}
+				searchable={false}
 				placeholder={""}
 				valueField="label"
 				labelField="label"
@@ -42,7 +43,7 @@
 		<Svelecte
 			bind:value={predicate.column}
 			placeholder={"Column"}
-			valueAsObject={true}
+			valueAsObject
 			valueField={"name"}
 			options={$status.completeColumns.filter(
 				(d) =>

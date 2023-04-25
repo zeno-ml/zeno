@@ -16,8 +16,21 @@
 	let predicateGroup: FilterPredicateGroup = { predicates: [], join: "" };
 	let nameInput;
 
-	// Track original name when editing to delete old slice.
+	// Track original settings when editing
 	let originalName = "";
+	let originalPredicates;
+
+	// check if predicates are valid (not empty)
+	function checkValidPredicates(preds) {
+		let valid = true;
+		preds.forEach((p) => {
+			if (p["column"] === null || p["operation"] === "" || p["value"] === "") {
+				valid = false;
+			}
+		});
+		return valid;
+	}
+	$: isValidPredicates = checkValidPredicates(predicateGroup.predicates);
 
 	$: if ($showNewSlice && nameInput) {
 		nameInput.getElement().focus();
@@ -32,6 +45,12 @@
 			predicateGroup = $sliceToEdit.filterPredicates;
 			folder = $sliceToEdit.folder;
 			originalName = sliceName;
+			originalPredicates = JSON.parse(JSON.stringify(predicateGroup));
+
+			// revert to original settings when close the slice popup w/ invalid predicates
+			if (!isValidPredicates) {
+				predicateGroup = originalPredicates;
+			}
 			return;
 		}
 
@@ -139,7 +158,8 @@
 					disabled={(!$sliceToEdit && $slices.has(sliceName)) ||
 						($sliceToEdit &&
 							originalName !== sliceName &&
-							$slices.has(sliceName))}>
+							$slices.has(sliceName)) ||
+						!isValidPredicates}>
 					{$sliceToEdit ? "Update Slice" : "Create Slice"}
 				</Button>
 				<Button
