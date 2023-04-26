@@ -7,6 +7,7 @@
 	} from "@mdi/js";
 	import CircularProgress from "@smui/circular-progress";
 	import { Svg } from "@smui/common";
+	import Button from "@smui/button";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
 	import { tooltip } from "@svelte-plugins/tooltips";
@@ -18,8 +19,10 @@
 		type HistogramEntry,
 	} from "../api/metadata";
 	import { getMetricsForSlicesAndTags } from "../api/slice";
-	import { getMetricsForTags } from "../api/tag";
+	import { createNewTag, getMetricsForTags } from "../api/tag";
 	import {
+		editId,
+		editedIds,
 		folders,
 		metric,
 		metricRange,
@@ -54,6 +57,7 @@
 	import SliceCell from "./cells/SliceCell.svelte";
 	import TagCell from "./cells/TagCell.svelte";
 	import MetricRange from "./MetricRange.svelte";
+  import { InitialFocus } from "@smui/dialog";
 
 	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
 		new InternMap([], columnHash);
@@ -424,7 +428,43 @@
 	</div>
 
 	{#each [...$tags.values()] as t}
-		<TagCell tag={t} />
+		{#if $editId === t.tagName}
+			<div style="display: flex; align-items: center">
+				<div style="width: 100%; margin-right: 10px">
+					<TagCell tag={t} />
+				</div>
+				<Button
+					style="background-color: var(--N1); margin-top: 5px; color: white; "
+					on:click={() => {
+						createNewTag($editId, { ids: $editedIds }).then(() => {
+							tags.update((t) => {
+								t.set($editId, {
+									tagName: $editId,
+									folder: "",
+									selectionIds: { ids: $editedIds },
+								});
+								return t;
+							});
+							editId.set(undefined);
+							editedIds.set([]);
+
+							// update tag IDs if a selected tag was edited
+							let s = new Set();
+							//this is to catch for the case when you have intersections between tags
+							//must come after selections is updated
+							$selections.tags.forEach((tag) =>
+								$tags.get(tag).selectionIds.ids.forEach((id) => s.add(id))
+							);
+							let finalArray = [];
+							s.forEach((id) => finalArray.push(id));
+							tagIds.set({ ids: finalArray });
+						});
+					}}
+				>Done</Button>
+			</div>
+		{:else}
+			<TagCell tag={t} />
+		{/if}
 	{/each}
 
 	<div id="metric-header" class="inline" style:margin-top="10px">
@@ -557,5 +597,9 @@
 		height: 24px;
 		cursor: help;
 		fill: var(--G2);
+	}
+	.done-button {
+		background-color: var(--N1); 
+		margin-top: 5px;
 	}
 </style>

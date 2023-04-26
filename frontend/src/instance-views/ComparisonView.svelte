@@ -13,6 +13,7 @@
 		rowsPerPage,
 		selectionIds,
 		selectionPredicates,
+		selections,
 		settings,
 		sort,
 		status,
@@ -57,6 +58,7 @@
 		$sort;
 		$selectionIds;
 		$tagIds;
+		$selections.tags;
 		updateTable();
 	}
 
@@ -96,7 +98,8 @@
 				[start, end],
 				$sort,
 				$tagIds,
-				$selectionIds
+				$selectionIds,
+				$selections.tags
 			);
 		});
 		Promise.all(proms).then((res) => {

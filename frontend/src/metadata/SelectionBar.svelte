@@ -168,33 +168,6 @@
 					<p style="margin: auto; margin-right: 10px">Editing</p>
 					<div class="meta-chip">{$editId}</div>
 				</div>
-				<Button
-					style="background-color: var(--N1)"
-					on:click={() => {
-						createNewTag($editId, { ids: $editedIds }).then(() => {
-							tags.update((t) => {
-								t.set($editId, {
-									tagName: $editId,
-									folder: "",
-									selectionIds: { ids: $editedIds },
-								});
-								return t;
-							});
-							editId.set(undefined);
-							editedIds.set([]);
-
-							// update tag IDs if a selected tag was edited
-							let s = new Set();
-							//this is to catch for the case when you have intersections between tags
-							//must come after selections is updated
-							$selections.tags.forEach((tag) =>
-								$tags.get(tag).selectionIds.ids.forEach((id) => s.add(id))
-							);
-							let finalArray = [];
-							s.forEach((id) => finalArray.push(id));
-							tagIds.set({ ids: finalArray });
-						});
-					}}>Done</Button>
 			{/if}
 		</div>
 	</div>

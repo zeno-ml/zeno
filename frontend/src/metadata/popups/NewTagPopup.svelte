@@ -30,15 +30,10 @@
 				t.set(tagName, <Tag>{
 					tagName,
 					folder,
-					selectionIds: $selectionIds,
+					selectionIds: {ids: [...$selectionIds.ids]},
 				});
 				return t;
 			});
-			// selections.update((sels) => ({
-			// 	slices: [],
-			// 	metadata: sels.metadata,
-			// 	tags: [],
-			// }));
 			showNewTag.set(false);
 		});
 	}

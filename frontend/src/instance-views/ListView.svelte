@@ -77,12 +77,6 @@
 		if (start === undefined || end === undefined) {
 			return;
 		}
-		// let s = new Set()
-		// $selectionIds.ids.forEach(id => s.add(id))
-		// $selections.tags.forEach(tagName => $tags.get(tagName).selectionIds.ids.forEach(id => s.add(id)))
-		// let finalArray = []
-		// s.forEach(id => finalArray.push(id))
-		//selectionIds.set({ids: finalArray})
 
 		getFilteredTable(
 			$status.completeColumns,
