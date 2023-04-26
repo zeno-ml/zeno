@@ -2,15 +2,17 @@
 	import { report, reports, metrics } from "../../../stores";
 	import Svelecte from "svelecte";
 	let options = [];
+	let value = 0;
 	function initialSettings() {
 		// restore all value when fixing dimension with empty options
 		if ($reports[$report].metrics.length === 0) {
-			$reports[$report].metrics = [...$metrics.values(), "size"];
+			$reports[$report].metrics = [$metrics[0]];
 		}
-		// prepare options
-		[...$metrics.values(), "size"].forEach((m) => {
-			options.push({ label: m });
+		// initial options & values
+		[...$metrics.values(), "size"].forEach((m, i) => {
+			options[i] = { value: i, label: m };
 		});
+		value = options.find((o) => o.label === $reports[$report].metrics[0]).value;
 	}
 	$: initialSettings();
 </script>
@@ -19,9 +21,8 @@
 	<h4 class="select-label">&nbsp;</h4>
 	<Svelecte
 		style="width: 280px; flex:none;"
-		value={$reports[$report].metrics[0]}
+		bind:value
 		{options}
-		searchable={false}
 		on:change={(e) => {
 			if (e.detail.label !== $reports[$report].metrics[0]) {
 				let tmpMetrics = $reports[$report].metrics;

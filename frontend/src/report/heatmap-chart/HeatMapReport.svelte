@@ -91,7 +91,12 @@
 				<VegaLite
 					spec={generateSpec(parameters, selectMetric)}
 					data={chartData}
-					options={{ tooltip: true }} />
+					options={{
+						actions: { source: false, editor: false, compiled: false },
+						scaleFactor: {
+							png: 3,
+						},
+					}} />
 			{/await}
 		{:else}
 			{#await modelResults then res}
@@ -108,7 +113,12 @@
 				<VegaLite
 					spec={generateSliceVsSliceSpec(selectMetric)}
 					data={chartData}
-					options={{ tooltip: true }} />
+					options={{
+						actions: { source: false, editor: false, compiled: false },
+						scaleFactor: {
+							png: 3,
+						},
+					}} />
 			{/await}
 		{/if}
 	</div>

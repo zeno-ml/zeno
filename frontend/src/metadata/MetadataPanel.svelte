@@ -386,7 +386,7 @@
 		<FolderCell {folder} />
 	{/each}
 
-	{#each [...$slices.values()].filter((s) => s.folder === "") as s (s.sliceName)}
+	{#each [...$slices.values()].filter((s) => s.folder === "" && s.sliceName !== "All Instances") as s (s.sliceName)}
 		<SliceCell slice={s} />
 	{/each}
 

@@ -97,8 +97,8 @@ def run_inference(
             # Check if we also get embedding
             if out.embedding is not None:
                 for j, idx in enumerate(to_predict_indices[i : i + batch_size]):
-                    model_col.at[idx] = out.model_output[j]
-                    embedding_col.at[idx] = out.embedding[j]
+                    model_col.at[idx] = out.model_output[j]  # noqa: PD008
+                    embedding_col.at[idx] = out.embedding[j]  # noqa: PD008
 
                 embedding_col.to_pickle(str(embedding_save_path))
             else:
@@ -134,9 +134,9 @@ def run_inference(
             model_col.to_pickle(str(model_save_path))
 
     ret = [DataProcessingReturn(column=model_col_obj, output=model_col)]
-    if not embedding_col.isnull().values.any():  # type: ignore
+    if not embedding_col.isna().to_numpy().any():  # type: ignore
         ret.append(DataProcessingReturn(column=embedding_col_obj, output=embedding_col))
-    for k, v in other_return_cols.items():  # type: ignore
+    for k, v in other_return_cols.items():
         ret.append(DataProcessingReturn(column=v, output=df[str(v)]))
 
     return ret

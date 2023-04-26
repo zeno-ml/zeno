@@ -1,4 +1,4 @@
-all: lint typecheck clean
+all: lint typecheck test
 
 .PHONY: install
 install:
@@ -10,15 +10,13 @@ install:
 lint:
 	@echo "==> 👕 Linting"
 	@poetry check
-	@poetry run black zeno/
-	@poetry run usort format zeno/
-	@poetry run flake8 zeno --statistics
+	@poetry run black --check zeno/
+	@poetry run ruff check zeno/
 	@cd frontend && npm run lint
 
 .PHONY: typecheck
 typecheck:
 	@echo "==> ✅ Type checks"
-	@poetry run mypy -p zeno 
 	@poetry run pyright zeno 
 	@cd frontend && npm run check
 
@@ -26,7 +24,6 @@ typecheck:
 test:
 	@echo "==> 🧪 Tests"
 	@poetry run pytest -svv zeno/tests/
-	@cd frontend && npm run test
 
 .PHONY: build
 build:
@@ -43,7 +40,7 @@ build:
 clean:
 	@rm -rf dist
 	@rm -rf ./.zeno_cache
-	@find . -type d -name '.mypy_cache' -exec rm -rf {} +
+	@rm -rf ./.ruff_cache
 	@find . -type d -name '__pycache__' -exec rm -rf {} +
 	@find . -type d -name '*pytest_cache*' -exec rm -rf {} +
 	@find . -type f -name "*.py[co]" -exec rm -rf {} +

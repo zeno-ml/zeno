@@ -30,13 +30,17 @@ def get_filter_string(filter: FilterPredicateGroup) -> str:
             if f.operation == "match":
                 filt = (
                     filt
-                    + "{} (`{}`.str.contains('{}', na=False, regex=False))".format(
+                    + "{} (`{}`.astype('string').str.contains('{}', na=False,".format(
                         f.join, f.column, f.value
                     )
+                    + "regex=False, case=False))"
                 )
             elif f.operation == "match (regex)":
-                filt = filt + "{} (`{}`.str.contains('{}', na=False))".format(
-                    f.join, f.column, f.value
+                filt = (
+                    filt
+                    + "{} (`{}`.astype('string').str.contains('{}', na=False))".format(
+                        f.join, f.column, f.value
+                    )
                 )
             else:
                 try:
@@ -56,7 +60,7 @@ def get_filter_string(filter: FilterPredicateGroup) -> str:
 
 
 def filter_table(
-    df,
+    main_df,
     filter_predicates: Optional[FilterPredicateGroup] = None,
     list_ids_first: Optional[FilterIds] = None,
     list_ids_second: Optional[FilterIds] = None,
@@ -70,20 +74,20 @@ def filter_table(
     # if we have ids, filter them out now!
     if len(allIndicies) > 0:
         # make sure the ids we are querying exist
-        existingIds = df.index.intersection(allIndicies)
+        existingIds = main_df.index.intersection(allIndicies)
         # this is fast because the index is set to ids
-        df = df.loc[existingIds]
+        main_df = main_df.loc[existingIds]
     
-    # empty tags
+    # empty selected tags so always return empty table
     if len(allIndicies) == 0 and tag_list is not None and len(tag_list) > 0:
-        return df.iloc[0:0]
+        return main_df.iloc[0:0]
 
     if filter_predicates is not None:
         final_filter = get_filter_string(filter_predicates)
         if len(final_filter) > 0:
-            return df.query(final_filter)
+            return main_df.query(final_filter, engine="python")
 
-    return df
+    return main_df
 
 
 def filter_table_single(df: DataFrame, col: ZenoColumn, bucket: HistogramBucket):

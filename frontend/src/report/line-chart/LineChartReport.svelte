@@ -49,9 +49,12 @@
 				spec={generateSpec(parameters, selectMetrics)}
 				data={chartData}
 				options={{
-					tooltip: true,
+					actions: { source: false, editor: false, compiled: false },
 					width: 1000,
 					height: 400,
+					scaleFactor: {
+						png: 3,
+					},
 				}} />
 		{/await}
 	</div>

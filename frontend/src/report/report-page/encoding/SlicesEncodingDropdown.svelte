@@ -2,17 +2,19 @@
 	import { report, reports, slices } from "../../../stores";
 	import Svelecte from "svelecte";
 	let options = [];
-	let selectSliceName = "";
+	let value = 0;
 	function initialSettings() {
-		// restore all value when fixing dimension with empty options
+		// restore default first value when fixing dimension with empty options
 		if ($reports[$report].slices.length === 0) {
-			$reports[$report].slices = [...$slices.values()];
+			$reports[$report].slices = [...Array.from($slices.values()).slice(0, 1)];
 		}
-		// prepare options
-		$slices.forEach((s) => {
-			options.push({ label: s.sliceName });
+		// initial options & values
+		[...$slices.values()].forEach((s, i) => {
+			options[i] = { value: i, label: s.sliceName };
 		});
-		selectSliceName = $reports[$report].slices[0].sliceName;
+		value = options.find(
+			(o) => o.label === $reports[$report].slices[0].sliceName
+		).value;
 	}
 	$: initialSettings();
 </script>
@@ -21,11 +23,10 @@
 	<h4 class="select-label">&nbsp;</h4>
 	<Svelecte
 		style="width: 280px; flex:none;"
-		value={selectSliceName}
+		bind:value
 		{options}
-		searchable={false}
 		on:change={(e) => {
-			if (e.detail.label !== selectSliceName) {
+			if (e.detail.label !== $reports[$report].slices[0].sliceName) {
 				let tmpSlices = $reports[$report].slices;
 				tmpSlices = tmpSlices.filter((p) => p.sliceName !== e.detail.label);
 				tmpSlices.unshift($slices.get(e.detail.label));
