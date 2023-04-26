@@ -11,6 +11,7 @@
 		editedIds,
 		model,
 		rowsPerPage,
+		selections,
 		selectionIds,
 		selectionPredicates,
 		settings,
@@ -64,6 +65,7 @@
 	// update on page, metadata selection, slice selection, or state change.
 	$: {
 		$status.completeColumns;
+		$selections.tags;
 		$selectionPredicates;
 		$model;
 		$sort;
@@ -90,7 +92,8 @@
 			[start, end],
 			$sort,
 			$tagIds,
-			$selectionIds
+			$selectionIds,
+			$selections.tags
 		).then((res) => {
 			table = res;
 			if (body) {

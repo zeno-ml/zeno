@@ -214,7 +214,7 @@ def get_server(zeno: ZenoBackend):
     @api_app.post("/slice-tag-metrics", response_model=List[GroupMetric], tags=["zeno"])
     def get_metrics_for_slices_and_tags(req: MetricRequest):
         return zeno.get_metrics_for_slices_and_tags(
-            req.metric_keys, req.tag_ids, req.filter_ids
+            req.metric_keys, req.tag_ids, req.filter_ids, req.tag_list
         )
 
     @api_app.post("/tag-metrics", response_model=List[GroupMetric], tags=["zeno"])

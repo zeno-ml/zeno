@@ -13,4 +13,5 @@ export type HistogramRequest = {
 	metric?: string;
 	tagIds?: FilterIds;
 	filterIds?: FilterIds;
+	tagList?: Array<string>;
 };

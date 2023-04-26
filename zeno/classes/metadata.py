@@ -21,6 +21,7 @@ class HistogramRequest(CamelModel):
     metric: Union[None, str] = None
     tag_ids: Optional[FilterIds] = None
     filter_ids: Optional[FilterIds] = None
+    tag_list: Optional[List[str]] = None
 
 
 class StringFilterRequest(CamelModel):

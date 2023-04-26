@@ -64,7 +64,8 @@ export async function getHistogramCounts(
 	histograms: InternMap<ZenoColumn, HistogramEntry[]>,
 	filterPredicates: FilterPredicateGroup,
 	tagIds?: FilterIds,
-	filterIds?: FilterIds
+	filterIds?: FilterIds,
+	tagList?: Array<string>,
 ): Promise<number[][]> {
 	const columnRequests = [...histograms.entries()].map(([k, v]) => ({
 		column: k,
@@ -80,6 +81,7 @@ export async function getHistogramCounts(
 			filterPredicates,
 			tagIds,
 			filterIds,
+			tagList,
 		});
 		const out = await histogramCountRequest;
 		requestingHistogramCounts.set(false);
@@ -120,7 +122,8 @@ export async function getHistogramMetrics(
 	model: string,
 	metric: string,
 	tagIds: FilterIds,
-	filterIds?: FilterIds
+	filterIds?: FilterIds,
+	tagList?: Array<string>,
 ): Promise<number[][]> {
 	if (
 		metric === "" ||
@@ -144,6 +147,7 @@ export async function getHistogramMetrics(
 			metric,
 			tagIds,
 			filterIds,
+			tagList,
 		});
 		requestingHistogramCounts.set(true);
 		const res = await histogramMetricRequest;

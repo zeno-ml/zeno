@@ -85,7 +85,7 @@
 	// Get histogram buckets, counts, and metrics when columns update.
 	status.subscribe((s) => {
 		getHistograms(s.completeColumns, $model).then((res) => {
-			getHistogramCounts(res, null, $tagIds, $selectionIds).then((res) => {
+			getHistogramCounts(res, null, $tagIds, $selectionIds, $selections.tags).then((res) => {
 				if (res === undefined) {
 					return;
 				}
@@ -96,7 +96,8 @@
 					$model,
 					$metric,
 					$tagIds,
-					$selectionIds
+					$selectionIds,
+					$selections.tags
 				).then((res) => {
 					if (res !== undefined) {
 						metadataHistograms = res;
@@ -118,7 +119,8 @@
 			$model,
 			metric,
 			$tagIds,
-			$selectionIds
+			$selectionIds,
+			$selections.tags
 		).then((res) => {
 			if (res === undefined) {
 				return;
@@ -134,12 +136,12 @@
 		}
 		selections.set({ metadata: {}, slices: [], tags: [] });
 		getHistograms($status.completeColumns, model).then((res) => {
-			getHistogramCounts(res, null, null, null).then((res) => {
+			getHistogramCounts(res, null, null, null, null).then((res) => {
 				if (res === undefined) {
 					return;
 				}
 				metadataHistograms = res;
-				getHistogramMetrics(res, null, model, $metric, null, null).then(
+				getHistogramMetrics(res, null, model, $metric, null, null, null).then(
 					(res) => {
 						if (res === undefined) {
 							return;
@@ -163,7 +165,8 @@
 				join: "",
 			},
 			$tagIds,
-			selectionIds
+			selectionIds,
+			$selections.tags
 		).then((res) => {
 			if (res === undefined) {
 				return;
@@ -179,7 +182,8 @@
 				$model,
 				$metric,
 				$tagIds,
-				selectionIds
+				selectionIds,
+				$selections.tags
 			).then((res) => {
 				if (res === undefined) {
 					return;
@@ -201,7 +205,8 @@
 				join: "",
 			},
 			tIds,
-			$selectionIds
+			$selectionIds,
+			$selections.tags
 		).then((res) => {
 			if (res === undefined) {
 				return;
@@ -217,7 +222,8 @@
 				$model,
 				$metric,
 				tIds,
-				$selectionIds
+				$selectionIds,
+				$selections.tags
 			).then((res) => {
 				if (res === undefined) {
 					return;
@@ -239,7 +245,8 @@
 				join: "&",
 			},
 			$tagIds,
-			$selectionIds
+			$selectionIds,
+			$selections.tags
 		).then((res) => {
 			if (res === undefined) {
 				return;
@@ -255,7 +262,8 @@
 				$model,
 				$metric,
 				$tagIds,
-				$selectionIds
+				$selectionIds,
+				$selections.tags
 			).then((res) => {
 				if (res === undefined) {
 					return;

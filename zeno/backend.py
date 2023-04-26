@@ -446,13 +446,13 @@ class ZenoBackend(object):
         requests: List[MetricKey],
         tag_ids: Optional[FilterIds] = None,
         filter_ids: Optional[FilterIds] = None,
+        tag_list: Optional[List[str]] = None,
     ) -> List[GroupMetric]:
         """Calculate result for each requested combination."""
-
         return_metrics: List[GroupMetric] = []
         for metric_key in requests:
             filt_df = filter_table(
-                self.df, metric_key.sli.filter_predicates, tag_ids, filter_ids
+                self.df, metric_key.sli.filter_predicates, tag_ids, filter_ids, tag_list
             )
             if metric_key.metric == "" or self.label_column.name == "":
                 return_metrics.append(GroupMetric(metric=None, size=filt_df.shape[0]))
@@ -471,6 +471,9 @@ class ZenoBackend(object):
             if tag_metric_key.metric == "" or self.label_column.name == "":
                 return_metrics.append(GroupMetric(metric=None, size=filt_df.shape[0]))
             else:
+                #if the tag is empty
+                if(len(tag_metric_key.tag.selection_ids.ids) == 0):
+                    filt_df = self.df.iloc[0:0]
                 metric = self.calculate_metric(
                     filt_df, tag_metric_key.model, tag_metric_key.metric
                 )
@@ -584,7 +587,7 @@ class ZenoBackend(object):
     def get_filtered_table(self, req: TableRequest):
         """Return filtered table from list of filter predicates."""
         filt_df = filter_table(
-            self.df, req.filter_predicates, req.filter_ids, req.tag_ids
+            self.df, req.filter_predicates, req.filter_ids, req.tag_ids, req.tag_list
         )
         if req.sort[0]:
             filt_df = filt_df.sort_values(str(req.sort[0]), ascending=req.sort[1])

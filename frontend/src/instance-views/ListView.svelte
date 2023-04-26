@@ -91,7 +91,8 @@
 			[start, end],
 			$sort,
 			$tagIds,
-			$selectionIds
+			$selectionIds,
+			$selections.tags
 		).then((res) => (table = res));
 	}
 

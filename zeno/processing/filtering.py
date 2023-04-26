@@ -1,5 +1,5 @@
 """Functions for parsing filter predicates and filtering dataframes"""
-from typing import Optional
+from typing import Optional, List
 
 import pandas as pd
 from pandas import DataFrame
@@ -60,6 +60,7 @@ def filter_table(
     filter_predicates: Optional[FilterPredicateGroup] = None,
     list_ids_first: Optional[FilterIds] = None,
     list_ids_second: Optional[FilterIds] = None,
+    tag_list: Optional[List[str]] = None,
 ) -> pd.DataFrame:
     allIndicies = []  # type: ignore
     if list_ids_first is not None and len(list_ids_first.ids) > 0:
@@ -72,6 +73,10 @@ def filter_table(
         existingIds = df.index.intersection(allIndicies)
         # this is fast because the index is set to ids
         df = df.loc[existingIds]
+    
+    # empty tags
+    if len(allIndicies) == 0 and tag_list is not None and len(tag_list) > 0:
+        return df.iloc[0:0]
 
     if filter_predicates is not None:
         final_filter = get_filter_string(filter_predicates)

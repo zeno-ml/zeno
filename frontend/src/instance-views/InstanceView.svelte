@@ -8,6 +8,7 @@
 	import { getMetricsForSlicesAndTags } from "../api/slice";
 	import {
 		editId,
+		selections,
 		selectionIds,
 		selectionPredicates,
 		tagIds,
@@ -67,7 +68,8 @@
 			},
 		],
 		$tagIds,
-		$selectionIds
+		$selectionIds,
+		$selections.tags
 	);
 
 	// change selected to table if a tag is edited

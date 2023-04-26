@@ -81,7 +81,8 @@ export async function getMetricsForSlices(
 export async function getMetricsForSlicesAndTags(
 	metricKeys: MetricKey[],
 	tagIds?: FilterIds,
-	filterIds?: FilterIds
+	filterIds?: FilterIds,
+	tagList?: String[],
 ): Promise<GroupMetric[]> {
 	if (metricKeys.length === 0) {
 		return null;
@@ -94,12 +95,12 @@ export async function getMetricsForSlicesAndTags(
 	}
 	// Update model in predicates if slices are dependent on postdistill columns.
 	metricKeys = setModelForMetricKeys(metricKeys);
-
 	if (metricKeys.length > 0) {
 		return await ZenoService.getMetricsForSlicesAndTags({
 			metricKeys,
 			tagIds,
 			filterIds,
+			tagList,
 		});
 	}
 }

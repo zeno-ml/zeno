@@ -42,6 +42,7 @@ class MetricRequest(CamelModel):
     metric_keys: List[MetricKey]
     tag_ids: Optional[FilterIds] = None
     filter_ids: Optional[FilterIds] = None
+    tag_list: Optional[List[str]] = None
 
 
 class TableRequest(CamelModel):
@@ -51,6 +52,7 @@ class TableRequest(CamelModel):
     sort: Tuple[Union[ZenoColumn, None], bool]
     tag_ids: FilterIds
     filter_ids: Optional[FilterIds] = None
+    tag_list: List[str]
 
 
 class PlotRequest(CamelModel):

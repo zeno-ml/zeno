@@ -13,7 +13,8 @@ export async function getFilteredTable(
 	sliceRange: [number, number],
 	sort: [ZenoColumn, boolean],
 	tagIds: FilterIds,
-	filterIds?: FilterIds
+	filterIds?: FilterIds,
+	tagList?: Array<string>,
 ) {
 	const requestedColumns = completeColumns.filter(
 		(c) =>
@@ -30,6 +31,7 @@ export async function getFilteredTable(
 		sort,
 		tagIds,
 		filterIds,
+		tagList
 	});
 	return JSON.parse(res);
 }
