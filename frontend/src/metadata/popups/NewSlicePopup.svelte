@@ -23,9 +23,22 @@
 	// check if predicates are valid (not empty)
 	function checkValidPredicates(preds) {
 		let valid = true;
-		preds.forEach((p) => {
-			if (p["column"] === null || p["operation"] === "" || p["value"] === "") {
+		preds.forEach((p, i) => {
+			if (i !== 0 && p["join"] === "") {
 				valid = false;
+			} else {
+				if (p["predicates"]) {
+					valid = checkValidPredicates(p["predicates"]);
+				} else {
+					if (
+						p["column"] === null ||
+						p["operation"] === "" ||
+						p["value"] === "" ||
+						p["value"] === null
+					) {
+						valid = false;
+					}
+				}
 			}
 		});
 		return valid;
@@ -45,6 +58,7 @@
 			predicateGroup = $sliceToEdit.filterPredicates;
 			folder = $sliceToEdit.folder;
 			originalName = sliceName;
+			// deep copy of predicate group to avoid sharing nested objects
 			originalPredicates = JSON.parse(JSON.stringify(predicateGroup));
 
 			// revert to original settings when close the slice popup w/ invalid predicates
@@ -60,13 +74,28 @@
 			.filter((d) => d.predicates.length > 0)
 			.flat()
 			.map((d, i) => {
-				if (i !== 0) {
+				if (i !== 0 || $selections.slices.length > 0) {
 					d.join = "&";
-				} else {
-					d.join = "";
 				}
 				return d;
 			});
+
+		// if slices are not empty in $selections
+		if ($selections.slices.length > 0) {
+			let slicesPredicates: FilterPredicateGroup = { predicates: [], join: "" };
+			$selections.slices.forEach((s, i) => {
+				let sli_preds = $slices.get(s).filterPredicates;
+				if (i !== 0) {
+					sli_preds.join = "&";
+				}
+				slicesPredicates.predicates.push(sli_preds);
+			});
+			slicesPredicates.predicates = [
+				...slicesPredicates.predicates,
+				...predicateGroup.predicates,
+			];
+			predicateGroup = slicesPredicates;
+		}
 
 		// If no predicates, add an empty one.
 		if (predicateGroup.predicates.length === 0) {

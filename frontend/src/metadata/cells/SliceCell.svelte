@@ -170,10 +170,7 @@
 			</div>
 			<div class="group">
 				{#if showOptions}
-					<div
-						id="options-container"
-						use:clickOutside
-						on:click_outside={() => (showOptions = !showOptions)}>
+					<div id="options-container">
 						<Paper style="padding: 3px 0px;" elevation={7}>
 							<Content>
 								<div
@@ -238,7 +235,10 @@
 					<div
 						style:width="36px"
 						use:clickOutside
-						on:click_outside={() => (hovering = false)}>
+						on:click_outside={() => {
+							showOptions = false;
+							hovering = false;
+						}}>
 						{#if hovering}
 							<IconButton
 								size="button"
