@@ -230,23 +230,23 @@
 					{/await}
 				{/if}
 				{#if $editId !== tag.tagName}
-				<div class="inline" style:cursor="pointer">
-					<div style:width="36px">
-						{#if hovering}
-							<IconButton
-								size="button"
-								style="padding: 0px"
-								on:click={(e) => {
-									e.stopPropagation();
-									showOptions = !showOptions;
-								}}>
-								<Icon component={Svg} viewBox="0 0 24 24">
-									<path fill="black" d={mdiDotsHorizontal} />
-								</Icon>
-							</IconButton>
-						{/if}
+					<div class="inline" style:cursor="pointer">
+						<div style:width="36px">
+							{#if hovering}
+								<IconButton
+									size="button"
+									style="padding: 0px"
+									on:click={(e) => {
+										e.stopPropagation();
+										showOptions = !showOptions;
+									}}>
+									<Icon component={Svg} viewBox="0 0 24 24">
+										<path fill="black" d={mdiDotsHorizontal} />
+									</Icon>
+								</IconButton>
+							{/if}
+						</div>
 					</div>
-				</div>
 				{/if}
 			</div>
 		</div>

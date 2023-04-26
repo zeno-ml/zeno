@@ -8,21 +8,18 @@
 	import {
 		metric,
 		editId,
-		editedIds,
 		selectionIds,
 		selectionPredicates,
 		selections,
 		settings,
 		status,
 		tagIds,
-		tags,
 	} from "../stores";
 	import { ZenoService, type FilterPredicate } from "../zenoservice";
 	import IdsChip from "./chips/IdsChip.svelte";
 	import MetadataChip from "./chips/MetadataChip.svelte";
 	import SliceChip from "./chips/SliceChip.svelte";
 	import TagChip from "./chips/TagChip.svelte";
-	import { createNewTag } from "../api/tag";
 
 	export let currentResult;
 	export let selected = "list";

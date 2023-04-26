@@ -66,7 +66,9 @@ def histogram_buckets(
 def histogram_counts(df: pd.DataFrame, req: HistogramRequest) -> List[List[int]]:
     """Calculate count for each bucket in each column histogram."""
     if req.filter_predicates is not None:
-        filt_df = filter_table(df, req.filter_predicates, req.tag_ids, req.filter_ids, req.tag_list)
+        filt_df = filter_table(
+            df, req.filter_predicates, req.tag_ids, req.filter_ids, req.tag_list
+        )
     else:
         filt_df = df
 
@@ -123,7 +125,9 @@ def histogram_metrics(
         return []
 
     if req.filter_predicates is not None:
-        filt_df = filter_table(df, req.filter_predicates, req.tag_ids, req.filter_ids, req.tag_list)
+        filt_df = filter_table(
+            df, req.filter_predicates, req.tag_ids, req.filter_ids, req.tag_list
+        )
     else:
         filt_df = df
 

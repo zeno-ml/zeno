@@ -65,7 +65,7 @@ export async function getHistogramCounts(
 	filterPredicates: FilterPredicateGroup,
 	tagIds?: FilterIds,
 	filterIds?: FilterIds,
-	tagList?: Array<string>,
+	tagList?: Array<string>
 ): Promise<number[][]> {
 	const columnRequests = [...histograms.entries()].map(([k, v]) => ({
 		column: k,
@@ -123,7 +123,7 @@ export async function getHistogramMetrics(
 	metric: string,
 	tagIds: FilterIds,
 	filterIds?: FilterIds,
-	tagList?: Array<string>,
+	tagList?: Array<string>
 ): Promise<number[][]> {
 	if (
 		metric === "" ||

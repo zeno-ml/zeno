@@ -30,7 +30,7 @@
 				t.set(tagName, <Tag>{
 					tagName,
 					folder,
-					selectionIds: {ids: [...$selectionIds.ids]},
+					selectionIds: { ids: [...$selectionIds.ids] },
 				});
 				return t;
 			});

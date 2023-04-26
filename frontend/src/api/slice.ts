@@ -82,7 +82,7 @@ export async function getMetricsForSlicesAndTags(
 	metricKeys: MetricKey[],
 	tagIds?: FilterIds,
 	filterIds?: FilterIds,
-	tagList?: String[],
+	tagList?: string[]
 ): Promise<GroupMetric[]> {
 	if (metricKeys.length === 0) {
 		return null;

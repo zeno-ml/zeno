@@ -517,15 +517,14 @@ class ZenoBackend(object):
         return return_metrics
 
     def get_metrics_for_tags(self, requests: List[TagMetricKey]) -> List[GroupMetric]:
-
         return_metrics: List[GroupMetric] = []
         for tag_metric_key in requests:
             filt_df = filter_table(self.df, None, tag_metric_key.tag.selection_ids)
             if tag_metric_key.metric == "" or self.label_column.name == "":
                 return_metrics.append(GroupMetric(metric=None, size=filt_df.shape[0]))
             else:
-                #if the tag is empty
-                if(len(tag_metric_key.tag.selection_ids.ids) == 0):
+                # if the tag is empty
+                if len(tag_metric_key.tag.selection_ids.ids) == 0:
                     filt_df = self.df.iloc[0:0]
                 metric = self.calculate_metric(
                     filt_df, tag_metric_key.model, tag_metric_key.metric

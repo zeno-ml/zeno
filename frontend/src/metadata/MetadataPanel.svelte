@@ -57,7 +57,6 @@
 	import SliceCell from "./cells/SliceCell.svelte";
 	import TagCell from "./cells/TagCell.svelte";
 	import MetricRange from "./MetricRange.svelte";
-  import { InitialFocus } from "@smui/dialog";
 
 	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
 		new InternMap([], columnHash);
@@ -89,7 +88,13 @@
 	// Get histogram buckets, counts, and metrics when columns update.
 	status.subscribe((s) => {
 		getHistograms(s.completeColumns, $model).then((res) => {
-			getHistogramCounts(res, null, $tagIds, $selectionIds, $selections.tags).then((res) => {
+			getHistogramCounts(
+				res,
+				null,
+				$tagIds,
+				$selectionIds,
+				$selections.tags
+			).then((res) => {
 				if (res === undefined) {
 					return;
 				}
@@ -459,8 +464,7 @@
 							s.forEach((id) => finalArray.push(id));
 							tagIds.set({ ids: finalArray });
 						});
-					}}
-				>Done</Button>
+					}}>Done</Button>
 			</div>
 		{:else}
 			<TagCell tag={t} />
@@ -599,7 +603,7 @@
 		fill: var(--G2);
 	}
 	.done-button {
-		background-color: var(--N1); 
+		background-color: var(--N1);
 		margin-top: 5px;
 	}
 </style>
