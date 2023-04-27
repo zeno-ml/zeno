@@ -1,6 +1,5 @@
 <script lang="ts">
 	import Paper from "@smui/paper";
-	import { beforeUpdate, afterUpdate } from "svelte";
 	import { fade } from "svelte/transition";
 	import { Label } from "@smui/common";
 	import Chip from "@smui/chips";
@@ -12,9 +11,10 @@
 	import { mdiPlus, mdiClose } from "@mdi/js";
 	import { Pagination } from "@smui/data-table";
 	import { showSliceFinder } from "../../stores";
-	import { ZenoService } from "../../zenoservice";
-	import { model } from "../../stores";
+	import { model, metric } from "../../stores";
 	import Button from "@smui/button";
+	import { getMetricsForSlices } from "../../api/slice";
+	import { ZenoService, type MetricKey } from "../../zenoservice";
 
 	let currentResult;
 	let currentPage = 1;
@@ -22,12 +22,12 @@
 	let slice_data = [];
 	let sampleOptions = [5, 10, 20].sort((a, b) => a - b);
 	// dummy data for presenting frontend UI
-	let minimumSizes = ["2", "3", "5", "7", "9"];
+	let minimumSizes = ["2", "3", "4", "5", "6", "7"];
 	let minimumSize = "5";
-	let max_ls = ["4", "5", "6", "8"];
+	let max_ls = ["4", "5", "6", "7", "8"];
 	let max_l = "5";
 	let sliceFinderKeys = [""];
-	let sliceFinderKey = "";
+	let sliceFinderKey = "general";
 	let orderBys = ["ascending", "descending"];
 	let orderBy = "ascending";
 
@@ -43,7 +43,6 @@
 
 	export async function addSliceAtIndex(index) {
 		let slice = sets.slices_of_interest[index];
-		console.log(slice);
 
 		ZenoService.createNewSlice(slice).then(() => {
 			slices.update((s) => {
@@ -67,11 +66,23 @@
 			model: $model,
 			columnName: sliceFinderKey ? sliceFinderKey : "",
 		});
-		console.log(sets);
+		let all_metrics = [];
+		for (let i = 0; i < sets.slices_of_interest.length; i++) {
+			let curr_slice = sets.slices_of_interest[i];
+			let curr_metric = await getMetricsForSlices([
+				<MetricKey>{
+					sli: curr_slice,
+					model: $model,
+					metric: $metric,
+				},
+			]);
+			all_metrics.push(curr_metric);
+		}
 		document.getElementById("generate-slices").innerHTML = "";
 		slice_data_generator(
 			sets.list_of_trained_elements,
-			sets.slices_of_interest
+			sets.slices_of_interest,
+			all_metrics
 		);
 	}
 
@@ -84,12 +95,16 @@
 	export async function get_all_valid_columns() {
 		dataframeKeyValuePair = await ZenoService.getColumnsWithSummary();
 		sliceFinderKeys = Object.keys(dataframeKeyValuePair);
+		sliceFinderKeys.push("general");
 		sliceFinderKeys = sliceFinderKeys;
-		console.log(dataframeKeyValuePair);
-		sliceFinderKey = Object.keys(dataframeKeyValuePair)[0];
+		sliceFinderKey = "general";
 	}
 
-	function slice_data_generator(predicateList = [], slices_of_interest = []) {
+	function slice_data_generator(
+		predicateList = [],
+		slices_of_interest = [],
+		all_metrics = []
+	) {
 		// demo page
 		slice_data = [];
 		if (predicateList.length === 0) {
@@ -102,8 +117,8 @@
 				predicate.push(predicateList[0]);
 				let data = {
 					predicate: predicate,
-					number_1: 0,
-					number_2: 0,
+					slice_size: 0,
+					accuracy_rate: 0,
 					index: i,
 				};
 				slice_data.push(data);
@@ -111,12 +126,9 @@
 		} else {
 			start = 0;
 			end = slices_of_interest.length;
-			console.log(slices_of_interest);
 			slice_data = [];
 			for (let i = 0; i < slices_of_interest.length; i++) {
 				let predicate = [];
-				console.log(slices_of_interest);
-
 				let predicates_store =
 					slices_of_interest[i].filterPredicates.predicates;
 				for (let k = 0; k < predicates_store.length; k++) {
@@ -126,11 +138,10 @@
 							predicates_store[k].value
 					);
 				}
-				//}
 				let data = {
 					predicate: predicate,
-					number_1: 0,
-					number_2: 0,
+					slice_size: all_metrics[i][0].size,
+					accuracy_rate: all_metrics[i][0].metric,
 					index: i,
 				};
 				slice_data.push(data);
@@ -223,10 +234,10 @@
 							</Icon>
 						</IconButton>
 					</span>
-					<span class="rightElement" style="margin-top:10px;"
-						>{"" + element.number_2 * 100 + "%"}</span>
 					<span class="rightElement" style="margin-top:10px;color:gray;"
-						>{"(" + element.number_1 + ")"}</span>
+						>{"(" + element.slice_size + ")"}</span>
+					<span class="rightElement" style="margin-top:10px;"
+						>{"" + Math.round(element.accuracy_rate * 100) / 100.0 + "%"}</span>
 				</div>
 			{/each}
 		</div>
@@ -277,6 +288,7 @@
 	#slice-finder-container {
 		position: fixed;
 		top: 8vh;
+		margin-left: 10vw;
 		z-index: 10;
 		min-width: 70vw;
 	}
@@ -302,7 +314,7 @@
 		height: 500vh;
 		margin-left: -100vw;
 		margin-top: -100vh;
-		z-index: 1;
+		z-index: 9;
 	}
 	.metrics :global(.label) {
 		background-color: rgba(230, 222, 237, 1);

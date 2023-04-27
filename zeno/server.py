@@ -12,7 +12,7 @@ from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
 
-from zeno import MetricReturn, SliceFinderMetricReturn
+from zeno import SliceFinderMetricReturn
 
 from zeno.backend import ZenoBackend
 from zeno.classes.base import ZenoColumn
@@ -42,7 +42,7 @@ from zeno.processing.projection_processing import (
     project_into_2D,
     projection_colors,
 )
-from zeno.processing.slice_finder import slice_finder, get_column_name_with_summary
+from zeno.processing.slice_finder import get_column_name_with_summary, slice_finder
 
 
 def custom_generate_unique_id(route: APIRoute):
@@ -200,14 +200,14 @@ def get_server(zeno: ZenoBackend):
     def project_embed_into_2D(req: EmbedProject2DRequest):
         return project_into_2D(zeno.df, zeno.id_column, req.model, req.column)
 
-    @api_app.post("/slice-finder-project", tags=["zeno"],
-                  response_model=SliceFinderMetricReturn)
+    @api_app.post(
+        "/slice-finder-project", tags=["zeno"], response_model=SliceFinderMetricReturn
+    )
     def project_find_available_slices(req: SliceFinderRequest):
         return slice_finder(
             zeno.df, req, zeno.zeno_options, zeno.postdistill_functions, zeno.columns
         )
-    
-    
+
     @api_app.get("/get-columns-with-summary", tags=["zeno"])
     def get_columns_with_summary():
         return get_column_name_with_summary(zeno.df, zeno.columns)

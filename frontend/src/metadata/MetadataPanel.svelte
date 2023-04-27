@@ -384,7 +384,7 @@
 	#metric-header {
 		position: sticky;
 		top: 40px;
-		z-index: 0;
+		z-index: 2;
 		border-bottom: 0.5px solid var(--G5);
 		background-color: var(--Y2);
 	}

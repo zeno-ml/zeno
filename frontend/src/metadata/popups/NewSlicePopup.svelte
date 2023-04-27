@@ -58,7 +58,6 @@
 				join: "",
 			});
 		}
-		console.log(predicateGroup.predicates);
 	}
 
 	function createSlice() {
