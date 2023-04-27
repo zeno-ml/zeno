@@ -168,7 +168,12 @@
 					{slice.sliceName}
 				</div>
 			</div>
-			<div class="group">
+			<div
+				class="group"
+				use:clickOutside
+				on:click_outside={() => {
+					showOptions = false;
+				}}>
 				{#if showOptions}
 					<div id="options-container">
 						<Paper style="padding: 3px 0px;" elevation={7}>
@@ -236,7 +241,6 @@
 						style:width="36px"
 						use:clickOutside
 						on:click_outside={() => {
-							showOptions = false;
 							hovering = false;
 						}}>
 						{#if hovering}
