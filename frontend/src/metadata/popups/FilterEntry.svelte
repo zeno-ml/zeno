@@ -24,13 +24,11 @@
 				style={"width: 60px"}
 				value={predicate.join}
 				on:change={(e) => {
-					predicate.join = e.detail.label;
-					predicate = predicate;
+					// avoid backspace or delete
+					predicate.join = e.detail !== null ? e.detail.label : "&";
 				}}
-				resetOnBlur={false}
-				placeholder={""}
+				searchable={false}
 				valueField="label"
-				labelField="label"
 				options={["&", "|"]} />
 		</div>
 	{:else}
@@ -42,13 +40,22 @@
 		<Svelecte
 			bind:value={predicate.column}
 			placeholder={"Column"}
-			valueAsObject={true}
+			valueAsObject
+			valueField={"name"}
 			options={$status.completeColumns.filter(
 				(d) =>
 					d.model === $model ||
 					d.columnType === ZenoColumnType.METADATA ||
 					d.columnType === ZenoColumnType.PREDISTILL
-			)} />
+			)}
+			on:change={() => {
+				// assign default value for changing column
+				if (predicate.column.metadataType === MetadataType.OTHER) {
+					predicate.operation = "match";
+				} else {
+					predicate.operation = "==";
+				}
+			}} />
 	</div>
 	<div class="selector">
 		{#if predicate.column}
@@ -56,33 +63,30 @@
 				<Svelecte
 					value={predicate.operation}
 					on:change={(e) => {
-						predicate.operation = e.detail.label;
-						predicate = predicate;
+						predicate.operation = e.detail !== null ? e.detail.label : "==";
 					}}
+					valueField="label"
 					placeholder={"Operation"}
-					valueField={"label"}
 					searchable={false}
 					options={["==", "!="]} />
 			{:else if predicate.column.metadataType === MetadataType.OTHER}
 				<Svelecte
 					value={predicate.operation}
 					on:change={(e) => {
-						predicate.operation = e.detail.label;
-						predicate = predicate;
+						predicate.operation = e.detail !== null ? e.detail.label : "match";
 					}}
+					valueField="label"
 					placeholder={"Operation"}
-					valueField={"label"}
 					searchable={false}
 					options={["match", "match (regex)"]} />
 			{:else}
 				<Svelecte
 					value={predicate.operation}
 					on:change={(e) => {
-						predicate.operation = e.detail.label;
-						predicate = predicate;
+						predicate.operation = e.detail !== null ? e.detail.label : "==";
 					}}
+					valueField="label"
 					placeholder={"Operation"}
-					valueField={"label"}
 					searchable={false}
 					options={operations} />
 			{/if}

@@ -168,12 +168,14 @@
 					{slice.sliceName}
 				</div>
 			</div>
-			<div class="group">
+			<div
+				class="group"
+				use:clickOutside
+				on:click_outside={() => {
+					showOptions = false;
+				}}>
 				{#if showOptions}
-					<div
-						id="options-container"
-						use:clickOutside
-						on:click_outside={() => (showOptions = !showOptions)}>
+					<div id="options-container">
 						<Paper style="padding: 3px 0px;" elevation={7}>
 							<Content>
 								<div
@@ -235,7 +237,12 @@
 					{/await}
 				{/if}
 				<div class="inline" style:cursor="pointer">
-					<div style:width="36px">
+					<div
+						style:width="36px"
+						use:clickOutside
+						on:click_outside={() => {
+							hovering = false;
+						}}>
 						{#if hovering}
 							<IconButton
 								size="button"
