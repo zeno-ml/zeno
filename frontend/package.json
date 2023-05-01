@@ -24,7 +24,7 @@
         "@smui/form-field": "7.0.0-beta.3",
         "@smui/layout-grid": "7.0.0-beta.3",
         "@smui/list": "7.0.0-beta.3",
-        "@smui/paper": "7.0.0-beta.3",
+        "@smui/paper": "7.0.0-beta.8",
         "@smui/ripple": "7.0.0-beta.3",
         "@smui/segmented-button": "^7.0.0-beta.3",
         "@smui/select": "7.0.0-beta.3",
