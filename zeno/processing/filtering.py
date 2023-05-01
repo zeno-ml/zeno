@@ -27,21 +27,15 @@ def get_filter_string(filter: FilterPredicateGroup) -> str:
                 filt = filt + get_filter_string(f)
                 filt = filt + ")"
         elif isinstance(f, FilterPredicate):
-            if f.operation == "match":
-                filt = (
-                    filt
-                    + "{} (`{}`.astype('string').str.contains('{}', na=False,".format(
-                        f.join, f.column, f.value
-                    )
-                    + "regex=False, case=False))"
-                )
-            elif f.operation == "match (regex)":
-                filt = (
-                    filt
-                    + "{} (`{}`.astype('string').str.contains('{}', na=False))".format(
-                        f.join, f.column, f.value
-                    )
-                )
+            if "match" in f.operation:
+                isregex = "re" in f.operation
+                iscase = "ca" in f.operation
+                keyword = f"\\b{f.value}\\b" if "w" in f.operation else f.value
+                try:
+                    filt += f"{f.join} ({f.column}.str.contains(\
+                    r'{keyword}', na=False, regex={isregex}, case={iscase}))"
+                except Exception as e:
+                    print("Invalid Regex Error: ", e)
             else:
                 try:
                     val = str(float(f.value))
