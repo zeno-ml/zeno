@@ -22,7 +22,7 @@
 
 	// check if predicates are valid (not empty)
 	function checkValidPredicates(preds) {
-		let valid = true;
+		let valid = preds.length > 0;
 		preds.forEach((p, i) => {
 			if (i !== 0 && p["join"] === "") {
 				valid = false;
@@ -88,7 +88,7 @@
 				if (i !== 0) {
 					sli_preds.join = "&";
 				}
-				slicesPredicates.predicates.push(sli_preds);
+				slicesPredicates.predicates.push(JSON.parse(JSON.stringify(sli_preds)));
 			});
 			slicesPredicates.predicates = [
 				...slicesPredicates.predicates,
