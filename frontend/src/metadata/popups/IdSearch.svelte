@@ -89,9 +89,9 @@
 <div class="container">
 	{#key refresh}
 		<AutoComplete
+			style="height: 37px"
 			id="autoinput"
 			bind:text={predicate.value}
-			placeholder={"Search"}
 			{noResultsText}
 			hideArrow={true}
 			searchFunction={searchItems}
@@ -170,7 +170,7 @@
 		padding: 2px 3px;
 		padding-left: 6px;
 		padding-right: 6px;
-		height: 26px;
+		height: 30px;
 		cursor: pointer;
 	}
 	.search-option:hover {
