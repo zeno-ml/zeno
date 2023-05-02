@@ -30,10 +30,19 @@ def get_filter_string(filter: FilterPredicateGroup) -> str:
             if "match" in f.operation:
                 isregex = "re" in f.operation
                 iscase = "ca" in f.operation
-                keyword = f"\\b{f.value}\\b" if "w" in f.operation else f.value
+                iswhole = "w" in f.operation
+
+                if iswhole:
+                    f.value = f"\\b{f.value}\\b" if isregex else f'"{f.value}"'
+
+                filt_string = f"{f.join} ({f.column}.str.contains(\
+                    r'{f.value}', na=False, regex={isregex}, case={iscase}))"
+
+                if (not isregex) and iswhole:
+                    filt_string = f"{f.join} (`{f.column}`=={f.value})"
+
                 try:
-                    filt += f"{f.join} ({f.column}.str.contains(\
-                    r'{keyword}', na=False, regex={isregex}, case={iscase}))"
+                    filt += filt_string
                 except Exception as e:
                     print("Invalid Regex Error: ", e)
             else:
