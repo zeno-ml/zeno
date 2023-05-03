@@ -17,7 +17,7 @@
 	export let updatePredicates;
 
 	let searchString = "";
-	let selectionType = "string";
+	let isRegex = false;
 	let regexValid = true;
 	let caseMatch = false;
 	let wholeWordMatch = false;
@@ -31,7 +31,7 @@
 	};
 	$: {
 		regexValid = true;
-		if (selectionType === "regex") {
+		if (isRegex) {
 			try {
 				new RegExp(searchString);
 			} catch (e) {
@@ -49,7 +49,7 @@
 
 		filterPredicates.push({
 			column: col,
-			operation: selectionType === "regex" ? "match (regex)" : "match",
+			operation: isRegex ? "match (regex)" : "match",
 			value: searchString,
 			join: "",
 		});
@@ -60,7 +60,7 @@
 	}
 
 	async function searchItems(input: string) {
-		if (selectionType === "regex") {
+		if (isRegex) {
 			try {
 				new RegExp(input);
 				noResultsText = "No results";
@@ -75,7 +75,7 @@
 			results = await ZenoService.filterStringMetadata({
 				column: col,
 				filterString: input,
-				selectionType: selectionType,
+				isRegex: isRegex,
 				caseMatch: caseMatch,
 				wholeWordMatch: wholeWordMatch,
 			});
@@ -94,12 +94,12 @@
 			} else if (id === "wholeWordMatch") {
 				wholeWordMatch = !wholeWordMatch;
 			} else {
-				if (selectionType === "regex") {
-					selectionType = "string";
+				if (isRegex) {
+					isRegex = false;
 					noResultsText = "No results";
 					regexValid = true;
 				} else {
-					selectionType = "regex";
+					isRegex = true;
 				}
 			}
 		}
@@ -156,7 +156,7 @@
 		<div
 			id="typeSelection"
 			class="search-option"
-			style:background={selectionType === "regex" ? "var(--P2)" : ""}
+			style:background={isRegex ? "var(--P2)" : ""}
 			on:keydown={() => ({})}
 			on:click={optionClick}
 			use:tooltip={{

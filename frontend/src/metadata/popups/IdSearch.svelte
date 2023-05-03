@@ -9,7 +9,7 @@
 	export let col;
 
 	// option box selection
-	let selectionType = predicate.operation.includes("re") ? "regex" : "string";
+	let isRegex = predicate.operation.includes("re");
 	let caseMatch = predicate.operation.includes("ca");
 	let wholeWordMatch = predicate.operation.includes("w");
 
@@ -27,12 +27,12 @@
 		"match",
 		caseMatch ? "(case)" : "",
 		wholeWordMatch ? "(wholeword)" : "",
-		selectionType === "regex" ? "(regex)" : "",
+		isRegex ? "(regex)" : "",
 	];
 
 	$: {
 		regexValid = true;
-		if (selectionType === "regex") {
+		if (isRegex) {
 			try {
 				new RegExp(predicate.value);
 			} catch (e) {
@@ -42,7 +42,7 @@
 	}
 
 	async function searchItems(input: string) {
-		if (selectionType === "regex") {
+		if (isRegex) {
 			try {
 				new RegExp(input);
 				noResultsText = "No results";
@@ -57,7 +57,7 @@
 			searchResults = await ZenoService.filterStringMetadata({
 				column: col,
 				filterString: input,
-				selectionType: selectionType,
+				isRegex: isRegex,
 				caseMatch: caseMatch,
 				wholeWordMatch: wholeWordMatch,
 			});
@@ -78,13 +78,13 @@
 				wholeWordMatch = !wholeWordMatch;
 				opString[2] = wholeWordMatch ? "(wholeword)" : "";
 			} else {
-				if (selectionType === "regex") {
-					selectionType = "string";
+				if (isRegex) {
+					isRegex = false;
 					noResultsText = "No results";
 					regexValid = true;
 					opString[3] = "";
 				} else {
-					selectionType = "regex";
+					isRegex = true;
 					opString[3] = "(regex)";
 				}
 			}
@@ -142,7 +142,7 @@
 		<div
 			id="typeSelection"
 			class="search-option"
-			style:background={selectionType === "regex" ? "var(--P2)" : ""}
+			style:background={isRegex ? "var(--P2)" : ""}
 			on:keydown={() => ({})}
 			on:click={optionClick}
 			use:tooltip={{
