@@ -22,7 +22,7 @@
 
 	// check if predicates are valid (not empty)
 	function checkValidPredicates(preds) {
-		let valid = true;
+		let valid = preds.length > 0;
 		preds.forEach((p, i) => {
 			if (i !== 0 && p["join"] === "") {
 				valid = false;
@@ -49,10 +49,12 @@
 		nameInput.getElement().focus();
 	}
 
-	showNewSlice.subscribe(() => updatePredicates());
+	// declare this way instead of subscribe to avoid mis-tracking on $sliceToEdit
+	$: $showNewSlice, updatePredicates();
 
 	function updatePredicates() {
 		predicateGroup = { predicates: [], join: "" };
+
 		if ($sliceToEdit) {
 			sliceName = $sliceToEdit.sliceName;
 			predicateGroup = $sliceToEdit.filterPredicates;
@@ -82,13 +84,13 @@
 
 		// if slices are not empty in $selections
 		if ($selections.slices.length > 0) {
-			let slicesPredicates: FilterPredicateGroup = { predicates: [], join: "" };
+			let slicesPredicates;
 			$selections.slices.forEach((s, i) => {
 				let sli_preds = $slices.get(s).filterPredicates;
 				if (i !== 0) {
 					sli_preds.join = "&";
 				}
-				slicesPredicates.predicates.push(sli_preds);
+				slicesPredicates = JSON.parse(JSON.stringify(sli_preds));
 			});
 			slicesPredicates.predicates = [
 				...slicesPredicates.predicates,
@@ -135,7 +137,10 @@
 				});
 				return s;
 			});
-			selections.update((sels) => ({ slices: [], metadata: sels.metadata }));
+			selections.update((sels) => ({
+				slices: [sliceName],
+				metadata: sels.metadata,
+			}));
 			showNewSlice.set(false);
 			sliceToEdit.set(null);
 		});
