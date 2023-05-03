@@ -28,17 +28,17 @@ def get_filter_string(filter: FilterPredicateGroup) -> str:
                 filt = filt + ")"
         elif isinstance(f, FilterPredicate):
             if "match" in f.operation:
-                isregex = "re" in f.operation
-                iscase = "ca" in f.operation
-                iswhole = "w" in f.operation
+                is_regex = "re" in f.operation
+                is_case = "ca" in f.operation
+                is_whole = "w" in f.operation
 
-                if iswhole:
-                    f.value = f"\\b{f.value}\\b" if isregex else f'"{f.value}"'
+                if is_whole:
+                    f.value = f"\\b{f.value}\\b" if is_regex else f'"{f.value}"'
 
                 filt_string = f"{f.join} ({f.column}.str.contains(\
-                    r'{f.value}', na=False, regex={isregex}, case={iscase}))"
+                    r'{f.value}', na=False, regex={is_regex}, case={is_case}))"
 
-                if (not isregex) and iswhole:
+                if (not is_regex) and is_whole:
                     filt_string = f"{f.join} (`{f.column}`=={f.value})"
 
                 try:

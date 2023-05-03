@@ -2,15 +2,15 @@
 	import Button from "@smui/button";
 	import { TrailingIcon } from "@smui/chips";
 	import { Label } from "@smui/common";
-	import AutoComplete from "simple-svelte-autocomplete";
 	import { tooltip } from "@svelte-plugins/tooltips";
-	import MatchWholeWordIcon from "./static/MatchWholeWordIcon.svelte";
-	import RegexIcon from "./static/RegexIcon.svelte";
+	import AutoComplete from "simple-svelte-autocomplete";
 	import {
 		ZenoService,
 		type FilterPredicate,
 		type ZenoColumn,
 	} from "../../../zenoservice";
+	import MatchWholeWordIcon from "./static/MatchWholeWordIcon.svelte";
+	import RegexIcon from "./static/RegexIcon.svelte";
 
 	export let col: ZenoColumn;
 	export let filterPredicates: FilterPredicate[];
@@ -57,6 +57,8 @@
 			filterPredicates[filterPredicates.length - 1].join = "|";
 		}
 		updatePredicates(filterPredicates);
+
+		searchString = "";
 	}
 
 	async function searchItems(input: string) {
