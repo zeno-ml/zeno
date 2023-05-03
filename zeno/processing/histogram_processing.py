@@ -145,14 +145,14 @@ def histogram_metrics(
 def filter_by_string(df: pd.DataFrame, req: StringFilterRequest) -> List[str]:
     """Filter the table based on a string filter request."""
     short_ret: List[str] = []
-    type = req.selection_type
+    regex = req.is_regex
     keyword = req.filter_string
     col_type = req.column
     case_match = req.case_match
     whole_word_match = req.whole_word_match
 
     # string search
-    if type == "string":
+    if not regex:
         col = df[str(col_type)].dropna().astype(str)
 
         if not case_match:

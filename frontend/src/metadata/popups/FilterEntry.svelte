@@ -9,6 +9,7 @@
 		ZenoColumnType,
 		type FilterPredicate,
 	} from "../../zenoservice";
+	import IdSearch from "./IdSearch.svelte";
 
 	export let predicate: FilterPredicate;
 	export let deletePredicate: () => void;
@@ -70,15 +71,9 @@
 					searchable={false}
 					options={["==", "!="]} />
 			{:else if predicate.column.metadataType === MetadataType.OTHER}
-				<Svelecte
-					value={predicate.operation}
-					on:change={(e) => {
-						predicate.operation = e.detail !== null ? e.detail.label : "match";
-					}}
-					valueField="label"
-					placeholder={"Operation"}
-					searchable={false}
-					options={["match", "match (regex)"]} />
+				<IdSearch
+					col={$status.completeColumns.filter((d) => d.name === "id")[0]}
+					bind:predicate />
 			{:else}
 				<Svelecte
 					value={predicate.operation}
@@ -99,14 +94,15 @@
 		{#if predicate.column}
 			{#if predicate.column.metadataType === MetadataType.BOOLEAN}
 				<Svelecte
-					bind:value={predicate.value}
+					value={predicate.value}
+					on:change={(e) => {
+						predicate.value = e.detail.label;
+					}}
+					valueField="label"
 					placeholder={"Value"}
 					searchable={false}
-					options={[
-						{ id: true, name: "true" },
-						{ id: false, name: "false" },
-					]} />
-			{:else}
+					options={["true", "false"]} />
+			{:else if predicate.column.metadataType !== MetadataType.OTHER}
 				<input type="text" bind:value={predicate.value} />
 			{/if}
 		{:else}
