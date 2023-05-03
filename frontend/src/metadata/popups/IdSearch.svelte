@@ -8,13 +8,21 @@
 	export let predicate;
 	export let col;
 
+	// option box selection
 	let selectionType = predicate.operation.includes("re") ? "regex" : "string";
-	let regexValid = true;
 	let caseMatch = predicate.operation.includes("ca");
 	let wholeWordMatch = predicate.operation.includes("w");
+
+	// checking if regex is valid, such as not closing brackets (
+	let regexValid = true;
+	// forcing the autocomplete to rerender and show new search result after clicking the option
 	let refresh = 0;
+
 	let noResultsText = "No results";
-	let results = [];
+	let searchResults = [];
+
+	// option string for slice detail when hovering over slice,
+	// use an array to keep the same order for case, wholeword, regex
 	let opString = [
 		"match",
 		caseMatch ? "(case)" : "",
@@ -40,23 +48,23 @@
 				noResultsText = "No results";
 			} catch (e) {
 				noResultsText = "Invalid Regex";
-				results = [];
-				return results;
+				searchResults = [];
+				return searchResults;
 			}
 		}
 
 		try {
-			results = await ZenoService.filterStringMetadata({
+			searchResults = await ZenoService.filterStringMetadata({
 				column: col,
 				filterString: input,
 				selectionType: selectionType,
 				caseMatch: caseMatch,
 				wholeWordMatch: wholeWordMatch,
 			});
-			return results;
+			return searchResults;
 		} catch (e) {
-			results = [];
-			return results;
+			searchResults = [];
+			return searchResults;
 		}
 	}
 
