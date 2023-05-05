@@ -1,64 +1,44 @@
 <script lang="ts">
-	import Button from "@smui/button";
-	import { TrailingIcon } from "@smui/chips";
-	import { Label } from "@smui/common";
-	import { tooltip } from "@svelte-plugins/tooltips";
 	import AutoComplete from "simple-svelte-autocomplete";
-	import {
-		ZenoService,
-		type FilterPredicate,
-		type ZenoColumn,
-	} from "../../../zenoservice";
-	import MatchWholeWordIcon from "./static/MatchWholeWordIcon.svelte";
-	import RegexIcon from "./static/RegexIcon.svelte";
+	import { tooltip } from "@svelte-plugins/tooltips";
+	import MatchWholeWordIcon from "../cells/metadata-cells/static/MatchWholeWordIcon.svelte";
+	import RegexIcon from "../cells/metadata-cells/static/RegexIcon.svelte";
+	import { ZenoService } from "../../zenoservice";
 
-	export let col: ZenoColumn;
-	export let filterPredicates: FilterPredicate[];
-	export let updatePredicates;
+	export let predicate;
+	export let col;
 
-	let searchString = "";
-	let isRegex = false;
+	// option box selection
+	let isRegex = predicate.operation.includes("re");
+	let caseMatch = predicate.operation.includes("ca");
+	let wholeWordMatch = predicate.operation.includes("w");
+
+	// checking if regex is valid, such as not closing brackets (
 	let regexValid = true;
-	let caseMatch = false;
-	let wholeWordMatch = false;
+	// forcing the autocomplete to rerender and show new search result after clicking the option
 	let refresh = 0;
-	let noResultsText = "No results";
-	let results = [];
-	let showEmptyError = false;
 
-	let blur = function (ev) {
-		ev.target.blur();
-	};
+	let noResultsText = "No results";
+	let searchResults = [];
+
+	// option string for slice detail when hovering over slice,
+	// use an array to keep the same order for case, wholeword, regex
+	let opString = [
+		"match",
+		caseMatch ? "(case)" : "",
+		wholeWordMatch ? "(wholeword)" : "",
+		isRegex ? "(regex)" : "",
+	];
+
 	$: {
 		regexValid = true;
 		if (isRegex) {
 			try {
-				new RegExp(searchString);
+				new RegExp(predicate.value);
 			} catch (e) {
 				regexValid = false;
 			}
 		}
-	}
-
-	function setSelection() {
-		if (!searchString || results.length === 0) {
-			showEmptyError = true;
-			return;
-		}
-		showEmptyError = false;
-
-		filterPredicates.push({
-			column: col,
-			operation: isRegex ? "match (regex)" : "match",
-			value: searchString,
-			join: "",
-		});
-		if (filterPredicates.length > 1) {
-			filterPredicates[filterPredicates.length - 1].join = "|";
-		}
-		updatePredicates(filterPredicates);
-
-		searchString = "";
 	}
 
 	async function searchItems(input: string) {
@@ -67,24 +47,24 @@
 				new RegExp(input);
 				noResultsText = "No results";
 			} catch (e) {
-				noResultsText = "Invalid Regex!";
-				results = [];
-				return results;
+				noResultsText = "Invalid Regex";
+				searchResults = [];
+				return searchResults;
 			}
 		}
 
 		try {
-			results = await ZenoService.filterStringMetadata({
+			searchResults = await ZenoService.filterStringMetadata({
 				column: col,
 				filterString: input,
 				isRegex: isRegex,
 				caseMatch: caseMatch,
 				wholeWordMatch: wholeWordMatch,
 			});
-			return results;
+			return searchResults;
 		} catch (e) {
-			results = [];
-			return results;
+			searchResults = [];
+			return searchResults;
 		}
 	}
 
@@ -93,18 +73,23 @@
 			let id = e.currentTarget.id;
 			if (id === "caseMatch") {
 				caseMatch = !caseMatch;
+				opString[1] = caseMatch ? "(case)" : "";
 			} else if (id === "wholeWordMatch") {
 				wholeWordMatch = !wholeWordMatch;
+				opString[2] = wholeWordMatch ? "(wholeword)" : "";
 			} else {
 				if (isRegex) {
 					isRegex = false;
 					noResultsText = "No results";
 					regexValid = true;
+					opString[3] = "";
 				} else {
 					isRegex = true;
+					opString[3] = "(regex)";
 				}
 			}
 		}
+		predicate.operation = opString.filter((e) => e).join(" ");
 		refresh++;
 	}
 </script>
@@ -112,17 +97,16 @@
 <div class="container">
 	{#key refresh}
 		<AutoComplete
+			style="height: 37px"
 			id="autoinput"
-			bind:text={searchString}
-			placeholder={"Search"}
+			bind:text={predicate.value}
 			{noResultsText}
 			hideArrow={true}
 			searchFunction={searchItems}
 			cleanUserText={false}
 			ignoreAccents={false}
 			localFiltering={false}
-			delay={200}
-			onFocus={() => (showEmptyError = false)}>
+			delay={200}>
 			<div slot="no-results" let:noResultsText>
 				<span style:color={regexValid ? "" : "red"}>{noResultsText}</span>
 			</div>
@@ -169,40 +153,6 @@
 			<svelte:component this={RegexIcon} />
 		</div>
 	</div>
-	<Button
-		style="margin-left: 10px; height: 32px"
-		variant="outlined"
-		on:click={setSelection}
-		on:mouseleave={blur}
-		on:focusout={blur}>
-		<Label>Set</Label>
-	</Button>
-</div>
-{#if showEmptyError}
-	<p style="margin-left:10px; color: red;">Error: The ID entered is invalid</p>
-{/if}
-
-<div class="chips">
-	{#each filterPredicates as pred}
-		<div class="meta-chip">
-			<span>
-				{pred.operation === "match (regex)" ? "/" : ""}
-				{pred.value}
-				{pred.operation === "match (regex)" ? "/" : ""}
-			</span>
-			<TrailingIcon
-				class="remove material-icons"
-				on:click={() => {
-					filterPredicates = filterPredicates.filter((p) => p !== pred);
-					if (filterPredicates.length > 0) {
-						filterPredicates[0].join = "";
-					}
-					updatePredicates(filterPredicates);
-				}}>
-				cancel
-			</TrailingIcon>
-		</div>
-	{/each}
 </div>
 
 <style>
@@ -228,29 +178,10 @@
 		padding: 2px 3px;
 		padding-left: 6px;
 		padding-right: 6px;
-		height: 26px;
+		height: 30px;
 		cursor: pointer;
 	}
 	.search-option:hover {
 		background: var(--Y1);
-	}
-	.chips {
-		display: flex;
-		flex-direction: inline;
-		flex-wrap: wrap;
-		height: fit-content;
-		align-items: center;
-		padding-bottom: 5px;
-		padding-top: 5px;
-	}
-	.meta-chip {
-		padding: 5px 10px;
-		background: var(--P3);
-		margin-left: 5px;
-		margin-right: 5px;
-		margin-top: 2px;
-		margin-bottom: 2px;
-		border-radius: 5px;
-		width: fit-content;
 	}
 </style>
