@@ -1,76 +1,145 @@
 <script lang="ts">
-	import Select, { Option } from "@smui/select";
 	import { Vega } from "svelte-vega";
 	import { getMetricsForSlices } from "../../api/slice";
-	import {
-		metric,
-		metrics,
-		model,
-		models,
-		reports,
-		slices,
-	} from "../../stores";
+	import { report, reports } from "../../stores";
 	import type { MetricKey } from "../../zenoservice";
 	import generateSpec from "./vegaSpec-beeswarm";
 
-	export let reportId: number;
+	$: currentReport = $reports[$report];
+	$: parameters = currentReport.parameters;
+	$: fixed_dimension = currentReport.parameters.fixedDimension;
 
+	let yEntries = [];
 	let chartEntries = [];
 
-	$: report = $reports[reportId];
-
-	function getMetKeys(rep, $metric, $model) {
-		const entries: MetricKey[] = [];
-		chartEntries = [];
-		rep.reportPredicates.forEach((pred) => {
-			chartEntries.push({
-				slice: pred.sliceName,
-				model: $model,
-			});
-			entries.push({
-				sli: [...$slices.values()].find((s) => s.sliceName === pred.sliceName),
-				metric: $metric,
-				model: $model,
-			});
-		});
-		return entries;
+	function getMetKeys(rep) {
+		const metricKeys: MetricKey[] = [];
+		let res_index = 0;
+		yEntries = [];
+		if (fixed_dimension === "x") {
+			if (parameters.yEncoding === "models") {
+				rep.models.forEach((mod) => {
+					chartEntries = [];
+					rep.slices.forEach((slice) => {
+						chartEntries.push({
+							slice: slice.sliceName,
+							metric: rep.metrics[0],
+							index: res_index,
+						});
+						metricKeys.push({
+							sli: slice,
+							metric: rep.metrics[0],
+							model: mod,
+						});
+						res_index++;
+					});
+					yEntries.push({
+						yName: mod,
+						chartData: chartEntries,
+						xLabel: rep.metrics[0],
+					});
+				});
+			} else if (parameters.yEncoding === "slices") {
+				rep.slices.forEach((slice) => {
+					chartEntries = [];
+					rep.models.forEach((mod) => {
+						chartEntries.push({
+							model: mod,
+							metric: rep.metrics[0],
+							index: res_index,
+						});
+						metricKeys.push({
+							sli: slice,
+							metric: rep.metrics[0],
+							model: mod,
+						});
+						res_index++;
+					});
+					yEntries.push({
+						yName: slice.sliceName,
+						chartData: chartEntries,
+						xLabel: rep.metrics[0],
+					});
+				});
+			}
+		} else if (fixed_dimension === "y") {
+			if (parameters.yEncoding === "models") {
+				rep.metrics.forEach((metric) => {
+					chartEntries = [];
+					rep.slices.forEach((slice) => {
+						chartEntries.push({
+							slice: slice.sliceName,
+							metric: rep.metrics[0],
+							index: res_index,
+						});
+						metricKeys.push({
+							sli: slice,
+							metric: metric,
+							model: rep.models[0],
+						});
+						res_index++;
+					});
+					yEntries.push({
+						yName: rep.models[0],
+						chartData: chartEntries,
+						xLabel: metric,
+					});
+				});
+			} else if (parameters.yEncoding === "slices") {
+				rep.metrics.forEach((metric) => {
+					chartEntries = [];
+					rep.models.forEach((mod) => {
+						chartEntries.push({
+							model: mod,
+							metric: rep.metrics[0],
+							index: res_index,
+						});
+						metricKeys.push({
+							sli: rep.slices[0],
+							metric: metric,
+							model: mod,
+						});
+						res_index++;
+					});
+					yEntries.push({
+						yName: rep.slices[0].sliceName,
+						chartData: chartEntries,
+						xLabel: metric,
+					});
+				});
+			}
+		}
+		return metricKeys;
 	}
 
-	$: modelResults = getMetricsForSlices(getMetKeys(report, $metric, $model));
+	$: modelResults = getMetricsForSlices(getMetKeys(currentReport));
 </script>
 
 <div class="main">
-	{#if $models && $models.length > 0}
-		<Select
-			bind:value={$model}
-			label="Model"
-			style="margin-right: 20px; width: fit-content">
-			{#each $models as m}
-				<Option value={m}>{m}</Option>
-			{/each}
-		</Select>
-	{/if}
-	{#if $metrics && $metrics.length > 0}
-		<Select
-			bind:value={$metric}
-			label="Metric"
-			style="margin-right: 20px; width: fit-content">
-			{#each $metrics as m}
-				<Option value={m}>{m}</Option>
-			{/each}
-		</Select>
-	{/if}
-	<br />
 	<div class="model-result">
 		{#await modelResults then res}
-			{@const data = {
-				table: chartEntries.map((r, i) => ({
-					sli_name: r.slice,
-					size: res[i].size,
-					metric: res[i].metric.toFixed(2),
-				})),
-			}}
-			<Vega {data} spec={generateSpec($metric)} />
+			{#each yEntries as { yName, chartData, xLabel }}
+				{@const data = {
+					table: chartData.map((r) => ({
+						slices: parameters.yEncoding === "slices" ? yName : r.slice,
+						models: parameters.yEncoding === "models" ? yName : r.model,
+						size: res[r.index].size,
+						metrics: res[r.index].metric.toFixed(2),
+					})),
+				}}
+				<h4>{yName}</h4>
+				<Vega
+					spec={generateSpec(parameters, xLabel)}
+					{data}
+					options={{
+						actions: { source: false, editor: false, compiled: false },
+						width: 800,
+						height: 100,
+						scaleFactor: {
+							png: 3,
+						},
+					}} />
+			{/each}
 		{/await}
 	</div>
 </div>
@@ -81,6 +150,8 @@
 	}
 	.model-result {
 		margin-top: 30px;
-		width: 500px;
+	}
+	.model-result h4 {
+		margin: 0px 0px 10px 0px;
 	}
 </style>

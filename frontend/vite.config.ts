@@ -14,13 +14,4 @@ export default defineConfig({
 			},
 		},
 	},
-	optimizeDeps: {
-		include: [
-			"fast-deep-equal",
-			"semver",
-			"json-stringify-pretty-compact",
-			"clone",
-			"fast-json-stable-stringify",
-		],
-	},
 });

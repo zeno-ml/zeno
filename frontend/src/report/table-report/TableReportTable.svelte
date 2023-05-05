@@ -1,13 +1,17 @@
 <script lang="ts">
+	import { report, reports } from "../../stores";
 	import DataTable, { Body, Cell, Head, Row } from "@smui/data-table";
-	import { models, reports } from "../../stores";
-	import TableReportTableRow from "./TableReportTableRow.svelte";
-
-	export let reportId: number;
+	import SliceDetailsContainer from "./SliceDetailsContainer.svelte";
+	import TableReportRow from "./TableReportRow.svelte";
 
 	let table: HTMLDivElement;
 
-	$: report = $reports[reportId];
+	$: currentReport = $reports[$report];
+	$: selectModels = currentReport.models;
+	$: selectMetrics = currentReport.metrics;
+	$: selectSlices = currentReport.slices;
+	$: parameters = currentReport.parameters;
+	$: fixed_dimension = currentReport.parameters.fixedDimension;
 </script>
 
 <div id="container">
@@ -16,18 +20,54 @@
 			<Head>
 				<Row>
 					<Cell class="sticky" style="border-right: 1px solid #e8e8e8">
-						Slice
+						{parameters.yEncoding}
 					</Cell>
-					<Cell>Metric</Cell>
-					{#each $models as m}
-						<Cell>{m}</Cell>
-					{/each}
+					<Cell>{parameters.zEncoding}</Cell>
+					{#if parameters.xEncoding === "slices"}
+						{#each selectSlices as slice}
+							<Cell>
+								<div class="inline">
+									{#if slice}
+										<SliceDetailsContainer sli={slice} />
+									{/if}
+								</div>
+							</Cell>
+						{/each}
+					{:else if parameters.xEncoding === "models"}
+						{#each selectModels as m}
+							<Cell>{m}</Cell>
+						{/each}
+					{/if}
 				</Row>
 			</Head>
 			<Body style="overflow: visible">
-				{#each report.reportPredicates as predicate, i}
-					<TableReportTableRow {predicate} predicateIndex={i} />
-				{/each}
+				{#if fixed_dimension === "z"}
+					{#if parameters.yEncoding === "slices"}
+						{#each selectSlices as slice}
+							<TableReportRow
+								row={slice}
+								{fixed_dimension}
+								{parameters}
+								{currentReport} />
+						{/each}
+					{:else if parameters.yEncoding === "models"}
+						{#each selectModels as model}
+							<TableReportRow
+								row={model}
+								{fixed_dimension}
+								{parameters}
+								{currentReport} />
+						{/each}
+					{/if}
+				{:else if fixed_dimension === "y"}
+					{#each selectMetrics as metric}
+						<TableReportRow
+							row={metric}
+							{fixed_dimension}
+							{parameters}
+							{currentReport} />
+					{/each}
+				{/if}
 			</Body>
 		</DataTable>
 	</div>
@@ -36,5 +76,10 @@
 <style>
 	#container {
 		margin-left: 20px;
+		margin-top: 20px;
+	}
+	.inline {
+		display: flex;
+		align-items: center;
 	}
 </style>

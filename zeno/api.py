@@ -3,7 +3,6 @@
 import functools
 from typing import Any, Callable, Dict, List, Union
 
-from gradio.interface import IOComponent  # type: ignore
 from numpy.typing import NDArray
 from pandas import DataFrame, Series
 from pydantic import BaseModel
@@ -39,9 +38,11 @@ class ZenoOptions(BaseModel):
 class ZenoParameters(BaseModel):
     """Options passed to the backend processing pipeline."""
 
-    metadata: DataFrame
+    metadata: Union[DataFrame, str]
+    # If run from command line, config_file will be a path to a config file.
+    config_file: str = ""
+    functions: Union[List[Callable], str] = []
     view: str = ""
-    functions: List[Callable] = []
     models: List[str] = []
     id_column: str = ""
     data_column: str = ""
@@ -52,6 +53,7 @@ class ZenoParameters(BaseModel):
     cache_path: str = ""
     calculate_histogram_metrics = True
     editable: bool = True
+    multiprocessing: bool = True
     serve: bool = True
     samples: int = 30
     port: int = 8000
@@ -117,25 +119,6 @@ class SliceFinderMetricReturn(BaseModel):
         arbitrary_types_allowed = True
 
 
-class InferenceReturn(BaseModel):
-    """Return type for inference UI functions.
-    Take a look at the Gradio documentation for details.
-
-    Args:
-        input_components (List[Blocks]): List of input components.
-        output_components (Blocks): Output component.
-        input_columns (List[str]): List of input column names matching the
-        input components.
-    """
-
-    input_components: List[IOComponent]
-    output_component: IOComponent
-    input_columns: List[str]
-
-    class Config:
-        arbitrary_types_allowed = True
-
-
 def model(func: Callable[[str], Callable[[DataFrame, ZenoOptions], ModelReturn]]):
     """Decorator function for model functions.
 
@@ -184,20 +167,4 @@ def metric(func: Callable[[DataFrame, ZenoOptions], MetricReturn]):
         return func(*args, **kwargs)
 
     _wrapper.metric_function = True  # type: ignore
-    return _wrapper
-
-
-def inference(func: Callable[[ZenoOptions], InferenceReturn]):
-    """A decorator function for inference UI using Gradio.
-
-    Args:
-        func (Callable[[ZenoOptions], InferenceReturn]): Function that returns a set of
-        Gradio components and input columns to scaffold an inference UI.
-    """
-
-    @functools.wraps(func)
-    def _wrapper(*args, **kwargs):
-        return func(*args, **kwargs)
-
-    _wrapper.inference_function = True  # type: ignore
     return _wrapper

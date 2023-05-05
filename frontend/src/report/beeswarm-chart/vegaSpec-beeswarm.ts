@@ -1,5 +1,19 @@
 import type { VisualizationSpec } from "vega-embed";
-export default function generateSpec(metric): VisualizationSpec {
+export default function generateSpec(parameters, xLabel): VisualizationSpec {
+	const x_encode = parameters.xEncoding;
+	const z_encode = parameters.zEncoding;
+
+	const paramMap = {
+		models: {
+			type: "nominal",
+			title: "Model Color",
+		},
+		slices: {
+			type: "nominal",
+			title: "Slice Color",
+		},
+	};
+
 	const spec = {
 		$schema: "https://vega.github.io/schema/vega/v5.json",
 		description:
@@ -36,7 +50,7 @@ export default function generateSpec(metric): VisualizationSpec {
 				name: "xscale",
 				domain: {
 					data: "table",
-					field: "metric",
+					field: xLabel !== "size" ? x_encode : "size",
 				},
 				range: "width",
 				nice: true,
@@ -50,13 +64,29 @@ export default function generateSpec(metric): VisualizationSpec {
 				},
 				range: [80, 800],
 			},
+			{
+				name: "color",
+				type: "ordinal",
+				domain: { data: "table", field: z_encode },
+				range: { scheme: "category20" },
+			},
 		],
 
 		axes: [
 			{
-				title: "",
+				title: xLabel,
+				titleFontSize: 13,
+				titlePadding: 10,
 				orient: "bottom",
 				scale: "xscale",
+			},
+		],
+
+		legends: [
+			{
+				type: "symbol",
+				title: paramMap[z_encode].title,
+				fill: "color",
 			},
 		],
 
@@ -67,8 +97,12 @@ export default function generateSpec(metric): VisualizationSpec {
 				from: { data: "table" },
 				encode: {
 					enter: {
-						fill: { value: "purple" },
-						xfocus: { scale: "xscale", field: "metric", band: 0.5 },
+						fill: { scale: "color", field: z_encode },
+						xfocus: {
+							scale: "xscale",
+							field: xLabel !== "size" ? x_encode : "size",
+							band: 0.5,
+						},
 						yfocus: { signal: "cy" },
 					},
 					update: {
@@ -78,12 +112,14 @@ export default function generateSpec(metric): VisualizationSpec {
 						zindex: { value: 0 },
 					},
 					hover: {
-						stroke: { value: "purple" },
+						stroke: { value: "black" },
 						strokeWidth: { value: 3 },
 						zindex: { value: 1 },
 						tooltip: {
 							signal:
-								"{'name': datum.sli_name, 'size': datum.size, 'metric': datum.metric}",
+								"{'slice_name': datum.slices,'size': datum.size, " +
+								(xLabel !== "size" ? xLabel : "accuracy") +
+								": datum.metrics, 'model': datum.models}",
 						},
 					},
 				},
@@ -106,8 +142,6 @@ export default function generateSpec(metric): VisualizationSpec {
 			},
 		],
 	};
-
-	spec.axes[0].title = metric;
 
 	return spec as VisualizationSpec;
 }
