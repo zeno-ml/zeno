@@ -12,7 +12,3 @@ class TagMetricKey(CamelModel):
     tag: Tag
     model: str
     metric: str
-
-
-# class TagMetricRequest(CamelModel):
-#     tag_metric_keys: List[TagMetricKey]

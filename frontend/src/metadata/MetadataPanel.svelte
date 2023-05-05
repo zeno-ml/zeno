@@ -401,7 +401,7 @@
 			<div
 				class="information-tooltip"
 				use:tooltip={{
-					content: "Tags are named combinations of instances of data.",
+					content: "Tags are named sets of data instances.",
 					position: "right",
 					theme: "zeno-tooltip",
 				}}>
@@ -421,7 +421,7 @@
 					<IconButton on:click={() => showNewTag.update((b) => !b)}>
 						<Icon component={Svg} viewBox="0 0 24 24">
 							{#if $selectionIds.ids.length > 0}
-								<path fill="#6a1a9a" d={mdiPlusCircle} />
+								<path fill="var(--N1)" d={mdiPlusCircle} />
 							{:else}
 								<path fill="black" d={mdiPlus} />
 							{/if}

@@ -69,11 +69,11 @@ def filter_table(
     list_ids_second: Optional[FilterIds] = None,
     tag_list: Optional[List[str]] = None,
 ) -> pd.DataFrame:
-    all_indicies = []  # type: ignore
+    all_indicies = []
     if list_ids_first is not None and len(list_ids_first.ids) > 0:
-        all_indicies += list_ids_first.ids  # type: ignore
+        all_indicies += list_ids_first.ids
     if list_ids_second is not None and len(list_ids_second.ids) > 0:
-        all_indicies += list_ids_second.ids  # type: ignore
+        all_indicies += list_ids_second.ids
     # if we have ids, filter them out now!
     if len(all_indicies) > 0:
         # make sure the ids we are querying exist

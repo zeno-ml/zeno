@@ -158,26 +158,6 @@
 		ev.dataTransfer.dropEffect = "copy";
 	}}
 	on:keydown={() => ({})}>
-	<!-- add this back in once decide to do with tagFolders
-        on:dragend={(ev) => {
-		if (ev.dataTransfer.dropEffect === "none") {
-			slices.update((sls) => {
-				const sli = sls.get(slice.sliceName);
-				sli.folder = "";
-				sls.set(slice.sliceName, sli);
-				createNewSlice(sli.sliceName, sli.filterPredicates);
-				return sls;
-			});
-		}
-	}} -->
-	<!-- {#if showTooltip}
-		<div class="tooltip-container">
-			<div class="tooltip">
-				<SliceDetails predicateGroup={slice.filterPredicates} />
-			</div>
-		</div>
-	{/if} -->
-
 	<div class="group" style:width="100%">
 		<div class="group" style:width="100%">
 			<div class="inline">

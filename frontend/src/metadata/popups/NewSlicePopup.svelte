@@ -138,7 +138,7 @@
 				return s;
 			});
 			selections.update((sels) => ({
-				slices: [sliceName],
+				slices: [],
 				metadata: sels.metadata,
 				tags: [],
 			}));
