@@ -7,6 +7,7 @@
 	} from "@mdi/js";
 	import CircularProgress from "@smui/circular-progress";
 	import { Svg } from "@smui/common";
+	import Button from "@smui/button";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
 	import { tooltip } from "@svelte-plugins/tooltips";
@@ -17,8 +18,11 @@
 		getHistograms,
 		type HistogramEntry,
 	} from "../api/metadata";
-	import { getMetricsForSlices } from "../api/slice";
+	import { getMetricsForSlicesAndTags } from "../api/slice";
+	import { createNewTag, getMetricsForTags } from "../api/tag";
 	import {
+		editId,
+		editedIds,
 		folders,
 		metric,
 		metricRange,
@@ -32,26 +36,32 @@
 		settings,
 		showNewFolder,
 		showNewSlice,
+		showNewTag,
 		slices,
 		sliceToEdit,
 		status,
+		tags,
+		tagIds,
 	} from "../stores";
 	import { columnHash } from "../util/util";
 	import {
 		ZenoColumnType,
 		type MetricKey,
 		type Slice,
+		type Tag,
+		type TagMetricKey,
 		type ZenoColumn,
 	} from "../zenoservice";
 	import FolderCell from "./cells/FolderCell.svelte";
 	import MetadataCell from "./cells/MetadataCell.svelte";
 	import SliceCell from "./cells/SliceCell.svelte";
+	import TagCell from "./cells/TagCell.svelte";
 	import MetricRange from "./MetricRange.svelte";
 
 	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
 		new InternMap([], columnHash);
 
-	$: res = getMetricsForSlices([
+	$: res = getMetricsForSlicesAndTags([
 		<MetricKey>{
 			sli: <Slice>{
 				sliceName: "",
@@ -63,21 +73,45 @@
 		},
 	]);
 
+	$: tagRes = getMetricsForTags([
+		<TagMetricKey>{
+			tag: <Tag>{
+				tagName: "",
+				folder: "",
+				selectionIds: { ids: [] },
+			},
+			model: $model,
+			metric: $metric,
+		},
+	]);
+
 	// Get histogram buckets, counts, and metrics when columns update.
 	status.subscribe((s) => {
 		getHistograms(s.completeColumns, $model).then((res) => {
-			getHistogramCounts(res, null, $selectionIds).then((res) => {
+			getHistogramCounts(
+				res,
+				null,
+				$tagIds,
+				$selectionIds,
+				$selections.tags
+			).then((res) => {
 				if (res === undefined) {
 					return;
 				}
 				metadataHistograms = res;
-				getHistogramMetrics(res, null, $model, $metric, $selectionIds).then(
-					(res) => {
-						if (res !== undefined) {
-							metadataHistograms = res;
-						}
+				getHistogramMetrics(
+					res,
+					null,
+					$model,
+					$metric,
+					$tagIds,
+					$selectionIds,
+					$selections.tags
+				).then((res) => {
+					if (res !== undefined) {
+						metadataHistograms = res;
 					}
-				);
+				});
 			});
 		});
 	});
@@ -93,7 +127,9 @@
 			null,
 			$model,
 			metric,
-			$selectionIds
+			$tagIds,
+			$selectionIds,
+			$selections.tags
 		).then((res) => {
 			if (res === undefined) {
 				return;
@@ -107,19 +143,21 @@
 		if (metadataHistograms.size === 0) {
 			return;
 		}
-		selections.set({ metadata: {}, slices: [] });
+		selections.set({ metadata: {}, slices: [], tags: [] });
 		getHistograms($status.completeColumns, model).then((res) => {
-			getHistogramCounts(res, null, null).then((res) => {
+			getHistogramCounts(res, null, null, null, null).then((res) => {
 				if (res === undefined) {
 					return;
 				}
 				metadataHistograms = res;
-				getHistogramMetrics(res, null, model, $metric, null).then((res) => {
-					if (res === undefined) {
-						return;
+				getHistogramMetrics(res, null, model, $metric, null, null, null).then(
+					(res) => {
+						if (res === undefined) {
+							return;
+						}
+						metadataHistograms = res;
 					}
-					metadataHistograms = res;
-				});
+				);
 			});
 		});
 	});
@@ -135,7 +173,9 @@
 				predicates: [$selectionPredicates],
 				join: "",
 			},
-			selectionIds
+			$tagIds,
+			selectionIds,
+			$selections.tags
 		).then((res) => {
 			if (res === undefined) {
 				return;
@@ -150,7 +190,49 @@
 				},
 				$model,
 				$metric,
-				selectionIds
+				$tagIds,
+				selectionIds,
+				$selections.tags
+			).then((res) => {
+				if (res === undefined) {
+					return;
+				}
+				metadataHistograms = res;
+			});
+		});
+	});
+
+	// when the tag Ids change, update the histograms
+	tagIds.subscribe((tIds) => {
+		if (metadataHistograms.size === 0) {
+			return;
+		}
+		getHistogramCounts(
+			metadataHistograms,
+			{
+				predicates: [$selectionPredicates],
+				join: "",
+			},
+			tIds,
+			$selectionIds,
+			$selections.tags
+		).then((res) => {
+			if (res === undefined) {
+				return;
+			}
+
+			metadataHistograms = res;
+			getHistogramMetrics(
+				res,
+				{
+					predicates: [$selectionPredicates],
+					join: "",
+				},
+				$model,
+				$metric,
+				tIds,
+				$selectionIds,
+				$selections.tags
 			).then((res) => {
 				if (res === undefined) {
 					return;
@@ -171,7 +253,9 @@
 				predicates: [sels],
 				join: "&",
 			},
-			$selectionIds
+			$tagIds,
+			$selectionIds,
+			$selections.tags
 		).then((res) => {
 			if (res === undefined) {
 				return;
@@ -186,7 +270,9 @@
 				},
 				$model,
 				$metric,
-				$selectionIds
+				$tagIds,
+				$selectionIds,
+				$selections.tags
 			).then((res) => {
 				if (res === undefined) {
 					return;
@@ -282,8 +368,9 @@
 				Object.keys(m.metadata).forEach((key) => {
 					m.metadata[key] = { predicates: [], join: "" };
 				});
-				return { slices: [], metadata: { ...m.metadata } };
+				return { slices: [], metadata: { ...m.metadata }, tags: [] };
 			});
+			tagIds.set({ ids: [] });
 		}}>
 		<div class="inline">All instances</div>
 
@@ -306,6 +393,82 @@
 
 	{#each [...$slices.values()].filter((s) => s.folder === "" && s.sliceName !== "All Instances") as s (s.sliceName)}
 		<SliceCell slice={s} />
+	{/each}
+
+	<div id="tag-header" class="inline" style:margin-top="10px">
+		<div class="inline">
+			<h4>Tags</h4>
+			<div
+				class="information-tooltip"
+				use:tooltip={{
+					content: "Tags are named sets of data instances.",
+					position: "right",
+					theme: "zeno-tooltip",
+				}}>
+				<Icon component={Svg} viewBox="-6 -6 36 36">
+					<path d={mdiInformationOutline} />
+				</Icon>
+			</div>
+		</div>
+		<div class="inline">
+			<div>
+				<div
+					use:tooltip={{
+						content: "Create a new tag.",
+						position: "left",
+						theme: "zeno-tooltip",
+					}}>
+					<IconButton on:click={() => showNewTag.update((b) => !b)}>
+						<Icon component={Svg} viewBox="0 0 24 24">
+							{#if $selectionIds.ids.length > 0}
+								<path fill="var(--N1)" d={mdiPlusCircle} />
+							{:else}
+								<path fill="black" d={mdiPlus} />
+							{/if}
+						</Icon>
+					</IconButton>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	{#each [...$tags.values()] as t}
+		{#if $editId === t.tagName}
+			<div style="display: flex; align-items: center">
+				<div style="width: 100%; margin-right: 10px">
+					<TagCell tag={t} />
+				</div>
+				<Button
+					style="background-color: var(--N1); margin-top: 5px; color: white; "
+					on:click={() => {
+						createNewTag($editId, { ids: $editedIds }).then(() => {
+							tags.update((t) => {
+								t.set($editId, {
+									tagName: $editId,
+									folder: "",
+									selectionIds: { ids: $editedIds },
+								});
+								return t;
+							});
+							editId.set(undefined);
+							editedIds.set([]);
+
+							// update tag IDs if a selected tag was edited
+							let s = new Set();
+							//this is to catch for the case when you have intersections between tags
+							//must come after selections is updated
+							$selections.tags.forEach((tag) =>
+								$tags.get(tag).selectionIds.ids.forEach((id) => s.add(id))
+							);
+							let finalArray = [];
+							s.forEach((id) => finalArray.push(id));
+							tagIds.set({ ids: finalArray });
+						});
+					}}>Done</Button>
+			</div>
+		{:else}
+			<TagCell tag={t} />
+		{/if}
 	{/each}
 
 	<div id="metric-header" class="inline" style:margin-top="10px">
@@ -360,6 +523,10 @@
 		position: sticky;
 		top: -10px;
 		z-index: 3;
+		background-color: var(--Y2);
+	}
+	#tag-header {
+		border-bottom: 0.5px solid var(--G5);
 		background-color: var(--Y2);
 	}
 	#metric-header {
@@ -434,5 +601,9 @@
 		height: 24px;
 		cursor: help;
 		fill: var(--G2);
+	}
+	.done-button {
+		background-color: var(--N1);
+		margin-top: 5px;
 	}
 </style>

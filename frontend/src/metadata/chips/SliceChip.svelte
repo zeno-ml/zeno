@@ -13,7 +13,7 @@
 		on:click={() =>
 			selections.update((sel) => {
 				sel.slices.splice(sel.slices.indexOf(slice), 1);
-				return { slices: sel.slices, metadata: sel.metadata };
+				return { slices: sel.slices, metadata: sel.metadata, tags: sel.tags };
 			})}>
 		cancel
 	</TrailingIcon>
@@ -27,7 +27,7 @@
 		margin-right: 5px;
 		margin-top: 2px;
 		margin-bottom: 2px;
-		border-radius: 4px;
+		border-radius: 10px;
 		width: fit-content;
 	}
 </style>

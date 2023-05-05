@@ -31,6 +31,7 @@
 		selections.update((sels) => ({
 			slices: sels.slices,
 			metadata: tempSelections,
+			tags: sels.tags,
 		}));
 	});
 

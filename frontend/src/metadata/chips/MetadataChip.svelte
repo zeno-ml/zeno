@@ -47,6 +47,7 @@
 					...m.metadata,
 					[hash]: { predicates: [], join: "&" },
 				},
+				tags: m.tags,
 			}))}>
 		cancel
 	</TrailingIcon>

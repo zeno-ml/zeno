@@ -2,7 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type SliceMetric = {
+export type GroupMetric = {
 	metric?: number;
 	size: number;
 };

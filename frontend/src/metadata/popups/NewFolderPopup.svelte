@@ -69,6 +69,6 @@
 		position: fixed;
 		left: 440px;
 		top: 70px;
-		z-index: 10;
+		z-index: 20;
 	}
 </style>

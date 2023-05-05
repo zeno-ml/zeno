@@ -12,7 +12,9 @@ export async function getFilteredTable(
 	model: string,
 	sliceRange: [number, number],
 	sort: [ZenoColumn, boolean],
-	filterIds?: FilterIds
+	tagIds: FilterIds,
+	filterIds?: FilterIds,
+	tagList?: Array<string>
 ) {
 	const requestedColumns = completeColumns.filter(
 		(c) =>
@@ -27,7 +29,9 @@ export async function getFilteredTable(
 		filterPredicates: filterPredicates,
 		sliceRange,
 		sort,
+		tagIds,
 		filterIds,
+		tagList,
 	});
 	return JSON.parse(res);
 }
@@ -35,7 +39,10 @@ export async function getFilteredTable(
 /**
  * Gets a list of ids from the filter predicates only
  */
-export async function getFilteredIds(filterPredicates: FilterPredicateGroup) {
-	const res = await ZenoService.getFilteredIds(filterPredicates);
+export async function getFilteredIds(
+	filterPredicates: FilterPredicateGroup,
+	tagIds: FilterIds = { ids: [] }
+) {
+	const res = await ZenoService.getFilteredIds({ filterPredicates, tagIds });
 	return JSON.parse(res);
 }

@@ -1,4 +1,4 @@
-import { ZenoService, type FilterIds, type SliceMetric } from "../zenoservice";
+import { ZenoService, type FilterIds, type GroupMetric } from "../zenoservice";
 import {
 	ZenoColumnType,
 	type FilterPredicate,
@@ -54,7 +54,7 @@ export async function deleteSlice(sliceName: string) {
 export async function getMetricsForSlices(
 	metricKeys: MetricKey[],
 	filterIds?: FilterIds
-): Promise<SliceMetric[]> {
+): Promise<GroupMetric[]> {
 	if (metricKeys.length === 0) {
 		return null;
 	}
@@ -74,6 +74,33 @@ export async function getMetricsForSlices(
 		return await ZenoService.getMetricsForSlices({
 			metricKeys,
 			filterIds,
+		});
+	}
+}
+
+export async function getMetricsForSlicesAndTags(
+	metricKeys: MetricKey[],
+	tagIds?: FilterIds,
+	filterIds?: FilterIds,
+	tagList?: string[]
+): Promise<GroupMetric[]> {
+	if (metricKeys.length === 0) {
+		return null;
+	}
+	if (metricKeys[0].metric === undefined) {
+		metricKeys = metricKeys.map((k) => ({ ...k, metric: "" }));
+	}
+	if (metricKeys[0].model === undefined) {
+		metricKeys = metricKeys.map((k) => ({ ...k, model: "" }));
+	}
+	// Update model in predicates if slices are dependent on postdistill columns.
+	metricKeys = setModelForMetricKeys(metricKeys);
+	if (metricKeys.length > 0) {
+		return await ZenoService.getMetricsForSlicesAndTags({
+			metricKeys,
+			tagIds,
+			filterIds,
+			tagList,
 		});
 	}
 }

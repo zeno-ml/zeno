@@ -13,9 +13,11 @@
 		rowsPerPage,
 		selectionIds,
 		selectionPredicates,
+		selections,
 		settings,
 		sort,
 		status,
+		tagIds,
 	} from "../stores";
 	import { columnHash } from "../util/util";
 	import { ZenoColumnType } from "../zenoservice";
@@ -55,6 +57,8 @@
 		$model;
 		$sort;
 		$selectionIds;
+		$tagIds;
+		$selections.tags;
 		updateTable();
 	}
 
@@ -93,7 +97,9 @@
 				mod,
 				[start, end],
 				$sort,
-				$selectionIds
+				$tagIds,
+				$selectionIds,
+				$selections.tags
 			);
 		});
 		Promise.all(proms).then((res) => {

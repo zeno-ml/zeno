@@ -11,6 +11,7 @@ import {
 	settings,
 	slices,
 	tab,
+	tags,
 } from "../stores";
 import { ZenoService } from "../zenoservice";
 
@@ -34,6 +35,9 @@ export async function getInitialData() {
 
 	const reportsRes = await ZenoService.getReports();
 	reports.set(reportsRes);
+
+	const tagsRes = await ZenoService.getTags();
+	tags.set(new Map(Object.entries(tagsRes)));
 
 	ready.set(true);
 }
