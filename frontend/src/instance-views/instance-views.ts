@@ -21,7 +21,8 @@ export type ViewRenderFunction = (
 export function modelOutputColumnName() {
 	const modelColumn = {
 		columnType: ZenoColumnType.OUTPUT,
-		name: get(model),
+		name: "output",
+		model: get(model),
 	} as ZenoColumn;
 	const modelColumnStr = model ? columnHash(modelColumn) : "";
 	return modelColumnStr;

@@ -57,12 +57,10 @@ def run_inference(
     model_name = os.path.basename(model_path).split(".")[0]
 
     model_col_obj = ZenoColumn(
-        column_type=ZenoColumnType.OUTPUT,
-        name=model_name,
+        column_type=ZenoColumnType.OUTPUT, name="output", model=model_name
     )
     embedding_col_obj = ZenoColumn(
-        column_type=ZenoColumnType.EMBEDDING,
-        name=model_name,
+        column_type=ZenoColumnType.EMBEDDING, name="embedding", model=model_name
     )
     model_hash = str(model_col_obj)
     embedding_hash = str(embedding_col_obj)
@@ -160,8 +158,7 @@ def postdistill_data(
     col = df[col_hash].copy()
 
     output_obj = ZenoColumn(
-        column_type=ZenoColumnType.OUTPUT,
-        name=model,
+        column_type=ZenoColumnType.OUTPUT, name="output", model=model
     )
     output_hash = str(output_obj)
 

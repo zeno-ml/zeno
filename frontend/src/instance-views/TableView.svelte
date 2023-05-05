@@ -99,7 +99,7 @@
 		}
 
 		let obj = $status.completeColumns.find((c) => {
-			return c.columnType === ZenoColumnType.OUTPUT && c.name === $model;
+			return c.columnType === ZenoColumnType.OUTPUT && c.model === $model;
 		});
 		let modelColumn = obj ? columnHash(obj) : "";
 

@@ -17,7 +17,7 @@ export async function getFilteredTable(
 	const requestedColumns = completeColumns.filter(
 		(c) =>
 			c.columnType !== ZenoColumnType.EMBEDDING &&
-			((c.columnType === ZenoColumnType.OUTPUT && c.name === model) ||
+			((c.columnType === ZenoColumnType.OUTPUT && c.model === model) ||
 				(c.columnType === ZenoColumnType.POSTDISTILL && c.model === model) ||
 				(c.columnType !== ZenoColumnType.OUTPUT &&
 					c.columnType !== ZenoColumnType.POSTDISTILL))
