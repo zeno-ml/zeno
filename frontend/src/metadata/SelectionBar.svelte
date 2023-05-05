@@ -7,26 +7,26 @@
 	import { onMount } from "svelte";
 	import {
 		metric,
+		editId,
 		selectionIds,
 		selectionPredicates,
 		selections,
 		settings,
 		status,
+		tagIds,
 	} from "../stores";
 	import { ZenoService, type FilterPredicate } from "../zenoservice";
 	import IdsChip from "./chips/IdsChip.svelte";
 	import MetadataChip from "./chips/MetadataChip.svelte";
 	import SliceChip from "./chips/SliceChip.svelte";
+	import TagChip from "./chips/TagChip.svelte";
 
 	export let currentResult;
 	export let selected = "list";
 	export let optionsFunction;
 	export let viewOptions;
 
-	let CHOICES =
-		$settings.view !== ""
-			? ["list", "table", "comparison", "projection"]
-			: ["table", "projection"];
+	let CHOICES;
 
 	let optionsDiv: HTMLDivElement;
 	let mounted = false;
@@ -35,6 +35,13 @@
 	$: if (mounted && optionsDiv && optionsFunction) {
 		optionsFunction(optionsDiv, (opts) => (viewOptions = opts));
 	}
+
+	$: CHOICES =
+		$editId === undefined
+			? $settings.view !== ""
+				? ["list", "table", "comparison", "projection"]
+				: ["table", "projection"]
+			: ["table"];
 
 	$: filters = Object.entries($selections.metadata)
 		.filter(([, value]) => value.predicates.length > 0)
@@ -57,7 +64,7 @@
 <div style:width="100%">
 	<div class="between">
 		<div class="chips">
-			{#if $selections.slices.length + filters.length === 0 && $selectionIds.ids.length === 0}
+			{#if $selections.slices.length + $selections.tags.length + filters.length === 0 && $selectionIds.ids.length === 0}
 				<p>Filter with the metadata distributions.</p>
 			{:else}
 				{#each $selections.slices as slice}
@@ -66,10 +73,13 @@
 				{#each filters as [hash, chip]}
 					<MetadataChip {hash} {chip} />
 				{/each}
+				{#each $selections.tags as tag}
+					<TagChip {tag} />
+				{/each}
 				{#if $selectionIds.ids.length > 0}
 					<IdsChip />
 				{/if}
-				{#if $selectionPredicates.predicates.length > 0 || $selectionIds.ids.length > 0}
+				{#if $selectionPredicates.predicates.length > 0 || $tagIds.ids.length > 0 || $selectionIds.ids.length > 0}
 					<span
 						class="clear"
 						on:keydown={() => ({})}
@@ -81,9 +91,10 @@
 										join: "",
 									};
 								});
-								return { slices: [], metadata: { ...m.metadata } };
+								return { slices: [], metadata: { ...m.metadata }, tags: [] };
 							});
 							selectionIds.set({ ids: [] });
+							tagIds.set({ ids: [] });
 						}}>
 						clear all
 					</span>
@@ -135,19 +146,26 @@
 			{/await}
 		</div>
 		<div class="inline">
-			{#if optionsFunction}
-				<div style:margin-right="20px" bind:this={optionsDiv} />
+			{#if $editId === undefined}
+				{#if optionsFunction}
+					<div style:margin-right="20px" bind:this={optionsDiv} />
+				{/if}
+				<Group>
+					{#each CHOICES as choice}
+						<Button
+							style="background-color: {selected === choice
+								? 'var(--G5)'
+								: 'var(--G6)'}"
+							variant="outlined"
+							on:click={() => (selected = choice)}>{choice}</Button>
+					{/each}
+				</Group>
+			{:else}
+				<div class="inline" style="margin-right: 10px">
+					<p style="margin: auto; margin-right: 10px">Editing</p>
+					<div class="meta-chip">{$editId}</div>
+				</div>
 			{/if}
-			<Group>
-				{#each CHOICES as choice}
-					<Button
-						style="background-color: {selected === choice
-							? 'var(--G5)'
-							: 'var(--G6'}"
-						variant="outlined"
-						on:click={() => (selected = choice)}>{choice}</Button>
-				{/each}
-			</Group>
 		</div>
 	</div>
 </div>
@@ -218,5 +236,16 @@
 	.inline {
 		display: flex;
 		align-items: center;
+	}
+	.meta-chip {
+		padding: 5px 10px;
+		background: var(--N2);
+		margin-left: 5px;
+		margin-right: 5px;
+		margin-top: 2px;
+		margin-bottom: 2px;
+		border-radius: 4px;
+		width: fit-content;
+		margin: auto;
 	}
 </style>

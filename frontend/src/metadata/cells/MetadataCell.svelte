@@ -39,6 +39,7 @@
 				...mets.metadata,
 				[columnHash(col)]: { predicates, join: "" },
 			},
+			tags: mets.tags,
 		}));
 	}
 </script>

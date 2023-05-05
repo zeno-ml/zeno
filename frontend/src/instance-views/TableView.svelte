@@ -1,18 +1,24 @@
 <script lang="ts">
 	import { Icon, Label } from "@smui/button";
 	import { Pagination } from "@smui/data-table";
+	import Checkbox from "@smui/checkbox";
 	import IconButton from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
 	import { tick } from "svelte";
 	import { getFilteredTable } from "../api/table";
 	import {
+		editId,
+		editedIds,
 		model,
 		rowsPerPage,
+		selections,
 		selectionIds,
 		selectionPredicates,
 		settings,
 		sort,
 		status,
+		tags,
+		tagIds,
 	} from "../stores";
 	import { columnHash } from "../util/util";
 	import type { ZenoColumn } from "../zenoservice";
@@ -27,6 +33,7 @@
 	let viewDivs = {};
 	let columnHeader: ZenoColumn[] = [];
 	let body: HTMLElement;
+	let currentTagIds = [];
 
 	let currentPage = 0;
 	let end = 0;
@@ -46,13 +53,23 @@
 		currentPage = lastPage;
 	}
 
+	if ($editId !== undefined) {
+		currentTagIds = $tags.get($editId).selectionIds.ids;
+	}
+
+	$: {
+		currentTagIds;
+		editedIds.set(currentTagIds);
+	}
+
 	// update on page, metadata selection, slice selection, or state change.
 	$: {
 		$status.completeColumns;
+		$selections.tags;
 		$selectionPredicates;
 		$model;
 		$sort;
-		currentPage;
+		$editId, currentPage;
 		updateTable();
 	}
 
@@ -74,7 +91,9 @@
 			$model,
 			[start, end],
 			$sort,
-			$selectionIds
+			$tagIds,
+			$selectionIds,
+			$selections.tags
 		).then((res) => {
 			table = res;
 			if (body) {
@@ -137,11 +156,14 @@
 		<table id="column-table">
 			<thead>
 				<tr>
+					{#if $editId !== undefined}
+						<th>Included</th>
+					{/if}
 					{#if viewFunction}
 						<th>instance</th>
 					{/if}
 					{#each columnHeader as header}
-						{#if header.name !== $settings.idColumn.name}
+						{#if header.name !== $settings.idColumn.name && header.name !== $settings.dataColumn.name}
 							<th on:click={() => updateSort(header)}>
 								<div class="inline-header">
 									{header.name}
@@ -163,13 +185,21 @@
 			<tbody>
 				{#each table as tableContent, i (tableContent[idHash])}
 					<tr>
+						{#if $editId !== undefined}
+							<td
+								><Checkbox
+									bind:group={currentTagIds}
+									value={String(
+										tableContent[columnHash($settings.idColumn)]
+									)} /></td>
+						{/if}
 						{#if viewFunction}
 							<td>
 								<div bind:this={viewDivs[i]} />
 							</td>
 						{/if}
 						{#each columnHeader as header}
-							{#if header.name !== $settings.idColumn.name}
+							{#if header.name !== $settings.idColumn.name && header.name !== $settings.dataColumn.name}
 								{#if header.metadataType === MetadataType.CONTINUOUS}
 									<td>{tableContent[columnHash(header)].toFixed(2)}</td>
 								{:else}

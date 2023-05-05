@@ -14,6 +14,7 @@ import type {
 	FilterPredicateGroup,
 	Report,
 	Slice,
+	Tag,
 	ZenoColumn,
 	ZenoSettings,
 } from "./zenoservice";
@@ -78,18 +79,29 @@ export const requestingHistogramCounts: Writable<boolean> = writable(false);
 
 export const slices: Writable<Map<string, Slice>> = writable(new Map());
 export const folders: Writable<string[]> = folderWritable();
+export const tags: Writable<Map<string, Tag>> = writable(new Map());
 export const reports: Writable<Report[]> = reportWritable();
 
-// the ids directly selected by the user
+// The tag ids selected by the user.
+export const tagIds: Writable<FilterIds> = writable({ ids: [] });
+
+// tag name to edit
+export const editId: Writable<string> = writable(undefined);
+
+export const editedIds: Writable<string[] | number[]> = writable([]);
+
+// The ids directly selected by the user.
 export const selectionIds: Writable<FilterIds> = writable({ ids: [] });
-// slices is an array of slice names,
+// Slices is an array of slice names,
 // metadata is an object where keys are column names and values are FilterPredicateGroups
 export const selections: Writable<{
 	metadata: Record<string, FilterPredicateGroup>;
 	slices: Array<string>;
+	tags: Array<string>;
 }> = writable({
 	metadata: {},
 	slices: [],
+	tags: [],
 });
 // Combination of selected filters and slice filters.
 // Needs to be a group because we need to join the predicates with &.
@@ -121,6 +133,7 @@ export const report: Writable<number> = writable(undefined);
 
 export const showNewFolder: Writable<boolean> = writable(false);
 export const showNewSlice: Writable<boolean> = writable(false);
+export const showNewTag: Writable<boolean> = writable(false);
 export const sliceToEdit: Writable<Slice> = writable(null);
 
 export const metricRange: Writable<[number, number]> = writable([
