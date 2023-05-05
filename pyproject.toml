@@ -27,6 +27,7 @@ tomli = "^2.0.1"
 tqdm = "^4.64.0"
 uvicorn = ">=0.17.5,<0.23.0"
 websockets = ">=10.2,<12.0"
+sliceline = { git = "https://github.com/zeno-ml/sliceline" }
 
 [tool.poetry.dev-dependencies]
 black = "^23.3.0"
