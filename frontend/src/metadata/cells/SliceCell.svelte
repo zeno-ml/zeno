@@ -1,21 +1,23 @@
 <script lang="ts">
-	import { mdiPencilOutline, mdiDotsHorizontal } from "@mdi/js";
+	import { mdiDotsHorizontal } from "@mdi/js";
 	import Button, { Label } from "@smui/button";
-	import IconButton, { Icon } from "@smui/icon-button";
 	import { Svg } from "@smui/common";
-	import Dialog, { Actions, Content, Title, InitialFocus } from "@smui/dialog";
+	import Dialog, { Actions, Content, InitialFocus, Title } from "@smui/dialog";
+	import IconButton, { Icon } from "@smui/icon-button";
+	import Paper from "@smui/paper";
+	import { deleteSlice, getMetricsForSlices } from "../../api/slice";
 	import SliceDetails from "../../general/SliceDetails.svelte";
 	import {
-		status,
-		showNewSlice,
-		selections,
-		slices,
-		sliceToEdit,
-		reports,
-		model,
 		metric,
+		model,
+		reports,
+		selections,
+		showNewSlice,
+		sliceToEdit,
+		slices,
+		status,
 	} from "../../stores";
-	import { getMetricsForSlices, deleteSlice } from "../../api/slice";
+	import { clickOutside } from "../../util/clickOutside";
 	import { ZenoService, type MetricKey, type Slice } from "../../zenoservice";
 
 	export let slice: Slice;
@@ -58,9 +60,7 @@
 		});
 		reports.update((reps) => {
 			reps = reps.map((r) => {
-				r.reportPredicates = r.reportPredicates.filter(
-					(p) => p.sliceName !== slice.sliceName
-				);
+				r.slices = r.slices.filter((p) => p.sliceName !== slice.sliceName);
 				return r;
 			});
 			return reps;
@@ -168,52 +168,68 @@
 					{slice.sliceName}
 				</div>
 			</div>
-			<div class="group">
+			<div
+				class="group"
+				use:clickOutside
+				on:click_outside={() => {
+					showOptions = false;
+				}}>
 				{#if showOptions}
-					<div
-						id="options-container"
-						on:mouseleave={() => (showOptions = false)}
-						on:blur={() => (showOptions = false)}>
-						<IconButton
-							on:click={(e) => {
-								e.stopPropagation();
-								showOptions = false;
-								$reports.forEach((r) => {
-									let hasSlice = false;
-									r.reportPredicates.forEach((p) => {
-										if (p.sliceName === slice.sliceName) {
-											hasSlice = true;
+					<div id="options-container">
+						<Paper style="padding: 3px 0px;" elevation={7}>
+							<Content>
+								<div
+									class="option"
+									on:keydown={() => ({})}
+									on:click={(e) => {
+										e.stopPropagation();
+										showOptions = false;
+										$reports.forEach((r) => {
+											let hasSlice = false;
+											r.slices.forEach((p) => {
+												if (p.sliceName === slice.sliceName) {
+													hasSlice = true;
+												}
+											});
+											if (hasSlice) {
+												relatedReports++;
+											}
+										});
+										if (relatedReports > 0) {
+											confirmDelete = true;
+										} else {
+											removeSlice();
 										}
-									});
-									if (hasSlice) {
-										relatedReports++;
-									}
-								});
-								if (relatedReports > 0) {
-									confirmDelete = true;
-								} else {
-									removeSlice();
-								}
-							}}>
-							<Icon class="material-icons">delete_outline</Icon>
-						</IconButton>
-						<IconButton
-							on:click={(e) => {
-								e.stopPropagation();
-								showOptions = false;
-								sliceToEdit.set(slice);
-								showNewSlice.set(true);
-							}}>
-							<Icon component={Svg} viewBox="0 0 24 24">
-								<path fill="black" d={mdiPencilOutline} />
-							</Icon>
-						</IconButton>
+									}}>
+									<Icon style="font-size: 18px;" class="material-icons"
+										>delete_outline</Icon
+									>&nbsp;
+									<span>Remove</span>
+								</div>
+								<div
+									class="option"
+									on:keydown={() => ({})}
+									on:click={(e) => {
+										e.stopPropagation();
+										showOptions = false;
+										sliceToEdit.set(slice);
+										showNewSlice.set(true);
+									}}>
+									<Icon style="font-size: 18px;" class="material-icons"
+										>edit</Icon
+									>&nbsp;
+									<span>Edit</span>
+								</div>
+							</Content>
+						</Paper>
 					</div>
 				{/if}
 				{#if result}
 					{#await result then res}
 						<span style:margin-right="10px">
-							{res[0].metric !== undefined ? res[0].metric.toFixed(2) : ""}
+							{res[0].metric !== undefined && res[0].metric !== null
+								? res[0].metric.toFixed(2)
+								: ""}
 						</span>
 						<span id="size">
 							({res[0].size.toLocaleString()})
@@ -221,7 +237,12 @@
 					{/await}
 				{/if}
 				<div class="inline" style:cursor="pointer">
-					<div style:width="36px">
+					<div
+						style:width="36px"
+						use:clickOutside
+						on:click_outside={() => {
+							hovering = false;
+						}}>
 						{#if hovering}
 							<IconButton
 								size="button"
@@ -322,12 +343,21 @@
 		top: 0px;
 		right: 0px;
 		z-index: 5;
-		background: var(--G6);
-		margin-top: -7px;
-		border: 1px solid var(--G5);
 		position: absolute;
-		height: max-content;
+		margin-top: 35px;
+	}
+	.option {
 		display: flex;
-		border-radius: 4px;
+		flex-direction: row;
+		align-items: center;
+		cursor: pointer;
+		width: 73px;
+		padding: 1px 6px;
+	}
+	.option span {
+		font-size: 12px;
+	}
+	.option:hover {
+		background: var(--G5);
 	}
 </style>

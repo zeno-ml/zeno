@@ -7,7 +7,6 @@ import asyncio
 import os
 from typing import Dict, List, Union
 
-import gradio as gr  # type: ignore
 from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
@@ -40,10 +39,11 @@ from zeno.processing.histogram_processing import (
 )
 from zeno.processing.projection_processing import (
     check_embed_exists,
-    project_into_2D,
+    project_into_2d,
     projection_colors,
 )
 from zeno.processing.slice_finder import get_column_name_with_summary, slice_finder
+from zeno.util import read_config
 
 
 def custom_generate_unique_id(route: APIRoute):
@@ -76,40 +76,6 @@ def get_server(zeno: ZenoBackend):
         name="base",
     )
 
-    # If an inference function is provided, mount the gradio app.
-    if zeno.inference_function:
-        # The input_columns should map to the input_components.
-        inference_return = zeno.inference_function(zeno.zeno_options)
-        zeno.gradio_input_columns = inference_return.input_columns
-
-        gradio_app = gr.Interface(
-            fn=zeno.single_inference,
-            inputs=[
-                gr.components.Dropdown(
-                    zeno.model_names, value=zeno.model_names[0], label="Model"
-                ),
-                *inference_return.input_components,
-            ],
-            outputs=inference_return.output_component,
-            css="""
-                    :root {
-                    --button-primary-background-base: #6a1b9a;
-                    --button-primary-background-hover: #d2bae9;
-                    --button-primary-text-color-base: white;
-                    --button-primary-text-color-hover: white;
-                    --button-primary-border-color-hover: #6a1b9a;
-                    --button-primary-border-color: #6a1b9a;
-                    }
-                """,
-            allow_flagging="never",
-            analytics_enabled=False,
-        )
-        api_app = gr.mount_gradio_app(
-            app=api_app,
-            blocks=gradio_app,
-            path="/gradio",
-        )
-
     @api_app.get("/settings", response_model=ZenoSettings, tags=["zeno"])
     def get_settings():
         return ZenoSettings(
@@ -118,9 +84,8 @@ def get_server(zeno: ZenoBackend):
             label_column=zeno.label_column,
             data_column=zeno.data_column,
             calculate_histogram_metrics=zeno.calculate_histogram_metrics,
-            inference_view=True if zeno.inference_function else False,
             samples=zeno.samples,
-            totalSize=zeno.df.shape[0],
+            total_size=zeno.df.shape[0],
         )
 
     @api_app.get("/initialize", response_model=ZenoVariables, tags=["zeno"])
@@ -154,6 +119,17 @@ def get_server(zeno: ZenoBackend):
     @api_app.post("/filtered-table", response_model=str, tags=["zeno"])
     def get_filtered_table(req: TableRequest):
         return zeno.get_filtered_table(req)
+
+    @api_app.get("/refresh", tags=["zeno"])
+    def refresh_data():
+        if not zeno.editable:
+            return
+
+        if zeno.params.config_file:
+            zeno.params = read_config(zeno.params.config_file)
+        zeno.done_running_inference = False
+        zeno.initial_setup()
+        zeno.start_processing()
 
     @api_app.post(
         "/histograms", response_model=List[List[HistogramBucket]], tags=["zeno"]
@@ -198,8 +174,8 @@ def get_server(zeno: ZenoBackend):
         return check_embed_exists(zeno.df, model)
 
     @api_app.post("/embed-project", tags=["zeno"], response_model=Points2D)
-    def project_embed_into_2D(req: EmbedProject2DRequest):
-        return project_into_2D(zeno.df, zeno.id_column, req.model, req.column)
+    def project_embed_into_2d(req: EmbedProject2DRequest):
+        return project_into_2d(zeno.df, zeno.id_column, req.model, req.column)
 
     @api_app.post(
         "/slice-finder-project", tags=["zeno"], response_model=SliceFinderMetricReturn

@@ -1,0 +1,91 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  lint-ts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install modules
+        run: cd frontend && npm i
+      - name: TS linting
+        run: cd frontend && npm run lint
+
+  format-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: psf/black@stable
+        with:
+          options: "--check --verbose"
+          src: "zeno/"
+
+  lint-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: jpetrucciani/ruff-check@main
+        with:
+          path: "zeno/"
+
+  typecheck-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: jakebailey/pyright-action@v1
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1.3.3
+        with:
+          virtualenvs-in-project: true
+          virtualenvs-path: ~/.virtualenvs
+
+      - name: Cache Poetry virtualenv
+        uses: actions/cache@v3.3.1
+        id: cache-poetry
+        with:
+          path: ~/.virtualenvs
+          key: poetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            poetry-${{ hashFiles('**/poetry.lock') }}
+      - name: Install Poetry Dependencies
+        if: steps.cache-poetry.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+
+      - name: Cache NPM packages
+        uses: actions/cache@v3.3.1
+        id: cache-npm
+        with:
+          path: ~/frontend/node_modules
+          key: npm-${{ hashFiles('~/frontend/**/package.lock') }}
+          restore-keys: |
+            npm-${{ hashFiles('~/frontend/**/package.lock') }}
+
+      - name: Install NPM packages
+        if: steps.cache-npm.outputs.cache-hit != 'true'
+        run: |
+          cd frontend/
+          npm i
+
+      - name: Build frontend
+        run: |
+          cd frontend/
+          npm run build
+
+      - name: Run tests
+        run: |
+          poetry run pytest -svv zeno/tests/

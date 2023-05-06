@@ -36,7 +36,13 @@
 		}
 
 		try {
-			import(window.location.origin + "/cache/view.mjs").then((m) => {
+			let import_path =
+				location.protocol +
+				"//" +
+				location.host +
+				location.pathname +
+				"cache/view.mjs";
+			import(import_path).then((m) => {
 				if (m.getOptions) {
 					optionsFunction = m.getOptions;
 				} else {

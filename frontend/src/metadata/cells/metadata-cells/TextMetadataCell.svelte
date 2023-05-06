@@ -2,112 +2,193 @@
 	import Button from "@smui/button";
 	import { TrailingIcon } from "@smui/chips";
 	import { Label } from "@smui/common";
+	import { tooltip } from "@svelte-plugins/tooltips";
 	import AutoComplete from "simple-svelte-autocomplete";
 	import {
 		ZenoService,
 		type FilterPredicate,
 		type ZenoColumn,
 	} from "../../../zenoservice";
+	import MatchWholeWordIcon from "./static/MatchWholeWordIcon.svelte";
+	import RegexIcon from "./static/RegexIcon.svelte";
 
 	export let col: ZenoColumn;
 	export let filterPredicates: FilterPredicate[];
 	export let updatePredicates;
 
-	let regex = "";
-	let selectionType = "string";
-	let valid = true;
+	let searchString = "";
+	let isRegex = false;
+	let regexValid = true;
+	let caseMatch = false;
+	let wholeWordMatch = false;
+	let refresh = 0;
+	let noResultsText = "No results";
+	let results = [];
+	let showEmptyError = false;
 
+	let blur = function (ev) {
+		ev.target.blur();
+	};
 	$: {
-		valid = true;
-		if (selectionType === "regex") {
+		regexValid = true;
+		if (isRegex) {
 			try {
-				new RegExp(regex);
+				new RegExp(searchString);
 			} catch (e) {
-				valid = false;
+				regexValid = false;
 			}
 		}
 	}
 
 	function setSelection() {
+		if (!searchString || results.length === 0) {
+			showEmptyError = true;
+			return;
+		}
+		showEmptyError = false;
+
 		filterPredicates.push({
 			column: col,
-			operation: "match",
-			value: regex,
+			operation: isRegex ? "match (regex)" : "match",
+			value: searchString,
 			join: "",
 		});
 		if (filterPredicates.length > 1) {
 			filterPredicates[filterPredicates.length - 1].join = "|";
 		}
 		updatePredicates(filterPredicates);
-		regex = "";
+
+		searchString = "";
 	}
 
 	async function searchItems(input: string) {
-		if (selectionType === "regex") {
+		if (isRegex) {
 			try {
-				new RegExp(regex);
+				new RegExp(input);
+				noResultsText = "No results";
 			} catch (e) {
-				return [];
+				noResultsText = "Invalid Regex!";
+				results = [];
+				return results;
 			}
 		}
 
 		try {
-			let res = await ZenoService.filterStringMetadata({
+			results = await ZenoService.filterStringMetadata({
 				column: col,
 				filterString: input,
-				selectionType: selectionType,
+				isRegex: isRegex,
+				caseMatch: caseMatch,
+				wholeWordMatch: wholeWordMatch,
 			});
-
-			return res;
+			return results;
 		} catch (e) {
-			return [];
+			results = [];
+			return results;
 		}
+	}
+
+	function optionClick(e) {
+		if (e.currentTarget instanceof HTMLElement) {
+			let id = e.currentTarget.id;
+			if (id === "caseMatch") {
+				caseMatch = !caseMatch;
+			} else if (id === "wholeWordMatch") {
+				wholeWordMatch = !wholeWordMatch;
+			} else {
+				if (isRegex) {
+					isRegex = false;
+					noResultsText = "No results";
+					regexValid = true;
+				} else {
+					isRegex = true;
+				}
+			}
+		}
+		refresh++;
 	}
 </script>
 
 <div class="container">
-	<AutoComplete
-		bind:text={regex}
-		placeholder={"Search"}
-		noResultsText={"No results"}
-		createText={""}
-		hideArrow={true}
-		searchFunction={searchItems}
-		showLoadingIndicator={true}
-		cleanUserText={false}
-		ignoreAccents={false}
-		create={true}
-		delay={200} />
-	<div id="options">
+	{#key refresh}
+		<AutoComplete
+			id="autoinput"
+			bind:text={searchString}
+			placeholder={"Search"}
+			{noResultsText}
+			hideArrow={true}
+			searchFunction={searchItems}
+			cleanUserText={false}
+			ignoreAccents={false}
+			localFiltering={false}
+			delay={200}
+			onFocus={() => (showEmptyError = false)}>
+			<div slot="no-results" let:noResultsText>
+				<span style:color={regexValid ? "" : "red"}>{noResultsText}</span>
+			</div>
+		</AutoComplete>
+	{/key}
+	<div class="option-box">
 		<div
-			class="option option-left"
-			style:background={selectionType === "string" ? "var(--G5)" : ""}
-			on:click={() => (selectionType = "string")}
-			on:keydown={() => (selectionType = "regex")}>
-			abc
+			id="caseMatch"
+			class="search-option"
+			style:background={caseMatch ? "var(--P2)" : ""}
+			on:keydown={() => ({})}
+			on:click={optionClick}
+			use:tooltip={{
+				content: "Match Case",
+				theme: "zeno-tooltip",
+				autoPosition: true,
+			}}>
+			Aa
 		</div>
 		<div
-			class="option option-right"
-			style:background={selectionType === "regex" ? "var(--G5)" : ""}
-			on:click={() => (selectionType = "regex")}
-			on:keydown={() => (selectionType = "regex")}>
-			.*
+			id="wholeWordMatch"
+			class="search-option"
+			style:background={wholeWordMatch ? "var(--P2)" : ""}
+			on:keydown={() => ({})}
+			on:click={optionClick}
+			use:tooltip={{
+				content: "Match Whole Word",
+				theme: "zeno-tooltip",
+				autoPosition: true,
+			}}>
+			<svelte:component this={MatchWholeWordIcon} />
+		</div>
+		<div
+			id="typeSelection"
+			class="search-option"
+			style:background={isRegex ? "var(--P2)" : ""}
+			on:keydown={() => ({})}
+			on:click={optionClick}
+			use:tooltip={{
+				content: "Use Regular Expression",
+				theme: "zeno-tooltip",
+				autoPosition: true,
+			}}>
+			<svelte:component this={RegexIcon} />
 		</div>
 	</div>
-
-	<Button style="margin-left: 10px;" variant="outlined" on:click={setSelection}>
+	<Button
+		style="margin-left: 10px; height: 32px"
+		variant="outlined"
+		on:click={setSelection}
+		on:mouseleave={blur}
+		on:focusout={blur}>
 		<Label>Set</Label>
 	</Button>
-	<p />
 </div>
-{#if !valid}
-	<p style="margin-right: 10px; color: #B71C1C">Invalid regex</p>
+{#if showEmptyError}
+	<p style="margin-left:10px; color: red;">Error: The ID entered is invalid</p>
 {/if}
+
 <div class="chips">
 	{#each filterPredicates as pred}
 		<div class="meta-chip">
 			<span>
+				{pred.operation === "match (regex)" ? "/" : ""}
 				{pred.value}
+				{pred.operation === "match (regex)" ? "/" : ""}
 			</span>
 			<TrailingIcon
 				class="remove material-icons"
@@ -125,32 +206,33 @@
 </div>
 
 <style>
-	#options {
-		display: flex;
-		flex-direction: row;
-		margin-left: 10px;
-	}
-	.option {
-		padding: 6px 10px;
-		border: 0.5px solid var(--G4);
-		width: fit-content;
-		cursor: pointer;
-	}
-	.option:hover {
-		background: var(--G4);
-	}
-	.option-left {
-		margin-right: -1px;
-		border-radius: 5px 0px 0px 5px;
-		border-right: 1px solid var(--G4);
-	}
-	.option-right {
-		border-radius: 0px 5px 5px 0px;
-	}
 	.container {
 		display: flex;
 		align-items: center;
 		margin-left: 5px;
+	}
+	.option-box {
+		margin-left: 10px;
+		display: flex;
+		align-items: center;
+		border: 1px solid
+			var(--mdc-outlined-button-outline-color, rgba(0, 0, 0, 0.12));
+		border-radius: var(
+			--mdc-outlined-button-container-shape,
+			var(--mdc-shape-small, 4px)
+		);
+	}
+	.search-option {
+		display: flex;
+		align-items: center;
+		padding: 2px 3px;
+		padding-left: 6px;
+		padding-right: 6px;
+		height: 26px;
+		cursor: pointer;
+	}
+	.search-option:hover {
+		background: var(--Y1);
 	}
 	.chips {
 		display: flex;

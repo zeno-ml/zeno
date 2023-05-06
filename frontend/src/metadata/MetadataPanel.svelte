@@ -109,20 +109,19 @@
 		if (metadataHistograms.size === 0) {
 			return;
 		}
+		selections.set({ metadata: {}, slices: [] });
 		getHistograms($status.completeColumns, model).then((res) => {
-			getHistogramCounts(res, null, $selectionIds).then((res) => {
+			getHistogramCounts(res, null, null).then((res) => {
 				if (res === undefined) {
 					return;
 				}
 				metadataHistograms = res;
-				getHistogramMetrics(res, null, model, $metric, $selectionIds).then(
-					(res) => {
-						if (res === undefined) {
-							return;
-						}
-						metadataHistograms = res;
+				getHistogramMetrics(res, null, model, $metric, null).then((res) => {
+					if (res === undefined) {
+						return;
 					}
-				);
+					metadataHistograms = res;
+				});
 			});
 		});
 	});
@@ -231,7 +230,7 @@
 					position: "right",
 					theme: "zeno-tooltip",
 				}}>
-				<Icon component={Svg} viewBox="-6 -6 36 36">
+				<Icon style="outline:none" component={Svg} viewBox="-6 -6 36 36">
 					<path d={mdiInformationOutline} />
 				</Icon>
 			</div>
@@ -266,7 +265,7 @@
 						showSliceFinder.set(false);
 					}}>
 					<Icon component={Svg} viewBox="0 0 24 24">
-						<path fill="black" d={mdiFolderPlusOutline} />
+						<path fill="var(--G1)" d={mdiFolderPlusOutline} />
 					</Icon>
 				</IconButton>
 			</div>
@@ -287,7 +286,7 @@
 						{#if $selectionPredicates.predicates.length > 0}
 							<path fill="#6a1a9a" d={mdiPlusCircle} />
 						{:else}
-							<path fill="black" d={mdiPlus} />
+							<path fill="var(--G1)" d={mdiPlus} />
 						{/if}
 					</Icon>
 				</IconButton>
@@ -311,7 +310,9 @@
 		<div class="inline">
 			<span>
 				{#await res then r}
-					{r && r[0].metric ? r[0].metric.toFixed(2) : ""}
+					{r && r[0].metric !== undefined && r[0].metric !== null
+						? r[0].metric.toFixed(2)
+						: ""}
 				{/await}
 			</span>
 			<span class="size">({$settings.totalSize.toLocaleString()})</span>
@@ -323,7 +324,7 @@
 		<FolderCell {folder} />
 	{/each}
 
-	{#each [...$slices.values()].filter((s) => s.folder === "") as s (s.sliceName)}
+	{#each [...$slices.values()].filter((s) => s.folder === "" && s.sliceName !== "All Instances") as s (s.sliceName)}
 		<SliceCell slice={s} />
 	{/each}
 
@@ -338,7 +339,7 @@
 					position: "right",
 					theme: "zeno-tooltip",
 				}}>
-				<Icon component={Svg} viewBox="-6 -6 36 36">
+				<Icon style="outline:none" component={Svg} viewBox="-6 -6 36 36">
 					<path d={mdiInformationOutline} />
 				</Icon>
 			</div>
@@ -390,9 +391,9 @@
 	}
 	.side-container {
 		height: calc(100vh - 15px);
-		width: 350px;
-		min-width: 350px;
-		max-width: 350px;
+		width: 360px;
+		min-width: 360px;
+		max-width: 360px;
 		padding-top: 10px;
 		padding-bottom: 0px;
 		padding-left: 15px;
