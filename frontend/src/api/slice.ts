@@ -42,7 +42,7 @@ function setModelForMetricKeys(metricKeys: MetricKey[]) {
 
 function setMetricForSize(metricKeys: MetricKey[]) {
 	return metricKeys.map((key) => {
-		key.metric = key.metric === "size" ? "accuracy" : key.metric;
+		key.metric = key.metric === "size" ? "" : key.metric;
 		return key;
 	});
 }
@@ -58,6 +58,9 @@ export async function getMetricsForSlices(
 	if (metricKeys.length === 0) {
 		return null;
 	}
+	// update metric to empty string if metric is size
+	metricKeys = setMetricForSize(metricKeys);
+
 	if (metricKeys[0].metric === undefined) {
 		metricKeys = metricKeys.map((k) => ({ ...k, metric: "" }));
 	}
@@ -66,9 +69,6 @@ export async function getMetricsForSlices(
 	}
 	// Update model in predicates if slices are dependent on postdistill columns.
 	metricKeys = setModelForMetricKeys(metricKeys);
-
-	// use accuracy as default metrics to fetch size metric
-	metricKeys = setMetricForSize(metricKeys);
 
 	if (metricKeys.length > 0) {
 		return await ZenoService.getMetricsForSlices({
