@@ -12,8 +12,6 @@ from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
 
-from zeno import SliceFinderMetricReturn
-
 from zeno.backend import ZenoBackend
 from zeno.classes.base import ZenoColumn
 from zeno.classes.classes import (
@@ -25,7 +23,10 @@ from zeno.classes.classes import (
     StatusResponse,
     TableRequest,
     ZenoSettings,
-    ZenoVariables,
+    ZenoVariables
+)
+from zeno.classes.slice_finder import (
+    SliceFinderMetricReturn
 )
 from zeno.classes.metadata import HistogramBucket, HistogramRequest, StringFilterRequest
 from zeno.classes.projection import Points2D, PointsColors

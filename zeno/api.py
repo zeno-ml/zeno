@@ -98,20 +98,11 @@ class MetricReturn(BaseModel):
 
     Args:
         metric (float): Average metric over subset of data
-        error_rate (float) Error Rate of metric over subset of data
+        variance (float): Variance of metric over subset of data
     """
 
     metric: float
-    error_rate: Union[List[float], None] = None
-
-    class Config:
-        arbitrary_types_allowed = True
-
-
-class SliceFinderMetricReturn(BaseModel):
-
-    list_of_trained_elements: Union[List[object], None] = None
-    slices_of_interest: Union[List[object], None] = None
+    variance: Union[List[float], None] = None
 
     class Config:
         arbitrary_types_allowed = True

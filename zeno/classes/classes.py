@@ -68,15 +68,9 @@ class EntryRequest(BaseModel):
 class SliceFinderRequest(BaseModel):
     id: str
     model: str
-    orderBy: str
-    minimumSize: str
+    order_by: str
+    minimum_size: str
     depth: str
     columns: List[ZenoColumn] = []
     model: str
-    columnName: str
-
-
-class SliceFinderMetricReturn(BaseModel):
-    metric: float
-    list_of_trained_elements: List[object]
-    slices_of_interest: List[List[object]]
+    column_name: str

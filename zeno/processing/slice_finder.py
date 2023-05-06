@@ -7,34 +7,50 @@ from sliceline.slicefinder import Slicefinder
 from zeno.classes.base import ZenoColumn, ZenoColumnType
 from zeno.classes.slice import FilterPredicate, FilterPredicateGroup, Slice
 
-"""
-Finds the right column given the df and zenocolumn.
-"""
 
 
-def find_the_right_column(columns, name):
+def find_right_column(columns, name):
+    """Finds the right column given the df and zenocolumn.
+
+    Args: 
+        columns: the list of all ZenoColumns.
+        name: the name that appears in a dataframe and can be a match for a ZenoColumn. 
+    Returns the right column with the correct Zenocolumn name.
+    """
     for i in range(0, len(columns)):
         if columns[i].__str__() == name:
             return columns[i]
     return
 
 
-def find_the_right_column_name(columns, name):
+def find_right_column_name(columns, name):
+    """Finds the right column given the df and zenocolumn.
+
+    Args: 
+        columns: the list of all ZenoColumns.
+        name: the name for a specific column.
+    Returns the dataframe column name associated with the Zeno column name.
+    """
     for i in range(0, len(columns)):
         if columns[i].name == name:
             return columns[i].__str__()
     return
 
 
-"""
-Catering to the need to display column names with summary from frontend.
-Only need to call once per lifecycle.
-"""
+
 
 
 def get_column_name_with_summary(df, columns):
+    """Catering to the need to display column names with summary from frontend.
+    Only need to call once per lifecycle.
+
+    Args:
+        df: the full data frame from the backend.
+        columns: full list from ZenoColumn
+    Returns column names with a summary of minimum and maximum values.
+    """
     column_summary_dict = dict()
-    updated_df = data_clean_for_columns(df, True)
+    updated_df = data_clean_for_columns(df)
     all_df_column_name = updated_df.columns.values
     for column in columns:
         for df_column_name in all_df_column_name:
@@ -51,20 +67,29 @@ def get_column_name_with_summary(df, columns):
     return column_summary_dict
 
 
-def data_clean_for_columns(df, is_summary=False):
-    updated_df = df.copy(deep=True)
-    updated_df.drop(list(df.filter(regex="id")), axis=1, inplace=True)
-    if is_summary:
-        updated_df.drop(list(df.filter(regex="label")), axis=1, inplace=True)
-    updated_df.drop(list(df.filter(regex="EMBEDDING")), axis=1, inplace=True)
-    updated_df.drop(list(df.filter(regex="POSTDISTILL")), axis=1, inplace=True)
-    updated_df.drop(list(df.filter(regex="OUTPUT")), axis=1, inplace=True)
+def data_clean_for_columns(df):
+    updated_df = df.copy()
+    updated_df.drop(list(updated_df.filter(regex="id")), axis=1, inplace=True)
+    updated_df.drop(list(updated_df.filter(regex="EMBEDDING")), axis=1, inplace=True)
+    updated_df.drop(list(updated_df.filter(regex="POSTDISTILL")), axis=1, inplace=True)
+    updated_df.drop(list(updated_df.filter(regex="OUTPUT")), axis=1, inplace=True)
     return updated_df
 
 
 def slice_finder(df, req, zeno_options, metric_functions, columns):
+
+    """Returns found slices based on certain heruisitics.
+
+    Args:
+        df: the dataframe from backend.
+        req: the SliceFinderRequst with arguments
+        zeno_options: options for zeno software.
+        metric_functions: the metrics functions for filtering out data of interest
+        columns: 
+    Returns a SliceFinderMetricReturn Object.
+    """
     # setting up config important for the next steps
-    minimum_size = int(req.minimumSize)
+    minimum_size = int(req.minimum_size)
 
     output_col = ZenoColumn(
         column_type=ZenoColumnType.OUTPUT,
@@ -93,9 +118,9 @@ def slice_finder(df, req, zeno_options, metric_functions, columns):
 
     # data cleaning
 
-    updated_df = df.copy(deep=True)
+    updated_df = df.copy()
 
-    df_column_name = find_the_right_column_name(columns, req.columnName)
+    df_column_name = find_right_column_name(columns, req.column_name)
     updated_df = data_clean_for_columns(updated_df)
 
     result = metric_functions["slice_finder_accuracy"](df, local_ops)
@@ -135,7 +160,7 @@ def slice_finder(df, req, zeno_options, metric_functions, columns):
         )
 
         normalized_column = np.array(normalized_column, dtype=float)
-        if req.orderBy == "ascending":
+        if req.order_by == "ascending":
             normalized_column = 1 - normalized_column
         real_errors = np.array(result.distill_output, dtype=float)
         errors = np.multiply(normalized_column, real_errors)
@@ -160,7 +185,7 @@ def slice_finder(df, req, zeno_options, metric_functions, columns):
                     slice_predicate_half = code_dict[all_data_column[i]][
                         (int)(slice_predicate_half)
                     ]
-                zeno_column = find_the_right_column(columns, all_data_column[i])
+                zeno_column = find_right_column(columns, all_data_column[i])
                 join_val = "" if len(predicate_list) == 0 else "&"
                 predicate_list.append(
                     FilterPredicate(

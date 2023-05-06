@@ -9,18 +9,13 @@
 	import Select, { Option } from "@smui/select";
 	import { clickOutside } from "../../util/clickOutside";
 	import { mdiPlus, mdiClose } from "@mdi/js";
-	import { Pagination } from "@smui/data-table";
 	import { showSliceFinder } from "../../stores";
 	import { model, metric } from "../../stores";
 	import Button from "@smui/button";
 	import { getMetricsForSlices } from "../../api/slice";
 	import { ZenoService, type MetricKey } from "../../zenoservice";
 
-	let currentResult;
-	let currentPage = 1;
-	let input;
 	let slice_data = [];
-	let sampleOptions = [5, 10, 20].sort((a, b) => a - b);
 	// dummy data for presenting frontend UI
 	let minimumSizes = ["2", "3", "4", "5", "6", "7"];
 	let minimumSize = "5";
@@ -30,16 +25,9 @@
 	let sliceFinderKey = "general";
 	let orderBys = ["ascending", "descending"];
 	let orderBy = "ascending";
-
 	let sets;
 	$: dataframeKeyValuePair = {};
-
-	$: start = 0;
-	$: end = 10;
-	$: lastPage = 10;
-	$: if (showSliceFinder && input) {
-		input.getElement().focus();
-	}
+	$: sliceFinderMessage = "";
 
 	export async function addSliceAtIndex(index) {
 		let slice = sets.slices_of_interest[index];
@@ -56,15 +44,14 @@
 	}
 
 	export async function activateSliceFinder() {
-		document.getElementById("generate-slices").innerHTML =
-			"Generating Slices...";
+		sliceFinderMessage = "Generating Slices...";
 		sets = await ZenoService.projectFindAvailableSlices({
 			id: "1",
-			orderBy: orderBy,
-			minimumSize: minimumSize,
+			order_by: orderBy,
+			minimum_size: minimumSize,
 			depth: max_l,
 			model: $model,
-			columnName: sliceFinderKey ? sliceFinderKey : "",
+			column_name: sliceFinderKey ? sliceFinderKey : "",
 		});
 		let all_metrics = [];
 		for (let i = 0; i < sets.slices_of_interest.length; i++) {
@@ -78,7 +65,7 @@
 			]);
 			all_metrics.push(curr_metric);
 		}
-		document.getElementById("generate-slices").innerHTML = "";
+		sliceFinderMessage = "";
 		slice_data_generator(
 			sets.list_of_trained_elements,
 			sets.slices_of_interest,
@@ -111,26 +98,20 @@
 			predicateList = [
 				"Welcome to the Slice Finder Screen! Click on the Button on the upperright corner to begin!",
 			];
-
-			for (let i = 0; i < 1; i++) {
-				let predicate = [];
-				predicate.push(predicateList[0]);
-				let data = {
-					predicate: predicate,
-					slice_size: 0,
-					accuracy_rate: 0,
-					index: i,
-				};
-				slice_data.push(data);
-			}
+			let predicate = [];
+			predicate.push(predicateList[0]);
+			let data = {
+				predicate: predicate,
+				slice_size: 0,
+				accuracy_rate: 0,
+				index: 0,
+			};
+			slice_data.push(data);
 		} else {
-			start = 0;
-			end = slices_of_interest.length;
 			slice_data = [];
-			for (let i = 0; i < slices_of_interest.length; i++) {
+			slices_of_interest.forEach((element, i) => {
 				let predicate = [];
-				let predicates_store =
-					slices_of_interest[i].filterPredicates.predicates;
+				let predicates_store = element.filterPredicates.predicates;
 				for (let k = 0; k < predicates_store.length; k++) {
 					predicate.push(
 						predicates_store[k].column.name +
@@ -145,7 +126,8 @@
 					index: i,
 				};
 				slice_data.push(data);
-			}
+			});
+
 			if (orderBy === "descending") {
 				slice_data.reverse();
 			}
@@ -214,7 +196,7 @@
 			</Select>
 
 			<Button on:click={() => activateSliceFinder()}>Generate Slices</Button>
-			<span id="generate-slices" />
+			<span id="generate-slices">{sliceFinderMessage}</span>
 
 			{#each slice_data as element}
 				<div class="allSlices">
@@ -241,46 +223,6 @@
 				</div>
 			{/each}
 		</div>
-		<Pagination>
-			<svelte:fragment slot="rowsPerPage">
-				<Label>Rows Per Page</Label>
-				<Select variant="outlined" noLabel>
-					{#each sampleOptions as option}
-						<Option value={option}>{option}</Option>
-					{/each}
-				</Select>
-			</svelte:fragment>
-			<svelte:fragment slot="total">
-				{start + 1}-{end} of {#await currentResult then r}{r
-						? r[0].size
-						: ""}{/await}
-			</svelte:fragment>
-
-			<IconButton
-				class="material-icons"
-				action="first-page"
-				title="First page"
-				on:click={() => (currentPage = 0)}
-				disabled={currentPage === 0}>first_page</IconButton>
-			<IconButton
-				class="material-icons"
-				action="prev-page"
-				title="Prev page"
-				on:click={() => currentPage--}
-				disabled={currentPage === 0}>chevron_left</IconButton>
-			<IconButton
-				class="material-icons"
-				action="next-page"
-				title="Next page"
-				on:click={() => currentPage++}
-				disabled={currentPage === lastPage}>chevron_right</IconButton>
-			<IconButton
-				class="material-icons"
-				action="last-page"
-				title="Last page"
-				on:click={() => (currentPage = lastPage)}
-				disabled={currentPage === lastPage}>last_page</IconButton>
-		</Pagination>
 	</Paper>
 </div>
 
