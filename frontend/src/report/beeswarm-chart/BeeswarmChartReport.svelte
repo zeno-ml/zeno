@@ -124,7 +124,9 @@
 						slices: parameters.yEncoding === "slices" ? yName : r.slice,
 						models: parameters.yEncoding === "models" ? yName : r.model,
 						size: res[r.index].size,
-						metrics: res[r.index].metric.toFixed(2),
+						...(xLabel !== "size" && {
+							metrics: res[r.index].metric.toFixed(2),
+						}),
 					})),
 				}}
 				<h4>{yName}</h4>
