@@ -125,7 +125,7 @@
 
 		[$model, ...$comparisonModels].forEach((mod) => {
 			let obj = $status.completeColumns.find((c) => {
-				return c.columnType === ZenoColumnType.OUTPUT && c.name === mod;
+				return c.columnType === ZenoColumnType.OUTPUT && c.model === mod;
 			});
 			let modelColumn = obj ? columnHash(obj) : "";
 

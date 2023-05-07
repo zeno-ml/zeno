@@ -508,7 +508,7 @@
 		{/each}
 
 		{@const outputCol = $status.completeColumns.filter(
-			(m) => m.columnType === ZenoColumnType.OUTPUT && m.name === $model
+			(m) => m.columnType === ZenoColumnType.OUTPUT && m.model === $model
 		)}
 		{#if outputCol.length > 0}
 			<MetadataCell

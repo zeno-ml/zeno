@@ -322,7 +322,7 @@ class ZenoBackend(object):
                             i,
                         )
                     )
-            self.__set_data_processing_returns(predistill_outputs)
+                self.__set_data_processing_returns(predistill_outputs)
 
     def __inference(self):
         """Run models on instances."""
@@ -332,12 +332,10 @@ class ZenoBackend(object):
         for model_path in self.model_paths:
             model_name = os.path.basename(model_path).split(".")[0]
             model_column = ZenoColumn(
-                column_type=ZenoColumnType.OUTPUT,
-                name=model_name,
+                column_type=ZenoColumnType.OUTPUT, name="output", model=model_name
             )
             embedding_column = ZenoColumn(
-                column_type=ZenoColumnType.EMBEDDING,
-                name=model_name,
+                column_type=ZenoColumnType.EMBEDDING, name="embedding", model=model_name
             )
             model_hash = str(model_column)
             embedding_hash = str(embedding_column)
@@ -540,8 +538,7 @@ class ZenoBackend(object):
 
         if model is not None:
             output_col = ZenoColumn(
-                column_type=ZenoColumnType.OUTPUT,
-                name=model,
+                column_type=ZenoColumnType.OUTPUT, name="output", model=model
             )
             output_hash = str(output_col)
 

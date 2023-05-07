@@ -15,7 +15,10 @@ function setModelForMetricKey(
 	model: string
 ) {
 	if (instanceOfFilterPredicate(pred)) {
-		if (pred.column.columnType === ZenoColumnType.POSTDISTILL) {
+		if (
+			pred.column.columnType === ZenoColumnType.POSTDISTILL ||
+			pred.column.columnType === ZenoColumnType.OUTPUT
+		) {
 			pred.column.model = model;
 		}
 	} else {
@@ -67,7 +70,7 @@ export async function getMetricsForSlices(
 	if (metricKeys[0].model === undefined) {
 		metricKeys = metricKeys.map((k) => ({ ...k, model: "" }));
 	}
-	// Update model in predicates if slices are dependent on postdistill columns.
+	// Update model in predicates if slices are dependent on postdistill or output columns.
 	metricKeys = setModelForMetricKeys(metricKeys);
 
 	if (metricKeys.length > 0) {
