@@ -122,8 +122,6 @@
 		});
 		let modelColumn = obj ? columnHash(obj) : "";
 
-		await tick();
-
 		columnHeader = $status.completeColumns.filter(
 			(c) =>
 				(c.model === "" || c.model === $model) &&
@@ -133,6 +131,8 @@
 				$settings.dataColumn.name !== c.name &&
 				$settings.labelColumn.name !== c.name
 		);
+
+		await tick();
 
 		table.forEach((_, i) => {
 			let div = viewDivs[i];
