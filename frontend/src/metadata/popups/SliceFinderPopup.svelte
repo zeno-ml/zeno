@@ -51,7 +51,7 @@
 			minimum_size: minimumSize,
 			depth: max_l,
 			model: $model,
-			column_name: sliceFinderKey ? sliceFinderKey : "",
+			column_name: sliceFinderKey ? sliceFinderKey : "general",
 		});
 		let all_metrics = [];
 		for (let i = 0; i < sets.slices_of_interest.length; i++) {

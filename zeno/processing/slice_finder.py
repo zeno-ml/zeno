@@ -123,21 +123,17 @@ def slice_finder(df, req, zeno_options, metric_functions, columns):
     df_column_name = find_right_column_name(columns, req.column_name)
     updated_df = data_clean_for_columns(updated_df)
 
-    result = metric_functions["slice_finder_accuracy"](df, local_ops)
-    all_categorical_data = updated_df.select_dtypes(
-        include=["object", "boolean", "string"]
-    ).columns.tolist()
+    result = {}
 
-    filtered_all_categorical_data = []
+    if df_column_name is None or df_column_name == "general":
+        result = metric_functions["slice_finder_accuracy"](df, local_ops)
 
-    for i in range(0, len(all_categorical_data)):
-        data_name = all_categorical_data[i]
-        if "EMBEDDING" in data_name:
-            continue
-        if "POSTDISTILL" not in data_name:
-            filtered_all_categorical_data.append(data_name)
+    excluded_types = [ZenoColumnType.EMBEDDING, ZenoColumnType.OUTPUT]
 
-    all_categorical_data = filtered_all_categorical_data
+    for column in columns:
+        if(column.column_type in excluded_types and column.__str__() in updated_df.columns):
+            updated_df = updated_df.drop(column.__str__(), axis=1)
+    all_categorical_data = updated_df.columns.tolist()
 
     code_dict = dict()
 
@@ -145,14 +141,14 @@ def slice_finder(df, req, zeno_options, metric_functions, columns):
 
         target_list = updated_df[row_name].tolist()
         name_list = list(set(target_list))
-
         codes, uniques = updated_df[row_name].factorize(name_list)
         code_dict[row_name] = uniques
         updated_df[row_name] = codes
 
-    # load the correct error rate.
+    # load the correct error rate. If it's the general case, use the error rate itself.
     if df_column_name is None or df_column_name == "general":
         errors = result.distill_output
+    # else, use the min_max normalized result to find the slices with highest count metrics passed from the frontend.
     else:
         chosen_column_slice = updated_df[df_column_name]
         normalized_column = (chosen_column_slice - np.min(chosen_column_slice)) / (
@@ -162,9 +158,7 @@ def slice_finder(df, req, zeno_options, metric_functions, columns):
         normalized_column = np.array(normalized_column, dtype=float)
         if req.order_by == "ascending":
             normalized_column = 1 - normalized_column
-        real_errors = np.array(result.distill_output, dtype=float)
-        errors = np.multiply(normalized_column, real_errors)
-
+        errors = np.array(normalized_column, dtype=float)
     # slice finder code logic
 
     slice_finder = Slicefinder(alpha=0.99, k=minimum_size, max_l=(int)(req.depth))
