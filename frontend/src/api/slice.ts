@@ -19,12 +19,19 @@ function setModelForMetricKey(
 			pred.column.columnType === ZenoColumnType.POSTDISTILL ||
 			pred.column.columnType === ZenoColumnType.OUTPUT
 		) {
-			pred.column.model = model;
+			pred = {
+				...pred,
+				column: {
+					...pred.column,
+					model: model,
+				},
+			};
 		}
 	} else {
-		pred.predicates = pred.predicates.map((p) =>
-			setModelForMetricKey(p, model)
-		);
+		return {
+			...pred,
+			predicates: pred.predicates.map((p) => setModelForMetricKey(p, model)),
+		};
 	}
 	return pred;
 }
@@ -35,11 +42,20 @@ function setModelForMetricKeys(metricKeys: MetricKey[]) {
 			key.sli.filterPredicates &&
 			key.sli.filterPredicates.predicates.length > 0
 		) {
-			key.sli.filterPredicates.predicates.map((pred) =>
-				setModelForMetricKey(pred, key.model)
-			);
+			return {
+				...key,
+				sli: {
+					...key.sli,
+					filterPredicates: {
+						...key.sli.filterPredicates,
+						predicates: key.sli.filterPredicates.predicates.map((pred) => {
+							return { ...pred, ...setModelForMetricKey(pred, key.model) };
+						}),
+					},
+				},
+			};
 		}
-		return key;
+		return { ...key };
 	});
 }
 
@@ -71,8 +87,8 @@ export async function getMetricsForSlices(
 		metricKeys = metricKeys.map((k) => ({ ...k, model: "" }));
 	}
 	// Update model in predicates if slices are dependent on postdistill or output columns.
-	metricKeys = setModelForMetricKeys(metricKeys);
-
+	metricKeys = <MetricKey[]>setModelForMetricKeys(metricKeys);
+	console.log(metricKeys);
 	if (metricKeys.length > 0) {
 		return await ZenoService.getMetricsForSlices({
 			metricKeys,
@@ -97,7 +113,7 @@ export async function getMetricsForSlicesAndTags(
 		metricKeys = metricKeys.map((k) => ({ ...k, model: "" }));
 	}
 	// Update model in predicates if slices are dependent on postdistill columns.
-	metricKeys = setModelForMetricKeys(metricKeys);
+	metricKeys = <MetricKey[]>setModelForMetricKeys(metricKeys);
 	if (metricKeys.length > 0) {
 		return await ZenoService.getMetricsForSlicesAndTags({
 			metricKeys,
