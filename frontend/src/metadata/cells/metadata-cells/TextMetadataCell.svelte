@@ -24,7 +24,6 @@
 	let refresh = 0;
 	let noResultsText = "No results";
 	let results = [];
-	let showEmptyError = false;
 
 	let blur = function (ev) {
 		ev.target.blur();
@@ -41,11 +40,9 @@
 	}
 
 	function setSelection() {
-		if (!searchString || results.length === 0) {
-			showEmptyError = true;
+		if (!searchString) {
 			return;
 		}
-		showEmptyError = false;
 
 		filterPredicates.push({
 			column: col,
@@ -121,8 +118,7 @@
 			cleanUserText={false}
 			ignoreAccents={false}
 			localFiltering={false}
-			delay={200}
-			onFocus={() => (showEmptyError = false)}>
+			delay={200}>
 			<div slot="no-results" let:noResultsText>
 				<span style:color={regexValid ? "" : "red"}>{noResultsText}</span>
 			</div>
@@ -178,9 +174,6 @@
 		<Label>Set</Label>
 	</Button>
 </div>
-{#if showEmptyError}
-	<p style="margin-left:10px; color: red;">Error: The ID entered is invalid</p>
-{/if}
 
 <div class="chips">
 	{#each filterPredicates as pred}

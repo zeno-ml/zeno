@@ -1,8 +1,10 @@
-import { ZenoService, type FilterIds, type GroupMetric } from "../zenoservice";
 import {
 	ZenoColumnType,
+	ZenoService,
+	type FilterIds,
 	type FilterPredicate,
 	type FilterPredicateGroup,
+	type GroupMetric,
 	type MetricKey,
 } from "../zenoservice";
 
@@ -10,7 +12,7 @@ function instanceOfFilterPredicate(object): object is FilterPredicate {
 	return "column" in object;
 }
 
-function setModelForMetricKey(
+export function setModelForFilterPredicateGroup(
 	pred: FilterPredicateGroup | FilterPredicate,
 	model: string
 ) {
@@ -30,7 +32,9 @@ function setModelForMetricKey(
 	} else {
 		return {
 			...pred,
-			predicates: pred.predicates.map((p) => setModelForMetricKey(p, model)),
+			predicates: pred.predicates.map((p) =>
+				setModelForFilterPredicateGroup(p, model)
+			),
 		};
 	}
 	return pred;
@@ -49,7 +53,10 @@ function setModelForMetricKeys(metricKeys: MetricKey[]) {
 					filterPredicates: {
 						...key.sli.filterPredicates,
 						predicates: key.sli.filterPredicates.predicates.map((pred) => {
-							return { ...pred, ...setModelForMetricKey(pred, key.model) };
+							return {
+								...pred,
+								...setModelForFilterPredicateGroup(pred, key.model),
+							};
 						}),
 					},
 				},
@@ -70,9 +77,9 @@ export async function deleteSlice(sliceName: string) {
 	await ZenoService.deleteSlice([sliceName]);
 }
 
+const metricKeyCache = new Map();
 export async function getMetricsForSlices(
-	metricKeys: MetricKey[],
-	filterIds?: FilterIds
+	metricKeys: MetricKey[]
 ): Promise<GroupMetric[]> {
 	if (metricKeys.length === 0) {
 		return null;
@@ -88,12 +95,33 @@ export async function getMetricsForSlices(
 	}
 	// Update model in predicates if slices are dependent on postdistill or output columns.
 	metricKeys = <MetricKey[]>setModelForMetricKeys(metricKeys);
-	if (metricKeys.length > 0) {
-		return await ZenoService.getMetricsForSlices({
-			metricKeys,
-			filterIds,
-		});
+
+	// Check if we have already fetched this metric key
+	const keysToRequest = [];
+	const requestIndices = [];
+	const results = [];
+
+	for (let i = 0; i < metricKeys.length; i++) {
+		const metricKeyHash = JSON.stringify(metricKeys[i]);
+		if (metricKeyCache.has(metricKeyHash)) {
+			results[i] = metricKeyCache.get(metricKeyHash);
+		} else {
+			keysToRequest.push(metricKeys[i]);
+			requestIndices.push(i);
+		}
 	}
+
+	if (keysToRequest.length > 0) {
+		const res = await ZenoService.getMetricsForSlices({
+			metricKeys,
+		});
+		keysToRequest.forEach((key, i) =>
+			metricKeyCache.set(JSON.stringify(key), res[i])
+		);
+		requestIndices.forEach((i) => (results[i] = res[i]));
+	}
+
+	return results;
 }
 
 export async function getMetricsForSlicesAndTags(

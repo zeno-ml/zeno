@@ -5,6 +5,7 @@ import type {
 } from "../zenoservice";
 import { ZenoService } from "../zenoservice/";
 import { ZenoColumnType } from "./../zenoservice/models/ZenoColumnType";
+import { setModelForFilterPredicateGroup } from "./slice";
 
 export async function getFilteredTable(
 	completeColumns,
@@ -26,7 +27,7 @@ export async function getFilteredTable(
 	);
 	const res = await ZenoService.getFilteredTable({
 		columns: requestedColumns,
-		filterPredicates: filterPredicates,
+		filterPredicates: setModelForFilterPredicateGroup(filterPredicates, model),
 		sliceRange,
 		sort,
 		tagIds,
@@ -41,8 +42,12 @@ export async function getFilteredTable(
  */
 export async function getFilteredIds(
 	filterPredicates: FilterPredicateGroup,
+	model: string,
 	tagIds: FilterIds = { ids: [] }
 ) {
-	const res = await ZenoService.getFilteredIds({ filterPredicates, tagIds });
+	const res = await ZenoService.getFilteredIds({
+		filterPredicates: setModelForFilterPredicateGroup(filterPredicates, model),
+		tagIds,
+	});
 	return JSON.parse(res);
 }
