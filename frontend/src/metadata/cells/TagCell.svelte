@@ -52,6 +52,7 @@
 			t.delete(tag.tagName);
 			return t;
 		});
+		tagIds.set({ ids: [] });
 		deleteTag(tag.tagName);
 	}
 
