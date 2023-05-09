@@ -2,6 +2,7 @@
 	import { onMount } from "svelte";
 	import Router from "svelte-spa-router";
 	import Explore from "./Explore.svelte";
+	import Comparison from "./Comparison.svelte";
 	import Report from "./Report.svelte";
 	import Header from "./general/Header.svelte";
 	import ReportPage from "./report/report-page/ReportPage.svelte";
@@ -12,6 +13,7 @@
 	const routes = {
 		"/": Explore,
 		"/explore/": Explore,
+		"/comparison/": Comparison,
 		"/report/": Report,
 		"/report/:id": ReportPage,
 		"/report/:id/new": ReportPage,

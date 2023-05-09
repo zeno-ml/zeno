@@ -18,7 +18,7 @@
 	} from "../stores";
 	import type { MetricKey, Slice } from "../zenoservice";
 
-	let selected = "list";
+	let selected = location.hash === "#/comparison/" ? "comparison" : "list";
 
 	let viewOptions = undefined;
 	/**
@@ -77,7 +77,6 @@
 		$selectionIds,
 		$selections.tags
 	);
-
 	// change selected to table if a tag is edited
 	$: selected = $editId !== undefined ? "table" : selected;
 </script>
@@ -89,21 +88,22 @@
 		{currentResult}
 		bind:viewOptions />
 </div>
-{#if $editId !== undefined}
-	<TableView {currentResult} {viewFunction} {viewOptions} />
-{:else}
-	{#if selected === "list" && viewOptions !== undefined}
-		<ListView {currentResult} {viewFunction} {viewOptions} />
-	{/if}
-	{#if selected === "comparison" && viewOptions !== undefined}
-		<ComparisonView {currentResult} {viewFunction} {viewOptions} />
-	{/if}
-	{#if selected === "table"}
+{#if location.hash !== "#/comparison/"}
+	{#if $editId !== undefined}
 		<TableView {currentResult} {viewFunction} {viewOptions} />
+	{:else}
+		{#if selected === "list" && viewOptions !== undefined}
+			<ListView {currentResult} {viewFunction} {viewOptions} />
+		{/if}
+		{#if selected === "table"}
+			<TableView {currentResult} {viewFunction} {viewOptions} />
+		{/if}
+		{#if selected === "projection"}
+			<ScatterView {viewFunction} {viewOptions} />
+		{/if}
 	{/if}
-	{#if selected === "projection"}
-		<ScatterView {viewFunction} {viewOptions} />
-	{/if}
+{:else}
+	<ComparisonView {currentResult} {viewFunction} {viewOptions} />
 {/if}
 
 <style>

@@ -37,11 +37,13 @@
 	}
 
 	$: CHOICES =
-		$editId === undefined
-			? $settings.view !== ""
-				? ["list", "table", "comparison", "projection"]
-				: ["table", "projection"]
-			: ["table"];
+		selected !== "comparison"
+			? $editId === undefined
+				? $settings.view !== ""
+					? ["list", "table", "projection"]
+					: ["table", "projection"]
+				: ["table"]
+			: ["comparison"];
 
 	$: filters = Object.entries($selections.metadata)
 		.filter(([, value]) => value.predicates.length > 0)
