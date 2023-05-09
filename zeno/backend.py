@@ -109,7 +109,13 @@ class ZenoBackend(object):
             ]
         else:
             self.model_paths = self.params.models
-        self.model_names = [os.path.basename(p).split(".")[0] for p in self.model_paths]
+
+        if os.path.exists(self.model_paths[0]):
+            self.model_names = [
+                os.path.basename(p).split(".")[0] for p in self.model_paths
+            ]
+        else:
+            self.model_names = self.model_paths
 
         self.__setup_dataframe(
             self.params.id_column, self.params.data_column, self.params.label_column
