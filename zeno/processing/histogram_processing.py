@@ -183,7 +183,7 @@ def filter_by_string(df: pd.DataFrame, req: StringFilterRequest) -> List[str]:
         flag = 0 if case_match else re.IGNORECASE
         keyword = f"\\b{keyword}\\b" if whole_word_match else keyword
         try:
-            query_string = f"{col_type}.str.contains(r'{keyword}', flags=@flag)"
+            query_string = f"`{col_type}`.str.contains(r'{keyword}', flags=@flag)"
             ret = df.query(query_string)[str(col_type)].head().tolist()
         except Exception as e:
             print("Invalid Regex Error: ", e)

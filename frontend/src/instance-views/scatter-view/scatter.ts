@@ -1,10 +1,11 @@
+import { get } from "svelte/store";
+import { getFilteredIds } from "../../api/table";
+import { model, selectionIds } from "../../stores";
 import type {
 	FilterIds,
 	FilterPredicateGroup,
 	Points2D,
 } from "../../zenoservice";
-import { getFilteredIds } from "../../api/table";
-import { selectionIds } from "../../stores";
 
 export function getIndicesFromIds(
 	allIds: string[] | number[],
@@ -43,6 +44,7 @@ export async function getPointOpacities(
 ) {
 	const filteredIds = (await getFilteredIds(
 		selectionPredicates,
+		get(model),
 		tagIds
 	)) as string[];
 	const filteredIdsIndex = new Map(filteredIds.map((id, index) => [id, index]));

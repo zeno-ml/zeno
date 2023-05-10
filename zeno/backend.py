@@ -60,6 +60,7 @@ class ZenoBackend(object):
         self.samples = self.params.samples
         self.view = self.params.view
         self.calculate_histogram_metrics = self.params.calculate_histogram_metrics
+        self.model_names = self.params.models
 
         self.df = read_metadata(self.metadata)
         self.tests = read_functions(self.functions)
@@ -101,21 +102,6 @@ class ZenoBackend(object):
             )
             self.slices = {"All Instances": all_instance}
             self.slices.update(orig_slices)
-
-        if self.params.models and os.path.isdir(self.params.models[0]):
-            self.model_paths = [
-                os.path.join(self.params.models[0], m)
-                for m in os.listdir(self.params.models[0])
-            ]
-        else:
-            self.model_paths = self.params.models
-
-        if os.path.exists(self.model_paths[0]):
-            self.model_names = [
-                os.path.basename(p).split(".")[0] for p in self.model_paths
-            ]
-        else:
-            self.model_names = self.model_paths
 
         self.__setup_dataframe(
             self.params.id_column, self.params.data_column, self.params.label_column
@@ -335,8 +321,7 @@ class ZenoBackend(object):
 
         # Check if we need to run inference since Pool is expensive
         models_to_run = []
-        for model_path in self.model_paths:
-            model_name = os.path.basename(model_path).split(".")[0]
+        for model_name in self.model_names:
             model_column = ZenoColumn(
                 column_type=ZenoColumnType.OUTPUT, name="output", model=model_name
             )
@@ -352,8 +337,8 @@ class ZenoBackend(object):
             load_series(self.df, model_column, model_save_path)
             load_series(self.df, embedding_column, embedding_save_path)
 
-            if self.df[model_hash].isna().any() or self.df[embedding_hash].isna().any():
-                models_to_run.append(model_path)
+            if self.df[model_hash].isna().any():
+                models_to_run.append(model_name)
             else:
                 self.df[model_hash] = self.df[model_hash].convert_dtypes()
                 model_column.metadata_type = get_metadata_type(self.df[model_hash])
@@ -377,10 +362,7 @@ class ZenoBackend(object):
                     col.metadata_type = get_metadata_type(self.df[str(col)])
                     self.complete_columns.append(col)
 
-        if len(models_to_run) > 0:
-            if self.predict_function is None:
-                return
-
+        if len(models_to_run) > 0 and self.predict_function is not None:
             if self.multiprocessing:
                 with Pool() as pool:
                     inference_outputs = pool.map(
@@ -395,12 +377,12 @@ class ZenoBackend(object):
                     )
             else:
                 inference_outputs = []
-                for i, model_path in enumerate(models_to_run):
+                for i, model_name in enumerate(models_to_run):
                     inference_outputs.append(
                         run_inference(
                             self.predict_function,
                             self.zeno_options,
-                            model_path,
+                            model_name,
                             self.cache_path,
                             self.df,
                             self.batch_size,
