@@ -11,7 +11,6 @@
 	import IconButton, { Icon } from "@smui/icon-button";
 	import { tooltip } from "@svelte-plugins/tooltips";
 	import { InternMap } from "internmap";
-	import Svelecte from "svelecte";
 	import {
 		getHistogramCounts,
 		getHistogramMetrics,
@@ -19,16 +18,14 @@
 		type HistogramEntry,
 	} from "../api/metadata";
 	import { getMetricsForSlicesAndTags } from "../api/slice";
-	import { createNewTag, getMetricsForTags } from "../api/tag";
+	import { createNewTag } from "../api/tag";
 	import {
 		editId,
 		editedIds,
 		folders,
 		metric,
 		metricRange,
-		metrics,
 		model,
-		models,
 		requestingHistogramCounts,
 		selectionIds,
 		selectionPredicates,
@@ -48,8 +45,6 @@
 		ZenoColumnType,
 		type MetricKey,
 		type Slice,
-		type Tag,
-		type TagMetricKey,
 		type ZenoColumn,
 	} from "../zenoservice";
 	import MetricRange from "./MetricRange.svelte";
@@ -57,6 +52,7 @@
 	import MetadataCell from "./cells/MetadataCell.svelte";
 	import SliceCell from "./cells/SliceCell.svelte";
 	import TagCell from "./cells/TagCell.svelte";
+	import MetadataHeader from "./header/MetadataHeader.svelte";
 
 	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
 		new InternMap([], columnHash);
@@ -67,18 +63,6 @@
 				sliceName: "",
 				folder: "",
 				filterPredicates: { predicates: [], join: "" },
-			},
-			model: $model,
-			metric: $metric,
-		},
-	]);
-
-	$: tagRes = getMetricsForTags([
-		<TagMetricKey>{
-			tag: <Tag>{
-				tagName: "",
-				folder: "",
-				selectionIds: { ids: [] },
 			},
 			model: $model,
 			metric: $metric,
@@ -284,33 +268,7 @@
 </script>
 
 <div class="side-container">
-	<div id="selections">
-		{#if $model !== undefined}
-			<div>
-				<div class="options-header">Model</div>
-				<Svelecte
-					style="z-index: 5; margin-right: 10px; width: 167px; margin-top: 5px;"
-					name="model-select"
-					valueAsObject={false}
-					options={$models}
-					value={0}
-					on:change={(e) => (e.detail ? model.set(e.detail.label) : "")} />
-			</div>
-		{/if}
-		{#if $metric !== undefined}
-			<div>
-				<div class="options-header">Metric</div>
-				<Svelecte
-					style="z-index: 5; width: 167px; margin-top: 5px;"
-					name="metric-select"
-					valueAsObject={false}
-					options={$metrics}
-					value={0}
-					on:change={(e) => (e.detail ? metric.set(e.detail.label) : "")} />
-			</div>
-		{/if}
-	</div>
-
+	<MetadataHeader />
 	<div id="slice-header" class="inline">
 		<div class="inline">
 			<h4>Slices</h4>
@@ -526,10 +484,6 @@
 </div>
 
 <style>
-	.options-header {
-		margin-top: 5px;
-		color: var(--G2);
-	}
 	#slice-header {
 		position: sticky;
 		top: -10px;
@@ -562,20 +516,6 @@
 	.ghost-container {
 		width: 100%;
 		position: absolute;
-	}
-	#selections {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		padding-bottom: 10px;
-		padding-top: 5px;
-	}
-	/* I don't see where this is used, maybe delete? */
-	.cell {
-		border: 0.5px solid var(--G5);
-		padding: 10px;
-		min-width: 400px;
-		width: 400px;
 	}
 	.inline {
 		display: flex;

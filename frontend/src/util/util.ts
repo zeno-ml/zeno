@@ -5,6 +5,7 @@ import {
 	metrics,
 	model,
 	models,
+	comparisonModels,
 	ready,
 	reports,
 	rowsPerPage,
@@ -28,6 +29,7 @@ export async function getInitialData() {
 	model.set(
 		inits.models.length > 0 ? inits.models[inits.models.length - 1] : ""
 	);
+	comparisonModels.set([inits.models[0]]);
 	metric.set(inits.metrics.length > 0 ? inits.metrics[0] : "");
 
 	const slicesRes = await ZenoService.getSlices();

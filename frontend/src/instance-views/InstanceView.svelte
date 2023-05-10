@@ -15,10 +15,11 @@
 		settings,
 		model,
 		metric,
+		tab,
 	} from "../stores";
 	import type { MetricKey, Slice } from "../zenoservice";
 
-	let selected = location.hash === "#/comparison/" ? "comparison" : "list";
+	let selected = $tab === "comparison" ? "comparison" : "list";
 
 	let viewOptions = undefined;
 	/**
@@ -88,7 +89,7 @@
 		{currentResult}
 		bind:viewOptions />
 </div>
-{#if location.hash !== "#/comparison/"}
+{#if $tab !== "comparison"}
 	{#if $editId !== undefined}
 		<TableView {currentResult} {viewFunction} {viewOptions} />
 	{:else}

@@ -3,7 +3,6 @@
 	import { Pagination } from "@smui/data-table";
 	import IconButton from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
-	import Svelecte from "svelecte";
 	import { tick } from "svelte";
 	import { getFilteredTable } from "../api/table";
 	import {
@@ -69,11 +68,11 @@
 		drawInstances();
 	}
 
-	model.subscribe(() => {
-		if ($comparisonModels.includes($model)) {
-			$comparisonModels = $comparisonModels.filter((m) => m !== $model);
-			tables[$model] = [];
-			viewDivs[$model] = [];
+	model.subscribe((model) => {
+		if ($comparisonModels.includes(model)) {
+			$comparisonModels = [$models.filter((m) => m !== model)[0]];
+			tables[model] = [];
+			viewDivs[model] = [];
 		}
 	});
 
@@ -128,32 +127,25 @@
 				return c.columnType === ZenoColumnType.OUTPUT && c.model === mod;
 			});
 			let modelColumn = obj ? columnHash(obj) : "";
-
-			tables[mod].forEach((_, i) => {
-				let div = viewDivs[mod][i];
-				if (div) {
-					viewFunction(
-						div,
-						viewOptions,
-						tables[mod][i],
-						modelColumn,
-						columnHash($settings.labelColumn),
-						columnHash($settings.dataColumn),
-						idHash
-					);
-				}
-			});
+			if (tables[mod] && viewDivs[mod]) {
+				tables[mod].forEach((_, i) => {
+					let div = viewDivs[mod][i];
+					if (div) {
+						viewFunction(
+							div,
+							viewOptions,
+							tables[mod][i],
+							modelColumn,
+							columnHash($settings.labelColumn),
+							columnHash($settings.dataColumn),
+							idHash
+						);
+					}
+				});
+			}
 		});
 	}
 </script>
-
-<Svelecte
-	options={$models.filter((m) => m !== $model)}
-	labelAsValue={true}
-	closeAfterSelect={true}
-	bind:value={$comparisonModels}
-	multiple
-	placeholder="Select models to compare" />
 
 <div class="table-container" bind:this={instanceContainer}>
 	{#if tables[$model]}
