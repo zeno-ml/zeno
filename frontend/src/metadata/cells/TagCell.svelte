@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { mdiPencilOutline, mdiDotsHorizontal } from "@mdi/js";
+	import { mdiDotsHorizontal } from "@mdi/js";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import { Svg } from "@smui/common";
 	import {
@@ -13,7 +13,8 @@
 	} from "../../stores";
 	import { getMetricsForTags, deleteTag } from "../../api/tag";
 	import type { TagMetricKey, Tag } from "../../zenoservice";
-
+	import { clickOutside } from "../../util/clickOutside";
+	import Paper, { Content } from "@smui/paper";
 	export let tag: Tag;
 	export let inFolder = false;
 
@@ -52,6 +53,7 @@
 			t.delete(tag.tagName);
 			return t;
 		});
+		tagIds.set({ ids: [] });
 		deleteTag(tag.tagName);
 	}
 
@@ -171,38 +173,54 @@
 					{tag.tagName}
 				</div>
 			</div>
-			<div class="group">
+			<div
+				class="group"
+				use:clickOutside
+				on:click_outside={() => {
+					showOptions = false;
+				}}>
 				{#if showOptions}
-					<div
-						id="options-container"
-						on:mouseleave={() => (showOptions = false)}
-						on:blur={() => (showOptions = false)}>
-						<IconButton
-							on:click={(e) => {
-								e.stopPropagation();
-								showOptions = false;
-								removeTag();
-							}}>
-							<Icon class="material-icons">delete_outline</Icon>
-						</IconButton>
-						{#if $editId === undefined}
-							<IconButton
-								on:click={(e) => {
-									e.stopPropagation();
-									showOptions = false;
-									editId.set(tag.tagName);
-								}}>
-								<Icon component={Svg} viewBox="0 0 24 24">
-									<path fill="black" d={mdiPencilOutline} />
-								</Icon>
-							</IconButton>
-						{/if}
+					<div id="options-container">
+						<Paper style="padding: 3px 0px;" elevation={7}>
+							<Content>
+								<div
+									class="option"
+									on:keydown={() => ({})}
+									on:click={(e) => {
+										e.stopPropagation();
+										showOptions = false;
+										removeTag();
+									}}>
+									<Icon style="font-size: 18px;" class="material-icons"
+										>delete_outline</Icon
+									>&nbsp;
+									<span>Remove</span>
+								</div>
+								{#if $editId === undefined}
+									<div
+										class="option"
+										on:keydown={() => ({})}
+										on:click={(e) => {
+											e.stopPropagation();
+											showOptions = false;
+											editId.set(tag.tagName);
+										}}>
+										<Icon style="font-size: 18px;" class="material-icons"
+											>edit</Icon
+										>&nbsp;
+										<span>Edit</span>
+									</div>
+								{/if}
+							</Content>
+						</Paper>
 					</div>
 				{/if}
 				{#if result}
 					{#await result then res}
 						<span style:margin-right="10px">
-							{res[0].metric !== undefined ? res[0].metric.toFixed(2) : ""}
+							{res[0].metric !== undefined && res[0].metric !== null
+								? res[0].metric.toFixed(2)
+								: ""}
 						</span>
 						<span id="size">
 							({res[0].size.toLocaleString()})
@@ -211,7 +229,12 @@
 				{/if}
 				{#if $editId !== tag.tagName}
 					<div class="inline" style:cursor="pointer">
-						<div style:width="36px">
+						<div
+							style:width="36px"
+							use:clickOutside
+							on:click_outside={() => {
+								hovering = false;
+							}}>
 							{#if hovering}
 								<IconButton
 									size="button"
@@ -273,12 +296,21 @@
 		top: 0px;
 		right: 0px;
 		z-index: 5;
-		background: var(--G6);
-		margin-top: -7px;
-		border: 1px solid var(--G5);
 		position: absolute;
-		height: max-content;
+		margin-top: 35px;
+	}
+	.option {
 		display: flex;
-		border-radius: 4px;
+		flex-direction: row;
+		align-items: center;
+		cursor: pointer;
+		width: 73px;
+		padding: 1px 6px;
+	}
+	.option span {
+		font-size: 12px;
+	}
+	.option:hover {
+		background: var(--G5);
 	}
 </style>

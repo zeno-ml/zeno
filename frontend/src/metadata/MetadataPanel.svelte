@@ -289,7 +289,7 @@
 			<div>
 				<div class="options-header">Model</div>
 				<Svelecte
-					style="z-index: 5; margin-right: 10px; width: 170px; margin-top: 5px;"
+					style="z-index: 5; margin-right: 10px; width: 167px; margin-top: 5px;"
 					name="model-select"
 					valueAsObject={false}
 					options={$models}
@@ -301,7 +301,7 @@
 			<div>
 				<div class="options-header">Metric</div>
 				<Svelecte
-					style="z-index: 5; width: 170px; margin-top: 5px;"
+					style="z-index: 5; width: 167px; margin-top: 5px;"
 					name="metric-select"
 					valueAsObject={false}
 					options={$metrics}
