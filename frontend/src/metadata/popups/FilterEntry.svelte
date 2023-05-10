@@ -95,7 +95,7 @@
 		{#if predicate.column}
 			{#if predicate.column.metadataType === MetadataType.BOOLEAN}
 				<Svelecte
-					value={predicate.value}
+					value={predicate.value + ""}
 					on:change={(e) => {
 						predicate.value = e.detail.label;
 					}}
