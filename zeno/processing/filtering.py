@@ -35,7 +35,7 @@ def get_filter_string(filter: FilterPredicateGroup) -> str:
                 if is_whole:
                     f.value = f"\\b{f.value}\\b" if is_regex else f'"{f.value}"'
 
-                filt_string = f"{f.join} ({f.column}.str.contains(\
+                filt_string = f"{f.join} (`{f.column}`.str.contains(\
                     r'{f.value}', na=False, regex={is_regex}, case={is_case}))"
 
                 if (not is_regex) and is_whole:
