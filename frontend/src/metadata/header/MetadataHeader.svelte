@@ -7,18 +7,18 @@
 		comparisonModels,
 		tab,
 	} from "../../stores";
-	import MetadataComp from "./HeaderDropdown.svelte";
+	import HeaderDropdown from "./HeaderDropdown.svelte";
 	$: exludeModels = $models.filter((m) => m !== $model);
 </script>
 
 <div id="selections">
-	<MetadataComp
+	<HeaderDropdown
 		title={"Model"}
 		placeholder={"Select Model"}
 		bind:options={$models}
 		bind:value={$model} />
 	{#if $tab !== "comparison" && $metric !== undefined}
-		<MetadataComp
+		<HeaderDropdown
 			title={"Metric"}
 			placeholder={"Select Metric"}
 			bind:options={$metrics}
@@ -26,7 +26,7 @@
 	{/if}
 
 	{#if $tab === "comparison"}
-		<MetadataComp
+		<HeaderDropdown
 			title={"Model to Compare"}
 			placeholder={"Select 2nd Model"}
 			bind:options={exludeModels}
@@ -34,7 +34,7 @@
 	{/if}
 </div>
 {#if $tab === "comparison" && $metric !== undefined}
-	<MetadataComp
+	<HeaderDropdown
 		title={"Metric"}
 		placeholder={"Select Metric"}
 		bind:options={$metrics}
