@@ -7,6 +7,7 @@
 	import Paper from "@smui/paper";
 	import { deleteSlice, getMetricsForSlices } from "../../api/slice";
 	import SliceDetails from "../../general/SliceDetails.svelte";
+	import SliceCellResult from "./SliceCellResult.svelte";
 	import {
 		metric,
 		model,
@@ -16,14 +17,17 @@
 		sliceToEdit,
 		slices,
 		status,
+		comparisonModels,
 	} from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 	import { ZenoService, type MetricKey, type Slice } from "../../zenoservice";
 
 	export let slice: Slice;
 	export let inFolder = false;
+	export let compare;
 
 	let result;
+	let resultCompare;
 
 	let confirmDelete = false;
 	let relatedReports = 0;
@@ -33,16 +37,6 @@
 	let showOptions = false;
 
 	$: selected = $selections.slices.includes(slice.sliceName);
-	$: {
-		$status;
-		result = getMetricsForSlices([
-			<MetricKey>{
-				sli: slice,
-				model: $model,
-				metric: $metric,
-			},
-		]);
-	}
 
 	function removeSlice() {
 		confirmDelete = false;
@@ -128,7 +122,10 @@
 </script>
 
 <div
-	class="{inFolder ? 'in-folder' : ''} cell parent {selected ? 'selected' : ''}"
+	class=" cell parent
+	{inFolder ? 'in-folder' : ''}
+	{selected ? 'selected' : ''} 
+	{compare ? 'compare-slice-cell' : ''}"
 	on:click={(e) => setSelected(e)}
 	draggable="true"
 	on:mouseover={() => (hovering = true)}
@@ -233,18 +230,7 @@
 						</Paper>
 					</div>
 				{/if}
-				{#if result}
-					{#await result then res}
-						<span style:margin-right="10px">
-							{res[0].metric !== undefined && res[0].metric !== null
-								? res[0].metric.toFixed(2)
-								: ""}
-						</span>
-						<span id="size">
-							({res[0].size.toLocaleString()})
-						</span>
-					{/await}
-				{/if}
+				<SliceCellResult {compare} {slice} />
 				<div class="inline" style:cursor="pointer">
 					<div
 						style:width="36px"
@@ -313,11 +299,6 @@
 		padding-top: 10px;
 		padding-bottom: 10px;
 	}
-	#size {
-		font-style: italic;
-		color: var(--G3);
-		margin-right: 10px;
-	}
 	.cell {
 		position: relative;
 		overflow: visible;
@@ -328,6 +309,10 @@
 		padding-left: 10px;
 		padding-right: 10px;
 		min-height: 36px;
+	}
+	.compare-slice-cell {
+		padding-top: 5px;
+		padding-bottom: 5px;
 	}
 	.group {
 		display: flex;

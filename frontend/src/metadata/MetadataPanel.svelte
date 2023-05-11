@@ -17,7 +17,6 @@
 		getHistograms,
 		type HistogramEntry,
 	} from "../api/metadata";
-	import { getMetricsForSlicesAndTags } from "../api/slice";
 	import { createNewTag } from "../api/tag";
 	import {
 		editId,
@@ -30,7 +29,6 @@
 		selectionIds,
 		selectionPredicates,
 		selections,
-		settings,
 		showNewFolder,
 		showNewSlice,
 		showNewTag,
@@ -42,33 +40,17 @@
 		tab,
 	} from "../stores";
 	import { columnHash } from "../util/util";
-	import {
-		ZenoColumnType,
-		type MetricKey,
-		type Slice,
-		type ZenoColumn,
-	} from "../zenoservice";
+	import { ZenoColumnType, type ZenoColumn } from "../zenoservice";
 	import MetricRange from "./MetricRange.svelte";
 	import FolderCell from "./cells/FolderCell.svelte";
 	import MetadataCell from "./cells/MetadataCell.svelte";
 	import SliceCell from "./cells/SliceCell.svelte";
 	import TagCell from "./cells/TagCell.svelte";
 	import MetadataHeader from "./header/MetadataHeader.svelte";
+	import SliceCellResult from "./cells/SliceCellResult.svelte";
 
 	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
 		new InternMap([], columnHash);
-
-	$: res = getMetricsForSlicesAndTags([
-		<MetricKey>{
-			sli: <Slice>{
-				sliceName: "",
-				folder: "",
-				filterPredicates: { predicates: [], join: "" },
-			},
-			model: $model,
-			metric: $metric,
-		},
-	]);
 
 	// Get histogram buckets, counts, and metrics when columns update.
 	status.subscribe((s) => {
@@ -326,8 +308,9 @@
 		</div>
 	</div>
 	<div
-		class={"overview " +
-			($selectionPredicates.predicates.length === 0 ? "selected" : "")}
+		class="overview
+			{$selectionPredicates.predicates.length === 0 ? 'selected' : ''}
+			{$tab === 'comparison' ? 'compare-slice-cell' : ''}"
 		on:keydown={() => ({})}
 		on:click={() => {
 			selections.update((m) => {
@@ -339,16 +322,14 @@
 			tagIds.set({ ids: [] });
 		}}>
 		<div class="inline">All instances</div>
-
 		<div class="inline">
-			<span>
-				{#await res then r}
-					{r && r[0].metric !== undefined && r[0].metric !== null
-						? r[0].metric.toFixed(2)
-						: ""}
-				{/await}
-			</span>
-			<span class="size">({$settings.totalSize.toLocaleString()})</span>
+			<SliceCellResult
+				compare={$tab === "comparison"}
+				slice={{
+					sliceName: "",
+					folder: "",
+					filterPredicates: { predicates: [], join: "" },
+				}} />
 			<div style:width="36px" />
 		</div>
 	</div>
@@ -358,7 +339,7 @@
 	{/each}
 
 	{#each [...$slices.values()].filter((s) => s.folder === "" && s.sliceName !== "All Instances") as s (s.sliceName)}
-		<SliceCell slice={s} />
+		<SliceCell compare={$tab === "comparison"} slice={s} />
 	{/each}
 
 	<div id="tag-header" class="inline" style:margin-top="10px">
@@ -515,18 +496,14 @@
 		overflow-y: scroll;
 		background-color: var(--Y2);
 	}
-	.ghost-container {
-		width: 100%;
-		position: absolute;
-	}
 	.inline {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 	}
-	.icon {
-		width: 24px;
-		height: 24px;
+	.compare-slice-cell {
+		padding-top: 5px;
+		padding-bottom: 5px;
 	}
 	.overview {
 		display: flex;
@@ -543,20 +520,10 @@
 	.selected {
 		background: var(--P3);
 	}
-	.size {
-		font-style: italic;
-		color: var(--G3);
-		margin-right: 10px;
-		margin-left: 10px;
-	}
 	.information-tooltip {
 		width: 24px;
 		height: 24px;
 		cursor: help;
 		fill: var(--G2);
-	}
-	.done-button {
-		background-color: var(--N1);
-		margin-top: 5px;
 	}
 </style>
