@@ -233,8 +233,8 @@
 		font-weight: 600;
 	}
 	.table-container {
-		max-width: calc(100vw - 450px);
-		max-height: calc(100vh - 205px);
+		height: calc(100vh - 175px);
+		width: calc(100vw - 460px);
 		overflow: scroll;
 	}
 </style>

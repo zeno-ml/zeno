@@ -39,6 +39,7 @@
 		status,
 		tagIds,
 		tags,
+		tab,
 	} from "../stores";
 	import { columnHash } from "../util/util";
 	import {
@@ -435,50 +436,51 @@
 			<TagCell tag={t} />
 		{/if}
 	{/each}
-
-	<div id="metric-header" class="inline" style:margin-top="10px">
-		<div class="inline">
-			<h4>Metadata</h4>
-			<div
-				class="information-tooltip"
-				use:tooltip={{
-					content:
-						"Interactive distributions for metadata columns. Click or drag on the histograms to filter the data. Add new metadata with @distill functions.",
-					position: "right",
-					theme: "zeno-tooltip",
-				}}>
-				<Icon style="outline:none" component={Svg} viewBox="-6 -6 36 36">
-					<path d={mdiInformationOutline} />
-				</Icon>
+	{#if $tab !== "comparison"}
+		<div id="metric-header" class="inline" style:margin-top="10px">
+			<div class="inline">
+				<h4>Metadata</h4>
+				<div
+					class="information-tooltip"
+					use:tooltip={{
+						content:
+							"Interactive distributions for metadata columns. Click or drag on the histograms to filter the data. Add new metadata with @distill functions.",
+						position: "right",
+						theme: "zeno-tooltip",
+					}}>
+					<Icon style="outline:none" component={Svg} viewBox="-6 -6 36 36">
+						<path d={mdiInformationOutline} />
+					</Icon>
+				</div>
+				{#if $requestingHistogramCounts}
+					<CircularProgress
+						style="height: 15px; width: 15px; margin-left: 10px;"
+						indeterminate />
+				{/if}
 			</div>
-			{#if $requestingHistogramCounts}
-				<CircularProgress
-					style="height: 15px; width: 15px; margin-left: 10px;"
-					indeterminate />
-			{/if}
+			<MetricRange />
 		</div>
-		<MetricRange />
-	</div>
-	{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.METADATA) as col (columnHash(col))}
-		<MetadataCell {col} histogram={metadataHistograms.get(col)} />
-	{/each}
-
-	{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL) as col (columnHash(col))}
-		<MetadataCell {col} histogram={metadataHistograms.get(col)} />
-	{/each}
-
-	{#if $model}
-		{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.POSTDISTILL && m.model === $model) as col (columnHash(col))}
+		{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.METADATA) as col (columnHash(col))}
 			<MetadataCell {col} histogram={metadataHistograms.get(col)} />
 		{/each}
 
-		{@const outputCol = $status.completeColumns.filter(
-			(m) => m.columnType === ZenoColumnType.OUTPUT && m.model === $model
-		)}
-		{#if outputCol.length > 0}
-			<MetadataCell
-				col={outputCol[0]}
-				histogram={metadataHistograms.get(outputCol[0])} />
+		{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL) as col (columnHash(col))}
+			<MetadataCell {col} histogram={metadataHistograms.get(col)} />
+		{/each}
+
+		{#if $model}
+			{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.POSTDISTILL && m.model === $model) as col (columnHash(col))}
+				<MetadataCell {col} histogram={metadataHistograms.get(col)} />
+			{/each}
+
+			{@const outputCol = $status.completeColumns.filter(
+				(m) => m.columnType === ZenoColumnType.OUTPUT && m.model === $model
+			)}
+			{#if outputCol.length > 0}
+				<MetadataCell
+					col={outputCol[0]}
+					histogram={metadataHistograms.get(outputCol[0])} />
+			{/if}
 		{/if}
 	{/if}
 </div>
