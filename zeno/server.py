@@ -4,13 +4,12 @@ and the static files for the frontend.
 """
 
 import asyncio
+import os
+from typing import Dict, List, Union
 
 from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
-
-import os
-from typing import Dict, List, Union
 
 from zeno.backend import ZenoBackend
 from zeno.classes.base import ZenoColumn
@@ -26,11 +25,11 @@ from zeno.classes.classes import (
     ZenoSettings,
     ZenoVariables,
 )
-from zeno.classes.slice_finder import SliceFinderMetricReturn
 from zeno.classes.metadata import HistogramBucket, HistogramRequest, StringFilterRequest
 from zeno.classes.projection import Points2D, PointsColors
 from zeno.classes.report import Report
 from zeno.classes.slice import GroupMetric, Slice
+from zeno.classes.slice_finder import SliceFinderMetricReturn
 from zeno.classes.tag import Tag, TagMetricKey
 from zeno.processing.histogram_processing import (
     filter_by_string,
@@ -56,6 +55,7 @@ def get_server(zeno: ZenoBackend):
     api_app = FastAPI(
         title="Backend API", generate_unique_id_function=custom_generate_unique_id
     )
+
     if zeno.data_path != "" and os.path.exists(zeno.data_path):
         app.mount("/data", StaticFiles(directory=zeno.data_path), name="static")
     if zeno.label_path != "" and os.path.exists(zeno.label_path):
