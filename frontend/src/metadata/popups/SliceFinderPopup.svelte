@@ -37,7 +37,6 @@
 				s.set(slice.sliceName, slice);
 				return s;
 			});
-			selections.update((sels) => ({ slices: [], metadata: sels.metadata }));
 			showNewSlice.set(false);
 			sliceToEdit.set(null);
 		});
