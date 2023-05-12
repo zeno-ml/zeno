@@ -46,7 +46,8 @@ def get_column_name_with_summary(df, columns):
     Returns column names with a summary of minimum and maximum values.
     """
     column_summary_dict = dict()
-    updated_df = data_clean_for_columns(df)
+    print(df["label"])
+    updated_df = data_clean_for_columns(df, columns)
     all_df_column_name = updated_df.columns.to_numpy()
     for column in columns:
         for df_column_name in all_df_column_name:
@@ -63,12 +64,23 @@ def get_column_name_with_summary(df, columns):
     return column_summary_dict
 
 
-def data_clean_for_columns(df):
+def data_clean_for_columns(df, columns=[]):
     updated_df = df.copy()
+    if (len(columns) > 0):
+        excluded_types = [ZenoColumnType.EMBEDDING, ZenoColumnType.OUTPUT, 
+                          ZenoColumnType.METADATA]
+        for column in columns:
+            if (
+                column.column_type in excluded_types
+                and column.__str__() in updated_df.columns
+            ):
+                updated_df = updated_df.drop(column.__str__(), axis=1)
+
     updated_df = updated_df.drop(list(updated_df.filter(regex="id")), axis=1)
     updated_df = updated_df.drop(list(updated_df.filter(regex="EMBEDDING")), axis=1)
     updated_df = updated_df.drop(list(updated_df.filter(regex="POSTDISTILL")), axis=1)
     updated_df = updated_df.drop(list(updated_df.filter(regex="OUTPUT")), axis=1)
+
     return updated_df
 
 
@@ -93,14 +105,6 @@ def slice_finder(df, req, zeno_options, metric_functions, columns):
     df_column_name = find_right_column_name(columns, req.column_name)
     updated_df = data_clean_for_columns(updated_df)
 
-    excluded_types = [ZenoColumnType.EMBEDDING, ZenoColumnType.OUTPUT]
-
-    for column in columns:
-        if (
-            column.column_type in excluded_types
-            and column.__str__() in updated_df.columns
-        ):
-            updated_df = updated_df.drop(column.__str__(), axis=1)
     all_categorical_data = updated_df.columns.tolist()
 
     code_dict = dict()

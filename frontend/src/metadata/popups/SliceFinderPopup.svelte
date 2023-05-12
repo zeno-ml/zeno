@@ -21,8 +21,8 @@
 	let minimumSize = "5";
 	let max_ls = ["4", "5", "6", "7", "8"];
 	let max_l = "5";
-	let sliceFinderKeys = ["data"];
-	let sliceFinderKey = "data";
+	let sliceFinderKeys = [""];
+	let sliceFinderKey = "";
 	let orderBys = ["ascending", "descending"];
 	let orderBy = "ascending";
 	let sets;
@@ -44,6 +44,7 @@
 
 	export async function activateSliceFinder() {
 		sliceFinderMessage = "Generating Slices...";
+		console.log(sliceFinderKey)
 		sets = await ZenoService.projectFindAvailableSlices({
 			id: "1",
 			order_by: orderBy,
@@ -82,6 +83,9 @@
 		dataframeKeyValuePair = await ZenoService.getColumnsWithSummary();
 		sliceFinderKeys = Object.keys(dataframeKeyValuePair);
 		sliceFinderKeys = sliceFinderKeys;
+		sliceFinderKey = sliceFinderKeys[0];
+		sliceFinderKey = sliceFinderKey;
+		console.log(sliceFinderKey);
 	}
 
 	function slice_data_generator(
@@ -90,6 +94,7 @@
 		all_metrics = []
 	) {
 		// demo page
+		get_all_valid_columns();
 		slice_data = [];
 		if (predicateList.length === 0) {
 			predicateList = [
