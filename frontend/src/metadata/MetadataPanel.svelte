@@ -5,22 +5,22 @@
 		mdiInformationOutline,
 		mdiPlus,
 		mdiPlusCircle,
-	} from "@mdi/js"
-	import Button from "@smui/button"
-	import CircularProgress from "@smui/circular-progress"
-	import { Svg } from "@smui/common"
-	import IconButton, { Icon } from "@smui/icon-button"
-	import { tooltip } from "@svelte-plugins/tooltips"
-	import { InternMap } from "internmap"
-	import Svelecte from "svelecte"
+	} from "@mdi/js";
+	import Button from "@smui/button";
+	import CircularProgress from "@smui/circular-progress";
+	import { Svg } from "@smui/common";
+	import IconButton, { Icon } from "@smui/icon-button";
+	import { tooltip } from "@svelte-plugins/tooltips";
+	import { InternMap } from "internmap";
+	import Svelecte from "svelecte";
 	import {
 		getHistogramCounts,
 		getHistogramMetrics,
 		getHistograms,
 		type HistogramEntry,
-	} from "../api/metadata"
-	import { getMetricsForSlicesAndTags } from "../api/slice"
-	import { createNewTag, getMetricsForTags } from "../api/tag"
+	} from "../api/metadata";
+	import { getMetricsForSlicesAndTags } from "../api/slice";
+	import { createNewTag, getMetricsForTags } from "../api/tag";
 	import {
 		editId,
 		editedIds,
@@ -44,8 +44,8 @@
 		status,
 		tagIds,
 		tags,
-	} from "../stores"
-	import { columnHash } from "../util/util"
+	} from "../stores";
+	import { columnHash } from "../util/util";
 	import {
 		ZenoColumnType,
 		type MetricKey,
@@ -53,15 +53,15 @@
 		type Tag,
 		type TagMetricKey,
 		type ZenoColumn,
-	} from "../zenoservice"
-	import MetricRange from "./MetricRange.svelte"
-	import FolderCell from "./cells/FolderCell.svelte"
-	import MetadataCell from "./cells/MetadataCell.svelte"
-	import SliceCell from "./cells/SliceCell.svelte"
-	import TagCell from "./cells/TagCell.svelte"
+	} from "../zenoservice";
+	import MetricRange from "./MetricRange.svelte";
+	import FolderCell from "./cells/FolderCell.svelte";
+	import MetadataCell from "./cells/MetadataCell.svelte";
+	import SliceCell from "./cells/SliceCell.svelte";
+	import TagCell from "./cells/TagCell.svelte";
 
 	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
-		new InternMap([], columnHash)
+		new InternMap([], columnHash);
 
 	$: res = getMetricsForSlicesAndTags([
 		<MetricKey>{

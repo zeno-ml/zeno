@@ -66,9 +66,12 @@ def get_column_name_with_summary(df, columns):
 
 def data_clean_for_columns(df, columns=[]):
     updated_df = df.copy()
-    if (len(columns) > 0):
-        excluded_types = [ZenoColumnType.EMBEDDING, ZenoColumnType.OUTPUT, 
-                          ZenoColumnType.METADATA]
+    if len(columns) > 0:
+        excluded_types = [
+            ZenoColumnType.EMBEDDING,
+            ZenoColumnType.OUTPUT,
+            ZenoColumnType.METADATA,
+        ]
         for column in columns:
             if (
                 column.column_type in excluded_types

@@ -44,7 +44,7 @@
 
 	export async function activateSliceFinder() {
 		sliceFinderMessage = "Generating Slices...";
-		console.log(sliceFinderKey)
+		console.log(sliceFinderKey);
 		sets = await ZenoService.projectFindAvailableSlices({
 			id: "1",
 			order_by: orderBy,
