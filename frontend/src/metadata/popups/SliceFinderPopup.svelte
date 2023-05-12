@@ -4,7 +4,7 @@
 	import { Label } from "@smui/common";
 	import Chip from "@smui/chips";
 	import { Svg } from "@smui/common";
-	import { selections, showNewSlice, slices, sliceToEdit } from "../../stores";
+	import { showNewSlice, slices, sliceToEdit } from "../../stores";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
 	import { clickOutside } from "../../util/clickOutside";
