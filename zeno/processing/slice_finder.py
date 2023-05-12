@@ -46,7 +46,6 @@ def get_column_name_with_summary(df, columns):
     Returns column names with a summary of minimum and maximum values.
     """
     column_summary_dict = dict()
-    print(df["label"])
     updated_df = data_clean_for_columns(df, columns)
     all_df_column_name = updated_df.columns.to_numpy()
     for column in columns:
