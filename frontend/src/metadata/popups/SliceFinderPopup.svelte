@@ -221,7 +221,7 @@
 					<span class="rightElement" style="margin-top:10px;color:gray;"
 						>{"(" + element.slice_size + ")"}</span>
 					<span class="rightElement" style="margin-top:10px;"
-						>{"" + Math.round(element.accuracy_rate * 100) / 100.0 + "%"}</span>
+						>{Math.round(element.accuracy_rate)}</span>
 				</div>
 			{/each}
 		</div>
