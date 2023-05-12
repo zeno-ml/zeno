@@ -4,12 +4,13 @@ and the static files for the frontend.
 """
 
 import asyncio
-import os
-from typing import Dict, List, Union
 
 from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
+
+import os
+from typing import Dict, List, Union
 
 from zeno.backend import ZenoBackend
 from zeno.classes.base import ZenoColumn

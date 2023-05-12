@@ -46,7 +46,7 @@ def get_column_name_with_summary(df, columns):
     """
     column_summary_dict = dict()
     updated_df = data_clean_for_columns(df)
-    all_df_column_name = updated_df.columns.values
+    all_df_column_name = updated_df.columns.to_numpy()
     for column in columns:
         for df_column_name in all_df_column_name:
             if column.__str__() == df_column_name:
@@ -64,10 +64,10 @@ def get_column_name_with_summary(df, columns):
 
 def data_clean_for_columns(df):
     updated_df = df.copy()
-    updated_df.drop(list(updated_df.filter(regex="id")), axis=1, inplace=True)
-    updated_df.drop(list(updated_df.filter(regex="EMBEDDING")), axis=1, inplace=True)
-    updated_df.drop(list(updated_df.filter(regex="POSTDISTILL")), axis=1, inplace=True)
-    updated_df.drop(list(updated_df.filter(regex="OUTPUT")), axis=1, inplace=True)
+    updated_df.drop(list(updated_df.filter(regex="id")), axis=1)
+    updated_df.drop(list(updated_df.filter(regex="EMBEDDING")), axis=1)
+    updated_df.drop(list(updated_df.filter(regex="POSTDISTILL")), axis=1)
+    updated_df.drop(list(updated_df.filter(regex="OUTPUT")), axis=1)
     return updated_df
 
 
@@ -101,23 +101,12 @@ def slice_finder(df, req, zeno_options, metric_functions, columns):
         and c.model == req.model
     ]
 
-    local_ops = zeno_options.copy(
-        update={
-            "output_column": output_hash,
-            "distill_columns": dict(
-                zip([c.name for c in distill_fns], [str(c) for c in distill_fns])
-            ),
-        }
-    )
-
     # data cleaning
 
     updated_df = df.copy()
 
     df_column_name = find_right_column_name(columns, req.column_name)
     updated_df = data_clean_for_columns(updated_df)
-
-    result = {}
 
     excluded_types = [ZenoColumnType.EMBEDDING, ZenoColumnType.OUTPUT]
 
@@ -139,7 +128,8 @@ def slice_finder(df, req, zeno_options, metric_functions, columns):
         updated_df[row_name] = codes
 
     # load the correct error rate. If it's the general case, use the error rate itself.
-    # else, use the min_max normalized result to find the slices with highest count metrics passed from the frontend.
+    # else, use the min_max normalized result to find the slices with highest count metrics
+    # passed from the frontend.
     chosen_column_slice = updated_df[df_column_name]
     normalized_column = (chosen_column_slice - np.min(chosen_column_slice)) / (
         np.max(chosen_column_slice) - np.min(chosen_column_slice)
