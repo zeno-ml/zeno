@@ -21,7 +21,7 @@
 	let minimumSize = "5";
 	let max_ls = ["4", "5", "6", "7", "8"];
 	let max_l = "5";
-	let sliceFinderKeys = [""];
+	let sliceFinderKeys = ["data"];
 	let sliceFinderKey = "data";
 	let orderBys = ["ascending", "descending"];
 	let orderBy = "ascending";
@@ -51,7 +51,7 @@
 			minimum_size: minimumSize,
 			depth: max_l,
 			model: $model,
-			column_name: sliceFinderKey ? sliceFinderKey : "data",
+			column_name: sliceFinderKey,
 		});
 		let all_metrics = [];
 		for (let i = 0; i < sets.slices_of_interest.length; i++) {
