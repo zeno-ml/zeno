@@ -1,8 +1,9 @@
-import numpy as np
-
-from pandas.api.types import is_numeric_dtype
 import secrets
+
+import numpy as np
+from pandas.api.types import is_numeric_dtype
 from sliceline.slicefinder import Slicefinder
+
 from zeno.classes.base import ZenoColumnType
 from zeno.classes.slice import FilterPredicate, FilterPredicateGroup, Slice
 
