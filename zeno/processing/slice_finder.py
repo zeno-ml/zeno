@@ -1,9 +1,8 @@
-import secrets
-
 import numpy as np
 from pandas.api.types import is_numeric_dtype
+import secrets
 from sliceline.slicefinder import Slicefinder
-from zeno.classes.base import ZenoColumn, ZenoColumnType
+from zeno.classes.base import ZenoColumnType
 from zeno.classes.slice import FilterPredicate, FilterPredicateGroup, Slice
 
 
@@ -84,23 +83,6 @@ def slice_finder(df, req, zeno_options, metric_functions, columns):
     """
     # setting up config important for the next steps
     minimum_size = int(req.minimum_size)
-
-    output_col = ZenoColumn(
-        column_type=ZenoColumnType.OUTPUT,
-        name=req.model,
-    )
-    output_hash = str(output_col)
-
-    distill_fns = [
-        c
-        for c in columns
-        if (
-            c.column_type == ZenoColumnType.PREDISTILL
-            or c.column_type == ZenoColumnType.POSTDISTILL
-        )
-        and c.model == req.model
-    ]
-
     # data cleaning
 
     updated_df = df.copy()
@@ -128,8 +110,8 @@ def slice_finder(df, req, zeno_options, metric_functions, columns):
         updated_df[row_name] = codes
 
     # load the correct error rate. If it's the general case, use the error rate itself.
-    # else, use the min_max normalized result to find the slices with highest count metrics
-    # passed from the frontend.
+    # else, use the min_max normalized result to find the slices with highest
+    # count metrics passed from the frontend.
     chosen_column_slice = updated_df[df_column_name]
     normalized_column = (chosen_column_slice - np.min(chosen_column_slice)) / (
         np.max(chosen_column_slice) - np.min(chosen_column_slice)
