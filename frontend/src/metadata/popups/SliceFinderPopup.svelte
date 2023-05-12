@@ -22,7 +22,7 @@
 	let max_ls = ["4", "5", "6", "7", "8"];
 	let max_l = "5";
 	let sliceFinderKeys = [""];
-	let sliceFinderKey = "general";
+	let sliceFinderKey = "data";
 	let orderBys = ["ascending", "descending"];
 	let orderBy = "ascending";
 	let sets;
