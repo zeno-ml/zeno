@@ -26,6 +26,7 @@ class Slice(CamelModel):
     filter_predicates: FilterPredicateGroup
 
 
-class SliceMetric(CamelModel):
+# Used for slices or tags
+class GroupMetric(CamelModel):
     metric: Union[float, None]
     size: int

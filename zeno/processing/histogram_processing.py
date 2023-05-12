@@ -66,7 +66,9 @@ def histogram_buckets(
 def histogram_counts(df: pd.DataFrame, req: HistogramRequest) -> List[List[int]]:
     """Calculate count for each bucket in each column histogram."""
     if req.filter_predicates is not None:
-        filt_df = filter_table(df, req.filter_predicates, req.filter_ids)
+        filt_df = filter_table(
+            df, req.filter_predicates, req.tag_ids, req.filter_ids, req.tag_list
+        )
     else:
         filt_df = df
 
@@ -123,7 +125,9 @@ def histogram_metrics(
         return []
 
     if req.filter_predicates is not None:
-        filt_df = filter_table(df, req.filter_predicates, req.filter_ids)
+        filt_df = filter_table(
+            df, req.filter_predicates, req.tag_ids, req.filter_ids, req.tag_list
+        )
     else:
         filt_df = df
 
@@ -179,7 +183,7 @@ def filter_by_string(df: pd.DataFrame, req: StringFilterRequest) -> List[str]:
         flag = 0 if case_match else re.IGNORECASE
         keyword = f"\\b{keyword}\\b" if whole_word_match else keyword
         try:
-            query_string = f"{col_type}.str.contains(r'{keyword}', flags=@flag)"
+            query_string = f"`{col_type}`.str.contains(r'{keyword}', flags=@flag)"
             ret = df.query(query_string)[str(col_type)].head().tolist()
         except Exception as e:
             print("Invalid Regex Error: ", e)

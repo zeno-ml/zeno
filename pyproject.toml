@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "zenoml"
-version = "0.4.12"
+version = "0.5.2"
 description = "Interactive Evaluation Framework for Machine Learning"
 license = "MIT"
 authors = ["Ángel Alexander Cabrera <alex.cabrera@gmail.com>"]
@@ -32,9 +32,9 @@ sliceline = { git = "https://github.com/zeno-ml/sliceline" }
 [tool.poetry.dev-dependencies]
 black = "^23.3.0"
 httpx = "^0.24.0"
-pyright = "^1.1.305"
+pyright = "^1.1.306"
 pytest = "^7.2.2"
-ruff = "^0.0.263"
+ruff = "^0.0.265"
 
 [tool.poetry.scripts]
 zeno = "zeno.runner:command_line"

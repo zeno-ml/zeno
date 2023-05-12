@@ -7,6 +7,7 @@
 		selectionIds,
 		selectionPredicates,
 		status,
+		tagIds,
 	} from "../../stores";
 	import {
 		ZenoService,
@@ -74,7 +75,7 @@
 	}
 
 	$: if (points) {
-		getPointOpacities($selectionPredicates, points).then(
+		getPointOpacities($selectionPredicates, points, $tagIds).then(
 			(filteredOpacities) => {
 				pointOpacities = filteredOpacities;
 			}

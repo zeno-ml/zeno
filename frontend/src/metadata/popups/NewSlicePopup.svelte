@@ -16,9 +16,16 @@
 	let predicateGroup: FilterPredicateGroup = { predicates: [], join: "" };
 	let nameInput;
 
-	// Track original settings when editing
+	// Track original settings when editing.
 	let originalName = "";
 	let originalPredicates;
+
+	$: isValidPredicates = checkValidPredicates(predicateGroup.predicates);
+	$: if ($showNewSlice && nameInput) {
+		nameInput.getElement().focus();
+	}
+	// Declare this way instead of subscribe to avoid mis-tracking on $sliceToEdit.
+	$: $showNewSlice, updatePredicates();
 
 	// check if predicates are valid (not empty)
 	function checkValidPredicates(preds) {
@@ -43,14 +50,6 @@
 		});
 		return valid;
 	}
-	$: isValidPredicates = checkValidPredicates(predicateGroup.predicates);
-
-	$: if ($showNewSlice && nameInput) {
-		nameInput.getElement().focus();
-	}
-
-	// declare this way instead of subscribe to avoid mis-tracking on $sliceToEdit
-	$: $showNewSlice, updatePredicates();
 
 	function updatePredicates() {
 		predicateGroup = { predicates: [], join: "" };
@@ -138,8 +137,9 @@
 				return s;
 			});
 			selections.update((sels) => ({
-				slices: [sliceName],
+				slices: [],
 				metadata: sels.metadata,
+				tags: [],
 			}));
 			showNewSlice.set(false);
 			sliceToEdit.set(null);
@@ -217,7 +217,7 @@
 		position: fixed;
 		left: 440px;
 		top: 70px;
-		z-index: 10;
+		z-index: 20;
 	}
 	#submit {
 		display: flex;

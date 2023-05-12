@@ -45,9 +45,10 @@
 			valueField={"name"}
 			options={$status.completeColumns.filter(
 				(d) =>
-					d.model === $model ||
-					d.columnType === ZenoColumnType.METADATA ||
-					d.columnType === ZenoColumnType.PREDISTILL
+					d.columnType !== ZenoColumnType.EMBEDDING &&
+					(d.model === $model ||
+						d.columnType === ZenoColumnType.METADATA ||
+						d.columnType === ZenoColumnType.PREDISTILL)
 			)}
 			on:change={() => {
 				// assign default value for changing column
@@ -94,7 +95,7 @@
 		{#if predicate.column}
 			{#if predicate.column.metadataType === MetadataType.BOOLEAN}
 				<Svelecte
-					value={predicate.value}
+					value={predicate.value + ""}
 					on:change={(e) => {
 						predicate.value = e.detail.label;
 					}}

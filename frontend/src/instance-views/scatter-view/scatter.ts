@@ -1,6 +1,11 @@
-import type { FilterPredicateGroup, Points2D } from "../../zenoservice";
+import { get } from "svelte/store";
 import { getFilteredIds } from "../../api/table";
-import { selectionIds } from "../../stores";
+import { model, selectionIds } from "../../stores";
+import type {
+	FilterIds,
+	FilterPredicateGroup,
+	Points2D,
+} from "../../zenoservice";
 
 export function getIndicesFromIds(
 	allIds: string[] | number[],
@@ -34,9 +39,14 @@ export function deselectPoints() {
 export async function getPointOpacities(
 	selectionPredicates: FilterPredicateGroup,
 	points: Points2D,
+	tagIds: FilterIds = { ids: [] },
 	{ fullOpacity = 1, partialOpacity = 0.15 } = {}
 ) {
-	const filteredIds = (await getFilteredIds(selectionPredicates)) as string[];
+	const filteredIds = (await getFilteredIds(
+		selectionPredicates,
+		get(model),
+		tagIds
+	)) as string[];
 	const filteredIdsIndex = new Map(filteredIds.map((id, index) => [id, index]));
 	if (filteredIds.length > 0) {
 		return points.ids.map((id) =>

@@ -13,7 +13,9 @@ def check_embed_exists(df: pd.DataFrame, model: str):
     """Checks for the existence of an embedding column.
     Returns True if the column exists, False otherwise
     """
-    embed_column = ZenoColumn(name=model, column_type=ZenoColumnType.EMBEDDING)
+    embed_column = ZenoColumn(
+        column_type=ZenoColumnType.EMBEDDING, name="embedding", model=model
+    )
     exists = str(embed_column) in df.columns
     return exists and not df[str(embed_column)].isna().any()
 
@@ -32,7 +34,9 @@ def run_tsne(df: pd.DataFrame, model: str) -> np.ndarray:
 
     from openTSNE import TSNE
 
-    embed_col = ZenoColumn(column_type=ZenoColumnType.EMBEDDING, name=model)
+    embed_col = ZenoColumn(
+        column_type=ZenoColumnType.EMBEDDING, name="embedding", model=model
+    )
 
     embed = df[str(embed_col)].to_numpy()
     embed = np.stack(embed, axis=0)  # type: ignore

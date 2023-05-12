@@ -48,21 +48,17 @@ def predistill_data(
 def run_inference(
     fn: Callable[[str], Callable[[pd.DataFrame, ZenoOptions], ModelReturn]],
     options: ZenoOptions,
-    model_path: str,
+    model_name: str,
     cache_path: str,
     df: pd.DataFrame,
     batch_size: int,
     pos: int,
 ) -> List[DataProcessingReturn]:
-    model_name = os.path.basename(model_path).split(".")[0]
-
     model_col_obj = ZenoColumn(
-        column_type=ZenoColumnType.OUTPUT,
-        name=model_name,
+        column_type=ZenoColumnType.OUTPUT, name="output", model=model_name
     )
     embedding_col_obj = ZenoColumn(
-        column_type=ZenoColumnType.EMBEDDING,
-        name=model_name,
+        column_type=ZenoColumnType.EMBEDDING, name="embedding", model=model_name
     )
     model_hash = str(model_col_obj)
     embedding_hash = str(embedding_col_obj)
@@ -76,7 +72,7 @@ def run_inference(
 
     other_return_cols: Dict[str, ZenoColumn] = {}
     if len(to_predict_indices) > 0:
-        model_fn = fn(model_path)
+        model_fn = fn(model_name)
 
         # Make output folder if function uses output_path
         src = getsource(model_fn)
@@ -160,8 +156,7 @@ def postdistill_data(
     col = df[col_hash].copy()
 
     output_obj = ZenoColumn(
-        column_type=ZenoColumnType.OUTPUT,
-        name=model,
+        column_type=ZenoColumnType.OUTPUT, name="output", model=model
     )
     output_hash = str(output_obj)
 

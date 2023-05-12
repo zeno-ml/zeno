@@ -5,10 +5,13 @@
 	import ComparisonView from "./ComparisonView.svelte";
 	import TableView from "./TableView.svelte";
 	import ScatterView from "./scatter-view/ScatterView.svelte";
-	import { getMetricsForSlices } from "../api/slice";
+	import { getMetricsForSlicesAndTags } from "../api/slice";
 	import {
+		editId,
+		selections,
 		selectionIds,
 		selectionPredicates,
+		tagIds,
 		settings,
 		model,
 		metric,
@@ -55,7 +58,7 @@
 		}
 	});
 
-	$: currentResult = getMetricsForSlices(
+	$: currentResult = getMetricsForSlicesAndTags(
 		[
 			<MetricKey>{
 				sli: <Slice>{
@@ -70,8 +73,13 @@
 				metric: $metric,
 			},
 		],
-		$selectionIds
+		$tagIds,
+		$selectionIds,
+		$selections.tags
 	);
+
+	// change selected to table if a tag is edited
+	$: selected = $editId !== undefined ? "table" : selected;
 </script>
 
 <div class="heading">
@@ -81,18 +89,21 @@
 		{currentResult}
 		bind:viewOptions />
 </div>
-
-{#if selected === "list" && viewOptions !== undefined}
-	<ListView {currentResult} {viewFunction} {viewOptions} />
-{/if}
-{#if selected === "comparison" && viewOptions !== undefined}
-	<ComparisonView {currentResult} {viewFunction} {viewOptions} />
-{/if}
-{#if selected === "table"}
+{#if $editId !== undefined}
 	<TableView {currentResult} {viewFunction} {viewOptions} />
-{/if}
-{#if selected === "projection"}
-	<ScatterView {viewFunction} {viewOptions} />
+{:else}
+	{#if selected === "list" && viewOptions !== undefined}
+		<ListView {currentResult} {viewFunction} {viewOptions} />
+	{/if}
+	{#if selected === "comparison" && viewOptions !== undefined}
+		<ComparisonView {currentResult} {viewFunction} {viewOptions} />
+	{/if}
+	{#if selected === "table"}
+		<TableView {currentResult} {viewFunction} {viewOptions} />
+	{/if}
+	{#if selected === "projection"}
+		<ScatterView {viewFunction} {viewOptions} />
+	{/if}
 {/if}
 
 <style>

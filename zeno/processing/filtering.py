@@ -1,5 +1,5 @@
 """Functions for parsing filter predicates and filtering dataframes"""
-from typing import Optional
+from typing import List, Optional
 
 import pandas as pd
 from pandas import DataFrame
@@ -35,7 +35,7 @@ def get_filter_string(filter: FilterPredicateGroup) -> str:
                 if is_whole:
                     f.value = f"\\b{f.value}\\b" if is_regex else f'"{f.value}"'
 
-                filt_string = f"{f.join} ({f.column}.str.contains(\
+                filt_string = f"{f.join} (`{f.column}`.str.contains(\
                     r'{f.value}', na=False, regex={is_regex}, case={is_case}))"
 
                 if (not is_regex) and is_whole:
@@ -64,19 +64,33 @@ def get_filter_string(filter: FilterPredicateGroup) -> str:
 
 def filter_table(
     main_df,
-    filter_predicates: FilterPredicateGroup,
-    filter_ids: Optional[FilterIds] = None,
+    filter_predicates: Optional[FilterPredicateGroup] = None,
+    list_ids_first: Optional[FilterIds] = None,
+    list_ids_second: Optional[FilterIds] = None,
+    tag_list: Optional[List[str]] = None,
 ) -> pd.DataFrame:
+    all_indicies = []
+    if list_ids_first is not None and len(list_ids_first.ids) > 0:
+        all_indicies += list_ids_first.ids
+    if list_ids_second is not None and len(list_ids_second.ids) > 0:
+        all_indicies += list_ids_second.ids
     # if we have ids, filter them out now!
-    if filter_ids is not None and len(filter_ids.ids) > 0:
+    if len(all_indicies) > 0:
+        # make sure the ids we are querying exist
+        existing_ids = main_df.index.intersection(all_indicies)
         # this is fast because the index is set to ids
-        main_df = main_df.loc[filter_ids.ids]
+        main_df = main_df.loc[existing_ids]
 
-    final_filter = get_filter_string(filter_predicates)
-    if len(final_filter) > 0:
-        return main_df.query(final_filter, engine="python")
-    else:
-        return main_df
+    # empty selected tags so always return empty table
+    if len(all_indicies) == 0 and tag_list is not None and len(tag_list) > 0:
+        return main_df.iloc[0:0]
+
+    if filter_predicates is not None:
+        final_filter = get_filter_string(filter_predicates)
+        if len(final_filter) > 0:
+            return main_df.query(final_filter, engine="python")
+
+    return main_df
 
 
 def filter_table_single(df: DataFrame, col: ZenoColumn, bucket: HistogramBucket):

@@ -49,16 +49,25 @@
 
 					let sli_1_pred = [...sli_1.filterPredicates.predicates];
 					let sli_2_pred = [...sli_2.filterPredicates.predicates];
-					let sec_slice_pred_col_0 = {
-						...sli_2.filterPredicates.predicates[0],
-					};
-					sec_slice_pred_col_0.join = "&";
-					sli_2_pred[0] = sec_slice_pred_col_0;
+					let concat_preds = [];
+
+					// if both are not "all instance" slice
+					if (sli_1_pred.length !== 0 && sli_2_pred.length !== 0) {
+						let sec_slice_pred_col_0 = {
+							...sli_2.filterPredicates.predicates[0],
+						};
+						sec_slice_pred_col_0.join = "&";
+						sli_2_pred[0] = sec_slice_pred_col_0;
+						concat_preds = sli_1_pred.concat(sli_2_pred);
+					} else {
+						concat_preds = sli_1_pred.length === 0 ? sli_2_pred : sli_1_pred;
+					}
+
 					let combined_slice = <Slice>{
 						sliceName: "",
 						folder: "",
 						filterPredicates: {
-							predicates: sli_1_pred.concat(sli_2_pred),
+							predicates: concat_preds,
 							join: "",
 						},
 					};
@@ -84,8 +93,10 @@
 					table: chartEntries.map((r, i) => ({
 						slices: r.slice,
 						size: res[i].size,
-						metrics: res[i].metric.toFixed(2),
 						models: r.model,
+						...(selectMetric !== "size" && {
+							metrics: res[i].metric.toFixed(2),
+						}),
 					})),
 				}}
 				<VegaLite
@@ -105,8 +116,10 @@
 						slice_1: r.slice_1,
 						slice_2: r.slice_2,
 						size: res[i].size,
-						metrics: res[i].metric.toFixed(2),
 						models: r.model,
+						...(selectMetric !== "size" && {
+							metrics: res[i].metric.toFixed(2),
+						}),
 					})),
 				}}
 				<h4>{selectModel}</h4>

@@ -23,9 +23,10 @@ from zeno.api import (
     ZenoParameters,
 )
 from zeno.classes.base import DataProcessingReturn, MetadataType, ZenoColumnType
-from zeno.classes.classes import MetricKey, TableRequest, ZenoColumn
+from zeno.classes.classes import MetricKey, PlotRequest, TableRequest, ZenoColumn
 from zeno.classes.report import Report
-from zeno.classes.slice import FilterIds, FilterPredicateGroup, Slice, SliceMetric
+from zeno.classes.slice import FilterIds, FilterPredicateGroup, GroupMetric, Slice
+from zeno.classes.tag import Tag, TagMetricKey
 from zeno.processing.data_processing import (
     postdistill_data,
     predistill_data,
@@ -59,6 +60,7 @@ class ZenoBackend(object):
         self.samples = self.params.samples
         self.view = self.params.view
         self.calculate_histogram_metrics = self.params.calculate_histogram_metrics
+        self.model_names = self.params.models
 
         self.df = read_metadata(self.metadata)
         self.tests = read_functions(self.functions)
@@ -90,6 +92,7 @@ class ZenoBackend(object):
         self.slices: Dict[str, Slice] = read_pickle(
             "slices.pickle", self.cache_path, {}
         )
+        self.tags: Dict[str, Tag] = read_pickle("tags.pickle", self.cache_path, {})
         if "All Instances" not in self.slices:
             orig_slices = self.slices
             all_instance = Slice(
@@ -99,15 +102,6 @@ class ZenoBackend(object):
             )
             self.slices = {"All Instances": all_instance}
             self.slices.update(orig_slices)
-
-        if self.params.models and os.path.isdir(self.params.models[0]):
-            self.model_paths = [
-                os.path.join(self.params.models[0], m)
-                for m in os.listdir(self.params.models[0])
-            ]
-        else:
-            self.model_paths = self.params.models
-        self.model_names = [os.path.basename(p).split(".")[0] for p in self.model_paths]
 
         self.__setup_dataframe(
             self.params.id_column, self.params.data_column, self.params.label_column
@@ -128,11 +122,19 @@ class ZenoBackend(object):
 
     def __setup_dataframe(self, id_column: str, data_column: str, label_column: str):
         if data_column != "":
-            self.data_column = ZenoColumn(
-                column_type=ZenoColumnType.METADATA,
-                metadata_type=get_metadata_type(self.df[data_column]),
-                name=data_column,
-            )
+            if data_column != id_column:
+                self.data_column = ZenoColumn(
+                    column_type=ZenoColumnType.METADATA,
+                    metadata_type=get_metadata_type(self.df[data_column]),
+                    name=data_column,
+                )
+            else:  # make sure id and data column are different
+                self.df["data"] = self.df[data_column]
+                self.data_column = ZenoColumn(
+                    column_type=ZenoColumnType.METADATA,
+                    metadata_type=get_metadata_type(self.df["data"]),
+                    name="data",
+                )
         else:
             self.data_column = ZenoColumn(
                 column_type=ZenoColumnType.METADATA,
@@ -312,22 +314,19 @@ class ZenoBackend(object):
                             i,
                         )
                     )
-            self.__set_data_processing_returns(predistill_outputs)
+                self.__set_data_processing_returns(predistill_outputs)
 
     def __inference(self):
         """Run models on instances."""
 
         # Check if we need to run inference since Pool is expensive
         models_to_run = []
-        for model_path in self.model_paths:
-            model_name = os.path.basename(model_path).split(".")[0]
+        for model_name in self.model_names:
             model_column = ZenoColumn(
-                column_type=ZenoColumnType.OUTPUT,
-                name=model_name,
+                column_type=ZenoColumnType.OUTPUT, name="output", model=model_name
             )
             embedding_column = ZenoColumn(
-                column_type=ZenoColumnType.EMBEDDING,
-                name=model_name,
+                column_type=ZenoColumnType.EMBEDDING, name="embedding", model=model_name
             )
             model_hash = str(model_column)
             embedding_hash = str(embedding_column)
@@ -338,8 +337,8 @@ class ZenoBackend(object):
             load_series(self.df, model_column, model_save_path)
             load_series(self.df, embedding_column, embedding_save_path)
 
-            if self.df[model_hash].isna().any() or self.df[embedding_hash].isna().any():
-                models_to_run.append(model_path)
+            if self.df[model_hash].isna().any():
+                models_to_run.append(model_name)
             else:
                 self.df[model_hash] = self.df[model_hash].convert_dtypes()
                 model_column.metadata_type = get_metadata_type(self.df[model_hash])
@@ -363,10 +362,7 @@ class ZenoBackend(object):
                     col.metadata_type = get_metadata_type(self.df[str(col)])
                     self.complete_columns.append(col)
 
-        if len(models_to_run) > 0:
-            if self.predict_function is None:
-                return
-
+        if len(models_to_run) > 0 and self.predict_function is not None:
             if self.multiprocessing:
                 with Pool() as pool:
                     inference_outputs = pool.map(
@@ -381,12 +377,12 @@ class ZenoBackend(object):
                     )
             else:
                 inference_outputs = []
-                for i, model_path in enumerate(models_to_run):
+                for i, model_name in enumerate(models_to_run):
                     inference_outputs.append(
                         run_inference(
                             self.predict_function,
                             self.zeno_options,
-                            model_path,
+                            model_name,
                             self.cache_path,
                             self.df,
                             self.batch_size,
@@ -461,10 +457,10 @@ class ZenoBackend(object):
         self,
         requests: List[MetricKey],
         filter_ids: Optional[FilterIds] = None,
-    ) -> List[SliceMetric]:
+    ) -> List[GroupMetric]:
         """Calculate result for each requested combination."""
 
-        return_metrics: List[SliceMetric] = []
+        return_metrics: List[GroupMetric] = []
         for metric_key in requests:
             # If we refresh, might not have columns for a slice.
             try:
@@ -472,16 +468,54 @@ class ZenoBackend(object):
                     self.df, metric_key.sli.filter_predicates, filter_ids
                 )
             except pd.errors.UndefinedVariableError:
-                return_metrics.append(SliceMetric(metric=None, size=0))
+                return_metrics.append(GroupMetric(metric=None, size=0))
                 continue
 
             if metric_key.metric == "" or self.label_column.name == "":
-                return_metrics.append(SliceMetric(metric=None, size=filt_df.shape[0]))
+                return_metrics.append(GroupMetric(metric=None, size=filt_df.shape[0]))
             else:
                 metric = self.calculate_metric(
                     filt_df, metric_key.model, metric_key.metric
                 )
-                return_metrics.append(SliceMetric(metric=metric, size=filt_df.shape[0]))
+                return_metrics.append(GroupMetric(metric=metric, size=filt_df.shape[0]))
+        return return_metrics
+
+    def get_metrics_for_slices_and_tags(
+        self,
+        requests: List[MetricKey],
+        tag_ids: Optional[FilterIds] = None,
+        filter_ids: Optional[FilterIds] = None,
+        tag_list: Optional[List[str]] = None,
+    ) -> List[GroupMetric]:
+        """Calculate result for each requested combination."""
+        return_metrics: List[GroupMetric] = []
+        for metric_key in requests:
+            filt_df = filter_table(
+                self.df, metric_key.sli.filter_predicates, tag_ids, filter_ids, tag_list
+            )
+            if metric_key.metric == "" or self.label_column.name == "":
+                return_metrics.append(GroupMetric(metric=None, size=filt_df.shape[0]))
+            else:
+                metric = self.calculate_metric(
+                    filt_df, metric_key.model, metric_key.metric
+                )
+                return_metrics.append(GroupMetric(metric=metric, size=filt_df.shape[0]))
+        return return_metrics
+
+    def get_metrics_for_tags(self, requests: List[TagMetricKey]) -> List[GroupMetric]:
+        return_metrics: List[GroupMetric] = []
+        for tag_metric_key in requests:
+            filt_df = filter_table(self.df, None, tag_metric_key.tag.selection_ids)
+            if tag_metric_key.metric == "" or self.label_column.name == "":
+                return_metrics.append(GroupMetric(metric=None, size=filt_df.shape[0]))
+            else:
+                # if the tag is empty
+                if len(tag_metric_key.tag.selection_ids.ids) == 0:
+                    filt_df = self.df.iloc[0:0]
+                metric = self.calculate_metric(
+                    filt_df, tag_metric_key.model, tag_metric_key.metric
+                )
+                return_metrics.append(GroupMetric(metric=metric, size=filt_df.shape[0]))
         return return_metrics
 
     def calculate_metric(
@@ -492,8 +526,7 @@ class ZenoBackend(object):
 
         if model is not None:
             output_col = ZenoColumn(
-                column_type=ZenoColumnType.OUTPUT,
-                name=model,
+                column_type=ZenoColumnType.OUTPUT, name="output", model=model
             )
             output_hash = str(output_col)
 
@@ -547,6 +580,20 @@ class ZenoBackend(object):
         with open(os.path.join(self.cache_path, "folders.pickle"), "wb") as f:
             pickle.dump(self.folders, f)
 
+    def create_new_tag(self, req: Tag):
+        if not self.editable:
+            return
+        self.tags[req.tag_name] = req
+        with open(os.path.join(self.cache_path, "tags.pickle"), "wb") as f:
+            pickle.dump(self.tags, f)
+
+    def delete_tag(self, tag_name: str):
+        if not self.editable:
+            return
+        del self.tags[tag_name]
+        with open(os.path.join(self.cache_path, "tags.pickle"), "wb") as f:
+            pickle.dump(self.tags, f)
+
     def set_reports(self, reports: List[Report]):
         if not self.editable:
             return
@@ -568,20 +615,22 @@ class ZenoBackend(object):
         with open(os.path.join(self.cache_path, "slices.pickle"), "wb") as f:
             pickle.dump(self.slices, f)
 
-    def get_filtered_ids(self, req: FilterPredicateGroup):
-        return filter_table(self.df, req)[str(self.id_column)].to_json(orient="records")
+    def get_filtered_ids(self, req: PlotRequest):
+        return filter_table(self.df, req.filter_predicates, req.tag_ids)[
+            str(self.id_column)
+        ].to_json(orient="records")
 
     def get_filtered_table(self, req: TableRequest):
         """Return filtered table from list of filter predicates."""
-        filt_df = filter_table(self.df, req.filter_predicates, req.filter_ids)
+        filt_df = filter_table(
+            self.df, req.filter_predicates, req.filter_ids, req.tag_ids, req.tag_list
+        )
         if req.sort[0]:
             filt_df = filt_df.sort_values(str(req.sort[0]), ascending=req.sort[1])
         filt_df = filt_df.iloc[req.slice_range[0] : req.slice_range[1]].copy()
-
         if self.data_prefix != "":
             # Add data prefix to data column depending on type of data_path.
             filt_df.loc[:, str(self.data_column)] = (
                 self.data_prefix + filt_df[str(self.data_column)]
             )
-
         return filt_df[[str(col) for col in req.columns]].to_json(orient="records")

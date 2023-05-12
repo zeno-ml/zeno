@@ -1,8 +1,10 @@
-import { ZenoService, type FilterIds, type SliceMetric } from "../zenoservice";
 import {
 	ZenoColumnType,
+	ZenoService,
+	type FilterIds,
 	type FilterPredicate,
 	type FilterPredicateGroup,
+	type GroupMetric,
 	type MetricKey,
 } from "../zenoservice";
 
@@ -10,18 +12,30 @@ function instanceOfFilterPredicate(object): object is FilterPredicate {
 	return "column" in object;
 }
 
-function setModelForMetricKey(
+export function setModelForFilterPredicateGroup(
 	pred: FilterPredicateGroup | FilterPredicate,
 	model: string
 ) {
 	if (instanceOfFilterPredicate(pred)) {
-		if (pred.column.columnType === ZenoColumnType.POSTDISTILL) {
-			pred.column.model = model;
+		if (
+			pred.column.columnType === ZenoColumnType.POSTDISTILL ||
+			pred.column.columnType === ZenoColumnType.OUTPUT
+		) {
+			pred = {
+				...pred,
+				column: {
+					...pred.column,
+					model: model,
+				},
+			};
 		}
 	} else {
-		pred.predicates = pred.predicates.map((p) =>
-			setModelForMetricKey(p, model)
-		);
+		return {
+			...pred,
+			predicates: pred.predicates.map((p) =>
+				setModelForFilterPredicateGroup(p, model)
+			),
+		};
 	}
 	return pred;
 }
@@ -32,17 +46,29 @@ function setModelForMetricKeys(metricKeys: MetricKey[]) {
 			key.sli.filterPredicates &&
 			key.sli.filterPredicates.predicates.length > 0
 		) {
-			key.sli.filterPredicates.predicates.map((pred) =>
-				setModelForMetricKey(pred, key.model)
-			);
+			return {
+				...key,
+				sli: {
+					...key.sli,
+					filterPredicates: {
+						...key.sli.filterPredicates,
+						predicates: key.sli.filterPredicates.predicates.map((pred) => {
+							return {
+								...pred,
+								...setModelForFilterPredicateGroup(pred, key.model),
+							};
+						}),
+					},
+				},
+			};
 		}
-		return key;
+		return { ...key };
 	});
 }
 
 function setMetricForSize(metricKeys: MetricKey[]) {
 	return metricKeys.map((key) => {
-		key.metric = key.metric === "size" ? "accuracy" : key.metric;
+		key.metric = key.metric === "size" ? "" : key.metric;
 		return key;
 	});
 }
@@ -51,10 +77,59 @@ export async function deleteSlice(sliceName: string) {
 	await ZenoService.deleteSlice([sliceName]);
 }
 
+const metricKeyCache = new Map();
 export async function getMetricsForSlices(
+	metricKeys: MetricKey[]
+): Promise<GroupMetric[]> {
+	if (metricKeys.length === 0) {
+		return null;
+	}
+	// update metric to empty string if metric is size
+	metricKeys = setMetricForSize(metricKeys);
+
+	if (metricKeys[0].metric === undefined) {
+		metricKeys = metricKeys.map((k) => ({ ...k, metric: "" }));
+	}
+	if (metricKeys[0].model === undefined) {
+		metricKeys = metricKeys.map((k) => ({ ...k, model: "" }));
+	}
+	// Update model in predicates if slices are dependent on postdistill or output columns.
+	metricKeys = <MetricKey[]>setModelForMetricKeys(metricKeys);
+
+	// Check if we have already fetched this metric key
+	const keysToRequest = [];
+	const requestIndices = [];
+	const results = [];
+
+	for (let i = 0; i < metricKeys.length; i++) {
+		const metricKeyHash = JSON.stringify(metricKeys[i]);
+		if (metricKeyCache.has(metricKeyHash)) {
+			results[i] = metricKeyCache.get(metricKeyHash);
+		} else {
+			keysToRequest.push(metricKeys[i]);
+			requestIndices.push(i);
+		}
+	}
+
+	if (keysToRequest.length > 0) {
+		const res = await ZenoService.getMetricsForSlices({
+			metricKeys,
+		});
+		keysToRequest.forEach((key, i) =>
+			metricKeyCache.set(JSON.stringify(key), res[i])
+		);
+		requestIndices.forEach((i) => (results[i] = res[i]));
+	}
+
+	return results;
+}
+
+export async function getMetricsForSlicesAndTags(
 	metricKeys: MetricKey[],
-	filterIds?: FilterIds
-): Promise<SliceMetric[]> {
+	tagIds?: FilterIds,
+	filterIds?: FilterIds,
+	tagList?: string[]
+): Promise<GroupMetric[]> {
 	if (metricKeys.length === 0) {
 		return null;
 	}
@@ -65,15 +140,13 @@ export async function getMetricsForSlices(
 		metricKeys = metricKeys.map((k) => ({ ...k, model: "" }));
 	}
 	// Update model in predicates if slices are dependent on postdistill columns.
-	metricKeys = setModelForMetricKeys(metricKeys);
-
-	// use accuracy as default metrics to fetch size metric
-	metricKeys = setMetricForSize(metricKeys);
-
+	metricKeys = <MetricKey[]>setModelForMetricKeys(metricKeys);
 	if (metricKeys.length > 0) {
-		return await ZenoService.getMetricsForSlices({
+		return await ZenoService.getMetricsForSlicesAndTags({
 			metricKeys,
+			tagIds,
 			filterIds,
+			tagList,
 		});
 	}
 }
