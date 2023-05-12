@@ -23,11 +23,9 @@ from zeno.classes.classes import (
     StatusResponse,
     TableRequest,
     ZenoSettings,
-    ZenoVariables
+    ZenoVariables,
 )
-from zeno.classes.slice_finder import (
-    SliceFinderMetricReturn
-)
+from zeno.classes.slice_finder import SliceFinderMetricReturn
 from zeno.classes.metadata import HistogramBucket, HistogramRequest, StringFilterRequest
 from zeno.classes.projection import Points2D, PointsColors
 from zeno.classes.report import Report
@@ -57,7 +55,6 @@ def get_server(zeno: ZenoBackend):
     api_app = FastAPI(
         title="Backend API", generate_unique_id_function=custom_generate_unique_id
     )
-
     if zeno.data_path != "" and os.path.exists(zeno.data_path):
         app.mount("/data", StaticFiles(directory=zeno.data_path), name="static")
     if zeno.label_path != "" and os.path.exists(zeno.label_path):

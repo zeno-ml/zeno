@@ -3,18 +3,16 @@ import secrets
 import numpy as np
 from pandas.api.types import is_numeric_dtype
 from sliceline.slicefinder import Slicefinder
-
 from zeno.classes.base import ZenoColumn, ZenoColumnType
 from zeno.classes.slice import FilterPredicate, FilterPredicateGroup, Slice
-
 
 
 def find_right_column(columns, name):
     """Finds the right column given the df and zenocolumn.
 
-    Args: 
+    Args:
         columns: the list of all ZenoColumns.
-        name: the name that appears in a dataframe and can be a match for a ZenoColumn. 
+        name: the name that appears in a dataframe and can be a match for a ZenoColumn.
     Returns the right column with the correct Zenocolumn name.
     """
     for i in range(0, len(columns)):
@@ -26,7 +24,7 @@ def find_right_column(columns, name):
 def find_right_column_name(columns, name):
     """Finds the right column given the df and zenocolumn.
 
-    Args: 
+    Args:
         columns: the list of all ZenoColumns.
         name: the name for a specific column.
     Returns the dataframe column name associated with the Zeno column name.
@@ -35,9 +33,6 @@ def find_right_column_name(columns, name):
         if columns[i].name == name:
             return columns[i].__str__()
     return
-
-
-
 
 
 def get_column_name_with_summary(df, columns):
@@ -77,7 +72,6 @@ def data_clean_for_columns(df):
 
 
 def slice_finder(df, req, zeno_options, metric_functions, columns):
-
     """Returns found slices based on certain heruisitics.
 
     Args:
@@ -85,7 +79,7 @@ def slice_finder(df, req, zeno_options, metric_functions, columns):
         req: the SliceFinderRequst with arguments
         zeno_options: options for zeno software.
         metric_functions: the metrics functions for filtering out data of interest
-        columns: 
+        columns:
     Returns a SliceFinderMetricReturn Object.
     """
     # setting up config important for the next steps
@@ -128,14 +122,16 @@ def slice_finder(df, req, zeno_options, metric_functions, columns):
     excluded_types = [ZenoColumnType.EMBEDDING, ZenoColumnType.OUTPUT]
 
     for column in columns:
-        if(column.column_type in excluded_types and column.__str__() in updated_df.columns):
+        if (
+            column.column_type in excluded_types
+            and column.__str__() in updated_df.columns
+        ):
             updated_df = updated_df.drop(column.__str__(), axis=1)
     all_categorical_data = updated_df.columns.tolist()
 
     code_dict = dict()
 
     for row_name in all_categorical_data:
-
         target_list = updated_df[row_name].tolist()
         name_list = list(set(target_list))
         codes, uniques = updated_df[row_name].factorize(name_list)
