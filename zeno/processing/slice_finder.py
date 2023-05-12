@@ -125,9 +125,6 @@ def slice_finder(df, req, zeno_options, metric_functions, columns):
 
     result = {}
 
-    if df_column_name is None or df_column_name == "general":
-        result = metric_functions["slice_finder_accuracy"](df, local_ops)
-
     excluded_types = [ZenoColumnType.EMBEDDING, ZenoColumnType.OUTPUT]
 
     for column in columns:
@@ -146,19 +143,16 @@ def slice_finder(df, req, zeno_options, metric_functions, columns):
         updated_df[row_name] = codes
 
     # load the correct error rate. If it's the general case, use the error rate itself.
-    if df_column_name is None or df_column_name == "general":
-        errors = result.distill_output
     # else, use the min_max normalized result to find the slices with highest count metrics passed from the frontend.
-    else:
-        chosen_column_slice = updated_df[df_column_name]
-        normalized_column = (chosen_column_slice - np.min(chosen_column_slice)) / (
-            np.max(chosen_column_slice) - np.min(chosen_column_slice)
-        )
+    chosen_column_slice = updated_df[df_column_name]
+    normalized_column = (chosen_column_slice - np.min(chosen_column_slice)) / (
+        np.max(chosen_column_slice) - np.min(chosen_column_slice)
+    )
 
-        normalized_column = np.array(normalized_column, dtype=float)
-        if req.order_by == "ascending":
-            normalized_column = 1 - normalized_column
-        errors = np.array(normalized_column, dtype=float)
+    normalized_column = np.array(normalized_column, dtype=float)
+    if req.order_by == "ascending":
+        normalized_column = 1 - normalized_column
+    errors = np.array(normalized_column, dtype=float)
     # slice finder code logic
 
     slice_finder = Slicefinder(alpha=0.99, k=minimum_size, max_l=(int)(req.depth))

@@ -51,7 +51,7 @@
 			minimum_size: minimumSize,
 			depth: max_l,
 			model: $model,
-			column_name: sliceFinderKey ? sliceFinderKey : "general",
+			column_name: sliceFinderKey ? sliceFinderKey : "data",
 		});
 		let all_metrics = [];
 		for (let i = 0; i < sets.slices_of_interest.length; i++) {
@@ -82,9 +82,7 @@
 	export async function get_all_valid_columns() {
 		dataframeKeyValuePair = await ZenoService.getColumnsWithSummary();
 		sliceFinderKeys = Object.keys(dataframeKeyValuePair);
-		sliceFinderKeys.push("general");
 		sliceFinderKeys = sliceFinderKeys;
-		sliceFinderKey = "general";
 	}
 
 	function slice_data_generator(
