@@ -17,10 +17,10 @@ def slice_finder(df, req: SliceFinderRequest):
     Returns a SliceFinderMetricReturn Object.
     """
 
-    df = df[
+    updated_df = df[
         list(set([str(col) for col in req.columns] + [str(req.metric_column)]))
     ].dropna()
-    metric_col = np.array(df[str(req.metric_column)], dtype=float)
+    metric_col = np.array(updated_df[str(req.metric_column)], dtype=float)
     normalized_metric_col = (metric_col - np.min(metric_col)) / (
         np.max(metric_col) - np.min(metric_col)
     )
@@ -29,7 +29,7 @@ def slice_finder(df, req: SliceFinderRequest):
 
     slice_finder = Slicefinder(alpha=req.alpha, k=20, max_l=10, min_sup=10)
     slice_finder.fit(
-        df[[str(col) for col in req.columns]].to_numpy(), normalized_metric_col
+        updated_df[[str(col) for col in req.columns]].to_numpy(), normalized_metric_col
     )
 
     if slice_finder.top_slices_ is None:
