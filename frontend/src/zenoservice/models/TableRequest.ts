@@ -13,5 +13,5 @@ export type TableRequest = {
 	sort: Array<any>;
 	tagIds: FilterIds;
 	filterIds?: FilterIds;
-	tagList?: Array<string>;
+	tagList: Array<string>;
 };

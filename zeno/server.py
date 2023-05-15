@@ -19,7 +19,6 @@ from zeno.classes.classes import (
     EntryRequest,
     MetricRequest,
     PlotRequest,
-    SliceFinderRequest,
     StatusResponse,
     TableRequest,
     ZenoSettings,
@@ -29,7 +28,7 @@ from zeno.classes.metadata import HistogramBucket, HistogramRequest, StringFilte
 from zeno.classes.projection import Points2D, PointsColors
 from zeno.classes.report import Report
 from zeno.classes.slice import GroupMetric, Slice
-from zeno.classes.slice_finder import SliceFinderMetricReturn
+from zeno.classes.slice_finder import SliceFinderRequest, SliceFinderReturn
 from zeno.classes.tag import Tag, TagMetricKey
 from zeno.processing.histogram_processing import (
     filter_by_string,
@@ -42,7 +41,7 @@ from zeno.processing.projection_processing import (
     project_into_2d,
     projection_colors,
 )
-from zeno.processing.slice_finder import get_column_name_with_summary, slice_finder
+from zeno.processing.slice_finder import slice_finder
 from zeno.util import read_config
 
 
@@ -199,17 +198,9 @@ def get_server(zeno: ZenoBackend):
     def project_embed_into_2d(req: EmbedProject2DRequest):
         return project_into_2d(zeno.df, zeno.id_column, req.model, req.column)
 
-    @api_app.post(
-        "/slice-finder-project", tags=["zeno"], response_model=SliceFinderMetricReturn
-    )
-    def project_find_available_slices(req: SliceFinderRequest):
-        return slice_finder(
-            zeno.df, req, zeno.zeno_options, zeno.postdistill_functions, zeno.columns
-        )
-
-    @api_app.get("/get-columns-with-summary", tags=["zeno"])
-    def get_columns_with_summary():
-        return get_column_name_with_summary(zeno.df, zeno.columns)
+    @api_app.post("/slice-finder", tags=["zeno"], response_model=SliceFinderReturn)
+    def run_slice_finder(req: SliceFinderRequest):
+        return slice_finder(zeno.df, req)
 
     @api_app.post("/colors-project", tags=["zeno"], response_model=PointsColors)
     def get_projection_colors(req: ColorsProjectRequest):

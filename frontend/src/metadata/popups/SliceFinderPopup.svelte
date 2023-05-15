@@ -1,36 +1,70 @@
 <script lang="ts">
-	import Paper from "@smui/paper";
-	import { fade } from "svelte/transition";
-	import { Label } from "@smui/common";
-	import Chip from "@smui/chips";
-	import { Svg } from "@smui/common";
-	import { showNewSlice, slices, sliceToEdit } from "../../stores";
-	import IconButton, { Icon } from "@smui/icon-button";
-	import Select, { Option } from "@smui/select";
-	import { clickOutside } from "../../util/clickOutside";
-	import { mdiPlus, mdiClose } from "@mdi/js";
-	import { showSliceFinder } from "../../stores";
-	import { model, metric } from "../../stores";
+	import { mdiClose, mdiInformationOutline } from "@mdi/js";
 	import Button from "@smui/button";
-	import { getMetricsForSlices } from "../../api/slice";
-	import { ZenoService, type MetricKey } from "../../zenoservice";
+	import { Svg } from "@smui/common";
+	import IconButton, { Icon } from "@smui/icon-button";
+	import Paper from "@smui/paper";
+	import Select, { Option } from "@smui/select";
+	import { tooltip } from "@svelte-plugins/tooltips";
+	import Svelecte from "svelecte";
+	import { fade } from "svelte/transition";
+	import {
+		model,
+		showNewSlice,
+		showSliceFinder,
+		sliceToEdit,
+		slices,
+		status,
+	} from "../../stores";
+	import { clickOutside } from "../../util/clickOutside";
+	import {
+		MetadataType,
+		ZenoColumnType,
+		ZenoService,
+		type SliceFinderReturn,
+	} from "../../zenoservice";
 
-	let slice_data = [];
-	// dummy data for presenting frontend UI
-	let minimumSizes = ["2", "3", "4", "5", "6", "7"];
-	let minimumSize = "5";
-	let max_ls = ["4", "5", "6", "7", "8"];
-	let max_l = "5";
-	let sliceFinderKeys = [""];
-	let sliceFinderKey = "";
-	let orderBys = ["ascending", "descending"];
+	// Columns to create candidate slices accross
+	// TODO: Support discretized continuous columns.
+	let searchColumnOptions = $status.completeColumns.filter(
+		(d) =>
+			(d.metadataType === MetadataType.NOMINAL ||
+				d.metadataType === MetadataType.BOOLEAN) &&
+			(d.columnType === ZenoColumnType.METADATA ||
+				d.columnType === ZenoColumnType.PREDISTILL ||
+				((d.columnType === ZenoColumnType.OUTPUT ||
+					d.columnType === ZenoColumnType.POSTDISTILL) &&
+					d.model === $model))
+	);
+	let searchColumns =
+		searchColumnOptions.length > 0 ? searchColumnOptions : undefined;
+
+	// Column to use as the metric to compare slices.
+	let metricColumns = $status.completeColumns.filter(
+		(d) =>
+			(d.metadataType === MetadataType.CONTINUOUS ||
+				d.metadataType === MetadataType.BOOLEAN) &&
+			(d.columnType === ZenoColumnType.METADATA ||
+				d.columnType === ZenoColumnType.PREDISTILL ||
+				((d.columnType === ZenoColumnType.OUTPUT ||
+					d.columnType === ZenoColumnType.POSTDISTILL) &&
+					d.model === $model))
+	);
+	let metricColumn = metricColumns.length > 0 ? metricColumns[0] : undefined;
+
+	// TODO: make options for `alpha`, `min_supp`. Maybe use Svelecte.
+	let minimumSizes = ["1", "2", "3", "4", "5", "6", "7"];
+	let minimumSize = "1";
+	let maxLs = ["4", "5", "6", "7", "8"];
+	let maxL = "5";
+	let orderByOptions = ["ascending", "descending"];
 	let orderBy = "ascending";
-	let sets;
-	$: dataframeKeyValuePair = {};
+	let sliceFinderReturn: SliceFinderReturn;
+
 	$: sliceFinderMessage = "";
 
-	export async function addSliceAtIndex(index) {
-		let slice = sets.slices_of_interest[index];
+	export async function addSliceAtIndex(idx) {
+		let slice = sliceFinderReturn.slices[idx];
 
 		ZenoService.createNewSlice(slice).then(() => {
 			slices.update((s) => {
@@ -44,33 +78,17 @@
 
 	export async function activateSliceFinder() {
 		sliceFinderMessage = "Generating Slices...";
-		console.log(sliceFinderKey);
-		sets = await ZenoService.projectFindAvailableSlices({
-			id: "1",
-			order_by: orderBy,
-			minimum_size: minimumSize,
-			depth: max_l,
-			model: $model,
-			column_name: sliceFinderKey,
+		sliceFinderReturn = await ZenoService.runSliceFinder({
+			columns: searchColumns,
+			metricColumn: metricColumn,
+			orderBy: orderBy,
+			minimumSize: parseInt(minimumSize),
+			depth: parseInt(maxL),
 		});
-		let all_metrics = [];
-		for (let i = 0; i < sets.slices_of_interest.length; i++) {
-			let curr_slice = sets.slices_of_interest[i];
-			let curr_metric = await getMetricsForSlices([
-				<MetricKey>{
-					sli: curr_slice,
-					model: $model,
-					metric: $metric,
-				},
-			]);
-			all_metrics.push(curr_metric);
-		}
+
+		// TODO: render slices using return
+
 		sliceFinderMessage = "";
-		slice_data_generator(
-			sets.list_of_trained_elements,
-			sets.slices_of_interest,
-			all_metrics
-		);
 	}
 
 	function submit(e) {
@@ -79,65 +97,56 @@
 		}
 	}
 
-	export async function get_all_valid_columns() {
-		dataframeKeyValuePair = await ZenoService.getColumnsWithSummary();
-		sliceFinderKeys = Object.keys(dataframeKeyValuePair);
-		sliceFinderKeys = sliceFinderKeys;
-		sliceFinderKey = sliceFinderKeys[0];
-		sliceFinderKey = sliceFinderKey;
-		console.log(sliceFinderKey);
-	}
+	// function slice_data_generator(
+	// 	predicateList = [],
+	// 	slices_of_interest = [],
+	// 	all_metrics = []
+	// ) {
+	// 	// demo page
+	// 	get_all_valid_columns();
+	// 	slice_data = [];
+	// 	if (predicateList.length === 0) {
+	// 		predicateList = [
+	// 			"Welcome to the Slice Finder Screen! Click on the Button on the upperright corner to begin!",
+	// 		];
+	// 		let predicate = [];
+	// 		predicate.push(predicateList[0]);
+	// 		let data = {
+	// 			predicate: predicate,
+	// 			slice_size: 0,
+	// 			accuracy_rate: 0,
+	// 			index: 0,
+	// 		};
+	// 		slice_data.push(data);
+	// 	} else {
+	// 		slice_data = [];
+	// 		slices_of_interest.forEach((element, i) => {
+	// 			let predicate = [];
+	// 			let predicates_store = element.filterPredicates.predicates;
+	// 			for (let k = 0; k < predicates_store.length; k++) {
+	// 				predicate.push(
+	// 					predicates_store[k].column.name +
+	// 						predicates_store[k].operation +
+	// 						predicates_store[k].value
+	// 				);
+	// 			}
+	// 			let data = {
+	// 				predicate: predicate,
+	// 				slice_size: all_metrics[i][0].size,
+	// 				accuracy_rate: all_metrics[i][0].metric,
+	// 				index: i,
+	// 			};
+	// 			slice_data.push(data);
+	// 		});
 
-	function slice_data_generator(
-		predicateList = [],
-		slices_of_interest = [],
-		all_metrics = []
-	) {
-		// demo page
-		get_all_valid_columns();
-		slice_data = [];
-		if (predicateList.length === 0) {
-			predicateList = [
-				"Welcome to the Slice Finder Screen! Click on the Button on the upperright corner to begin!",
-			];
-			let predicate = [];
-			predicate.push(predicateList[0]);
-			let data = {
-				predicate: predicate,
-				slice_size: 0,
-				accuracy_rate: 0,
-				index: 0,
-			};
-			slice_data.push(data);
-		} else {
-			slice_data = [];
-			slices_of_interest.forEach((element, i) => {
-				let predicate = [];
-				let predicates_store = element.filterPredicates.predicates;
-				for (let k = 0; k < predicates_store.length; k++) {
-					predicate.push(
-						predicates_store[k].column.name +
-							predicates_store[k].operation +
-							predicates_store[k].value
-					);
-				}
-				let data = {
-					predicate: predicate,
-					slice_size: all_metrics[i][0].size,
-					accuracy_rate: all_metrics[i][0].metric,
-					index: i,
-				};
-				slice_data.push(data);
-			});
+	// 		if (orderBy === "descending") {
+	// 			slice_data.reverse();
+	// 		}
+	// 	}
+	// }
 
-			if (orderBy === "descending") {
-				slice_data.reverse();
-			}
-		}
-	}
-
-	get_all_valid_columns();
-	slice_data_generator();
+	// get_all_valid_columns();
+	// slice_data_generator();
 </script>
 
 <svelte:window on:keydown={submit} />
@@ -152,7 +161,21 @@
 	on:click_outside={() => ($showSliceFinder = false)}>
 	<Paper elevation={7}>
 		<div class="inline">
-			<h4 class="title">SUGGESTED SLICES</h4>
+			<div class="inline">
+				<h4 class="title">Slice Finder</h4>
+				<div
+					class="information-tooltip"
+					use:tooltip={{
+						content:
+							"Run the SliceLine algorithm to find slices of data with high or low metrics.",
+						position: "right",
+						theme: "zeno-tooltip",
+					}}>
+					<Icon style="outline:none" component={Svg} viewBox="-6 -6 36 36">
+						<path d={mdiInformationOutline} />
+					</Icon>
+				</div>
+			</div>
 			<IconButton on:click={() => ($showSliceFinder = false)}>
 				<Icon component={Svg} viewBox="0 0 24 24">
 					<path fill="#6a1b9a" d={mdiClose} />
@@ -160,6 +183,14 @@
 			</IconButton>
 		</div>
 		<div class="metrics">
+			<Svelecte
+				style="margin-left: 20px; margin-right: 20px; flex:none;"
+				bind:value={metricColumn}
+				valueAsObject={true}
+				valueField={"name"}
+				labelField={"name"}
+				options={metricColumns}
+				placeholder="Metric Column" />
 			<Select
 				class="select"
 				bind:value={minimumSize}
@@ -171,19 +202,10 @@
 			</Select>
 			<Select
 				class="select"
-				bind:value={max_l}
+				bind:value={maxL}
 				label="Max Lattice Level"
 				style="width: 170px">
-				{#each max_ls as m}
-					<Option value={m}>{m}</Option>
-				{/each}
-			</Select>
-			<Select
-				class="select"
-				bind:value={sliceFinderKey}
-				label="Metric Column 1"
-				style="width: 170px">
-				{#each sliceFinderKeys as m}
+				{#each maxLs as m}
 					<Option value={m}>{m}</Option>
 				{/each}
 			</Select>
@@ -192,16 +214,29 @@
 				bind:value={orderBy}
 				label="Order By"
 				style="width: 170px">
-				{#each orderBys as m}
+				{#each orderByOptions as m}
 					<Option value={m}>{m}</Option>
 				{/each}
 			</Select>
 
+			<div class="options-header">Model</div>
+			<Svelecte
+				style="margin-left: 20px; margin-right: 20px; flex:none;"
+				bind:value={searchColumns}
+				valueAsObject={true}
+				valueField={"name"}
+				labelField={"name"}
+				options={searchColumnOptions}
+				multiple={true}
+				placeholder="Slicing Columns" />
+
 			<Button on:click={() => activateSliceFinder()}>Generate Slices</Button>
 			<span id="generate-slices">{sliceFinderMessage}</span>
 
-			{#each slice_data as element}
+			<!-- {#each slice_data as element}
 				<div class="allSlices">
+					
+					<SliceDetails slice.filterGroup />
 					{#each element.predicate as pred}
 						<Chip bind:chip={pred} class="label meta-chip"
 							><Label>
@@ -223,7 +258,7 @@
 					<span class="rightElement" style="margin-top:10px;"
 						>{Math.round(element.accuracy_rate)}</span>
 				</div>
-			{/each}
+			{/each} -->
 		</div>
 	</Paper>
 </div>
@@ -236,12 +271,19 @@
 		z-index: 10;
 		min-width: 70vw;
 	}
+	.options-header {
+		margin-left: 20px;
+		margin-top: 15px;
+		margin-bottom: 5px;
+		color: var(--G2);
+	}
 	.title {
 		text-align: left;
 		padding-left: 20px;
 	}
 	.inline {
 		display: flex;
+		align-items: center;
 		justify-content: space-between;
 	}
 	.metrics {
@@ -285,5 +327,11 @@
 		margin-bottom: 2px;
 		border-radius: 5px;
 		width: fit-content;
+	}
+	.information-tooltip {
+		width: 24px;
+		height: 24px;
+		cursor: help;
+		fill: var(--G2);
 	}
 </style>

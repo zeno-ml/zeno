@@ -70,14 +70,3 @@ class ColorsProjectRequest(CamelModel):
 class EntryRequest(BaseModel):
     id: Union[int, str]
     columns: List[ZenoColumn] = []
-
-
-class SliceFinderRequest(BaseModel):
-    id: str
-    model: str
-    order_by: str
-    minimum_size: str
-    depth: str
-    columns: List[ZenoColumn] = []
-    model: str
-    column_name: str

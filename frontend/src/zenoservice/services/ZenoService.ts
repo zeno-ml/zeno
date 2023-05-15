@@ -4,24 +4,21 @@
 import type { ColorsProjectRequest } from "../models/ColorsProjectRequest";
 import type { EmbedProject2DRequest } from "../models/EmbedProject2DRequest";
 import type { EntryRequest } from "../models/EntryRequest";
-import type { FilterIds } from "../models/FilterIds";
-import type { FilterPredicateGroup } from "../models/FilterPredicateGroup";
+import type { GroupMetric } from "../models/GroupMetric";
 import type { HistogramBucket } from "../models/HistogramBucket";
 import type { HistogramRequest } from "../models/HistogramRequest";
-import type {
-	CombineMetricRequest,
-	MetricRequest,
-} from "../models/MetricRequest";
+import type { MetricRequest } from "../models/MetricRequest";
+import type { PlotRequest } from "../models/PlotRequest";
 import type { Points2D } from "../models/Points2D";
 import type { PointsColors } from "../models/PointsColors";
 import type { Report } from "../models/Report";
 import type { Slice } from "../models/Slice";
-import type { SliceFinderMetricReturn } from "../models/SliceFinderMetricReturn";
 import type { SliceFinderRequest } from "../models/SliceFinderRequest";
-import type { GroupMetric } from "../models/GroupMetric";
-import type { Tag, TagMetricKey } from "../models/Tag";
+import type { SliceFinderReturn } from "../models/SliceFinderReturn";
 import type { StringFilterRequest } from "../models/StringFilterRequest";
 import type { TableRequest } from "../models/TableRequest";
+import type { Tag } from "../models/Tag";
+import type { TagMetricKey } from "../models/TagMetricKey";
 import type { ZenoColumn } from "../models/ZenoColumn";
 import type { ZenoSettings } from "../models/ZenoSettings";
 import type { ZenoVariables } from "../models/ZenoVariables";
@@ -29,7 +26,6 @@ import type { ZenoVariables } from "../models/ZenoVariables";
 import type { CancelablePromise } from "../core/CancelablePromise";
 import { OpenAPI } from "../core/OpenAPI";
 import { request as __request } from "../core/request";
-import type { PlotRequest } from "../models/PlotRequest";
 
 export class ZenoService {
 	/**
@@ -122,60 +118,6 @@ export class ZenoService {
 		return __request(OpenAPI, {
 			method: "POST",
 			url: "/folders",
-			body: requestBody,
-			mediaType: "application/json",
-			errors: {
-				422: `Validation Error`,
-			},
-		});
-	}
-
-	// /**
-	//  * Set Tags
-	//  * @param requestBody
-	//  * @returns any Successful Response
-	//  * @throws ApiError
-	//  */
-	// public static setTags(requestBody: Array<string>): CancelablePromise<any> {
-	// 	return __request(OpenAPI, {
-	// 		method: "POST",
-	// 		url: "/tags",
-	// 		body: requestBody,
-	// 		mediaType: "application/json",
-	// 		errors: {
-	// 			422: `Validation Error`,
-	// 		},
-	// 	});
-	// }
-
-	/**
-	 * Create New Tag
-	 * @param requestBody
-	 * @returns any Successful Response
-	 * @throws ApiError
-	 */
-	public static createNewTag(requestBody: Tag): CancelablePromise<any> {
-		return __request(OpenAPI, {
-			method: "POST",
-			url: "/tag",
-			body: requestBody,
-			mediaType: "application/json",
-			errors: {
-				422: `Validation Error`,
-			},
-		});
-	}
-
-	/**
-	 * Delete Tag
-	 * @param requestBody
-	 * @returns any Successful Response
-	 * @throws ApiError
-	 */
-	public static deleteTag(requestBody: Array<string>): CancelablePromise<any> {
-		return __request(OpenAPI, {
-			method: "DELETE",
-			url: "/tag",
 			body: requestBody,
 			mediaType: "application/json",
 			errors: {
@@ -297,6 +239,42 @@ export class ZenoService {
 	}
 
 	/**
+	 * Create New Tag
+	 * @param requestBody
+	 * @returns any Successful Response
+	 * @throws ApiError
+	 */
+	public static createNewTag(requestBody: Tag): CancelablePromise<any> {
+		return __request(OpenAPI, {
+			method: "POST",
+			url: "/tag",
+			body: requestBody,
+			mediaType: "application/json",
+			errors: {
+				422: `Validation Error`,
+			},
+		});
+	}
+
+	/**
+	 * Delete Tag
+	 * @param requestBody
+	 * @returns any Successful Response
+	 * @throws ApiError
+	 */
+	public static deleteTag(requestBody: Array<string>): CancelablePromise<any> {
+		return __request(OpenAPI, {
+			method: "DELETE",
+			url: "/tag",
+			body: requestBody,
+			mediaType: "application/json",
+			errors: {
+				422: `Validation Error`,
+			},
+		});
+	}
+
+	/**
 	 * Create New Slice
 	 * @param requestBody
 	 * @returns any Successful Response
@@ -375,13 +353,13 @@ export class ZenoService {
 	}
 
 	/**
-	 * Get Metrics For Slices and Tags
+	 * Get Metrics For Slices And Tags
 	 * @param requestBody
 	 * @returns GroupMetric Successful Response
 	 * @throws ApiError
 	 */
 	public static getMetricsForSlicesAndTags(
-		requestBody: CombineMetricRequest
+		requestBody: MetricRequest
 	): CancelablePromise<Array<GroupMetric>> {
 		return __request(OpenAPI, {
 			method: "POST",
@@ -456,34 +434,22 @@ export class ZenoService {
 	}
 
 	/**
-	 * Project Find Available Slices
+	 * Run Slice Finder
 	 * @param requestBody
-	 * @returns SliceFinderMetricReturn Successful Response
+	 * @returns SliceFinderReturn Successful Response
 	 * @throws ApiError
 	 */
-	public static projectFindAvailableSlices(
+	public static runSliceFinder(
 		requestBody: SliceFinderRequest
-	): CancelablePromise<SliceFinderMetricReturn> {
+	): CancelablePromise<SliceFinderReturn> {
 		return __request(OpenAPI, {
 			method: "POST",
-			url: "/slice-finder-project",
+			url: "/slice-finder",
 			body: requestBody,
 			mediaType: "application/json",
 			errors: {
 				422: `Validation Error`,
 			},
-		});
-	}
-
-	/**
-	 * Get Columns With Summary
-	 * @returns any Successful Response
-	 * @throws ApiError
-	 */
-	public static getColumnsWithSummary(): CancelablePromise<any> {
-		return __request(OpenAPI, {
-			method: "GET",
-			url: "/get-columns-with-summary",
 		});
 	}
 

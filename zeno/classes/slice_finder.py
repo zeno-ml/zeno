@@ -1,9 +1,18 @@
 from typing import List
 
-from pydantic import BaseModel
+from zeno.classes.base import CamelModel, ZenoColumn
+from zeno.classes.slice import Slice
 
 
-class SliceFinderMetricReturn(BaseModel):
-    metric: float
-    list_of_trained_elements: List[object]
-    slices_of_interest: List[object]
+class SliceFinderRequest(CamelModel):
+    metric_column: ZenoColumn
+    columns: List[ZenoColumn]
+    order_by: str
+    minimum_size: int
+    depth: int
+
+
+class SliceFinderReturn(CamelModel):
+    slices: List[Slice]
+    metrics: List[float]
+    sizes: List[int]

@@ -1,173 +1,62 @@
-import secrets
+from typing import List
 
 import numpy as np
-from pandas.api.types import is_numeric_dtype
 from sliceline.slicefinder import Slicefinder
 
-from zeno.classes.base import ZenoColumnType
 from zeno.classes.slice import FilterPredicate, FilterPredicateGroup, Slice
+from zeno.classes.slice_finder import SliceFinderRequest, SliceFinderReturn
 
 
-def find_right_column(columns, name):
-    """Finds the right column given the df and zenocolumn.
-
-    Args:
-        columns: the list of all ZenoColumns.
-        name: the name that appears in a dataframe and can be a match for a ZenoColumn.
-    Returns the right column with the correct Zenocolumn name.
-    """
-    for i in range(0, len(columns)):
-        if columns[i].__str__() == name:
-            return columns[i]
-    return
-
-
-def find_right_column_name(columns, name):
-    """Finds the right column given the df and zenocolumn.
+def slice_finder(df, req: SliceFinderRequest):
+    """Return slices of data with high or low metric values.
 
     Args:
-        columns: the list of all ZenoColumns.
-        name: the name for a specific column.
-    Returns the dataframe column name associated with the Zeno column name.
-    """
-    for i in range(0, len(columns)):
-        if columns[i].name == name:
-            return columns[i].__str__()
-    return
+        df (DataFrame): Zeno DataFrame with all metadata.
+        req (SliceFinderRequest): Request with columns, metrics, and options.
 
-
-def get_column_name_with_summary(df, columns):
-    """Catering to the need to display column names with summary from frontend.
-    Only need to call once per lifecycle.
-
-    Args:
-        df: the full data frame from the backend.
-        columns: full list from ZenoColumn
-    Returns column names with a summary of minimum and maximum values.
-    """
-    column_summary_dict = dict()
-    updated_df = data_clean_for_columns(df, columns)
-    all_df_column_name = updated_df.columns.to_numpy()
-    for column in columns:
-        for df_column_name in all_df_column_name:
-            if column.__str__() == df_column_name:
-                if is_numeric_dtype(df[df_column_name]):
-                    column_summary_dict[column.name] = [
-                        (str)(df[df_column_name].min()),
-                        (str)(df[df_column_name].max()),
-                    ]
-                else:
-                    column_summary_dict[column.name] = (
-                        df[df_column_name].unique().tolist()
-                    )
-    return column_summary_dict
-
-
-def data_clean_for_columns(df, columns=[]):
-    updated_df = df.copy()
-    if len(columns) > 0:
-        excluded_types = [
-            ZenoColumnType.EMBEDDING,
-            ZenoColumnType.OUTPUT,
-            ZenoColumnType.METADATA,
-        ]
-        for column in columns:
-            if (
-                column.column_type in excluded_types
-                and column.__str__() in updated_df.columns
-            ):
-                updated_df = updated_df.drop(column.__str__(), axis=1)
-
-    updated_df = updated_df.drop(list(updated_df.filter(regex="id")), axis=1)
-    updated_df = updated_df.drop(list(updated_df.filter(regex="EMBEDDING")), axis=1)
-    updated_df = updated_df.drop(list(updated_df.filter(regex="POSTDISTILL")), axis=1)
-    updated_df = updated_df.drop(list(updated_df.filter(regex="OUTPUT")), axis=1)
-
-    return updated_df
-
-
-def slice_finder(df, req, zeno_options, metric_functions, columns):
-    """Returns found slices based on certain heruisitics.
-
-    Args:
-        df: the dataframe from backend.
-        req: the SliceFinderRequst with arguments
-        zeno_options: options for zeno software.
-        metric_functions: the metrics functions for filtering out data of interest
-        columns:
     Returns a SliceFinderMetricReturn Object.
     """
-    # setting up config important for the next steps
-    minimum_size = int(req.minimum_size)
 
-    # data cleaning
+    df = df[
+        list(set([str(col) for col in req.columns] + [str(req.metric_column)]))
+    ].dropna()
+    metric_col = np.array(df[str(req.metric_column)], dtype=float)
+    normalized_metric_col = (metric_col - np.min(metric_col)) / (
+        np.max(metric_col) - np.min(metric_col)
+    )
+    if req.order_by == "ascending":
+        normalized_metric_col = 1 - normalized_metric_col
 
-    updated_df = df.copy()
-
-    df_column_name = find_right_column_name(columns, req.column_name)
-    updated_df = data_clean_for_columns(updated_df)
-
-    all_categorical_data = updated_df.columns.tolist()
-
-    code_dict = dict()
-
-    for row_name in all_categorical_data:
-        target_list = updated_df[row_name].tolist()
-        name_list = list(set(target_list))
-        codes, uniques = updated_df[row_name].factorize(name_list)
-        code_dict[row_name] = uniques
-        updated_df[row_name] = codes
-
-    # load the correct error rate. If it's the general case, use the error
-    # rate itself. else, use the min_max normalized result to find the slices
-    # with highest count metrics passed from the frontend.
-    chosen_column_slice = updated_df[df_column_name]
-    normalized_column = (chosen_column_slice - np.min(chosen_column_slice)) / (
-        np.max(chosen_column_slice) - np.min(chosen_column_slice)
+    slice_finder = Slicefinder(alpha=0.1, k=10, max_l=req.depth, min_sup=0)
+    slice_finder.fit(
+        df[[str(col) for col in req.columns]].to_numpy(), normalized_metric_col
     )
 
-    normalized_column = np.array(normalized_column, dtype=float)
-    if req.order_by == "ascending":
-        normalized_column = 1 - normalized_column
-    errors = np.array(normalized_column, dtype=float)
-    # slice finder code logic
+    if slice_finder.top_slices_ is None:
+        return SliceFinderReturn(slices=[], metrics=[])
 
-    slice_finder = Slicefinder(alpha=0.99, k=minimum_size, max_l=(int)(req.depth))
-    slice_finder.fit(updated_df, errors)
-
-    # construct the top_slices_ into real slice objects
-
-    all_data_column = updated_df.columns.tolist()
-
-    slices_of_interest = []
-    for slice_name in slice_finder.top_slices_:
-        slice_name_result = "slicefinder-result-"
+    discovered_slices: List[Slice] = []
+    slice_metrics: List[float] = []
+    slice_sizes: List[int] = []
+    for sli_i, sli in enumerate(slice_finder.top_slices_):
         predicate_list = []
-        for i in range(0, len(slice_name)):
-            slice_predicate_half = slice_name[i]
-            if slice_predicate_half is not None:
-                if all_data_column[i] in code_dict:
-                    slice_predicate_half = code_dict[all_data_column[i]][
-                        (int)(slice_predicate_half)
-                    ]
-                zeno_column = find_right_column(columns, all_data_column[i])
+        # TODO: add the metric calculated by sliceline.
+        # slice_finder.top_slices_statistics_[] for slice_metrics and slice_sizes
+        slice_metrics.append(0)
+        for pred_i, sli_predicate in enumerate(sli):
+            if sli_predicate is not None:
                 join_val = "" if len(predicate_list) == 0 else "&"
                 predicate_list.append(
                     FilterPredicate(
-                        column=zeno_column,
+                        column=req.columns[pred_i],
                         operation="==",
-                        value=slice_predicate_half,
+                        value=sli_predicate,
                         join=join_val,
                     )
                 )
-                slice_name_result = (
-                    slice_name_result + (str)(slice_predicate_half) + "-"
-                )
-        slice_name_result = slice_name_result + (str)(secrets.token_hex(3))
-
-        slices_of_interest.append(
+        discovered_slices.append(
             Slice(
-                slice_name=slice_name_result,
+                slice_name="Slice " + str(sli_i),
                 folder="",
                 filter_predicates=FilterPredicateGroup(
                     predicates=predicate_list, join=""
@@ -175,8 +64,4 @@ def slice_finder(df, req, zeno_options, metric_functions, columns):
             )
         )
 
-    return {
-        "metric": slice_finder.average_error_,
-        "list_of_trained_elements": all_data_column,
-        "slices_of_interest": slices_of_interest,
-    }
+    return SliceFinderReturn(slices=discovered_slices, metrics=slice_metrics, sizes=slice_sizes)
