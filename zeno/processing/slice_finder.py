@@ -27,7 +27,7 @@ def slice_finder(df, req: SliceFinderRequest):
     if req.order_by == "ascending":
         normalized_metric_col = 1 - normalized_metric_col
 
-    slice_finder = Slicefinder(alpha=0.1, k=10, max_l=req.depth, min_sup=0)
+    slice_finder = Slicefinder(alpha=req.alpha, k=20, max_l=10, min_sup=10)
     slice_finder.fit(
         df[[str(col) for col in req.columns]].to_numpy(), normalized_metric_col
     )
@@ -40,9 +40,10 @@ def slice_finder(df, req: SliceFinderRequest):
     slice_sizes: List[int] = []
     for sli_i, sli in enumerate(slice_finder.top_slices_):
         predicate_list = []
-        # TODO: add the metric calculated by sliceline.
-        # slice_finder.top_slices_statistics_[] for slice_metrics and slice_sizes
-        slice_metrics.append(0)
+        slice_metrics.append(
+            slice_finder.top_slices_statistics_[sli_i]["slice_average_error"]
+        )
+        slice_sizes.append(slice_finder.top_slices_statistics_[sli_i]["slice_size"])
         for pred_i, sli_predicate in enumerate(sli):
             if sli_predicate is not None:
                 join_val = "" if len(predicate_list) == 0 else "&"
@@ -56,7 +57,7 @@ def slice_finder(df, req: SliceFinderRequest):
                 )
         discovered_slices.append(
             Slice(
-                slice_name="Slice " + str(sli_i),
+                slice_name="Algo-generated Slice " + str(sli_i),
                 folder="",
                 filter_predicates=FilterPredicateGroup(
                     predicates=predicate_list, join=""
@@ -64,4 +65,6 @@ def slice_finder(df, req: SliceFinderRequest):
             )
         )
 
-    return SliceFinderReturn(slices=discovered_slices, metrics=slice_metrics, sizes=slice_sizes)
+    return SliceFinderReturn(
+        slices=discovered_slices, metrics=slice_metrics, sizes=slice_sizes
+    )

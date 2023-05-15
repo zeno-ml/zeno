@@ -8,8 +8,8 @@ class SliceFinderRequest(CamelModel):
     metric_column: ZenoColumn
     columns: List[ZenoColumn]
     order_by: str
-    minimum_size: int
-    depth: int
+    alpha: float
+    minimum_supp: int
 
 
 class SliceFinderReturn(CamelModel):

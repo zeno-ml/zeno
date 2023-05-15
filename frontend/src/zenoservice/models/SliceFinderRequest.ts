@@ -8,6 +8,6 @@ export type SliceFinderRequest = {
 	metricColumn: ZenoColumn;
 	columns: Array<ZenoColumn>;
 	orderBy: string;
-	minimumSize: number;
-	depth: number;
+	alpha: number;
+	minimumSupp: number;
 };

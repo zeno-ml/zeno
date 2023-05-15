@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { mdiClose, mdiInformationOutline } from "@mdi/js";
+	import { mdiClose, mdiInformationOutline, mdiPlus } from "@mdi/js";
 	import Button from "@smui/button";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Paper from "@smui/paper";
-	import Select, { Option } from "@smui/select";
 	import { tooltip } from "@svelte-plugins/tooltips";
 	import Svelecte from "svelecte";
 	import { fade } from "svelte/transition";
@@ -23,6 +22,7 @@
 		ZenoService,
 		type SliceFinderReturn,
 	} from "../../zenoservice";
+	import SliceDetails from "../../general/SliceDetails.svelte";
 
 	// Columns to create candidate slices accross
 	// TODO: Support discretized continuous columns.
@@ -52,14 +52,17 @@
 	);
 	let metricColumn = metricColumns.length > 0 ? metricColumns[0] : undefined;
 
-	// TODO: make options for `alpha`, `min_supp`. Maybe use Svelecte.
-	let minimumSizes = ["1", "2", "3", "4", "5", "6", "7"];
-	let minimumSize = "1";
-	let maxLs = ["4", "5", "6", "7", "8"];
-	let maxL = "5";
+	let alphas = ["0.5", "0.75", "0.9", "0.95", "0.99", "0.999"];
+	let alpha = "0.95";
+	let minimumSupps = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+	let minimumSupp = "1";
 	let orderByOptions = ["ascending", "descending"];
 	let orderBy = "ascending";
-	let sliceFinderReturn: SliceFinderReturn;
+	let sliceFinderReturn = {
+		slices: [],
+		metrics: [],
+		sizes: [],
+	} as SliceFinderReturn;
 
 	$: sliceFinderMessage = "";
 
@@ -77,16 +80,27 @@
 	}
 
 	export async function activateSliceFinder() {
+		if (
+			searchColumns === null ||
+			metricColumn === null ||
+			orderBy === null ||
+			minimumSupp === null ||
+			alpha === null
+		) {
+			sliceFinderMessage = "Error! Please make a valid choice";
+			return;
+		}
+
 		sliceFinderMessage = "Generating Slices...";
 		sliceFinderReturn = await ZenoService.runSliceFinder({
 			columns: searchColumns,
 			metricColumn: metricColumn,
 			orderBy: orderBy,
-			minimumSize: parseInt(minimumSize),
-			depth: parseInt(maxL),
+			minimumSupp: parseInt(minimumSupp),
+			alpha: parseFloat(alpha),
 		});
 
-		// TODO: render slices using return
+		console.log(sliceFinderReturn);
 
 		sliceFinderMessage = "";
 	}
@@ -96,57 +110,6 @@
 			$showSliceFinder = false;
 		}
 	}
-
-	// function slice_data_generator(
-	// 	predicateList = [],
-	// 	slices_of_interest = [],
-	// 	all_metrics = []
-	// ) {
-	// 	// demo page
-	// 	get_all_valid_columns();
-	// 	slice_data = [];
-	// 	if (predicateList.length === 0) {
-	// 		predicateList = [
-	// 			"Welcome to the Slice Finder Screen! Click on the Button on the upperright corner to begin!",
-	// 		];
-	// 		let predicate = [];
-	// 		predicate.push(predicateList[0]);
-	// 		let data = {
-	// 			predicate: predicate,
-	// 			slice_size: 0,
-	// 			accuracy_rate: 0,
-	// 			index: 0,
-	// 		};
-	// 		slice_data.push(data);
-	// 	} else {
-	// 		slice_data = [];
-	// 		slices_of_interest.forEach((element, i) => {
-	// 			let predicate = [];
-	// 			let predicates_store = element.filterPredicates.predicates;
-	// 			for (let k = 0; k < predicates_store.length; k++) {
-	// 				predicate.push(
-	// 					predicates_store[k].column.name +
-	// 						predicates_store[k].operation +
-	// 						predicates_store[k].value
-	// 				);
-	// 			}
-	// 			let data = {
-	// 				predicate: predicate,
-	// 				slice_size: all_metrics[i][0].size,
-	// 				accuracy_rate: all_metrics[i][0].metric,
-	// 				index: i,
-	// 			};
-	// 			slice_data.push(data);
-	// 		});
-
-	// 		if (orderBy === "descending") {
-	// 			slice_data.reverse();
-	// 		}
-	// 	}
-	// }
-
-	// get_all_valid_columns();
-	// slice_data_generator();
 </script>
 
 <svelte:window on:keydown={submit} />
@@ -183,6 +146,7 @@
 			</IconButton>
 		</div>
 		<div class="metrics">
+			<div class="options-header">Metric Column</div>
 			<Svelecte
 				style="margin-left: 20px; margin-right: 20px; flex:none;"
 				bind:value={metricColumn}
@@ -191,41 +155,34 @@
 				labelField={"name"}
 				options={metricColumns}
 				placeholder="Metric Column" />
-			<Select
-				class="select"
-				bind:value={minimumSize}
-				label="Minimum Size"
-				style="width: 170px">
-				{#each minimumSizes as m}
-					<Option value={m}>{m}</Option>
-				{/each}
-			</Select>
-			<Select
-				class="select"
-				bind:value={maxL}
-				label="Max Lattice Level"
-				style="width: 170px">
-				{#each maxLs as m}
-					<Option value={m}>{m}</Option>
-				{/each}
-			</Select>
-			<Select
-				class="select"
+			<div class="options-header">Alpha</div>
+			<Svelecte
+				style="margin-left: 20px; margin-right: 20px; flex:none;"
+				bind:value={alpha}
+				valueField={"0.95"}
+				labelField={"0.95"}
+				options={alphas}
+				placeholder="Alpha" />
+			<div class="options-header">Minimum Support Threshold</div>
+			<Svelecte
+				style="margin-left: 20px; margin-right: 20px; flex:none;"
+				bind:value={minimumSupp}
+				label="Minimum Support Threshold"
+				options={minimumSupps}
+				placeholder="Minimum Support Threshold" />
+			<div class="options-header">Order By</div>
+			<Svelecte
+				style="margin-left: 20px; margin-right: 20px; flex:none;"
 				bind:value={orderBy}
 				label="Order By"
-				style="width: 170px">
-				{#each orderByOptions as m}
-					<Option value={m}>{m}</Option>
-				{/each}
-			</Select>
+				options={orderByOptions}
+				placeholder="Order By" />
 
 			<div class="options-header">Model</div>
 			<Svelecte
 				style="margin-left: 20px; margin-right: 20px; flex:none;"
 				bind:value={searchColumns}
 				valueAsObject={true}
-				valueField={"name"}
-				labelField={"name"}
 				options={searchColumnOptions}
 				multiple={true}
 				placeholder="Slicing Columns" />
@@ -233,34 +190,26 @@
 			<Button on:click={() => activateSliceFinder()}>Generate Slices</Button>
 			<span id="generate-slices">{sliceFinderMessage}</span>
 
-			<!-- {#each slice_data as element}
+			{#each sliceFinderReturn.slices as element, idx}
 				<div class="allSlices">
-					
-					<SliceDetails slice.filterGroup />
-					{#each element.predicate as pred}
-						<Chip bind:chip={pred} class="label meta-chip"
-							><Label>
-								{pred}
-							</Label></Chip>
-					{/each}
-					<span>
-						<IconButton
-							class="rightElement"
-							style="margin-top:-6px;"
-							on:click={() => addSliceAtIndex(element.index)}>
-							<Icon component={Svg} viewBox="0 0 24 24">
-								<path fill="#6a1b9a" d={mdiPlus} />
-							</Icon>
-						</IconButton>
+					<span style="display: inline-block;">
+						<SliceDetails predicateGroup={element.filterPredicates} />
 					</span>
+					<IconButton
+						class="rightElement"
+						style="margin-top:-6px;"
+						on:click={() => addSliceAtIndex(idx)}>
+						<Icon component={Svg} viewBox="0 0 24 24">
+							<path fill="#6a1b9a" d={mdiPlus} />
+						</Icon>
+					</IconButton>
 					<span class="rightElement" style="margin-top:10px;color:gray;"
-						>{"(" + element.slice_size + ")"}</span>
+						>{"(" + sliceFinderReturn.sizes[idx] + ")"}</span>
 					<span class="rightElement" style="margin-top:10px;"
-						>{Math.round(element.accuracy_rate)}</span>
+						>{sliceFinderReturn.metrics[idx].toFixed(3)}</span>
 				</div>
-			{/each} -->
-		</div>
-	</Paper>
+			{/each}
+		</div></Paper>
 </div>
 
 <style>
