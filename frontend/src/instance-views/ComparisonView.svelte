@@ -3,6 +3,7 @@
 	import { Pagination } from "@smui/data-table";
 	import IconButton from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
+	import Svelecte from "svelecte";
 	import { tick } from "svelte";
 	import { getFilteredTable } from "../api/table";
 	import {
@@ -19,7 +20,7 @@
 		tagIds,
 	} from "../stores";
 	import { columnHash } from "../util/util";
-	import { ZenoColumnType } from "../zenoservice";
+	import { MetadataType, ZenoColumnType } from "../zenoservice";
 	import type { ViewRenderFunction } from "./instance-views";
 
 	export let currentResult;
@@ -29,6 +30,14 @@
 	let tables = {};
 	let viewDivs = {};
 	let instanceContainer;
+	let columnHeader = [
+		$status.completeColumns.filter(
+			(c) =>
+				(c.model === "" || c.model === $model) &&
+				(c.columnType === ZenoColumnType.PREDISTILL ||
+					c.columnType === ZenoColumnType.POSTDISTILL)
+		)[0],
+	];
 
 	let currentPage = 0;
 	let end = 0;
@@ -147,12 +156,33 @@
 	}
 </script>
 
+<Svelecte
+	bind:value={columnHeader}
+	placeholder={"Column"}
+	valueAsObject
+	valueField={"name"}
+	multiple
+	options={$status.completeColumns.filter(
+		(c) =>
+			(c.model === "" || c.model === $model) &&
+			(c.columnType === ZenoColumnType.PREDISTILL ||
+				c.columnType === ZenoColumnType.POSTDISTILL)
+	)}
+	closeAfterSelect />
+
 <div class="table-container" bind:this={instanceContainer}>
-	{#if tables[$model]}
+	{#if tables[$model] && tables[$comparisonModels[0]]}
 		<table>
 			<thead>
 				{#each [$model, ...$comparisonModels] as mod}
 					<th>{mod}</th>
+				{/each}
+				{#each columnHeader as header}
+					<th>
+						<div class="inline-header">
+							{header.name}
+						</div>
+					</th>
 				{/each}
 			</thead>
 			<tbody>
@@ -165,6 +195,19 @@
 								</td>
 							{/if}
 						{/each}
+						<!-- {#each columnHeader as header}
+							{@const val = (mod) => {
+								let newHeader = header;
+								newHeader.model =
+									newHeader.columnType === ZenoColumnType.POSTDISTILL
+										? mod
+										: "";
+								return newHeader.metadataType === MetadataType.CONTINUOUS
+									? tables[mod][rowId][columnHash(newHeader)].toFixed(2)
+									: tables[mod][rowId][columnHash(newHeader)];
+							}}
+							<td>{val($model)} / {val($comparisonModels[0])}</td>
+						{/each} -->
 					</tr>
 				{/each}</tbody>
 		</table>
@@ -223,7 +266,7 @@
 		text-align: left;
 		border-bottom: 1px solid var(--G5);
 		padding-bottom: 5px;
-		top: 2px;
+		top: 0;
 		left: 0;
 		position: sticky;
 		background-color: var(--G6);
@@ -233,8 +276,9 @@
 		font-weight: 600;
 	}
 	.table-container {
-		height: calc(100vh - 175px);
-		width: calc(100vw - 460px);
+		max-width: calc(100vw - 440px);
+		height: calc(100vh - 170px);
+		max-height: calc(100vh - 210px);
 		overflow: scroll;
 	}
 </style>

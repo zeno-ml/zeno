@@ -5,29 +5,22 @@
 	import Dialog, { Actions, Content, InitialFocus, Title } from "@smui/dialog";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Paper from "@smui/paper";
-	import { deleteSlice, getMetricsForSlices } from "../../api/slice";
+	import { deleteSlice } from "../../api/slice";
 	import SliceDetails from "../../general/SliceDetails.svelte";
 	import SliceCellResult from "./SliceCellResult.svelte";
 	import {
-		metric,
-		model,
 		reports,
 		selections,
 		showNewSlice,
 		sliceToEdit,
 		slices,
-		status,
-		comparisonModels,
 	} from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
-	import { ZenoService, type MetricKey, type Slice } from "../../zenoservice";
+	import { ZenoService, type Slice } from "../../zenoservice";
 
 	export let slice: Slice;
 	export let inFolder = false;
 	export let compare;
-
-	let result;
-	let resultCompare;
 
 	let confirmDelete = false;
 	let relatedReports = 0;
