@@ -3,9 +3,9 @@
 		mdiBee,
 		mdiChartBar,
 		mdiChartLine,
-		mdiTable,
 		mdiDotsVertical,
 		mdiRadar,
+		mdiTable,
 		mdiViewGrid,
 	} from "@mdi/js";
 
@@ -14,8 +14,8 @@
 	import IconButton from "@smui/icon-button";
 	import Paper, { Content } from "@smui/paper";
 	import { reports } from "../stores";
-	import { updateTab } from "../util/util";
 	import { clickOutside } from "../util/clickOutside";
+	import { updateTab } from "../util/util";
 	import { ChartType } from "../zenoservice";
 
 	export let report;
@@ -67,22 +67,6 @@
 									e.stopPropagation();
 									showOptions = false;
 									reports.update((reps) => {
-										reps.splice(reportIndex, 1);
-										return reps;
-									});
-								}}>
-								<Icon style="font-size: 20px;" class="material-icons"
-									>delete_outline</Icon
-								>&nbsp;
-								<span>Remove</span>
-							</div>
-							<div
-								class="option"
-								on:keydown={() => ({})}
-								on:click={(e) => {
-									e.stopPropagation();
-									showOptions = false;
-									reports.update((reps) => {
 										reps.push({
 											name: "Copy of " + report.name,
 											type: report.type,
@@ -98,6 +82,22 @@
 									>content_copy</Icon
 								>&nbsp;
 								<span>Make a copy</span>
+							</div>
+							<div
+								class="option"
+								on:keydown={() => ({})}
+								on:click={(e) => {
+									e.stopPropagation();
+									showOptions = false;
+									reports.update((reps) => {
+										reps.splice(reportIndex, 1);
+										return reps;
+									});
+								}}>
+								<Icon style="font-size: 20px;" class="material-icons"
+									>delete_outline</Icon
+								>&nbsp;
+								<span>Remove</span>
 							</div>
 						</Content>
 					</Paper>
