@@ -158,10 +158,8 @@
 				<div class="options-header">Search Columns</div>
 				<Svelecte
 					style="margin-right: 5px;"
-					bind:value={searchColumns}
+					bind:readSelection={searchColumns}
 					valueAsObject={true}
-					valueField={"name"}
-					labelField={"name"}
 					options={searchColumnOptions}
 					multiple={true}
 					placeholder="Slicing Columns" />
@@ -181,7 +179,6 @@
 					style="margin-right: 5px; width: 100px"
 					bind:value={minimumSuppIdx}
 					options={minimumSupps}
-					label="Minimum Support Threshold"
 					placeholder="Minimum Support Threshold" />
 			</div>
 			<div>
@@ -190,7 +187,6 @@
 					style="width: 120px; margin-right: 20px"
 					bind:value={orderByIdx}
 					options={orderByOptions}
-					label="Order By"
 					placeholder="Order By" />
 			</div>
 		</div>

@@ -100,11 +100,9 @@ class MetricReturn(BaseModel):
 
     Args:
         metric (float): Average metric over subset of data
-        variance (float): Variance of metric over subset of data
     """
 
     metric: float
-    variance: Union[List[float], None] = None
 
     class Config:
         arbitrary_types_allowed = True
