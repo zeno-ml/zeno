@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "zenoml"
-version = "0.5.2"
+version = "0.5.3"
 description = "Interactive Evaluation Framework for Machine Learning"
 license = "MIT"
 authors = ["Ángel Alexander Cabrera <alex.cabrera@gmail.com>"]
