@@ -3,11 +3,13 @@
 	import MetadataPanel from "./metadata/MetadataPanel.svelte";
 	import NewFolderPopup from "./metadata/popups/NewFolderPopup.svelte";
 	import NewSlicePopup from "./metadata/popups/NewSlicePopup.svelte";
+	import SliceFinderPopup from "./metadata/popups/SliceFinderPopup.svelte";
 	import NewTagPopup from "./metadata/popups/NewTagPopup.svelte";
 	import {
 		ready,
 		showNewFolder,
 		showNewSlice,
+		showSliceFinder,
 		showNewTag,
 		status,
 	} from "./stores";
@@ -20,6 +22,9 @@
 	{/if}
 	{#if $showNewFolder}
 		<NewFolderPopup />
+	{/if}
+	{#if $showSliceFinder}
+		<SliceFinderPopup />
 	{/if}
 	{#if $showNewTag}
 		<NewTagPopup />

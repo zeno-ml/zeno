@@ -100,11 +100,9 @@ class MetricReturn(BaseModel):
 
     Args:
         metric (float): Average metric over subset of data
-        variance (float): Variance of metric over subset of data
     """
 
     metric: float
-    variance: Union[float, None] = None
 
     class Config:
         arbitrary_types_allowed = True
@@ -150,7 +148,7 @@ def metric(func: Callable[[DataFrame, ZenoOptions], MetricReturn]):
     Args:
         func (Callable[[DataFrame, ZenoOptions], MetricReturn]):
             A metric function that takes a DataFrame and ZenoOptions and
-            returns a MetricReturn with an average metric value and optional variance.
+            returns a MetricReturn with an average metric value and optional error rate.
     """
 
     @functools.wraps(func)

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import {
+		mdiCreationOutline,
 		mdiFolderPlusOutline,
 		mdiInformationOutline,
 		mdiPlus,
@@ -36,6 +37,7 @@
 		settings,
 		showNewFolder,
 		showNewSlice,
+		showSliceFinder,
 		showNewTag,
 		sliceToEdit,
 		slices,
@@ -329,6 +331,22 @@
 		<div class="inline">
 			<div
 				use:tooltip={{
+					content: "Discover underperforming slices.",
+					position: "bottom",
+					theme: "zeno-tooltip",
+				}}>
+				<IconButton
+					on:click={() => {
+						showNewFolder.set(false);
+						showSliceFinder.update((c) => !c);
+					}}>
+					<Icon component={Svg} viewBox="0 0 24 24">
+						<path fill="black" d={mdiCreationOutline} />
+					</Icon>
+				</IconButton>
+			</div>
+			<div
+				use:tooltip={{
 					content: "Create a new folder.",
 					position: "left",
 					theme: "zeno-tooltip",
@@ -337,6 +355,7 @@
 					on:click={() => {
 						showNewSlice.set(false);
 						showNewFolder.update((b) => !b);
+						showSliceFinder.set(false);
 					}}>
 					<Icon component={Svg} viewBox="0 0 24 24">
 						<path fill="var(--G1)" d={mdiFolderPlusOutline} />
@@ -354,6 +373,7 @@
 						sliceToEdit.set(undefined);
 						showNewSlice.update((d) => !d);
 						showNewFolder.set(false);
+						showSliceFinder.set(false);
 					}}>
 					<Icon component={Svg} viewBox="0 0 24 24">
 						{#if $selectionPredicates.predicates.length > 0}
@@ -569,13 +589,6 @@
 		align-items: center;
 		padding-bottom: 10px;
 		padding-top: 5px;
-	}
-	/* I don't see where this is used, maybe delete? */
-	.cell {
-		border: 0.5px solid var(--G5);
-		padding: 10px;
-		min-width: 400px;
-		width: 400px;
 	}
 	.inline {
 		display: flex;

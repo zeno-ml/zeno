@@ -9,9 +9,3 @@ export type Tag = {
 	folder: string;
 	selectionIds: FilterIds;
 };
-
-export type TagMetricKey = {
-	tag: Tag;
-	model: string;
-	metric: string;
-};
