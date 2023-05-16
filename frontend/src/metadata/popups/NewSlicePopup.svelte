@@ -15,6 +15,7 @@
 	let folder = "";
 	let predicateGroup: FilterPredicateGroup = { predicates: [], join: "" };
 	let nameInput;
+	let paperHeight;
 
 	// Track original settings when editing.
 	let originalName = "";
@@ -159,7 +160,6 @@
 			createSlice();
 		}
 	}
-	let paperHeight;
 </script>
 
 <svelte:window on:keydown={submit} />

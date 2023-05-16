@@ -7,6 +7,7 @@
 	import { tooltip } from "@svelte-plugins/tooltips";
 	import Svelecte from "svelecte";
 	import { fade } from "svelte/transition";
+	import SliceDetails from "../../general/SliceDetails.svelte";
 	import {
 		model,
 		showNewSlice,
@@ -22,7 +23,6 @@
 		ZenoService,
 		type SliceFinderReturn,
 	} from "../../zenoservice";
-	import SliceDetails from "../../general/SliceDetails.svelte";
 
 	// Columns to create candidate slices accross
 	// TODO: Support discretized continuous columns.
@@ -36,8 +36,7 @@
 					d.columnType === ZenoColumnType.POSTDISTILL) &&
 					d.model === $model))
 	);
-	let searchColumns =
-		searchColumnOptions.length > 0 ? searchColumnOptions : undefined;
+	let searchColumns = searchColumnOptions.length > 0 ? searchColumnOptions : [];
 
 	// Column to use as the metric to compare slices.
 	let metricColumns = $status.completeColumns.filter(
@@ -50,18 +49,20 @@
 					d.columnType === ZenoColumnType.POSTDISTILL) &&
 					d.model === $model))
 	);
-	let metricColumn = metricColumns.length > 0 ? metricColumns[0] : undefined;
+	let metricColumn = metricColumns.length > 0 ? metricColumns[0] : null;
 
 	let alphas = ["0.5", "0.75", "0.9", "0.95", "0.99", "0.999"];
-	let alpha = "0.95";
+	let alphaIdx = 3;
 	let minimumSupps = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
-	let minimumSupp = "1";
-	let orderByOptions = ["ascending", "descending"];
-	let orderBy = "ascending";
+	let minimumSuppIdx = 0;
+	let orderByOptions = ["descending", "ascending"];
+	let orderByIdx = 0;
+
 	let sliceFinderReturn = {
 		slices: [],
 		metrics: [],
 		sizes: [],
+		overallMetric: null,
 	} as SliceFinderReturn;
 
 	$: sliceFinderMessage = "";
@@ -80,14 +81,9 @@
 	}
 
 	export async function activateSliceFinder() {
-		if (
-			searchColumns === null ||
-			metricColumn === null ||
-			orderBy === null ||
-			minimumSupp === null ||
-			alpha === null
-		) {
-			sliceFinderMessage = "Error! Please make a valid choice";
+		if (searchColumns.length === 0 || metricColumn === null) {
+			sliceFinderMessage =
+				"Must have a metric column and at least one search column.";
 			return;
 		}
 
@@ -95,14 +91,16 @@
 		sliceFinderReturn = await ZenoService.runSliceFinder({
 			columns: searchColumns,
 			metricColumn: metricColumn,
-			orderBy: orderBy,
-			minimumSupp: parseInt(minimumSupp),
-			alpha: parseFloat(alpha),
+			orderBy: orderByOptions[orderByIdx],
+			minimumSupp: parseInt(minimumSupps[minimumSuppIdx]),
+			alpha: parseFloat(alphas[alphaIdx]),
 		});
 
-		console.log(sliceFinderReturn);
-
-		sliceFinderMessage = "";
+		if (sliceFinderReturn.slices.length === 0) {
+			sliceFinderMessage = "No slices found, try increasing alpha";
+		} else {
+			sliceFinderMessage = "";
+		}
 	}
 
 	function submit(e) {
@@ -118,12 +116,11 @@
 {/if}
 <div
 	id="slice-finder-container"
-	style="justify-content: flex-start;"
 	transition:fade
 	use:clickOutside
 	on:click_outside={() => ($showSliceFinder = false)}>
 	<Paper elevation={7}>
-		<div class="inline">
+		<div class="inline-justify">
 			<div class="inline">
 				<h4 class="title">Slice Finder</h4>
 				<div
@@ -141,87 +138,124 @@
 			</div>
 			<IconButton on:click={() => ($showSliceFinder = false)}>
 				<Icon component={Svg} viewBox="0 0 24 24">
-					<path fill="#6a1b9a" d={mdiClose} />
+					<path d={mdiClose} />
 				</Icon>
 			</IconButton>
 		</div>
-		<div class="metrics">
-			<div class="options-header">Metric Column</div>
-			<Svelecte
-				style="margin-left: 20px; margin-right: 20px; flex:none;"
-				bind:value={metricColumn}
-				valueAsObject={true}
-				valueField={"name"}
-				labelField={"name"}
-				options={metricColumns}
-				placeholder="Metric Column" />
-			<div class="options-header">Alpha</div>
-			<Svelecte
-				style="margin-left: 20px; margin-right: 20px; flex:none;"
-				bind:value={alpha}
-				valueField={"0.95"}
-				labelField={"0.95"}
-				options={alphas}
-				placeholder="Alpha" />
-			<div class="options-header">Minimum Support Threshold</div>
-			<Svelecte
-				style="margin-left: 20px; margin-right: 20px; flex:none;"
-				bind:value={minimumSupp}
-				label="Minimum Support Threshold"
-				options={minimumSupps}
-				placeholder="Minimum Support Threshold" />
-			<div class="options-header">Order By</div>
-			<Svelecte
-				style="margin-left: 20px; margin-right: 20px; flex:none;"
-				bind:value={orderBy}
-				label="Order By"
-				options={orderByOptions}
-				placeholder="Order By" />
+		<div class="inline">
+			<div style:margin-left={"20px"}>
+				<div class="options-header">Metric Column</div>
+				<Svelecte
+					style="margin-right: 5px; width: 125px"
+					bind:value={metricColumn}
+					valueAsObject={true}
+					valueField={"name"}
+					labelField={"name"}
+					options={metricColumns}
+					placeholder="Metric Column" />
+			</div>
+			<div style:width="100%">
+				<div class="options-header">Search Columns</div>
+				<Svelecte
+					style="margin-right: 5px;"
+					bind:value={searchColumns}
+					valueAsObject={true}
+					valueField={"name"}
+					labelField={"name"}
+					options={searchColumnOptions}
+					multiple={true}
+					placeholder="Slicing Columns" />
+			</div>
+			<div>
+				<div class="options-header">Alpha</div>
+				<Svelecte
+					style="margin-right: 5px; width: 80px"
+					bind:value={alphaIdx}
+					options={alphas}
+					required={true}
+					placeholder="Alpha" />
+			</div>
+			<div>
+				<div class="options-header">Min. Support</div>
+				<Svelecte
+					style="margin-right: 5px; width: 100px"
+					bind:value={minimumSuppIdx}
+					options={minimumSupps}
+					label="Minimum Support Threshold"
+					placeholder="Minimum Support Threshold" />
+			</div>
+			<div>
+				<div class="options-header">Order By</div>
+				<Svelecte
+					style="width: 120px; margin-right: 20px"
+					bind:value={orderByIdx}
+					options={orderByOptions}
+					label="Order By"
+					placeholder="Order By" />
+			</div>
+		</div>
 
-			<div class="options-header">Model</div>
-			<Svelecte
-				style="margin-left: 20px; margin-right: 20px; flex:none;"
-				bind:value={searchColumns}
-				valueAsObject={true}
-				options={searchColumnOptions}
-				multiple={true}
-				placeholder="Slicing Columns" />
-
-			<Button on:click={() => activateSliceFinder()}>Generate Slices</Button>
+		<div id="generation">
+			<Button variant="outlined" on:click={() => activateSliceFinder()}>
+				Generate Slices
+			</Button>
 			<span id="generate-slices">{sliceFinderMessage}</span>
+			<span id="overall">
+				{sliceFinderReturn.overallMetric !== null
+					? "Average: " + sliceFinderReturn.overallMetric.toFixed(3)
+					: ""}
+			</span>
+		</div>
 
-			{#each sliceFinderReturn.slices as element, idx}
-				<div class="allSlices">
-					<span style="display: inline-block;">
-						<SliceDetails predicateGroup={element.filterPredicates} />
+		{#each sliceFinderReturn.slices as element, idx}
+			<div class="slice">
+				<span style="display: inline-block;">
+					<SliceDetails predicateGroup={element.filterPredicates} />
+				</span>
+				<div class="inline">
+					<span style="margin-right: 10px; margin-left: 10px">
+						{sliceFinderReturn.metrics[idx].toFixed(3)}
 					</span>
-					<IconButton
-						class="rightElement"
-						style="margin-top:-6px;"
-						on:click={() => addSliceAtIndex(idx)}>
+					<span style="color:gray; font-style: italic">
+						{"(" + sliceFinderReturn.sizes[idx] + ")"}
+					</span>
+					<IconButton on:click={() => addSliceAtIndex(idx)}>
 						<Icon component={Svg} viewBox="0 0 24 24">
 							<path fill="#6a1b9a" d={mdiPlus} />
 						</Icon>
 					</IconButton>
-					<span class="rightElement" style="margin-top:10px;color:gray;"
-						>{"(" + sliceFinderReturn.sizes[idx] + ")"}</span>
-					<span class="rightElement" style="margin-top:10px;"
-						>{sliceFinderReturn.metrics[idx].toFixed(3)}</span>
 				</div>
-			{/each}
-		</div></Paper>
+			</div>
+		{/each}
+	</Paper>
 </div>
 
 <style>
+	#generate-slices {
+		margin-left: 10px;
+	}
 	#slice-finder-container {
+		max-height: calc(100vh - 100px);
+		justify-content: flex-start;
+		overflow: scroll;
 		position: fixed;
 		top: 8vh;
 		margin-left: 10vw;
 		z-index: 10;
 		min-width: 70vw;
 	}
-	.options-header {
+	#overall {
+		position: absolute;
+		right: 25px;
+	}
+	#generation {
 		margin-left: 20px;
+		margin-top: 20px;
+		margin-bottom: 20px;
+		display: flex;
+		align-items: center;
+	}
+	.options-header {
 		margin-top: 15px;
 		margin-bottom: 5px;
 		color: var(--G2);
@@ -229,18 +263,17 @@
 	.title {
 		text-align: left;
 		padding-left: 20px;
+		margin-bottom: 0px;
+		margin-top: 0px;
 	}
 	.inline {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
 	}
-	.metrics {
+	.inline-justify {
+		display: flex;
+		align-items: center;
 		justify-content: space-between;
-	}
-	.metrics :global(.select) {
-		margin-left: 20px;
-		padding-right: 15px;
 	}
 	.coverage {
 		position: fixed;
@@ -251,31 +284,12 @@
 		margin-top: -100vh;
 		z-index: 9;
 	}
-	.metrics :global(.label) {
-		background-color: rgba(230, 222, 237, 1);
-		color: black;
+	.slice {
 		margin-left: 20px;
-	}
-	.metrics :global(.rightElement) {
-		align-items: baseline;
-		float: right;
-		margin-right: 25px;
-	}
-	.allSlices {
+		display: flex;
 		margin-top: 10px;
 		margin-bottom: 10px;
 		justify-content: space-between;
-	}
-	.metrics :global(.meta-chip) {
-		padding: 5px;
-		background: rgba(230, 222, 237, 1);
-		border: 1px solid #e8e8e8;
-		margin-left: 10px;
-		margin-right: 10px;
-		margin-top: 2px;
-		margin-bottom: 2px;
-		border-radius: 5px;
-		width: fit-content;
 	}
 	.information-tooltip {
 		width: 24px;

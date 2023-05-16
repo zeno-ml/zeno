@@ -16,3 +16,4 @@ class SliceFinderReturn(CamelModel):
     slices: List[Slice]
     metrics: List[float]
     sizes: List[int]
+    overall_metric: float
