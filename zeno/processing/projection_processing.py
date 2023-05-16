@@ -2,7 +2,6 @@ from typing import List
 
 import numpy as np
 import pandas as pd
-from cachetools import cached
 from sklearn import preprocessing
 
 from zeno.classes.base import MetadataType, ZenoColumn, ZenoColumnType
@@ -20,7 +19,9 @@ def check_embed_exists(df: pd.DataFrame, model: str):
     return exists and not df[str(embed_column)].isna().any()
 
 
-@cached(cache={}, key=lambda _, model: model)
+cached_projections = {}
+
+
 def run_tsne(df: pd.DataFrame, model: str) -> np.ndarray:
     """Project embedding into 2D space using t-SNE.
 
@@ -31,6 +32,9 @@ def run_tsne(df: pd.DataFrame, model: str) -> np.ndarray:
     Returns:
         np.ndarray: 2D projection of the embedding.
     """
+
+    if model in cached_projections:
+        return cached_projections[model]
 
     from openTSNE import TSNE
 
@@ -45,6 +49,8 @@ def run_tsne(df: pd.DataFrame, model: str) -> np.ndarray:
     default_iterations = 400
     tsne = TSNE(n_jobs=all_available_processors, n_iter=default_iterations)
     projection = tsne.fit(embed)
+
+    cached_projections[model] = projection
 
     return projection
 
