@@ -25,6 +25,7 @@
 		metric,
 		metricRange,
 		model,
+		comparisonModels,
 		requestingHistogramCounts,
 		selectionIds,
 		selectionPredicates,
@@ -325,11 +326,14 @@
 		<div class="inline">
 			<SliceCellResult
 				compare={$tab === "comparison"}
-				slice={{
-					sliceName: "",
-					folder: "",
-					filterPredicates: { predicates: [], join: "" },
-				}} />
+				slice={undefined}
+				model={$model} />
+			{#if $tab === "comparison"}
+				<SliceCellResult
+					compare={true}
+					slice={undefined}
+					model={$comparisonModels[0]} />
+			{/if}
 			<div style:width="36px" />
 		</div>
 	</div>

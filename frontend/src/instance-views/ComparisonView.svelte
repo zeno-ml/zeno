@@ -20,7 +20,7 @@
 		tagIds,
 	} from "../stores";
 	import { columnHash } from "../util/util";
-	import { MetadataType, ZenoColumnType } from "../zenoservice";
+	import { ZenoColumnType } from "../zenoservice";
 	import type { ViewRenderFunction } from "./instance-views";
 
 	export let currentResult;

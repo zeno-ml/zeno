@@ -5,7 +5,7 @@
 	import Dialog, { Actions, Content, InitialFocus, Title } from "@smui/dialog";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Paper from "@smui/paper";
-	import { deleteSlice } from "../../api/slice";
+	import { deleteSlice, isModelDependPredicates } from "../../api/slice";
 	import SliceDetails from "../../general/SliceDetails.svelte";
 	import SliceCellResult from "./SliceCellResult.svelte";
 	import {
@@ -14,6 +14,8 @@
 		showNewSlice,
 		sliceToEdit,
 		slices,
+		model,
+		comparisonModels,
 	} from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 	import { ZenoService, type Slice } from "../../zenoservice";
@@ -28,6 +30,10 @@
 	let showTooltip = false;
 	let hovering = false;
 	let showOptions = false;
+
+	let compareButton = slice
+		? isModelDependPredicates(slice.filterPredicates.predicates)
+		: false;
 
 	$: selected = $selections.slices.includes(slice.sliceName);
 
@@ -56,6 +62,9 @@
 	}
 
 	function setSelected(e) {
+		if (compare && compareButton) {
+			return;
+		}
 		// Imitate selections in Vega bar charts.
 		if (
 			$selections.slices.length === 1 &&
@@ -118,7 +127,8 @@
 	class=" cell parent
 	{inFolder ? 'in-folder' : ''}
 	{selected ? 'selected' : ''} 
-	{compare ? 'compare-slice-cell' : ''}"
+	{compare ? 'compare-slice-cell' : ''}
+	{compare && compareButton ? '' : 'pointer'}"
 	on:click={(e) => setSelected(e)}
 	draggable="true"
 	on:mouseover={() => (hovering = true)}
@@ -223,7 +233,10 @@
 						</Paper>
 					</div>
 				{/if}
-				<SliceCellResult {compare} {slice} />
+				<SliceCellResult {compare} {slice} model={$model} />
+				{#if compare}
+					<SliceCellResult {compare} {slice} model={$comparisonModels[0]} />
+				{/if}
 				<div class="inline" style:cursor="pointer">
 					<div
 						style:width="36px"
@@ -312,6 +325,8 @@
 		flex-direction: row;
 		justify-content: space-between;
 		align-items: center;
+	}
+	.pointer {
 		cursor: pointer;
 	}
 	.selected {
