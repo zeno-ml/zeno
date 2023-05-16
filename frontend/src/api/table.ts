@@ -18,13 +18,9 @@ export async function getFilteredTable(
 	tagList?: Array<string>
 ) {
 	const requestedColumns = completeColumns.filter(
-		(c) =>
-			c.columnType !== ZenoColumnType.EMBEDDING &&
-			((c.columnType === ZenoColumnType.OUTPUT && c.model === model) ||
-				(c.columnType === ZenoColumnType.POSTDISTILL && c.model === model) ||
-				(c.columnType !== ZenoColumnType.OUTPUT &&
-					c.columnType !== ZenoColumnType.POSTDISTILL))
+		(c) => c.columnType !== ZenoColumnType.EMBEDDING
 	);
+	console.log(requestedColumns);
 	const res = await ZenoService.getFilteredTable({
 		columns: requestedColumns,
 		filterPredicates: setModelForFilterPredicateGroup(filterPredicates, model),
