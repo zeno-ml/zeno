@@ -6,7 +6,6 @@
 	import Paper from "@smui/paper";
 	import { tooltip } from "@svelte-plugins/tooltips";
 	import Svelecte from "svelecte";
-	import { fade } from "svelte/transition";
 	import SliceDetails from "../../general/SliceDetails.svelte";
 	import {
 		model,
@@ -112,11 +111,10 @@
 
 <svelte:window on:keydown={submit} />
 {#if showSliceFinder}
-	<div class="coverage" transition:fade />
+	<div class="coverage" />
 {/if}
 <div
 	id="slice-finder-container"
-	transition:fade
 	use:clickOutside
 	on:click_outside={() => ($showSliceFinder = false)}>
 	<Paper elevation={7}>

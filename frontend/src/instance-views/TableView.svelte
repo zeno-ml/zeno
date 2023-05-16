@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Icon, Label } from "@smui/button";
-	import { Pagination } from "@smui/data-table";
 	import Checkbox from "@smui/checkbox";
+	import { Pagination } from "@smui/data-table";
 	import IconButton from "@smui/icon-button";
 	import Select, { Option } from "@smui/select";
 	import { tick } from "svelte";
@@ -11,14 +11,14 @@
 		editedIds,
 		model,
 		rowsPerPage,
-		selections,
 		selectionIds,
 		selectionPredicates,
+		selections,
 		settings,
 		sort,
 		status,
-		tags,
 		tagIds,
+		tags,
 	} from "../stores";
 	import { columnHash } from "../util/util";
 	import type { ZenoColumn } from "../zenoservice";
@@ -113,7 +113,7 @@
 	}
 
 	async function drawInstances() {
-		if (!table || !viewFunction) {
+		if (!table) {
 			return;
 		}
 
@@ -131,6 +131,10 @@
 				$settings.dataColumn.name !== c.name &&
 				$settings.labelColumn.name !== c.name
 		);
+
+		if (!viewFunction) {
+			return;
+		}
 
 		await tick();
 
@@ -283,7 +287,7 @@
 		padding-right: 1.6vw;
 		cursor: pointer;
 		font-weight: 600;
-		z-index: 10;
+		z-index: 5;
 	}
 	td {
 		padding-right: 15px;
