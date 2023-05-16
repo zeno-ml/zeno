@@ -193,6 +193,20 @@
 									on:click={(e) => {
 										e.stopPropagation();
 										showOptions = false;
+										sliceToEdit.set(slice);
+										showNewSlice.set(true);
+									}}>
+									<Icon style="font-size: 18px;" class="material-icons"
+										>edit</Icon
+									>&nbsp;
+									<span>Edit</span>
+								</div>
+								<div
+									class="option"
+									on:keydown={() => ({})}
+									on:click={(e) => {
+										e.stopPropagation();
+										showOptions = false;
 										$reports.forEach((r) => {
 											let hasSlice = false;
 											r.slices.forEach((p) => {
@@ -214,20 +228,6 @@
 										>delete_outline</Icon
 									>&nbsp;
 									<span>Remove</span>
-								</div>
-								<div
-									class="option"
-									on:keydown={() => ({})}
-									on:click={(e) => {
-										e.stopPropagation();
-										showOptions = false;
-										sliceToEdit.set(slice);
-										showNewSlice.set(true);
-									}}>
-									<Icon style="font-size: 18px;" class="material-icons"
-										>edit</Icon
-									>&nbsp;
-									<span>Edit</span>
 								</div>
 							</Content>
 						</Paper>

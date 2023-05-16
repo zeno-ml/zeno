@@ -136,9 +136,9 @@
 				});
 				return s;
 			});
-			selections.update((sels) => ({
+			selections.update(() => ({
 				slices: [],
-				metadata: sels.metadata,
+				metadata: {},
 				tags: [],
 			}));
 			showNewSlice.set(false);

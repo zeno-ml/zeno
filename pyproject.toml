@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "zenoml"
-version = "0.5.1"
+version = "0.5.2"
 description = "Interactive Evaluation Framework for Machine Learning"
 license = "MIT"
 authors = ["Ángel Alexander Cabrera <alex.cabrera@gmail.com>"]
@@ -31,9 +31,9 @@ websockets = ">=10.2,<12.0"
 [tool.poetry.dev-dependencies]
 black = "^23.3.0"
 httpx = "^0.24.0"
-pyright = "^1.1.306"
+pyright = "^1.1.308"
 pytest = "^7.2.2"
-ruff = "^0.0.265"
+ruff = "^0.0.267"
 
 [tool.poetry.scripts]
 zeno = "zeno.runner:command_line"

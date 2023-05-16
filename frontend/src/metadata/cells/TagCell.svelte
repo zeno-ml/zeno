@@ -1,20 +1,20 @@
 <script lang="ts">
 	import { mdiDotsHorizontal } from "@mdi/js";
-	import IconButton, { Icon } from "@smui/icon-button";
 	import { Svg } from "@smui/common";
+	import IconButton, { Icon } from "@smui/icon-button";
+	import Paper, { Content } from "@smui/paper";
+	import { deleteTag, getMetricsForTags } from "../../api/tag";
 	import {
 		editId,
-		status,
-		selections,
-		tags,
-		tagIds,
-		model,
 		metric,
+		model,
+		selections,
+		status,
+		tagIds,
+		tags,
 	} from "../../stores";
-	import { getMetricsForTags, deleteTag } from "../../api/tag";
-	import type { TagMetricKey, Tag } from "../../zenoservice";
 	import { clickOutside } from "../../util/clickOutside";
-	import Paper, { Content } from "@smui/paper";
+	import type { Tag, TagMetricKey } from "../../zenoservice";
 	export let tag: Tag;
 	export let inFolder = false;
 
@@ -183,19 +183,6 @@
 					<div id="options-container">
 						<Paper style="padding: 3px 0px;" elevation={7}>
 							<Content>
-								<div
-									class="option"
-									on:keydown={() => ({})}
-									on:click={(e) => {
-										e.stopPropagation();
-										showOptions = false;
-										removeTag();
-									}}>
-									<Icon style="font-size: 18px;" class="material-icons"
-										>delete_outline</Icon
-									>&nbsp;
-									<span>Remove</span>
-								</div>
 								{#if $editId === undefined}
 									<div
 										class="option"
@@ -211,6 +198,19 @@
 										<span>Edit</span>
 									</div>
 								{/if}
+								<div
+									class="option"
+									on:keydown={() => ({})}
+									on:click={(e) => {
+										e.stopPropagation();
+										showOptions = false;
+										removeTag();
+									}}>
+									<Icon style="font-size: 18px;" class="material-icons"
+										>delete_outline</Icon
+									>&nbsp;
+									<span>Remove</span>
+								</div>
 							</Content>
 						</Paper>
 					</div>
