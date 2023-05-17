@@ -1,4 +1,4 @@
-import { ZenoColumnType, type ZenoColumn } from "../zenoservice";
+import { ZenoColumnType, type ZenoColumn, type Slice } from "../zenoservice";
 import {
 	folders,
 	metric,
@@ -11,10 +11,15 @@ import {
 	rowsPerPage,
 	settings,
 	slices,
+	modelDependSlices,
 	tab,
 	tags,
 } from "../stores";
 import { ZenoService } from "../zenoservice";
+import {
+	isModelDependPredicates,
+	setModelForFilterPredicateGroup,
+} from "../api/slice";
 
 export async function getInitialData() {
 	const sets = await ZenoService.getSettings();
@@ -34,6 +39,27 @@ export async function getInitialData() {
 
 	const slicesRes = await ZenoService.getSlices();
 	slices.set(new Map(Object.entries(slicesRes)));
+
+	// initial model dependent slices in compare tab
+	let modelSlices = new Map<string, Slice>();
+	inits.models.forEach((mod) => {
+		for (const key in slicesRes) {
+			let slice = slicesRes[key];
+			let preds = slice.filterPredicates.predicates;
+			if (isModelDependPredicates(preds)) {
+				let newSlice = <Slice>{
+					sliceName: slice.sliceName + "-" + mod,
+					folder: slice.folder,
+					filterPredicates: setModelForFilterPredicateGroup(
+						slice.filterPredicates,
+						mod
+					),
+				};
+				modelSlices[newSlice.sliceName] = newSlice;
+			}
+		}
+	});
+	modelDependSlices.set(new Map(Object.entries(modelSlices)));
 
 	const reportsRes = await ZenoService.getReports();
 	reports.set(reportsRes);

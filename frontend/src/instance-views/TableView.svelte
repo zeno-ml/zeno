@@ -6,6 +6,7 @@
 	import Select, { Option } from "@smui/select";
 	import { tick } from "svelte";
 	import { getFilteredTable } from "../api/table";
+	import { setModelForFilterPredicateGroup } from "../api/slice";
 	import {
 		editId,
 		editedIds,
@@ -87,8 +88,7 @@
 	function updateTable() {
 		getFilteredTable(
 			$status.completeColumns,
-			$selectionPredicates,
-			$model,
+			setModelForFilterPredicateGroup($selectionPredicates, $model),
 			[start, end],
 			$sort,
 			$tagIds,

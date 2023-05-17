@@ -78,6 +78,9 @@ export const sort: Writable<[ZenoColumn, boolean]> = writable([
 export const requestingHistogramCounts: Writable<boolean> = writable(false);
 
 export const slices: Writable<Map<string, Slice>> = writable(new Map());
+export const modelDependSlices: Writable<Map<string, Slice>> = writable(
+	new Map()
+);
 export const folders: Writable<string[]> = folderWritable();
 export const tags: Writable<Map<string, Tag>> = writable(new Map());
 export const reports: Writable<Report[]> = reportWritable();
@@ -121,7 +124,10 @@ export const selectionPredicates: Readable<FilterPredicateGroup> = derived(
 			ret = [
 				...ret,
 				...$selections.slices.map((sliName, i) => ({
-					predicates: get(slices).get(sliName).filterPredicates.predicates,
+					predicates: (get(slices).has(sliName)
+						? get(slices).get(sliName)
+						: get(modelDependSlices).get(sliName)
+					).filterPredicates.predicates,
 					join: i === 0 && ret.length === 0 ? "" : "&",
 				})),
 			];

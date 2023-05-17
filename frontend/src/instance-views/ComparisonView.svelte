@@ -98,22 +98,18 @@
 		if (start === undefined || end === undefined) {
 			return;
 		}
-		let proms = [$model, ...$comparisonModels].map((mod) => {
-			return getFilteredTable(
-				$status.completeColumns,
-				$selectionPredicates,
-				mod,
-				[start, end],
-				$sort,
-				$tagIds,
-				$selectionIds,
-				$selections.tags
-			);
-		});
-		Promise.all(proms).then((res) => {
+		getFilteredTable(
+			$status.completeColumns,
+			$selectionPredicates,
+			[start, end],
+			$sort,
+			$tagIds,
+			$selectionIds,
+			$selections.tags
+		).then((res) => {
 			const localDivs = {};
-			[$model, ...$comparisonModels].forEach((mod, i) => {
-				tables[mod] = res[i];
+			[$model, ...$comparisonModels].forEach((mod) => {
+				tables[mod] = res;
 				localDivs[mod] = [];
 			});
 			viewDivs = localDivs;

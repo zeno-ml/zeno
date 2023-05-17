@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { metric, status } from "../../stores";
+	import { metric, status, selections } from "../../stores";
 	import {
 		getMetricsForSlices,
 		isModelDependPredicates,
@@ -11,22 +11,28 @@
 	export let model;
 
 	let result;
-	let compareButton = slice
-		? isModelDependPredicates(slice.filterPredicates.predicates)
-		: false;
-	let selected = false;
+	// check if it is the all instance slice
+	slice = slice
+		? slice
+		: {
+				sliceName: "",
+				folder: "",
+				filterPredicates: { predicates: [], join: "" },
+		  };
 
+	let modelDependSliceName = slice.sliceName + "-" + model;
+	let compareButton = isModelDependPredicates(
+		slice.filterPredicates.predicates
+	);
+
+	$: selected =
+		$selections.slices.includes(slice.sliceName) ||
+		$selections.slices.includes(modelDependSliceName);
 	$: {
 		$status;
 		result = getMetricsForSlices([
 			<MetricKey>{
-				sli: slice
-					? slice
-					: {
-							sliceName: "",
-							folder: "",
-							filterPredicates: { predicates: [], join: "" },
-					  },
+				sli: slice,
 				model: model,
 				metric: $metric,
 			},
@@ -35,7 +41,11 @@
 	function selectFilter(e) {
 		if (compare && compareButton) {
 			e.stopPropagation();
-			selected = !selected;
+			selections.update((sel) => ({
+				slices: [...sel.slices, modelDependSliceName],
+				metadata: sel.metadata,
+				tags: sel.tags,
+			}));
 		}
 	}
 </script>
