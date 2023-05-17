@@ -6,6 +6,7 @@
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Paper from "@smui/paper";
 	import { deleteSlice, isModelDependPredicates } from "../../api/slice";
+	import { selectSliceCell } from "./sliceCellUtil";
 	import SliceDetails from "../../general/SliceDetails.svelte";
 	import SliceCellResult from "./SliceCellResult.svelte";
 	import {
@@ -65,61 +66,7 @@
 		if (compare && compareButton) {
 			return;
 		}
-		// Imitate selections in Vega bar charts.
-		if (
-			$selections.slices.length === 1 &&
-			$selections.slices.includes(slice.sliceName)
-		) {
-			selections.update((s) => ({
-				slices: [],
-				metadata: s.metadata,
-				tags: s.tags,
-			}));
-			return;
-		}
-		if (e.shiftKey) {
-			if ($selections.slices.includes(slice.sliceName)) {
-				selections.update((sel) => {
-					sel.slices.splice(sel.slices.indexOf(slice.sliceName), 1);
-					return {
-						slices: [...sel.slices],
-						metadata: sel.metadata,
-						tags: sel.tags,
-					};
-				});
-			} else {
-				selections.update((sel) => ({
-					slices: [...sel.slices, slice.sliceName],
-					metadata: sel.metadata,
-					tags: sel.tags,
-				}));
-			}
-		} else {
-			if ($selections.slices.includes(slice.sliceName)) {
-				if ($selections.slices.length > 0) {
-					selections.update((sel) => ({
-						slices: [slice.sliceName],
-						metadata: sel.metadata,
-						tags: sel.tags,
-					}));
-				} else {
-					selections.update((sel) => {
-						sel.slices.splice(sel.slices.indexOf(slice.sliceName), 1);
-						return {
-							slices: [...sel.slices],
-							metadata: sel.metadata,
-							tags: sel.tags,
-						};
-					});
-				}
-			} else {
-				selections.update((sel) => ({
-					slices: [slice.sliceName],
-					metadata: sel.metadata,
-					tags: sel.tags,
-				}));
-			}
-		}
+		selectSliceCell(e, slice.sliceName);
 	}
 </script>
 

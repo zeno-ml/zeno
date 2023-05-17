@@ -1,15 +1,10 @@
 <script lang="ts">
-	import {
-		metric,
-		status,
-		selections,
-		model,
-		comparisonModels,
-	} from "../../stores";
+	import { metric, status, selections, model } from "../../stores";
 	import {
 		getMetricsForSlices,
 		isModelDependPredicates,
 	} from "../../api/slice";
+	import { selectSliceCell } from "./sliceCellUtil";
 	import { type MetricKey, type Slice } from "../../zenoservice";
 
 	export let compare;
@@ -48,11 +43,7 @@
 	function selectFilter(e) {
 		if (compare && compareButton) {
 			e.stopPropagation();
-			selections.update((sel) => ({
-				slices: [...sel.slices, modelDependSliceName],
-				metadata: sel.metadata,
-				tags: sel.tags,
-			}));
+			selectSliceCell(e, modelDependSliceName);
 		}
 	}
 </script>
