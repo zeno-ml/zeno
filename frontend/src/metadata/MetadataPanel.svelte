@@ -19,6 +19,10 @@
 	} from "../api/metadata";
 	import { createNewTag } from "../api/tag";
 	import {
+		isModelDependPredicates,
+		setModelForFilterPredicateGroup,
+	} from "../api/slice";
+	import {
 		editId,
 		editedIds,
 		folders,
@@ -39,9 +43,10 @@
 		tagIds,
 		tags,
 		tab,
+		modelDependSlices,
 	} from "../stores";
 	import { columnHash } from "../util/util";
-	import { ZenoColumnType, type ZenoColumn } from "../zenoservice";
+	import { ZenoColumnType, type ZenoColumn, type Slice } from "../zenoservice";
 	import MetricRange from "./MetricRange.svelte";
 	import FolderCell from "./cells/FolderCell.svelte";
 	import MetadataCell from "./cells/MetadataCell.svelte";
@@ -52,6 +57,26 @@
 
 	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
 		new InternMap([], columnHash);
+
+	// update model dependent slices in compare tab
+	function updateModelDependentSlices(name, mod) {
+		$slices.forEach((sli) => {
+			let preds = sli.filterPredicates.predicates;
+			if (isModelDependPredicates(preds)) {
+				modelDependSlices.update((ms) => {
+					ms.set(sli.sliceName + "-" + name, <Slice>{
+						sliceName: sli.sliceName + "-" + name,
+						folder: sli.folder,
+						filterPredicates: setModelForFilterPredicateGroup(
+							sli.filterPredicates,
+							mod
+						),
+					});
+					return ms;
+				});
+			}
+		});
+	}
 
 	// Get histogram buckets, counts, and metrics when columns update.
 	status.subscribe((s) => {
@@ -128,6 +153,12 @@
 				);
 			});
 		});
+		updateModelDependentSlices("model A", model);
+	});
+
+	comparisonModels.subscribe((models) => {
+		selections.set({ metadata: {}, slices: [], tags: [] });
+		updateModelDependentSlices("model B", models[0]);
 	});
 
 	// when the selection Ids change, update the histograms
@@ -327,12 +358,12 @@
 			<SliceCellResult
 				compare={$tab === "comparison"}
 				slice={undefined}
-				model={$model} />
+				sliceModel={$model} />
 			{#if $tab === "comparison"}
 				<SliceCellResult
 					compare={true}
 					slice={undefined}
-					model={$comparisonModels[0]} />
+					sliceModel={$comparisonModels[0]} />
 			{/if}
 			<div style:width="36px" />
 		</div>

@@ -42,23 +42,28 @@ export async function getInitialData() {
 
 	// initial model dependent slices in compare tab
 	let modelSlices = new Map<string, Slice>();
-	inits.models.forEach((mod) => {
-		for (const key in slicesRes) {
-			let slice = slicesRes[key];
-			let preds = slice.filterPredicates.predicates;
-			if (isModelDependPredicates(preds)) {
-				let newSlice = <Slice>{
-					sliceName: slice.sliceName + "-" + mod,
-					folder: slice.folder,
-					filterPredicates: setModelForFilterPredicateGroup(
-						slice.filterPredicates,
-						mod
-					),
-				};
-				modelSlices[newSlice.sliceName] = newSlice;
+	if (inits.models.length > 0) {
+		[inits.models[0], inits.models[inits.models.length - 1]].forEach((mod) => {
+			for (const key in slicesRes) {
+				let slice = slicesRes[key];
+				let preds = slice.filterPredicates.predicates;
+				if (isModelDependPredicates(preds)) {
+					let newSlice = <Slice>{
+						sliceName:
+							slice.sliceName +
+							"-" +
+							(mod === inits.models[0] ? "model B" : "model A"),
+						folder: slice.folder,
+						filterPredicates: setModelForFilterPredicateGroup(
+							slice.filterPredicates,
+							mod
+						),
+					};
+					modelSlices[newSlice.sliceName] = newSlice;
+				}
 			}
-		}
-	});
+		});
+	}
 	modelDependSlices.set(new Map(Object.entries(modelSlices)));
 
 	const reportsRes = await ZenoService.getReports();

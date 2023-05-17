@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { metric, status, selections } from "../../stores";
+	import {
+		metric,
+		status,
+		selections,
+		model,
+		comparisonModels,
+	} from "../../stores";
 	import {
 		getMetricsForSlices,
 		isModelDependPredicates,
@@ -8,7 +14,7 @@
 
 	export let compare;
 	export let slice: Slice;
-	export let model;
+	export let sliceModel;
 
 	let result;
 	// check if it is the all instance slice
@@ -20,7 +26,8 @@
 				filterPredicates: { predicates: [], join: "" },
 		  };
 
-	let modelDependSliceName = slice.sliceName + "-" + model;
+	let modelDependSliceName =
+		slice.sliceName + "-" + (sliceModel === $model ? "model A" : "model B");
 	let compareButton = isModelDependPredicates(
 		slice.filterPredicates.predicates
 	);
@@ -33,7 +40,7 @@
 		result = getMetricsForSlices([
 			<MetricKey>{
 				sli: slice,
-				model: model,
+				model: sliceModel,
 				metric: $metric,
 			},
 		]);

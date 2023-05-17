@@ -233,9 +233,12 @@
 						</Paper>
 					</div>
 				{/if}
-				<SliceCellResult {compare} {slice} model={$model} />
+				<SliceCellResult {compare} {slice} sliceModel={$model} />
 				{#if compare}
-					<SliceCellResult {compare} {slice} model={$comparisonModels[0]} />
+					<SliceCellResult
+						{compare}
+						{slice}
+						sliceModel={$comparisonModels[0]} />
 				{/if}
 				<div class="inline" style:cursor="pointer">
 					<div
