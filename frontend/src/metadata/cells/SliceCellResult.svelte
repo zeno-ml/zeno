@@ -92,11 +92,10 @@
 	.compare-btn {
 		border: 0.5px solid var(--G4);
 		border-radius: 5px;
-		box-shadow: 0px 1px 3px 0px var(--G4);
 	}
 	.compare-btn:hover {
 		cursor: pointer;
-		box-shadow: 0px 3px 5px 0px var(--G4);
+		box-shadow: 0px 1px 2px 0px var(--G4);
 	}
 	.selected {
 		background: var(--P3);
