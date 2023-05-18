@@ -8,8 +8,5 @@
   "python.testing.pytestEnabled": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "python.analysis.typeCheckingMode": "basic",
-  "editor.formatOnSave": true,
-  "[svelte]": {
-    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
-  }
+  "editor.formatOnSave": true
 }
