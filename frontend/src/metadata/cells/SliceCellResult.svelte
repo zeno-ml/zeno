@@ -21,11 +21,10 @@
 				filterPredicates: { predicates: [], join: "" },
 		  };
 
-	let modelDependSliceName =
+	$: modelDependSliceName =
 		slice.sliceName + "-" + (sliceModel === $model ? "model A" : "model B");
-	let compareButton = isModelDependPredicates(
-		slice.filterPredicates.predicates
-	);
+
+	$: compareButton = isModelDependPredicates(slice.filterPredicates.predicates);
 
 	$: selected =
 		$selections.slices.includes(slice.sliceName) ||

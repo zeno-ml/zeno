@@ -59,8 +59,8 @@
 		new InternMap([], columnHash);
 
 	// update model dependent slices in compare tab
-	function updateModelDependentSlices(name, mod) {
-		$slices.forEach((sli) => {
+	function updateModelDependentSlices(name, mod, slis) {
+		slis.forEach((sli) => {
 			let preds = sli.filterPredicates.predicates;
 			if (isModelDependPredicates(preds)) {
 				modelDependSlices.update((ms) => {
@@ -153,12 +153,12 @@
 				);
 			});
 		});
-		updateModelDependentSlices("model A", model);
+		updateModelDependentSlices("model A", model, $slices);
 	});
 
 	comparisonModels.subscribe((models) => {
 		selections.set({ metadata: {}, slices: [], tags: [] });
-		updateModelDependentSlices("model B", models[0]);
+		updateModelDependentSlices("model B", models[0], $slices);
 	});
 
 	// when the selection Ids change, update the histograms
