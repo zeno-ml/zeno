@@ -19,7 +19,7 @@
 	} from "../stores";
 	import type { MetricKey, Slice } from "../zenoservice";
 
-	let selected = $tab === "comparison" ? "comparison" : "list";
+	let selected = "list";
 
 	let viewOptions = undefined;
 	/**

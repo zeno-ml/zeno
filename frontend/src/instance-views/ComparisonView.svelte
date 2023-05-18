@@ -30,14 +30,12 @@
 	let tables = {};
 	let viewDivs = {};
 	let instanceContainer;
-	let columnHeader = [
-		$status.completeColumns.filter(
-			(c) =>
-				(c.model === "" || c.model === $model) &&
-				(c.columnType === ZenoColumnType.PREDISTILL ||
-					c.columnType === ZenoColumnType.POSTDISTILL)
-		)[0],
-	];
+	let columnHeader = $status.completeColumns.filter(
+		(c) =>
+			(c.model === "" || c.model === $model) &&
+			(c.columnType === ZenoColumnType.PREDISTILL ||
+				c.columnType === ZenoColumnType.POSTDISTILL)
+	)[0];
 
 	let currentPage = 0;
 	let end = 0;
@@ -153,18 +151,17 @@
 </script>
 
 <Svelecte
+	style="padding-top: 5px;padding-bottom: 5px"
 	bind:value={columnHeader}
 	placeholder={"Column"}
 	valueAsObject
 	valueField={"name"}
-	multiple
 	options={$status.completeColumns.filter(
 		(c) =>
 			(c.model === "" || c.model === $model) &&
 			(c.columnType === ZenoColumnType.PREDISTILL ||
 				c.columnType === ZenoColumnType.POSTDISTILL)
-	)}
-	closeAfterSelect />
+	)} />
 
 <div class="table-container" bind:this={instanceContainer}>
 	{#if tables[$model] && tables[$comparisonModels[0]]}
@@ -173,12 +170,8 @@
 				{#each [$model, ...$comparisonModels] as mod}
 					<th>{mod}</th>
 				{/each}
-				{#each columnHeader as header}
-					<th>
-						<div class="inline-header">
-							{header.name}
-						</div>
-					</th>
+				{#each [$model, ...$comparisonModels] as mod}
+					<th>{columnHeader.name}-{mod}</th>
 				{/each}
 			</thead>
 			<tbody>

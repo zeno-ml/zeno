@@ -299,45 +299,47 @@
 				</Icon>
 			</div>
 		</div>
-		<div class="inline">
-			<div
-				use:tooltip={{
-					content: "Create a new folder.",
-					position: "left",
-					theme: "zeno-tooltip",
-				}}>
-				<IconButton
-					on:click={() => {
-						showNewSlice.set(false);
-						showNewFolder.update((b) => !b);
+		{#if $tab !== "comparison"}
+			<div class="inline">
+				<div
+					use:tooltip={{
+						content: "Create a new folder.",
+						position: "left",
+						theme: "zeno-tooltip",
 					}}>
-					<Icon component={Svg} viewBox="0 0 24 24">
-						<path fill="var(--G1)" d={mdiFolderPlusOutline} />
-					</Icon>
-				</IconButton>
-			</div>
-			<div
-				use:tooltip={{
-					content: "Create a new slice.",
-					position: "left",
-					theme: "zeno-tooltip",
-				}}>
-				<IconButton
-					on:click={() => {
-						sliceToEdit.set(undefined);
-						showNewSlice.update((d) => !d);
-						showNewFolder.set(false);
+					<IconButton
+						on:click={() => {
+							showNewSlice.set(false);
+							showNewFolder.update((b) => !b);
+						}}>
+						<Icon component={Svg} viewBox="0 0 24 24">
+							<path fill="var(--G1)" d={mdiFolderPlusOutline} />
+						</Icon>
+					</IconButton>
+				</div>
+				<div
+					use:tooltip={{
+						content: "Create a new slice.",
+						position: "left",
+						theme: "zeno-tooltip",
 					}}>
-					<Icon component={Svg} viewBox="0 0 24 24">
-						{#if $selectionPredicates.predicates.length > 0}
-							<path fill="#6a1a9a" d={mdiPlusCircle} />
-						{:else}
-							<path fill="var(--G1)" d={mdiPlus} />
-						{/if}
-					</Icon>
-				</IconButton>
+					<IconButton
+						on:click={() => {
+							sliceToEdit.set(undefined);
+							showNewSlice.update((d) => !d);
+							showNewFolder.set(false);
+						}}>
+						<Icon component={Svg} viewBox="0 0 24 24">
+							{#if $selectionPredicates.predicates.length > 0}
+								<path fill="#6a1a9a" d={mdiPlusCircle} />
+							{:else}
+								<path fill="var(--G1)" d={mdiPlus} />
+							{/if}
+						</Icon>
+					</IconButton>
+				</div>
 			</div>
-		</div>
+		{/if}
 	</div>
 	<div
 		class="overview
@@ -392,26 +394,28 @@
 				</Icon>
 			</div>
 		</div>
-		<div class="inline">
-			<div>
-				<div
-					use:tooltip={{
-						content: "Create a new tag.",
-						position: "left",
-						theme: "zeno-tooltip",
-					}}>
-					<IconButton on:click={() => showNewTag.update((b) => !b)}>
-						<Icon component={Svg} viewBox="0 0 24 24">
-							{#if $selectionIds.ids.length > 0}
-								<path fill="var(--N1)" d={mdiPlusCircle} />
-							{:else}
-								<path fill="black" d={mdiPlus} />
-							{/if}
-						</Icon>
-					</IconButton>
+		{#if $tab !== "comparison"}
+			<div class="inline">
+				<div>
+					<div
+						use:tooltip={{
+							content: "Create a new tag.",
+							position: "left",
+							theme: "zeno-tooltip",
+						}}>
+						<IconButton on:click={() => showNewTag.update((b) => !b)}>
+							<Icon component={Svg} viewBox="0 0 24 24">
+								{#if $selectionIds.ids.length > 0}
+									<path fill="var(--N1)" d={mdiPlusCircle} />
+								{:else}
+									<path fill="black" d={mdiPlus} />
+								{/if}
+							</Icon>
+						</IconButton>
+					</div>
 				</div>
 			</div>
-		</div>
+		{/if}
 	</div>
 
 	{#each [...$tags.values()] as t}
