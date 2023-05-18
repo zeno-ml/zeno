@@ -15,15 +15,6 @@
 
 {#if $ready && $status.completeColumns.length > 0}
 	<!-- These popups are at the top level b/c of issues with overflow-y scroll. -->
-	{#if $showNewSlice}
-		<NewSlicePopup />
-	{/if}
-	{#if $showNewFolder}
-		<NewFolderPopup />
-	{/if}
-	{#if $showNewTag}
-		<NewTagPopup />
-	{/if}
 	<div class="container">
 		<MetadataPanel />
 		<div id="samples">
