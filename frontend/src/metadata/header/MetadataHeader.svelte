@@ -4,7 +4,7 @@
 		metrics,
 		model,
 		models,
-		comparisonModels,
+		comparisonModel,
 		tab,
 	} from "../../stores";
 	import HeaderDropdown from "./HeaderDropdown.svelte";
@@ -30,7 +30,7 @@
 			title={"Model to Compare"}
 			placeholder={"Select 2nd Model"}
 			bind:options={exludeModels}
-			bind:value={$comparisonModels[0]} />
+			bind:value={$comparisonModel} />
 	{/if}
 </div>
 {#if $tab === "comparison" && $metric !== undefined}

@@ -162,15 +162,3 @@ export function isModelDependPredicates(predicates) {
 	});
 	return isModelDependent;
 }
-// check the model of slice
-export function checkPredicateModel(predicates) {
-	let model = new Set();
-	predicates.forEach((p) => {
-		if (p["predicates"]) {
-			model = new Set([...model, ...checkPredicateModel(p["predicates"])]);
-		} else if (p["column"].model) {
-			model.add(p["column"].model);
-		}
-	});
-	return model;
-}

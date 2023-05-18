@@ -29,7 +29,7 @@
 		metric,
 		metricRange,
 		model,
-		comparisonModels,
+		comparisonModel,
 		requestingHistogramCounts,
 		selectionIds,
 		selectionPredicates,
@@ -156,9 +156,9 @@
 		updateModelDependentSlices("model A", model, $slices);
 	});
 
-	comparisonModels.subscribe((models) => {
+	comparisonModel.subscribe((mod) => {
 		selections.set({ metadata: {}, slices: [], tags: [] });
-		updateModelDependentSlices("model B", models[0], $slices);
+		updateModelDependentSlices("model B", mod, $slices);
 	});
 
 	// when the selection Ids change, update the histograms
@@ -365,7 +365,7 @@
 				<SliceCellResult
 					compare={true}
 					slice={undefined}
-					sliceModel={$comparisonModels[0]} />
+					sliceModel={$comparisonModel} />
 			{/if}
 			<div style:width="36px" />
 		</div>

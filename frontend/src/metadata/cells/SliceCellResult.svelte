@@ -12,14 +12,15 @@
 	export let sliceModel;
 
 	let result;
+
 	// check if it is the all instance slice
-	slice = slice
-		? slice
-		: {
-				sliceName: "",
-				folder: "",
-				filterPredicates: { predicates: [], join: "" },
-		  };
+	if (!slice) {
+		slice = {
+			sliceName: "",
+			folder: "",
+			filterPredicates: { predicates: [], join: "" },
+		};
+	}
 
 	$: modelDependSliceName =
 		slice.sliceName + "-" + (sliceModel === $model ? "model A" : "model B");
@@ -29,6 +30,7 @@
 	$: selected =
 		$selections.slices.includes(slice.sliceName) ||
 		$selections.slices.includes(modelDependSliceName);
+
 	$: {
 		$status;
 		result = getMetricsForSlices([
@@ -39,6 +41,11 @@
 			},
 		]);
 	}
+
+	$: compareButtonstyle = compareButton
+		? "compare-btn " + (selected ? "selected" : "")
+		: "";
+
 	function selectFilter(e) {
 		if (compare && compareButton) {
 			e.stopPropagation();
@@ -50,10 +57,7 @@
 {#if result}
 	{#await result then res}
 		<div
-			class={compare
-				? "compare " +
-				  (compareButton ? "compare-btn " + (selected ? "selected" : "") : "")
-				: "flex-row"}
+			class={compare ? "compare " + compareButtonstyle : "flex-row"}
 			on:keydown={() => ({})}
 			on:click={selectFilter}>
 			<span>

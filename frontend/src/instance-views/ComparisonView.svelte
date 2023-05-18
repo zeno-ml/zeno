@@ -7,7 +7,7 @@
 	import { tick } from "svelte";
 	import { getFilteredTable } from "../api/table";
 	import {
-		comparisonModels,
+		comparisonModel,
 		model,
 		models,
 		rowsPerPage,
@@ -57,7 +57,7 @@
 
 	// when state changes update current table view
 	$: {
-		$comparisonModels;
+		$comparisonModel;
 		currentPage;
 		$status.completeColumns;
 		$model;
@@ -76,8 +76,8 @@
 	}
 
 	model.subscribe((model) => {
-		if ($comparisonModels.includes(model)) {
-			$comparisonModels = [$models.filter((m) => m !== model)[0]];
+		if ($comparisonModel.includes(model)) {
+			$comparisonModel = $models.filter((m) => m !== model)[0];
 			tables[model] = [];
 			viewDivs[model] = [];
 		}
@@ -106,7 +106,7 @@
 			$selections.tags
 		).then((res) => {
 			const localDivs = {};
-			[$model, ...$comparisonModels].forEach((mod) => {
+			[$model, $comparisonModel].forEach((mod) => {
 				tables[mod] = res;
 				localDivs[mod] = [];
 			});
@@ -125,7 +125,7 @@
 
 		await tick();
 
-		[$model, ...$comparisonModels].forEach((mod) => {
+		[$model, $comparisonModel].forEach((mod) => {
 			let obj = $status.completeColumns.find((c) => {
 				return c.columnType === ZenoColumnType.OUTPUT && c.model === mod;
 			});
@@ -164,20 +164,20 @@
 	)} />
 
 <div class="table-container" bind:this={instanceContainer}>
-	{#if tables[$model] && tables[$comparisonModels[0]]}
+	{#if tables[$model] && tables[$comparisonModel]}
 		<table>
 			<thead>
-				{#each [$model, ...$comparisonModels] as mod}
+				{#each [$model, $comparisonModel] as mod}
 					<th>{mod}</th>
 				{/each}
-				{#each [$model, ...$comparisonModels] as mod}
+				{#each [$model, $comparisonModel] as mod}
 					<th>{columnHeader.name}-{mod}</th>
 				{/each}
 			</thead>
 			<tbody>
 				{#each [...Array($rowsPerPage).keys()] as rowId (tables[$model][rowId] ? tables[$model][rowId][idHash] : rowId)}
 					<tr>
-						{#each [$model, ...$comparisonModels] as mod}
+						{#each [$model, $comparisonModel] as mod}
 							{#if viewDivs[mod]}
 								<td>
 									<div bind:this={viewDivs[mod][rowId]} />
@@ -195,7 +195,7 @@
 									? tables[mod][rowId][columnHash(newHeader)].toFixed(2)
 									: tables[mod][rowId][columnHash(newHeader)];
 							}}
-							<td>{val($model)} / {val($comparisonModels[0])}</td>
+							<td>{val($model)} / {val($comparisonModel)}</td>
 						{/each} -->
 					</tr>
 				{/each}</tbody>

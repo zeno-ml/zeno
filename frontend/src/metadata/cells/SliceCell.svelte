@@ -16,7 +16,7 @@
 		sliceToEdit,
 		slices,
 		model,
-		comparisonModels,
+		comparisonModel,
 	} from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 	import { ZenoService, type Slice } from "../../zenoservice";
@@ -182,10 +182,7 @@
 				{/if}
 				<SliceCellResult {compare} {slice} sliceModel={$model} />
 				{#if compare}
-					<SliceCellResult
-						{compare}
-						{slice}
-						sliceModel={$comparisonModels[0]} />
+					<SliceCellResult {compare} {slice} sliceModel={$comparisonModel} />
 				{/if}
 				<div class="inline" style:cursor="pointer">
 					<div

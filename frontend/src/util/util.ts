@@ -5,7 +5,7 @@ import {
 	metrics,
 	model,
 	models,
-	comparisonModels,
+	comparisonModel,
 	ready,
 	reports,
 	rowsPerPage,
@@ -34,21 +34,21 @@ export async function getInitialData() {
 	model.set(
 		inits.models.length > 0 ? inits.models[inits.models.length - 1] : ""
 	);
-	comparisonModels.set([inits.models[0]]);
+	comparisonModel.set(inits.models[0]);
 	metric.set(inits.metrics.length > 0 ? inits.metrics[0] : "");
 
 	const slicesRes = await ZenoService.getSlices();
 	slices.set(new Map(Object.entries(slicesRes)));
 
 	// initial model dependent slices in compare tab
-	let modelSlices = new Map<string, Slice>();
+	const modelSlices = new Map<string, Slice>();
 	if (inits.models.length > 0) {
 		[inits.models[0], inits.models[inits.models.length - 1]].forEach((mod) => {
 			for (const key in slicesRes) {
-				let slice = slicesRes[key];
-				let preds = slice.filterPredicates.predicates;
+				const slice = slicesRes[key];
+				const preds = slice.filterPredicates.predicates;
 				if (isModelDependPredicates(preds)) {
-					let newSlice = <Slice>{
+					const newSlice = <Slice>{
 						sliceName:
 							slice.sliceName +
 							"-" +
