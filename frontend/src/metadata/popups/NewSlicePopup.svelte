@@ -2,12 +2,17 @@
 	import Button from "@smui/button";
 	import Paper, { Content } from "@smui/paper";
 	import Textfield from "@smui/textfield";
-	import { selections, showNewSlice, slices, sliceToEdit } from "../../stores";
+	import {
+		selections,
+		showNewSlice,
+		slices,
+		sliceToEdit,
+		selectionPredicates,
+	} from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 	import {
 		ZenoService,
 		type FilterPredicateGroup,
-		type FilterPredicate,
 		type Slice,
 	} from "../../zenoservice";
 	import FilterGroupEntry from "./FilterGroupEntry.svelte";
@@ -71,35 +76,8 @@
 			return;
 		}
 
-		// Pre-fill slice creation with current metadata selections.
-		// Join with AND.
-		predicateGroup.predicates = Object.values($selections.metadata)
-			.filter((d) => d.predicates.length > 0)
-			.flat()
-			.map((d, i) => {
-				if (i !== 0 || $selections.slices.length > 0) {
-					d.join = "&";
-				}
-				return d;
-			});
-
-		// if slices are not empty in $selections
-		if ($selections.slices.length > 0) {
-			let slicesPredicates: (FilterPredicate | FilterPredicateGroup)[] = [];
-			$selections.slices.forEach((s, i) => {
-				let sli_preds = $slices.get(s).filterPredicates.predicates;
-				if (i !== 0) {
-					sli_preds[0].join = "&";
-				}
-				slicesPredicates = slicesPredicates.concat(
-					JSON.parse(JSON.stringify(sli_preds))
-				);
-			});
-			predicateGroup.predicates = [
-				...slicesPredicates,
-				...predicateGroup.predicates,
-			];
-		}
+		// prefill slice creation popup with selection bar filter predicates
+		predicateGroup = JSON.parse(JSON.stringify($selectionPredicates));
 
 		// If no predicates, add an empty one.
 		if (predicateGroup.predicates.length === 0) {
