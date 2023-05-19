@@ -16,6 +16,7 @@
 		model,
 		metric,
 		tab,
+		comparisonModel,
 	} from "../stores";
 	import type { MetricKey, Slice } from "../zenoservice";
 
@@ -59,25 +60,50 @@
 		}
 	});
 
-	$: currentResult = getMetricsForSlicesAndTags(
-		[
+	function getMetricKeys(model, metric, predicates) {
+		return [
 			<MetricKey>{
 				sli: <Slice>{
 					sliceName: "",
 					folder: "",
 					filterPredicates: {
-						predicates: [$selectionPredicates],
+						predicates: [predicates],
 						join: "",
 					},
 				},
-				model: $model,
-				metric: $metric,
+				model: model,
+				metric: metric,
 			},
-		],
+		];
+	}
+
+	function getCompareResults(model, metric, predicates) {
+		return getMetricsForSlicesAndTags(
+			getMetricKeys(model, metric, predicates),
+			$tagIds,
+			$selectionIds,
+			$selections.tags,
+			true
+		);
+	}
+
+	$: currentResult = getMetricsForSlicesAndTags(
+		getMetricKeys($model, $metric, $selectionPredicates),
 		$tagIds,
 		$selectionIds,
-		$selections.tags
+		$selections.tags,
+		false
 	);
+
+	$: modelAResult =
+		$tab === "comparison"
+			? getCompareResults($model, $metric, $selectionPredicates)
+			: undefined;
+	$: modelBResult =
+		$tab === "comparison"
+			? getCompareResults($comparisonModel, $metric, $selectionPredicates)
+			: undefined;
+
 	// change selected to table if a tag is edited
 	$: selected = $editId !== undefined ? "table" : selected;
 </script>
@@ -104,7 +130,7 @@
 		{/if}
 	{/if}
 {:else}
-	<ComparisonView {currentResult} {viewFunction} {viewOptions} />
+	<ComparisonView {modelAResult} {modelBResult} {viewFunction} {viewOptions} />
 {/if}
 
 <style>

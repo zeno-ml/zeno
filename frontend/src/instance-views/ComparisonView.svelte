@@ -10,6 +10,7 @@
 		comparisonModel,
 		model,
 		models,
+		metric,
 		rowsPerPage,
 		selectionIds,
 		selectionPredicates,
@@ -23,7 +24,8 @@
 	import { ZenoColumnType } from "../zenoservice";
 	import type { ViewRenderFunction } from "./instance-views";
 
-	export let currentResult;
+	export let modelAResult;
+	export let modelBResult;
 	export let viewFunction: ViewRenderFunction;
 	export let viewOptions;
 
@@ -40,17 +42,27 @@
 	let currentPage = 0;
 	let end = 0;
 	let lastPage = 0;
+	let totalSize = 0;
+	let metricA = 0;
+	let metricB = 0;
 
 	let sampleOptions = [5, 15, 30, 60, 100, $settings.samples].sort(
 		(a, b) => a - b
 	);
 
+	$: modelAResult.then((r) => {
+		totalSize = r[0].size;
+		metricA = r[0].metric.toFixed(2);
+	});
+
+	$: modelBResult.then((r) => {
+		metricB = r[0].metric.toFixed(2);
+	});
+
 	$: idHash = columnHash($settings.idColumn);
 	$: start = currentPage * $rowsPerPage;
 	$: end = Math.min(start + $rowsPerPage, $settings.totalSize);
-	$: currentResult.then((r) => {
-		lastPage = Math.max(Math.ceil(r[0].size / $rowsPerPage) - 1, 0);
-	});
+	$: lastPage = Math.max(Math.ceil(totalSize / $rowsPerPage) - 1, 0);
 	$: if (currentPage > lastPage) {
 		currentPage = lastPage;
 	}
@@ -167,11 +179,14 @@
 	{#if tables[$model] && tables[$comparisonModel]}
 		<table>
 			<thead>
+				<th
+					><div style="width: 150px">{$model}</div>
+					{$metric} : {metricA}</th>
+				<th
+					><div style="width: 150px">{$comparisonModel}</div>
+					{$metric} : {metricB}</th>
 				{#each [$model, $comparisonModel] as mod}
-					<th>{mod}</th>
-				{/each}
-				{#each [$model, $comparisonModel] as mod}
-					<th>{columnHeader.name}-{mod}</th>
+					<th><div style="width: 150px">{columnHeader.name}-{mod}</div></th>
 				{/each}
 			</thead>
 			<tbody>
@@ -213,9 +228,9 @@
 		</Select>
 	</svelte:fragment>
 	<svelte:fragment slot="total">
-		{start + 1}-{#await currentResult then r}
-			{Math.min(end, r ? r[0].size : end)} of
-			{r ? r[0].size : ""}{/await}
+		{totalSize === 0 ? start : start + 1} -
+		{Math.min(end, totalSize)} of
+		{totalSize}
 	</svelte:fragment>
 
 	<IconButton
