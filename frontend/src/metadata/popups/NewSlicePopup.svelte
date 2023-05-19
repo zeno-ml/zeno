@@ -7,6 +7,7 @@
 	import {
 		ZenoService,
 		type FilterPredicateGroup,
+		type FilterPredicate,
 		type Slice,
 	} from "../../zenoservice";
 	import FilterGroupEntry from "./FilterGroupEntry.svelte";
@@ -84,19 +85,20 @@
 
 		// if slices are not empty in $selections
 		if ($selections.slices.length > 0) {
-			let slicesPredicates;
+			let slicesPredicates: (FilterPredicate | FilterPredicateGroup)[] = [];
 			$selections.slices.forEach((s, i) => {
-				let sli_preds = $slices.get(s).filterPredicates;
+				let sli_preds = $slices.get(s).filterPredicates.predicates;
 				if (i !== 0) {
-					sli_preds.join = "&";
+					sli_preds[0].join = "&";
 				}
-				slicesPredicates = JSON.parse(JSON.stringify(sli_preds));
+				slicesPredicates = slicesPredicates.concat(
+					JSON.parse(JSON.stringify(sli_preds))
+				);
 			});
-			slicesPredicates.predicates = [
-				...slicesPredicates.predicates,
+			predicateGroup.predicates = [
+				...slicesPredicates,
 				...predicateGroup.predicates,
 			];
-			predicateGroup = slicesPredicates;
 		}
 
 		// If no predicates, add an empty one.
