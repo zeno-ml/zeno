@@ -292,7 +292,7 @@
 				<div class="options-header">Model</div>
 				<Svelecte
 					style="z-index: 5; margin-right: 10px; width: 167px; margin-top: 5px;"
-					name="model-select"
+					name="init-model-select"
 					labelAsValue={true}
 					options={$models}
 					value={$model}
@@ -308,7 +308,7 @@
 				<div class="options-header">Metric</div>
 				<Svelecte
 					style="z-index: 5; width: 167px; margin-top: 5px;"
-					name="metric-select"
+					name="init-metric-select"
 					labelAsValue={true}
 					options={$metrics}
 					value={$metric}
