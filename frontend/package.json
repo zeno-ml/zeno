@@ -27,7 +27,7 @@
         "@smui/paper": "7.0.0-beta.8",
         "@smui/ripple": "7.0.0-beta.3",
         "@smui/segmented-button": "^7.0.0-beta.3",
-        "@smui/select": "7.0.0-beta.3",
+        "@smui/select": "7.0.0-beta.8",
         "@smui/slider": "^7.0.0-beta.3",
         "@smui/textfield": "7.0.0-beta.3",
         "@svelte-plugins/tooltips": "^0.1.6",
