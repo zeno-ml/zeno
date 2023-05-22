@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { report, reports } from "../../stores";
+	import { report, reports, slices } from "../../stores";
 	import DataTable, { Body, Cell, Head, Row } from "@smui/data-table";
 	import SliceDetailsContainer from "./SliceDetailsContainer.svelte";
 	import TableReportRow from "./TableReportRow.svelte";
@@ -28,7 +28,7 @@
 							<Cell>
 								<div class="inline">
 									{#if slice}
-										<SliceDetailsContainer sli={slice} />
+										<SliceDetailsContainer sli={$slices.get(slice)} />
 									{/if}
 								</div>
 							</Cell>

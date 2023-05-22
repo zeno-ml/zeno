@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Vega } from "svelte-vega";
 	import { getMetricsForSlices } from "../../api/slice";
-	import { report, reports } from "../../stores";
-	import type { MetricKey } from "../../zenoservice";
+	import { report, reports, slices } from "../../stores";
+	import { type MetricKey, type Report } from "../../zenoservice";
 	import { generateSpec } from "./vegaSpec-radar";
 
 	$: currentReport = $reports[$report];
@@ -11,7 +11,7 @@
 	let chartEntries = [];
 	let fixedName = "";
 
-	function getMetKeys(rep) {
+	function getMetKeys(rep: Report) {
 		const metricKeys: MetricKey[] = [];
 		chartEntries = [];
 
@@ -22,17 +22,17 @@
 					rep.slices.forEach((slice) => {
 						chartEntries.push({
 							key: metric,
-							category: slice.sliceName,
+							category: slice,
 						});
 						metricKeys.push({
-							sli: slice,
+							sli: $slices.get(slice),
 							metric: metric,
 							model: rep.models[0],
 						});
 					});
 				});
 			} else if (parameters.yEncoding === "models") {
-				fixedName = rep.slices[0].sliceName;
+				fixedName = rep.slices[0];
 				rep.metrics.forEach((metric) => {
 					rep.models.forEach((mod) => {
 						chartEntries.push({
@@ -40,7 +40,7 @@
 							category: mod,
 						});
 						metricKeys.push({
-							sli: rep.slices[0],
+							sli: $slices.get(rep.slices[0]),
 							metric: metric,
 							model: mod,
 						});
@@ -54,10 +54,10 @@
 					rep.slices.forEach((slice) => {
 						chartEntries.push({
 							key: mod,
-							category: slice.sliceName,
+							category: slice,
 						});
 						metricKeys.push({
-							sli: slice,
+							sli: $slices.get(slice),
 							metric: rep.metrics[0],
 							model: mod,
 						});
@@ -67,11 +67,11 @@
 				rep.models.forEach((mod) => {
 					rep.slices.forEach((slice) => {
 						chartEntries.push({
-							key: slice.sliceName,
+							key: slice,
 							category: mod,
 						});
 						metricKeys.push({
-							sli: slice,
+							sli: $slices.get(slice),
 							metric: rep.metrics[0],
 							model: mod,
 						});

@@ -25,7 +25,7 @@
 					reps.push({
 						name: "New Report",
 						type: ChartType.BAR,
-						slices: [...Array.from($slices.values()).slice(0, 2)],
+						slices: [...Array.from($slices.keys()).slice(0, 2)],
 						models: [...$models.values()],
 						metrics: [...$metrics.values(), "size"],
 						parameters: {
@@ -33,7 +33,7 @@
 							yEncoding: "metrics",
 							zEncoding: "models",
 							fixedDimension: "y",
-							secondSlices: [...Array.from($slices.values()).slice(0, 2)],
+							secondSlices: [...Array.from($slices.keys()).slice(0, 2)],
 						},
 					});
 					return reps;
