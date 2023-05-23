@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { VegaLite } from "svelte-vega";
 	import { getMetricsForSlices } from "../../api/slice";
-	import { report, reports } from "../../stores";
+	import { report, reports, slices } from "../../stores";
 	import type { MetricKey } from "../../zenoservice";
 	import generateSpec from "./vegaSpec-line";
 
@@ -18,11 +18,11 @@
 		rep.slices.forEach((slice) => {
 			rep.models.forEach((mod) => {
 				chartEntries.push({
-					slice: slice.sliceName,
+					slice: slice,
 					model: mod,
 				});
 				metricKeys.push({
-					sli: slice,
+					sli: $slices.get(slice),
 					metric: selectMetrics,
 					model: mod,
 				});

@@ -4,12 +4,11 @@
 
 import type { ChartType } from "./ChartType";
 import type { Parameters } from "./Parameters";
-import type { Slice } from "./Slice";
 
 export type Report = {
 	name: string;
 	type?: ChartType;
-	slices?: Array<Slice>;
+	slices?: Array<string>;
 	metrics?: Array<string>;
 	models?: Array<string>;
 	parameters?: Parameters;

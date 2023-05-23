@@ -5,12 +5,13 @@
 
 	let options = [];
 	let value = [];
-	// initial options
-	[...$slices.values()].forEach((s, i) => {
-		options[i] = { value: i, label: s.sliceName };
+
+	// initial options & values
+	[...$slices.keys()].forEach((s, i) => {
+		options[i] = { value: i, label: s };
 	});
 	$reports[$report].parameters.secondSlices.forEach((s, i) => {
-		value[i] = options.find((o) => o.label === s.sliceName).value;
+		value[i] = options.find((o) => o.label === s).value;
 	});
 
 	function updateDragOrder(val) {
@@ -19,7 +20,7 @@
 			let tmp = [];
 			// align by drag order
 			val.forEach((v, i) => {
-				tmp[i] = $slices.get(options[v].label);
+				tmp[i] = options[v].label;
 			});
 			$reports[$report].parameters.secondSlices = tmp;
 		}
@@ -39,7 +40,7 @@
 		on:change={(e) => {
 			let s = [];
 			e.detail.forEach((ed) => {
-				s.push($slices.get(ed.label));
+				s.push(ed.label);
 			});
 			$reports[$report].parameters.secondSlices = s;
 		}}

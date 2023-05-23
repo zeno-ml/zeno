@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Vega } from "svelte-vega";
 	import { getMetricsForSlices } from "../../api/slice";
-	import { report, reports } from "../../stores";
+	import { report, reports, slices } from "../../stores";
 	import type { MetricKey } from "../../zenoservice";
 	import generateSpec from "./vegaSpec-beeswarm";
 
@@ -22,12 +22,12 @@
 					chartEntries = [];
 					rep.slices.forEach((slice) => {
 						chartEntries.push({
-							slice: slice.sliceName,
+							slice: slice,
 							metric: rep.metrics[0],
 							index: res_index,
 						});
 						metricKeys.push({
-							sli: slice,
+							sli: $slices.get(slice),
 							metric: rep.metrics[0],
 							model: mod,
 						});
@@ -49,14 +49,14 @@
 							index: res_index,
 						});
 						metricKeys.push({
-							sli: slice,
+							sli: $slices.get(slice),
 							metric: rep.metrics[0],
 							model: mod,
 						});
 						res_index++;
 					});
 					yEntries.push({
-						yName: slice.sliceName,
+						yName: slice,
 						chartData: chartEntries,
 						xLabel: rep.metrics[0],
 					});
@@ -68,12 +68,12 @@
 					chartEntries = [];
 					rep.slices.forEach((slice) => {
 						chartEntries.push({
-							slice: slice.sliceName,
+							slice: slice,
 							metric: rep.metrics[0],
 							index: res_index,
 						});
 						metricKeys.push({
-							sli: slice,
+							sli: $slices.get(slice),
 							metric: metric,
 							model: rep.models[0],
 						});
@@ -95,14 +95,14 @@
 							index: res_index,
 						});
 						metricKeys.push({
-							sli: rep.slices[0],
+							sli: $slices.get(rep.slices[0]),
 							metric: metric,
 							model: mod,
 						});
 						res_index++;
 					});
 					yEntries.push({
-						yName: rep.slices[0].sliceName,
+						yName: rep.slices[0],
 						chartData: chartEntries,
 						xLabel: metric,
 					});

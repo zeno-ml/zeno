@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { VegaLite } from "svelte-vega";
 	import { getMetricsForSlices } from "../../api/slice";
-	import { report, reports } from "../../stores";
+	import { report, reports, slices } from "../../stores";
 	import type { MetricKey, Slice } from "../../zenoservice";
 	import generateSpec from "./vegaSpec-heatmap";
 	import generateSliceVsSliceSpec from "./vegaSpec-heatmap_slice_vs_slice";
@@ -19,19 +19,19 @@
 		// slice vs model
 		if (parameters.xEncoding !== parameters.yEncoding) {
 			// decide which slice list to use
-			let slices =
+			let usedslices =
 				parameters.xEncoding === "slices"
 					? rep.slices
 					: rep.parameters.secondSlices;
 
-			slices.forEach((slice) => {
+			usedslices.forEach((slice) => {
 				rep.models.forEach((mod) => {
 					chartEntries.push({
-						slice: slice.sliceName,
+						slice: slice,
 						model: mod,
 					});
 					metricKeys.push({
-						sli: slice,
+						sli: $slices.get(slice),
 						metric: selectMetric,
 						model: mod,
 					});
@@ -43,18 +43,18 @@
 			rep.slices.forEach((sli_1) => {
 				rep.parameters.secondSlices.forEach((sli_2) => {
 					chartEntries.push({
-						slice_1: sli_1.sliceName,
-						slice_2: sli_2.sliceName,
+						slice_1: sli_1,
+						slice_2: sli_2,
 					});
 
-					let sli_1_pred = [...sli_1.filterPredicates.predicates];
-					let sli_2_pred = [...sli_2.filterPredicates.predicates];
+					let sli_1_pred = [...$slices.get(sli_1).filterPredicates.predicates];
+					let sli_2_pred = [...$slices.get(sli_2).filterPredicates.predicates];
 					let concat_preds = [];
 
 					// if both are not "all instance" slice
 					if (sli_1_pred.length !== 0 && sli_2_pred.length !== 0) {
 						let sec_slice_pred_col_0 = {
-							...sli_2.filterPredicates.predicates[0],
+							...$slices.get(sli_2).filterPredicates.predicates[0],
 						};
 						sec_slice_pred_col_0.join = "&";
 						sli_2_pred[0] = sec_slice_pred_col_0;

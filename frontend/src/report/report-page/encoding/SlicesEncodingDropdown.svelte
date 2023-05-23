@@ -6,15 +6,13 @@
 	function initialSettings() {
 		// restore default first value when fixing dimension with empty options
 		if ($reports[$report].slices.length === 0) {
-			$reports[$report].slices = [...Array.from($slices.values()).slice(0, 1)];
+			$reports[$report].slices = [...Array.from($slices.keys()).slice(0, 1)];
 		}
 		// initial options & values
-		[...$slices.values()].forEach((s, i) => {
-			options[i] = { value: i, label: s.sliceName };
+		[...$slices.keys()].forEach((s, i) => {
+			options[i] = { value: i, label: s };
 		});
-		value = options.find(
-			(o) => o.label === $reports[$report].slices[0].sliceName
-		).value;
+		value = options.find((o) => o.label === $reports[$report].slices[0]).value;
 	}
 	$: initialSettings();
 </script>
@@ -26,10 +24,12 @@
 		bind:value
 		{options}
 		on:change={(e) => {
-			if (e.detail.label !== $reports[$report].slices[0].sliceName) {
+			if (e.detail.label !== $reports[$report].slices[0]) {
 				let tmpSlices = $reports[$report].slices;
-				tmpSlices = tmpSlices.filter((p) => p.sliceName !== e.detail.label);
-				tmpSlices.unshift($slices.get(e.detail.label));
+				if (tmpSlices.includes(e.detail.label)) {
+					tmpSlices.splice(tmpSlices.indexOf(e.detail.label), 1);
+				}
+				tmpSlices.unshift(e.detail.label);
 				$reports[$report].slices = tmpSlices;
 			}
 		}} />
