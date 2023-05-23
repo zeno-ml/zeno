@@ -2,7 +2,13 @@
 	import Button from "@smui/button";
 	import Paper, { Content } from "@smui/paper";
 	import Textfield from "@smui/textfield";
-	import { selections, showNewSlice, slices, sliceToEdit } from "../../stores";
+	import {
+		selections,
+		showNewSlice,
+		slices,
+		reports,
+		sliceToEdit,
+	} from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 	import {
 		ZenoService,
@@ -115,11 +121,19 @@
 			sliceName = "Slice " + $slices.size;
 		}
 
+		let involvedReports = new Map();
 		if ($sliceToEdit && originalName !== sliceName) {
 			ZenoService.deleteSlice([originalName]).then(() => {
 				slices.update((s) => {
 					s.delete(originalName);
 					return s;
+				});
+				// record involved reports and original slice index
+				$reports.forEach((r, i) => {
+					let sliceIndex = r.slices.indexOf(originalName);
+					if (sliceIndex !== -1) {
+						involvedReports.set(i, sliceIndex);
+					}
 				});
 			});
 		}
@@ -142,6 +156,16 @@
 				metadata: {},
 				tags: [],
 			}));
+
+			// replace the editing slice in the related reports
+			if ($sliceToEdit) {
+				involvedReports.forEach((sliceIndex, reportIndex) => {
+					let tmpSlices = Object.assign([], $reports[reportIndex].slices);
+					tmpSlices[sliceIndex] = sliceName;
+					$reports[reportIndex].slices = tmpSlices;
+				});
+			}
+
 			showNewSlice.set(false);
 			sliceToEdit.set(null);
 		});
