@@ -20,7 +20,7 @@
 		type HistogramEntry,
 	} from "../api/metadata";
 	import { getMetricsForSlicesAndTags } from "../api/slice";
-	import { createNewTag, getMetricsForTags } from "../api/tag";
+	import { createNewTag } from "../api/tag";
 	import {
 		editId,
 		editedIds,
@@ -37,8 +37,8 @@
 		settings,
 		showNewFolder,
 		showNewSlice,
-		showSliceFinder,
 		showNewTag,
+		showSliceFinder,
 		sliceToEdit,
 		slices,
 		status,
@@ -50,8 +50,6 @@
 		ZenoColumnType,
 		type MetricKey,
 		type Slice,
-		type Tag,
-		type TagMetricKey,
 		type ZenoColumn,
 	} from "../zenoservice";
 	import MetricRange from "./MetricRange.svelte";
@@ -69,18 +67,6 @@
 				sliceName: "",
 				folder: "",
 				filterPredicates: { predicates: [], join: "" },
-			},
-			model: $model,
-			metric: $metric,
-		},
-	]);
-
-	$: tagRes = getMetricsForTags([
-		<TagMetricKey>{
-			tag: <Tag>{
-				tagName: "",
-				folder: "",
-				selectionIds: { ids: [] },
 			},
 			model: $model,
 			metric: $metric,
