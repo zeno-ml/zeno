@@ -119,7 +119,17 @@ body {
 
 .has-multiSelection {
 	outline: none !important;
-	overflow: auto !important;
+}
+
+.svelecte-control .has-multiSelection .sv-item {
+	--sv-item-selected-bg: var(--P3);
+	--sv-item-btn-bg: var(--P3);
+}
+
+.svelecte-control .has-multiSelection .sv-item-content {
+	max-width: 210px;
+	white-space: break-spaces;
+	overflow-wrap: break-word;
 }
 
 .autocomplete {
