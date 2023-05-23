@@ -292,11 +292,15 @@
 				<div class="options-header">Model</div>
 				<Svelecte
 					style="z-index: 5; margin-right: 10px; width: 167px; margin-top: 5px;"
-					name="model-select"
-					valueAsObject={false}
+					name="init-model-select"
+					labelAsValue={true}
 					options={$models}
-					value={0}
-					on:change={(e) => (e.detail ? model.set(e.detail.label) : "")} />
+					value={$model}
+					on:change={(e) => {
+						if (e.detail.label !== $model) {
+							model.set(e.detail.label);
+						}
+					}} />
 			</div>
 		{/if}
 		{#if $metric !== undefined}
@@ -304,11 +308,15 @@
 				<div class="options-header">Metric</div>
 				<Svelecte
 					style="z-index: 5; width: 167px; margin-top: 5px;"
-					name="metric-select"
-					valueAsObject={false}
+					name="init-metric-select"
+					labelAsValue={true}
 					options={$metrics}
-					value={0}
-					on:change={(e) => (e.detail ? metric.set(e.detail.label) : "")} />
+					value={$metric}
+					on:change={(e) => {
+						if (e.detail.label !== $metric) {
+							metric.set(e.detail.label);
+						}
+					}} />
 			</div>
 		{/if}
 	</div>
