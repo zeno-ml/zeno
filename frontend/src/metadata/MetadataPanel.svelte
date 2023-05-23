@@ -12,7 +12,6 @@
 	import IconButton, { Icon } from "@smui/icon-button";
 	import { tooltip } from "@svelte-plugins/tooltips";
 	import { InternMap } from "internmap";
-	import Svelecte from "svelecte";
 	import {
 		getHistogramCounts,
 		getHistogramMetrics,
@@ -274,35 +273,23 @@
 <div class="side-container">
 	<div id="selections">
 		{#if $model !== undefined}
-			<div>
+			<div style:margin-right={"10px"}>
 				<div class="options-header">Model</div>
-				<Svelecte
-					style="z-index: 5; margin-right: 10px; width: 167px; margin-top: 5px;"
-					name="init-model-select"
-					labelAsValue={true}
-					options={$models}
-					value={$model}
-					on:change={(e) => {
-						if (e.detail.label !== $model) {
-							model.set(e.detail.label);
-						}
-					}} />
+				<select bind:value={$model}>
+					{#each $models as mod}
+						<option value={mod}>{mod}</option>
+					{/each}
+				</select>
 			</div>
 		{/if}
 		{#if $metric !== undefined}
 			<div>
 				<div class="options-header">Metric</div>
-				<Svelecte
-					style="z-index: 5; width: 167px; margin-top: 5px;"
-					name="init-metric-select"
-					labelAsValue={true}
-					options={$metrics}
-					value={$metric}
-					on:change={(e) => {
-						if (e.detail.label !== $metric) {
-							metric.set(e.detail.label);
-						}
-					}} />
+				<select bind:value={$metric}>
+					{#each $metrics as met}
+						<option value={met}>{met}</option>
+					{/each}
+				</select>
 			</div>
 		{/if}
 	</div>
@@ -540,8 +527,15 @@
 </div>
 
 <style>
+	select {
+		width: 175px;
+		height: 35px;
+		border: 1px solid var(--G4);
+		border-radius: 5px;
+	}
 	.options-header {
 		margin-top: 5px;
+		margin-bottom: 5px;
 		color: var(--G2);
 	}
 	#slice-header {
