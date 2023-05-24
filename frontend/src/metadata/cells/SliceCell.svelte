@@ -54,7 +54,7 @@
 		});
 		reports.update((reps) => {
 			reps = reps.map((r) => {
-				r.slices = r.slices.filter((p) => p.sliceName !== slice.sliceName);
+				r.slices = r.slices.filter((p) => p !== slice.sliceName);
 				return r;
 			});
 			return reps;
@@ -157,7 +157,7 @@
 										$reports.forEach((r) => {
 											let hasSlice = false;
 											r.slices.forEach((p) => {
-												if (p.sliceName === slice.sliceName) {
+												if (p === slice.sliceName) {
 													hasSlice = true;
 												}
 											});

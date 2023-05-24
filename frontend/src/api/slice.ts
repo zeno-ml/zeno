@@ -95,12 +95,10 @@ export async function getMetricsForSlices(
 	}
 	// Update model in predicates if slices are dependent on postdistill or output columns.
 	metricKeys = <MetricKey[]>setModelForMetricKeys(metricKeys);
-
 	// Check if we have already fetched this metric key
-	const keysToRequest = [];
+	const keysToRequest: MetricKey[] = [];
 	const requestIndices = [];
 	const results = [];
-
 	for (let i = 0; i < metricKeys.length; i++) {
 		const metricKeyHash = JSON.stringify(metricKeys[i]);
 		if (metricKeyCache.has(metricKeyHash)) {
@@ -110,15 +108,14 @@ export async function getMetricsForSlices(
 			requestIndices.push(i);
 		}
 	}
-
 	if (keysToRequest.length > 0) {
 		const res = await ZenoService.getMetricsForSlices({
-			metricKeys,
+			metricKeys: keysToRequest,
 		});
-		keysToRequest.forEach((key, i) =>
-			metricKeyCache.set(JSON.stringify(key), res[i])
-		);
-		requestIndices.forEach((i) => (results[i] = res[i]));
+		keysToRequest.forEach((key, i) => {
+			metricKeyCache.set(JSON.stringify(key), res[i]);
+			results[requestIndices[i]] = res[i];
+		});
 	}
 
 	return results;

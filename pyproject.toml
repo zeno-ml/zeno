@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "zenoml"
-version = "0.5.2"
+version = "0.6.0"
 description = "Interactive Evaluation Framework for Machine Learning"
 license = "MIT"
 authors = ["Ángel Alexander Cabrera <alex.cabrera@gmail.com>"]
@@ -13,27 +13,27 @@ include = ["zeno/frontend/**/*"]
 exclude = ["zeno/tests/*"]
 
 [tool.poetry.dependencies]
-cachetools = "^5.3.0"
-fastapi = ">=0.75,<0.96"
+fastapi = "^0.95.1"
 inquirer = "^3.1.2"
 nest-asyncio = "^1.5.6"
 opentsne = "^0.7.1"
 pandas = "^2.0.0"
 pathos = "^0.3.0"
-python = ">=3.8.1, <=3.11"
+python = "^3.8"
 requests = "^2.28.1"
 setuptools = "*"
 tomli = "^2.0.1"
 tqdm = "^4.64.0"
-uvicorn = ">=0.17.5,<0.23.0"
-websockets = ">=10.2,<12.0"
+uvicorn = "^0.22.0"
+websockets = "^11.0"
+zeno-sliceline = "^0.0.1"
 
 [tool.poetry.dev-dependencies]
 black = "^23.3.0"
-httpx = "^0.24.0"
-pyright = "^1.1.308"
+httpx = "^0.24.1"
+pyright = "^1.1.309"
 pytest = "^7.2.2"
-ruff = "^0.0.267"
+ruff = "^0.0.269"
 
 [tool.poetry.scripts]
 zeno = "zeno.runner:command_line"

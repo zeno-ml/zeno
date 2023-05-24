@@ -111,28 +111,36 @@ export const selections: Writable<{
 export const selectionPredicates: Readable<FilterPredicateGroup> = derived(
 	[selections],
 	([$selections]) => {
-		let ret: (FilterPredicate | FilterPredicateGroup)[] = Array.from(
-			Object.values($selections.metadata)
-		)
-			.filter((d) => d.predicates.length !== 0)
-			.map((d, i) => ({
-				predicates: d.predicates,
-				join: i === 0 ? "" : "&",
-			}))
-			.flat();
-		if ($selections.slices.length !== 0) {
-			ret = [
-				...ret,
-				...$selections.slices.map((sliName, i) => ({
-					predicates: (get(slices).has(sliName)
-						? get(slices).get(sliName)
-						: get(modelDependSlices).get(sliName)
-					).filterPredicates.predicates,
-					join: i === 0 && ret.length === 0 ? "" : "&",
-				})),
+		const predicateGroup: FilterPredicateGroup = { predicates: [], join: "" };
+		// Pre-fill slice creation with current metadata selections.
+		// Join with AND.
+		predicateGroup.predicates = Object.values($selections.metadata)
+			.filter((d) => d.predicates.length > 0)
+			.flat()
+			.map((d, i) => {
+				d.join = i === 0 && $selections.slices.length === 0 ? "" : "&";
+				return d;
+			});
+
+		// if slices are not empty in $selections, add slice filters
+		if ($selections.slices.length > 0) {
+			let slicesPredicates: (FilterPredicate | FilterPredicateGroup)[] = [];
+			$selections.slices.forEach((s, i) => {
+        let sli = get(slices).has(s)
+						? get(slices).get(s)
+						: get(modelDependSlices).get(s);
+				const sli_preds = JSON.parse(
+					JSON.stringify(sli.filterPredicates.predicates)
+				);
+				sli_preds[0].join = i === 0 ? "" : "&";
+				slicesPredicates = slicesPredicates.concat(sli_preds);
+			});
+			predicateGroup.predicates = [
+				...slicesPredicates,
+				...predicateGroup.predicates,
 			];
 		}
-		return { predicates: ret, join: "" };
+		return predicateGroup;
 	}
 );
 export const report: Writable<number> = writable(undefined);
@@ -141,6 +149,7 @@ export const showNewFolder: Writable<boolean> = writable(false);
 export const showNewSlice: Writable<boolean> = writable(false);
 export const showNewTag: Writable<boolean> = writable(false);
 export const sliceToEdit: Writable<Slice> = writable(null);
+export const showSliceFinder: Writable<boolean> = writable(false);
 
 export const metricRange: Writable<[number, number]> = writable([
 	Infinity,

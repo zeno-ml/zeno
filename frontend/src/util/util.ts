@@ -31,11 +31,9 @@ export async function getInitialData() {
 	metrics.set(inits.metrics);
 	folders.set(inits.folders);
 
-	model.set(
-		inits.models.length > 0 ? inits.models[inits.models.length - 1] : ""
-	);
+	model.set(inits.models.length > 0 ? inits.models[0] : "");
 	comparisonModel.set(inits.models[0]);
-	metric.set(inits.metrics.length > 0 ? inits.metrics[0] : "");
+  metric.set(inits.metrics.length > 0 ? inits.metrics[0] : "");
 
 	const slicesRes = await ZenoService.getSlices();
 	slices.set(new Map(Object.entries(slicesRes)));

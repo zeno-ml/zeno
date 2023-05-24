@@ -2,7 +2,14 @@
 	import Button from "@smui/button";
 	import Paper, { Content } from "@smui/paper";
 	import Textfield from "@smui/textfield";
-	import { selections, showNewSlice, slices, sliceToEdit } from "../../stores";
+	import {
+		selections,
+		showNewSlice,
+		slices,
+		reports,
+		sliceToEdit,
+		selectionPredicates,
+	} from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 	import {
 		ZenoService,
@@ -15,6 +22,7 @@
 	let folder = "";
 	let predicateGroup: FilterPredicateGroup = { predicates: [], join: "" };
 	let nameInput;
+	let paperHeight;
 
 	// Track original settings when editing.
 	let originalName = "";
@@ -69,34 +77,8 @@
 			return;
 		}
 
-		// Pre-fill slice creation with current metadata selections.
-		// Join with AND.
-		predicateGroup.predicates = Object.values($selections.metadata)
-			.filter((d) => d.predicates.length > 0)
-			.flat()
-			.map((d, i) => {
-				if (i !== 0 || $selections.slices.length > 0) {
-					d.join = "&";
-				}
-				return d;
-			});
-
-		// if slices are not empty in $selections
-		if ($selections.slices.length > 0) {
-			let slicesPredicates;
-			$selections.slices.forEach((s, i) => {
-				let sli_preds = $slices.get(s).filterPredicates;
-				if (i !== 0) {
-					sli_preds.join = "&";
-				}
-				slicesPredicates = JSON.parse(JSON.stringify(sli_preds));
-			});
-			slicesPredicates.predicates = [
-				...slicesPredicates.predicates,
-				...predicateGroup.predicates,
-			];
-			predicateGroup = slicesPredicates;
-		}
+		// prefill slice creation popup with selection bar filter predicates
+		predicateGroup = JSON.parse(JSON.stringify($selectionPredicates));
 
 		// If no predicates, add an empty one.
 		if (predicateGroup.predicates.length === 0) {
@@ -114,11 +96,19 @@
 			sliceName = "Slice " + $slices.size;
 		}
 
+		let involvedReports = new Map();
 		if ($sliceToEdit && originalName !== sliceName) {
 			ZenoService.deleteSlice([originalName]).then(() => {
 				slices.update((s) => {
 					s.delete(originalName);
 					return s;
+				});
+				// record involved reports and original slice index
+				$reports.forEach((r, i) => {
+					let sliceIndex = r.slices.indexOf(originalName);
+					if (sliceIndex !== -1) {
+						involvedReports.set(i, sliceIndex);
+					}
 				});
 			});
 		}
@@ -141,6 +131,16 @@
 				metadata: {},
 				tags: [],
 			}));
+
+			// replace the editing slice in the related reports
+			if ($sliceToEdit) {
+				involvedReports.forEach((sliceIndex, reportIndex) => {
+					let tmpSlices = Object.assign([], $reports[reportIndex].slices);
+					tmpSlices[sliceIndex] = sliceName;
+					$reports[reportIndex].slices = tmpSlices;
+				});
+			}
+
 			showNewSlice.set(false);
 			sliceToEdit.set(null);
 		});
@@ -159,7 +159,6 @@
 			createSlice();
 		}
 	}
-	let paperHeight;
 </script>
 
 <svelte:window on:keydown={submit} />

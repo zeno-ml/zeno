@@ -8,6 +8,7 @@
       "cwd": "${workspaceFolder}",
       "module": "zeno",
       "subProcess": true,
+      "justMyCode": false,
       "args": ["./examples/cifar/config.toml"]
     },
     {

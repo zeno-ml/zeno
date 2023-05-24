@@ -125,7 +125,6 @@
 				} else {
 					selections.update((sel) => {
 						sel.tags.splice(sel.tags.indexOf(tag.tagName), 1);
-						console.log(sel.tags);
 						return {
 							slices: sel.slices,
 							metadata: sel.metadata,
