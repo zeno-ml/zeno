@@ -32,7 +32,7 @@ export async function getInitialData() {
 	folders.set(inits.folders);
 
 	model.set(inits.models.length > 0 ? inits.models[0] : "");
-	comparisonModel.set(inits.models[0]);
+	comparisonModel.set(inits.models[1]);
 	metric.set(inits.metrics.length > 0 ? inits.metrics[0] : "");
 
 	const slicesRes = await ZenoService.getSlices();
@@ -41,7 +41,7 @@ export async function getInitialData() {
 	// initial model dependent slices in compare tab
 	const modelSlices = new Map<string, Slice>();
 	if (inits.models.length > 0) {
-		[inits.models[0], inits.models[inits.models.length - 1]].forEach((mod) => {
+		[inits.models[0], inits.models[1]].forEach((mod) => {
 			for (const key in slicesRes) {
 				const slice = slicesRes[key];
 				const preds = slice.filterPredicates.predicates;
@@ -50,7 +50,7 @@ export async function getInitialData() {
 						sliceName:
 							slice.sliceName +
 							"-" +
-							(mod === inits.models[0] ? "model B" : "model A"),
+							(mod === inits.models[0] ? "model A" : "model B"),
 						folder: slice.folder,
 						filterPredicates: setModelForFilterPredicateGroup(
 							slice.filterPredicates,
