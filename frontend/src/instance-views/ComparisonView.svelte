@@ -21,7 +21,7 @@
 		tagIds,
 	} from "../stores";
 	import { columnHash } from "../util/util";
-	import { ZenoColumnType } from "../zenoservice";
+	import { ZenoColumnType, MetadataType } from "../zenoservice";
 	import type { ViewRenderFunction } from "./instance-views";
 
 	export let modelAResult;
@@ -179,18 +179,33 @@
 	{#if tables[$model] && tables[$comparisonModel]}
 		<table>
 			<thead>
-				<th
-					><div style="width: 150px">{$model}</div>
-					{$metric} : {metricA}</th>
-				<th
-					><div style="width: 150px">{$comparisonModel}</div>
-					{$metric} : {metricB}</th>
-				{#each [$model, $comparisonModel] as mod}
-					<th><div style="width: 150px">{columnHeader.name}-{mod}</div></th>
-				{/each}
+				<th>
+					<div style="width: 150px">{$model}</div>
+					<div>{$metric} : {metricA}</div>
+				</th>
+				<th>
+					<div style="width: 150px">{$comparisonModel}</div>
+					<div>{$metric} : {metricB}</div>
+				</th>
+				<th>
+					<div style="width: 150px">{$model}</div>
+					<div>{columnHeader.name}</div>
+				</th>
+				<th>
+					<div style="width: 150px">{$comparisonModel}</div>
+					<div>{columnHeader.name}</div>
+				</th>
 			</thead>
 			<tbody>
 				{#each [...Array($rowsPerPage).keys()] as rowId (tables[$model][rowId] ? tables[$model][rowId][idHash] : rowId)}
+					{@const val = (mod) => {
+						let newHeader = columnHeader;
+						newHeader.model =
+							newHeader.columnType === ZenoColumnType.POSTDISTILL ? mod : "";
+						return newHeader.metadataType === MetadataType.CONTINUOUS
+							? tables[mod][rowId][columnHash(newHeader)].toFixed(2)
+							: tables[mod][rowId][columnHash(newHeader)];
+					}}
 					<tr>
 						{#each [$model, $comparisonModel] as mod}
 							{#if viewDivs[mod]}
@@ -199,19 +214,8 @@
 								</td>
 							{/if}
 						{/each}
-						<!-- {#each columnHeader as header}
-							{@const val = (mod) => {
-								let newHeader = header;
-								newHeader.model =
-									newHeader.columnType === ZenoColumnType.POSTDISTILL
-										? mod
-										: "";
-								return newHeader.metadataType === MetadataType.CONTINUOUS
-									? tables[mod][rowId][columnHash(newHeader)].toFixed(2)
-									: tables[mod][rowId][columnHash(newHeader)];
-							}}
-							<td>{val($model)} / {val($comparisonModel)}</td>
-						{/each} -->
+						<td>{val($model)}</td>
+						<td>{val($comparisonModel)}</td>
 					</tr>
 				{/each}</tbody>
 		</table>
@@ -262,9 +266,6 @@
 <style>
 	table {
 		margin-top: 5px;
-	}
-	td {
-		vertical-align: top;
 	}
 	thead th {
 		text-align: left;
