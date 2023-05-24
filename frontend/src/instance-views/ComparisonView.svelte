@@ -16,13 +16,14 @@
 		selectionPredicates,
 		selections,
 		settings,
-		sort,
+		compareSort,
 		status,
 		tagIds,
 	} from "../stores";
 	import { columnHash } from "../util/util";
 	import { ZenoColumnType, MetadataType } from "../zenoservice";
 	import type { ViewRenderFunction } from "./instance-views";
+	import ComparisonViewTableHeader from "./ComparisonViewTableHeader.svelte";
 
 	export let modelAResult;
 	export let modelBResult;
@@ -32,6 +33,7 @@
 	let tables = {};
 	let viewDivs = {};
 	let instanceContainer;
+	let selectSort = "";
 	let columnHeader = $status.completeColumns.filter(
 		(c) =>
 			(c.model === "" || c.model === $model) &&
@@ -73,7 +75,7 @@
 		currentPage;
 		$status.completeColumns;
 		$model;
-		$sort;
+		$compareSort;
 		$selectionIds;
 		$tagIds;
 		$selections.tags;
@@ -82,7 +84,7 @@
 
 	$: if (viewFunction) {
 		tables;
-		$sort;
+		$compareSort;
 		viewOptions;
 		drawInstances();
 	}
@@ -104,6 +106,23 @@
 		}
 	});
 
+	function updateSort(columnHeader, model) {
+		if (selectSort !== model) {
+			compareSort.set([undefined, true]);
+		}
+		selectSort = model;
+		let newHeader = columnHeader;
+		newHeader.model =
+			columnHeader.columnType === ZenoColumnType.POSTDISTILL ? model : "";
+		if ($compareSort[0] !== newHeader) {
+			compareSort.set([newHeader, true]);
+		} else if ($compareSort[0] === newHeader && $compareSort[1]) {
+			compareSort.set([newHeader, false]);
+		} else {
+			compareSort.set([undefined, true]);
+		}
+	}
+
 	function updateTable() {
 		if (start === undefined || end === undefined) {
 			return;
@@ -112,7 +131,7 @@
 			$status.completeColumns,
 			$selectionPredicates,
 			[start, end],
-			$sort,
+			$compareSort,
 			$tagIds,
 			$selectionIds,
 			$selections.tags
@@ -180,26 +199,30 @@
 		<table>
 			<thead>
 				<th>
-					<div style="width: 150px">{$model}</div>
+					<div style="width: 160px">{$model}</div>
 					<div>{$metric} : {metricA}</div>
 				</th>
 				<th>
-					<div style="width: 150px">{$comparisonModel}</div>
+					<div style="width: 160px">{$comparisonModel}</div>
 					<div>{$metric} : {metricB}</div>
 				</th>
-				<th>
-					<div style="width: 150px">{$model}</div>
-					<div>{columnHeader.name}</div>
+				<th on:click={() => updateSort(columnHeader, $model)}>
+					<ComparisonViewTableHeader
+						{columnHeader}
+						{selectSort}
+						model={$model} />
 				</th>
-				<th>
-					<div style="width: 150px">{$comparisonModel}</div>
-					<div>{columnHeader.name}</div>
+				<th on:click={() => updateSort(columnHeader, $comparisonModel)}>
+					<ComparisonViewTableHeader
+						{columnHeader}
+						{selectSort}
+						model={$comparisonModel} />
 				</th>
 			</thead>
 			<tbody>
 				{#each [...Array($rowsPerPage).keys()] as rowId (tables[$model][rowId] ? tables[$model][rowId][idHash] : rowId)}
 					{@const val = (mod) => {
-						let newHeader = columnHeader;
+						let newHeader = Object.assign({}, columnHeader);
 						newHeader.model =
 							newHeader.columnType === ZenoColumnType.POSTDISTILL ? mod : "";
 						return newHeader.metadataType === MetadataType.CONTINUOUS
