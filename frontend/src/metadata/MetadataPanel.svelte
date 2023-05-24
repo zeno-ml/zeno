@@ -54,7 +54,7 @@
 	import MetadataCell from "./cells/MetadataCell.svelte";
 	import SliceCell from "./cells/SliceCell.svelte";
 	import TagCell from "./cells/TagCell.svelte";
-	import MetadataHeader from "./header/MetadataHeader.svelte";
+	import MetadataHeader from "./MetadataHeader.svelte";
 	import SliceCellResult from "./cells/SliceCellResult.svelte";
 
 	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
@@ -285,29 +285,7 @@
 </script>
 
 <div class="side-container">
-	<div id="selections">
-		{#if $model !== undefined}
-			<div style:margin-right={"10px"}>
-				<div class="options-header">Model</div>
-				<select bind:value={$model}>
-					{#each $models as mod}
-						<option value={mod}>{mod}</option>
-					{/each}
-				</select>
-			</div>
-		{/if}
-		{#if $metric !== undefined}
-			<div>
-				<div class="options-header">Metric</div>
-				<select bind:value={$metric}>
-					{#each $metrics as met}
-						<option value={met}>{met}</option>
-					{/each}
-				</select>
-			</div>
-		{/if}
-	</div>
-
+	<MetadataHeader />
 	<div id="slice-header" class="inline">
 		<div class="inline">
 			<h4>Slices</h4>
@@ -324,58 +302,52 @@
 			</div>
 		</div>
 		{#if $tab !== "comparison"}
-		<div class="inline">
-			<div
-				use:tooltip={{
-					content: "Discover underperforming slices.",
-					position: "bottom",
-					theme: "zeno-tooltip",
-				}}>
-				<IconButton
-					on:click={() => {
-						showNewFolder.set(false);
-						showSliceFinder.update((c) => !c);
+			<div class="inline">
+				<div
+					use:tooltip={{
+						content: "Discover underperforming slices.",
+						position: "bottom",
+						theme: "zeno-tooltip",
 					}}>
-					<Icon component={Svg} viewBox="0 0 24 24">
-						<path fill="black" d={mdiCreationOutline} />
-					</Icon>
-				</IconButton>
-			</div>
-			<div
-				use:tooltip={{
-					content: "Create a new folder.",
-					position: "left",
-					theme: "zeno-tooltip",
-				}}>
-				<IconButton
-					on:click={() => {
-						showNewSlice.set(false);
-						showNewFolder.update((b) => !b);
-						showSliceFinder.set(false);
+					<IconButton
+						on:click={() => {
+							showNewFolder.set(false);
+							showSliceFinder.update((c) => !c);
+						}}>
+						<Icon component={Svg} viewBox="0 0 24 24">
+							<path fill="black" d={mdiCreationOutline} />
+						</Icon>
+					</IconButton>
+				</div>
+				<div
+					use:tooltip={{
+						content: "Create a new folder.",
+						position: "left",
+						theme: "zeno-tooltip",
 					}}>
-					<Icon component={Svg} viewBox="0 0 24 24">
-						<path fill="var(--G1)" d={mdiFolderPlusOutline} />
-					</Icon>
-				</IconButton>
-			</div>
-			<div
-				use:tooltip={{
-					content: "Create a new slice.",
-					position: "left",
-					theme: "zeno-tooltip",
-				}}>
-				<IconButton
-					on:click={() => {
-						sliceToEdit.set(undefined);
-						showNewSlice.update((d) => !d);
-						showNewFolder.set(false);
-						showSliceFinder.set(false);
+					<IconButton
+						on:click={() => {
+							showNewSlice.set(false);
+							showNewFolder.update((b) => !b);
+							showSliceFinder.set(false);
+						}}>
+						<Icon component={Svg} viewBox="0 0 24 24">
+							<path fill="var(--G1)" d={mdiFolderPlusOutline} />
+						</Icon>
+					</IconButton>
+				</div>
+				<div
+					use:tooltip={{
+						content: "Create a new slice.",
+						position: "left",
+						theme: "zeno-tooltip",
 					}}>
 					<IconButton
 						on:click={() => {
 							sliceToEdit.set(undefined);
 							showNewSlice.update((d) => !d);
 							showNewFolder.set(false);
+							showSliceFinder.set(false);
 						}}>
 						<Icon component={Svg} viewBox="0 0 24 24">
 							{#if $selectionPredicates.predicates.length > 0}
@@ -554,17 +526,6 @@
 </div>
 
 <style>
-	select {
-		width: 175px;
-		height: 35px;
-		border: 1px solid var(--G4);
-		border-radius: 5px;
-	}
-	.options-header {
-		margin-top: 5px;
-		margin-bottom: 5px;
-		color: var(--G2);
-	}
 	#slice-header {
 		position: sticky;
 		top: -10px;

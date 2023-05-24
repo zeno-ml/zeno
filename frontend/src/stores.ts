@@ -126,9 +126,9 @@ export const selectionPredicates: Readable<FilterPredicateGroup> = derived(
 		if ($selections.slices.length > 0) {
 			let slicesPredicates: (FilterPredicate | FilterPredicateGroup)[] = [];
 			$selections.slices.forEach((s, i) => {
-        let sli = get(slices).has(s)
-						? get(slices).get(s)
-						: get(modelDependSlices).get(s);
+				const sli = get(slices).has(s)
+					? get(slices).get(s)
+					: get(modelDependSlices).get(s);
 				const sli_preds = JSON.parse(
 					JSON.stringify(sli.filterPredicates.predicates)
 				);
