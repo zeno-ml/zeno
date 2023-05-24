@@ -154,12 +154,14 @@ export async function getMetricsForSlicesAndTags(
 
 // check if predicates contain model dependent columns (postdistill or output)
 export function isModelDependPredicates(predicates) {
-	let isModelDependent = false;
+	const isModelDependent = [];
 	predicates.forEach((p) => {
-		isModelDependent = p["predicates"]
-			? isModelDependPredicates(p["predicates"])
-			: p["column"].columnType === ZenoColumnType.POSTDISTILL ||
-			  p["column"].columnType === ZenoColumnType.OUTPUT;
+		isModelDependent.push(
+			p["predicates"]
+				? isModelDependPredicates(p["predicates"])
+				: p["column"].columnType === ZenoColumnType.POSTDISTILL ||
+						p["column"].columnType === ZenoColumnType.OUTPUT
+		);
 	});
-	return isModelDependent;
+	return isModelDependent.includes(true);
 }
