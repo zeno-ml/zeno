@@ -41,10 +41,9 @@
 				c.columnType === ZenoColumnType.POSTDISTILL)
 	)[0];
 
-	let currentPage = 0;
-	let end = 0;
+	$: currentPage = 0;
 	let lastPage = 0;
-	let totalSize = 0;
+	let totalSize = $settings.totalSize;
 	let metricA = 0;
 	let metricB = 0;
 
@@ -63,7 +62,7 @@
 
 	$: idHash = columnHash($settings.idColumn);
 	$: start = currentPage * $rowsPerPage;
-	$: end = Math.min(start + $rowsPerPage, $settings.totalSize);
+	$: end = Math.min(start + $rowsPerPage, totalSize);
 	$: lastPage = Math.max(Math.ceil(totalSize / $rowsPerPage) - 1, 0);
 	$: if (currentPage > lastPage) {
 		currentPage = lastPage;
@@ -71,18 +70,20 @@
 
 	// when state changes update current table view
 	$: {
-		$comparisonModel;
 		currentPage;
+		$comparisonModel;
 		$status.completeColumns;
 		$model;
 		$compareSort;
 		$selectionIds;
+		$selectionPredicates;
 		$tagIds;
 		$selections.tags;
 		updateTable();
 	}
 
-	$: if (viewFunction) {
+	$: {
+		viewFunction;
 		tables;
 		$compareSort;
 		viewOptions;
@@ -99,9 +100,7 @@
 
 	// reset page on selection change
 	selectionPredicates.subscribe(() => {
-		if (currentPage === 0) {
-			updateTable();
-		} else {
+		if (currentPage !== 0) {
 			currentPage = 0;
 		}
 	});
@@ -142,7 +141,6 @@
 				localDivs[mod] = [];
 			});
 			viewDivs = localDivs;
-			tables = tables;
 			if (instanceContainer) {
 				instanceContainer.scrollTop = 0;
 			}
@@ -199,12 +197,26 @@
 		<table>
 			<thead>
 				<th>
-					<div style="width: 160px">{$model}</div>
-					<div>{$metric} : {metricA}</div>
+					<div>{$model}</div>
+					<div>
+						<span class="metric">
+							{$metric ? $metric + ":" : ""}
+						</span>
+						<span class="metric-value">
+							{metricA}
+						</span>
+					</div>
 				</th>
 				<th>
-					<div style="width: 160px">{$comparisonModel}</div>
-					<div>{$metric} : {metricB}</div>
+					<div>{$comparisonModel}</div>
+					<div>
+						<span class="metric">
+							{$metric ? $metric + ":" : ""}
+						</span>
+						<span class="metric-value">
+							{metricB}
+						</span>
+					</div>
 				</th>
 				<th on:click={() => updateSort(columnHeader, $model)}>
 					<ComparisonViewTableHeader
@@ -220,14 +232,16 @@
 				</th>
 			</thead>
 			<tbody>
-				{#each [...Array($rowsPerPage).keys()] as rowId (tables[$model][rowId] ? tables[$model][rowId][idHash] : rowId)}
+				{#each [...Array(end - start).keys()] as rowId (tables[$model][rowId] ? tables[$model][rowId][idHash] : rowId)}
 					{@const val = (mod) => {
 						let newHeader = Object.assign({}, columnHeader);
 						newHeader.model =
 							newHeader.columnType === ZenoColumnType.POSTDISTILL ? mod : "";
-						return newHeader.metadataType === MetadataType.CONTINUOUS
-							? tables[mod][rowId][columnHash(newHeader)].toFixed(2)
-							: tables[mod][rowId][columnHash(newHeader)];
+						return tables[mod][rowId]
+							? newHeader.metadataType === MetadataType.CONTINUOUS
+								? tables[mod][rowId][columnHash(newHeader)].toFixed(2)
+								: tables[mod][rowId][columnHash(newHeader)]
+							: "";
 					}}
 					<tr>
 						{#each [$model, $comparisonModel] as mod}
@@ -240,7 +254,8 @@
 						<td>{val($model)}</td>
 						<td>{val($comparisonModel)}</td>
 					</tr>
-				{/each}</tbody>
+				{/each}
+			</tbody>
 		</table>
 	{/if}
 </div>
@@ -291,6 +306,7 @@
 		margin-top: 5px;
 	}
 	thead th {
+		width: 160px;
 		text-align: left;
 		border-bottom: 1px solid var(--G5);
 		padding-bottom: 5px;
@@ -303,10 +319,21 @@
 		cursor: pointer;
 		font-weight: 600;
 	}
+	.metric {
+		font-weight: 400;
+		font-size: 15px;
+		color: var(--G2);
+		margin-right: 15px;
+	}
+	.metric-value {
+		font-weight: 400;
+		color: var(--logo);
+		margin-right: 15px;
+	}
 	.table-container {
 		max-width: calc(100vw - 440px);
 		height: calc(100vh - 170px);
-		max-height: calc(100vh - 210px);
+		max-height: calc(100vh - 170px);
 		overflow: scroll;
 	}
 </style>

@@ -6,10 +6,10 @@
 	export let selectSort;
 </script>
 
-<div style="width: 160px; display: flex; align-items:center;">
+<div style="display: flex; align-items:center;">
 	<div>
 		<div>{model}</div>
-		<div>{columnHeader.name}</div>
+		<div class="header">{columnHeader.name}</div>
 	</div>
 	{#if selectSort === model}
 		<Icon class="material-icons" style="font-size: 25px; padding-top:3px;">
@@ -21,3 +21,10 @@
 		</Icon>
 	{/if}
 </div>
+
+<style>
+	.header {
+		font-weight: 400;
+		color: var(--G2);
+	}
+</style>
