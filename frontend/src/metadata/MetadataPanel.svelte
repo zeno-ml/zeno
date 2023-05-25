@@ -138,7 +138,6 @@
 		if (metadataHistograms.size === 0) {
 			return;
 		}
-		// selections.set({ metadata: {}, slices: [], tags: [] });
 		getHistograms($status.completeColumns, model).then((res) => {
 			getHistogramCounts(res, null, null, null, null).then((res) => {
 				if (res === undefined) {
