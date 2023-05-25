@@ -6,7 +6,7 @@
 	import Report from "./Report.svelte";
 	import Header from "./general/Header.svelte";
 	import ReportPage from "./report/report-page/ReportPage.svelte";
-	import { selections, status } from "./stores";
+	import { selections, status, tab } from "./stores";
 	import { columnHash, getInitialData } from "./util/util";
 	import { OpenAPI } from "./zenoservice";
 
@@ -35,6 +35,12 @@
 			metadata: tempSelections,
 			tags: sels.tags,
 		}));
+	});
+
+	tab.subscribe((t) => {
+		if (t === "comparison") {
+			selections.set({ metadata: {}, slices: [], tags: [] });
+		}
 	});
 
 	onMount(() => getInitialData());
