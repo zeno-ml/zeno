@@ -33,7 +33,7 @@
 	let tables = {};
 	let viewDivs = {};
 	let instanceContainer;
-	let selectSort = "";
+	let selectSort = $model;
 	let columnHeader = $status.completeColumns.filter(
 		(c) =>
 			(c.model === "" || c.model === $model) &&
@@ -41,7 +41,7 @@
 				c.columnType === ZenoColumnType.POSTDISTILL)
 	)[0];
 
-	$: currentPage = 0;
+	let currentPage = 0;
 	let lastPage = 0;
 	let totalSize = $settings.totalSize;
 	let metricA = 0;
@@ -181,16 +181,25 @@
 
 <Svelecte
 	style="padding-top: 5px;padding-bottom: 5px"
-	bind:value={columnHeader}
+	value={columnHeader}
 	placeholder={"Column"}
 	valueAsObject
 	valueField={"name"}
 	options={$status.completeColumns.filter(
 		(c) =>
-			(c.model === "" || c.model === $model) &&
+			(c.model === "" || c.model === selectSort) &&
 			(c.columnType === ZenoColumnType.PREDISTILL ||
 				c.columnType === ZenoColumnType.POSTDISTILL)
-	)} />
+	)}
+	on:change={(e) => {
+		if (e.detail !== columnHeader) {
+			columnHeader = e.detail;
+			compareSort.update((c) => {
+				c[0] = columnHeader;
+				return c;
+			});
+		}
+	}} />
 
 <div class="table-container" bind:this={instanceContainer}>
 	{#if tables[$model] && tables[$comparisonModel]}
