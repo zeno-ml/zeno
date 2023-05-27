@@ -184,28 +184,30 @@
 				{#if compare}
 					<SliceCellResult {compare} {slice} sliceModel={$comparisonModel} />
 				{/if}
-				<div class="inline" style:cursor="pointer">
-					<div
-						style:width="36px"
-						use:clickOutside
-						on:click_outside={() => {
-							hovering = false;
-						}}>
-						{#if hovering}
-							<IconButton
-								size="button"
-								style="padding: 0px"
-								on:click={(e) => {
-									e.stopPropagation();
-									showOptions = !showOptions;
-								}}>
-								<Icon component={Svg} viewBox="0 0 24 24">
-									<path fill="black" d={mdiDotsHorizontal} />
-								</Icon>
-							</IconButton>
-						{/if}
+				{#if !compare}
+					<div class="inline" style:cursor="pointer">
+						<div
+							style:width="36px"
+							use:clickOutside
+							on:click_outside={() => {
+								hovering = false;
+							}}>
+							{#if hovering}
+								<IconButton
+									size="button"
+									style="padding: 0px"
+									on:click={(e) => {
+										e.stopPropagation();
+										showOptions = !showOptions;
+									}}>
+									<Icon component={Svg} viewBox="0 0 24 24">
+										<path fill="black" d={mdiDotsHorizontal} />
+									</Icon>
+								</IconButton>
+							{/if}
+						</div>
 					</div>
-				</div>
+				{/if}
 			</div>
 		</div>
 	</div>

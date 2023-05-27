@@ -90,7 +90,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		margin-right: 5px;
+		margin-right: 10px;
 		padding: 1px;
 	}
 	.compare-btn {
