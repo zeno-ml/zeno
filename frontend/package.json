@@ -23,7 +23,7 @@
         "@smui/dialog": "7.0.0-beta.8",
         "@smui/form-field": "7.0.0-beta.8",
         "@smui/layout-grid": "7.0.0-beta.8",
-        "@smui/list": "7.0.0-beta.3",
+        "@smui/list": "7.0.0-beta.8",
         "@smui/paper": "7.0.0-beta.8",
         "@smui/ripple": "7.0.0-beta.3",
         "@smui/segmented-button": "^7.0.0-beta.3",
