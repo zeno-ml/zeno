@@ -63,7 +63,7 @@
         "d3-selection": "^3.0.0",
         "d3-shape": "^3.1.0",
         "internmap": "^2.0.3",
-        "regl-scatterplot": "^1.6.6",
+        "regl-scatterplot": "^1.6.9",
         "sirv-cli": "^2.0.0",
         "svelte-dnd-action": "^0.9.22",
         "svelte-spa-router": "^3.3.0",
