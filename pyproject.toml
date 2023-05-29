@@ -16,7 +16,7 @@ exclude = ["zeno/tests/*"]
 fastapi = "^0.95.1"
 inquirer = "^3.1.2"
 nest-asyncio = "^1.5.6"
-opentsne = "^0.7.1"
+opentsne = ">=0.7.1,<1.1.0"
 pandas = "^2.0.0"
 pathos = "^0.3.0"
 python = "^3.8"
