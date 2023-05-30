@@ -14,7 +14,7 @@
 	on:click={() => {
 		updateTab("explore");
 		selections.update((sel) => ({
-			slices: [sli.sliceName],
+			slices: sli.sliceName !== "All Instances" ? [sli.sliceName] : [],
 			metadata: sel.metadata,
 			tags: sel.tags,
 		}));
@@ -27,7 +27,7 @@
 	{sli.sliceName}
 </div>
 
-{#if showTooltip}
+{#if sli.sliceName !== "All Instances" && showTooltip}
 	<div class="tooltip-container">
 		<div class="tooltip">
 			<SliceDetails predicateGroup={sli.filterPredicates} />
