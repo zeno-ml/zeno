@@ -9,10 +9,10 @@
 
 	$: currentReport = $reports[$report];
 	$: parameters = currentReport.parameters;
+	$: sortCol = [-1, true];
 
 	let xCells = [];
 	let yCells = [];
-	$: sortCol = ["", true];
 
 	function getMetKeys(rep) {
 		const metricKeys: MetricKey[] = [];
@@ -80,32 +80,49 @@
 		return metricKeys;
 	}
 
-	async function getSortResult(currentReport) {
-		let fetchResult;
-		let sortResult = {};
-		await getMetricsForSlices(getMetKeys(currentReport)).then(
-			(res) => (fetchResult = res)
-		);
-		const resultSize = fetchResult.length / yCells.length;
-		yCells.forEach((y, i) => {
-			sortResult[y] = fetchResult.slice(resultSize * i, resultSize * (i + 1));
-		});
-		console.log(
-			new Map(
-				Object.entries(sortResult).sort(
-					(a, b) => b[1][0].metric - a[1][0].metric
-				)
-			)
-		);
-		return sortResult;
+	function sortByCol(resMap, sortCol) {
+		if (sortCol[0] >= 0) {
+			let sortResult = new Map(
+				Object.entries(resMap).sort((a, b) => {
+					if (a[1][sortCol[0]].metric) {
+						return sortCol[1]
+							? a[1][sortCol[0]].metric - b[1][sortCol[0]].metric
+							: b[1][sortCol[0]].metric - a[1][sortCol[0]].metric;
+					} else {
+						return sortCol[1]
+							? a[1][sortCol[0]].size - b[1][sortCol[0]].size
+							: b[1][sortCol[0]].size - a[1][sortCol[0]].size;
+					}
+				})
+			);
+			if (parameters.yEncoding === "models") {
+				$reports[$report].models = Array.from(sortResult.keys());
+			} else {
+				$reports[$report].slices = Array.from(sortResult.keys());
+			}
+		}
 	}
 
-	$: sortResult = getSortResult(currentReport);
+	async function getResultMap(rep) {
+		let fetchResult;
+		await getMetricsForSlices(getMetKeys(rep)).then(
+			(res) => (fetchResult = res)
+		);
+		const rowSize = fetchResult.length / yCells.length;
+		let resMap = {};
+
+		yCells.forEach((y, i) => {
+			resMap[y] = fetchResult.slice(rowSize * i, rowSize * (i + 1));
+		});
+		return resMap;
+	}
+
+	$: modelResultMap = getResultMap(currentReport);
 </script>
 
 <div id="container">
 	<div>
-		{#await sortResult then res}
+		{#await modelResultMap then res}
 			<DataTable style="max-width: calc(100vw - 450px);">
 				<Head>
 					<Row>
@@ -113,18 +130,19 @@
 							fixed
 						</Cell>
 						<Cell>{parameters.yEncoding} \ {parameters.xEncoding}</Cell>
-						{#each xCells as xCell}
+						{#each xCells as xCell, i}
 							<Cell
-								style="width: 130px; max-width: 130px;"
+								style="width: 140px; max-width: 140px;"
 								on:keydown={() => {}}
 								on:click={() => {
-									if (sortCol[0] !== xCell) {
-										sortCol = [xCell, true];
-									} else if (sortCol[0] === xCell && sortCol[1]) {
-										sortCol = [xCell, false];
+									if (sortCol[0] !== i) {
+										sortCol = [i, true];
+									} else if (sortCol[0] === i && sortCol[1]) {
+										sortCol = [i, false];
 									} else {
-										sortCol = ["", true];
+										sortCol = [-1, true];
 									}
+									sortByCol(res, sortCol);
 								}}>
 								<div style="display: flex;">
 									<div style="margin:auto;overflow: hidden">
@@ -135,9 +153,9 @@
 										{/if}
 									</div>
 									<Icon class="material-icons" style="font-size: 25px;">
-										{#if sortCol[0] === xCell && sortCol[1]}
+										{#if sortCol[0] === i && sortCol[1]}
 											arrow_drop_up
-										{:else if sortCol[0] === xCell}
+										{:else if sortCol[0] === i}
 											arrow_drop_down
 										{/if}
 									</Icon>
