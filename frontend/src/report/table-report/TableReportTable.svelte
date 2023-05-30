@@ -12,7 +12,7 @@
 
 	let xCells = [];
 	let yCells = [];
-	$: sortCol = [];
+	$: sortCol = ["", true];
 
 	function getMetKeys(rep) {
 		const metricKeys: MetricKey[] = [];
@@ -114,12 +114,34 @@
 						</Cell>
 						<Cell>{parameters.yEncoding} \ {parameters.xEncoding}</Cell>
 						{#each xCells as xCell}
-							<Cell style="width: 120px; max-width: 120px; text-align: center;">
-								{#if parameters.xEncoding === "slices"}
-									<SliceDetailsContainer sli={$slices.get(xCell)} />
-								{:else}
-									{xCell}
-								{/if}
+							<Cell
+								style="width: 130px; max-width: 130px;"
+								on:keydown={() => {}}
+								on:click={() => {
+									if (sortCol[0] !== xCell) {
+										sortCol = [xCell, true];
+									} else if (sortCol[0] === xCell && sortCol[1]) {
+										sortCol = [xCell, false];
+									} else {
+										sortCol = ["", true];
+									}
+								}}>
+								<div style="display: flex;">
+									<div style="margin:auto;overflow: hidden">
+										{#if parameters.xEncoding === "slices"}
+											<SliceDetailsContainer sli={$slices.get(xCell)} />
+										{:else}
+											{xCell}
+										{/if}
+									</div>
+									<Icon class="material-icons" style="font-size: 25px;">
+										{#if sortCol[0] === xCell && sortCol[1]}
+											arrow_drop_up
+										{:else if sortCol[0] === xCell}
+											arrow_drop_down
+										{/if}
+									</Icon>
+								</div>
 							</Cell>
 						{/each}
 					</Row>
