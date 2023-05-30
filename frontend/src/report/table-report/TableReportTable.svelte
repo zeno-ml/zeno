@@ -105,15 +105,16 @@
 
 	async function getResultMap(rep) {
 		let fetchResult;
+		let resMap = {};
+
 		await getMetricsForSlices(getMetKeys(rep)).then(
 			(res) => (fetchResult = res)
 		);
 		const rowSize = fetchResult.length / yCells.length;
-		let resMap = {};
-
 		yCells.forEach((y, i) => {
 			resMap[y] = fetchResult.slice(rowSize * i, rowSize * (i + 1));
 		});
+
 		return resMap;
 	}
 
@@ -132,8 +133,8 @@
 						<Cell>{parameters.yEncoding} \ {parameters.xEncoding}</Cell>
 						{#each xCells as xCell, i}
 							<Cell
-								style="width: 140px; max-width: 140px;"
-								on:keydown={() => {}}
+								style="width: 140px; max-width: 140px; cursor: pointer;"
+								on:keydown={() => ({})}
 								on:click={() => {
 									if (sortCol[0] !== i) {
 										sortCol = [i, true];
