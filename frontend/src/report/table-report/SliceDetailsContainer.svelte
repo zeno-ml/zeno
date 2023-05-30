@@ -12,7 +12,7 @@
 <div
 	class="slice-link"
 	on:click={() => {
-		updateTab("exploration");
+		updateTab("explore");
 		selections.update((sel) => ({
 			slices: [sli.sliceName],
 			metadata: sel.metadata,
@@ -38,15 +38,18 @@
 <style>
 	.tooltip-container {
 		z-index: 10;
+		width: fit-content;
 		position: absolute;
-		height: max-content;
-		transform: translateY(100%);
+		transform: translateY(10%);
 	}
 	.tooltip {
 		background: var(--G6);
-		padding: 10px;
-		box-shadow: 1px 1px 3px 1px var(--G4);
+		padding-left: 10px;
+		padding-right: 10px;
+		box-shadow: 1px 1px 3px 1px var(--G3);
 		border-radius: 4px;
+		padding-top: 10px;
+		padding-bottom: 10px;
 	}
 	.slice-link {
 		color: #6a1b9a;

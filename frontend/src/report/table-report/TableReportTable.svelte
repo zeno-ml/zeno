@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Icon } from "@smui/button";
 	import { report, reports, slices } from "../../stores";
 	import DataTable, { Body, Cell, Head, Row } from "@smui/data-table";
 	import SliceDetailsContainer from "./SliceDetailsContainer.svelte";
@@ -7,10 +8,11 @@
 	import type { MetricKey } from "../../zenoservice";
 
 	$: currentReport = $reports[$report];
-	$: selectModels = currentReport.models;
-	$: selectMetrics = currentReport.metrics;
-	$: selectSlices = currentReport.slices;
 	$: parameters = currentReport.parameters;
+
+	let xCells = [];
+	let yCells = [];
+	$: sortCol = [];
 
 	function getMetKeys(rep) {
 		const metricKeys: MetricKey[] = [];
@@ -27,6 +29,8 @@
 						});
 					});
 				});
+				xCells = Object.assign([], rep.models);
+				yCells = Object.assign([], rep.slices);
 			}
 			// x: slices, y: models
 			else if (parameters.yEncoding === "models") {
@@ -39,6 +43,8 @@
 						});
 					});
 				});
+				xCells = Object.assign([], rep.slices);
+				yCells = Object.assign([], rep.models);
 			}
 		}
 		// fixed slices
@@ -53,6 +59,8 @@
 					});
 				});
 			});
+			xCells = Object.assign([], rep.metrics);
+			yCells = Object.assign([], rep.models);
 		}
 		// fixed models
 		else if (parameters.zEncoding === "models") {
@@ -66,66 +74,67 @@
 					});
 				});
 			});
+			xCells = Object.assign([], rep.metrics);
+			yCells = Object.assign([], rep.slices);
 		}
 		return metricKeys;
 	}
-	$: modelResults = getMetricsForSlices(getMetKeys(currentReport));
+
+	async function getSortResult(currentReport) {
+		let fetchResult;
+		let sortResult = {};
+		await getMetricsForSlices(getMetKeys(currentReport)).then(
+			(res) => (fetchResult = res)
+		);
+		const resultSize = fetchResult.length / yCells.length;
+		yCells.forEach((y, i) => {
+			sortResult[y] = fetchResult.slice(resultSize * i, resultSize * (i + 1));
+		});
+		console.log(
+			new Map(
+				Object.entries(sortResult).sort(
+					(a, b) => b[1][0].metric - a[1][0].metric
+				)
+			)
+		);
+		return sortResult;
+	}
+
+	$: sortResult = getSortResult(currentReport);
 </script>
 
 <div id="container">
 	<div>
-		<DataTable style="max-width: calc(100vw - 450px);">
-			<Head>
-				<Row>
-					<Cell class="sticky" style="border-right: 1px solid #e8e8e8">
-						fixed
-					</Cell>
-					<Cell>{parameters.yEncoding} \ {parameters.xEncoding}</Cell>
-					{#if parameters.xEncoding === "slices"}
-						{#each selectSlices as slice}
+		{#await sortResult then res}
+			<DataTable style="max-width: calc(100vw - 450px);">
+				<Head>
+					<Row>
+						<Cell class="sticky" style="border-right: 1px solid #e8e8e8">
+							fixed
+						</Cell>
+						<Cell>{parameters.yEncoding} \ {parameters.xEncoding}</Cell>
+						{#each xCells as xCell}
 							<Cell style="width: 120px; max-width: 120px; text-align: center;">
-								<SliceDetailsContainer sli={$slices.get(slice)} />
+								{#if parameters.xEncoding === "slices"}
+									<SliceDetailsContainer sli={$slices.get(xCell)} />
+								{:else}
+									{xCell}
+								{/if}
 							</Cell>
 						{/each}
-					{:else if parameters.xEncoding === "models"}
-						{#each selectModels as m}
-							<Cell style="width: 120px; max-width: 120px; text-align: center;">
-								{m}
-							</Cell>
-						{/each}
-					{:else if parameters.xEncoding === "metrics"}
-						{#each selectMetrics as m}
-							<Cell style="width: 120px; max-width: 120px; text-align: center;">
-								{m}
-							</Cell>
-						{/each}
-					{/if}
-				</Row>
-			</Head>
-			<Body style="overflow: visible">
-				{#await modelResults then res}
-					{#if parameters.yEncoding === "slices"}
-						{@const resultSize = res.length / selectSlices.length}
-						{#each selectSlices as slice, i}
-							<TableReportRow
-								result={res.slice(resultSize * i, resultSize * (i + 1))}
-								yCell={slice}
-								{parameters}
-								{currentReport} />
-						{/each}
-					{:else if parameters.yEncoding === "models"}
-						{@const resultSize = res.length / selectModels.length}
-						{#each selectModels as model, i}
-							<TableReportRow
-								result={res.slice(resultSize * i, resultSize * (i + 1))}
-								yCell={model}
-								{parameters}
-								{currentReport} />
-						{/each}
-					{/if}
-				{/await}
-			</Body>
-		</DataTable>
+					</Row>
+				</Head>
+				<Body style="overflow: visible">
+					{#each yCells as yCell}
+						<TableReportRow
+							result={res[yCell]}
+							{yCell}
+							{parameters}
+							{currentReport} />
+					{/each}
+				</Body>
+			</DataTable>
+		{/await}
 	</div>
 </div>
 
