@@ -53,6 +53,7 @@
 	$: {
 		$comparisonModels;
 		currentPage;
+		$rowsPerPage;
 		$status.completeColumns;
 		$model;
 		$sort;

@@ -70,6 +70,7 @@
 		$model;
 		$sort;
 		$editId, currentPage;
+		$rowsPerPage;
 		updateTable();
 	}
 
