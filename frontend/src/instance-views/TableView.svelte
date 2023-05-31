@@ -64,12 +64,13 @@
 
 	// update on page, metadata selection, slice selection, or state change.
 	$: {
+		currentPage;
 		$status.completeColumns;
 		$selections.tags;
 		$selectionPredicates;
 		$model;
 		$sort;
-		$editId, currentPage;
+		$editId;
 		$rowsPerPage;
 		updateTable();
 	}
