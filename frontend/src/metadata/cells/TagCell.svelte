@@ -57,11 +57,11 @@
 		deleteTag(tag.tagName);
 	}
 
-	function updateTagIdsAfterRemove() {
+	function updateTagIdsAfterRemove(selectionTags) {
 		let s = new Set();
 		//loop through all selectedTags and re-add their IDs (assumes that the selections.tags will already be updated)
 		//this is to catch for the case when you have intersections between tags
-		$selections.tags.forEach((tag) =>
+		selectionTags.forEach((tag) =>
 			$tags.get(tag).selectionIds.ids.forEach((id) => s.add(id))
 		);
 		let finalArray = [];
@@ -85,62 +85,70 @@
 			$selections.tags.length === 1 &&
 			$selections.tags.includes(tag.tagName)
 		) {
-			selections.update((s) => ({
-				slices: s.slices,
-				metadata: s.metadata,
-				tags: [],
-			}));
-			updateTagIdsAfterRemove();
+			selections.update((s) => {
+				tagIds.set({ ids: [] });
+				return {
+					slices: s.slices,
+					metadata: s.metadata,
+					tags: [],
+				};
+			});
 			return;
 		}
 		if (e.shiftKey) {
 			if ($selections.tags.includes(tag.tagName)) {
 				selections.update((sel) => {
 					sel.tags.splice(sel.tags.indexOf(tag.tagName), 1);
+					updateTagIdsAfterRemove(sel.tags);
 					return {
 						slices: sel.slices,
 						metadata: sel.metadata,
 						tags: [...sel.tags],
 					};
 				});
-				updateTagIdsAfterRemove();
 			} else {
-				selections.update((sel) => ({
-					slices: sel.slices,
-					metadata: sel.metadata,
-					tags: [...sel.tags, tag.tagName],
-				}));
-				addTagIdsToTagIds(tag.tagName);
+				selections.update((sel) => {
+					addTagIdsToTagIds(tag.tagName);
+					return {
+						slices: sel.slices,
+						metadata: sel.metadata,
+						tags: [...sel.tags, tag.tagName],
+					};
+				});
 			}
 		} else {
 			if ($selections.tags.includes(tag.tagName)) {
 				if ($selections.tags.length > 0) {
-					selections.update((sel) => ({
-						slices: sel.slices,
-						metadata: sel.metadata,
-						tags: [tag.tagName],
-					}));
-					tagIds.set({ ids: [] });
-					addTagIdsToTagIds(tag.tagName);
+					selections.update((sel) => {
+						tagIds.set({ ids: [] });
+						addTagIdsToTagIds(tag.tagName);
+						return {
+							slices: sel.slices,
+							metadata: sel.metadata,
+							tags: [tag.tagName],
+						};
+					});
 				} else {
 					selections.update((sel) => {
 						sel.tags.splice(sel.tags.indexOf(tag.tagName), 1);
+						updateTagIdsAfterRemove(sel.tags);
 						return {
 							slices: sel.slices,
 							metadata: sel.metadata,
 							tags: [...sel.tags],
 						};
 					});
-					updateTagIdsAfterRemove();
 				}
 			} else {
-				selections.update((sel) => ({
-					slices: sel.slices,
-					metadata: sel.metadata,
-					tags: [tag.tagName],
-				}));
-				tagIds.set({ ids: [] });
-				addTagIdsToTagIds(tag.tagName);
+				selections.update((sel) => {
+					tagIds.set({ ids: [] });
+					addTagIdsToTagIds(tag.tagName);
+					return {
+						slices: sel.slices,
+						metadata: sel.metadata,
+						tags: [tag.tagName],
+					};
+				});
 			}
 		}
 	}
