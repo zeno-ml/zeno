@@ -128,6 +128,7 @@
 		}
 		getFilteredTable(
 			$status.completeColumns,
+			[$model, $comparisonModel],
 			$selectionPredicates,
 			[start, end],
 			$compareSort,

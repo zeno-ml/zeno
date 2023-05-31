@@ -88,6 +88,7 @@
 	function updateTable() {
 		getFilteredTable(
 			$status.completeColumns,
+			[$model],
 			setModelForFilterPredicateGroup($selectionPredicates, $model),
 			[start, end],
 			$sort,

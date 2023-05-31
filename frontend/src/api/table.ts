@@ -9,6 +9,7 @@ import { setModelForFilterPredicateGroup } from "./slice";
 
 export async function getFilteredTable(
 	completeColumns,
+	filterModels: string[],
 	filterPredicates: FilterPredicateGroup,
 	sliceRange: [number, number],
 	sort: [ZenoColumn, boolean],
@@ -17,7 +18,9 @@ export async function getFilteredTable(
 	tagList?: Array<string>
 ) {
 	const requestedColumns = completeColumns.filter(
-		(c) => c.columnType !== ZenoColumnType.EMBEDDING
+		(c) =>
+			c.columnType !== ZenoColumnType.EMBEDDING &&
+			(filterModels.includes(c.model) || c.model === "")
 	);
 	const res = await ZenoService.getFilteredTable({
 		columns: requestedColumns,
