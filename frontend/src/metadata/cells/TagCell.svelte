@@ -85,6 +85,7 @@
 			$selections.tags.length === 1 &&
 			$selections.tags.includes(tag.tagName)
 		) {
+			// deselect single tag cell
 			selections.update((s) => {
 				tagIds.set({ ids: [] });
 				return {
@@ -96,6 +97,7 @@
 			return;
 		}
 		if (e.shiftKey) {
+			// remove selection in multi-select mode
 			if ($selections.tags.includes(tag.tagName)) {
 				selections.update((sel) => {
 					sel.tags.splice(sel.tags.indexOf(tag.tagName), 1);
@@ -106,7 +108,9 @@
 						tags: [...sel.tags],
 					};
 				});
-			} else {
+			}
+			// add selection in multi-select mode
+			else {
 				selections.update((sel) => {
 					addTagIdsToTagIds(tag.tagName);
 					return {
@@ -117,6 +121,7 @@
 				});
 			}
 		} else {
+			// single select mode
 			if ($selections.tags.includes(tag.tagName)) {
 				if ($selections.tags.length > 0) {
 					selections.update((sel) => {
