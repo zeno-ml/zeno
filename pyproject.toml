@@ -16,7 +16,7 @@ exclude = ["zeno/tests/*"]
 fastapi = "^0.95.1"
 inquirer = "^3.1.2"
 nest-asyncio = "^1.5.6"
-opentsne = "^0.7.1"
+opentsne = ">=0.7.1,<1.1.0"
 pandas = "^2.0.0"
 pathos = "^0.3.0"
 python = "^3.8"
@@ -31,9 +31,9 @@ zeno-sliceline = "^0.0.1"
 [tool.poetry.dev-dependencies]
 black = "^23.3.0"
 httpx = "^0.24.1"
-pyright = "^1.1.309"
+pyright = "^1.1.310"
 pytest = "^7.2.2"
-ruff = "^0.0.269"
+ruff = "^0.0.270"
 
 [tool.poetry.scripts]
 zeno = "zeno.runner:command_line"

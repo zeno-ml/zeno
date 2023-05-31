@@ -72,6 +72,7 @@
 	$: {
 		currentPage;
 		$comparisonModel;
+		$rowsPerPage;
 		$status.completeColumns;
 		$model;
 		$compareSort;

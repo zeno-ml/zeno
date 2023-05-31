@@ -39,7 +39,7 @@
 		[ChartType.TABLE]: {
 			x: "x",
 			y: "y",
-			z: "layer",
+			z: "fixed",
 		},
 		[ChartType.BEESWARM]: {
 			x: "x",
@@ -72,9 +72,9 @@
 		},
 		// table view select option dropdown
 		[ChartType.TABLE]: {
-			x: [{ label: "slices" }, { label: "models" }],
+			x: [{ label: "slices" }, { label: "models" }, { label: "metrics" }],
 			y: [{ label: "slices" }, { label: "models" }],
-			z: [{ label: "metrics" }],
+			z: [{ label: "slices" }, { label: "models" }, { label: "metrics" }],
 		},
 		// beeswarm chart select option dropdown
 		[ChartType.BEESWARM]: {
@@ -109,18 +109,8 @@
 			if (currentParam === "x") {
 				parameters.xEncoding = label;
 				parameters.zEncoding = paramExcluMap[label];
-			} else if (currentParam === "color") {
+			} else if (currentParam === "z") {
 				parameters.zEncoding = label;
-				parameters.xEncoding = paramExcluMap[label];
-			}
-		}
-		// table view exclusive combination
-		else if (chartType === ChartType.TABLE) {
-			if (currentParam === "x") {
-				parameters.xEncoding = label;
-				parameters.yEncoding = paramExcluMap[label];
-			} else if (currentParam === "y") {
-				parameters.yEncoding = label;
 				parameters.xEncoding = paramExcluMap[label];
 			}
 		}
@@ -129,13 +119,13 @@
 			if (currentParam === "y") {
 				parameters.yEncoding = label;
 				parameters.zEncoding = paramExcluMap[label];
-			} else if (currentParam === "color") {
+			} else if (currentParam === "z") {
 				parameters.zEncoding = label;
 				parameters.yEncoding = paramExcluMap[label];
 			}
 		}
-		// radar exclusive combination
-		else if (chartType === ChartType.RADAR) {
+		// radar or table exclusive combination
+		else if (chartType === ChartType.RADAR || chartType === ChartType.TABLE) {
 			if (currentParam === "x") {
 				parameters.xEncoding = label;
 				if (label === "metrics") {
@@ -151,7 +141,7 @@
 				} else if (parameters.zEncoding === "metrics") {
 					parameters.xEncoding = paramExcluMap[label];
 				}
-			} else if (currentParam === "color") {
+			} else if (currentParam === "z") {
 				parameters.zEncoding = label;
 				if (label === "metrics") {
 					parameters.xEncoding = paramExcluMap[parameters.yEncoding];
@@ -222,7 +212,7 @@
 						}
 					}} />
 			</div>
-			{#if chartType === ChartType.BEESWARM || chartType === ChartType.TABLE}
+			{#if chartType === ChartType.BEESWARM}
 				<FixDimension value={"y"} />
 			{/if}
 			{#if chartType === ChartType.HEATMAP && parameters.yEncoding === "slices"}
@@ -251,7 +241,7 @@
 			</div>
 		{/if}
 
-		<!-- color encoding start-->
+		<!-- z encoding start-->
 		<div class="encoding-section">
 			<div class="parameters">
 				<h4>{labelMap[chartType].z}</h4>
@@ -262,19 +252,16 @@
 					searchable={false}
 					on:change={(e) => {
 						if (e.detail.label !== parameters.zEncoding) {
-							refreshParams(e, "color");
+							refreshParams(e, "z");
 						}
 					}} />
 			</div>
-			{#if chartType === ChartType.TABLE}
-				<FixDimension value={"z"} />
-			{/if}
 			<svelte:component
 				this={fixed_dimension === "z"
 					? EncodingMap[parameters.zEncoding].fixed
 					: EncodingMap[parameters.zEncoding].multi} />
 		</div>
-		<!-- color encoding end-->
+		<!-- z encoding end-->
 	</div>
 </div>
 

@@ -49,6 +49,7 @@
 	// when state changes update current table view
 	$: {
 		currentPage;
+		$rowsPerPage;
 		$status.completeColumns;
 		$selections.tags;
 		$model;
