@@ -196,10 +196,7 @@
 	on:change={(e) => {
 		if (e.detail !== columnHeader) {
 			columnHeader = e.detail;
-			compareSort.update((c) => {
-				c[0] = columnHeader;
-				return c;
-			});
+			compareSort.set([undefined, true]);
 		}
 	}} />
 

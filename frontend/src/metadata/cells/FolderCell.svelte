@@ -4,7 +4,7 @@
 	import { Svg } from "@smui/common";
 	import Paper, { Content } from "@smui/paper";
 	import { slide } from "svelte/transition";
-	import { folders, slices } from "../../stores";
+	import { folders, slices, tab } from "../../stores";
 	import SliceCell from "./SliceCell.svelte";
 	import { ZenoService } from "../../zenoservice";
 	import { clickOutside } from "../../util/clickOutside";
@@ -123,7 +123,7 @@
 {#if expandFolder}
 	<div transition:slide>
 		{#each sls as s}
-			<SliceCell slice={s} inFolder={true} />
+			<SliceCell compare={$tab === "comparison"} slice={s} inFolder={true} />
 		{/each}
 	</div>
 {/if}
