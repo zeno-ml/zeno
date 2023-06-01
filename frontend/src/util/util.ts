@@ -41,6 +41,8 @@ export async function getInitialData() {
 
 	// initial model dependent slices in compare tab
 	modelDependSlices.set(new Map<string, Slice>());
+	updateModelDependentSlices("model A", inits.models[0], slicesMap);
+	updateModelDependentSlices("model B", inits.models[1], slicesMap);
 
 	const reportsRes = await ZenoService.getReports();
 	reports.set(reportsRes);

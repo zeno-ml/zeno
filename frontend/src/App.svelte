@@ -50,8 +50,9 @@
 	});
 
 	tab.subscribe((t) => {
+		// reset selections when switching tabs
+		selections.set({ metadata: {}, slices: [], tags: [] });
 		if (t === "comparison") {
-			selections.set({ metadata: {}, slices: [], tags: [] });
 			modelDependSlices.set(new Map<string, Slice>());
 			updateModelDependentSlices("model A", $model, $slices);
 			updateModelDependentSlices("model B", $comparisonModel, $slices);
