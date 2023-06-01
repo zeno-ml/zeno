@@ -36,33 +36,11 @@ export async function getInitialData() {
 	metric.set(inits.metrics.length > 0 ? inits.metrics[0] : "");
 
 	const slicesRes = await ZenoService.getSlices();
-	slices.set(new Map(Object.entries(slicesRes)));
+	const slicesMap = new Map(Object.entries(slicesRes));
+	slices.set(slicesMap);
 
 	// initial model dependent slices in compare tab
-	const modelSlices = new Map<string, Slice>();
-	if (inits.models.length > 0) {
-		[inits.models[0], inits.models[1]].forEach((mod) => {
-			for (const key in slicesRes) {
-				const slice = slicesRes[key];
-				const preds = slice.filterPredicates.predicates;
-				if (isModelDependPredicates(preds)) {
-					const newSlice = <Slice>{
-						sliceName:
-							slice.sliceName +
-							"-" +
-							(mod === inits.models[0] ? "model A" : "model B"),
-						folder: slice.folder,
-						filterPredicates: setModelForFilterPredicateGroup(
-							slice.filterPredicates,
-							mod
-						),
-					};
-					modelSlices[newSlice.sliceName] = newSlice;
-				}
-			}
-		});
-	}
-	modelDependSlices.set(new Map(Object.entries(modelSlices)));
+	modelDependSlices.set(new Map<string, Slice>());
 
 	const reportsRes = await ZenoService.getReports();
 	reports.set(reportsRes);
@@ -107,4 +85,24 @@ export function getMetricRange(res: number[][]): [number, number] {
 		return [Infinity, -Infinity];
 	}
 	return range;
+}
+
+// update model dependent slices in compare tab
+export function updateModelDependentSlices(name, mod, slis) {
+	slis.forEach((sli) => {
+		const preds = sli.filterPredicates.predicates;
+		if (isModelDependPredicates(preds)) {
+			modelDependSlices.update((ms) => {
+				ms.set(sli.sliceName + "-" + name, <Slice>{
+					sliceName: sli.sliceName + "-" + name,
+					folder: sli.folder,
+					filterPredicates: setModelForFilterPredicateGroup(
+						sli.filterPredicates,
+						mod
+					),
+				});
+				return ms;
+			});
+		}
+	});
 }

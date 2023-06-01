@@ -20,10 +20,6 @@
 	} from "../api/metadata";
 	import { createNewTag } from "../api/tag";
 	import {
-		isModelDependPredicates,
-		setModelForFilterPredicateGroup,
-	} from "../api/slice";
-	import {
 		editId,
 		editedIds,
 		folders,
@@ -45,10 +41,9 @@
 		tagIds,
 		tags,
 		tab,
-		modelDependSlices,
 	} from "../stores";
-	import { columnHash } from "../util/util";
-	import { ZenoColumnType, type ZenoColumn, type Slice } from "../zenoservice";
+	import { columnHash, updateModelDependentSlices } from "../util/util";
+	import { ZenoColumnType, type ZenoColumn } from "../zenoservice";
 	import MetricRange from "./MetricRange.svelte";
 	import FolderCell from "./cells/FolderCell.svelte";
 	import MetadataCell from "./cells/MetadataCell.svelte";
@@ -59,26 +54,6 @@
 
 	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
 		new InternMap([], columnHash);
-
-	// update model dependent slices in compare tab
-	function updateModelDependentSlices(name, mod, slis) {
-		slis.forEach((sli) => {
-			let preds = sli.filterPredicates.predicates;
-			if (isModelDependPredicates(preds)) {
-				modelDependSlices.update((ms) => {
-					ms.set(sli.sliceName + "-" + name, <Slice>{
-						sliceName: sli.sliceName + "-" + name,
-						folder: sli.folder,
-						filterPredicates: setModelForFilterPredicateGroup(
-							sli.filterPredicates,
-							mod
-						),
-					});
-					return ms;
-				});
-			}
-		});
-	}
 
 	// Get histogram buckets, counts, and metrics when columns update.
 	status.subscribe((s) => {
