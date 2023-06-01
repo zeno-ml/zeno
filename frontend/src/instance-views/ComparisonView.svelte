@@ -80,7 +80,7 @@
 		$selectionPredicates;
 		$tagIds;
 		$selections.tags;
-		updateTable();
+		start, end, updateTable();
 	}
 
 	$: {
