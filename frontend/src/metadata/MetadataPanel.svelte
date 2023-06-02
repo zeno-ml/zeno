@@ -528,7 +528,7 @@
 
 <style>
 	select {
-		width: 175px;
+		width: 167px;
 		height: 35px;
 		border: 1px solid var(--G4);
 		border-radius: 5px;
