@@ -36,11 +36,10 @@
 	let selectSort = $model;
 	let columnHeader = $status.completeColumns.filter(
 		(c) =>
-			(c.model === "" || c.model === $model) &&
-			(c.columnType === ZenoColumnType.PREDISTILL ||
-				c.columnType === ZenoColumnType.POSTDISTILL)
+			c.model === "" ||
+			c.model === selectSort ||
+			(selectSort === "" && c.model === $model)
 	)[0];
-
 	let currentPage = 0;
 	let lastPage = 0;
 	let totalSize = $settings.totalSize;
@@ -115,7 +114,10 @@
 		let newHeader = Object.assign({}, columnHeader);
 		newHeader.name = model ? newHeader.name : newHeader.name + "_diff";
 		newHeader.model =
-			columnHeader.columnType === ZenoColumnType.POSTDISTILL ? model : "";
+			columnHeader.columnType === ZenoColumnType.POSTDISTILL ||
+			columnHeader.columnType === ZenoColumnType.OUTPUT
+				? model
+				: "";
 
 		if (JSON.stringify($compareSort[0]) !== JSON.stringify(newHeader)) {
 			compareSort.set([newHeader, true]);
@@ -148,6 +150,7 @@
 			$selectionIds,
 			$selections.tags
 		).then((res) => {
+			console.log(res);
 			const localDivs = {};
 			[$model, $comparisonModel].forEach((mod) => {
 				tables[mod] = res;
@@ -200,11 +203,9 @@
 	valueField={"name"}
 	options={$status.completeColumns.filter(
 		(c) =>
-			(c.model === "" ||
-				c.model === selectSort ||
-				(selectSort === "" && c.model === $model)) &&
-			(c.columnType === ZenoColumnType.PREDISTILL ||
-				c.columnType === ZenoColumnType.POSTDISTILL)
+			c.model === "" ||
+			c.model === selectSort ||
+			(selectSort === "" && c.model === $model)
 	)}
 	on:change={(e) => {
 		if (e.detail !== columnHeader) {
@@ -260,7 +261,9 @@
 					{@const val = (mod, diff) => {
 						let newHeader = Object.assign({}, columnHeader);
 						newHeader.model =
-							!diff && newHeader.columnType === ZenoColumnType.POSTDISTILL
+							!diff &&
+							(newHeader.columnType === ZenoColumnType.POSTDISTILL ||
+								newHeader.columnType === ZenoColumnType.OUTPUT)
 								? mod
 								: "";
 						newHeader.name = !diff ? newHeader.name : newHeader.name + "_diff";
