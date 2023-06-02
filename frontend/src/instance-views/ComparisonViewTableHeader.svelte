@@ -8,7 +8,7 @@
 
 <div style="display: flex; align-items:center;">
 	<div>
-		<div>{model}</div>
+		<div>{model ? model : "difference"}</div>
 		<div class="header">{columnHeader.name}</div>
 	</div>
 	{#if selectSort === model}

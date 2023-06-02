@@ -24,6 +24,7 @@ export async function getFilteredTable(
 	);
 	const res = await ZenoService.getFilteredTable({
 		columns: requestedColumns,
+		filterModels,
 		filterPredicates,
 		sliceRange,
 		sort,

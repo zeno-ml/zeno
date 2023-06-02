@@ -109,14 +109,20 @@
 	function updateSort(columnHeader, model) {
 		if (selectSort !== model) {
 			compareSort.set([undefined, true]);
+			selectSort = model;
 		}
-		selectSort = model;
-		let newHeader = columnHeader;
+
+		let newHeader = Object.assign({}, columnHeader);
+		newHeader.name = model ? newHeader.name : newHeader.name + "_diff";
 		newHeader.model =
 			columnHeader.columnType === ZenoColumnType.POSTDISTILL ? model : "";
-		if ($compareSort[0] !== newHeader) {
+
+		if (JSON.stringify($compareSort[0]) !== JSON.stringify(newHeader)) {
 			compareSort.set([newHeader, true]);
-		} else if ($compareSort[0] === newHeader && $compareSort[1]) {
+		} else if (
+			JSON.stringify($compareSort[0]) === JSON.stringify(newHeader) &&
+			$compareSort[1]
+		) {
 			compareSort.set([newHeader, false]);
 		} else {
 			compareSort.set([undefined, true]);
@@ -127,8 +133,13 @@
 		if (start === undefined || end === undefined) {
 			return;
 		}
+		// add a difference ZenoColumn before getting filter tables
+		let diffHeader = Object.assign({}, columnHeader);
+		diffHeader.name += "_diff";
+		diffHeader.model = "";
+
 		getFilteredTable(
-			$status.completeColumns,
+			$status.completeColumns.concat(diffHeader),
 			[$model, $comparisonModel],
 			$selectionPredicates,
 			[start, end],
@@ -189,7 +200,9 @@
 	valueField={"name"}
 	options={$status.completeColumns.filter(
 		(c) =>
-			(c.model === "" || c.model === selectSort) &&
+			(c.model === "" ||
+				c.model === selectSort ||
+				(selectSort === "" && c.model === $model)) &&
 			(c.columnType === ZenoColumnType.PREDISTILL ||
 				c.columnType === ZenoColumnType.POSTDISTILL)
 	)}
@@ -238,14 +251,21 @@
 						{selectSort}
 						model={$comparisonModel} />
 				</th>
+				<th on:click={() => updateSort(columnHeader, "")}>
+					<ComparisonViewTableHeader {columnHeader} {selectSort} model={""} />
+				</th>
 			</thead>
 			<tbody>
 				{#each [...Array(end - start).keys()] as rowId (tables[$model][rowId] ? tables[$model][rowId][idHash] : rowId)}
-					{@const val = (mod) => {
+					{@const val = (mod, diff) => {
 						let newHeader = Object.assign({}, columnHeader);
 						newHeader.model =
-							newHeader.columnType === ZenoColumnType.POSTDISTILL ? mod : "";
-						return tables[mod][rowId]
+							!diff && newHeader.columnType === ZenoColumnType.POSTDISTILL
+								? mod
+								: "";
+						newHeader.name = !diff ? newHeader.name : newHeader.name + "_diff";
+						return tables[mod][rowId] &&
+							columnHash(newHeader) in tables[mod][rowId]
 							? newHeader.metadataType === MetadataType.CONTINUOUS
 								? tables[mod][rowId][columnHash(newHeader)].toFixed(2)
 								: tables[mod][rowId][columnHash(newHeader)]
@@ -259,8 +279,9 @@
 								</td>
 							{/if}
 						{/each}
-						<td>{val($model)}</td>
-						<td>{val($comparisonModel)}</td>
+						<td>{val($model, false)}</td>
+						<td>{val($comparisonModel, false)}</td>
+						<td>{val($model, true)}</td>
 					</tr>
 				{/each}
 			</tbody>

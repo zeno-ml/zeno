@@ -45,6 +45,7 @@ class MetricRequest(CamelModel):
 
 class TableRequest(CamelModel):
     columns: List[ZenoColumn]
+    filter_models: List[str]
     slice_range: List[int]
     filter_predicates: FilterPredicateGroup
     sort: Tuple[Union[ZenoColumn, None], bool]
