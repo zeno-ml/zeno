@@ -14,6 +14,7 @@
 		comparisonModel,
 		slices,
 		modelDependSlices,
+		tagIds,
 	} from "./stores";
 	import {
 		columnHash,
@@ -52,6 +53,7 @@
 	tab.subscribe((t) => {
 		// reset selections when switching tabs
 		selections.set({ metadata: {}, slices: [], tags: [] });
+		tagIds.set({ ids: [] });
 		if (t === "comparison") {
 			modelDependSlices.set(new Map<string, Slice>());
 			updateModelDependentSlices("model A", $model, $slices);
