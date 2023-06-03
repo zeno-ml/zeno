@@ -1,17 +1,17 @@
 <script>
 	import { Icon } from "@smui/button";
 	import { compareSort } from "../stores";
-	export let model;
-	export let columnHeader;
-	export let selectSort;
+	export let header;
+	export let selectColumn;
+	export let sortModel;
 </script>
 
 <div style="display: flex; align-items:center;">
 	<div>
-		<div>{model ? model : "difference"}</div>
-		<div class="header">{columnHeader.name}</div>
+		<div>{header ? header : "difference"}</div>
+		<div class="header">{selectColumn.name}</div>
 	</div>
-	{#if selectSort === model}
+	{#if sortModel === header}
 		<Icon class="material-icons" style="font-size: 25px; padding-top:3px;">
 			{#if $compareSort[0] && $compareSort[1]}
 				arrow_drop_up

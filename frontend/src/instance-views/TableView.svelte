@@ -91,6 +91,7 @@
 		getFilteredTable(
 			$status.completeColumns,
 			[$model],
+			undefined,
 			setModelForFilterPredicateGroup($selectionPredicates, $model),
 			[start, end],
 			$sort,

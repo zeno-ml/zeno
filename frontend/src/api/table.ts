@@ -10,9 +10,10 @@ import { setModelForFilterPredicateGroup } from "./slice";
 export async function getFilteredTable(
 	completeColumns,
 	filterModels: string[],
+	diffColumn: ZenoColumn,
 	filterPredicates: FilterPredicateGroup,
 	sliceRange: [number, number],
-	sort: [ZenoColumn, boolean],
+	sort: [ZenoColumn | string, boolean],
 	tagIds: FilterIds,
 	filterIds?: FilterIds,
 	tagList?: Array<string>
@@ -22,9 +23,24 @@ export async function getFilteredTable(
 			c.columnType !== ZenoColumnType.EMBEDDING &&
 			(filterModels.includes(c.model) || c.model === "")
 	);
+
+	// create diff columns for comparison view
+	let diffColumnA;
+	let diffColumnB;
+	if (diffColumn) {
+		diffColumnA = Object.assign({}, diffColumn);
+		diffColumnB = Object.assign({}, diffColumn);
+		const addModel = [
+			ZenoColumnType.POSTDISTILL,
+			ZenoColumnType.OUTPUT,
+		].includes(diffColumn.columnType);
+		diffColumnA.model = addModel ? filterModels[0] : "";
+		diffColumnB.model = addModel ? filterModels[1] : "";
+	}
+
 	const res = await ZenoService.getFilteredTable({
 		columns: requestedColumns,
-		filterModels,
+		diffColumns: diffColumn ? [diffColumnA, diffColumnB] : [],
 		filterPredicates,
 		sliceRange,
 		sort,

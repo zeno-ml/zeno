@@ -33,13 +33,18 @@
 	let tables = {};
 	let viewDivs = {};
 	let instanceContainer;
-	let selectSort = $model;
-	let columnHeader = $status.completeColumns.filter(
+
+	// decide which model column to show sort icon
+	let sortModel = "";
+
+	let options = $status.completeColumns.filter(
 		(c) =>
 			c.model === "" ||
-			c.model === selectSort ||
-			(selectSort === "" && c.model === $model)
-	)[0];
+			c.model === $model ||
+			(sortModel === "" && c.model === $model)
+	);
+	let selectColumn = options[0];
+
 	let currentPage = 0;
 	let lastPage = 0;
 	let totalSize = $settings.totalSize;
@@ -91,6 +96,7 @@
 	}
 
 	model.subscribe((model) => {
+		// make sure Model A and Model B are exclusive
 		if ($comparisonModel.includes(model)) {
 			$comparisonModel = $models.filter((m) => m !== model)[0];
 			tables[model] = [];
@@ -105,44 +111,49 @@
 		}
 	});
 
-	function updateSort(columnHeader, model) {
-		if (selectSort !== model) {
+	// trigger this function when clicking column header to sort
+	function updateSort(selectColumn, model) {
+		// when clicking different model columns, reset compareSort
+		if (sortModel !== model) {
 			compareSort.set([undefined, true]);
-			selectSort = model;
+			sortModel = model;
 		}
 
-		let newHeader = Object.assign({}, columnHeader);
-		newHeader.name = model ? newHeader.name : newHeader.name + "_diff";
-		newHeader.model =
-			columnHeader.columnType === ZenoColumnType.POSTDISTILL ||
-			columnHeader.columnType === ZenoColumnType.OUTPUT
-				? model
-				: "";
+		// assign new model to the selected column
+		let newHeader = model ? setColumnModel(selectColumn, model) : "diff";
 
-		if (JSON.stringify($compareSort[0]) !== JSON.stringify(newHeader)) {
+		let compareSortString = JSON.stringify($compareSort[0]);
+		let newHeaderString = JSON.stringify(newHeader);
+
+		if (compareSortString !== newHeaderString) {
 			compareSort.set([newHeader, true]);
-		} else if (
-			JSON.stringify($compareSort[0]) === JSON.stringify(newHeader) &&
-			$compareSort[1]
-		) {
+		} else if (compareSortString === newHeaderString && $compareSort[1]) {
 			compareSort.set([newHeader, false]);
 		} else {
 			compareSort.set([undefined, true]);
 		}
 	}
 
+	// set model for postdistill/output column
+	function setColumnModel(col, model) {
+		let col_copy = Object.assign({}, col);
+		col_copy.model =
+			col.columnType === ZenoColumnType.POSTDISTILL ||
+			col.columnType === ZenoColumnType.OUTPUT
+				? model
+				: "";
+		return col_copy;
+	}
+
 	function updateTable() {
 		if (start === undefined || end === undefined) {
 			return;
 		}
-		// add a difference ZenoColumn before getting filter tables
-		let diffHeader = Object.assign({}, columnHeader);
-		diffHeader.name += "_diff";
-		diffHeader.model = "";
 
 		getFilteredTable(
-			$status.completeColumns.concat(diffHeader),
+			$status.completeColumns,
 			[$model, $comparisonModel],
+			selectColumn,
 			$selectionPredicates,
 			[start, end],
 			$compareSort,
@@ -150,7 +161,6 @@
 			$selectionIds,
 			$selections.tags
 		).then((res) => {
-			console.log(res);
 			const localDivs = {};
 			[$model, $comparisonModel].forEach((mod) => {
 				tables[mod] = res;
@@ -197,19 +207,17 @@
 
 <Svelecte
 	style="padding-top: 5px;padding-bottom: 5px"
-	value={columnHeader}
+	value={selectColumn}
 	placeholder={"Column"}
 	valueAsObject
 	valueField={"name"}
-	options={$status.completeColumns.filter(
-		(c) =>
-			c.model === "" ||
-			c.model === selectSort ||
-			(selectSort === "" && c.model === $model)
-	)}
+	{options}
 	on:change={(e) => {
-		if (e.detail !== columnHeader) {
-			columnHeader = e.detail;
+		if (e.detail !== selectColumn) {
+			selectColumn = e.detail;
+			// reset tables data to prevent rerender the existing(non-updated) data
+			tables[$model] = [];
+			tables[$comparisonModel] = [];
 			compareSort.set([undefined, true]);
 		}
 	}} />
@@ -240,38 +248,32 @@
 						</span>
 					</div>
 				</th>
-				<th on:click={() => updateSort(columnHeader, $model)}>
+				<th on:click={() => updateSort(selectColumn, $model)}>
 					<ComparisonViewTableHeader
-						{columnHeader}
-						{selectSort}
-						model={$model} />
+						{selectColumn}
+						{sortModel}
+						header={$model} />
 				</th>
-				<th on:click={() => updateSort(columnHeader, $comparisonModel)}>
+				<th on:click={() => updateSort(selectColumn, $comparisonModel)}>
 					<ComparisonViewTableHeader
-						{columnHeader}
-						{selectSort}
-						model={$comparisonModel} />
+						{selectColumn}
+						{sortModel}
+						header={$comparisonModel} />
 				</th>
-				<th on:click={() => updateSort(columnHeader, "")}>
-					<ComparisonViewTableHeader {columnHeader} {selectSort} model={""} />
+				<th on:click={() => updateSort(selectColumn, "")}>
+					<ComparisonViewTableHeader {selectColumn} {sortModel} header={""} />
 				</th>
 			</thead>
 			<tbody>
 				{#each [...Array(end - start).keys()] as rowId (tables[$model][rowId] ? tables[$model][rowId][idHash] : rowId)}
 					{@const val = (mod, diff) => {
-						let newHeader = Object.assign({}, columnHeader);
-						newHeader.model =
-							!diff &&
-							(newHeader.columnType === ZenoColumnType.POSTDISTILL ||
-								newHeader.columnType === ZenoColumnType.OUTPUT)
-								? mod
-								: "";
-						newHeader.name = !diff ? newHeader.name : newHeader.name + "_diff";
-						return tables[mod][rowId] &&
-							columnHash(newHeader) in tables[mod][rowId]
+						let row = tables[mod][rowId];
+						let newHeader = setColumnModel(selectColumn, mod);
+						let key = diff ? "diff" : columnHash(newHeader);
+						return row
 							? newHeader.metadataType === MetadataType.CONTINUOUS
-								? tables[mod][rowId][columnHash(newHeader)].toFixed(2)
-								: tables[mod][rowId][columnHash(newHeader)]
+								? row[key].toFixed(2)
+								: row[key]
 							: "";
 					}}
 					<tr>

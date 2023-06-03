@@ -74,7 +74,7 @@ export const sort: Writable<[ZenoColumn, boolean]> = writable([
 	undefined,
 	true,
 ]);
-export const compareSort: Writable<[ZenoColumn, boolean]> = writable([
+export const compareSort: Writable<[ZenoColumn | string, boolean]> = writable([
 	undefined,
 	true,
 ]);

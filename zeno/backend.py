@@ -625,7 +625,10 @@ class ZenoBackend(object):
         filt_df = filter_table(
             self.df, req.filter_predicates, req.filter_ids, req.tag_ids, req.tag_list
         )
-        filt_df = self.generate_diff_cols(filt_df, req.columns, req.filter_models)
+        req_columns = [str(col) for col in req.columns]
+        if req.diff_columns:
+            filt_df = self.generate_diff_cols(filt_df, req.diff_columns)
+            req_columns.append("diff")
         if req.sort[0]:
             filt_df = filt_df.sort_values(str(req.sort[0]), ascending=req.sort[1])
         filt_df = filt_df.iloc[req.slice_range[0] : req.slice_range[1]].copy()
@@ -634,31 +637,23 @@ class ZenoBackend(object):
             filt_df.loc[:, str(self.data_column)] = (
                 self.data_prefix + filt_df[str(self.data_column)]
             )
-        return filt_df[[str(col) for col in req.columns]].to_json(orient="records")
+        return filt_df.loc[:, req_columns].to_json(orient="records")
 
-    def generate_diff_cols(
-        self, df: DataFrame, cols: List[ZenoColumn], models: List[str]
-    ):
-        for col in cols:
-            if str(col).split("_")[-1] == "diff":
-                diff_col = str(col)[:-5]
-                diff_cols = []
-                # postdistill column name includes model
-                if col.column_type == ZenoColumnType.POSTDISTILL:
-                    diff_cols = [diff_col + m for m in models]
-                    # various metadata type difference
-                    if col.metadata_type in (
-                        MetadataType.CONTINUOUS,
-                        MetadataType.BOOLEAN,
-                    ):
-                        df[diff_col + "_diff"] = abs(
-                            df[diff_cols[0]].astype(float)
-                            - df[diff_cols[1]].astype(float)
-                        )
-                    elif col.metadata_type == MetadataType.NOMINAL:
-                        df[diff_col + "_diff"] = df[diff_cols[0]] == df[diff_cols[1]]
-                # predistill columns have no difference
-                else:
-                    df[diff_col + "_diff"] = 0
-                return df
+    def generate_diff_cols(self, df: DataFrame, diff_cols: List[ZenoColumn]):
+        col_1, col_2 = diff_cols[0], diff_cols[1]
+        if (
+            col_1.column_type != col_2.column_type
+            or col_1.metadata_type != col_2.metadata_type
+        ):
+            print("error: different column types!")
+            return df
+
+        # various metadata type difference
+        if col_1.metadata_type == MetadataType.CONTINUOUS:
+            df["diff"] = abs(
+                df[str(col_1)].astype(float) - df[str(col_2)].astype(float)
+            )
+        else:
+            df["diff"] = df[str(col_1)] != df[str(col_2)]
+
         return df
