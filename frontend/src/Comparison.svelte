@@ -1,15 +1,10 @@
 <script lang="ts">
 	import InstanceView from "./instance-views/InstanceView.svelte";
 	import MetadataPanel from "./metadata/MetadataPanel.svelte";
-	import NewSlicePopup from "./metadata/popups/NewSlicePopup.svelte";
-	import { ready, showNewSlice, status } from "./stores";
+	import { ready, status } from "./stores";
 </script>
 
 {#if $ready && $status.completeColumns.length > 0}
-	<!-- These popups are at the top level b/c of issues with overflow-y scroll. -->
-	{#if $showNewSlice}
-		<NewSlicePopup />
-	{/if}
 	<div class="container">
 		<MetadataPanel />
 		<div id="samples">
