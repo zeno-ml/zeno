@@ -13,7 +13,7 @@ include = ["zeno/frontend/**/*"]
 exclude = ["zeno/tests/*"]
 
 [tool.poetry.dependencies]
-fastapi = "^0.95.1"
+fastapi = ">=0.95.1,<0.97.0"
 inquirer = "^3.1.2"
 nest-asyncio = "^1.5.6"
 opentsne = ">=0.7.1,<1.1.0"
