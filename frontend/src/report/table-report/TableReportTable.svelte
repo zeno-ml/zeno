@@ -124,12 +124,29 @@
 <div id="container">
 	<div>
 		{#await modelResultMap then res}
+			<div class="fixed-line">
+				<h4 style="margin-right: 8px;">fixed dimension:</h4>
+				<div style="margin-right: 8px;">
+					{#if parameters.zEncoding === "slices"}
+						<SliceDetailsContainer sli={$slices.get(currentReport.slices[0])} />
+					{:else if parameters.zEncoding === "models"}
+						{currentReport.models[0]}
+					{:else if parameters.zEncoding === "metrics"}
+						{currentReport.metrics[0]}
+					{/if}
+				</div>
+				<div>
+					{parameters.zEncoding === "slices"
+						? "(Slice)"
+						: parameters.zEncoding === "models"
+						? "(Model)"
+						: "(Metric)"}
+				</div>
+			</div>
+
 			<DataTable style="max-width: calc(100vw - 450px);">
 				<Head>
 					<Row>
-						<Cell class="sticky" style="border-right: 1px solid #e8e8e8">
-							fixed
-						</Cell>
 						<Cell>{parameters.yEncoding} \ {parameters.xEncoding}</Cell>
 						{#each xCells as xCell, i}
 							<Cell
@@ -183,5 +200,9 @@
 	#container {
 		margin-left: 20px;
 		margin-top: 20px;
+	}
+	.fixed-line {
+		display: flex;
+		align-items: center;
 	}
 </style>
