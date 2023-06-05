@@ -10,16 +10,6 @@
 </script>
 
 <Row style="overflow: visible">
-	<!-- fixed cell -->
-	<Cell class="sticky" style="left: 0px; border-right: 1px solid #e8e8e8;">
-		{#if parameters.zEncoding === "slices"}
-			<SliceDetailsContainer sli={$slices.get(currentReport.slices[0])} />
-		{:else if parameters.zEncoding === "models"}
-			{currentReport.models[0]}
-		{:else if parameters.zEncoding === "metrics"}
-			{currentReport.metrics[0]}
-		{/if}
-	</Cell>
 	<!-- y cell -->
 	<Cell>
 		{#if parameters.yEncoding === "slices"}
