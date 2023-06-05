@@ -67,7 +67,7 @@ Then, to set up the CIFAR example:
 - `cd examples/cifar`
 - `mkdir data; cd data; git clone https://github.com/YoongiKim/CIFAR-10-images`
 - `pip install Pillow torch torchvision`
-- `poetry run zeno ./examples/cifar/tests/zeno.toml`
+- `poetry run zeno ./examples/cifar/config.toml`
   - For debugging, you can use the "Run and Debug" sidebar in VSCode (a play button with a bug icon), and run the `zenocifar` configuration.
 
 In a different terminal window, run the following command to serve the frontend code:
