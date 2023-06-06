@@ -60,6 +60,9 @@ def slice_finder(df, req: SliceFinderRequest):
         for pred_i, sli_predicate in enumerate(sli):
             if sli_predicate is not None:
                 join_val = "" if len(predicate_list) == 0 else "&"
+                if str(sli_predicate) in ["True", "False"]:
+                    sli_predicate = "true" if sli_predicate else "false"
+
                 predicate_list.append(
                     FilterPredicate(
                         column=req.columns[pred_i],

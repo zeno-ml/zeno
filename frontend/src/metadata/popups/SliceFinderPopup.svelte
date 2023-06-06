@@ -35,7 +35,10 @@
 					d.columnType === ZenoColumnType.POSTDISTILL) &&
 					d.model === $model))
 	);
-	let searchColumns = searchColumnOptions.length > 0 ? searchColumnOptions : [];
+	let searchColumns =
+		searchColumnOptions.length > 0
+			? Object.assign([], searchColumnOptions)
+			: [];
 
 	// Column to use as the metric to compare slices.
 	let metricColumns = $status.completeColumns.filter(
@@ -110,14 +113,14 @@
 </script>
 
 <svelte:window on:keydown={submit} />
-{#if showSliceFinder}
+{#if $showSliceFinder}
 	<div class="coverage" />
 {/if}
 <div
 	id="slice-finder-container"
 	use:clickOutside
 	on:click_outside={() => ($showSliceFinder = false)}>
-	<Paper elevation={7}>
+	<Paper style="min-height: 50vh;" elevation={7}>
 		<div class="inline-justify">
 			<div class="inline">
 				<h4 class="title">Slice Finder</h4>
@@ -144,7 +147,7 @@
 			<div style:margin-left={"20px"}>
 				<div class="options-header">Metric Column</div>
 				<Svelecte
-					style="margin-right: 5px; width: 125px"
+					style="margin-right: 5px; width: 175px"
 					bind:value={metricColumn}
 					valueAsObject={true}
 					valueField={"name"}
@@ -156,7 +159,7 @@
 				<div class="options-header">Search Columns</div>
 				<Svelecte
 					style="margin-right: 5px;"
-					bind:readSelection={searchColumns}
+					bind:value={searchColumns}
 					valueAsObject={true}
 					options={searchColumnOptions}
 					multiple={true}
@@ -230,7 +233,6 @@
 	}
 	#slice-finder-container {
 		max-height: calc(100vh - 100px);
-		justify-content: flex-start;
 		overflow: scroll;
 		position: fixed;
 		top: 8vh;
