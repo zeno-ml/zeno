@@ -88,6 +88,11 @@
 				"Must have a metric column and at least one search column.";
 			return;
 		}
+		if (alphaIdx === null || minimumSuppIdx === null || orderByIdx === null) {
+			sliceFinderMessage =
+				"Parameters (Alpha, Min. Support, Order By) can't be null.";
+			return;
+		}
 
 		sliceFinderMessage = "Generating Slices...";
 		sliceFinderReturn = await ZenoService.runSliceFinder({
