@@ -37,22 +37,30 @@ You should now be able to run `poetry run zeno`
 
 **MacOS Note**
 
-If you are using MacBook Pro/Macbook Air with M1 chip and is experiencing error logs while running the backend server
+If you are using MacBook Pro/Macbook Air with M1 chip and are experiencing error logs while running the backend server, there are different possible solutions. For example:
+
+If you see this error message:
 
 ```
 objc[29381]: +[NSMutableString initialize] may have been in progress in another thread when fork() was called.
 ```
 
-, please add
+, please set an environment variable to disable fork safety as follows:
 
 ```
 export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 ```
 
-at the end of the ~/.zprofile file, and do
+If python crashes, and you get this error message:
 
 ```
-source ~/.zprofile
+crashed on child side of fork pre-exec
+```
+
+, please set an environment variable to disable fork safety as follows:
+
+```
+export no_proxy=*
 ```
 
 ## Examples
@@ -67,7 +75,7 @@ Then, to set up the CIFAR example:
 - `cd examples/cifar`
 - `mkdir data; cd data; git clone https://github.com/YoongiKim/CIFAR-10-images`
 - `pip install Pillow torch torchvision`
-- `poetry run zeno ./examples/cifar/tests/zeno.toml`
+- `poetry run zeno ./examples/cifar/config.toml`
   - For debugging, you can use the "Run and Debug" sidebar in VSCode (a play button with a bug icon), and run the `zenocifar` configuration.
 
 In a different terminal window, run the following command to serve the frontend code:
