@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { mdiClose, mdiInformationOutline, mdiPlus } from "@mdi/js";
+	import {
+		mdiClose,
+		mdiInformationOutline,
+		mdiPlus,
+		mdiRefreshCircle,
+	} from "@mdi/js";
 	import Button from "@smui/button";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
@@ -22,6 +27,10 @@
 		ZenoService,
 		type SliceFinderReturn,
 	} from "../../zenoservice";
+
+	let blur = function (ev) {
+		ev.target.blur();
+	};
 
 	let notEmbedUniqCols = $status.completeColumns.filter(
 		(d) =>
@@ -51,7 +60,7 @@
 	let metricColumn = metricColumns.length > 0 ? metricColumns[0] : null;
 
 	let alphas = ["0.5", "0.75", "0.9", "0.95", "0.99", "0.999"];
-	let alphaIdx = 3;
+	let alphaIdx = 4;
 	let minimumSupps = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 	let minimumSuppIdx = 0;
 	let orderByOptions = ["descending", "ascending"];
@@ -106,7 +115,7 @@
 		});
 
 		if (sliceFinderReturn.slices.length === 0) {
-			sliceFinderMessage = "No slices found, try increasing alpha";
+			sliceFinderMessage = "No slices found, try increasing alpha.";
 		} else {
 			sliceFinderMessage = "";
 		}
@@ -130,7 +139,7 @@
 	<Paper style="min-height: 50vh;" elevation={7}>
 		<div class="inline-justify">
 			<div class="inline">
-				<h4 class="title">Slice Finder</h4>
+				<h3 class="title">Slice Finder</h3>
 				<div
 					class="information-tooltip"
 					use:tooltip={{
@@ -200,19 +209,40 @@
 					placeholder="Order By" />
 			</div>
 		</div>
-
-		<div id="generation">
-			<Button variant="outlined" on:click={() => activateSliceFinder()}>
-				Generate Slices
-			</Button>
-			<span id="generate-slices">{sliceFinderMessage}</span>
-			<span id="overall">
-				{sliceFinderReturn.overallMetric !== null
-					? "Average: " + sliceFinderReturn.overallMetric.toFixed(3)
-					: ""}
-			</span>
-		</div>
-
+		{#if sliceFinderReturn.slices.length > 0}
+			<div id="generation">
+				<Button
+					variant="outlined"
+					style="color:white; background-color: var(--P2);"
+					on:click={() => activateSliceFinder()}
+					on:mouseleave={blur}
+					on:focusout={blur}>
+					Generate Slices
+				</Button>
+				<span>{sliceFinderMessage}</span>
+				<div>
+					<span class="average"> Average: </span>
+					<span class="average-value" style="color: var(--logo);">
+						{sliceFinderReturn.overallMetric.toFixed(3)}
+					</span>
+				</div>
+			</div>
+		{/if}
+		{#if sliceFinderReturn.slices.length === 0}
+			<div id="initial">
+				<span class="intial-text" style="font-weight: bold"
+					>Click below to find slices with low performance!</span>
+				<Button
+					variant="outlined"
+					style="color:white; background-color: var(--P2);"
+					on:click={() => activateSliceFinder()}
+					on:mouseleave={blur}
+					on:focusout={blur}>
+					Generate Slices
+				</Button>
+				<span class="intial-text">{sliceFinderMessage}</span>
+			</div>
+		{/if}
 		{#each sliceFinderReturn.slices as element, idx}
 			<div class="slice">
 				<span style="display: inline-block;">
@@ -222,7 +252,7 @@
 					<span style="margin-right: 10px; margin-left: 10px">
 						{sliceFinderReturn.metrics[idx].toFixed(3)}
 					</span>
-					<span style="color:gray; font-style: italic">
+					<span style="color:gray; font-style: italic; margin-right: 5px">
 						{"(" + sliceFinderReturn.sizes[idx] + ")"}
 					</span>
 					<IconButton on:click={() => addSliceAtIndex(idx)}>
@@ -237,27 +267,36 @@
 </div>
 
 <style>
-	#generate-slices {
-		margin-left: 10px;
+	.intial-text {
+		margin: 10px;
 	}
 	#slice-finder-container {
-		max-height: calc(100vh - 100px);
+		max-height: calc(100vh - 150px);
 		overflow: scroll;
 		position: fixed;
 		top: 8vh;
-		margin-left: 10vw;
+		margin-left: 17vw;
 		z-index: 10;
-		min-width: 70vw;
+		min-width: 60vw;
+		max-width: 60vw;
 	}
-	#overall {
-		position: absolute;
-		right: 25px;
+	.average {
+		font-weight: 400;
+		color: var(--G2);
+		margin-right: 15px;
+	}
+	#initial {
+		display: flex;
+		flex-direction: column;
+		height: 25vh;
+		margin: 20px;
+		align-items: center;
+		justify-content: center;
 	}
 	#generation {
-		margin-left: 20px;
-		margin-top: 20px;
-		margin-bottom: 20px;
+		margin: 20px;
 		display: flex;
+		justify-content: space-between;
 		align-items: center;
 	}
 	.options-header {
@@ -294,6 +333,7 @@
 		display: flex;
 		margin-top: 10px;
 		margin-bottom: 10px;
+		align-items: center;
 		justify-content: space-between;
 	}
 	.information-tooltip {
