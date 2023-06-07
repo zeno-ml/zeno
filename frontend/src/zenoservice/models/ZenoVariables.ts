@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 export type ZenoVariables = {
-    metrics: Array<string>;
-    models: Array<string>;
-    folders: Array<string>;
+	metrics: Array<string>;
+	models: Array<string>;
+	folders: Array<string>;
 };

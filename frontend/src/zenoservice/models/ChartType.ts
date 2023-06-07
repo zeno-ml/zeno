@@ -6,10 +6,10 @@
  * An enumeration.
  */
 export enum ChartType {
-    BAR = 'BAR',
-    LINE = 'LINE',
-    TABLE = 'TABLE',
-    BEESWARM = 'BEESWARM',
-    RADAR = 'RADAR',
-    HEATMAP = 'HEATMAP',
+	BAR = "BAR",
+	LINE = "LINE",
+	TABLE = "TABLE",
+	BEESWARM = "BEESWARM",
+	RADAR = "RADAR",
+	HEATMAP = "HEATMAP",
 }

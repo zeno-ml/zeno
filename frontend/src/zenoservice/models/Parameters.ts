@@ -3,9 +3,9 @@
 /* eslint-disable */
 
 export type Parameters = {
-    xEncoding: string;
-    yEncoding: string;
-    zEncoding: string;
-    fixedDimension: string;
-    secondSlices: Array<string>;
+	xEncoding: string;
+	yEncoding: string;
+	zEncoding: string;
+	fixedDimension: string;
+	secondSlices: Array<string>;
 };
