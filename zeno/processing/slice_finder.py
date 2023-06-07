@@ -2,10 +2,22 @@ import secrets
 from typing import List
 
 import numpy as np
+import pandas as pd
 from sliceline.slicefinder import Slicefinder
 
 from zeno.classes.slice import FilterPredicate, FilterPredicateGroup, Slice
 from zeno.classes.slice_finder import SliceFinderRequest, SliceFinderReturn
+
+
+# encode continuous value to range bins categorical columns
+def cont_cols_df(df, cols: List[str]):
+    new_df = pd.DataFrame()
+    for col in cols:
+        df_col = df.loc[:, col].copy()
+        bins = list(np.histogram_bin_edges(df_col, bins="doane"))
+        bins[0], bins[len(bins) - 1] = bins[0] - 1, bins[len(bins) - 1] + 1
+        new_df.loc[:, col + "_encode"] = pd.cut(df_col, bins=bins)
+    return new_df
 
 
 def slice_finder(df, req: SliceFinderRequest):
@@ -17,10 +29,13 @@ def slice_finder(df, req: SliceFinderRequest):
 
     Returns a SliceFinderMetricReturn Object.
     """
+    cont_search_cols = [str(col) for col in req.search_columns_cont]
+    not_cont_search_cols = [str(col) for col in req.search_columns]
 
-    updated_df = df[
-        list(set([str(col) for col in req.columns] + [str(req.metric_column)]))
-    ].dropna()
+    cont_df = cont_cols_df(df[cont_search_cols].dropna(), cont_search_cols)
+
+    uniq_cols = set(not_cont_search_cols + [str(req.metric_column)])
+    updated_df = pd.concat([df[list(uniq_cols)], cont_df], axis=1).dropna()
 
     # Invert metric column if ascending.
     normalized_metric_col = np.array(updated_df[str(req.metric_column)], dtype=float)
@@ -28,10 +43,10 @@ def slice_finder(df, req: SliceFinderRequest):
     if req.order_by == "ascending":
         normalized_metric_col = metric_max - normalized_metric_col
 
+    cont_search_cols = [col + "_encode" for col in cont_search_cols]
+    search_cols = not_cont_search_cols + cont_search_cols
     slice_finder = Slicefinder(alpha=req.alpha, k=20, min_sup=req.minimum_supp)
-    slice_finder.fit(
-        updated_df[[str(col) for col in req.columns]].to_numpy(), normalized_metric_col
-    )
+    slice_finder.fit(updated_df[search_cols].to_numpy(), normalized_metric_col)
 
     if slice_finder.top_slices_ is None or slice_finder.top_slices_statistics_ is None:
         return SliceFinderReturn(slices=[], metrics=[], sizes=[], overall_metric=0)
@@ -39,15 +54,15 @@ def slice_finder(df, req: SliceFinderRequest):
     discovered_slices: List[Slice] = []
     slice_metrics: List[float] = []
     slice_sizes: List[int] = []
+    search_cols = req.search_columns + req.search_columns_cont
+    search_cols_len = len(req.search_columns)
 
     for sli_i, sli in enumerate(slice_finder.top_slices_):
         # Rescale back to original metric.
         if req.order_by == "ascending":
             slice_metrics.append(
-                abs(
-                    slice_finder.top_slices_statistics_[sli_i]["slice_average_error"]
-                    - metric_max
-                )
+                metric_max
+                - slice_finder.top_slices_statistics_[sli_i]["slice_average_error"]
             )
         else:
             slice_metrics.append(
@@ -60,17 +75,38 @@ def slice_finder(df, req: SliceFinderRequest):
         for pred_i, sli_predicate in enumerate(sli):
             if sli_predicate is not None:
                 join_val = "" if len(predicate_list) == 0 else "&"
-                if str(sli_predicate) in ["True", "False"]:
-                    sli_predicate = "true" if sli_predicate else "false"
 
-                predicate_list.append(
-                    FilterPredicate(
-                        column=req.columns[pred_i],
-                        operation="==",
-                        value=sli_predicate,
-                        join=join_val,
+                # Not continuous
+                if pred_i < search_cols_len:
+                    if str(sli_predicate) in ["True", "False"]:
+                        sli_predicate = "true" if sli_predicate else "false"
+                    predicate_list.append(
+                        FilterPredicate(
+                            column=req.search_columns[pred_i],
+                            operation="==",
+                            value=sli_predicate,
+                            join=join_val,
+                        )
                     )
-                )
+                else:
+                    col = req.search_columns_cont[pred_i - search_cols_len]
+                    left_pred = FilterPredicate(
+                        column=col,
+                        operation=">=",
+                        value=sli_predicate.left,
+                        join="",
+                    )
+                    right_pred = FilterPredicate(
+                        column=col,
+                        operation="<",
+                        value=sli_predicate.right,
+                        join="&",
+                    )
+                    predicate_list.append(
+                        FilterPredicateGroup(
+                            predicates=[left_pred, right_pred], join=join_val
+                        ),
+                    )
 
         discovered_slices.append(
             Slice(
@@ -81,7 +117,6 @@ def slice_finder(df, req: SliceFinderRequest):
                 ),
             )
         )
-
     return SliceFinderReturn(
         slices=discovered_slices,
         metrics=slice_metrics,

@@ -3,6 +3,6 @@
 /* eslint-disable */
 
 export type GroupMetric = {
-	metric?: number;
-	size: number;
+    metric?: number;
+    size: number;
 };

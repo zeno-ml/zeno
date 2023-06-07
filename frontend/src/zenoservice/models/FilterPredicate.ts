@@ -2,11 +2,11 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { ZenoColumn } from "./ZenoColumn";
+import type { ZenoColumn } from './ZenoColumn';
 
 export type FilterPredicate = {
-	column: ZenoColumn;
-	operation: string;
-	value: string | number | boolean;
-	join?: string;
+    column: ZenoColumn;
+    operation: string;
+    value: (string | number | boolean);
+    join?: string;
 };

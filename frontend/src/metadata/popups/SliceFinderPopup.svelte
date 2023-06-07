@@ -23,33 +23,30 @@
 		type SliceFinderReturn,
 	} from "../../zenoservice";
 
+	let notEmbedUniqCols = $status.completeColumns.filter(
+		(d) =>
+			d.columnType === ZenoColumnType.METADATA ||
+			d.columnType === ZenoColumnType.PREDISTILL ||
+			((d.columnType === ZenoColumnType.OUTPUT ||
+				d.columnType === ZenoColumnType.POSTDISTILL) &&
+				d.model === $model)
+	);
+
 	// Columns to create candidate slices accross
-	// TODO: Support discretized continuous columns.
 	let searchColumnOptions = $status.completeColumns.filter(
 		(d) =>
-			(d.metadataType === MetadataType.NOMINAL ||
-				d.metadataType === MetadataType.BOOLEAN) &&
-			(d.columnType === ZenoColumnType.METADATA ||
-				d.columnType === ZenoColumnType.PREDISTILL ||
-				((d.columnType === ZenoColumnType.OUTPUT ||
-					d.columnType === ZenoColumnType.POSTDISTILL) &&
-					d.model === $model))
+			d.metadataType !== MetadataType.OTHER &&
+			d.metadataType !== MetadataType.DATETIME &&
+			notEmbedUniqCols.includes(d)
 	);
-	let searchColumns =
-		searchColumnOptions.length > 0
-			? Object.assign([], searchColumnOptions)
-			: [];
+	let searchColumns = [searchColumnOptions[0]];
 
 	// Column to use as the metric to compare slices.
 	let metricColumns = $status.completeColumns.filter(
 		(d) =>
 			(d.metadataType === MetadataType.CONTINUOUS ||
 				d.metadataType === MetadataType.BOOLEAN) &&
-			(d.columnType === ZenoColumnType.METADATA ||
-				d.columnType === ZenoColumnType.PREDISTILL ||
-				((d.columnType === ZenoColumnType.OUTPUT ||
-					d.columnType === ZenoColumnType.POSTDISTILL) &&
-					d.model === $model))
+			notEmbedUniqCols.includes(d)
 	);
 	let metricColumn = metricColumns.length > 0 ? metricColumns[0] : null;
 
@@ -96,11 +93,16 @@
 
 		sliceFinderMessage = "Generating Slices...";
 		sliceFinderReturn = await ZenoService.runSliceFinder({
-			columns: searchColumns,
-			metricColumn: metricColumn,
+			metricColumn,
+			searchColumnsCont: searchColumns.filter(
+				(d) => d.metadataType === MetadataType.CONTINUOUS
+			),
+			searchColumns: searchColumns.filter(
+				(d) => d.metadataType !== MetadataType.CONTINUOUS
+			),
 			orderBy: orderByOptions[orderByIdx],
-			minimumSupp: parseInt(minimumSupps[minimumSuppIdx]),
 			alpha: parseFloat(alphas[alphaIdx]),
+			minimumSupp: parseInt(minimumSupps[minimumSuppIdx]),
 		});
 
 		if (sliceFinderReturn.slices.length === 0) {
@@ -165,6 +167,8 @@
 				<Svelecte
 					style="margin-right: 5px;"
 					bind:value={searchColumns}
+					valueField={"name"}
+					labelField={"name"}
 					valueAsObject={true}
 					options={searchColumnOptions}
 					multiple={true}
