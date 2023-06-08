@@ -1,25 +1,12 @@
 <script lang="ts">
-	import {
-		mdiClose,
-		mdiInformationOutline,
-		mdiPlus,
-		mdiRefreshCircle,
-	} from "@mdi/js";
+	import { mdiClose, mdiInformationOutline } from "@mdi/js";
 	import Button from "@smui/button";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Paper from "@smui/paper";
 	import { tooltip } from "@svelte-plugins/tooltips";
 	import Svelecte from "svelecte";
-	import SliceDetails from "../../general/SliceDetails.svelte";
-	import {
-		model,
-		showNewSlice,
-		showSliceFinder,
-		sliceToEdit,
-		slices,
-		status,
-	} from "../../stores";
+	import { model, showSliceFinder, status } from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 	import {
 		MetadataType,
@@ -27,6 +14,7 @@
 		ZenoService,
 		type SliceFinderReturn,
 	} from "../../zenoservice";
+	import SliceFinderCell from "../cells/SliceFinderCell.svelte";
 
 	let blur = function (ev) {
 		ev.target.blur();
@@ -74,19 +62,6 @@
 	} as SliceFinderReturn;
 
 	$: sliceFinderMessage = "";
-
-	export async function addSliceAtIndex(idx) {
-		let slice = sliceFinderReturn.slices[idx];
-
-		ZenoService.createNewSlice(slice).then(() => {
-			slices.update((s) => {
-				s.set(slice.sliceName, slice);
-				return s;
-			});
-			showNewSlice.set(false);
-			sliceToEdit.set(null);
-		});
-	}
 
 	export async function activateSliceFinder() {
 		if (searchColumns.length === 0 || metricColumn === null) {
@@ -227,8 +202,7 @@
 					</span>
 				</div>
 			</div>
-		{/if}
-		{#if sliceFinderReturn.slices.length === 0}
+		{:else}
 			<div id="initial">
 				<span class="intial-text" style="font-weight: bold"
 					>Click below to find slices with low performance!</span>
@@ -243,25 +217,10 @@
 				<span class="intial-text">{sliceFinderMessage}</span>
 			</div>
 		{/if}
-		{#each sliceFinderReturn.slices as element, idx}
-			<div class="slice">
-				<span style="display: inline-block;">
-					<SliceDetails predicateGroup={element.filterPredicates} />
-				</span>
-				<div class="inline">
-					<span style="margin-right: 10px; margin-left: 10px">
-						{sliceFinderReturn.metrics[idx].toFixed(3)}
-					</span>
-					<span style="color:gray; font-style: italic; margin-right: 5px">
-						{"(" + sliceFinderReturn.sizes[idx] + ")"}
-					</span>
-					<IconButton on:click={() => addSliceAtIndex(idx)}>
-						<Icon component={Svg} viewBox="0 0 24 24">
-							<path fill="#6a1b9a" d={mdiPlus} />
-						</Icon>
-					</IconButton>
-				</div>
-			</div>
+		{#each sliceFinderReturn.slices as slice, idx}
+			{@const metric = sliceFinderReturn.metrics[idx].toFixed(3)}
+			{@const size = sliceFinderReturn.sizes[idx]}
+			<SliceFinderCell {slice} {metric} {size} />
 		{/each}
 	</Paper>
 </div>
@@ -276,7 +235,7 @@
 		position: fixed;
 		top: 8vh;
 		margin-left: 17vw;
-		z-index: 10;
+		z-index: 5;
 		min-width: 60vw;
 		max-width: 60vw;
 	}
@@ -326,15 +285,7 @@
 		height: 500vh;
 		margin-left: -100vw;
 		margin-top: -100vh;
-		z-index: 9;
-	}
-	.slice {
-		margin-left: 20px;
-		display: flex;
-		margin-top: 10px;
-		margin-bottom: 10px;
-		align-items: center;
-		justify-content: space-between;
+		z-index: 4;
 	}
 	.information-tooltip {
 		width: 24px;
