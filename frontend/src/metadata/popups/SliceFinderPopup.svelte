@@ -159,7 +159,21 @@
 					placeholder="Slicing Columns" />
 			</div>
 			<div>
-				<div class="options-header">Alpha</div>
+				<div style="display:flex">
+					<div class="options-header">Alpha</div>
+					<div
+						class="information-tooltip"
+						style="margin-top: 3px;"
+						use:tooltip={{
+							content: "Increase alpha to find more slices",
+							theme: "zeno-tooltip",
+							maxWidth: "250",
+						}}>
+						<Icon style="outline:none" component={Svg} viewBox="-6 -6 36 36">
+							<path d={mdiInformationOutline} />
+						</Icon>
+					</div>
+				</div>
 				<Svelecte
 					style="margin-right: 5px; width: 80px"
 					bind:value={alphaIdx}
@@ -168,15 +182,45 @@
 					placeholder="Alpha" />
 			</div>
 			<div>
-				<div class="options-header">Min. Support</div>
+				<div style="display:flex">
+					<div class="options-header">Min. Support</div>
+					<div
+						class="information-tooltip"
+						style="margin-top: 3px;"
+						use:tooltip={{
+							content: "controls the minimum slice threshold",
+							theme: "zeno-tooltip",
+							maxWidth: "270",
+						}}>
+						<Icon style="outline:none" component={Svg} viewBox="-6 -6 36 36">
+							<path d={mdiInformationOutline} />
+						</Icon>
+					</div>
+				</div>
 				<Svelecte
-					style="margin-right: 5px; width: 100px"
+					style="margin-right: 5px; width: 120px"
 					bind:value={minimumSuppIdx}
 					options={minimumSupps}
 					placeholder="Minimum Support Threshold" />
 			</div>
 			<div>
-				<div class="options-header">Order By</div>
+				<div style="display:flex">
+					<div class="options-header">Order By</div>
+					<div
+						class="information-tooltip"
+						style="margin-top: 3px;"
+						use:tooltip={{
+							content:
+								"Ordered by cumulative slice score obtained through the sliceline function",
+							theme: "zeno-tooltip",
+							position: "left",
+							maxWidth: "250",
+						}}>
+						<Icon style="outline:none" component={Svg} viewBox="-6 -6 36 36">
+							<path d={mdiInformationOutline} />
+						</Icon>
+					</div>
+				</div>
 				<Svelecte
 					style="width: 120px; margin-right: 20px"
 					bind:value={orderByIdx}
@@ -185,7 +229,7 @@
 			</div>
 		</div>
 		{#if sliceFinderReturn.slices.length > 0}
-			<div id="generation">
+			<div class="generation">
 				<Button
 					variant="outlined"
 					style="color:white; background-color: var(--P2);"
@@ -196,11 +240,15 @@
 				</Button>
 				<span>{sliceFinderMessage}</span>
 				<div>
-					<span class="average"> Average: </span>
+					<span class="average"> Overall Average: </span>
 					<span class="average-value" style="color: var(--logo);">
 						{sliceFinderReturn.overallMetric.toFixed(3)}
 					</span>
 				</div>
+			</div>
+			<div class="generation" style="margin-bottom:0px;">
+				<h4 style="margin-bottom:0px;">Filter Predicates</h4>
+				<h4 style="margin-bottom:0px;">Slice Average Metrics</h4>
 			</div>
 		{:else}
 			<div id="initial">
@@ -231,7 +279,7 @@
 	}
 	#slice-finder-container {
 		max-height: calc(100vh - 150px);
-		overflow: scroll;
+		overflow: auto;
 		position: fixed;
 		top: 8vh;
 		margin-left: 17vw;
@@ -252,14 +300,14 @@
 		align-items: center;
 		justify-content: center;
 	}
-	#generation {
+	.generation {
 		margin: 20px;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
 	}
 	.options-header {
-		margin-top: 15px;
+		margin-top: 5px;
 		margin-bottom: 5px;
 		color: var(--G2);
 	}

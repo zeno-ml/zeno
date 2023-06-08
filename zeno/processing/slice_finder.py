@@ -76,7 +76,7 @@ def slice_finder(df, req: SliceFinderRequest):
             if sli_predicate is not None:
                 join_val = "" if len(predicate_list) == 0 else "&"
 
-                # Not continuous
+                # not continuous columns
                 if pred_i < search_cols_len:
                     if str(sli_predicate) in ["True", "False"]:
                         sli_predicate = "true" if sli_predicate else "false"
@@ -88,6 +88,7 @@ def slice_finder(df, req: SliceFinderRequest):
                             join=join_val,
                         )
                     )
+                # continuous columns
                 else:
                     col = req.search_columns_cont[pred_i - search_cols_len]
                     left_pred = FilterPredicate(
