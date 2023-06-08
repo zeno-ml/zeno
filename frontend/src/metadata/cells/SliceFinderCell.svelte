@@ -47,8 +47,12 @@
 		created = false;
 	}
 	function submit(e) {
+		e.stopPropagation();
 		if (validSlice && e.key === "Enter") {
 			addSlice();
+		}
+		if (showSliceName && e.key === "Escape") {
+			showSliceName = false;
 		}
 	}
 </script>
@@ -86,6 +90,7 @@
 	{#if showSliceName}
 		<div
 			id="slice-name"
+			on:keydown={submit}
 			use:clickOutside
 			on:click_outside={() => (showSliceName = false)}>
 			<Paper elevation={7}>
