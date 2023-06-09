@@ -91,9 +91,9 @@
 	{#if showSliceName}
 		<div
 			id="slice-name"
-			on:keydown={submit}
 			use:clickOutside
-			on:click_outside={() => (showSliceName = false)}>
+			on:click_outside={() => (showSliceName = false)}
+			on:keydown={submit}>
 			<Paper elevation={7}>
 				<Content style="display:flex; flex-direction:column">
 					<Textfield
@@ -107,15 +107,15 @@
 						<Button
 							style="margin-left: 10px;"
 							variant="outlined"
-							on:click={() => (showSliceName = false)}
-							>Cancel
+							on:click={() => (showSliceName = false)}>
+							Cancel
 						</Button>
 						<Button
 							style="margin-left: 5px;"
 							variant="outlined"
 							disabled={!validSlice}
-							on:click={() => addSlice()}
-							>{"Create"}
+							on:click={() => addSlice()}>
+							{"Create"}
 						</Button>
 					</div>
 				</Content>
