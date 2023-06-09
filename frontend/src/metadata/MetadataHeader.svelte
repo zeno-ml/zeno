@@ -61,6 +61,19 @@
 		height: 35px;
 		border: 1px solid var(--G4);
 		border-radius: 5px;
+		font-size: 14px;
+		color: var(--G1);
+	}
+	option {
+		padding: 5px;
+	}
+	option:checked {
+		background-color: var(--G5);
+	}
+	.options-header {
+		margin-top: 5px;
+		margin-bottom: 5px;
+		color: var(--G2);
 	}
 	#selections {
 		display: flex;
