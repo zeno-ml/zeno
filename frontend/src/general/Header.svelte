@@ -55,7 +55,7 @@
 				on:keydown={() => ({})}
 				on:click={() => updateTab("comparison")}
 				use:tooltip={{
-					content: "Compare data qualitatively between two models",
+					content: "Qualitatively compare model outputs",
 					position: "right",
 					theme: "zeno-tooltip",
 				}}>

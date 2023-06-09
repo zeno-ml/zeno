@@ -23,7 +23,10 @@
 	}
 
 	$: modelDependSliceName =
-		slice.sliceName + "-" + (sliceModel === $model ? "model A" : "model B");
+		slice.sliceName +
+		" (" +
+		(sliceModel === $model ? "model A" : "model B") +
+		")";
 
 	$: compareButton = doesModelDependOnPredicates(
 		slice.filterPredicates.predicates

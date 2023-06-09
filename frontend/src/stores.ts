@@ -82,7 +82,9 @@ export const compareSort: Writable<[ZenoColumn | string, boolean]> = writable([
 export const requestingHistogramCounts: Writable<boolean> = writable(false);
 
 export const slices: Writable<Map<string, Slice>> = writable(new Map());
-export const modelDependSlices: Writable<Map<string, Slice>> = writable(
+// Slices dependent on models will be separate into two new slices in the comparison tab
+// and stored in this writable for model output comparison
+export const slicesForComparison: Writable<Map<string, Slice>> = writable(
 	new Map()
 );
 export const folders: Writable<string[]> = folderWritable();
@@ -132,7 +134,7 @@ export const selectionPredicates: Readable<FilterPredicateGroup> = derived(
 			$selections.slices.forEach((s, i) => {
 				const sli = get(slices).has(s)
 					? get(slices).get(s)
-					: get(modelDependSlices).get(s);
+					: get(slicesForComparison).get(s);
 				const sli_preds = JSON.parse(
 					JSON.stringify(sli.filterPredicates.predicates)
 				);

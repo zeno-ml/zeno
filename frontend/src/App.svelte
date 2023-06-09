@@ -13,7 +13,7 @@
 		model,
 		comparisonModel,
 		slices,
-		modelDependSlices,
+		slicesForComparison,
 		tagIds,
 	} from "./stores";
 	import {
@@ -55,7 +55,7 @@
 		selections.set({ metadata: {}, slices: [], tags: [] });
 		tagIds.set({ ids: [] });
 		if (t === "comparison") {
-			modelDependSlices.set(new Map<string, Slice>());
+			slicesForComparison.set(new Map<string, Slice>());
 			updateModelDependentSlices("model A", $model, $slices);
 			updateModelDependentSlices("model B", $comparisonModel, $slices);
 		}

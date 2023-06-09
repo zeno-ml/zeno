@@ -11,7 +11,7 @@ import {
 	rowsPerPage,
 	settings,
 	slices,
-	modelDependSlices,
+	slicesForComparison,
 	tab,
 	tags,
 } from "../stores";
@@ -40,7 +40,7 @@ export async function getInitialData() {
 	slices.set(slicesMap);
 
 	// initial model dependent slices in compare tab
-	modelDependSlices.set(new Map<string, Slice>());
+	slicesForComparison.set(new Map<string, Slice>());
 	updateModelDependentSlices("model A", inits.models[0], slicesMap);
 	updateModelDependentSlices("model B", inits.models[1], slicesMap);
 
@@ -94,9 +94,9 @@ export function updateModelDependentSlices(name, mod, slis) {
 	slis.forEach((sli) => {
 		const preds = sli.filterPredicates.predicates;
 		if (doesModelDependOnPredicates(preds)) {
-			modelDependSlices.update((ms) => {
-				ms.set(sli.sliceName + "-" + name, <Slice>{
-					sliceName: sli.sliceName + "-" + name,
+			slicesForComparison.update((ms) => {
+				ms.set(sli.sliceName + " (" + name + ")", <Slice>{
+					sliceName: sli.sliceName + " (" + name + ")",
 					folder: sli.folder,
 					filterPredicates: setModelForFilterPredicateGroup(
 						sli.filterPredicates,
