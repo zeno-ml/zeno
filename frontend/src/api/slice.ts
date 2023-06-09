@@ -7,6 +7,7 @@ import {
 	type GroupMetric,
 	type MetricKey,
 } from "../zenoservice";
+import { slices } from "../stores";
 
 function instanceOfFilterPredicate(object): object is FilterPredicate {
 	return "column" in object;
@@ -74,6 +75,10 @@ function setMetricForSize(metricKeys: MetricKey[]) {
 }
 
 export async function deleteSlice(sliceName: string) {
+	slices.update((s) => {
+		s.delete(sliceName);
+		return s;
+	});
 	await ZenoService.deleteSlice([sliceName]);
 }
 

@@ -26,6 +26,7 @@
 	}
 	$: validSlice = newSliceName && !$slices.has(newSliceName);
 
+	/** Save a generated slice to the slice drawer **/
 	function addSlice() {
 		slice.sliceName = newSliceName;
 		ZenoService.createNewSlice(slice).then(() => {
@@ -38,14 +39,14 @@
 		showSliceName = false;
 		created = true;
 	}
+
+	/** Remove a generated slice from the slice drawer **/
 	function removeSlice() {
-		slices.update((s) => {
-			s.delete(createdSliceName);
-			return s;
-		});
 		deleteSlice(createdSliceName);
 		created = false;
 	}
+
+	/** Define keyboard actions **/
 	function submit(e) {
 		e.stopPropagation();
 		if (validSlice && e.key === "Enter") {

@@ -54,10 +54,6 @@
 			}
 			return { slices: [], metadata: { ...m.metadata }, tags: [] };
 		});
-		slices.update((s) => {
-			s.delete(slice.sliceName);
-			return s;
-		});
 		reports.update((reps) => {
 			reps = reps.map((r) => {
 				r.slices = r.slices.filter((p) => p !== slice.sliceName);
