@@ -125,7 +125,8 @@ export async function getMetricsForSlicesAndTags(
 	metricKeys: MetricKey[],
 	tagIds?: FilterIds,
 	filterIds?: FilterIds,
-	tagList?: string[]
+	tagList?: string[],
+	compare?: boolean
 ): Promise<GroupMetric[]> {
 	if (metricKeys.length === 0) {
 		return null;
@@ -137,7 +138,10 @@ export async function getMetricsForSlicesAndTags(
 		metricKeys = metricKeys.map((k) => ({ ...k, model: "" }));
 	}
 	// Update model in predicates if slices are dependent on postdistill columns.
-	metricKeys = <MetricKey[]>setModelForMetricKeys(metricKeys);
+	if (!compare) {
+		metricKeys = <MetricKey[]>setModelForMetricKeys(metricKeys);
+	}
+
 	if (metricKeys.length > 0) {
 		return await ZenoService.getMetricsForSlicesAndTags({
 			metricKeys,
@@ -146,4 +150,18 @@ export async function getMetricsForSlicesAndTags(
 			tagList,
 		});
 	}
+}
+
+// check if predicates contain model dependent columns (postdistill or output)
+export function doesModelDependOnPredicates(predicates) {
+	const isModelDependent = [];
+	predicates.forEach((p) => {
+		isModelDependent.push(
+			p["predicates"]
+				? doesModelDependOnPredicates(p["predicates"])
+				: p["column"].columnType === ZenoColumnType.POSTDISTILL ||
+						p["column"].columnType === ZenoColumnType.OUTPUT
+		);
+	});
+	return isModelDependent.includes(true);
 }

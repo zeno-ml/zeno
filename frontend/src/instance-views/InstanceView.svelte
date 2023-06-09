@@ -15,6 +15,8 @@
 		settings,
 		model,
 		metric,
+		tab,
+		comparisonModel,
 	} from "../stores";
 	import type { MetricKey, Slice } from "../zenoservice";
 
@@ -58,25 +60,49 @@
 		}
 	});
 
-	$: currentResult = getMetricsForSlicesAndTags(
-		[
+	function getMetricKeys(model, metric, predicates) {
+		return [
 			<MetricKey>{
 				sli: <Slice>{
 					sliceName: "",
 					folder: "",
 					filterPredicates: {
-						predicates: [$selectionPredicates],
+						predicates: [predicates],
 						join: "",
 					},
 				},
-				model: $model,
-				metric: $metric,
+				model: model,
+				metric: metric,
 			},
-		],
+		];
+	}
+
+	function getCompareResults(model, metric, predicates) {
+		return getMetricsForSlicesAndTags(
+			getMetricKeys(model, metric, predicates),
+			$tagIds,
+			$selectionIds,
+			$selections.tags,
+			true
+		);
+	}
+
+	$: currentResult = getMetricsForSlicesAndTags(
+		getMetricKeys($model, $metric, $selectionPredicates),
 		$tagIds,
 		$selectionIds,
-		$selections.tags
+		$selections.tags,
+		false
 	);
+
+	$: modelAResult =
+		$tab === "comparison"
+			? getCompareResults($model, $metric, $selectionPredicates)
+			: undefined;
+	$: modelBResult =
+		$tab === "comparison"
+			? getCompareResults($comparisonModel, $metric, $selectionPredicates)
+			: undefined;
 
 	// change selected to table if a tag is edited
 	$: selected = $editId !== undefined ? "table" : selected;
@@ -89,21 +115,22 @@
 		{currentResult}
 		bind:viewOptions />
 </div>
-{#if $editId !== undefined}
-	<TableView {currentResult} {viewFunction} {viewOptions} />
-{:else}
-	{#if selected === "list" && viewOptions !== undefined}
-		<ListView {currentResult} {viewFunction} {viewOptions} />
-	{/if}
-	{#if selected === "comparison" && viewOptions !== undefined}
-		<ComparisonView {currentResult} {viewFunction} {viewOptions} />
-	{/if}
-	{#if selected === "table"}
+{#if $tab !== "comparison"}
+	{#if $editId !== undefined}
 		<TableView {currentResult} {viewFunction} {viewOptions} />
+	{:else}
+		{#if selected === "list" && viewOptions !== undefined}
+			<ListView {currentResult} {viewFunction} {viewOptions} />
+		{/if}
+		{#if selected === "table"}
+			<TableView {currentResult} {viewFunction} {viewOptions} />
+		{/if}
+		{#if selected === "projection"}
+			<ScatterView {viewFunction} {viewOptions} />
+		{/if}
 	{/if}
-	{#if selected === "projection"}
-		<ScatterView {viewFunction} {viewOptions} />
-	{/if}
+{:else}
+	<ComparisonView {modelAResult} {modelBResult} {viewFunction} {viewOptions} />
 {/if}
 
 <style>

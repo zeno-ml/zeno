@@ -5,25 +5,25 @@
 	import Dialog, { Actions, Content, InitialFocus, Title } from "@smui/dialog";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Paper from "@smui/paper";
-	import { deleteSlice, getMetricsForSlices } from "../../api/slice";
+	import { deleteSlice, doesModelDependOnPredicates } from "../../api/slice";
+	import { selectSliceCell } from "./sliceCellUtil";
 	import SliceDetails from "../../general/SliceDetails.svelte";
+	import SliceCellResult from "./SliceCellResult.svelte";
 	import {
-		metric,
-		model,
 		reports,
 		selections,
 		showNewSlice,
 		sliceToEdit,
 		slices,
-		status,
+		model,
+		comparisonModel,
 	} from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
-	import { ZenoService, type MetricKey, type Slice } from "../../zenoservice";
+	import { ZenoService, type Slice } from "../../zenoservice";
 
 	export let slice: Slice;
 	export let inFolder = false;
-
-	let result;
+	export let compare;
 
 	let confirmDelete = false;
 	let relatedReports = 0;
@@ -32,17 +32,11 @@
 	let hovering = false;
 	let showOptions = false;
 
+	let compareButton = slice
+		? doesModelDependOnPredicates(slice.filterPredicates.predicates)
+		: false;
+
 	$: selected = $selections.slices.includes(slice.sliceName);
-	$: {
-		$status;
-		result = getMetricsForSlices([
-			<MetricKey>{
-				sli: slice,
-				model: $model,
-				metric: $metric,
-			},
-		]);
-	}
 
 	function removeSlice() {
 		confirmDelete = false;
@@ -69,66 +63,19 @@
 	}
 
 	function setSelected(e) {
-		// Imitate selections in Vega bar charts.
-		if (
-			$selections.slices.length === 1 &&
-			$selections.slices.includes(slice.sliceName)
-		) {
-			selections.update((s) => ({
-				slices: [],
-				metadata: s.metadata,
-				tags: s.tags,
-			}));
+		if (compare && compareButton) {
 			return;
 		}
-		if (e.shiftKey) {
-			if ($selections.slices.includes(slice.sliceName)) {
-				selections.update((sel) => {
-					sel.slices.splice(sel.slices.indexOf(slice.sliceName), 1);
-					return {
-						slices: [...sel.slices],
-						metadata: sel.metadata,
-						tags: sel.tags,
-					};
-				});
-			} else {
-				selections.update((sel) => ({
-					slices: [...sel.slices, slice.sliceName],
-					metadata: sel.metadata,
-					tags: sel.tags,
-				}));
-			}
-		} else {
-			if ($selections.slices.includes(slice.sliceName)) {
-				if ($selections.slices.length > 0) {
-					selections.update((sel) => ({
-						slices: [slice.sliceName],
-						metadata: sel.metadata,
-						tags: sel.tags,
-					}));
-				} else {
-					selections.update((sel) => {
-						sel.slices.splice(sel.slices.indexOf(slice.sliceName), 1);
-						return {
-							slices: [...sel.slices],
-							metadata: sel.metadata,
-							tags: sel.tags,
-						};
-					});
-				}
-			} else {
-				selections.update((sel) => ({
-					slices: [slice.sliceName],
-					metadata: sel.metadata,
-					tags: sel.tags,
-				}));
-			}
-		}
+		selectSliceCell(e, slice.sliceName);
 	}
 </script>
 
 <div
-	class="{inFolder ? 'in-folder' : ''} cell parent {selected ? 'selected' : ''}"
+	class=" cell parent
+	{inFolder ? 'in-folder' : ''}
+	{selected ? 'selected' : ''} 
+	{compare ? 'compare-slice-cell' : ''}
+	{compare && compareButton ? '' : 'pointer'}"
 	on:click={(e) => setSelected(e)}
 	draggable="true"
 	on:mouseover={() => (hovering = true)}
@@ -233,40 +180,34 @@
 						</Paper>
 					</div>
 				{/if}
-				{#if result}
-					{#await result then res}
-						<span style:margin-right="10px">
-							{res[0].metric !== undefined && res[0].metric !== null
-								? res[0].metric.toFixed(2)
-								: ""}
-						</span>
-						<span id="size">
-							({res[0].size.toLocaleString()})
-						</span>
-					{/await}
+				<SliceCellResult {compare} {slice} sliceModel={$model} />
+				{#if compare}
+					<SliceCellResult {compare} {slice} sliceModel={$comparisonModel} />
 				{/if}
-				<div class="inline" style:cursor="pointer">
-					<div
-						style:width="36px"
-						use:clickOutside
-						on:click_outside={() => {
-							hovering = false;
-						}}>
-						{#if hovering}
-							<IconButton
-								size="button"
-								style="padding: 0px"
-								on:click={(e) => {
-									e.stopPropagation();
-									showOptions = !showOptions;
-								}}>
-								<Icon component={Svg} viewBox="0 0 24 24">
-									<path fill="black" d={mdiDotsHorizontal} />
-								</Icon>
-							</IconButton>
-						{/if}
+				{#if !compare}
+					<div class="inline" style:cursor="pointer">
+						<div
+							style:width="36px"
+							use:clickOutside
+							on:click_outside={() => {
+								hovering = false;
+							}}>
+							{#if hovering}
+								<IconButton
+									size="button"
+									style="padding: 0px"
+									on:click={(e) => {
+										e.stopPropagation();
+										showOptions = !showOptions;
+									}}>
+									<Icon component={Svg} viewBox="0 0 24 24">
+										<path fill="black" d={mdiDotsHorizontal} />
+									</Icon>
+								</IconButton>
+							{/if}
+						</div>
 					</div>
-				</div>
+				{/if}
 			</div>
 		</div>
 	</div>
@@ -313,11 +254,6 @@
 		padding-top: 10px;
 		padding-bottom: 10px;
 	}
-	#size {
-		font-style: italic;
-		color: var(--G3);
-		margin-right: 10px;
-	}
 	.cell {
 		position: relative;
 		overflow: visible;
@@ -329,11 +265,17 @@
 		padding-right: 10px;
 		min-height: 36px;
 	}
+	.compare-slice-cell {
+		padding-top: 5px;
+		padding-bottom: 5px;
+	}
 	.group {
 		display: flex;
 		flex-direction: row;
 		justify-content: space-between;
 		align-items: center;
+	}
+	.pointer {
 		cursor: pointer;
 	}
 	.selected {

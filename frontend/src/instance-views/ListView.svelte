@@ -5,6 +5,7 @@
 	import Select, { Option } from "@smui/select";
 	import { tick } from "svelte";
 	import { getFilteredTable } from "../api/table";
+	import { setModelForFilterPredicateGroup } from "../api/slice";
 	import {
 		model,
 		rowsPerPage,
@@ -81,8 +82,9 @@
 
 		getFilteredTable(
 			$status.completeColumns,
-			$selectionPredicates,
-			$model,
+			[$model],
+			undefined,
+			setModelForFilterPredicateGroup($selectionPredicates, $model),
 			[start, end],
 			$sort,
 			$tagIds,

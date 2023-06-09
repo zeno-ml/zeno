@@ -14,6 +14,7 @@
 		settings,
 		status,
 		tagIds,
+		tab,
 	} from "../stores";
 	import { ZenoService, type FilterPredicate } from "../zenoservice";
 	import IdsChip from "./chips/IdsChip.svelte";
@@ -39,7 +40,7 @@
 	$: CHOICES =
 		$editId === undefined
 			? $settings.view !== ""
-				? ["list", "table", "comparison", "projection"]
+				? ["list", "table", "projection"]
 				: ["table", "projection"]
 			: ["table"];
 
@@ -129,45 +130,47 @@
 			{/if}
 		</div>
 	</div>
-	<div class="options">
-		<div>
-			{#await currentResult then r}
-				{#if r}
-					{#if r[0].metric !== undefined && r[0].metric !== null}
-						<span class="metric">
-							{$metric ? $metric + ":" : ""}
-						</span>
-						<span class="metric-value">
-							{r[0].metric.toFixed(2)}
-						</span>
+	{#if $tab !== "comparison"}
+		<div class="options">
+			<div>
+				{#await currentResult then r}
+					{#if r}
+						{#if r[0].metric !== undefined && r[0].metric !== null}
+							<span class="metric">
+								{$metric ? $metric + ":" : ""}
+							</span>
+							<span class="metric-value">
+								{r[0].metric.toFixed(2)}
+							</span>
+						{/if}
+						<span id="size">({r[0].size.toLocaleString()} instances)</span>
 					{/if}
-					<span id="size">({r[0].size.toLocaleString()} instances)</span>
+				{/await}
+			</div>
+			<div class="inline">
+				{#if $editId === undefined}
+					{#if optionsFunction}
+						<div style:margin-right="20px" bind:this={optionsDiv} />
+					{/if}
+					<Group>
+						{#each CHOICES as choice}
+							<Button
+								style="background-color: {selected === choice
+									? 'var(--G5)'
+									: 'var(--G6)'}"
+								variant="outlined"
+								on:click={() => (selected = choice)}>{choice}</Button>
+						{/each}
+					</Group>
+				{:else}
+					<div class="inline" style="margin-right: 10px">
+						<p style="margin: auto; margin-right: 10px">Editing</p>
+						<div class="meta-chip">{$editId}</div>
+					</div>
 				{/if}
-			{/await}
+			</div>
 		</div>
-		<div class="inline">
-			{#if $editId === undefined}
-				{#if optionsFunction}
-					<div style:margin-right="20px" bind:this={optionsDiv} />
-				{/if}
-				<Group>
-					{#each CHOICES as choice}
-						<Button
-							style="background-color: {selected === choice
-								? 'var(--G5)'
-								: 'var(--G6)'}"
-							variant="outlined"
-							on:click={() => (selected = choice)}>{choice}</Button>
-					{/each}
-				</Group>
-			{:else}
-				<div class="inline" style="margin-right: 10px">
-					<p style="margin: auto; margin-right: 10px">Editing</p>
-					<div class="meta-chip">{$editId}</div>
-				</div>
-			{/if}
-		</div>
-	</div>
+	{/if}
 </div>
 
 <style>

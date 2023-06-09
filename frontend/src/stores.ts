@@ -67,10 +67,14 @@ export const models: Writable<string[]> = writable([]);
 export const model: Writable<string> = writable(undefined);
 export const metric: Writable<string> = writable(undefined);
 
-export const comparisonModels: Writable<string[]> = writable([]);
+export const comparisonModel: Writable<string> = writable(undefined);
 
 // [column, ascending]
 export const sort: Writable<[ZenoColumn, boolean]> = writable([
+	undefined,
+	true,
+]);
+export const compareSort: Writable<[ZenoColumn | string, boolean]> = writable([
 	undefined,
 	true,
 ]);
@@ -78,6 +82,11 @@ export const sort: Writable<[ZenoColumn, boolean]> = writable([
 export const requestingHistogramCounts: Writable<boolean> = writable(false);
 
 export const slices: Writable<Map<string, Slice>> = writable(new Map());
+// Slices dependent on models will be separate into two new slices in the comparison tab
+// and stored in this writable for model output comparison
+export const slicesForComparison: Writable<Map<string, Slice>> = writable(
+	new Map()
+);
 export const folders: Writable<string[]> = folderWritable();
 export const tags: Writable<Map<string, Tag>> = writable(new Map());
 export const reports: Writable<Report[]> = reportWritable();
@@ -123,8 +132,11 @@ export const selectionPredicates: Readable<FilterPredicateGroup> = derived(
 		if ($selections.slices.length > 0) {
 			let slicesPredicates: (FilterPredicate | FilterPredicateGroup)[] = [];
 			$selections.slices.forEach((s, i) => {
+				const sli = get(slices).has(s)
+					? get(slices).get(s)
+					: get(slicesForComparison).get(s);
 				const sli_preds = JSON.parse(
-					JSON.stringify(get(slices).get(s).filterPredicates.predicates)
+					JSON.stringify(sli.filterPredicates.predicates)
 				);
 				sli_preds[0].join = i === 0 ? "" : "&";
 				slicesPredicates = slicesPredicates.concat(sli_preds);

@@ -2,16 +2,31 @@
 	import { onMount } from "svelte";
 	import Router from "svelte-spa-router";
 	import Explore from "./Explore.svelte";
+	import Comparison from "./Comparison.svelte";
 	import Report from "./Report.svelte";
 	import Header from "./general/Header.svelte";
 	import ReportPage from "./report/report-page/ReportPage.svelte";
-	import { selections, status } from "./stores";
-	import { columnHash, getInitialData } from "./util/util";
-	import { OpenAPI } from "./zenoservice";
+	import {
+		selections,
+		status,
+		tab,
+		model,
+		comparisonModel,
+		slices,
+		slicesForComparison,
+		tagIds,
+	} from "./stores";
+	import {
+		columnHash,
+		getInitialData,
+		updateModelDependentSlices,
+	} from "./util/util";
+	import { OpenAPI, type Slice } from "./zenoservice";
 
 	const routes = {
 		"/": Explore,
 		"/explore/": Explore,
+		"/comparison/": Comparison,
 		"/report/": Report,
 		"/report/:id": ReportPage,
 		"/report/:id/new": ReportPage,
@@ -33,6 +48,17 @@
 			metadata: tempSelections,
 			tags: sels.tags,
 		}));
+	});
+
+	tab.subscribe((t) => {
+		// reset selections when switching tabs
+		selections.set({ metadata: {}, slices: [], tags: [] });
+		tagIds.set({ ids: [] });
+		if (t === "comparison") {
+			slicesForComparison.set(new Map<string, Slice>());
+			updateModelDependentSlices("model A", $model, $slices);
+			updateModelDependentSlices("model B", $comparisonModel, $slices);
+		}
 	});
 
 	onMount(() => getInitialData());

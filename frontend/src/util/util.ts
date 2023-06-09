@@ -1,18 +1,25 @@
+import { ZenoColumnType, type ZenoColumn, type Slice } from "../zenoservice";
 import {
 	folders,
 	metric,
 	metrics,
 	model,
 	models,
+	comparisonModel,
 	ready,
 	reports,
 	rowsPerPage,
 	settings,
 	slices,
+	slicesForComparison,
 	tab,
 	tags,
 } from "../stores";
-import { ZenoColumnType, ZenoService, type ZenoColumn } from "../zenoservice";
+import { ZenoService } from "../zenoservice";
+import {
+	doesModelDependOnPredicates,
+	setModelForFilterPredicateGroup,
+} from "../api/slice";
 
 export async function getInitialData() {
 	const sets = await ZenoService.getSettings();
@@ -25,10 +32,17 @@ export async function getInitialData() {
 	folders.set(inits.folders);
 
 	model.set(inits.models.length > 0 ? inits.models[0] : "");
+	comparisonModel.set(inits.models[1]);
 	metric.set(inits.metrics.length > 0 ? inits.metrics[0] : "");
 
 	const slicesRes = await ZenoService.getSlices();
-	slices.set(new Map(Object.entries(slicesRes)));
+	const slicesMap = new Map(Object.entries(slicesRes));
+	slices.set(slicesMap);
+
+	// initial model dependent slices in compare tab
+	slicesForComparison.set(new Map<string, Slice>());
+	updateModelDependentSlices("model A", inits.models[0], slicesMap);
+	updateModelDependentSlices("model B", inits.models[1], slicesMap);
 
 	const reportsRes = await ZenoService.getReports();
 	reports.set(reportsRes);
@@ -73,4 +87,24 @@ export function getMetricRange(res: number[][]): [number, number] {
 		return [Infinity, -Infinity];
 	}
 	return range;
+}
+
+// update model dependent slices in compare tab
+export function updateModelDependentSlices(name, mod, slis) {
+	slis.forEach((sli) => {
+		const preds = sli.filterPredicates.predicates;
+		if (doesModelDependOnPredicates(preds)) {
+			slicesForComparison.update((ms) => {
+				ms.set(sli.sliceName + " (" + name + ")", <Slice>{
+					sliceName: sli.sliceName + " (" + name + ")",
+					folder: sli.folder,
+					filterPredicates: setModelForFilterPredicateGroup(
+						sli.filterPredicates,
+						mod
+					),
+				});
+				return ms;
+			});
+		}
+	});
 }

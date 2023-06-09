@@ -6,6 +6,7 @@
 	import Select, { Option } from "@smui/select";
 	import { tick } from "svelte";
 	import { getFilteredTable } from "../api/table";
+	import { setModelForFilterPredicateGroup } from "../api/slice";
 	import {
 		editId,
 		editedIds,
@@ -89,8 +90,9 @@
 	function updateTable() {
 		getFilteredTable(
 			$status.completeColumns,
-			$selectionPredicates,
-			$model,
+			[$model],
+			undefined,
+			setModelForFilterPredicateGroup($selectionPredicates, $model),
 			[start, end],
 			$sort,
 			$tagIds,
@@ -267,8 +269,7 @@
 	.sample-container {
 		height: calc(100vh - 175px);
 		width: calc(100vw - 460px);
-		overflow-x: scroll;
-		overflow-y: scroll;
+		overflow: scroll;
 		align-content: baseline;
 		border-bottom: 1px solid var(--G5);
 		display: flex;

@@ -5,6 +5,7 @@
 		mdiCompassOutline,
 		mdiGithub,
 		mdiHomeOutline,
+		mdiCompare,
 	} from "@mdi/js";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
@@ -46,6 +47,23 @@
 						<path
 							fill={$tab === "explore" ? "#6a1b9a" : "black"}
 							d={mdiCompassOutline} />
+					</Icon>
+				</div>
+			</div>
+			<div
+				class="item {$tab === 'comparison' ? 'selected' : ''}"
+				on:keydown={() => ({})}
+				on:click={() => updateTab("comparison")}
+				use:tooltip={{
+					content: "Qualitatively compare model outputs",
+					position: "right",
+					theme: "zeno-tooltip",
+				}}>
+				<div class="icon">
+					<Icon style="outline:none" component={Svg} viewBox="0 0 24 24">
+						<path
+							fill={$tab === "comparison" ? "#6a1b9a" : "black"}
+							d={mdiCompare} />
 					</Icon>
 				</div>
 			</div>
