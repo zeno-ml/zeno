@@ -205,23 +205,25 @@
 	}
 </script>
 
-<Svelecte
-	style="padding-top: 5px;padding-bottom: 5px"
-	value={selectColumn}
-	placeholder={"Column"}
-	valueAsObject
-	valueField={"name"}
-	{options}
-	on:change={(e) => {
-		if (e.detail !== selectColumn) {
-			selectColumn = e.detail;
-			// reset tables data to prevent rerender the existing(non-updated) data
-			tables[$model] = [];
-			tables[$comparisonModel] = [];
-			compareSort.set([undefined, true]);
-		}
-	}} />
-
+<div style="display: flex; align-items:center;">
+	<h4 style="margin-right: 10px">Comparison Feature:</h4>
+	<Svelecte
+		style="padding-top: 5px;padding-bottom: 5px; z-index:6"
+		value={selectColumn}
+		placeholder={"Column"}
+		valueAsObject
+		valueField={"name"}
+		{options}
+		on:change={(e) => {
+			if (e.detail !== selectColumn) {
+				selectColumn = e.detail;
+				// reset tables data to prevent rerender the existing(non-updated) data
+				tables[$model] = [];
+				tables[$comparisonModel] = [];
+				compareSort.set([undefined, true]);
+			}
+		}} />
+</div>
 <div class="table-container" bind:this={instanceContainer}>
 	{#if tables[$model] && tables[$comparisonModel]}
 		<table>
@@ -280,7 +282,9 @@
 						{#each [$model, $comparisonModel] as mod}
 							{#if viewDivs[mod]}
 								<td>
-									<div bind:this={viewDivs[mod][rowId]} />
+									<div
+										style="vertical-align: top"
+										bind:this={viewDivs[mod][rowId]} />
 								</td>
 							{/if}
 						{/each}
@@ -339,7 +343,7 @@
 	table {
 		margin-top: 5px;
 	}
-	thead th {
+	th {
 		width: 160px;
 		text-align: left;
 		border-bottom: 1px solid var(--G5);
@@ -350,8 +354,13 @@
 		background-color: var(--G6);
 		min-width: 70px;
 		padding-right: 1.6vw;
+		vertical-align: top;
 		cursor: pointer;
 		font-weight: 600;
+		z-index: 5;
+	}
+	td {
+		padding-right: 10px;
 	}
 	.metric {
 		font-weight: 400;
