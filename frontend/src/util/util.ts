@@ -17,7 +17,7 @@ import {
 } from "../stores";
 import { ZenoService } from "../zenoservice";
 import {
-	isModelDependPredicates,
+	doesModelDependOnPredicates,
 	setModelForFilterPredicateGroup,
 } from "../api/slice";
 
@@ -93,7 +93,7 @@ export function getMetricRange(res: number[][]): [number, number] {
 export function updateModelDependentSlices(name, mod, slis) {
 	slis.forEach((sli) => {
 		const preds = sli.filterPredicates.predicates;
-		if (isModelDependPredicates(preds)) {
+		if (doesModelDependOnPredicates(preds)) {
 			modelDependSlices.update((ms) => {
 				ms.set(sli.sliceName + "-" + name, <Slice>{
 					sliceName: sli.sliceName + "-" + name,

@@ -2,7 +2,7 @@
 	import { metric, status, selections, model } from "../../stores";
 	import {
 		getMetricsForSlices,
-		isModelDependPredicates,
+		doesModelDependOnPredicates,
 	} from "../../api/slice";
 	import { selectModelDependSliceCell } from "./sliceCellUtil";
 	import { type MetricKey, type Slice } from "../../zenoservice";
@@ -25,7 +25,9 @@
 	$: modelDependSliceName =
 		slice.sliceName + "-" + (sliceModel === $model ? "model A" : "model B");
 
-	$: compareButton = isModelDependPredicates(slice.filterPredicates.predicates);
+	$: compareButton = doesModelDependOnPredicates(
+		slice.filterPredicates.predicates
+	);
 
 	$: selected =
 		$selections.slices.includes(slice.sliceName) ||

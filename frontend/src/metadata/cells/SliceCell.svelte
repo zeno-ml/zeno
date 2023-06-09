@@ -5,7 +5,7 @@
 	import Dialog, { Actions, Content, InitialFocus, Title } from "@smui/dialog";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Paper from "@smui/paper";
-	import { deleteSlice, isModelDependPredicates } from "../../api/slice";
+	import { deleteSlice, doesModelDependOnPredicates } from "../../api/slice";
 	import { selectSliceCell } from "./sliceCellUtil";
 	import SliceDetails from "../../general/SliceDetails.svelte";
 	import SliceCellResult from "./SliceCellResult.svelte";
@@ -33,7 +33,7 @@
 	let showOptions = false;
 
 	let compareButton = slice
-		? isModelDependPredicates(slice.filterPredicates.predicates)
+		? doesModelDependOnPredicates(slice.filterPredicates.predicates)
 		: false;
 
 	$: selected = $selections.slices.includes(slice.sliceName);
