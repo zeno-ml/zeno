@@ -4,7 +4,7 @@
 		getMetricsForSlices,
 		isModelDependPredicates,
 	} from "../../api/slice";
-	import { selectSliceCell } from "./sliceCellUtil";
+	import { selectModelDependSliceCell } from "./sliceCellUtil";
 	import { type MetricKey, type Slice } from "../../zenoservice";
 
 	export let compare;
@@ -49,7 +49,7 @@
 	function selectFilter(e) {
 		if (compare && compareButton) {
 			e.stopPropagation();
-			selectSliceCell(e, modelDependSliceName);
+			selectModelDependSliceCell(modelDependSliceName);
 		}
 	}
 </script>
