@@ -79,12 +79,7 @@
 		sliceFinderMessage = "Generating Slices...";
 		sliceFinderReturn = await ZenoService.runSliceFinder({
 			metricColumn,
-			searchColumnsCont: searchColumns.filter(
-				(d) => d.metadataType === MetadataType.CONTINUOUS
-			),
-			searchColumns: searchColumns.filter(
-				(d) => d.metadataType !== MetadataType.CONTINUOUS
-			),
+			searchColumns: searchColumns,
 			orderBy: orderByOptions[orderByIdx],
 			alpha: parseFloat(alphas[alphaIdx]),
 			maxLattice: parseInt(maxlattice[maxlatticeIdx]),

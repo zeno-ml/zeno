@@ -5,11 +5,12 @@ import numpy as np
 import pandas as pd
 from sliceline.slicefinder import Slicefinder
 
+from zeno.classes.base import MetadataType
 from zeno.classes.slice import FilterPredicate, FilterPredicateGroup, Slice
 from zeno.classes.slice_finder import SliceFinderRequest, SliceFinderReturn
 
 
-# encode continuous value to range bins categorical columns
+# Discretize continuous valued columns.
 def cont_cols_df(df, cols: List[str]):
     new_df = pd.DataFrame()
     for col in cols:
@@ -29,13 +30,21 @@ def slice_finder(df, req: SliceFinderRequest):
 
     Returns a SliceFinderMetricReturn Object.
     """
-    cont_search_cols = [str(col) for col in req.search_columns_cont]
-    not_cont_search_cols = [str(col) for col in req.search_columns]
+    cont_search_cols, not_cont_search_cols = [], []
+    for col in req.search_columns:
+        if col.metadata_type == MetadataType.CONTINUOUS:
+            cont_search_cols.append(col)
+        else:
+            not_cont_search_cols.append(col)
+
+    search_cols = not_cont_search_cols + cont_search_cols
+    cont_search_cols = [str(col) for col in cont_search_cols]
+    not_cont_search_cols = [str(col) for col in not_cont_search_cols]
 
     cont_df = cont_cols_df(df[cont_search_cols].dropna(), cont_search_cols)
 
-    uniq_cols = set(not_cont_search_cols + [str(req.metric_column)])
-    updated_df = pd.concat([df[list(uniq_cols)], cont_df], axis=1).dropna()
+    unique_cols = set(not_cont_search_cols + [str(req.metric_column)])
+    updated_df = pd.concat([df[list(unique_cols)], cont_df], axis=1).dropna()
 
     # Invert metric column if ascending.
     normalized_metric_col = np.array(updated_df[str(req.metric_column)], dtype=float)
@@ -44,9 +53,9 @@ def slice_finder(df, req: SliceFinderRequest):
         normalized_metric_col = metric_max - normalized_metric_col
 
     cont_search_cols = [col + "_encode" for col in cont_search_cols]
-    search_cols = not_cont_search_cols + cont_search_cols
+    search_cols_str = not_cont_search_cols + cont_search_cols
     slice_finder = Slicefinder(alpha=req.alpha, k=20, max_l=req.max_lattice)
-    slice_finder.fit(updated_df[search_cols].to_numpy(), normalized_metric_col)
+    slice_finder.fit(updated_df[search_cols_str].to_numpy(), normalized_metric_col)
 
     if slice_finder.top_slices_ is None or slice_finder.top_slices_statistics_ is None:
         return SliceFinderReturn(slices=[], metrics=[], sizes=[], overall_metric=0)
@@ -54,8 +63,7 @@ def slice_finder(df, req: SliceFinderRequest):
     discovered_slices: List[Slice] = []
     slice_metrics: List[float] = []
     slice_sizes: List[int] = []
-    search_cols = req.search_columns + req.search_columns_cont
-    search_cols_len = len(req.search_columns)
+    not_cont_search_num = len(not_cont_search_cols)
 
     for sli_i, sli in enumerate(slice_finder.top_slices_):
         # Rescale back to original metric.
@@ -75,14 +83,15 @@ def slice_finder(df, req: SliceFinderRequest):
         for pred_i, sli_predicate in enumerate(sli):
             if sli_predicate is not None:
                 join_val = "" if len(predicate_list) == 0 else "&"
+                col = search_cols[pred_i]
 
                 # not continuous columns
-                if pred_i < search_cols_len:
+                if pred_i < not_cont_search_num:
                     if str(sli_predicate) in ["True", "False"]:
                         sli_predicate = "true" if sli_predicate else "false"
                     predicate_list.append(
                         FilterPredicate(
-                            column=req.search_columns[pred_i],
+                            column=col,
                             operation="==",
                             value=sli_predicate,
                             join=join_val,
@@ -90,7 +99,6 @@ def slice_finder(df, req: SliceFinderRequest):
                     )
                 # continuous columns
                 else:
-                    col = req.search_columns_cont[pred_i - search_cols_len]
                     left_pred = FilterPredicate(
                         column=col,
                         operation=">=",
