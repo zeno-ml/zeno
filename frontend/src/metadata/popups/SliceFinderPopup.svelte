@@ -63,7 +63,8 @@
 
 	$: sliceFinderMessage = "";
 
-	export async function activateSliceFinder() {
+	/** Run sliceline algorithm to generate recommended slices **/
+	export async function generateSlices() {
 		if (searchColumns.length === 0 || metricColumn === null) {
 			sliceFinderMessage =
 				"Must have a metric column and at least one search column.";
@@ -96,6 +97,7 @@
 		}
 	}
 
+	/** Define keyboard actions **/
 	function submit(e) {
 		if ($showSliceFinder && e.key === "Escape") {
 			$showSliceFinder = false;
@@ -210,8 +212,7 @@
 						class="information-tooltip"
 						style="margin-top: 3px;"
 						use:tooltip={{
-							content:
-								"Ordered by cumulative slice score obtained through the sliceline function",
+							content: "Order by slice score, a combination of size and metric",
 							theme: "zeno-tooltip",
 							position: "left",
 							maxWidth: "250",
@@ -233,7 +234,7 @@
 				<Button
 					variant="outlined"
 					style="color:white; background-color: var(--P2);"
-					on:click={() => activateSliceFinder()}
+					on:click={() => generateSlices()}
 					on:mouseleave={blur}
 					on:focusout={blur}>
 					Generate Slices
@@ -252,12 +253,13 @@
 			</div>
 		{:else}
 			<div id="initial">
-				<span class="intial-text" style="font-weight: bold"
-					>Click below to find slices with low performance!</span>
+				<span class="intial-text" style="font-weight: bold">
+					Click below to find slices with low performance!
+				</span>
 				<Button
 					variant="outlined"
 					style="color:white; background-color: var(--P2);"
-					on:click={() => activateSliceFinder()}
+					on:click={() => generateSlices()}
 					on:mouseleave={blur}
 					on:focusout={blur}>
 					Generate Slices
