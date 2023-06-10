@@ -10,5 +10,5 @@ export type SliceFinderRequest = {
 	searchColumns: Array<ZenoColumn>;
 	orderBy: string;
 	alpha: number;
-	minimumSupp: number;
+	maxLattice: number;
 };

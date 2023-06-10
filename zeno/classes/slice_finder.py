@@ -10,7 +10,7 @@ class SliceFinderRequest(CamelModel):
     search_columns: List[ZenoColumn]
     order_by: str
     alpha: float
-    minimum_supp: int
+    max_lattice: int
 
 
 class SliceFinderReturn(CamelModel):

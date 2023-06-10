@@ -45,7 +45,7 @@ def slice_finder(df, req: SliceFinderRequest):
 
     cont_search_cols = [col + "_encode" for col in cont_search_cols]
     search_cols = not_cont_search_cols + cont_search_cols
-    slice_finder = Slicefinder(alpha=req.alpha, k=20, min_sup=req.minimum_supp)
+    slice_finder = Slicefinder(alpha=req.alpha, k=20, max_l=req.max_lattice)
     slice_finder.fit(updated_df[search_cols].to_numpy(), normalized_metric_col)
 
     if slice_finder.top_slices_ is None or slice_finder.top_slices_statistics_ is None:

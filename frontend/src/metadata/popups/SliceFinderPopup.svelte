@@ -49,8 +49,8 @@
 
 	let alphas = ["0.5", "0.75", "0.9", "0.95", "0.99", "0.999"];
 	let alphaIdx = 4;
-	let minimumSupps = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
-	let minimumSuppIdx = 0;
+	let maxlattice = ["1", "2", "3", "4", "5", "6"];
+	let maxlatticeIdx = 3;
 	let orderByOptions = ["descending", "ascending"];
 	let orderByIdx = 0;
 
@@ -69,9 +69,9 @@
 				"Must have a metric column and at least one search column.";
 			return;
 		}
-		if (alphaIdx === null || minimumSuppIdx === null || orderByIdx === null) {
+		if (alphaIdx === null || maxlattice === null || orderByIdx === null) {
 			sliceFinderMessage =
-				"Parameters (Alpha, Min. Support, Order By) can't be null.";
+				"Parameters (Alpha, Max. Lattice, Order By) can't be null.";
 			return;
 		}
 
@@ -86,7 +86,7 @@
 			),
 			orderBy: orderByOptions[orderByIdx],
 			alpha: parseFloat(alphas[alphaIdx]),
-			minimumSupp: parseInt(minimumSupps[minimumSuppIdx]),
+			maxLattice: parseInt(maxlattice[maxlatticeIdx]),
 		});
 
 		if (sliceFinderReturn.slices.length === 0) {
@@ -183,12 +183,12 @@
 			</div>
 			<div>
 				<div style="display:flex">
-					<div class="options-header">Min. Support</div>
+					<div class="options-header">Max. Lattice</div>
 					<div
 						class="information-tooltip"
 						style="margin-top: 3px;"
 						use:tooltip={{
-							content: "controls the minimum slice threshold",
+							content: "Maximum number of predicates",
 							theme: "zeno-tooltip",
 							maxWidth: "270",
 						}}>
@@ -199,9 +199,9 @@
 				</div>
 				<Svelecte
 					style="margin-right: 5px; width: 120px"
-					bind:value={minimumSuppIdx}
-					options={minimumSupps}
-					placeholder="Minimum Support Threshold" />
+					bind:value={maxlatticeIdx}
+					options={maxlattice}
+					placeholder="Maximum lattice level" />
 			</div>
 			<div>
 				<div style="display:flex">
