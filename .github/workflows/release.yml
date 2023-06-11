@@ -30,11 +30,11 @@ jobs:
           cd frontend/
           npm run build
           node build.js
-          mv zeno/frontend/index.html zeno/frontend/index_og.html
-          mv zeno/frontend/index_tmp.html zeno/frontend/index.html
+          mv index.html index_og.html
+          mv index_tmp.html index.html
           poetry build -v
-          rm zeno/frontend/index.html
-          mv zeno/frontend/index_og.html zeno/frontend/index.html
+          rm index.html
+          mv index_og.html index.html
       - name: publish
         run: |
           poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
