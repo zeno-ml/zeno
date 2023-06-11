@@ -6,10 +6,10 @@ from zeno.classes.slice import Slice
 
 class SliceFinderRequest(CamelModel):
     metric_column: ZenoColumn
-    columns: List[ZenoColumn]
+    search_columns: List[ZenoColumn]
     order_by: str
     alpha: float
-    minimum_supp: int
+    max_lattice: int
 
 
 class SliceFinderReturn(CamelModel):

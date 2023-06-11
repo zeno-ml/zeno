@@ -1,20 +1,12 @@
 <script lang="ts">
-	import { mdiClose, mdiInformationOutline, mdiPlus } from "@mdi/js";
+	import { mdiClose, mdiInformationOutline } from "@mdi/js";
 	import Button from "@smui/button";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Paper from "@smui/paper";
 	import { tooltip } from "@svelte-plugins/tooltips";
 	import Svelecte from "svelecte";
-	import SliceDetails from "../../general/SliceDetails.svelte";
-	import {
-		model,
-		showNewSlice,
-		showSliceFinder,
-		sliceToEdit,
-		slices,
-		status,
-	} from "../../stores";
+	import { model, showSliceFinder, status } from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 	import {
 		MetadataType,
@@ -22,38 +14,43 @@
 		ZenoService,
 		type SliceFinderReturn,
 	} from "../../zenoservice";
+	import SliceFinderCell from "../cells/SliceFinderCell.svelte";
+
+	let blur = function (ev) {
+		ev.target.blur();
+	};
+
+	let notEmbedUniqCols = $status.completeColumns.filter(
+		(d) =>
+			d.columnType === ZenoColumnType.METADATA ||
+			d.columnType === ZenoColumnType.PREDISTILL ||
+			((d.columnType === ZenoColumnType.OUTPUT ||
+				d.columnType === ZenoColumnType.POSTDISTILL) &&
+				d.model === $model)
+	);
 
 	// Columns to create candidate slices accross
-	// TODO: Support discretized continuous columns.
 	let searchColumnOptions = $status.completeColumns.filter(
 		(d) =>
-			(d.metadataType === MetadataType.NOMINAL ||
-				d.metadataType === MetadataType.BOOLEAN) &&
-			(d.columnType === ZenoColumnType.METADATA ||
-				d.columnType === ZenoColumnType.PREDISTILL ||
-				((d.columnType === ZenoColumnType.OUTPUT ||
-					d.columnType === ZenoColumnType.POSTDISTILL) &&
-					d.model === $model))
+			d.metadataType !== MetadataType.OTHER &&
+			d.metadataType !== MetadataType.DATETIME &&
+			notEmbedUniqCols.includes(d)
 	);
-	let searchColumns = searchColumnOptions.length > 0 ? searchColumnOptions : [];
+	let searchColumns = [searchColumnOptions[0]];
 
 	// Column to use as the metric to compare slices.
 	let metricColumns = $status.completeColumns.filter(
 		(d) =>
 			(d.metadataType === MetadataType.CONTINUOUS ||
 				d.metadataType === MetadataType.BOOLEAN) &&
-			(d.columnType === ZenoColumnType.METADATA ||
-				d.columnType === ZenoColumnType.PREDISTILL ||
-				((d.columnType === ZenoColumnType.OUTPUT ||
-					d.columnType === ZenoColumnType.POSTDISTILL) &&
-					d.model === $model))
+			notEmbedUniqCols.includes(d)
 	);
 	let metricColumn = metricColumns.length > 0 ? metricColumns[0] : null;
 
 	let alphas = ["0.5", "0.75", "0.9", "0.95", "0.99", "0.999"];
-	let alphaIdx = 3;
-	let minimumSupps = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
-	let minimumSuppIdx = 0;
+	let alphaIdx = 4;
+	let maxlattice = ["1", "2", "3", "4", "5", "6"];
+	let maxlatticeIdx = 3;
 	let orderByOptions = ["descending", "ascending"];
 	let orderByIdx = 0;
 
@@ -66,42 +63,36 @@
 
 	$: sliceFinderMessage = "";
 
-	export async function addSliceAtIndex(idx) {
-		let slice = sliceFinderReturn.slices[idx];
-
-		ZenoService.createNewSlice(slice).then(() => {
-			slices.update((s) => {
-				s.set(slice.sliceName, slice);
-				return s;
-			});
-			showNewSlice.set(false);
-			sliceToEdit.set(null);
-		});
-	}
-
-	export async function activateSliceFinder() {
+	/** Run sliceline algorithm to generate recommended slices **/
+	export async function generateSlices() {
 		if (searchColumns.length === 0 || metricColumn === null) {
 			sliceFinderMessage =
 				"Must have a metric column and at least one search column.";
 			return;
 		}
+		if (alphaIdx === null || maxlattice === null || orderByIdx === null) {
+			sliceFinderMessage =
+				"Parameters (Alpha, Max. Lattice, Order By) can't be null.";
+			return;
+		}
 
 		sliceFinderMessage = "Generating Slices...";
 		sliceFinderReturn = await ZenoService.runSliceFinder({
-			columns: searchColumns,
-			metricColumn: metricColumn,
+			metricColumn,
+			searchColumns: searchColumns,
 			orderBy: orderByOptions[orderByIdx],
-			minimumSupp: parseInt(minimumSupps[minimumSuppIdx]),
 			alpha: parseFloat(alphas[alphaIdx]),
+			maxLattice: parseInt(maxlattice[maxlatticeIdx]),
 		});
 
 		if (sliceFinderReturn.slices.length === 0) {
-			sliceFinderMessage = "No slices found, try increasing alpha";
+			sliceFinderMessage = "No slices found, try increasing alpha.";
 		} else {
 			sliceFinderMessage = "";
 		}
 	}
 
+	/** Define keyboard actions **/
 	function submit(e) {
 		if ($showSliceFinder && e.key === "Escape") {
 			$showSliceFinder = false;
@@ -110,17 +101,17 @@
 </script>
 
 <svelte:window on:keydown={submit} />
-{#if showSliceFinder}
+{#if $showSliceFinder}
 	<div class="coverage" />
 {/if}
 <div
 	id="slice-finder-container"
 	use:clickOutside
 	on:click_outside={() => ($showSliceFinder = false)}>
-	<Paper elevation={7}>
+	<Paper style="min-height: 50vh;" elevation={7}>
 		<div class="inline-justify">
 			<div class="inline">
-				<h4 class="title">Slice Finder</h4>
+				<h3 class="title">Slice Finder</h3>
 				<div
 					class="information-tooltip"
 					use:tooltip={{
@@ -144,7 +135,7 @@
 			<div style:margin-left={"20px"}>
 				<div class="options-header">Metric Column</div>
 				<Svelecte
-					style="margin-right: 5px; width: 125px"
+					style="margin-right: 5px; width: 175px"
 					bind:value={metricColumn}
 					valueAsObject={true}
 					valueField={"name"}
@@ -156,14 +147,30 @@
 				<div class="options-header">Search Columns</div>
 				<Svelecte
 					style="margin-right: 5px;"
-					bind:readSelection={searchColumns}
+					bind:value={searchColumns}
+					valueField={"name"}
+					labelField={"name"}
 					valueAsObject={true}
 					options={searchColumnOptions}
 					multiple={true}
 					placeholder="Slicing Columns" />
 			</div>
 			<div>
-				<div class="options-header">Alpha</div>
+				<div style="display:flex">
+					<div class="options-header">Alpha</div>
+					<div
+						class="information-tooltip"
+						style="margin-top: 3px;"
+						use:tooltip={{
+							content: "Increase alpha to find more slices",
+							theme: "zeno-tooltip",
+							maxWidth: "250",
+						}}>
+						<Icon style="outline:none" component={Svg} viewBox="-6 -6 36 36">
+							<path d={mdiInformationOutline} />
+						</Icon>
+					</div>
+				</div>
 				<Svelecte
 					style="margin-right: 5px; width: 80px"
 					bind:value={alphaIdx}
@@ -172,15 +179,44 @@
 					placeholder="Alpha" />
 			</div>
 			<div>
-				<div class="options-header">Min. Support</div>
+				<div style="display:flex">
+					<div class="options-header">Max. Lattice</div>
+					<div
+						class="information-tooltip"
+						style="margin-top: 3px;"
+						use:tooltip={{
+							content: "Maximum number of predicates",
+							theme: "zeno-tooltip",
+							maxWidth: "270",
+						}}>
+						<Icon style="outline:none" component={Svg} viewBox="-6 -6 36 36">
+							<path d={mdiInformationOutline} />
+						</Icon>
+					</div>
+				</div>
 				<Svelecte
-					style="margin-right: 5px; width: 100px"
-					bind:value={minimumSuppIdx}
-					options={minimumSupps}
-					placeholder="Minimum Support Threshold" />
+					style="margin-right: 5px; width: 120px"
+					bind:value={maxlatticeIdx}
+					options={maxlattice}
+					placeholder="Maximum lattice level" />
 			</div>
 			<div>
-				<div class="options-header">Order By</div>
+				<div style="display:flex">
+					<div class="options-header">Order By</div>
+					<div
+						class="information-tooltip"
+						style="margin-top: 3px;"
+						use:tooltip={{
+							content: "Order by slice score, a combination of size and metric",
+							theme: "zeno-tooltip",
+							position: "left",
+							maxWidth: "250",
+						}}>
+						<Icon style="outline:none" component={Svg} viewBox="-6 -6 36 36">
+							<path d={mdiInformationOutline} />
+						</Icon>
+					</div>
+				</div>
 				<Svelecte
 					style="width: 120px; margin-right: 20px"
 					bind:value={orderByIdx}
@@ -188,69 +224,87 @@
 					placeholder="Order By" />
 			</div>
 		</div>
-
-		<div id="generation">
-			<Button variant="outlined" on:click={() => activateSliceFinder()}>
-				Generate Slices
-			</Button>
-			<span id="generate-slices">{sliceFinderMessage}</span>
-			<span id="overall">
-				{sliceFinderReturn.overallMetric !== null
-					? "Average: " + sliceFinderReturn.overallMetric.toFixed(3)
-					: ""}
-			</span>
-		</div>
-
-		{#each sliceFinderReturn.slices as element, idx}
-			<div class="slice">
-				<span style="display: inline-block;">
-					<SliceDetails predicateGroup={element.filterPredicates} />
-				</span>
-				<div class="inline">
-					<span style="margin-right: 10px; margin-left: 10px">
-						{sliceFinderReturn.metrics[idx].toFixed(3)}
+		{#if sliceFinderReturn.slices.length > 0}
+			<div class="generation">
+				<Button
+					variant="outlined"
+					style="color:white; background-color: var(--P2);"
+					on:click={() => generateSlices()}
+					on:mouseleave={blur}
+					on:focusout={blur}>
+					Generate Slices
+				</Button>
+				<span>{sliceFinderMessage}</span>
+				<div>
+					<span class="average"> Overall Average: </span>
+					<span class="average-value" style="color: var(--logo);">
+						{sliceFinderReturn.overallMetric.toFixed(3)}
 					</span>
-					<span style="color:gray; font-style: italic">
-						{"(" + sliceFinderReturn.sizes[idx] + ")"}
-					</span>
-					<IconButton on:click={() => addSliceAtIndex(idx)}>
-						<Icon component={Svg} viewBox="0 0 24 24">
-							<path fill="#6a1b9a" d={mdiPlus} />
-						</Icon>
-					</IconButton>
 				</div>
 			</div>
+			<div class="generation" style="margin-bottom:0px;">
+				<h4 style="margin-bottom:0px;">Filter Predicates</h4>
+				<h4 style="margin-bottom:0px;">Slice Average Metrics</h4>
+			</div>
+		{:else}
+			<div id="initial">
+				<span class="intial-text" style="font-weight: bold">
+					Click below to find slices with low performance!
+				</span>
+				<Button
+					variant="outlined"
+					style="color:white; background-color: var(--P2);"
+					on:click={() => generateSlices()}
+					on:mouseleave={blur}
+					on:focusout={blur}>
+					Generate Slices
+				</Button>
+				<span class="intial-text">{sliceFinderMessage}</span>
+			</div>
+		{/if}
+		{#each sliceFinderReturn.slices as slice, idx}
+			{@const metric = sliceFinderReturn.metrics[idx].toFixed(3)}
+			{@const size = sliceFinderReturn.sizes[idx]}
+			<SliceFinderCell {slice} {metric} {size} />
 		{/each}
 	</Paper>
 </div>
 
 <style>
-	#generate-slices {
-		margin-left: 10px;
+	.intial-text {
+		margin: 10px;
 	}
 	#slice-finder-container {
-		max-height: calc(100vh - 100px);
-		justify-content: flex-start;
-		overflow: scroll;
+		max-height: calc(100vh - 150px);
+		overflow: auto;
 		position: fixed;
 		top: 8vh;
-		margin-left: 10vw;
-		z-index: 10;
-		min-width: 70vw;
+		margin-left: 17vw;
+		z-index: 5;
+		min-width: 60vw;
+		max-width: 60vw;
 	}
-	#overall {
-		position: absolute;
-		right: 25px;
+	.average {
+		font-weight: 400;
+		color: var(--G2);
+		margin-right: 15px;
 	}
-	#generation {
-		margin-left: 20px;
-		margin-top: 20px;
-		margin-bottom: 20px;
+	#initial {
 		display: flex;
+		flex-direction: column;
+		height: 25vh;
+		margin: 20px;
+		align-items: center;
+		justify-content: center;
+	}
+	.generation {
+		margin: 20px;
+		display: flex;
+		justify-content: space-between;
 		align-items: center;
 	}
 	.options-header {
-		margin-top: 15px;
+		margin-top: 5px;
 		margin-bottom: 5px;
 		color: var(--G2);
 	}
@@ -276,14 +330,7 @@
 		height: 500vh;
 		margin-left: -100vw;
 		margin-top: -100vh;
-		z-index: 9;
-	}
-	.slice {
-		margin-left: 20px;
-		display: flex;
-		margin-top: 10px;
-		margin-bottom: 10px;
-		justify-content: space-between;
+		z-index: 4;
 	}
 	.information-tooltip {
 		width: 24px;

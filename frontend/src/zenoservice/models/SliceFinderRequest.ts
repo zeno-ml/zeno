@@ -6,8 +6,8 @@ import type { ZenoColumn } from "./ZenoColumn";
 
 export type SliceFinderRequest = {
 	metricColumn: ZenoColumn;
-	columns: Array<ZenoColumn>;
+	searchColumns: Array<ZenoColumn>;
 	orderBy: string;
 	alpha: number;
-	minimumSupp: number;
+	maxLattice: number;
 };
