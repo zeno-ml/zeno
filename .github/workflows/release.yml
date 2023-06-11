@@ -30,6 +30,7 @@ jobs:
           cd frontend/
           npm run build
           node build.js
+          cd ../zeno/frontend
           mv index.html index_og.html
           mv index_tmp.html index.html
           poetry build -v
