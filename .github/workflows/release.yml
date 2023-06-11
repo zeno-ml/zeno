@@ -25,17 +25,16 @@ jobs:
         run: |
           cd frontend/
           npm i
-      - name: Build project
+      - name: Build frontend
         run: |
           cd frontend/
           npm run build
           node build.js
-          cd ../zeno/frontend
-          mv index.html index_og.html
+      - name: Build poetry project
+          cd zeno/frontend
+          rm index.html
           mv index_tmp.html index.html
           poetry build -v
-          rm index.html
-          mv index_og.html index.html
       - name: publish
         run: |
           poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
