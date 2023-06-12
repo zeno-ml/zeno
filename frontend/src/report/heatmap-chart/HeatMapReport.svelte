@@ -94,7 +94,7 @@
 						slices: r.slice,
 						size: res[i].size,
 						models: r.model,
-						...(selectMetric !== "size" && {
+						...(selectMetric !== "slice size" && {
 							metrics: res[i].metric.toFixed(2),
 						}),
 					})),
@@ -117,7 +117,7 @@
 						slice_2: r.slice_2,
 						size: res[i].size,
 						models: r.model,
-						...(selectMetric !== "size" && {
+						...(selectMetric !== "slice size" && {
 							metrics: res[i].metric.toFixed(2),
 						}),
 					})),

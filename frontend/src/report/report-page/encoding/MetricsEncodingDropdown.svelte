@@ -9,7 +9,7 @@
 			$reports[$report].metrics = [$metrics[0]];
 		}
 		// initial options & values
-		[...$metrics.values(), "size"].forEach((m, i) => {
+		[...$metrics.values(), "slice size"].forEach((m, i) => {
 			options[i] = { value: i, label: m };
 		});
 		value = options.find((o) => o.label === $reports[$report].metrics[0]).value;

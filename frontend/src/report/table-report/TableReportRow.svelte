@@ -23,7 +23,7 @@
 			<p>
 				{!r.metric ||
 				(parameters.zEncoding === "metrics" &&
-					currentReport.metrics[0] === "size")
+					currentReport.metrics[0] === "slice size")
 					? r.size
 					: r.metric.toFixed(2)}
 			</p>

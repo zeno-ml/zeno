@@ -69,7 +69,7 @@ function setModelForMetricKeys(metricKeys: MetricKey[]) {
 
 function setMetricForSize(metricKeys: MetricKey[]) {
 	return metricKeys.map((key) => {
-		key.metric = key.metric === "size" ? "" : key.metric;
+		key.metric = key.metric === "slice size" ? "" : key.metric;
 		return key;
 	});
 }
