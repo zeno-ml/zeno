@@ -227,7 +227,7 @@ def read_functions(fns: Union[List[Callable], str]) -> List[Callable]:
 
 def is_notebook() -> bool:
     try:
-        from IPython import get_ipython
+        from IPython.core.getipython import get_ipython
 
         shell = get_ipython().__class__.__name__
         if shell == "ZMQInteractiveShell":
