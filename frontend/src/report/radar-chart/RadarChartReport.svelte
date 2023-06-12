@@ -92,7 +92,7 @@
 				table: chartEntries.map((r, i) => ({
 					key: r.key,
 					value:
-						r.key === "size" || fixedName === "size"
+						r.key === "slice size" || fixedName === "slice size"
 							? res[i].size
 							: res[i].metric.toFixed(2),
 					category: r.category,

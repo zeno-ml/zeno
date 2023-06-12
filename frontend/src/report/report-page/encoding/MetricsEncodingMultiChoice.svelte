@@ -6,7 +6,7 @@
 	let value = [];
 
 	// initial options & values
-	[...$metrics.values(), "size"].forEach((m, i) => {
+	[...$metrics.values(), "slice size"].forEach((m, i) => {
 		options[i] = { value: i, label: m };
 	});
 	$reports[$report].metrics.forEach((m, i) => {
