@@ -60,7 +60,7 @@
 		width: 167px;
 		height: 35px;
 		border: 1px solid var(--G4);
-		border-radius: 5px;
+		border-radius: 4px;
 		font-size: 14px;
 		color: var(--G1);
 	}
