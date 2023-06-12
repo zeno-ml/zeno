@@ -278,7 +278,7 @@
 		position: relative;
 		overflow: visible;
 		border: 0.5px solid var(--G4);
-		border-radius: 4px;
+		border-radius: 15px;
 		margin-top: 5px;
 		display: flex;
 		padding-left: 10px;

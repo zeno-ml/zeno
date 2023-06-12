@@ -37,7 +37,7 @@
 		margin-right: 5px;
 		margin-top: 2px;
 		margin-bottom: 2px;
-		border-radius: 2px;
+		border-radius: 15px;
 		width: fit-content;
 	}
 </style>
