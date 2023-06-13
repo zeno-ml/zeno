@@ -14,7 +14,7 @@ import requests
 import tomli
 
 from zeno.api import ZenoParameters
-from zeno.classes.base import MetadataType
+from zeno.classes.base import MetadataType, ZenoColumn
 
 VIEW_MAP_URL: str = "https://raw.githubusercontent.com/zeno-ml/instance-views/0.3/"
 VIEWS_MAP_JSON: str = "views.json"
@@ -238,3 +238,22 @@ def is_notebook() -> bool:
             return False  # Other type (?)
     except (NameError, ImportError):
         return False  # Probably standard Python interpreter
+
+
+def generate_diff_cols(df: pd.DataFrame, diff_cols: List[ZenoColumn]) -> pd.DataFrame:
+    col_1, col_2 = diff_cols[0], diff_cols[1]
+    if (
+        col_1.column_type != col_2.column_type
+        or col_1.metadata_type != col_2.metadata_type
+    ):
+        print("error: different column types!")
+        return df
+
+    # various metadata type difference
+    if col_1.metadata_type == MetadataType.CONTINUOUS:
+        df.loc[:, "diff"] = abs(
+            df[str(col_1)].astype(float) - df[str(col_2)].astype(float)
+        )
+    else:
+        df.loc[:, "diff"] = df[str(col_1)] != df[str(col_2)]
+    return df

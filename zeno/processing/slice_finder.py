@@ -8,6 +8,7 @@ from sliceline.slicefinder import Slicefinder
 from zeno.classes.base import MetadataType
 from zeno.classes.slice import FilterPredicate, FilterPredicateGroup, Slice
 from zeno.classes.slice_finder import SliceFinderRequest, SliceFinderReturn
+from zeno.util import generate_diff_cols
 
 
 # Discretize continuous valued columns.
@@ -30,6 +31,7 @@ def slice_finder(df, req: SliceFinderRequest):
 
     Returns a SliceFinderMetricReturn Object.
     """
+    print(req.compare_column)
     cont_search_cols, not_cont_search_cols = [], []
     for col in req.search_columns:
         if col.metadata_type == MetadataType.CONTINUOUS:
@@ -40,14 +42,19 @@ def slice_finder(df, req: SliceFinderRequest):
     search_cols = not_cont_search_cols + cont_search_cols
     cont_search_cols = [str(col) for col in cont_search_cols]
     not_cont_search_cols = [str(col) for col in not_cont_search_cols]
+    metric_col = "diff" if req.compare_column else str(req.metric_column)
 
     cont_df = cont_cols_df(df[cont_search_cols].dropna(), cont_search_cols)
 
-    unique_cols = set(not_cont_search_cols + [str(req.metric_column)])
+    if req.compare_column:
+        diff_cols = [req.metric_column, req.compare_column]
+        df = generate_diff_cols(df, diff_cols)
+
+    unique_cols = set(not_cont_search_cols + [metric_col])
     updated_df = pd.concat([df[list(unique_cols)], cont_df], axis=1).dropna()
 
+    normalized_metric_col = np.array(updated_df[metric_col], dtype=float)
     # Invert metric column if ascending.
-    normalized_metric_col = np.array(updated_df[str(req.metric_column)], dtype=float)
     metric_max = np.max(normalized_metric_col)
     if req.order_by == "ascending":
         normalized_metric_col = metric_max - normalized_metric_col

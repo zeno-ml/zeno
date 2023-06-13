@@ -6,7 +6,13 @@
 	import Paper from "@smui/paper";
 	import { tooltip } from "@svelte-plugins/tooltips";
 	import Svelecte from "svelecte";
-	import { model, showSliceFinder, status, tab } from "../../stores";
+	import {
+		model,
+		showSliceFinder,
+		status,
+		tab,
+		comparisonModel,
+	} from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 	import {
 		MetadataType,
@@ -39,13 +45,23 @@
 	let searchColumns = [searchColumnOptions[0]];
 
 	// Column to use as the metric to compare slices.
-	let metricColumns = $status.completeColumns.filter(
-		(d) =>
-			(d.metadataType === MetadataType.CONTINUOUS ||
-				d.metadataType === MetadataType.BOOLEAN) &&
-			notEmbedUniqCols.includes(d)
+	let metricColumns = $status.completeColumns.filter((d) =>
+		$tab !== "comparison"
+			? (d.metadataType === MetadataType.CONTINUOUS ||
+					d.metadataType === MetadataType.BOOLEAN) &&
+			  notEmbedUniqCols.includes(d)
+			: (d.columnType === ZenoColumnType.OUTPUT ||
+					d.columnType === ZenoColumnType.POSTDISTILL) &&
+			  d.model === $model
 	);
 	let metricColumn = metricColumns.length > 0 ? metricColumns[0] : null;
+	let compareColumn = undefined;
+	$: if (metricColumn && $tab === "comparison") {
+		compareColumn = Object.assign({}, metricColumn);
+		if (compareColumn.model) {
+			compareColumn.model = $comparisonModel;
+		}
+	}
 
 	let alphas = ["0.5", "0.75", "0.9", "0.95", "0.99", "0.999"];
 	let alphaIdx = 4;
@@ -83,6 +99,7 @@
 			orderBy: orderByOptions[orderByIdx],
 			alpha: parseFloat(alphas[alphaIdx]),
 			maxLattice: parseInt(maxlattice[maxlatticeIdx]),
+			compareColumn,
 		});
 
 		if (sliceFinderReturn.slices.length === 0) {
@@ -118,7 +135,7 @@
 						content:
 							$tab !== "comparison"
 								? "Run the SliceLine algorithm to find slices of data with high or low metrics."
-								: "Run the SliceLine algorithm to find slices with the highest average difference in a metric column between two models.",
+								: "Run the SliceLine algorithm to find slices with the highest or lowest average difference in a metric column between two models.",
 						position: "right",
 						theme: "zeno-tooltip",
 						maxWidth: "350",

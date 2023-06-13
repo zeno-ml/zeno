@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from zeno.classes.base import CamelModel, ZenoColumn
 from zeno.classes.slice import Slice
@@ -10,6 +10,7 @@ class SliceFinderRequest(CamelModel):
     order_by: str
     alpha: float
     max_lattice: int
+    compare_column: Optional[ZenoColumn] = None
 
 
 class SliceFinderReturn(CamelModel):
