@@ -79,7 +79,7 @@
 		sliceFinderMessage = "Generating Slices...";
 		sliceFinderReturn = await ZenoService.runSliceFinder({
 			metricColumn,
-			searchColumns: searchColumns,
+			searchColumns,
 			orderBy: orderByOptions[orderByIdx],
 			alpha: parseFloat(alphas[alphaIdx]),
 			maxLattice: parseInt(maxlattice[maxlatticeIdx]),
@@ -280,7 +280,7 @@
 		position: fixed;
 		top: 8vh;
 		margin-left: 17vw;
-		z-index: 5;
+		z-index: 10;
 		min-width: 60vw;
 		max-width: 60vw;
 	}
@@ -330,7 +330,7 @@
 		height: 500vh;
 		margin-left: -100vw;
 		margin-top: -100vh;
-		z-index: 4;
+		z-index: 9;
 	}
 	.information-tooltip {
 		width: 24px;
