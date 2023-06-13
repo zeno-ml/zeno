@@ -6,7 +6,7 @@
 	import Paper from "@smui/paper";
 	import { tooltip } from "@svelte-plugins/tooltips";
 	import Svelecte from "svelecte";
-	import { model, showSliceFinder, status } from "../../stores";
+	import { model, showSliceFinder, status, tab } from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 	import {
 		MetadataType,
@@ -116,9 +116,12 @@
 					class="information-tooltip"
 					use:tooltip={{
 						content:
-							"Run the SliceLine algorithm to find slices of data with high or low metrics.",
+							$tab !== "comparison"
+								? "Run the SliceLine algorithm to find slices of data with high or low metrics."
+								: "Run the SliceLine algorithm to find slices with the highest average difference in a metric column between two models.",
 						position: "right",
 						theme: "zeno-tooltip",
+						maxWidth: "350",
 					}}>
 					<Icon style="outline:none" component={Svg} viewBox="-6 -6 36 36">
 						<path d={mdiInformationOutline} />
@@ -244,12 +247,16 @@
 			</div>
 			<div class="generation" style="margin-bottom:0px;">
 				<h4 style="margin-bottom:0px;">Filter Predicates</h4>
-				<h4 style="margin-bottom:0px;">Slice Average Metrics</h4>
+				<h4 style="margin-bottom:0px;">
+					Slice Average Metric {$tab !== "comparison" ? "" : "difference"}
+				</h4>
 			</div>
 		{:else}
 			<div id="initial">
 				<span class="intial-text" style="font-weight: bold">
-					Click below to find slices with low performance!
+					Click below to find slices with {$tab !== "comparison"
+						? "low performance"
+						: "the highest difference"}!
 				</span>
 				<Button
 					variant="outlined"
