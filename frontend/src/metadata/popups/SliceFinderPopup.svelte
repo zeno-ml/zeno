@@ -153,7 +153,25 @@
 		</div>
 		<div class="inline">
 			<div style:margin-left={"20px"}>
-				<div class="options-header">Metric Column</div>
+				<div style="display:flex">
+					<div class="options-header">Metric Column</div>
+					<div
+						class="information-tooltip"
+						style="margin-top: 3px;"
+						use:tooltip={{
+							content:
+								$tab !== "comparison"
+									? "The metric column to decide performance"
+									: "The metric column that have difference between models",
+							position: "right",
+							theme: "zeno-tooltip",
+							maxWidth: "450",
+						}}>
+						<Icon style="outline:none" component={Svg} viewBox="-6 -6 36 36">
+							<path d={mdiInformationOutline} />
+						</Icon>
+					</div>
+				</div>
 				<Svelecte
 					style="margin-right: 5px; width: 175px"
 					bind:value={metricColumn}
@@ -164,7 +182,22 @@
 					placeholder="Metric Column" />
 			</div>
 			<div style:width="100%">
-				<div class="options-header">Search Columns</div>
+				<div style="display:flex">
+					<div class="options-header">Search Columns</div>
+					<div
+						class="information-tooltip"
+						style="margin-top: 3px;"
+						use:tooltip={{
+							content: "Columns with distinct predicates for searching",
+							position: "top",
+							theme: "zeno-tooltip",
+							maxWidth: "450",
+						}}>
+						<Icon style="outline:none" component={Svg} viewBox="-6 -6 36 36">
+							<path d={mdiInformationOutline} />
+						</Icon>
+					</div>
+				</div>
 				<Svelecte
 					style="margin-right: 5px;"
 					bind:value={searchColumns}
