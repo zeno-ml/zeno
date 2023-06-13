@@ -68,7 +68,7 @@
 	let maxlattice = ["1", "2", "3", "4", "5", "6"];
 	let maxlatticeIdx = 3;
 	let orderByOptions = ["descending", "ascending"];
-	let orderByIdx = 0;
+	let orderByIdx = $tab !== "comparison" ? 1 : 0;
 
 	let sliceFinderReturn = {
 		slices: [],
