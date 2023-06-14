@@ -15,6 +15,7 @@
 		type SliceFinderReturn,
 	} from "../../zenoservice";
 	import SliceFinderCell from "../cells/SliceFinderCell.svelte";
+	import ChipWrapper from "../ChipWrapper.svelte";
 
 	let blur = function (ev) {
 		ev.target.blur();
@@ -248,6 +249,10 @@
 			</div>
 		{:else}
 			<div id="initial">
+				<h4>Search within predicates</h4>
+				<div class="chipbar">
+					<ChipWrapper />
+				</div>
 				<span class="intial-text" style="font-weight: bold">
 					Click below to find slices with low performance!
 				</span>
@@ -272,7 +277,13 @@
 
 <style>
 	.intial-text {
-		margin: 10px;
+		margin: 50px 10px 10px 10px;
+	}
+	.chipbar {
+		display: flex;
+		flex-direction: row;
+		width: 100%;
+		border-bottom: 1px solid var(--G5);
 	}
 	#slice-finder-container {
 		max-height: calc(100vh - 150px);
@@ -292,7 +303,7 @@
 	#initial {
 		display: flex;
 		flex-direction: column;
-		height: 25vh;
+		height: 33vh;
 		margin: 20px;
 		align-items: center;
 		justify-content: center;

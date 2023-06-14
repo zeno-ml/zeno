@@ -5,22 +5,9 @@
 	import { Svg } from "@smui/common";
 	import { tooltip } from "@svelte-plugins/tooltips";
 	import { onMount } from "svelte";
-	import {
-		metric,
-		editId,
-		selectionIds,
-		selectionPredicates,
-		selections,
-		settings,
-		status,
-		tagIds,
-		tab,
-	} from "../stores";
-	import { ZenoService, type FilterPredicate } from "../zenoservice";
-	import IdsChip from "./chips/IdsChip.svelte";
-	import MetadataChip from "./chips/MetadataChip.svelte";
-	import SliceChip from "./chips/SliceChip.svelte";
-	import TagChip from "./chips/TagChip.svelte";
+	import { metric, editId, settings, status, tab } from "../stores";
+	import { ZenoService } from "../zenoservice";
+	import ChipWrapper from "./ChipWrapper.svelte";
 
 	export let currentResult;
 	export let selected = "list";
@@ -44,13 +31,6 @@
 				: ["table", "projection"]
 			: ["table"];
 
-	$: filters = Object.entries($selections.metadata)
-		.filter(([, value]) => value.predicates.length > 0)
-		.map(
-			([key, value]) =>
-				[key, value.predicates as unknown] as [string, FilterPredicate[]]
-		);
-
 	status.subscribe((s) => {
 		if (s.status.startsWith("Done")) {
 			runningAnalysis = false;
@@ -64,44 +44,7 @@
 
 <div style:width="100%">
 	<div class="between">
-		<div class="chips">
-			{#if $selections.slices.length + $selections.tags.length + filters.length === 0 && $selectionIds.ids.length === 0}
-				<p>Filter with the metadata distributions.</p>
-			{:else}
-				{#each $selections.slices as slice}
-					<SliceChip {slice} />
-				{/each}
-				{#each filters as [hash, chip]}
-					<MetadataChip {hash} {chip} />
-				{/each}
-				{#each $selections.tags as tag}
-					<TagChip {tag} />
-				{/each}
-				{#if $selectionIds.ids.length > 0}
-					<IdsChip />
-				{/if}
-				{#if $selectionPredicates.predicates.length > 0 || $tagIds.ids.length > 0 || $selectionIds.ids.length > 0}
-					<span
-						class="clear"
-						on:keydown={() => ({})}
-						on:click={() => {
-							selections.update((m) => {
-								Object.keys(m.metadata).forEach((key) => {
-									m.metadata[key] = {
-										predicates: [],
-										join: "",
-									};
-								});
-								return { slices: [], metadata: { ...m.metadata }, tags: [] };
-							});
-							selectionIds.set({ ids: [] });
-							tagIds.set({ ids: [] });
-						}}>
-						clear all
-					</span>
-				{/if}
-			{/if}
-		</div>
+		<ChipWrapper />
 		<div class="status inline">
 			{#if runningAnalysis}
 				<span style="margin-right: 10px">{@html $status.status}</span>
@@ -202,15 +145,6 @@
 		padding-bottom: 10px;
 		border-bottom: 1px solid var(--G5);
 	}
-	.chips {
-		display: flex;
-		flex-wrap: wrap;
-		height: fit-content;
-		align-items: center;
-		min-height: 40px;
-		padding-bottom: 5px;
-		padding-top: 5px;
-	}
 	.metric {
 		font-weight: 400;
 		color: var(--G2);
@@ -220,16 +154,6 @@
 		font-weight: 400;
 		color: var(--logo);
 		margin-right: 15px;
-	}
-	.clear {
-		padding: 5px;
-		margin-left: 10px;
-		cursor: pointer;
-		color: var(--G3);
-	}
-	.clear:hover {
-		background: var(--Y1);
-		border-radius: 4px;
 	}
 	#size {
 		font-style: italic;
