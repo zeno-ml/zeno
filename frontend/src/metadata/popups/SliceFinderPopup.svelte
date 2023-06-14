@@ -26,7 +26,7 @@
 		ev.target.blur();
 	};
 
-	let notEmbedUniqCols = $status.completeColumns.filter(
+	let completeColumns = $status.completeColumns.filter(
 		(d) =>
 			d.columnType === ZenoColumnType.METADATA ||
 			d.columnType === ZenoColumnType.PREDISTILL ||
@@ -40,7 +40,7 @@
 		(d) =>
 			d.metadataType !== MetadataType.OTHER &&
 			d.metadataType !== MetadataType.DATETIME &&
-			notEmbedUniqCols.includes(d)
+			completeColumns.includes(d)
 	);
 	let searchColumns = [searchColumnOptions[0]];
 
@@ -49,7 +49,7 @@
 		return $tab !== "comparison"
 			? (d.metadataType === MetadataType.CONTINUOUS ||
 					d.metadataType === MetadataType.BOOLEAN) &&
-					notEmbedUniqCols.includes(d)
+					completeColumns.includes(d)
 			: (d.columnType === ZenoColumnType.OUTPUT ||
 					d.columnType === ZenoColumnType.POSTDISTILL) &&
 					d.model === $model;
@@ -159,10 +159,7 @@
 						class="information-tooltip"
 						style="margin-top: 3px;"
 						use:tooltip={{
-							content:
-								$tab !== "comparison"
-									? "The metric column to decide performance"
-									: "The metric column that has difference between models",
+							content: "The continuous column to compare slices across",
 							position: "right",
 							theme: "zeno-tooltip",
 							maxWidth: "450",
@@ -188,7 +185,7 @@
 						class="information-tooltip"
 						style="margin-top: 3px;"
 						use:tooltip={{
-							content: "Columns with distinct predicates for searching",
+							content: "Metadata columns used to create slices",
 							position: "top",
 							theme: "zeno-tooltip",
 							maxWidth: "450",
@@ -281,7 +278,7 @@
 			<div class="generation">
 				<Button
 					variant="outlined"
-					style="color:white; background-color: var(--P1);"
+					style="color:white; background-color: var(--logo);"
 					on:click={() => generateSlices()}
 					on:mouseleave={blur}
 					on:focusout={blur}>
@@ -291,26 +288,26 @@
 				<div>
 					<span class="average"> Overall Average: </span>
 					<span class="average-value" style="color: var(--logo);">
-						{sliceFinderReturn.overallMetric.toFixed(3)}
+						{sliceFinderReturn.overallMetric.toFixed(2)}
 					</span>
 				</div>
 			</div>
 			<div class="generation" style="margin-bottom:0px;">
 				<h4 style="margin-bottom:0px;">Filter Predicates</h4>
 				<h4 style="margin-bottom:0px;">
-					Slice Average Metric {$tab !== "comparison" ? "" : "difference"}
+					Average Slice Metric {$tab !== "comparison" ? "" : "difference"}
 				</h4>
 			</div>
 		{:else}
 			<div id="initial">
 				<span class="intial-text" style="font-weight: bold">
 					Click below to find slices with {$tab !== "comparison"
-						? "low performance"
-						: "the highest difference"}!
+						? "the lowest performance"
+						: "the largest difference"}!
 				</span>
 				<Button
 					variant="outlined"
-					style="color:white; background-color: var(--P1);"
+					style="color:white; background-color: var(--logo);"
 					on:click={() => generateSlices()}
 					on:mouseleave={blur}
 					on:focusout={blur}>
@@ -320,7 +317,7 @@
 			</div>
 		{/if}
 		{#each sliceFinderReturn.slices as slice, idx}
-			{@const metric = sliceFinderReturn.metrics[idx].toFixed(3)}
+			{@const metric = sliceFinderReturn.metrics[idx].toFixed(2)}
 			{@const size = sliceFinderReturn.sizes[idx]}
 			<SliceFinderCell {slice} {metric} {size} />
 		{/each}

@@ -281,7 +281,7 @@
 					content:
 						$tab !== "comparison"
 							? "Find underperforming slices."
-							: "Find slices with the highest difference between models",
+							: "Find slices with the largest output differences between models",
 					position: "left",
 					theme: "zeno-tooltip",
 					maxWidth: $tab !== "comparison" ? "150" : "200",
