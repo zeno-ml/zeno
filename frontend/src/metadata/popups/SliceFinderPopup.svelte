@@ -45,15 +45,15 @@
 	let searchColumns = [searchColumnOptions[0]];
 
 	// Column to use as the metric to compare slices.
-	let metricColumns = $status.completeColumns.filter((d) =>
-		$tab !== "comparison"
+	let metricColumns = $status.completeColumns.filter((d) => {
+		return $tab !== "comparison"
 			? (d.metadataType === MetadataType.CONTINUOUS ||
 					d.metadataType === MetadataType.BOOLEAN) &&
-			  notEmbedUniqCols.includes(d)
+					notEmbedUniqCols.includes(d)
 			: (d.columnType === ZenoColumnType.OUTPUT ||
 					d.columnType === ZenoColumnType.POSTDISTILL) &&
-			  d.model === $model
-	);
+					d.model === $model;
+	});
 	let metricColumn = metricColumns.length > 0 ? metricColumns[0] : null;
 	let compareColumn = undefined;
 	$: if (metricColumn && $tab === "comparison") {
@@ -281,7 +281,7 @@
 			<div class="generation">
 				<Button
 					variant="outlined"
-					style="color:white; background-color: var(--P2);"
+					style="color:white; background-color: var(--P1);"
 					on:click={() => generateSlices()}
 					on:mouseleave={blur}
 					on:focusout={blur}>
@@ -310,7 +310,7 @@
 				</span>
 				<Button
 					variant="outlined"
-					style="color:white; background-color: var(--P2);"
+					style="color:white; background-color: var(--P1);"
 					on:click={() => generateSlices()}
 					on:mouseleave={blur}
 					on:focusout={blur}>

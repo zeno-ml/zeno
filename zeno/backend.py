@@ -34,12 +34,12 @@ from zeno.processing.data_processing import (
 )
 from zeno.processing.filtering import filter_table
 from zeno.util import (
+    generate_diff_cols,
     get_metadata_type,
     load_series,
     read_functions,
     read_metadata,
     read_pickle,
-    generate_diff_cols,
 )
 
 

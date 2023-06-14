@@ -46,12 +46,14 @@ def slice_finder(df, req: SliceFinderRequest):
 
     cont_df = cont_cols_df(df[cont_search_cols].dropna(), cont_search_cols)
 
+    diff_df = pd.DataFrame()
     if req.compare_column:
         diff_cols = [req.metric_column, req.compare_column]
-        df = generate_diff_cols(df, diff_cols)
+        diff_df = generate_diff_cols(df, diff_cols)
 
     unique_cols = set(not_cont_search_cols + [metric_col])
-    updated_df = pd.concat([df[list(unique_cols)], cont_df], axis=1).dropna()
+    updated_df = diff_df if req.compare_column else df
+    updated_df = pd.concat([updated_df[list(unique_cols)], cont_df], axis=1).dropna()
 
     normalized_metric_col = np.array(updated_df[metric_col], dtype=float)
     # Invert metric column if ascending.
