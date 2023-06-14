@@ -226,7 +226,7 @@
 			</div>
 		</div>
 		<div style="margin-left: 20px;margin-right: 20px">
-			<div class="options-header">Search within predicates</div>
+			<div class="options-header">Search for slices in:</div>
 			<div class="chipbar">
 				<ChipWrapper />
 			</div>
@@ -284,6 +284,7 @@
 	.chipbar {
 		display: flex;
 		flex-direction: row;
+		padding-left: 10px;
 		border: 1px solid var(--G4);
 		border-radius: 4px;
 	}
