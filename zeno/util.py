@@ -251,9 +251,7 @@ def generate_diff_cols(df: pd.DataFrame, diff_cols: List[ZenoColumn]) -> pd.Data
 
     # various metadata type difference
     if col_1.metadata_type == MetadataType.CONTINUOUS:
-        df.loc[:, "diff"] = abs(
-            df[str(col_1)].astype(float) - df[str(col_2)].astype(float)
-        )
+        df.loc[:, "diff"] = df[str(col_1)].astype(float) - df[str(col_2)].astype(float)
     else:
         df.loc[:, "diff"] = df[str(col_1)] != df[str(col_2)]
     return df
