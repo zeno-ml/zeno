@@ -12,7 +12,7 @@
 
 <div id="selections">
 	{#if $model !== undefined}
-		<div style="z-index: 6; margin-right: 10px;">
+		<div style="margin-right: 10px;">
 			<div class="options-header">
 				{$tab === "comparison" ? "Model A" : "Model"}
 			</div>
@@ -34,7 +34,7 @@
 		</div>
 	{/if}
 	{#if $tab === "comparison"}
-		<div style="z-index: 6;">
+		<div>
 			<div class="options-header">Model B</div>
 			<select bind:value={$comparisonModel}>
 				{#each exludeModels as mod}
@@ -45,7 +45,7 @@
 	{/if}
 </div>
 {#if $tab === "comparison" && $metric !== undefined}
-	<div style="z-index: 5">
+	<div>
 		<div class="options-header">Metric</div>
 		<select style="width: 345px" bind:value={$metric}>
 			{#each $metrics as met}
@@ -60,7 +60,7 @@
 		width: 167px;
 		height: 35px;
 		border: 1px solid var(--G4);
-		border-radius: 5px;
+		border-radius: 4px;
 		font-size: 14px;
 		color: var(--G1);
 	}
