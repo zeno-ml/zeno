@@ -225,6 +225,12 @@
 					placeholder="Order By" />
 			</div>
 		</div>
+		<div style="margin-left: 20px;margin-right: 20px">
+			<div class="options-header">Search within predicates</div>
+			<div class="chipbar">
+				<ChipWrapper />
+			</div>
+		</div>
 		{#if sliceFinderReturn.slices.length > 0}
 			<div class="generation">
 				<Button
@@ -249,10 +255,6 @@
 			</div>
 		{:else}
 			<div id="initial">
-				<h4>Search within predicates</h4>
-				<div class="chipbar">
-					<ChipWrapper />
-				</div>
 				<span class="intial-text" style="font-weight: bold">
 					Click below to find slices with low performance!
 				</span>
@@ -282,8 +284,8 @@
 	.chipbar {
 		display: flex;
 		flex-direction: row;
-		width: 100%;
-		border-bottom: 1px solid var(--G5);
+		border: 1px solid var(--G4);
+		border-radius: 4px;
 	}
 	#slice-finder-container {
 		max-height: calc(100vh - 150px);
@@ -303,7 +305,7 @@
 	#initial {
 		display: flex;
 		flex-direction: column;
-		height: 33vh;
+		height: 25vh;
 		margin: 20px;
 		align-items: center;
 		justify-content: center;
