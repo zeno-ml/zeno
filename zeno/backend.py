@@ -650,7 +650,9 @@ class ZenoBackend(object):
 
         # various metadata type difference
         if col_1.metadata_type == MetadataType.CONTINUOUS:
-            df.loc[:, "diff"] = df[str(col_1)].astype(float) - df[str(col_2)].astype(float)
+            df.loc[:, "diff"] = df[str(col_1)].astype(float) - df[str(col_2)].astype(
+                float
+            )
         else:
             df.loc[:, "diff"] = df[str(col_1)] != df[str(col_2)]
 
