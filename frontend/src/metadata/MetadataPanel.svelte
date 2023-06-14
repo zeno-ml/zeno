@@ -274,24 +274,29 @@
 				</Icon>
 			</div>
 		</div>
-		{#if $tab !== "comparison"}
-			<div class="inline">
-				<div
-					use:tooltip={{
-						content: "Discover underperforming slices.",
-						position: "bottom",
-						theme: "zeno-tooltip",
+
+		<div class="inline">
+			<div
+				use:tooltip={{
+					content:
+						$tab !== "comparison"
+							? "Find underperforming slices."
+							: "Find slices with the largest output differences between models",
+					position: "left",
+					theme: "zeno-tooltip",
+					maxWidth: $tab !== "comparison" ? "150" : "200",
+				}}>
+				<IconButton
+					on:click={() => {
+						showNewFolder.set(false);
+						showSliceFinder.update((c) => !c);
 					}}>
-					<IconButton
-						on:click={() => {
-							showNewFolder.set(false);
-							showSliceFinder.update((c) => !c);
-						}}>
-						<Icon component={Svg} viewBox="0 0 24 24">
-							<path fill="black" d={mdiCreationOutline} />
-						</Icon>
-					</IconButton>
-				</div>
+					<Icon component={Svg} viewBox="0 0 24 24">
+						<path fill="black" d={mdiCreationOutline} />
+					</Icon>
+				</IconButton>
+			</div>
+			{#if $tab !== "comparison"}
 				<div
 					use:tooltip={{
 						content: "Create a new folder.",
@@ -331,8 +336,8 @@
 						</Icon>
 					</IconButton>
 				</div>
-			</div>
-		{/if}
+			{/if}
+		</div>
 	</div>
 	<div
 		class="overview

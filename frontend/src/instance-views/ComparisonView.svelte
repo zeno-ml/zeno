@@ -273,7 +273,7 @@
 						let newHeader = setColumnModel(selectColumn, mod);
 						let key = diff ? "diff" : columnHash(newHeader);
 						return row
-							? newHeader.metadataType === MetadataType.CONTINUOUS
+							? row[key] && newHeader.metadataType === MetadataType.CONTINUOUS
 								? row[key].toFixed(2)
 								: row[key]
 							: "";
