@@ -135,7 +135,7 @@
 						content:
 							$tab !== "comparison"
 								? "Run the SliceLine algorithm to find slices of data with high or low metrics."
-								: "Run the SliceLine algorithm to find slices with the highest or lowest average difference in a metric column between two models.",
+								: "Run the SliceLine algorithm to find slices with the largest or smallest average difference in a metric column between two models.",
 						position: "right",
 						theme: "zeno-tooltip",
 						maxWidth: "350",

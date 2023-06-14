@@ -241,6 +241,15 @@ def is_notebook() -> bool:
 
 
 def generate_diff_cols(df: pd.DataFrame, diff_cols: List[ZenoColumn]) -> pd.DataFrame:
+    """Generate a new column of differences
+    based on the original dataframe and specified columns.
+
+    Args:
+        df (DataFrame): The original dataframe.
+        diff_cols (List[ZenoColumn]): The columns used to calculate the difference.
+    Returns:
+        DataFrame: Return the new dataframe containing the diff column.
+    """
     col_1, col_2 = diff_cols[0], diff_cols[1]
     if (
         col_1.column_type != col_2.column_type
