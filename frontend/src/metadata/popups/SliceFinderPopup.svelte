@@ -162,7 +162,7 @@
 							content:
 								$tab !== "comparison"
 									? "The metric column to decide performance"
-									: "The metric column that have difference between models",
+									: "The metric column that has difference between models",
 							position: "right",
 							theme: "zeno-tooltip",
 							maxWidth: "450",
