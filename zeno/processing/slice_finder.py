@@ -31,7 +31,6 @@ def slice_finder(df, req: SliceFinderRequest):
 
     Returns a SliceFinderMetricReturn Object.
     """
-    print(req.compare_column)
     cont_search_cols, not_cont_search_cols = [], []
     for col in req.search_columns:
         if col.metadata_type == MetadataType.CONTINUOUS:
