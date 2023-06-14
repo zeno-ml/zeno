@@ -7,11 +7,11 @@
 	import { tooltip } from "@svelte-plugins/tooltips";
 	import Svelecte from "svelecte";
 	import {
+		comparisonModel,
 		model,
 		showSliceFinder,
 		status,
 		tab,
-		comparisonModel,
 	} from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 	import {
@@ -300,11 +300,6 @@
 			</div>
 		{:else}
 			<div id="initial">
-				<span class="intial-text" style="font-weight: bold">
-					Click below to find slices with {$tab !== "comparison"
-						? "the lowest performance"
-						: "the largest difference"}!
-				</span>
 				<Button
 					variant="outlined"
 					style="color:white; background-color: var(--logo);"
@@ -313,6 +308,11 @@
 					on:focusout={blur}>
 					Generate Slices
 				</Button>
+				<span class="intial-text">
+					Find slices with {$tab !== "comparison"
+						? "the lowest performance"
+						: "the largest difference"}
+				</span>
 				<span class="intial-text">{sliceFinderMessage}</span>
 			</div>
 		{/if}
@@ -327,6 +327,7 @@
 <style>
 	.intial-text {
 		margin: 10px;
+		font-size: 16px;
 	}
 	#slice-finder-container {
 		max-height: calc(100vh - 150px);
