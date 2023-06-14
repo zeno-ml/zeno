@@ -627,8 +627,8 @@ class ZenoBackend(object):
             self.df, req.filter_predicates, req.filter_ids, req.tag_ids, req.tag_list
         )
         req_columns = [str(col) for col in req.columns]
-        if req.diff_columns:
-            filt_df = generate_diff_cols(filt_df, req.diff_columns)
+        if req.diff_column_1 and req.diff_column_2:
+            filt_df = generate_diff_cols(filt_df, req.diff_column_1, req.diff_column_2)
             req_columns.append("diff")
         if req.sort[0]:
             filt_df = filt_df.sort_values(str(req.sort[0]), ascending=req.sort[1])

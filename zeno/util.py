@@ -240,27 +240,31 @@ def is_notebook() -> bool:
         return False  # Probably standard Python interpreter
 
 
-def generate_diff_cols(df: pd.DataFrame, diff_cols: List[ZenoColumn]) -> pd.DataFrame:
+def generate_diff_cols(
+    df: pd.DataFrame, diff_col_1: ZenoColumn, diff_col_2: ZenoColumn
+) -> pd.DataFrame:
     """Generate a new column of differences
     based on the original dataframe and specified columns.
 
     Args:
         df (DataFrame): The original dataframe.
-        diff_cols (List[ZenoColumn]): The columns used to calculate the difference.
+        diff_col_1 (ZenoColumn): The first column used to calculate the difference.
+        diff_col_2 (ZenoColumn): The second column used to calculate the difference.
     Returns:
         DataFrame: Return the new dataframe containing the diff column.
     """
-    col_1, col_2 = diff_cols[0], diff_cols[1]
     if (
-        col_1.column_type != col_2.column_type
-        or col_1.metadata_type != col_2.metadata_type
+        diff_col_1.column_type != diff_col_2.column_type
+        or diff_col_1.metadata_type != diff_col_2.metadata_type
     ):
         print("error: different column types!")
         return df
 
     # various metadata type difference
-    if col_1.metadata_type == MetadataType.CONTINUOUS:
-        df.loc[:, "diff"] = df[str(col_1)].astype(float) - df[str(col_2)].astype(float)
+    if diff_col_1.metadata_type == MetadataType.CONTINUOUS:
+        df.loc[:, "diff"] = df[str(diff_col_1)].astype(float) - df[
+            str(diff_col_2)
+        ].astype(float)
     else:
-        df.loc[:, "diff"] = df[str(col_1)] != df[str(col_2)]
+        df.loc[:, "diff"] = df[str(diff_col_1)] != df[str(diff_col_2)]
     return df

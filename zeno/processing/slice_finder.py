@@ -48,8 +48,7 @@ def slice_finder(df, req: SliceFinderRequest):
 
     diff_df = pd.DataFrame()
     if req.compare_column:
-        diff_cols = [req.metric_column, req.compare_column]
-        diff_df = generate_diff_cols(df, diff_cols)
+        diff_df = generate_diff_cols(df, req.metric_column, req.compare_column)
 
     unique_cols = set(not_cont_search_cols + [metric_col])
     updated_df = diff_df if req.compare_column else df
