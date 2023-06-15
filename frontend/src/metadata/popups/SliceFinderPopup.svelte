@@ -12,6 +12,7 @@
 		showSliceFinder,
 		status,
 		tab,
+		selectionPredicates,
 	} from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 	import {
@@ -21,7 +22,7 @@
 		type SliceFinderReturn,
 	} from "../../zenoservice";
 	import SliceFinderCell from "../cells/SliceFinderCell.svelte";
-	import ChipWrapper from "../ChipWrapper.svelte";
+	import ChipsWrapper from "../ChipsWrapper.svelte";
 
 	let blur = function (ev) {
 		ev.target.blur();
@@ -101,10 +102,12 @@
 			alpha: parseFloat(alphas[alphaIdx]),
 			maxLattice: parseInt(maxlattice[maxlatticeIdx]),
 			compareColumn,
+			filterPredicates: $selectionPredicates,
 		});
 
 		if (sliceFinderReturn.slices.length === 0) {
-			sliceFinderMessage = "No slices found, try increasing alpha.";
+			sliceFinderMessage =
+				"No slices found, try to increase alpha or add more search columns.";
 		} else {
 			sliceFinderMessage = "";
 		}
@@ -278,7 +281,7 @@
 		<div style="margin-left: 20px;margin-right: 20px">
 			<div class="options-header">Search for slices in:</div>
 			<div class="chipbar">
-				<ChipWrapper />
+				<ChipsWrapper />
 			</div>
 		</div>
 		{#if sliceFinderReturn.slices.length > 0}
@@ -291,7 +294,7 @@
 					on:focusout={blur}>
 					Generate Slices
 				</Button>
-				<span>{sliceFinderMessage}</span>
+				<span class="message">{sliceFinderMessage}</span>
 				<div>
 					<span class="average"> Overall Average: </span>
 					<span class="average-value" style="color: var(--logo);">
@@ -320,7 +323,7 @@
 						? "the lowest performance"
 						: "the largest difference"}
 				</span>
-				<span class="intial-text">{sliceFinderMessage}</span>
+				<span class="message">{sliceFinderMessage}</span>
 			</div>
 		{/if}
 		{#each sliceFinderReturn.slices as slice, idx}
@@ -335,6 +338,10 @@
 	.intial-text {
 		margin: 50px 10px 10px 10px;
 		font-size: 16px;
+	}
+	.message {
+		font-size: 14px;
+		margin: 10px;
 	}
 	.chipbar {
 		display: flex;

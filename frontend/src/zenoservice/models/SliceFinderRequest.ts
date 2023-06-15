@@ -2,6 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import type { FilterPredicateGroup } from "./FilterPredicateGroup";
 import type { ZenoColumn } from "./ZenoColumn";
 
 export type SliceFinderRequest = {
@@ -11,4 +12,5 @@ export type SliceFinderRequest = {
 	alpha: number;
 	maxLattice: number;
 	compareColumn?: ZenoColumn;
+	filterPredicates?: FilterPredicateGroup;
 };

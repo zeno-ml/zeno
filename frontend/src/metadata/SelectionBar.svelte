@@ -7,7 +7,7 @@
 	import { onMount } from "svelte";
 	import { metric, editId, settings, status, tab } from "../stores";
 	import { ZenoService } from "../zenoservice";
-	import ChipWrapper from "./ChipWrapper.svelte";
+	import ChipsWrapper from "./ChipsWrapper.svelte";
 
 	export let currentResult;
 	export let selected = "list";
@@ -44,7 +44,7 @@
 
 <div style:width="100%">
 	<div class="between">
-		<ChipWrapper />
+		<ChipsWrapper />
 		<div class="status inline">
 			{#if runningAnalysis}
 				<span style="margin-right: 10px">{@html $status.status}</span>

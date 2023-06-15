@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from zeno.classes.base import CamelModel, ZenoColumn
-from zeno.classes.slice import Slice
+from zeno.classes.slice import FilterPredicateGroup, Slice
 
 
 class SliceFinderRequest(CamelModel):
@@ -11,6 +11,7 @@ class SliceFinderRequest(CamelModel):
     alpha: float
     max_lattice: int
     compare_column: Optional[ZenoColumn] = None
+    filter_predicates: Optional[FilterPredicateGroup] = None
 
 
 class SliceFinderReturn(CamelModel):
