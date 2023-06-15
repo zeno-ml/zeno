@@ -267,7 +267,7 @@
 		display: flex;
 	}
 	.sample-container {
-		height: calc(100vh - 175px);
+		height: calc(100vh - 180px);
 		width: calc(100vw - 460px);
 		overflow: scroll;
 		align-content: baseline;

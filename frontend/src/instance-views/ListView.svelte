@@ -172,7 +172,7 @@
 
 <style>
 	.sample-container {
-		height: calc(100vh - 170px);
+		height: calc(100vh - 180px);
 		overflow-y: auto;
 		align-content: baseline;
 		border-bottom: 1px solid rgb(224, 224, 224);
