@@ -44,7 +44,9 @@ def slice_finder(df, req: SliceFinderRequest):
     not_cont_search_cols = [str(col) for col in not_cont_search_cols]
     metric_col = "diff" if req.compare_column else str(req.metric_column)
 
-    filt_df = filter_table(df, req.filter_predicates)
+    filt_df = filter_table(
+        df, req.filter_predicates, req.filter_ids, req.tag_ids, req.tag_list
+    )
     cont_df = cont_cols_df(filt_df[cont_search_cols].dropna(), cont_search_cols)
 
     if req.compare_column:

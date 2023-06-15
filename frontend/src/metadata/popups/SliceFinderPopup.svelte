@@ -9,10 +9,13 @@
 	import {
 		comparisonModel,
 		model,
+		selections,
+		selectionIds,
+		selectionPredicates,
 		showSliceFinder,
 		status,
 		tab,
-		selectionPredicates,
+		tagIds,
 	} from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 	import {
@@ -103,6 +106,9 @@
 			maxLattice: parseInt(maxlattice[maxlatticeIdx]),
 			compareColumn,
 			filterPredicates: $selectionPredicates,
+			tagIds: $tagIds,
+			filterIds: $selectionIds,
+			tagList: $selections.tags,
 		});
 
 		if (sliceFinderReturn.slices.length === 0) {
