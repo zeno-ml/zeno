@@ -55,12 +55,12 @@
 		</div>
 		{folder}
 	</div>
-	<div class="inline">
+	<div
+		class="inline"
+		use:clickOutside
+		on:click_outside={() => (showOptions = false)}>
 		{#if showOptions}
-			<div
-				id="options-container"
-				use:clickOutside
-				on:click_outside={() => (showOptions = !showOptions)}>
+			<div id="options-container">
 				<Paper style="padding: 3px 0px;" elevation={7}>
 					<Content>
 						<div
