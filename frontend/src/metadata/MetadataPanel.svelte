@@ -293,7 +293,7 @@
 						showSliceFinder.update((c) => !c);
 					}}>
 					<Icon component={Svg} viewBox="0 0 24 24">
-						{#if $selectionPredicates.predicates.length > 0}
+						{#if $selectionPredicates.predicates.length + $selections.tags.length > 0 || $selectionIds.ids.length > 0}
 							<path fill="#6a1a9a" d={mdiCreation} />
 						{:else}
 							<path fill="var(--G1)" d={mdiCreationOutline} />

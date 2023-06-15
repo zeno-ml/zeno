@@ -113,7 +113,7 @@
 
 		if (sliceFinderReturn.slices.length === 0) {
 			sliceFinderMessage =
-				"No slices found, try to increase alpha or add more search columns.";
+				"No slices found, try to increase alpha or add more search columns or predicates.";
 		} else {
 			sliceFinderMessage = "";
 		}
