@@ -59,7 +59,7 @@
 				on:click={() => createFolder()}>{"Create"}</Button>
 		</Content>
 		{#if invalidName && folderName.length > 0}
-			<p style:margin-right="10px">folder already exists</p>
+			<p style:margin-right="10px" style:color="red">folder already exists</p>
 		{/if}
 	</Paper>
 </div>
