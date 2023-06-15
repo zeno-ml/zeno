@@ -1,10 +1,14 @@
 <script lang="ts">
 	import InstanceView from "./instance-views/InstanceView.svelte";
 	import MetadataPanel from "./metadata/MetadataPanel.svelte";
-	import { ready, status } from "./stores";
+	import SliceFinderPopup from "./metadata/popups/SliceFinderPopup.svelte";
+	import { ready, status, showSliceFinder } from "./stores";
 </script>
 
 {#if $ready && $status.completeColumns.length > 0}
+	{#if $showSliceFinder}
+		<SliceFinderPopup />
+	{/if}
 	<div class="container">
 		<MetadataPanel />
 		<div id="samples">

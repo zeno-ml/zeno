@@ -25,22 +25,23 @@ export async function getFilteredTable(
 	);
 
 	// create diff columns for comparison view
-	let diffColumnA;
-	let diffColumnB;
+	let diffColumn1 = undefined;
+	let diffColumn2 = undefined;
 	if (diffColumn) {
-		diffColumnA = Object.assign({}, diffColumn);
-		diffColumnB = Object.assign({}, diffColumn);
+		diffColumn1 = Object.assign({}, diffColumn);
+		diffColumn2 = Object.assign({}, diffColumn);
 		const addModel = [
 			ZenoColumnType.POSTDISTILL,
 			ZenoColumnType.OUTPUT,
 		].includes(diffColumn.columnType);
-		diffColumnA.model = addModel ? filterModels[0] : "";
-		diffColumnB.model = addModel ? filterModels[1] : "";
+		diffColumn1.model = addModel ? filterModels[0] : "";
+		diffColumn2.model = addModel ? filterModels[1] : "";
 	}
 
 	const res = await ZenoService.getFilteredTable({
 		columns: requestedColumns,
-		diffColumns: diffColumn ? [diffColumnA, diffColumnB] : [],
+		diffColumn1,
+		diffColumn2,
 		filterPredicates,
 		sliceRange,
 		sort,

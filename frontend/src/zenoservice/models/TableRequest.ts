@@ -8,7 +8,8 @@ import type { ZenoColumn } from "./ZenoColumn";
 
 export type TableRequest = {
 	columns: Array<ZenoColumn>;
-	diffColumns: Array<ZenoColumn>;
+	diffColumn1?: ZenoColumn;
+	diffColumn2?: ZenoColumn;
 	sliceRange: Array<number>;
 	filterPredicates: FilterPredicateGroup;
 	sort: Array<any>;

@@ -45,7 +45,8 @@ class MetricRequest(CamelModel):
 
 class TableRequest(CamelModel):
     columns: List[ZenoColumn]
-    diff_columns: List[ZenoColumn]
+    diff_column_1: Optional[ZenoColumn] = None
+    diff_column_2: Optional[ZenoColumn] = None
     slice_range: List[int]
     filter_predicates: FilterPredicateGroup
     sort: Tuple[Union[ZenoColumn, str, None], bool]

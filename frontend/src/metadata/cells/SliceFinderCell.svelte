@@ -4,11 +4,12 @@
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import { clickOutside } from "../../util/clickOutside";
+	import { updateModelDependentSlices } from "../../util/util";
 	import { ZenoService, type Slice } from "../../zenoservice";
 	import SliceDetails from "../../general/SliceDetails.svelte";
 	import Paper, { Content } from "@smui/paper";
 	import Textfield from "@smui/textfield";
-	import { slices } from "../../stores";
+	import { slices, model, comparisonModel } from "../../stores";
 	import { deleteSlice } from "../../api/slice";
 
 	export let slice: Slice;
@@ -34,6 +35,8 @@
 				s.set(newSliceName, slice);
 				return s;
 			});
+			updateModelDependentSlices("model A", $model, $slices);
+			updateModelDependentSlices("model B", $comparisonModel, $slices);
 		});
 		createdSliceName = newSliceName;
 		showSliceName = false;

@@ -34,6 +34,7 @@ from zeno.processing.data_processing import (
 )
 from zeno.processing.filtering import filter_table
 from zeno.util import (
+    generate_diff_cols,
     get_metadata_type,
     load_series,
     read_functions,
@@ -626,8 +627,8 @@ class ZenoBackend(object):
             self.df, req.filter_predicates, req.filter_ids, req.tag_ids, req.tag_list
         )
         req_columns = [str(col) for col in req.columns]
-        if req.diff_columns:
-            filt_df = self.generate_diff_cols(filt_df, req.diff_columns)
+        if req.diff_column_1 and req.diff_column_2:
+            filt_df = generate_diff_cols(filt_df, req.diff_column_1, req.diff_column_2)
             req_columns.append("diff")
         if req.sort[0]:
             filt_df = filt_df.sort_values(str(req.sort[0]), ascending=req.sort[1])
@@ -638,22 +639,3 @@ class ZenoBackend(object):
                 self.data_prefix + filt_df[str(self.data_column)]
             )
         return filt_df.loc[:, req_columns].to_json(orient="records")
-
-    def generate_diff_cols(self, df: DataFrame, diff_cols: List[ZenoColumn]):
-        col_1, col_2 = diff_cols[0], diff_cols[1]
-        if (
-            col_1.column_type != col_2.column_type
-            or col_1.metadata_type != col_2.metadata_type
-        ):
-            print("error: different column types!")
-            return df
-
-        # various metadata type difference
-        if col_1.metadata_type == MetadataType.CONTINUOUS:
-            df.loc[:, "diff"] = df[str(col_1)].astype(float) - df[str(col_2)].astype(
-                float
-            )
-        else:
-            df.loc[:, "diff"] = df[str(col_1)] != df[str(col_2)]
-
-        return df

@@ -6,7 +6,13 @@
 	import Paper from "@smui/paper";
 	import { tooltip } from "@svelte-plugins/tooltips";
 	import Svelecte from "svelecte";
-	import { model, showSliceFinder, status } from "../../stores";
+	import {
+		comparisonModel,
+		model,
+		showSliceFinder,
+		status,
+		tab,
+	} from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 	import {
 		MetadataType,
@@ -21,7 +27,7 @@
 		ev.target.blur();
 	};
 
-	let notEmbedUniqCols = $status.completeColumns.filter(
+	let completeColumns = $status.completeColumns.filter(
 		(d) =>
 			d.columnType === ZenoColumnType.METADATA ||
 			d.columnType === ZenoColumnType.PREDISTILL ||
@@ -35,25 +41,35 @@
 		(d) =>
 			d.metadataType !== MetadataType.OTHER &&
 			d.metadataType !== MetadataType.DATETIME &&
-			notEmbedUniqCols.includes(d)
+			completeColumns.includes(d)
 	);
 	let searchColumns = [searchColumnOptions[0]];
 
 	// Column to use as the metric to compare slices.
-	let metricColumns = $status.completeColumns.filter(
-		(d) =>
-			(d.metadataType === MetadataType.CONTINUOUS ||
-				d.metadataType === MetadataType.BOOLEAN) &&
-			notEmbedUniqCols.includes(d)
-	);
+	let metricColumns = $status.completeColumns.filter((d) => {
+		return $tab !== "comparison"
+			? (d.metadataType === MetadataType.CONTINUOUS ||
+					d.metadataType === MetadataType.BOOLEAN) &&
+					completeColumns.includes(d)
+			: (d.columnType === ZenoColumnType.OUTPUT ||
+					d.columnType === ZenoColumnType.POSTDISTILL) &&
+					d.model === $model;
+	});
 	let metricColumn = metricColumns.length > 0 ? metricColumns[0] : null;
+	let compareColumn = undefined;
+	$: if (metricColumn && $tab === "comparison") {
+		compareColumn = Object.assign({}, metricColumn);
+		if (compareColumn.model) {
+			compareColumn.model = $comparisonModel;
+		}
+	}
 
 	let alphas = ["0.5", "0.75", "0.9", "0.95", "0.99", "0.999"];
 	let alphaIdx = 4;
 	let maxlattice = ["1", "2", "3", "4", "5", "6"];
 	let maxlatticeIdx = 3;
 	let orderByOptions = ["descending", "ascending"];
-	let orderByIdx = 0;
+	let orderByIdx = $tab !== "comparison" ? 1 : 0;
 
 	let sliceFinderReturn = {
 		slices: [],
@@ -80,10 +96,11 @@
 		sliceFinderMessage = "Generating Slices...";
 		sliceFinderReturn = await ZenoService.runSliceFinder({
 			metricColumn,
-			searchColumns: searchColumns,
+			searchColumns,
 			orderBy: orderByOptions[orderByIdx],
 			alpha: parseFloat(alphas[alphaIdx]),
 			maxLattice: parseInt(maxlattice[maxlatticeIdx]),
+			compareColumn,
 		});
 
 		if (sliceFinderReturn.slices.length === 0) {
@@ -117,9 +134,12 @@
 					class="information-tooltip"
 					use:tooltip={{
 						content:
-							"Run the SliceLine algorithm to find slices of data with high or low metrics.",
+							$tab !== "comparison"
+								? "Run the SliceLine algorithm to find slices of data with high or low metrics."
+								: "Run the SliceLine algorithm to find slices with the largest or smallest average difference in a metric column between two models.",
 						position: "right",
 						theme: "zeno-tooltip",
+						maxWidth: "350",
 					}}>
 					<Icon style="outline:none" component={Svg} viewBox="-6 -6 36 36">
 						<path d={mdiInformationOutline} />
@@ -134,7 +154,22 @@
 		</div>
 		<div class="inline">
 			<div style:margin-left={"20px"}>
-				<div class="options-header">Metric Column</div>
+				<div style="display:flex">
+					<div class="options-header">Metric Column</div>
+					<div
+						class="information-tooltip"
+						style="margin-top: 3px;"
+						use:tooltip={{
+							content: "The continuous column to compare slices across",
+							position: "right",
+							theme: "zeno-tooltip",
+							maxWidth: "450",
+						}}>
+						<Icon style="outline:none" component={Svg} viewBox="-6 -6 36 36">
+							<path d={mdiInformationOutline} />
+						</Icon>
+					</div>
+				</div>
 				<Svelecte
 					style="margin-right: 5px; width: 175px"
 					bind:value={metricColumn}
@@ -145,7 +180,22 @@
 					placeholder="Metric Column" />
 			</div>
 			<div style:width="100%">
-				<div class="options-header">Search Columns</div>
+				<div style="display:flex">
+					<div class="options-header">Search Columns</div>
+					<div
+						class="information-tooltip"
+						style="margin-top: 3px;"
+						use:tooltip={{
+							content: "Metadata columns used to create slices",
+							position: "top",
+							theme: "zeno-tooltip",
+							maxWidth: "450",
+						}}>
+						<Icon style="outline:none" component={Svg} viewBox="-6 -6 36 36">
+							<path d={mdiInformationOutline} />
+						</Icon>
+					</div>
+				</div>
 				<Svelecte
 					style="margin-right: 5px;"
 					bind:value={searchColumns}
@@ -235,7 +285,7 @@
 			<div class="generation">
 				<Button
 					variant="outlined"
-					style="color:white; background-color: var(--P2);"
+					style="color:white; background-color: var(--logo);"
 					on:click={() => generateSlices()}
 					on:mouseleave={blur}
 					on:focusout={blur}>
@@ -245,32 +295,36 @@
 				<div>
 					<span class="average"> Overall Average: </span>
 					<span class="average-value" style="color: var(--logo);">
-						{sliceFinderReturn.overallMetric.toFixed(3)}
+						{sliceFinderReturn.overallMetric.toFixed(2)}
 					</span>
 				</div>
 			</div>
 			<div class="generation" style="margin-bottom:0px;">
 				<h4 style="margin-bottom:0px;">Filter Predicates</h4>
-				<h4 style="margin-bottom:0px;">Slice Average Metrics</h4>
+				<h4 style="margin-bottom:0px;">
+					Average Slice Metric {$tab !== "comparison" ? "" : "difference"}
+				</h4>
 			</div>
 		{:else}
 			<div id="initial">
-				<span class="intial-text" style="font-weight: bold">
-					Click below to find slices with low performance!
-				</span>
 				<Button
 					variant="outlined"
-					style="color:white; background-color: var(--P2);"
+					style="color:white; background-color: var(--logo);"
 					on:click={() => generateSlices()}
 					on:mouseleave={blur}
 					on:focusout={blur}>
 					Generate Slices
 				</Button>
+				<span class="intial-text">
+					Find slices with {$tab !== "comparison"
+						? "the lowest performance"
+						: "the largest difference"}
+				</span>
 				<span class="intial-text">{sliceFinderMessage}</span>
 			</div>
 		{/if}
 		{#each sliceFinderReturn.slices as slice, idx}
-			{@const metric = sliceFinderReturn.metrics[idx].toFixed(3)}
+			{@const metric = sliceFinderReturn.metrics[idx].toFixed(2)}
 			{@const size = sliceFinderReturn.sizes[idx]}
 			<SliceFinderCell {slice} {metric} {size} />
 		{/each}
@@ -280,6 +334,7 @@
 <style>
 	.intial-text {
 		margin: 50px 10px 10px 10px;
+		font-size: 16px;
 	}
 	.chipbar {
 		display: flex;
@@ -294,7 +349,7 @@
 		position: fixed;
 		top: 8vh;
 		margin-left: 17vw;
-		z-index: 5;
+		z-index: 10;
 		min-width: 60vw;
 		max-width: 60vw;
 	}
@@ -344,7 +399,7 @@
 		height: 500vh;
 		margin-left: -100vw;
 		margin-top: -100vh;
-		z-index: 4;
+		z-index: 9;
 	}
 	.information-tooltip {
 		width: 24px;
