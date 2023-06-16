@@ -4,7 +4,13 @@
 	import { Svg } from "@smui/common";
 	import Paper, { Content } from "@smui/paper";
 	import { slide } from "svelte/transition";
-	import { folders, slices, tab } from "../../stores";
+	import {
+		folders,
+		folderToEdit,
+		showNewFolder,
+		slices,
+		tab,
+	} from "../../stores";
 	import SliceCell from "./SliceCell.svelte";
 	import { ZenoService } from "../../zenoservice";
 	import { clickOutside } from "../../util/clickOutside";
@@ -55,14 +61,27 @@
 		</div>
 		{folder}
 	</div>
-	<div class="inline">
+	<div
+		class="inline"
+		use:clickOutside
+		on:click_outside={() => (showOptions = false)}>
 		{#if showOptions}
-			<div
-				id="options-container"
-				use:clickOutside
-				on:click_outside={() => (showOptions = !showOptions)}>
+			<div id="options-container">
 				<Paper style="padding: 3px 0px;" elevation={7}>
 					<Content>
+						<div
+							class="option"
+							on:keydown={() => ({})}
+							on:click={(e) => {
+								e.stopPropagation();
+								showOptions = false;
+								folderToEdit.set(folder);
+								showNewFolder.set(true);
+							}}>
+							<Icon style="font-size: 18px;" class="material-icons">edit</Icon
+							>&nbsp;
+							<span>Edit</span>
+						</div>
 						<div
 							class="option"
 							on:keydown={() => ({})}
