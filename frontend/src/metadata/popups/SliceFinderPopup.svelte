@@ -284,12 +284,14 @@
 					placeholder="Order By" />
 			</div>
 		</div>
-		<div style="margin-left: 20px;margin-right: 20px">
-			<div class="options-header">Search for slices in:</div>
-			<div class="chipbar">
-				<ChipsWrapper />
+		{#if $selectionPredicates.predicates.length + $selections.tags.length > 0 || $selectionIds.ids.length > 0}
+			<div style="margin-left: 20px;margin-right: 20px">
+				<div class="options-header">Search for slices in:</div>
+				<div class="chipbar">
+					<ChipsWrapper />
+				</div>
 			</div>
-		</div>
+		{/if}
 		{#if sliceFinderReturn.slices.length > 0}
 			<div class="generation">
 				<Button
@@ -352,7 +354,6 @@
 	.chipbar {
 		display: flex;
 		flex-direction: row;
-		padding-left: 10px;
 		border: 1px solid var(--G4);
 		border-radius: 4px;
 	}
