@@ -9,9 +9,13 @@
 	import {
 		comparisonModel,
 		model,
+		selections,
+		selectionIds,
+		selectionPredicates,
 		showSliceFinder,
 		status,
 		tab,
+		tagIds,
 	} from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 	import {
@@ -21,6 +25,7 @@
 		type SliceFinderReturn,
 	} from "../../zenoservice";
 	import SliceFinderCell from "../cells/SliceFinderCell.svelte";
+	import ChipsWrapper from "../ChipsWrapper.svelte";
 
 	let blur = function (ev) {
 		ev.target.blur();
@@ -100,10 +105,15 @@
 			alpha: parseFloat(alphas[alphaIdx]),
 			maxLattice: parseInt(maxlattice[maxlatticeIdx]),
 			compareColumn,
+			filterPredicates: $selectionPredicates,
+			tagIds: $tagIds,
+			filterIds: $selectionIds,
+			tagList: $selections.tags,
 		});
 
 		if (sliceFinderReturn.slices.length === 0) {
-			sliceFinderMessage = "No slices found, try increasing alpha.";
+			sliceFinderMessage =
+				"No slices found, try to increase alpha or add more search columns or predicates.";
 		} else {
 			sliceFinderMessage = "";
 		}
@@ -274,6 +284,14 @@
 					placeholder="Order By" />
 			</div>
 		</div>
+		{#if $selectionPredicates.predicates.length + $selections.tags.length > 0 || $selectionIds.ids.length > 0}
+			<div style="margin-left: 20px;margin-right: 20px">
+				<div class="options-header">Search for slices in:</div>
+				<div class="chipbar">
+					<ChipsWrapper />
+				</div>
+			</div>
+		{/if}
 		{#if sliceFinderReturn.slices.length > 0}
 			<div class="generation">
 				<Button
@@ -284,7 +302,7 @@
 					on:focusout={blur}>
 					Generate Slices
 				</Button>
-				<span>{sliceFinderMessage}</span>
+				<span class="message">{sliceFinderMessage}</span>
 				<div>
 					<span class="average"> Overall Average: </span>
 					<span class="average-value" style="color: var(--logo);">
@@ -313,7 +331,7 @@
 						? "the lowest performance"
 						: "the largest difference"}
 				</span>
-				<span class="intial-text">{sliceFinderMessage}</span>
+				<span class="message">{sliceFinderMessage}</span>
 			</div>
 		{/if}
 		{#each sliceFinderReturn.slices as slice, idx}
@@ -326,8 +344,18 @@
 
 <style>
 	.intial-text {
-		margin: 10px;
+		margin: 20px 10px 10px 10px;
 		font-size: 16px;
+	}
+	.message {
+		font-size: 14px;
+		margin: 10px;
+	}
+	.chipbar {
+		display: flex;
+		flex-direction: row;
+		border: 1px solid var(--G4);
+		border-radius: 4px;
 	}
 	#slice-finder-container {
 		max-height: calc(100vh - 150px);
@@ -347,7 +375,7 @@
 	#initial {
 		display: flex;
 		flex-direction: column;
-		height: 25vh;
+		height: 28vh;
 		margin: 20px;
 		align-items: center;
 		justify-content: center;

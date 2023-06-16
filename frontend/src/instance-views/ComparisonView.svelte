@@ -375,8 +375,8 @@
 	}
 	.table-container {
 		max-width: calc(100vw - 440px);
-		height: calc(100vh - 170px);
-		max-height: calc(100vh - 170px);
+		height: calc(100vh - 180px);
+		max-height: calc(100vh - 180px);
 		overflow: scroll;
 	}
 </style>

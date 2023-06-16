@@ -1,5 +1,6 @@
 <script lang="ts">
 	import {
+		mdiCreation,
 		mdiCreationOutline,
 		mdiFolderPlusOutline,
 		mdiInformationOutline,
@@ -292,7 +293,11 @@
 						showSliceFinder.update((c) => !c);
 					}}>
 					<Icon component={Svg} viewBox="0 0 24 24">
-						<path fill="black" d={mdiCreationOutline} />
+						{#if $selectionPredicates.predicates.length + $selections.tags.length > 0 || $selectionIds.ids.length > 0}
+							<path fill="#6a1a9a" d={mdiCreation} />
+						{:else}
+							<path fill="var(--G1)" d={mdiCreationOutline} />
+						{/if}
 					</Icon>
 				</IconButton>
 			</div>
