@@ -344,7 +344,7 @@
 
 <style>
 	.intial-text {
-		margin: 50px 10px 10px 10px;
+		margin: 20px 10px 10px 10px;
 		font-size: 16px;
 	}
 	.message {
@@ -375,7 +375,7 @@
 	#initial {
 		display: flex;
 		flex-direction: column;
-		height: 25vh;
+		height: 28vh;
 		margin: 20px;
 		align-items: center;
 		justify-content: center;
