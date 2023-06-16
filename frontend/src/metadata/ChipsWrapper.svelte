@@ -21,7 +21,7 @@
 
 <div class="chips">
 	{#if $selections.slices.length + $selections.tags.length + filters.length === 0 && $selectionIds.ids.length === 0}
-		<p>Filter with the selected predicates.</p>
+		<p style="margin: 0px">Filter with the selected predicates.</p>
 	{:else}
 		{#each $selections.slices as slice}
 			<SliceChip {slice} />
