@@ -23,6 +23,7 @@
 		editId,
 		editedIds,
 		folders,
+		folderToEdit,
 		metric,
 		metricRange,
 		model,
@@ -305,6 +306,7 @@
 					}}>
 					<IconButton
 						on:click={() => {
+							folderToEdit.set(undefined);
 							showNewSlice.set(false);
 							showNewFolder.update((b) => !b);
 							showSliceFinder.set(false);
