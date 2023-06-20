@@ -1,12 +1,19 @@
 <script lang="ts">
+	import { mdiDotsHorizontal } from "@mdi/js";
+	import { Svg } from "@smui/common";
+	import IconButton, { Icon } from "@smui/icon-button";
+	import Paper, { Content } from "@smui/paper";
 	import type { HistogramEntry } from "../../api/metadata";
-	import { selections } from "../../stores";
+	import { selections, folders, slices } from "../../stores";
+	import { clickOutside } from "../../util/clickOutside";
 	import { columnHash } from "../../util/util";
 	import {
 		MetadataType,
 		ZenoColumnType,
+		ZenoService,
 		type FilterPredicate,
 		type FilterPredicateGroup,
+		type Slice,
 		type ZenoColumn,
 	} from "../../zenoservice";
 	import BinaryMetadataCell from "./metadata-cells/BinaryMetadataCell.svelte";
@@ -25,6 +32,9 @@
 		[MetadataType.OTHER]: TextMetadataCell,
 	};
 
+	let hovering = false;
+	let showOptions = false;
+
 	let filterPredicates: FilterPredicateGroup;
 	$: filterPredicates = $selections.metadata[columnHash(col)]
 		? $selections.metadata[columnHash(col)]
@@ -42,16 +52,103 @@
 			tags: mets.tags,
 		}));
 	}
+
+	function createSlices() {
+		// NomialMetadataCell
+		if (col.metadataType === MetadataType.NOMINAL) {
+			let folderName = col.name + "s";
+			folders.update((f) => {
+				f.push(folderName);
+				return [...f];
+			});
+			histogram.forEach((h) => {
+				let preds: FilterPredicate[] = [];
+				let slicePredGroup: FilterPredicateGroup = { predicates: [], join: "" };
+				preds.push({
+					column: col,
+					operation: "==",
+					value: h.bucket,
+					join: "",
+				});
+				slicePredGroup.predicates = preds;
+
+				let sliceName = folderName + "/" + col.name + " == " + h.bucket;
+				ZenoService.createNewSlice({
+					sliceName,
+					filterPredicates: slicePredGroup,
+					folder: folderName,
+				}).then(() => {
+					slices.update((s) => {
+						s.set(sliceName, <Slice>{
+							sliceName,
+							folder: folderName,
+							filterPredicates: slicePredGroup,
+						});
+						return s;
+					});
+				});
+			});
+		}
+	}
 </script>
 
 {#if histogram}
-	<div class="cell">
-		<div class="info">
+	<div
+		class="cell"
+		on:mouseover={() => (hovering = true)}
+		on:focus={() => (hovering = true)}
+		on:mouseleave={() => (hovering = false)}
+		on:blur={() => (hovering = false)}>
+		<div
+			class="info"
+			use:clickOutside
+			on:click_outside={() => (showOptions = false)}>
 			<div class="label top-text">
 				<span>
 					{col.columnType === ZenoColumnType.OUTPUT ? "output" : col.name}
 				</span>
 			</div>
+			{#if showOptions}
+				<div id="options-container">
+					<Paper style="padding: 3px 0px;" elevation={7}>
+						<Content>
+							<div
+								class="option"
+								on:keydown={() => ({})}
+								on:click={(e) => {
+									e.stopPropagation();
+									showOptions = false;
+									createSlices();
+								}}>
+								<Icon style="font-size: 18px;" class="material-icons">edit</Icon
+								>&nbsp;
+								<span>Create Slices</span>
+							</div>
+						</Content>
+					</Paper>
+				</div>
+			{/if}
+			{#if histogram.length > 0 && hovering}
+				<div
+					class="inline"
+					style="cursor:pointer"
+					use:clickOutside
+					on:click_outside={() => {
+						hovering = false;
+					}}>
+					<IconButton
+						size="button"
+						style="padding: 0px"
+						on:click={(e) => {
+							e.stopPropagation();
+							showOptions = !showOptions;
+						}}>
+						<Icon component={Svg} viewBox="0 0 24 24">
+							<path fill="black" d={mdiDotsHorizontal} />
+						</Icon>
+					</IconButton>
+				</div>
+			{/if}
 		</div>
 
 		<svelte:component
@@ -65,6 +162,7 @@
 
 <style>
 	.cell {
+		position: relative;
 		border-top: 0.5px solid #ebebea;
 		border-bottom: 0.5px solid #ebebea;
 		padding: 10px 0px 10px 0px;
@@ -75,8 +173,33 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
+		height: 16px;
 		margin-left: 5px;
 		margin-bottom: 10px;
 		color: var(--G2);
+	}
+	#options-container {
+		top: 0px;
+		right: 0px;
+		z-index: 5;
+		position: absolute;
+		margin-top: 35px;
+	}
+	.option {
+		display: flex;
+		align-items: center;
+		cursor: pointer;
+		width: 100px;
+		padding: 1px 6px;
+	}
+	.option span {
+		font-size: 12px;
+	}
+	.option:hover {
+		background: var(--G5);
+	}
+	.inline {
+		display: flex;
+		align-items: center;
 	}
 </style>
