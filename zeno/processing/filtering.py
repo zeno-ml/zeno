@@ -31,6 +31,7 @@ def get_filter_string(filter: FilterPredicateGroup) -> str:
                 is_regex = "re" in f.operation
                 is_case = "ca" in f.operation
                 is_whole = "w" in f.operation
+                is_not = "not" in f.operation
 
                 if is_whole:
                     f.value = f"\\b{f.value}\\b" if is_regex else f'"{f.value}"'
@@ -42,7 +43,7 @@ def get_filter_string(filter: FilterPredicateGroup) -> str:
                     filt_string = f"{f.join} (`{f.column}`=={f.value})"
 
                 try:
-                    filt += filt_string
+                    filt += filt_string + "== False" if is_not else filt_string
                 except Exception as e:
                     print("Invalid Regex Error: ", e)
             else:

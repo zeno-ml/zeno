@@ -17,6 +17,7 @@
 	export let updatePredicates;
 
 	let searchString = "";
+	let notOption = false;
 	let isRegex = false;
 	let regexValid = true;
 	let caseMatch = false;
@@ -44,12 +45,23 @@
 			return;
 		}
 
+		// option string for slice detail when hovering over slice,
+		// use an array to keep the same order for case, wholeword, regex
+		let opString = [
+			notOption ? "not " : "",
+			"match",
+			caseMatch ? "(case)" : "",
+			wholeWordMatch ? "(wholeword)" : "",
+			isRegex ? "(regex)" : "",
+		];
+
 		filterPredicates.push({
 			column: col,
-			operation: isRegex ? "match (regex)" : "match",
+			operation: opString.filter((e) => e).join(" "),
 			value: searchString,
 			join: "",
 		});
+
 		if (filterPredicates.length > 1) {
 			filterPredicates[filterPredicates.length - 1].join = "|";
 		}
@@ -88,7 +100,9 @@
 	function optionClick(e) {
 		if (e.currentTarget instanceof HTMLElement) {
 			let id = e.currentTarget.id;
-			if (id === "caseMatch") {
+			if (id === "notOption") {
+				notOption = !notOption;
+			} else if (id === "caseMatch") {
 				caseMatch = !caseMatch;
 			} else if (id === "wholeWordMatch") {
 				wholeWordMatch = !wholeWordMatch;
@@ -107,6 +121,21 @@
 </script>
 
 <div class="container">
+	<div class="option-box" style:margin-right="10px">
+		<div
+			id="notOption"
+			class="search-option"
+			style:background={notOption ? "var(--P2)" : ""}
+			on:keydown={() => ({})}
+			on:click={optionClick}
+			use:tooltip={{
+				content: "Not",
+				theme: "zeno-tooltip",
+				autoPosition: true,
+			}}>
+			~
+		</div>
+	</div>
 	{#key refresh}
 		<AutoComplete
 			id="autoinput"
@@ -179,9 +208,8 @@
 	{#each filterPredicates as pred}
 		<div class="meta-chip">
 			<span>
-				{pred.operation === "match (regex)" ? "/" : ""}
-				{pred.value}
-				{pred.operation === "match (regex)" ? "/" : ""}
+				{pred.operation}
+				'{pred.value}'
 			</span>
 			<TrailingIcon
 				class="remove material-icons"
@@ -202,7 +230,6 @@
 	.container {
 		display: flex;
 		align-items: center;
-		margin-left: 5px;
 	}
 	.option-box {
 		margin-left: 10px;

@@ -12,6 +12,7 @@
 	let isRegex = predicate.operation.includes("re");
 	let caseMatch = predicate.operation.includes("ca");
 	let wholeWordMatch = predicate.operation.includes("w");
+	let notOption = predicate.operation.includes("not");
 
 	// checking if regex is valid, such as not closing brackets (
 	let regexValid = true;
@@ -20,15 +21,6 @@
 
 	let noResultsText = "No results";
 	let searchResults = [];
-
-	// option string for slice detail when hovering over slice,
-	// use an array to keep the same order for case, wholeword, regex
-	let opString = [
-		"match",
-		caseMatch ? "(case)" : "",
-		wholeWordMatch ? "(wholeword)" : "",
-		isRegex ? "(regex)" : "",
-	];
 
 	$: {
 		regexValid = true;
@@ -71,30 +63,52 @@
 	function optionClick(e) {
 		if (e.currentTarget instanceof HTMLElement) {
 			let id = e.currentTarget.id;
-			if (id === "caseMatch") {
+			if (id === "notOption") {
+				notOption = !notOption;
+			} else if (id === "caseMatch") {
 				caseMatch = !caseMatch;
-				opString[1] = caseMatch ? "(case)" : "";
 			} else if (id === "wholeWordMatch") {
 				wholeWordMatch = !wholeWordMatch;
-				opString[2] = wholeWordMatch ? "(wholeword)" : "";
 			} else {
 				if (isRegex) {
 					isRegex = false;
 					noResultsText = "No results";
 					regexValid = true;
-					opString[3] = "";
 				} else {
 					isRegex = true;
-					opString[3] = "(regex)";
 				}
 			}
 		}
+		// option string for slice detail when hovering over slice,
+		// use an array to keep the same order for case, wholeword, regex
+		let opString = [
+			notOption ? "not" : "",
+			"match",
+			caseMatch ? "(case)" : "",
+			wholeWordMatch ? "(wholeword)" : "",
+			isRegex ? "(regex)" : "",
+		];
 		predicate.operation = opString.filter((e) => e).join(" ");
 		refresh++;
 	}
 </script>
 
 <div class="container">
+	<div class="option-box" style:margin-right="10px">
+		<div
+			id="notOption"
+			class="search-option"
+			style:background={notOption ? "var(--P2)" : ""}
+			on:keydown={() => ({})}
+			on:click={optionClick}
+			use:tooltip={{
+				content: "Not",
+				theme: "zeno-tooltip",
+				autoPosition: true,
+			}}>
+			~
+		</div>
+	</div>
 	{#key refresh}
 		<AutoComplete
 			style="height: 37px"
@@ -159,7 +173,6 @@
 	.container {
 		display: flex;
 		align-items: center;
-		margin-left: 5px;
 	}
 	.option-box {
 		margin-left: 10px;
