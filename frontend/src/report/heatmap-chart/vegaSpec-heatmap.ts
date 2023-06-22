@@ -113,6 +113,7 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 						},
 						value: "white",
 					},
+					format: ".2f",
 				},
 			},
 		],
