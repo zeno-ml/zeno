@@ -100,6 +100,7 @@ export default function generateSliceVsSliceSpec(selectMetrics): VegaLiteSpec {
 							value: "black",
 						},
 						value: "white",
+						format: ".2f",
 					},
 				},
 			},

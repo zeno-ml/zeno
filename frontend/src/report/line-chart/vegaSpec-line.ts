@@ -114,6 +114,7 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 						type: paramMap[y_encode].type,
 					},
 					color: { value: "black" },
+					format: paramMap[y_encode].type === "quantitative" ? ".2f" : "",
 				},
 			},
 		],
