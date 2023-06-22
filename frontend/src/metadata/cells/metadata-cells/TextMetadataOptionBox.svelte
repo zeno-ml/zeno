@@ -86,7 +86,7 @@
 	}
 </script>
 
-<div class="option-box" style:margin-right="10px">
+<div class="option-box" style:margin-right="5px">
 	<div
 		id="notOption"
 		class="search-option"
@@ -98,7 +98,7 @@
 			theme: "zeno-tooltip",
 			autoPosition: true,
 		}}>
-		~
+		NOT
 	</div>
 </div>
 {#key refresh}
@@ -163,7 +163,7 @@
 
 <style>
 	.option-box {
-		margin-left: 10px;
+		margin-left: 5px;
 		display: flex;
 		align-items: center;
 		border: 1px solid
