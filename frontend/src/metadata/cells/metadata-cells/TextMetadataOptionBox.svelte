@@ -92,12 +92,7 @@
 		class="search-option"
 		style:background={notOption ? "var(--P2)" : ""}
 		on:keydown={() => ({})}
-		on:click={optionClick}
-		use:tooltip={{
-			content: "Not",
-			theme: "zeno-tooltip",
-			autoPosition: true,
-		}}>
+		on:click={optionClick}>
 		NOT
 	</div>
 </div>
