@@ -1,19 +1,20 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 	import Router from "svelte-spa-router";
-	import Explore from "./Explore.svelte";
 	import Comparison from "./Comparison.svelte";
+	import Explore from "./Explore.svelte";
+	import Home from "./Home.svelte";
 	import Report from "./Report.svelte";
 	import Header from "./general/Header.svelte";
 	import ReportPage from "./report/report-page/ReportPage.svelte";
 	import {
-		selections,
-		status,
-		tab,
-		model,
 		comparisonModel,
+		model,
+		selections,
 		slices,
 		slicesForComparison,
+		status,
+		tab,
 		tagIds,
 	} from "./stores";
 	import {
@@ -24,7 +25,7 @@
 	import { OpenAPI, type Slice } from "./zenoservice";
 
 	const routes = {
-		"/": Explore,
+		"/": Home,
 		"/explore/": Explore,
 		"/comparison/": Comparison,
 		"/report/": Report,
