@@ -344,7 +344,7 @@
 		margin-top: 5px;
 	}
 	th {
-		width: 160px;
+		width: calc(20vw);
 		text-align: left;
 		border-bottom: 1px solid var(--G5);
 		padding-bottom: 5px;
