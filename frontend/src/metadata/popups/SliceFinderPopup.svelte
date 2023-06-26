@@ -222,9 +222,11 @@
 						class="information-tooltip"
 						style="margin-top: 3px;"
 						use:tooltip={{
-							content: "Increase alpha to find more slices",
+							content:
+								"Weight parameter for the average slice metric. Increase it to find more slices.",
 							theme: "zeno-tooltip",
-							maxWidth: "250",
+							maxWidth: "195",
+							position: "left",
 						}}>
 						<Icon style="outline:none" component={Svg} viewBox="-6 -6 36 36">
 							<path d={mdiInformationOutline} />
