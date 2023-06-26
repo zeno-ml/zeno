@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { mdiChevronDown, mdiDotsHorizontal, mdiChevronUp } from "@mdi/js";
+	import { mdiChevronDown, mdiDotsHorizontal, mdiChevronRight } from "@mdi/js";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import { Svg } from "@smui/common";
 	import Paper, { Content } from "@smui/paper";
@@ -56,7 +56,9 @@
 			on:keydown={() => ({})}
 			on:click={() => (expandFolder = !expandFolder)}>
 			<Icon style="outline:none" component={Svg} viewBox="0 0 24 24">
-				<path fill="black" d={expandFolder ? mdiChevronDown : mdiChevronUp} />
+				<path
+					fill="black"
+					d={expandFolder ? mdiChevronDown : mdiChevronRight} />
 			</Icon>
 		</div>
 		{folder}
