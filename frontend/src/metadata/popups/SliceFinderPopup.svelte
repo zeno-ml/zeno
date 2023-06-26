@@ -164,12 +164,17 @@
 		<div class="inline">
 			<div style:margin-left={"20px"}>
 				<div style="display:flex">
-					<div class="options-header">Metric Column</div>
+					<div class="options-header">
+						{$tab !== "comparison" ? "Metric Column" : "Difference Column"}
+					</div>
 					<div
 						class="information-tooltip"
 						style="margin-top: 3px;"
 						use:tooltip={{
-							content: "The continuous column to compare slices across",
+							content:
+								$tab !== "comparison"
+									? "The continuous column to compare slices across"
+									: "The column to calculate model disagreement",
 							position: "right",
 							theme: "zeno-tooltip",
 							maxWidth: "450",
