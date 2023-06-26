@@ -9,16 +9,21 @@
 		ready,
 		showNewFolder,
 		showNewSlice,
+		showFixSlice,
 		showSliceFinder,
 		showNewTag,
 		status,
 	} from "./stores";
+	import FixSlicePopup from "./metadata/popups/FixSlicePopup.svelte";
 </script>
 
 {#if $ready && $status.completeColumns.length > 0}
 	<!-- These popups are at the top level b/c of issues with overflow-y scroll. -->
 	{#if $showNewSlice}
 		<NewSlicePopup />
+	{/if}
+	{#if $showFixSlice}
+		<FixSlicePopup />
 	{/if}
 	{#if $showNewFolder}
 		<NewFolderPopup />

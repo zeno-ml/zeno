@@ -17,6 +17,7 @@
 		slices,
 		model,
 		comparisonModel,
+		showFixSlice,
 	} from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 	import { ZenoService, type Slice } from "../../zenoservice";
@@ -150,6 +151,18 @@
 					<div id="options-container">
 						<Paper style="padding: 3px 0px;" elevation={7}>
 							<Content>
+								<div
+									class="option"
+									on:keydown={() => ({})}
+									on:click={(e) => {
+										e.stopPropagation();
+										showFixSlice.set(true);
+									}}>
+									<Icon style="font-size: 18px;" class="material-icons"
+										>healing</Icon
+									>&nbsp;
+									<span>Fix</span>
+								</div>
 								<div
 									class="option"
 									on:keydown={() => ({})}
