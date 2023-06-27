@@ -1,62 +1,31 @@
 <script>
+	import { tooltip } from "@svelte-plugins/tooltips";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Button, { Label } from "@smui/button";
 	import autoAnimate from "@formkit/auto-animate";
 	import Svelecte from "svelecte";
-	import { tab } from "./stores";
+	import { tab, currentPrompt } from "./stores";
 	import Textfield from "@smui/textfield";
-	import FormField from "@smui/form-field";
-	import Radio from "@smui/radio";
 	import CircularProgress from "@smui/circular-progress";
 	import { mdiChevronLeft } from "@mdi/js";
 	import Checkbox from "@smui/checkbox";
-	import { prompt } from "./util/demoMetadata";
+	import {
+		datasets,
+		featureFunctions,
+		initialPrompt,
+		metrics,
+		promptToString,
+		tasks,
+	} from "./util/demoMetadata";
+	import Huggingface from "./general/Huggingface.svelte";
+	import FormField from "@smui/form-field";
 
-	let dialogStep = 0;
+	let dialogStep = 2;
 	let description = "";
 	let task = null;
-	let tasks = [
-		{ id: 0, name: "classification" },
-		{ id: 1, name: "segmentation" },
-		{ id: 2, name: "chatbot" },
-		{ id: 3, name: "text-generation" },
-	];
-	let datasets = [
-		{ name: "DSTC11", href: "https://huggingface.co/datasets/gneubig/dstc11" },
-		{
-			name: "Empathetic Dialogues",
-			href: "https://huggingface.co/datasets/empathetic_dialogues",
-		},
-		{
-			name: "Multi WOZ V22",
-			href: "https://huggingface.co/datasets/multi_woz_v22",
-		},
-		{
-			name: "Proposal Dialog",
-			href: "https://huggingface.co/allenai/proposal-dialog",
-		},
-		{
-			name: "Customer Service",
-			href: "https://huggingface.co/LL1234/CustomerService",
-		},
-	];
 	let selectedDataset = null;
 	let loading = false;
-	let featureFunctions = [
-		{ name: "Output Length", checked: true },
-		{ name: "Input Length", checked: true },
-		{ name: "Chat Context Length", checked: true },
-		{ name: "English Number Count", checked: true },
-		{ name: "Label Clusters", checked: true },
-	];
-	let metrics = [
-		{ name: "chrf", checked: true },
-		{ name: "Length Ratio", checked: true },
-		{ name: "BERT Score", checked: true },
-		{ name: "Exact Match", checked: true },
-		{ name: "Averages of Metrics", checked: true },
-	];
 
 	function loadResults() {
 		loading = true;
@@ -91,10 +60,14 @@
 						<div class="margins">
 							<Textfield
 								textarea
-								style="width: 100%;"
+								style="width: 100%; height: 200px"
 								label="Prompt"
 								bind:value={description}
-								on:focus={() => (description = prompt)} />
+								on:focus={() =>
+									setTimeout(() => {
+										$currentPrompt = initialPrompt;
+										description = promptToString(initialPrompt);
+									}, 700)} />
 						</div>
 					</div>
 				{/if}
@@ -120,14 +93,28 @@
 			</div>
 		{:else if dialogStep === 1}
 			<div class="results full-width">
-				<p class="full-width">Which dataset would you like to use?</p>
-				{#each datasets as dataset}
-					<FormField>
-						<Radio value={dataset.name} bind:group={selectedDataset} />
-						<span slot="label">
-							<a href={dataset.href} target="_blank">{dataset.name}</a>
+				<p class="full-width">
+					Here are some datasets that could be useful for you. Select the one
+					that you would like to use.
+				</p>
+				{#each datasets as dataset, datasetIndex}
+					<div
+						class=" cell parent {datasetIndex === selectedDataset
+							? 'selected'
+							: ''}"
+						on:keydown={() => ({})}
+						on:click={() => (selectedDataset = datasetIndex)}>
+						<span>
+							{dataset.name}
 						</span>
-					</FormField>
+						<div class="huggingface-button">
+							<IconButton on:click={() => window.open(dataset.href)}>
+								<Icon component={Svg} viewBox="0 0 95 88">
+									<Huggingface />
+								</Icon>
+							</IconButton>
+						</div>
+					</div>
 				{/each}
 			</div>
 			{#if selectedDataset !== null}
@@ -145,11 +132,24 @@
 			{/if}
 		{:else if dialogStep === 2}
 			<div class="results full-width">
+				<p class="full-width">
+					The following functions can be used wiht your selected dataset. Select
+					the ones that you would like to run.
+				</p>
 				<div class="fields">
 					{#each featureFunctions as featureFunction}
-						<div class="starting-row-flex">
-							<Checkbox bind:checked={featureFunction.checked} />
-							{featureFunction.name}
+						<div
+							class="starting-row-flex"
+							use:tooltip={{
+								content: featureFunction.explanation,
+								position: "left",
+								theme: "zeno-tooltip",
+								maxWidth: "200",
+							}}>
+							<FormField>
+								<Checkbox bind:checked={featureFunction.checked} />
+								<span slot="label">{featureFunction.name}</span>
+							</FormField>
 						</div>
 					{/each}
 				</div>
@@ -167,11 +167,24 @@
 			</div>
 		{:else}
 			<div class="results full-width">
+				<p class="full-width">
+					The following metrics work well with your setup. Select ones that you
+					would like to calculate.
+				</p>
 				<div class="fields">
 					{#each metrics as metric}
-						<div class="starting-row-flex">
-							<Checkbox bind:checked={metric.checked} />
-							{metric.name}
+						<div
+							class="starting-row-flex"
+							use:tooltip={{
+								content: metric.explanation,
+								position: "left",
+								theme: "zeno-tooltip",
+								maxWidth: "200",
+							}}>
+							<FormField>
+								<Checkbox bind:checked={metric.checked} />
+								<span slot="label">{metric.name}</span>
+							</FormField>
 						</div>
 					{/each}
 				</div>
@@ -239,5 +252,19 @@
 		position: absolute;
 		left: 0px;
 		top: 0px;
+	}
+	.cell {
+		border: 0.5px solid var(--G4);
+		border-radius: 4px;
+		margin-top: 5px;
+		display: flex;
+		align-items: center;
+		padding-left: 10px;
+		padding-right: 10px;
+		min-height: 36px;
+		justify-content: space-between;
+	}
+	.selected {
+		background: var(--P3);
 	}
 </style>
