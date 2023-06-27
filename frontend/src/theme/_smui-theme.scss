@@ -27,7 +27,9 @@
 	--N1: #61988e;
 	--N2: #d0ebe6;
 
-	--mdc-theme-primary: var(--G2);
+	--mdc-theme-primary: var(--logo);
+	--mdc-checkbox-checked-color: var(--logo);
+	--mdc-checkbox-ink-color: var(--G6);
 	--mdc-theme-secondary: var(--G3);
 	--mdc-theme-background: var(--G6);
 	--mdc-theme-surface: var(--G6);

@@ -50,7 +50,7 @@
 		<img src="build/zeno-full.png" alt="Zeno logo" width="200px" />
 		{#if dialogStep === 0}
 			<div id="fields" use:autoAnimate>
-				<div class:fields={task !== ""}>
+				<div class:fields={task !== null}>
 					<p class="full-width">What kind of task are you tackling?</p>
 					<Svelecte searchable={false} bind:value={task} options={tasks} />
 				</div>
