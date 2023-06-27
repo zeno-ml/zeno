@@ -1,3 +1,4 @@
+import { Prompt } from "./util/demoMetadata";
 import { interpolate } from "d3-interpolate";
 import {
 	derived,
@@ -178,3 +179,9 @@ export const metricRangeColorScale: Readable<(n: number) => string> = derived(
 );
 
 export const scatterColorByColumn: Writable<ZenoColumn> = writable(null);
+
+export const currentPrompt: Writable<Prompt> = writable({
+	prompt:
+		"You are an agent at the Rivertown Insurance helpdesk that helps with resolving insurance claims.",
+	examples: [],
+});

@@ -1,34 +1,53 @@
 <script lang="ts">
+	import { Svg } from "@smui/common";
 	import autoAnimate from "@formkit/auto-animate";
 	import Paper, { Content } from "@smui/paper";
+	import IconButton, { Icon } from "@smui/icon-button";
+	import { mdiChevronLeft } from "@mdi/js";
 	import { clickOutside } from "../../util/clickOutside";
-	import { model, showFixSlice } from "../../stores";
-	import { newModel, prompt } from "../../util/demoMetadata";
-	import Textfield from "@smui/textfield";
+	import { currentPrompt, showFixSlice } from "../../stores";
+	import { promptToString } from "../../util/demoMetadata";
 	import Button, { Label } from "@smui/button";
+	import Prompt from "../../general/Prompt.svelte";
 
 	let paperHeight;
-	let currentPrompt = prompt;
 	let dialogStep = 0;
-	let modelName = $model;
+	let prompt = $currentPrompt;
+	let copied = false;
 </script>
 
 <div
-	id="paper-container"
+	class="paper-container"
+	class:narrow={dialogStep === 0}
+	class:wide={dialogStep === 1}
 	bind:clientHeight={paperHeight}
 	use:clickOutside
 	on:click_outside={() => showFixSlice.set(false)}>
 	<Paper
 		elevation={7}
 		class="paper"
-		style="max-height: 75vh; {paperHeight &&
+		style="padding-top: 0px; max-height: 75vh; {paperHeight &&
 		paperHeight > window.innerHeight * 0.75
 			? 'overflow-y: scroll'
 			: 'overflow-y: show'}">
 		<Content>
+			<div class="horizontal">
+				{#if dialogStep > 0}
+					<div>
+						<IconButton on:click={() => (dialogStep -= 1)}>
+							<Icon component={Svg} viewBox="0 0 24 24">
+								<path fill="black" d={mdiChevronLeft} />
+							</Icon>
+						</IconButton>
+					</div>
+				{/if}
+				<h3>{dialogStep === 0 ? "Fix Slice" : "Edit Prompt"}</h3>
+			</div>
 			<div class="container" use:autoAnimate>
 				{#if dialogStep === 0}
-					<p class="full-width">How would you like to fix this slice?</p>
+					<p class="full-width" style="margin-top: 0px;">
+						How would you like to fix this slice?
+					</p>
 					<Button
 						on:mouseleave={blur}
 						on:focusout={blur}
@@ -38,7 +57,7 @@
 						variant="raised"
 						color="primary"
 						style="width: 100%; margin-bottom: 10px;">
-						<Label>Add in-context examples</Label>
+						<Label>Modify in-context examples</Label>
 					</Button>
 					<Button
 						on:mouseleave={blur}
@@ -49,29 +68,40 @@
 						style="width: 100%;">
 						<Label>Generate data for fine-tuning</Label>
 					</Button>
-				{:else}
-					<Textfield
-						bind:value={currentPrompt}
-						textarea
-						label="Current Prompt"
-						style="width: 100%; height: 200px; margin-bottom: 10px;" />
-					<Textfield
-						bind:value={modelName}
-						label="Model Name"
-						style="width: 100%; margin-bottom: 10px;" />
-					<Button
-						on:mouseleave={blur}
-						on:focusout={blur}
-						disabled={modelName === $model}
-						on:click={() => {
-							$showFixSlice = false;
-							$model = newModel;
-						}}
-						variant="raised"
-						color="primary"
-						style="width: 100%;">
-						<Label>Add new model</Label>
-					</Button>
+				{:else if dialogStep === 1}
+					<Prompt bind:prompt />
+					<div class="horizontal end">
+						<Button
+							on:mouseleave={blur}
+							on:focusout={blur}
+							on:click={() => {
+								$currentPrompt = prompt;
+								$showFixSlice = false;
+							}}
+							variant="raised"
+							style="margin-right: 10px"
+							color="primary">
+							<Label>Save Prompt</Label>
+						</Button>
+						<Button
+							on:mouseleave={blur}
+							on:focusout={blur}
+							on:click={() => {
+								navigator.clipboard.writeText(promptToString(prompt));
+								copied = true;
+								setTimeout(() => {
+									copied = false;
+								}, 500);
+							}}
+							variant="raised"
+							color="primary">
+							{#if copied}
+								<Label>Copied!</Label>
+							{:else}
+								<Label>Copy to Clipboard</Label>
+							{/if}
+						</Button>
+					</div>
 				{/if}
 			</div>
 		</Content>
@@ -79,18 +109,19 @@
 </div>
 
 <style>
-	#paper-container {
+	.paper-container {
 		position: fixed;
 		left: 50%;
-		margin-left: -250px;
 		top: 70px;
 		z-index: 20;
-		width: 500px;
 	}
-	#submit {
-		display: flex;
-		flex-direction: row-reverse;
-		align-items: center;
+	.narrow {
+		width: 500px;
+		margin-left: -250px;
+	}
+	.wide {
+		width: 800px;
+		margin-left: -400px;
 	}
 	.full-width {
 		width: 100%;
@@ -100,5 +131,12 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
+	}
+	.horizontal {
+		display: flex;
+		align-items: center;
+	}
+	.end {
+		align-self: end;
 	}
 </style>
