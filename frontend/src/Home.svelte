@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { tooltip } from "@svelte-plugins/tooltips";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
@@ -8,6 +8,7 @@
 	import { tab, currentPrompt } from "./stores";
 	import Textfield from "@smui/textfield";
 	import CircularProgress from "@smui/circular-progress";
+	import LinearProgress from "@smui/linear-progress";
 	import { mdiChevronLeft } from "@mdi/js";
 	import Checkbox from "@smui/checkbox";
 	import {
@@ -15,17 +16,25 @@
 		featureFunctions,
 		initialPrompt,
 		metrics,
+		progressSteps,
 		promptToString,
 		tasks,
 	} from "./util/demoMetadata";
 	import Huggingface from "./general/Huggingface.svelte";
 	import FormField from "@smui/form-field";
 
-	let dialogStep = 2;
+	let dialogStep = 0;
 	let description = "";
 	let task = null;
 	let selectedDataset = null;
 	let loading = false;
+	let progress = null;
+	let timer: NodeJS.Timer;
+
+	$: if (progress === 1) {
+		tab.set("explore");
+		window.location.hash = "/explore";
+	}
 
 	function loadResults() {
 		loading = true;
@@ -34,11 +43,24 @@
 			loading = false;
 		}, 2000);
 	}
+
+	function createProject() {
+		dialogStep = 4;
+		progress = 0;
+		clearInterval(timer);
+		timer = setInterval(() => {
+			progress += 0.01;
+			if (progress >= 1) {
+				progress = 1;
+				clearInterval(timer);
+			}
+		}, 100);
+	}
 </script>
 
 <div id="container">
 	<div class="start" use:autoAnimate>
-		{#if dialogStep > 0}
+		{#if dialogStep > 0 && dialogStep < 4}
 			<div class="back-button">
 				<IconButton on:click={() => (dialogStep -= 1)}>
 					<Icon component={Svg} viewBox="0 0 24 24">
@@ -165,7 +187,7 @@
 					<Label>Select Metrics</Label>
 				</Button>
 			</div>
-		{:else}
+		{:else if dialogStep === 3}
 			<div class="results full-width">
 				<p class="full-width">
 					The following metrics work well with your setup. Select ones that you
@@ -191,15 +213,23 @@
 				<Button
 					on:mouseleave={blur}
 					on:focusout={blur}
-					on:click={() => {
-						tab.set("explore");
-						window.location.hash = "/explore";
-					}}
+					on:click={createProject}
 					variant="raised"
 					color="primary"
 					style="width: 300px;">
 					<Label>Create Project</Label>
 				</Button>
+			</div>
+		{:else}
+			<div class="results centered-column-flex">
+				<LinearProgress {progress} style="margin-bottom: 10px;" />
+				<span>
+					{progress < 0.1
+						? progressSteps[0]
+						: progress < 0.7
+						? progressSteps[1]
+						: progressSteps[2]}
+				</span>
 			</div>
 		{/if}
 	</div>

@@ -132,3 +132,9 @@ export const initialPrompt: Prompt = {
 		"You are an agent at the Rivertown Insurance helpdesk that helps with resolving insurance claims.",
 	examples: [],
 };
+
+export const progressSteps = [
+	"Checking Cache Files...",
+	"Loading Model Results...",
+	"Loading Functions and Metrics...",
+];
