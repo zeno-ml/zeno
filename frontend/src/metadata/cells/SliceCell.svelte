@@ -37,6 +37,11 @@
 		: false;
 
 	$: selected = $selections.slices.includes(slice.sliceName);
+	$: transferData =
+		$selections.slices.length > 0 &&
+		$selections.slices.includes(slice.sliceName)
+			? $selections.slices.join(",")
+			: slice.sliceName;
 
 	function removeSlice() {
 		confirmDelete = false;
@@ -79,21 +84,24 @@
 	on:mouseleave={() => (hovering = false)}
 	on:blur={() => (hovering = false)}
 	on:dragstart={(ev) => {
-		ev.dataTransfer.setData("text/plain", slice.sliceName);
+		ev.dataTransfer.setData("text/plain", transferData);
 		ev.dataTransfer.dropEffect = "copy";
 	}}
 	on:keydown={() => ({})}
 	on:dragend={(ev) => {
 		// If dragged out of a folder, remove from the folder it was in.
 		if (ev.dataTransfer.dropEffect === "none") {
+			const data = transferData.split(",");
 			slices.update((sls) => {
-				const sli = sls.get(slice.sliceName);
-				sli.folder = "";
-				sls.set(slice.sliceName, sli);
-				ZenoService.createNewSlice({
-					sliceName: sli.sliceName,
-					filterPredicates: sli.filterPredicates,
-					folder: sli.folder,
+				data.forEach((d) => {
+					const sli = sls.get(d);
+					sli.folder = "";
+					sls.set(d, sli);
+					ZenoService.createNewSlice({
+						sliceName: sli.sliceName,
+						filterPredicates: sli.filterPredicates,
+						folder: sli.folder,
+					});
 				});
 				return sls;
 			});
