@@ -40,8 +40,19 @@
 	$: transferData =
 		$selections.slices.length > 0 &&
 		$selections.slices.includes(slice.sliceName)
-			? $selections.slices.join(",")
-			: slice.sliceName;
+			? getSlicesIndex($selections.slices)
+			: getSlicesIndex([slice.sliceName]);
+
+	/** Return slices index stored in $slices **/
+	function getSlicesIndex(sls) {
+		let idxs = [];
+		Array.from($slices.entries()).forEach((s, i) => {
+			if (sls.includes(s[0])) {
+				idxs.push(i);
+			}
+		});
+		return idxs.join(",");
+	}
 
 	function removeSlice() {
 		confirmDelete = false;
@@ -93,10 +104,11 @@
 		if (ev.dataTransfer.dropEffect === "none") {
 			const data = transferData.split(",");
 			slices.update((sls) => {
+				let entries = Array.from($slices.entries());
 				data.forEach((d) => {
-					const sli = sls.get(d);
+					const sli = sls.get(entries[d][0]);
 					sli.folder = "";
-					sls.set(d, sli);
+					sls.set(entries[d][0], sli);
 					ZenoService.createNewSlice({
 						sliceName: sli.sliceName,
 						filterPredicates: sli.filterPredicates,
