@@ -95,26 +95,11 @@
 									});
 								}}>
 								<Icon style="font-size: 20px;" class="material-icons"
-									>healing</Icon
+									>delete_outline</Icon
 								>&nbsp;
-								<span>Fix Slice</span>
-								<div
-									class="option"
-									on:keydown={() => ({})}
-									on:click={(e) => {
-										e.stopPropagation();
-										showOptions = false;
-										reports.update((reps) => {
-											reps.splice(reportIndex, 1);
-											return reps;
-										});
-									}}>
-									<Icon style="font-size: 20px;" class="material-icons"
-										>delete_outline</Icon
-									>&nbsp;
-									<span>Remove</span>
-								</div>
-							</div></Content>
+								<span>Remove</span>
+							</div>
+						</Content>
 					</Paper>
 				</div>
 			{/if}
