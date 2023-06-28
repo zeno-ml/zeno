@@ -378,7 +378,7 @@
 	</div>
 
 	{#each $folders as folder}
-		<FolderCell {folder} />
+		<FolderCell compare={$tab === "comparison"} {folder} />
 	{/each}
 
 	{#each [...$slices.values()].filter((s) => s.folder === "" && s.sliceName !== "All Instances") as s (s.sliceName)}
