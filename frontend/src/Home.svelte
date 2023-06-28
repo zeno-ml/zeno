@@ -8,7 +8,6 @@
 	import { tab, currentPrompt } from "./stores";
 	import Textfield from "@smui/textfield";
 	import CircularProgress from "@smui/circular-progress";
-	import LinearProgress from "@smui/linear-progress";
 	import { mdiChevronLeft } from "@mdi/js";
 	import Checkbox from "@smui/checkbox";
 	import {
@@ -16,7 +15,6 @@
 		featureFunctions,
 		initialPrompt,
 		metrics,
-		progressSteps,
 		promptToString,
 		tasks,
 	} from "./util/demoMetadata";
@@ -28,10 +26,8 @@
 	let task = null;
 	let selectedDataset = null;
 	let loading = false;
-	let progress = null;
-	let timer: NodeJS.Timer;
 
-	$: if (progress === 1) {
+	function explore() {
 		tab.set("explore");
 		window.location.hash = "/explore";
 	}
@@ -46,15 +42,19 @@
 
 	function createProject() {
 		dialogStep = 4;
-		progress = 0;
-		clearInterval(timer);
-		timer = setInterval(() => {
-			progress += 0.01;
-			if (progress >= 1) {
-				progress = 1;
-				clearInterval(timer);
-			}
-		}, 100);
+	}
+
+	async function download() {
+		let res = await fetch("build/zeno_scripts.zip");
+		let blob = await res.blob();
+		let url = window.URL || window.webkitURL;
+		let link = url.createObjectURL(blob);
+		let a = document.createElement("a");
+		a.setAttribute("download", "zeno_scripts.zip");
+		a.setAttribute("href", link);
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
 	}
 </script>
 
@@ -139,23 +139,31 @@
 					</div>
 				{/each}
 			</div>
-			{#if selectedDataset !== null}
-				<Button
-					on:mouseleave={blur}
-					on:focusout={blur}
-					on:click={() => {
-						dialogStep = 2;
-					}}
-					variant="raised"
-					color="primary"
-					style="width: 300px;">
-					<Label>Select Feature Functions</Label>
-				</Button>
-			{/if}
+			<Button
+				on:mouseleave={blur}
+				on:focusout={blur}
+				disabled={selectedDataset === null}
+				on:click={() => {
+					dialogStep = 2;
+				}}
+				variant="raised"
+				color="primary"
+				style="width: 300px; margin-bottom:10px;">
+				<Label>Select Dataset</Label>
+			</Button>
+			<Button
+				on:mouseleave={blur}
+				on:focusout={blur}
+				disabled
+				variant="raised"
+				color="primary"
+				style="width: 300px;">
+				<Label>Create New Dataset</Label>
+			</Button>
 		{:else if dialogStep === 2}
 			<div class="results full-width">
 				<p class="full-width">
-					The following functions can be used wiht your selected dataset. Select
+					The following functions can be used with your selected dataset. Select
 					the ones that you would like to run.
 				</p>
 				<div class="fields">
@@ -184,7 +192,7 @@
 					variant="raised"
 					color="primary"
 					style="width: 300px;">
-					<Label>Select Metrics</Label>
+					<Label>Select Feature Functions</Label>
 				</Button>
 			</div>
 		{:else if dialogStep === 3}
@@ -217,19 +225,29 @@
 					variant="raised"
 					color="primary"
 					style="width: 300px;">
-					<Label>Create Project</Label>
+					<Label>Select Metrics</Label>
 				</Button>
 			</div>
 		{:else}
 			<div class="results centered-column-flex">
-				<LinearProgress {progress} style="margin-bottom: 10px;" />
-				<span>
-					{progress < 0.1
-						? progressSteps[0]
-						: progress < 0.7
-						? progressSteps[1]
-						: progressSteps[2]}
-				</span>
+				<Button
+					on:mouseleave={blur}
+					on:focusout={blur}
+					on:click={download}
+					variant="raised"
+					color="primary"
+					style="width: 300px; margin-bottom: 10px;">
+					<Label>Download Template Scripts</Label>
+				</Button>
+				<Button
+					on:mouseleave={blur}
+					on:focusout={blur}
+					on:click={explore}
+					variant="raised"
+					color="primary"
+					style="width: 300px;">
+					<Label>Open existing Project</Label>
+				</Button>
 			</div>
 		{/if}
 	</div>
