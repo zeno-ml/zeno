@@ -9,12 +9,14 @@
 	import Textfield from "@smui/textfield";
 	import CircularProgress from "@smui/circular-progress";
 	import { mdiChevronLeft } from "@mdi/js";
+	import { progressSteps, taskDescription } from "./util/demoMetadata";
 	import Checkbox from "@smui/checkbox";
 	import {
 		datasets,
 		featureFunctions,
 		initialPrompt,
 		metrics,
+		models,
 		promptToString,
 		tasks,
 	} from "./util/demoMetadata";
@@ -23,13 +25,28 @@
 
 	let dialogStep = 0;
 	let description = "";
+	let prompt = "";
 	let task = null;
 	let selectedDataset = null;
 	let loading = false;
-
-	function explore() {
+	let progress = 0;
+	let timer: NodeJS.Timer;
+	$: if (progress === 1) {
 		tab.set("explore");
 		window.location.hash = "/explore";
+	}
+
+	function explore() {
+		dialogStep = 6;
+		progress = 0;
+		clearInterval(timer);
+		timer = setInterval(() => {
+			progress += 0.01;
+			if (progress >= 1) {
+				progress = 1;
+				clearInterval(timer);
+			}
+		}, 50);
 	}
 
 	function loadResults() {
@@ -60,7 +77,7 @@
 
 <div id="container">
 	<div class="start" use:autoAnimate>
-		{#if dialogStep > 0 && dialogStep < 4}
+		{#if dialogStep > 0 && dialogStep < 6}
 			<div class="back-button">
 				<IconButton on:click={() => (dialogStep -= 1)}>
 					<Icon component={Svg} viewBox="0 0 24 24">
@@ -82,13 +99,12 @@
 						<div class="margins">
 							<Textfield
 								textarea
-								style="width: 100%; height: 200px"
-								label="Prompt"
+								style="width: 100%; height: 120px"
+								label="Task Description"
 								bind:value={description}
 								on:focus={() =>
 									setTimeout(() => {
-										$currentPrompt = initialPrompt;
-										description = promptToString(initialPrompt);
+										description = taskDescription;
 									}, 700)} />
 						</div>
 					</div>
@@ -108,17 +124,15 @@
 							variant="raised"
 							color="primary"
 							style="width: 300px;">
-							<Label>Search</Label>
+							<Label>Next</Label>
 						</Button>
 					{/if}
 				{/if}
 			</div>
 		{:else if dialogStep === 1}
 			<div class="results full-width">
-				<p class="full-width">
-					Here are some datasets that could be useful for you. Select the one
-					that you would like to use.
-				</p>
+				<h3 class="step-header">Dataset</h3>
+				<p class="full-width">These datasets could be useful for you.</p>
 				{#each datasets as dataset, datasetIndex}
 					<div
 						class=" cell parent {datasetIndex === selectedDataset
@@ -162,10 +176,8 @@
 			</Button>
 		{:else if dialogStep === 2}
 			<div class="results full-width">
-				<p class="full-width">
-					The following functions can be used with your selected dataset. Select
-					the ones that you would like to run.
-				</p>
+				<h3 class="step-header">Feature Functions</h3>
+				<p class="full-width">These functions could be used with your data.</p>
 				<div class="fields">
 					{#each featureFunctions as featureFunction}
 						<div
@@ -197,10 +209,8 @@
 			</div>
 		{:else if dialogStep === 3}
 			<div class="results full-width">
-				<p class="full-width">
-					The following metrics work well with your setup. Select ones that you
-					would like to calculate.
-				</p>
+				<h3 class="step-header">Metrics</h3>
+				<p class="full-width">These metrics could be used for evaluation.</p>
 				<div class="fields">
 					{#each metrics as metric}
 						<div
@@ -228,26 +238,84 @@
 					<Label>Select Metrics</Label>
 				</Button>
 			</div>
-		{:else}
+		{:else if dialogStep === 4}
 			<div class="results centered-column-flex">
+				<Button
+					on:mouseleave={blur}
+					on:focusout={blur}
+					on:click={() => (dialogStep = 5)}
+					variant="raised"
+					color="primary"
+					style="width: 300px; margin-bottom: 10px;">
+					<Label>Build in Zeno</Label>
+				</Button>
 				<Button
 					on:mouseleave={blur}
 					on:focusout={blur}
 					on:click={download}
 					variant="raised"
 					color="primary"
-					style="width: 300px; margin-bottom: 10px;">
-					<Label>Download Template Scripts</Label>
-				</Button>
-				<Button
-					on:mouseleave={blur}
-					on:focusout={blur}
-					on:click={explore}
-					variant="raised"
-					color="primary"
 					style="width: 300px;">
-					<Label>Open existing Project</Label>
+					<Label>Build Offline</Label>
 				</Button>
+			</div>
+		{:else if dialogStep === 5}
+			<div class="results full-width">
+				<div class:fields={prompt !== ""}>
+					<p class="full-width">What models would you like to run?</p>
+					{#each models as model}
+						<div
+							class="starting-row-flex"
+							use:tooltip={{
+								content: model.explanation,
+								position: "left",
+								theme: "zeno-tooltip",
+								maxWidth: "200",
+							}}>
+							<FormField>
+								<Checkbox bind:checked={model.checked} />
+								<span slot="label">{model.name}</span>
+							</FormField>
+						</div>
+					{/each}
+					<p class="full-width">Which prompt would you like to use?</p>
+					<div class="margins">
+						<Textfield
+							textarea
+							style="width: 100%; height: 120px"
+							label="Prompt"
+							bind:value={prompt}
+							on:focus={() =>
+								setTimeout(() => {
+									$currentPrompt = initialPrompt;
+									prompt = promptToString(initialPrompt).replaceAll("\n", "");
+								}, 700)} />
+					</div>
+				</div>
+				{#if prompt !== ""}
+					<Button
+						on:mouseleave={blur}
+						on:focusout={blur}
+						on:click={explore}
+						variant="raised"
+						color="primary"
+						style="width: 300px;">
+						<Label>Build</Label>
+					</Button>
+				{/if}
+			</div>
+		{:else}
+			<div class="results centered-column-flex">
+				<CircularProgress
+					style="height: 32px; width: 32px; margin-bottom: 10px;"
+					{progress} />
+				<span>
+					{progress < 0.1
+						? progressSteps[0]
+						: progress < 0.7
+						? progressSteps[1]
+						: progressSteps[2]}
+				</span>
 			</div>
 		{/if}
 	</div>
@@ -314,5 +382,8 @@
 	}
 	.selected {
 		background: var(--P3);
+	}
+	.step-header {
+		margin: 0;
 	}
 </style>

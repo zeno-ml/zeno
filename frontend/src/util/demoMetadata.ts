@@ -72,6 +72,24 @@ export const datasets = [
 	},
 ];
 
+export const models = [
+	{
+		name: "GPT 3.5 Turbo",
+		checked: true,
+		explanation: "OpenAI model used in the ChatGPT interface.",
+	},
+	{
+		name: "Vicuna",
+		checked: true,
+		explanation:
+			"Open-source chatbot trained by fine-tuning LLaMA on user-shared conversations collected from ShareGPT.",
+	},
+	{
+		name: "GPT 2",
+		checked: false,
+		explanation: "Smaller chatbot model from OpenAI.",
+	},
+];
 export const featureFunctions = [
 	{
 		name: "Output Length",
@@ -133,10 +151,19 @@ export const initialPrompt: Prompt = {
 	examples: [],
 };
 
+export const taskDescription = "Helpdesk assistance.";
+
 export const progressSteps = [
 	"Checking Cache Files...",
 	"Loading Model Results...",
 	"Loading Functions and Metrics...",
+];
+
+export const modelSteps = [
+	"Initializing model...",
+	"Running inference...",
+	"Evaluating feature functions...",
+	"Calculating metrics...",
 ];
 
 export interface DemoReport {
@@ -177,3 +204,5 @@ export function isChartElement(
 	}
 	return false;
 }
+
+export const newModelName = "{old_name}_v2";
