@@ -5,7 +5,10 @@
 	import { type MetricKey, type Report } from "../../zenoservice";
 	import { generateSpec } from "./vegaSpec-radar";
 
-	$: currentReport = $reports[$report];
+	export let passedReport: Report | undefined = undefined;
+
+	$: currentReport =
+		passedReport === undefined ? $reports[$report] : passedReport;
 	$: parameters = currentReport.parameters;
 
 	let chartEntries = [];

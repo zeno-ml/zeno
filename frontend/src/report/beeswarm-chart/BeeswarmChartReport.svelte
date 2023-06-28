@@ -2,10 +2,13 @@
 	import { Vega } from "svelte-vega";
 	import { getMetricsForSlices } from "../../api/slice";
 	import { report, reports, slices } from "../../stores";
-	import type { MetricKey } from "../../zenoservice";
+	import type { MetricKey, Report } from "../../zenoservice";
 	import generateSpec from "./vegaSpec-beeswarm";
 
-	$: currentReport = $reports[$report];
+	export let passedReport: Report | undefined = undefined;
+
+	$: currentReport =
+		passedReport === undefined ? $reports[$report] : passedReport;
 	$: parameters = currentReport.parameters;
 	$: fixed_dimension = currentReport.parameters.fixedDimension;
 

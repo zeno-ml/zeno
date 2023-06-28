@@ -34,7 +34,7 @@
 
 <div
 	class="report"
-	on:click={() => updateTab("report/" + reportIndex)}
+	on:click={() => updateTab("chart/" + reportIndex)}
 	on:keydown={() => ({})}>
 	<div class="inline">
 		<div class="report-type">
@@ -95,11 +95,26 @@
 									});
 								}}>
 								<Icon style="font-size: 20px;" class="material-icons"
-									>delete_outline</Icon
+									>healing</Icon
 								>&nbsp;
-								<span>Remove</span>
-							</div>
-						</Content>
+								<span>Fix Slice</span>
+								<div
+									class="option"
+									on:keydown={() => ({})}
+									on:click={(e) => {
+										e.stopPropagation();
+										showOptions = false;
+										reports.update((reps) => {
+											reps.splice(reportIndex, 1);
+											return reps;
+										});
+									}}>
+									<Icon style="font-size: 20px;" class="material-icons"
+										>delete_outline</Icon
+									>&nbsp;
+									<span>Remove</span>
+								</div>
+							</div></Content>
 					</Paper>
 				</div>
 			{/if}

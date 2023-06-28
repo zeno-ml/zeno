@@ -23,14 +23,16 @@
 		updateModelDependentSlices,
 	} from "./util/util";
 	import { OpenAPI, type Slice } from "./zenoservice";
+	import Dashboard from "./Dashboard.svelte";
 
 	const routes = {
 		"/": Home,
 		"/explore/": Explore,
 		"/comparison/": Comparison,
-		"/report/": Report,
-		"/report/:id": ReportPage,
-		"/report/:id/new": ReportPage,
+		"/charts/": Report,
+		"/report/": Dashboard,
+		"/chart/:id": ReportPage,
+		"/chart/:id/new": ReportPage,
 		"*": Explore,
 	};
 

@@ -1,4 +1,5 @@
-import { Prompt } from "./util/demoMetadata";
+import type { Prompt, DemoReport } from "./util/demoMetadata";
+import { ReportTextElementType } from "./util/demoMetadata";
 import { interpolate } from "d3-interpolate";
 import {
 	derived,
@@ -184,4 +185,24 @@ export const currentPrompt: Writable<Prompt> = writable({
 	prompt:
 		"You are an agent at the Rivertown Insurance helpdesk that helps with resolving insurance claims.",
 	examples: [],
+});
+
+export const demoReport: Writable<DemoReport> = writable({
+	elements: [
+		{
+			type: ReportTextElementType.HEADING,
+			text: "Insurance Chatbot",
+		},
+		{
+			type: ReportTextElementType.TEXT,
+			text: 'by <a href="http://phontron.com/" target="_blank">Graham Neubig</a>',
+		},
+		{
+			type: ReportTextElementType.TEXT,
+			text: "updated Jun 27, 2023",
+		},
+		{
+			reportIndex: 0,
+		},
+	],
 });

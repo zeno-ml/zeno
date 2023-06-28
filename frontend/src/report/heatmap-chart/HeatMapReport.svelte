@@ -2,11 +2,14 @@
 	import { VegaLite } from "svelte-vega";
 	import { getMetricsForSlices } from "../../api/slice";
 	import { report, reports, slices } from "../../stores";
-	import type { MetricKey, Slice } from "../../zenoservice";
+	import type { MetricKey, Report, Slice } from "../../zenoservice";
 	import generateSpec from "./vegaSpec-heatmap";
 	import generateSliceVsSliceSpec from "./vegaSpec-heatmap_slice_vs_slice";
 
-	$: currentReport = $reports[$report];
+	export let passedReport: Report | undefined = undefined;
+
+	$: currentReport =
+		passedReport === undefined ? $reports[$report] : passedReport;
 	$: selectMetric = currentReport.metrics[0];
 	$: selectModel = currentReport.models[0];
 	$: parameters = currentReport.parameters;

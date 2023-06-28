@@ -21,7 +21,7 @@
 			on:keydown={() => ({})}
 			on:click={() => {
 				$reports[$report].name = currentReport.name;
-				updateTab("report");
+				updateTab("charts");
 			}}
 			on:focus={() => ({})}
 			on:mouseover={() => {
@@ -37,7 +37,7 @@
 				<path fill={ishover ? "black" : "var(--G2)"} d={mdiArrowCollapseLeft} />
 			</Svg>
 			<h4 style={ishover ? "color:black" : "color:var(--G2)"}>
-				Back to Report Home
+				Back to Charts Home
 			</h4>
 		</div>
 		<Button

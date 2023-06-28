@@ -10,7 +10,7 @@
 
 <div id="reports-container">
 	<div class="header">
-		<h3>Reports</h3>
+		<h3>Charts</h3>
 	</div>
 	<div class="reports">
 		{#each $reports as rep, i}
@@ -21,7 +21,7 @@
 			on:click={(e) => {
 				e.stopPropagation();
 				reports.update((reps) => {
-					updateTab("report/" + reps.length + "/new");
+					updateTab("chart/" + reps.length + "/new");
 					reps.push({
 						name: "New Report",
 						type: ChartType.BAR,

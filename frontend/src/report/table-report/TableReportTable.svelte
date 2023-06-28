@@ -5,9 +5,12 @@
 	import SliceDetailsContainer from "./SliceDetailsContainer.svelte";
 	import TableReportRow from "./TableReportRow.svelte";
 	import { getMetricsForSlices } from "../../api/slice";
-	import type { MetricKey } from "../../zenoservice";
+	import type { MetricKey, Report } from "../../zenoservice";
 
-	$: currentReport = $reports[$report];
+	export let passedReport: Report | undefined = undefined;
+
+	$: currentReport =
+		passedReport === undefined ? $reports[$report] : passedReport;
 	$: parameters = currentReport.parameters;
 	$: sortCol = [-1, true];
 

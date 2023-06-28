@@ -138,3 +138,42 @@ export const progressSteps = [
 	"Loading Model Results...",
 	"Loading Functions and Metrics...",
 ];
+
+export interface DemoReport {
+	elements: Array<ReportElement>;
+}
+
+export interface ReportTextElement {
+	type: ReportTextElementType;
+	text: string;
+}
+
+export type ReportElement = ReportTextElement | ReportChartElement;
+
+export function isTextElement(
+	element: ReportElement
+): element is ReportTextElement {
+	if ((element as ReportTextElement).text !== undefined) {
+		return true;
+	}
+	return false;
+}
+
+export enum ReportTextElementType {
+	HEADING = "Heading",
+	SUBHEADING = "Subheading",
+	TEXT = "Text",
+}
+
+export interface ReportChartElement {
+	reportIndex: number;
+}
+
+export function isChartElement(
+	element: ReportElement
+): element is ReportChartElement {
+	if ((element as ReportChartElement).reportIndex !== undefined) {
+		return true;
+	}
+	return false;
+}

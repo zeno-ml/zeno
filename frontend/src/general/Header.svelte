@@ -6,6 +6,7 @@
 		mdiCompassOutline,
 		mdiGithub,
 		mdiHomeOutline,
+		mdiTextBoxOutline,
 	} from "@mdi/js";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
@@ -69,11 +70,28 @@
 					</div>
 				</div>
 				<div
+					class="item {$tab === 'charts' ? 'selected' : ''}"
+					on:keydown={() => ({})}
+					on:click={() => updateTab("charts")}
+					use:tooltip={{
+						content: "Create charts from your slices and metrics.",
+						position: "right",
+						theme: "zeno-tooltip",
+					}}>
+					<div class="icon">
+						<Icon style="outline:none" component={Svg} viewBox="0 0 24 24">
+							<path
+								fill={$tab === "charts" ? "#6a1b9a" : "black"}
+								d={mdiChartBoxOutline} />
+						</Icon>
+					</div>
+				</div>
+				<div
 					class="item {$tab === 'report' ? 'selected' : ''}"
 					on:keydown={() => ({})}
 					on:click={() => updateTab("report")}
 					use:tooltip={{
-						content: "Create reports from your slices and metrics.",
+						content: "Create a report from your findings.",
 						position: "right",
 						theme: "zeno-tooltip",
 					}}>
@@ -81,7 +99,7 @@
 						<Icon style="outline:none" component={Svg} viewBox="0 0 24 24">
 							<path
 								fill={$tab === "report" ? "#6a1b9a" : "black"}
-								d={mdiChartBoxOutline} />
+								d={mdiTextBoxOutline} />
 						</Icon>
 					</div>
 				</div>
