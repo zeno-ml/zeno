@@ -33,7 +33,9 @@
 		</Popup>
 	{/if}
 	{#if $showNewFolder}
-		<NewFolderPopup />
+		<Popup on:close={() => showNewFolder.set(false)}>
+			<NewFolderPopup />
+		</Popup>
 	{/if}
 	<div class="container">
 		<MetadataPanel />

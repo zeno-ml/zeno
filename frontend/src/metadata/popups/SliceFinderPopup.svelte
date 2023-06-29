@@ -25,6 +25,7 @@
 	import ChipsWrapper from "../ChipsWrapper.svelte";
 	import SliceFinderCell from "../cells/SliceFinderCell.svelte";
 	import { columnSort } from "../../util/util";
+	import SliceFinderCell from "../cells/SliceFinderCell.svelte";
 
 	let blur = function (ev) {
 		ev.target.blur();
