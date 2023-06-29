@@ -2,8 +2,9 @@
 	import InstanceView from "./instance-views/InstanceView.svelte";
 	import MetadataPanel from "./metadata/MetadataPanel.svelte";
 	import NewSlicePopup from "./metadata/popups/NewSlicePopup.svelte";
+	import Popup from "./metadata/popups/Popup.svelte";
 	import SliceFinderPopup from "./metadata/popups/SliceFinderPopup.svelte";
-	import { ready, status, showSliceFinder, showNewSlice } from "./stores";
+	import { ready, showSliceFinder, status, showNewSlice } from "./stores";
 </script>
 
 {#if $ready && $status.completeColumns.length > 0}
@@ -11,7 +12,9 @@
 		<NewSlicePopup />
 	{/if}
 	{#if $showSliceFinder}
-		<SliceFinderPopup />
+		<Popup on:close={() => showSliceFinder.set(false)}>
+			<SliceFinderPopup />
+		</Popup>
 	{/if}
 	<div class="container">
 		<MetadataPanel />

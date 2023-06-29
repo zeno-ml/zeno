@@ -1,11 +1,10 @@
 <script lang="ts">
 	import Button from "@smui/button";
-	import Paper, { Content } from "@smui/paper";
+	import { Content } from "@smui/paper";
 	import Textfield from "@smui/textfield";
 	import { createNewTag } from "../../api/tag";
-	import { tags, showNewTag, selectionIds } from "../../stores";
+	import { selectionIds, showNewTag, tags } from "../../stores";
 	import type { Tag } from "../../zenoservice";
-	import { clickOutside } from "../../util/clickOutside";
 
 	let tagName = "";
 	let folder = "";
@@ -50,38 +49,22 @@
 
 <svelte:window on:keydown={submit} />
 
-<div
-	id="paper-container"
-	use:clickOutside
-	on:click_outside={() => showNewTag.set(false)}>
-	<Paper elevation={7}>
-		<Content style="display: flex; align-items: center;">
-			<Textfield bind:value={tagName} label="Tag Name" bind:this={input} />
-			<Button
-				style="margin-left: 10px;"
-				variant="outlined"
-				on:click={() => showNewTag.set(false)}>Cancel</Button>
-			<Button
-				style="margin-left: 5px;"
-				variant="outlined"
-				disabled={invalidName}
-				on:click={() => createTag()}>{"Create"}</Button>
-		</Content>
-		{#if invalidName && tagName.length > 0}
-			<p style:margin-right="10px">tag already exists</p>
-		{:else if $selectionIds.ids.length > 0}
-			<p style:margin-right="10px">
-				{$selectionIds.ids.length} instances selected
-			</p>
-		{/if}
-	</Paper>
-</div>
-
-<style>
-	#paper-container {
-		position: fixed;
-		left: 440px;
-		top: 70px;
-		z-index: 20;
-	}
-</style>
+<Content style="display: flex; align-items: center;">
+	<Textfield bind:value={tagName} label="Tag Name" bind:this={input} />
+	<Button
+		style="margin-left: 10px;"
+		variant="outlined"
+		on:click={() => showNewTag.set(false)}>Cancel</Button>
+	<Button
+		style="margin-left: 5px;"
+		variant="outlined"
+		disabled={invalidName}
+		on:click={() => createTag()}>{"Create"}</Button>
+</Content>
+{#if invalidName && tagName.length > 0}
+	<p style:margin-right="10px">tag already exists</p>
+{:else if $selectionIds.ids.length > 0}
+	<p style:margin-right="10px">
+		{$selectionIds.ids.length} instances selected
+	</p>
+{/if}

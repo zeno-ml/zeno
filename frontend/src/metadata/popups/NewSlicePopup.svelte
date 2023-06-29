@@ -1,16 +1,15 @@
 <script lang="ts">
 	import Button from "@smui/button";
-	import Paper, { Content } from "@smui/paper";
+	import { Content } from "@smui/paper";
 	import Textfield from "@smui/textfield";
 	import {
+		reports,
+		selectionPredicates,
 		selections,
 		showNewSlice,
-		slices,
-		reports,
 		sliceToEdit,
-		selectionPredicates,
+		slices,
 	} from "../../stores";
-	import { clickOutside } from "../../util/clickOutside";
 	import {
 		ZenoService,
 		type FilterPredicateGroup,
@@ -22,7 +21,6 @@
 	let folder = "";
 	let predicateGroup: FilterPredicateGroup = { predicates: [], join: "" };
 	let nameInput;
-	let paperHeight;
 
 	// Track original settings when editing.
 	let originalName = "";
@@ -163,61 +161,36 @@
 
 <svelte:window on:keydown={submit} />
 
-<div
-	id="paper-container"
-	bind:clientHeight={paperHeight}
-	use:clickOutside
-	on:click_outside={() => showNewSlice.set(false)}>
-	<Paper
-		elevation={7}
-		class="paper"
-		style="max-height: 75vh; {paperHeight &&
-		paperHeight > window.innerHeight * 0.75
-			? 'overflow-y: scroll'
-			: 'overflow-y: show'}">
-		<Content>
-			<Textfield
-				bind:value={sliceName}
-				label="Slice Name"
-				bind:this={nameInput} />
-			<FilterGroupEntry
-				index={-1}
-				deletePredicate={() => deletePredicate(-1)}
-				bind:predicateGroup />
-			<div id="submit">
-				<Button
-					variant="outlined"
-					on:click={createSlice}
-					disabled={(!$sliceToEdit && $slices.has(sliceName)) ||
-						($sliceToEdit &&
-							originalName !== sliceName &&
-							$slices.has(sliceName)) ||
-						!isValidPredicates}>
-					{$sliceToEdit ? "Update Slice" : "Create Slice"}
-				</Button>
-				<Button
-					style="margin-right: 10px"
-					variant="outlined"
-					on:click={() => showNewSlice.set(false)}>
-					cancel
-				</Button>
-				{#if (!$sliceToEdit && $slices.has(sliceName)) || ($sliceToEdit && originalName !== sliceName && $slices.has(sliceName))}
-					<p style:margin-right="10px" style:color="red">
-						slice already exists
-					</p>
-				{/if}
-			</div>
-		</Content>
-	</Paper>
-</div>
+<Content>
+	<Textfield bind:value={sliceName} label="Slice Name" bind:this={nameInput} />
+	<FilterGroupEntry
+		index={-1}
+		deletePredicate={() => deletePredicate(-1)}
+		bind:predicateGroup />
+	<div id="submit">
+		<Button
+			variant="outlined"
+			on:click={createSlice}
+			disabled={(!$sliceToEdit && $slices.has(sliceName)) ||
+				($sliceToEdit &&
+					originalName !== sliceName &&
+					$slices.has(sliceName)) ||
+				!isValidPredicates}>
+			{$sliceToEdit ? "Update Slice" : "Create Slice"}
+		</Button>
+		<Button
+			style="margin-right: 10px"
+			variant="outlined"
+			on:click={() => showNewSlice.set(false)}>
+			cancel
+		</Button>
+		{#if (!$sliceToEdit && $slices.has(sliceName)) || ($sliceToEdit && originalName !== sliceName && $slices.has(sliceName))}
+			<p style:margin-right="10px" style:color="red">slice already exists</p>
+		{/if}
+	</div>
+</Content>
 
 <style>
-	#paper-container {
-		position: fixed;
-		left: 440px;
-		top: 70px;
-		z-index: 20;
-	}
 	#submit {
 		display: flex;
 		flex-direction: row-reverse;

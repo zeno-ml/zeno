@@ -1,38 +1,49 @@
 <script lang="ts">
 	import InstanceView from "./instance-views/InstanceView.svelte";
 	import MetadataPanel from "./metadata/MetadataPanel.svelte";
+	import FixSlicePopup from "./metadata/popups/FixSlicePopup.svelte";
 	import NewFolderPopup from "./metadata/popups/NewFolderPopup.svelte";
 	import NewSlicePopup from "./metadata/popups/NewSlicePopup.svelte";
-	import SliceFinderPopup from "./metadata/popups/SliceFinderPopup.svelte";
 	import NewTagPopup from "./metadata/popups/NewTagPopup.svelte";
+	import Popup from "./metadata/popups/Popup.svelte";
+	import SliceFinderPopup from "./metadata/popups/SliceFinderPopup.svelte";
 	import {
 		ready,
+		showFixSlice,
 		showNewFolder,
 		showNewSlice,
-		showFixSlice,
-		showSliceFinder,
 		showNewTag,
+		showSliceFinder,
 		status,
 	} from "./stores";
-	import FixSlicePopup from "./metadata/popups/FixSlicePopup.svelte";
 </script>
 
 {#if $ready && $status.completeColumns.length > 0}
 	<!-- These popups are at the top level b/c of issues with overflow-y scroll. -->
 	{#if $showNewSlice}
-		<NewSlicePopup />
+		<Popup on:close={() => showNewSlice.set(false)}>
+			<NewSlicePopup />
+		</Popup>
 	{/if}
 	{#if $showFixSlice}
-		<FixSlicePopup />
+		<Popup on:close={() => showFixSlice.set(false)}>
+			<FixSlicePopup />
+		</Popup>
 	{/if}
 	{#if $showNewFolder}
-		<NewFolderPopup />
+		<Popup on:close={() => showNewFolder.set(false)}>
+			<NewFolderPopup />
+		</Popup>
 	{/if}
 	{#if $showSliceFinder}
-		<SliceFinderPopup />
+		<Popup on:close={() => showSliceFinder.set(false)}>
+			<SliceFinderPopup />
+		</Popup>
 	{/if}
 	{#if $showNewTag}
-		<NewTagPopup />
+		<Popup on:close={() => showNewTag.set(false)}>
+			<NewTagPopup />
+		</Popup>
 	{/if}
 	<div class="container">
 		<MetadataPanel />

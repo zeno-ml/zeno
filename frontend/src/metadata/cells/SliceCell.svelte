@@ -6,21 +6,21 @@
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Paper from "@smui/paper";
 	import { deleteSlice, doesModelDependOnPredicates } from "../../api/slice";
-	import { selectSliceCell } from "./sliceCellUtil";
 	import SliceDetails from "../../general/SliceDetails.svelte";
-	import SliceCellResult from "./SliceCellResult.svelte";
 	import {
+		comparisonModel,
+		model,
 		reports,
 		selections,
+		showFixSlice,
 		showNewSlice,
 		sliceToEdit,
 		slices,
-		model,
-		comparisonModel,
-		showFixSlice,
 	} from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 	import { ZenoService, type Slice } from "../../zenoservice";
+	import SliceCellResult from "./SliceCellResult.svelte";
+	import { selectSliceCell } from "./sliceCellUtil";
 
 	export let slice: Slice;
 	export let inFolder = false;
@@ -156,6 +156,7 @@
 									on:keydown={() => ({})}
 									on:click={(e) => {
 										e.stopPropagation();
+										showOptions = false;
 										showFixSlice.set(true);
 									}}>
 									<Icon style="font-size: 18px;" class="material-icons"

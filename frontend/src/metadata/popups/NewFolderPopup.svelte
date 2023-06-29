@@ -1,9 +1,8 @@
 <script lang="ts">
 	import Button from "@smui/button";
-	import Paper, { Content } from "@smui/paper";
+	import { Content } from "@smui/paper";
 	import Textfield from "@smui/textfield";
 	import { folders, folderToEdit, showNewFolder, slices } from "../../stores";
-	import { clickOutside } from "../../util/clickOutside";
 	import { ZenoService } from "../../zenoservice";
 
 	let folderName = "";
@@ -68,41 +67,22 @@
 
 <svelte:window on:keydown={submit} />
 
-<div
-	id="paper-container"
-	use:clickOutside
-	on:click_outside={() => showNewFolder.set(false)}>
-	<Paper elevation={7}>
-		<Content style="display: flex; align-items: center;">
-			<Textfield
-				bind:value={folderName}
-				label="Folder Name"
-				bind:this={input} />
-			<Button
-				style="margin-left: 10px;"
-				variant="outlined"
-				on:click={() => showNewFolder.set(false)}>
-				Cancel
-			</Button>
-			<Button
-				style="margin-left: 5px;"
-				variant="outlined"
-				disabled={invalidName}
-				on:click={() => createFolder()}>
-				{$folderToEdit ? "Update" : "Create"}
-			</Button>
-		</Content>
-		{#if invalidName && folderName.length > 0}
-			<p style:margin-right="10px" style:color="red">folder already exists</p>
-		{/if}
-	</Paper>
-</div>
-
-<style>
-	#paper-container {
-		position: fixed;
-		left: 440px;
-		top: 70px;
-		z-index: 20;
-	}
-</style>
+<Content style="display: flex; align-items: center;">
+	<Textfield bind:value={folderName} label="Folder Name" bind:this={input} />
+	<Button
+		style="margin-left: 10px;"
+		variant="outlined"
+		on:click={() => showNewFolder.set(false)}>
+		Cancel
+	</Button>
+	<Button
+		style="margin-left: 5px;"
+		variant="outlined"
+		disabled={invalidName}
+		on:click={() => createFolder()}>
+		{$folderToEdit ? "Update" : "Create"}
+	</Button>
+</Content>
+{#if invalidName && folderName.length > 0}
+	<p style:margin-right="10px" style:color="red">folder already exists</p>
+{/if}
