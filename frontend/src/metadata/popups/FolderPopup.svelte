@@ -2,6 +2,8 @@
 	import Button from "@smui/button";
 	import Paper, { Content } from "@smui/paper";
 	import Textfield from "@smui/textfield";
+	import Checkbox from "@smui/checkbox";
+	import FormField from "@smui/form-field";
 	import {
 		folders,
 		folderToEdit,
@@ -20,6 +22,7 @@
 	let originalFolderName = "";
 
 	let searchColumns = [];
+	let selectColumns = [];
 
 	$: metadataHistogram = getHistograms($status.completeColumns, $model);
 
@@ -82,9 +85,9 @@
 <svelte:window on:keydown={submit} />
 
 {#await metadataHistogram then res}
-	{@const searchColumnOptions = [
-		...new Map([...res].filter(([k, v]) => v.length > 0)).keys(),
-	]}
+	{@const searchColumnOptions = [...res]
+		.filter(([k, v]) => k && v.length > 0)
+		.map((e) => e[0].name)}
 	<div
 		id="paper-container"
 		use:clickOutside
@@ -100,11 +103,17 @@
 					<Svelecte
 						style="width: 500px"
 						bind:value={searchColumns}
-						valueField={"name"}
-						labelField={"name"}
-						valueAsObject={true}
+						valueField="label"
 						options={searchColumnOptions}
 						multiple={true} />
+				</div>
+				<div id="buckets">
+					{#each searchColumns as col}
+						<FormField>
+							<Checkbox bind:group={selectColumns} value={col} />
+							<span slot="label">{col}</span>
+						</FormField>
+					{/each}
 				</div>
 				<div id="submit">
 					<Button
@@ -140,5 +149,9 @@
 		display: flex;
 		flex-direction: row-reverse;
 		align-items: center;
+	}
+	#buckets {
+		display: flex;
+		flex-direction: column;
 	}
 </style>
