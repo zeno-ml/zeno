@@ -1,27 +1,28 @@
 <script lang="ts">
-	import { tooltip } from "@svelte-plugins/tooltips";
-	import { Svg } from "@smui/common";
-	import IconButton, { Icon } from "@smui/icon-button";
-	import Button, { Label } from "@smui/button";
 	import autoAnimate from "@formkit/auto-animate";
-	import Svelecte from "svelecte";
-	import { tab, currentPrompt } from "./stores";
-	import Textfield from "@smui/textfield";
-	import CircularProgress from "@smui/circular-progress";
 	import { mdiChevronLeft } from "@mdi/js";
-	import { progressSteps, taskDescription } from "./util/demoMetadata";
+	import Button, { Label } from "@smui/button";
 	import Checkbox from "@smui/checkbox";
+	import CircularProgress from "@smui/circular-progress";
+	import { Svg } from "@smui/common";
+	import FormField from "@smui/form-field";
+	import IconButton, { Icon } from "@smui/icon-button";
+	import Textfield from "@smui/textfield";
+	import { tooltip } from "@svelte-plugins/tooltips";
+	import Svelecte from "svelecte";
+	import Huggingface from "./general/Huggingface.svelte";
+	import { currentPrompt, tab } from "./stores";
 	import {
 		datasets,
 		featureFunctions,
 		initialPrompt,
 		metrics,
 		models,
+		progressSteps,
 		promptToString,
+		taskDescription,
 		tasks,
 	} from "./util/demoMetadata";
-	import Huggingface from "./general/Huggingface.svelte";
-	import FormField from "@smui/form-field";
 
 	let dialogStep = 0;
 	let description = "";
@@ -90,7 +91,7 @@
 		{#if dialogStep === 0}
 			<div id="fields" use:autoAnimate>
 				<div class:fields={task !== null}>
-					<p class="full-width">What kind of task are you tackling?</p>
+					<p class="full-width">What LLM task are you working on?</p>
 					<Svelecte searchable={false} bind:value={task} options={tasks} />
 				</div>
 				{#if task !== null && tasks[task].name === "chatbot"}
@@ -132,7 +133,10 @@
 		{:else if dialogStep === 1}
 			<div class="results full-width">
 				<h3 class="step-header">Dataset</h3>
-				<p class="full-width">These datasets could be useful for you.</p>
+				<p class="full-width">
+					To get you started, pick the dataset that is most similar to your
+					task:
+				</p>
 				{#each datasets as dataset, datasetIndex}
 					<div
 						class=" cell parent {datasetIndex === selectedDataset
@@ -177,7 +181,9 @@
 		{:else if dialogStep === 2}
 			<div class="results full-width">
 				<h3 class="step-header">Feature Functions</h3>
-				<p class="full-width">These functions could be used with your data.</p>
+				<p class="full-width">
+					Select which features you want to calculate for you data:
+				</p>
 				<div class="fields">
 					{#each featureFunctions as featureFunction}
 						<div
@@ -210,7 +216,9 @@
 		{:else if dialogStep === 3}
 			<div class="results full-width">
 				<h3 class="step-header">Metrics</h3>
-				<p class="full-width">These metrics could be used for evaluation.</p>
+				<p class="full-width">
+					Select which metrics you want to use for evaluation:
+				</p>
 				<div class="fields">
 					{#each metrics as metric}
 						<div

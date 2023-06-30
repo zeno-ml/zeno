@@ -43,10 +43,10 @@ export const textSnippets = [
 ];
 
 export const tasks = [
-	{ id: 0, name: "classification" },
-	{ id: 1, name: "segmentation" },
+	{ id: 0, name: "text generation" },
+	{ id: 1, name: "code generation" },
 	{ id: 2, name: "chatbot" },
-	{ id: 3, name: "text-generation" },
+	{ id: 3, name: "chat your data" },
 ];
 
 export const datasets = [
@@ -92,29 +92,29 @@ export const models = [
 ];
 export const featureFunctions = [
 	{
-		name: "Output Length",
+		name: "Output length",
 		checked: true,
 		explanation: "Length of model output.",
 	},
 	{
-		name: "Input Length",
+		name: "Input length",
 		checked: true,
 		explanation: "Length of model input.",
 	},
 	{
-		name: "Chat Context Length",
+		name: "Chat context length",
 		checked: true,
 		explanation: "Length of the input context (e.g. for chatbots).",
 	},
 	{
-		name: "English Number Count",
+		name: "English number count",
 		checked: true,
 		explanation: "Number of English number words in the output.",
 	},
 	{
-		name: "Label Clusters",
+		name: "Topic clusters",
 		checked: true,
-		explanation: "Cluster the labels together to find similar sentences.",
+		explanation: "Generate topic clusters for the data inputs.",
 	},
 ];
 
@@ -123,25 +123,25 @@ export const metrics = [
 		name: "ChrF",
 		checked: true,
 		explanation:
-			"Metric for evaluating the similarity between a target and reference text based on similarity of character and word n-grams.",
+			"Calculates the similarity between a target and reference text based on similarity of character and word n-grams.",
 	},
 	{
-		name: "length Ratio",
+		name: "Length ratio",
 		checked: true,
 		explanation:
-			"Calculates the ratio of the length of the target text to the length of the closest reference text.",
+			"Calculates the ratio of the length of the target text to the length of the reference text.",
 	},
 	{
-		name: "BERT Score",
+		name: "BERT score",
 		checked: true,
 		explanation:
-			"Measuring generated text that measures the similarity between embeddings calculated by the BERT model.",
+			"Measures similarity between target and reference text using the similarity between embeddings calculated by the BERT model.",
 	},
 	{
-		name: "Exact Match",
+		name: "Exact match",
 		checked: true,
 		explanation:
-			"Calculates whether the target text exactly matches any of the references.",
+			"Calculates whether the target text exactly matches the reference text.",
 	},
 ];
 
@@ -151,7 +151,7 @@ export const initialPrompt: Prompt = {
 	examples: [],
 };
 
-export const taskDescription = "Helpdesk assistance.";
+export const taskDescription = "A customer service assistant that can chat with customers who are using our banking software.";
 
 export const progressSteps = [
 	"Checking Cache Files...",

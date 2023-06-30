@@ -1,12 +1,12 @@
 <script lang="ts">
+	import { mdiClose } from "@mdi/js";
+	import Button from "@smui/button";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
-	import Button from "@smui/button";
 	import Textfield from "@smui/textfield";
+	import Svelecte from "svelecte";
 	import type { Prompt } from "../util/demoMetadata";
 	import { agents, textSnippets } from "../util/demoMetadata";
-	import Svelecte from "svelecte";
-	import { mdiClose } from "@mdi/js";
 
 	export let prompt: Prompt;
 </script>
@@ -35,7 +35,7 @@
 				</IconButton>
 			</div>
 			<Textfield
-				label="Exampple Prompt"
+				label="Example Prompt"
 				bind:value={example.prompt}
 				on:focus={() => {
 					switch (exampleIndex) {
