@@ -6,20 +6,13 @@
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import { Content } from "@smui/paper";
-	import Textfield from "@smui/textfield";
-	import Prompt from "../../general/Prompt.svelte";
 	import { currentPrompt, showFixSlice } from "../../stores";
-	import {
-		modelSteps,
-		newModelName,
-		promptToString,
-	} from "../../util/demoMetadata";
+	import { modelSteps, newPrompt1, newPrompt2 } from "../../util/demoMetadata";
+	import Prompt from "../../general/Prompt.svelte";
 
 	let dialogStep = 0;
-	let prompt = $currentPrompt;
-	let copied = false;
+	let prompt = $currentPrompt.examples.length === 0 ? newPrompt1 : newPrompt2;
 	let progress = 0;
-	let modelName = newModelName;
 	let timer: NodeJS.Timer;
 	$: if (progress === 1) {
 		$currentPrompt = prompt;
@@ -27,7 +20,7 @@
 	}
 
 	function addModel() {
-		dialogStep = 3;
+		dialogStep = 1;
 		progress = 0;
 		clearInterval(timer);
 		timer = setInterval(() => {
@@ -40,7 +33,7 @@
 	}
 </script>
 
-<Content style={dialogStep === 1 ? "width: 800px;" : "width: 500px;"}>
+<Content style={dialogStep === 0 ? "width: 800px;" : "width: 500px;"}>
 	{#if dialogStep < 3}
 		<div class="horizontal">
 			{#if dialogStep > 0}
@@ -58,74 +51,28 @@
 	<div class="container" use:autoAnimate>
 		{#if dialogStep === 0}
 			<p class="full-width" style="margin-top: 0px;">
-				How would you like to fix this slice?
+				Update the prompt used to evaluate the model:
 			</p>
-			<Button
-				on:mouseleave={blur}
-				on:focusout={blur}
-				on:click={() => {
-					dialogStep = 1;
-				}}
-				variant="raised"
-				color="primary"
-				style="width: 100%; margin-bottom: 10px;">
-				<Label>Modify in-context examples</Label>
-			</Button>
-			<Button
-				on:mouseleave={blur}
-				on:focusout={blur}
-				disabled
-				variant="raised"
-				color="primary"
-				style="width: 100%;">
-				<Label>Generate data for fine-tuning</Label>
-			</Button>
-		{:else if dialogStep === 1}
 			<Prompt bind:prompt />
 			<div class="horizontal end">
 				<Button
 					on:mouseleave={blur}
 					on:focusout={blur}
-					on:click={() => {
-						navigator.clipboard.writeText(promptToString(prompt));
-						copied = true;
-						setTimeout(() => {
-							copied = false;
-						}, 500);
-					}}
+					disabled
 					variant="raised"
-					style="margin-right: 10px"
 					color="primary">
-					{#if copied}
-						<Label>Copied!</Label>
-					{:else}
-						<Label>Copy to Clipboard</Label>
-					{/if}
+					<Label>Fine-tune on new data</Label>
 				</Button>
 				<Button
 					on:mouseleave={blur}
 					on:focusout={blur}
 					on:click={() => {
-						dialogStep = 2;
+						addModel();
 					}}
 					variant="raised"
-					color="primary">
-					<Label>Add new Models</Label>
-				</Button>
-			</div>
-		{:else if dialogStep === 2}
-			<Textfield
-				style="width: 100%; margin-bottom: 30px;"
-				label="Model Name"
-				bind:value={modelName} />
-			<div class="horizontal end">
-				<Button
-					on:mouseleave={blur}
-					on:focusout={blur}
-					on:click={addModel}
-					variant="raised"
-					color="primary">
-					<Label>Add</Label>
+					color="primary"
+					style="margin-left: 10px;">
+					<Label>Update prompt</Label>
 				</Button>
 			</div>
 		{:else}

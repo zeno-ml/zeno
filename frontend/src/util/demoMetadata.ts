@@ -42,6 +42,38 @@ export const textSnippets = [
 	"Four five.",
 ];
 
+export const initialPrompt: Prompt = {
+	prompt:
+		"You are an agent at the Rivertown Insurance helpdesk that helps with resolving insurance claims.",
+	examples: [],
+};
+
+export const newPrompt1: Prompt = {
+	...initialPrompt,
+	examples: [
+		{
+			prompt: textSnippets[0],
+			conversationElements: [{ agent: agents[1].id, text: textSnippets[1] }],
+		},
+	],
+};
+
+export const newPrompt2: Prompt = {
+	...newPrompt1,
+	examples: [
+		...newPrompt1.examples,
+		{
+			prompt: textSnippets[2],
+			conversationElements: [
+				{ agent: agents[0].id, text: textSnippets[3] },
+				{ agent: agents[1].id, text: textSnippets[4] },
+				{ agent: agents[0].id, text: textSnippets[5] },
+				{ agent: agents[1].id, text: textSnippets[6] },
+			],
+		},
+	],
+};
+
 export const tasks = [
 	{ id: 0, name: "text generation" },
 	{ id: 1, name: "code generation" },
@@ -152,12 +184,6 @@ export const metrics = [
 			"Calculates whether the target text exactly matches the reference text.",
 	},
 ];
-
-export const initialPrompt: Prompt = {
-	prompt:
-		"You are an agent at the Rivertown Insurance helpdesk that helps with resolving insurance claims.",
-	examples: [],
-};
 
 export const taskDescription =
 	"A customer service assistant that can chat with customers who are using our banking software.";
