@@ -143,7 +143,13 @@
 							? 'selected'
 							: ''}"
 						on:keydown={() => ({})}
-						on:click={() => (selectedDataset = datasetIndex)}>
+						on:click={() => (selectedDataset = datasetIndex)}
+						use:tooltip={{
+							content: dataset.description,
+							position: "left",
+							theme: "zeno-tooltip",
+							maxWidth: "200",
+						}}>
 						<span>
 							{dataset.name}
 						</span>
