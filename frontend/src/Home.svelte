@@ -11,22 +11,18 @@
 	import { tooltip } from "@svelte-plugins/tooltips";
 	import Svelecte from "svelecte";
 	import Huggingface from "./general/Huggingface.svelte";
-	import { currentPrompt, tab } from "./stores";
+	import { tab } from "./stores";
 	import {
 		datasets,
 		featureFunctions,
-		initialPrompt,
 		metrics,
-		models,
 		progressSteps,
-		promptToString,
 		taskDescription,
 		tasks,
 	} from "./util/demoMetadata";
 
 	let dialogStep = 0;
 	let description = "";
-	let prompt = "";
 	let task = null;
 	let selectedDataset = null;
 	let loading = false;
@@ -38,7 +34,7 @@
 	}
 
 	function explore() {
-		dialogStep = 6;
+		dialogStep = 4;
 		progress = 0;
 		clearInterval(timer);
 		timer = setInterval(() => {
@@ -59,7 +55,7 @@
 	}
 
 	function createProject() {
-		dialogStep = 4;
+		explore();
 	}
 
 	async function download() {
@@ -78,7 +74,7 @@
 
 <div id="container">
 	<div class="start" use:autoAnimate>
-		{#if dialogStep > 0 && dialogStep < 6}
+		{#if dialogStep > 0 && dialogStep < 5}
 			<div class="back-button">
 				<IconButton on:click={() => (dialogStep -= 1)}>
 					<Icon component={Svg} viewBox="0 0 24 24">
@@ -134,7 +130,7 @@
 			<div class="results full-width">
 				<h3 class="step-header">Dataset</h3>
 				<p class="full-width">
-					To get you started, pick the dataset that is most similar to your
+					To get you started, pick the dataset that is most adequate for your
 					task:
 				</p>
 				{#each datasets as dataset, datasetIndex}
@@ -251,72 +247,6 @@
 					style="width: 300px;">
 					<Label>Select Metrics</Label>
 				</Button>
-			</div>
-		{:else if dialogStep === 4}
-			<div class="results centered-column-flex">
-				<Button
-					on:mouseleave={blur}
-					on:focusout={blur}
-					on:click={() => (dialogStep = 5)}
-					variant="raised"
-					color="primary"
-					style="width: 300px; margin-bottom: 10px;">
-					<Label>Build in Zeno</Label>
-				</Button>
-				<Button
-					on:mouseleave={blur}
-					on:focusout={blur}
-					on:click={download}
-					variant="raised"
-					color="primary"
-					style="width: 300px;">
-					<Label>Build Offline</Label>
-				</Button>
-			</div>
-		{:else if dialogStep === 5}
-			<div class="results full-width">
-				<div class:fields={prompt !== ""}>
-					<p class="full-width">What models would you like to run?</p>
-					{#each models as model}
-						<div
-							class="starting-row-flex"
-							use:tooltip={{
-								content: model.explanation,
-								position: "left",
-								theme: "zeno-tooltip",
-								maxWidth: "200",
-							}}>
-							<FormField>
-								<Checkbox bind:checked={model.checked} />
-								<span slot="label">{model.name}</span>
-							</FormField>
-						</div>
-					{/each}
-					<p class="full-width">Which prompt would you like to use?</p>
-					<div class="margins">
-						<Textfield
-							textarea
-							style="width: 100%; height: 120px"
-							label="Prompt"
-							bind:value={prompt}
-							on:focus={() =>
-								setTimeout(() => {
-									$currentPrompt = initialPrompt;
-									prompt = promptToString(initialPrompt).replaceAll("\n", "");
-								}, 700)} />
-					</div>
-				</div>
-				{#if prompt !== ""}
-					<Button
-						on:mouseleave={blur}
-						on:focusout={blur}
-						on:click={explore}
-						variant="raised"
-						color="primary"
-						style="width: 300px;">
-						<Label>Build</Label>
-					</Button>
-				{/if}
 			</div>
 		{:else}
 			<div class="results centered-column-flex">
