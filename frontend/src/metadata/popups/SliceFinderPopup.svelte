@@ -145,7 +145,7 @@
 						content:
 							$tab !== "comparison"
 								? "Run the SliceLine algorithm to find slices of data with high or low metrics."
-								: "Run the SliceLine algorithm to find slices with the largest or smallest average difference in a metric column between two models.",
+								: "Run the SliceLine algorithm to find slices with the largest or smallest average difference in a difference column between two models.",
 						position: "right",
 						theme: "zeno-tooltip",
 						maxWidth: "350",
@@ -274,7 +274,10 @@
 						class="information-tooltip"
 						style="margin-top: 3px;"
 						use:tooltip={{
-							content: "Order by slice score, a combination of size and metric",
+							content:
+								$tab !== "comparison"
+									? "Order by slice score, a combination of metric and size"
+									: "Order by slice score, a combination of model difference and size",
 							theme: "zeno-tooltip",
 							position: "left",
 							maxWidth: "250",
@@ -285,9 +288,11 @@
 					</div>
 				</div>
 				<Svelecte
-					style="width: 120px; margin-right: 20px"
+					style="width: 130px; margin-right: 20px"
 					bind:value={orderByIdx}
-					options={orderByOptions}
+					options={$tab !== "comparison"
+						? orderByOptions
+						: ["(model) A > B", "(model) B > A"]}
 					placeholder="Order By" />
 			</div>
 		</div>
