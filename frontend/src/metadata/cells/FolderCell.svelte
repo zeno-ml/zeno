@@ -37,15 +37,18 @@
 	on:dragleave={() => (dragOver = false)}
 	on:drop={(ev) => {
 		dragOver = false;
-		const data = ev.dataTransfer.getData("text/plain");
+		const data = ev.dataTransfer.getData("text/plain").split(",");
 		slices.update((sls) => {
-			const sli = sls.get(data);
-			sli.folder = folder;
-			sls.set(data, sli);
-			ZenoService.createNewSlice({
-				sliceName: sli.sliceName,
-				filterPredicates: sli.filterPredicates,
-				folder: folder,
+			let entries = Array.from($slices.entries());
+			data.forEach((d) => {
+				const sli = sls.get(entries[d][0]);
+				sli.folder = folder;
+				sls.set(entries[d][0], sli);
+				ZenoService.createNewSlice({
+					sliceName: sli.sliceName,
+					filterPredicates: sli.filterPredicates,
+					folder: folder,
+				});
 			});
 			return sls;
 		});
