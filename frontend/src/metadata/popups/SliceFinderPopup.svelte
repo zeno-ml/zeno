@@ -174,7 +174,7 @@
 							content:
 								$tab !== "comparison"
 									? "The continuous column to compare slices across"
-									: "The column to calculate model disagreement",
+									: "The column on which to measure model disagreement",
 							position: "right",
 							theme: "zeno-tooltip",
 							maxWidth: "450",
