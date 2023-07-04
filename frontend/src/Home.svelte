@@ -128,10 +128,9 @@
 			</div>
 		{:else if dialogStep === 1}
 			<div class="results full-width">
-				<h3 class="step-header">Dataset</h3>
+				<h3 class="step-header">Select or Create Evaluation Data</h3>
 				<p class="full-width">
-					To get you started, pick the dataset that is most adequate for your
-					task:
+					To get started, either select an existing representative dataset, or create a new one specifically for your task:
 				</p>
 				{#each datasets as dataset, datasetIndex}
 					<div
@@ -184,7 +183,7 @@
 			<div class="results full-width">
 				<h3 class="step-header">Feature Functions</h3>
 				<p class="full-width">
-					Select which features you want to calculate for you data:
+					Select which features of the data you want to use in analysis of examples:
 				</p>
 				<div class="fields">
 					{#each featureFunctions as featureFunction}
@@ -217,7 +216,7 @@
 			</div>
 		{:else if dialogStep === 3}
 			<div class="results full-width">
-				<h3 class="step-header">Metrics</h3>
+				<h3 class="step-header">Evaluation Metrics</h3>
 				<p class="full-width">
 					Select which metrics you want to use for evaluation:
 				</p>

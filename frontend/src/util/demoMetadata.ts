@@ -132,19 +132,14 @@ export const models = [
 ];
 export const featureFunctions = [
 	{
-		name: "Output length",
-		checked: true,
-		explanation: "Length of model output.",
-	},
-	{
-		name: "Input length",
-		checked: true,
-		explanation: "Length of model input.",
-	},
-	{
 		name: "Chat context length",
 		checked: true,
 		explanation: "Length of the input context (e.g. for chatbots).",
+	},
+	{
+		name: "Text clusters",
+		checked: true,
+		explanation: "Automatic clusters of text inputs based on embeddings.",
 	},
 	{
 		name: "English number count",
@@ -152,27 +147,21 @@ export const featureFunctions = [
 		explanation: "Number of English number words in the output.",
 	},
 	{
-		name: "Topic clusters",
+		name: "Output length",
 		checked: true,
-		explanation: "Generate topic clusters for the data inputs.",
+		explanation: "Length of model output.",
 	},
 ];
 
 export const metrics = [
 	{
-		name: "ChrF",
+		name: "Textual similarity (ChrF)",
 		checked: true,
 		explanation:
 			"Calculates the similarity between a target and reference text based on similarity of character and word n-grams.",
 	},
 	{
-		name: "Length ratio",
-		checked: true,
-		explanation:
-			"Calculates the ratio of the length of the target text to the length of the reference text.",
-	},
-	{
-		name: "BERT score",
+		name: "Embedding similarity (BERTScore)",
 		checked: true,
 		explanation:
 			"Measures similarity between target and reference text using the similarity between embeddings calculated by the BERT model.",
@@ -182,6 +171,12 @@ export const metrics = [
 		checked: true,
 		explanation:
 			"Calculates whether the target text exactly matches the reference text.",
+	},
+	{
+		name: "Length ratio",
+		checked: true,
+		explanation:
+			"Calculates the ratio of the length of the target text to the length of the reference text.",
 	},
 ];
 
