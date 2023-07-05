@@ -12,9 +12,9 @@
 	class="paper-container"
 	transition:fade={{ duration: 200 }}
 	bind:clientHeight={paperHeight}
-	on:click={() => dispatch("close")}
+	on:mousedown={() => dispatch("close")}
 	on:keydown={() => undefined}>
-	<Paper elevation={7} on:click={(e) => e.stopPropagation()}>
+	<Paper elevation={7} on:mousedown={(e) => e.stopPropagation()}>
 		<slot />
 	</Paper>
 </div>
