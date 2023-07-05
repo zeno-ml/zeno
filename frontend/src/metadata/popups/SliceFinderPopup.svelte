@@ -145,7 +145,7 @@
 						content:
 							$tab !== "comparison"
 								? "Run the SliceLine algorithm to find slices of data with high or low metrics."
-								: "Run the SliceLine algorithm to find slices with the largest or smallest average difference in a metric column between two models.",
+								: "Run the SliceLine algorithm to find slices with the largest or smallest average difference in a difference column between two models.",
 						position: "right",
 						theme: "zeno-tooltip",
 						maxWidth: "350",
@@ -164,12 +164,17 @@
 		<div class="inline">
 			<div style:margin-left={"20px"}>
 				<div style="display:flex">
-					<div class="options-header">Metric Column</div>
+					<div class="options-header">
+						{$tab !== "comparison" ? "Metric Column" : "Difference Column"}
+					</div>
 					<div
 						class="information-tooltip"
 						style="margin-top: 3px;"
 						use:tooltip={{
-							content: "The continuous column to compare slices across",
+							content:
+								$tab !== "comparison"
+									? "The continuous column to compare slices across"
+									: "The column on which to measure model disagreement",
 							position: "right",
 							theme: "zeno-tooltip",
 							maxWidth: "450",
@@ -222,9 +227,11 @@
 						class="information-tooltip"
 						style="margin-top: 3px;"
 						use:tooltip={{
-							content: "Increase alpha to find more slices",
+							content:
+								"Weight parameter for the average slice metric. Increase it to find more slices.",
 							theme: "zeno-tooltip",
-							maxWidth: "250",
+							maxWidth: "195",
+							position: "left",
 						}}>
 						<Icon style="outline:none" component={Svg} viewBox="-6 -6 36 36">
 							<path d={mdiInformationOutline} />
@@ -267,7 +274,10 @@
 						class="information-tooltip"
 						style="margin-top: 3px;"
 						use:tooltip={{
-							content: "Order by slice score, a combination of size and metric",
+							content:
+								$tab !== "comparison"
+									? "Order by slice score, a combination of metric and size"
+									: "Order by slice score, a combination of model difference and size",
 							theme: "zeno-tooltip",
 							position: "left",
 							maxWidth: "250",
@@ -278,9 +288,11 @@
 					</div>
 				</div>
 				<Svelecte
-					style="width: 120px; margin-right: 20px"
+					style="width: 130px; margin-right: 20px"
 					bind:value={orderByIdx}
-					options={orderByOptions}
+					options={$tab !== "comparison"
+						? orderByOptions
+						: ["(model) A > B", "(model) B > A"]}
 					placeholder="Order By" />
 			</div>
 		</div>
