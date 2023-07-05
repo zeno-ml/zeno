@@ -6,17 +6,9 @@
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import { Content } from "@smui/paper";
+	import Prompt from "../../general/Prompt.svelte";
 	import { currentPrompt, showFixSlice } from "../../stores";
 	import { modelSteps, newPrompt1, newPrompt2 } from "../../util/demoMetadata";
-	import Prompt from "../../general/Prompt.svelte";
-	import Textfield from "@smui/textfield";
-	import Prompt from "../../general/Prompt.svelte";
-	import { currentPrompt, showFixSlice } from "../../stores";
-	import {
-		modelSteps,
-		newModelName,
-		promptToString,
-	} from "../../util/demoMetadata";
 
 	let dialogStep = 0;
 	let prompt =
