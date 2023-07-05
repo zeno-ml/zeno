@@ -11,13 +11,16 @@
 	import { tooltip } from "@svelte-plugins/tooltips";
 	import Svelecte from "svelecte";
 	import Huggingface from "./general/Huggingface.svelte";
-	import { tab } from "./stores";
+	import { currentPrompt, tab } from "./stores";
 	import {
 		datasets,
 		featureFunctions,
 		metrics,
 		progressSteps,
 		taskDescription,
+		models,
+		initialPrompt,
+		promptToString,
 		tasks,
 	} from "./util/demoMetadata";
 
@@ -26,6 +29,7 @@
 	let task = null;
 	let selectedDataset = null;
 	let loading = false;
+	let prompt = "";
 	let progress = 0;
 	let timer: NodeJS.Timer;
 	$: if (progress === 1) {
@@ -34,7 +38,7 @@
 	}
 
 	function explore() {
-		dialogStep = 4;
+		dialogStep = 5;
 		progress = 0;
 		clearInterval(timer);
 		timer = setInterval(() => {
@@ -56,19 +60,6 @@
 
 	function createProject() {
 		explore();
-	}
-
-	async function download() {
-		let res = await fetch("build/zeno_scripts.zip");
-		let blob = await res.blob();
-		let url = window.URL || window.webkitURL;
-		let link = url.createObjectURL(blob);
-		let a = document.createElement("a");
-		a.setAttribute("download", "zeno_scripts.zip");
-		a.setAttribute("href", link);
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
 	}
 </script>
 
@@ -128,9 +119,61 @@
 			</div>
 		{:else if dialogStep === 1}
 			<div class="results full-width">
+				<div class:fields={prompt !== ""}>
+					<p class="full-width">What models would you like to run?</p>
+					{#each models as model}
+						<div
+							class="starting-row-flex"
+							use:tooltip={{
+								content: model.explanation,
+								position: "left",
+								theme: "zeno-tooltip",
+								maxWidth: "200",
+							}}>
+							<FormField>
+								<Checkbox bind:checked={model.checked} />
+								<span slot="label">{model.name}</span>
+							</FormField>
+						</div>
+					{/each}
+					<p class="full-width">Input your initial prompt:</p>
+					<div class="margins">
+						<Textfield
+							textarea
+							style="width: 100%; height: 120px"
+							label="Prompt"
+							bind:value={prompt}
+							on:focus={() =>
+								setTimeout(() => {
+									$currentPrompt = initialPrompt;
+									prompt = promptToString(initialPrompt).replaceAll("\n", "");
+								}, 700)} />
+					</div>
+				</div>
+				{#if prompt !== ""}
+					<Button
+						on:mouseleave={blur}
+						on:focusout={blur}
+						on:click={() => {
+							$currentPrompt = {
+								prompt: prompt,
+								examples: [],
+							};
+							dialogStep = 2;
+						}}
+						variant="raised"
+						color="primary"
+						style="width: 300px;">
+						<Label>Confirm</Label>
+					</Button>
+				{/if}
+			</div>
+		{:else if dialogStep === 2}
+			<div class="results full-width">
 				<h3 class="step-header">Select or Create Evaluation Data</h3>
 				<p class="full-width">
-					To get started, either select an existing representative dataset, or create a new one specifically for your task:
+					To get started, either select an existing representative dataset, or
+					create a new one specifically for your task:
 				</p>
 				{#each datasets as dataset, datasetIndex}
 					<div
@@ -163,7 +206,7 @@
 				on:focusout={blur}
 				disabled={selectedDataset === null}
 				on:click={() => {
-					dialogStep = 2;
+					dialogStep = 3;
 				}}
 				variant="raised"
 				color="primary"
@@ -179,11 +222,12 @@
 				style="width: 300px;">
 				<Label>Create New Dataset</Label>
 			</Button>
-		{:else if dialogStep === 2}
+		{:else if dialogStep === 3}
 			<div class="results full-width">
 				<h3 class="step-header">Feature Functions</h3>
 				<p class="full-width">
-					Select which features of the data you want to use in analysis of examples:
+					Select which features of the data you want to use in analysis of
+					examples:
 				</p>
 				<div class="fields">
 					{#each featureFunctions as featureFunction}
@@ -206,7 +250,7 @@
 					on:mouseleave={blur}
 					on:focusout={blur}
 					on:click={() => {
-						dialogStep = 3;
+						dialogStep = 4;
 					}}
 					variant="raised"
 					color="primary"
@@ -214,7 +258,7 @@
 					<Label>Select Feature Functions</Label>
 				</Button>
 			</div>
-		{:else if dialogStep === 3}
+		{:else if dialogStep === 4}
 			<div class="results full-width">
 				<h3 class="step-header">Evaluation Metrics</h3>
 				<p class="full-width">
