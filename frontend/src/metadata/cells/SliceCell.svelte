@@ -37,6 +37,22 @@
 		: false;
 
 	$: selected = $selections.slices.includes(slice.sliceName);
+	$: transferData =
+		$selections.slices.length > 0 &&
+		$selections.slices.includes(slice.sliceName)
+			? getSlicesIndex($selections.slices)
+			: getSlicesIndex([slice.sliceName]);
+
+	/** Return slices index stored in $slices **/
+	function getSlicesIndex(sls) {
+		let idxs = [];
+		Array.from($slices.entries()).forEach((s, i) => {
+			if (sls.includes(s[0])) {
+				idxs.push(i);
+			}
+		});
+		return idxs.join(",");
+	}
 
 	function removeSlice() {
 		confirmDelete = false;
@@ -79,21 +95,25 @@
 	on:mouseleave={() => (hovering = false)}
 	on:blur={() => (hovering = false)}
 	on:dragstart={(ev) => {
-		ev.dataTransfer.setData("text/plain", slice.sliceName);
+		ev.dataTransfer.setData("text/plain", transferData);
 		ev.dataTransfer.dropEffect = "copy";
 	}}
 	on:keydown={() => ({})}
 	on:dragend={(ev) => {
 		// If dragged out of a folder, remove from the folder it was in.
 		if (ev.dataTransfer.dropEffect === "none") {
+			const data = transferData.split(",");
 			slices.update((sls) => {
-				const sli = sls.get(slice.sliceName);
-				sli.folder = "";
-				sls.set(slice.sliceName, sli);
-				ZenoService.createNewSlice({
-					sliceName: sli.sliceName,
-					filterPredicates: sli.filterPredicates,
-					folder: sli.folder,
+				let entries = Array.from($slices.entries());
+				data.forEach((d) => {
+					const sli = sls.get(entries[d][0]);
+					sli.folder = "";
+					sls.set(entries[d][0], sli);
+					ZenoService.createNewSlice({
+						sliceName: sli.sliceName,
+						filterPredicates: sli.filterPredicates,
+						folder: sli.folder,
+					});
 				});
 				return sls;
 			});
@@ -180,30 +200,28 @@
 				{#if compare}
 					<SliceCellResult {compare} {slice} sliceModel={$comparisonModel} />
 				{/if}
-				{#if !compare}
-					<div class="inline" style:cursor="pointer">
-						<div
-							style:width="36px"
-							use:clickOutside
-							on:click_outside={() => {
-								hovering = false;
-							}}>
-							{#if hovering}
-								<IconButton
-									size="button"
-									style="padding: 0px"
-									on:click={(e) => {
-										e.stopPropagation();
-										showOptions = !showOptions;
-									}}>
-									<Icon component={Svg} viewBox="0 0 24 24">
-										<path fill="black" d={mdiDotsHorizontal} />
-									</Icon>
-								</IconButton>
-							{/if}
-						</div>
+				<div class="inline" style:cursor="pointer">
+					<div
+						style:width="36px"
+						use:clickOutside
+						on:click_outside={() => {
+							hovering = false;
+						}}>
+						{#if hovering}
+							<IconButton
+								size="button"
+								style="padding: 0px"
+								on:click={(e) => {
+									e.stopPropagation();
+									showOptions = !showOptions;
+								}}>
+								<Icon component={Svg} viewBox="0 0 24 24">
+									<path fill="black" d={mdiDotsHorizontal} />
+								</Icon>
+							</IconButton>
+						{/if}
 					</div>
-				{/if}
+				</div>
 			</div>
 		</div>
 	</div>

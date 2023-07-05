@@ -95,7 +95,7 @@
 						size: res[i].size,
 						models: r.model,
 						...(selectMetric !== "slice size" && {
-							metrics: res[i].metric.toFixed(2),
+							metrics: res[i].metric,
 						}),
 					})),
 				}}
@@ -118,7 +118,7 @@
 						size: res[i].size,
 						models: r.model,
 						...(selectMetric !== "slice size" && {
-							metrics: res[i].metric.toFixed(2),
+							metrics: res[i].metric,
 						}),
 					})),
 				}}

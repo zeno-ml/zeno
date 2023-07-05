@@ -90,6 +90,7 @@ export default function generateSliceVsSliceSpec(selectMetrics): VegaLiteSpec {
 					text: {
 						field: selectMetrics !== "slice size" ? "metrics" : "size",
 						type: "quantitative",
+						format: ".2f",
 					},
 					color: {
 						condition: {

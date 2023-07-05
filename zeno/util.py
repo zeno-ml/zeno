@@ -262,6 +262,9 @@ def generate_diff_cols(
 
     # various metadata type difference
     if diff_col_1.metadata_type == MetadataType.CONTINUOUS:
+        # force the column type being float
+        if "diff" in df.columns:
+            df["diff"] = df["diff"].astype(float)
         df.loc[:, "diff"] = df[str(diff_col_1)].astype(float) - df[
             str(diff_col_2)
         ].astype(float)

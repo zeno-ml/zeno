@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { mdiChevronDown, mdiDotsHorizontal, mdiChevronUp } from "@mdi/js";
+	import { mdiChevronDown, mdiDotsHorizontal, mdiChevronRight } from "@mdi/js";
 	import IconButton, { Icon } from "@smui/icon-button";
 	import { Svg } from "@smui/common";
 	import Paper, { Content } from "@smui/paper";
@@ -37,15 +37,18 @@
 	on:dragleave={() => (dragOver = false)}
 	on:drop={(ev) => {
 		dragOver = false;
-		const data = ev.dataTransfer.getData("text/plain");
+		const data = ev.dataTransfer.getData("text/plain").split(",");
 		slices.update((sls) => {
-			const sli = sls.get(data);
-			sli.folder = folder;
-			sls.set(data, sli);
-			ZenoService.createNewSlice({
-				sliceName: sli.sliceName,
-				filterPredicates: sli.filterPredicates,
-				folder: folder,
+			let entries = Array.from($slices.entries());
+			data.forEach((d) => {
+				const sli = sls.get(entries[d][0]);
+				sli.folder = folder;
+				sls.set(entries[d][0], sli);
+				ZenoService.createNewSlice({
+					sliceName: sli.sliceName,
+					filterPredicates: sli.filterPredicates,
+					folder: folder,
+				});
 			});
 			return sls;
 		});
@@ -56,7 +59,9 @@
 			on:keydown={() => ({})}
 			on:click={() => (expandFolder = !expandFolder)}>
 			<Icon style="outline:none" component={Svg} viewBox="0 0 24 24">
-				<path fill="black" d={expandFolder ? mdiChevronDown : mdiChevronUp} />
+				<path
+					fill="black"
+					d={expandFolder ? mdiChevronDown : mdiChevronRight} />
 			</Icon>
 		</div>
 		{folder}

@@ -112,6 +112,7 @@ export default function generateSpec(parameters, selectMetrics): VegaLiteSpec {
 					text: {
 						field: selectMetrics !== "slice size" ? y_encode : "size",
 						type: paramMap[y_encode].type,
+						format: paramMap[y_encode].type === "quantitative" ? ".2f" : "",
 					},
 					color: { value: "black" },
 				},

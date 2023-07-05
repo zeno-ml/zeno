@@ -137,7 +137,7 @@ export const generateSpec: VisualizationSpec = {
 						update: {
 							align: { value: "center" },
 							baseline: { value: "middle" },
-							text: { signal: "datum.datum.value" },
+							text: { signal: "datum.datum.textValue" },
 							fill: { value: "black" },
 							fontSize: [
 								{ test: "datum.datum.category === hover", value: 14 },

@@ -94,6 +94,10 @@
 					value:
 						r.key === "slice size" || fixedName === "slice size"
 							? res[i].size
+							: res[i].metric,
+					textValue:
+						r.key === "slice size" || fixedName === "slice size"
+							? res[i].size
 							: res[i].metric.toFixed(2),
 					category: r.category,
 				})),
