@@ -37,22 +37,6 @@
 			<Textfield
 				label="Example Prompt"
 				bind:value={example.prompt}
-				on:focus={() => {
-					switch (exampleIndex) {
-						case 0:
-							setTimeout(() => {
-								example.prompt = textSnippets[0];
-							}, 500);
-							break;
-						case 1:
-							setTimeout(() => {
-								example.prompt = textSnippets[2];
-							}, 500);
-							break;
-						default:
-							break;
-					}
-				}}
 				textarea
 				style="width: 100%;" />
 			{#each example.conversationElements as element, elementIndex}

@@ -48,31 +48,35 @@ export const initialPrompt: Prompt = {
 	examples: [],
 };
 
-export const newPrompt1: Prompt = {
-	...initialPrompt,
-	examples: [
-		{
-			prompt: textSnippets[0],
-			conversationElements: [{ agent: agents[1].id, text: textSnippets[1] }],
-		},
-	],
-};
+export function newPrompt1(prompt: Prompt): Prompt {
+	return {
+		...prompt,
+		examples: [
+			{
+				prompt: "",
+				conversationElements: [{ agent: agents[1].id, text: textSnippets[1] }],
+			},
+		],
+	};
+}
 
-export const newPrompt2: Prompt = {
-	...newPrompt1,
-	examples: [
-		...newPrompt1.examples,
-		{
-			prompt: textSnippets[2],
-			conversationElements: [
-				{ agent: agents[0].id, text: textSnippets[3] },
-				{ agent: agents[1].id, text: textSnippets[4] },
-				{ agent: agents[0].id, text: textSnippets[5] },
-				{ agent: agents[1].id, text: textSnippets[6] },
-			],
-		},
-	],
-};
+export function newPrompt2(prompt: Prompt): Prompt {
+	return {
+		...prompt,
+		examples: [
+			...prompt.examples,
+			{
+				prompt: "",
+				conversationElements: [
+					{ agent: agents[0].id, text: textSnippets[3] },
+					{ agent: agents[1].id, text: textSnippets[4] },
+					{ agent: agents[0].id, text: textSnippets[5] },
+					{ agent: agents[1].id, text: textSnippets[6] },
+				],
+			},
+		],
+	};
+}
 
 export const tasks = [
 	{ id: 0, name: "text generation" },

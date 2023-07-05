@@ -11,11 +11,17 @@
 	import Prompt from "../../general/Prompt.svelte";
 
 	let dialogStep = 0;
-	let prompt = $currentPrompt.examples.length === 0 ? newPrompt1 : newPrompt2;
+	let prompt =
+		$currentPrompt.examples.length > 1
+			? $currentPrompt
+			: $currentPrompt.examples.length === 0
+			? newPrompt1($currentPrompt)
+			: newPrompt2($currentPrompt);
 	let progress = 0;
 	let timer: NodeJS.Timer;
+
+	$: currentPrompt.set(prompt);
 	$: if (progress === 1) {
-		$currentPrompt = prompt;
 		showFixSlice.set(false);
 	}
 
