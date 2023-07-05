@@ -1,15 +1,29 @@
 <script lang="ts">
 	import InstanceView from "./instance-views/InstanceView.svelte";
 	import MetadataPanel from "./metadata/MetadataPanel.svelte";
+	import FixSlicePopup from "./metadata/popups/FixSlicePopup.svelte";
 	import NewSlicePopup from "./metadata/popups/NewSlicePopup.svelte";
 	import Popup from "./metadata/popups/Popup.svelte";
 	import SliceFinderPopup from "./metadata/popups/SliceFinderPopup.svelte";
-	import { ready, showSliceFinder, status, showNewSlice } from "./stores";
+	import {
+		ready,
+		showNewSlice,
+		showFixSlice,
+		showSliceFinder,
+		status,
+	} from "./stores";
 </script>
 
 {#if $ready && $status.completeColumns.length > 0}
 	{#if $showNewSlice}
-		<NewSlicePopup />
+		<Popup on:close={() => showNewSlice.set(false)}>
+			<NewSlicePopup />
+		</Popup>
+	{/if}
+	{#if $showFixSlice}
+		<Popup on:close={() => showFixSlice.set(false)}>
+			<FixSlicePopup />
+		</Popup>
 	{/if}
 	{#if $showSliceFinder}
 		<Popup on:close={() => showSliceFinder.set(false)}>
