@@ -20,7 +20,7 @@
 		status,
 		tagIds,
 	} from "../stores";
-	import { columnHash } from "../util/util";
+	import { columnHash, columnSort } from "../util/util";
 	import { ZenoColumnType, MetadataType } from "../zenoservice";
 	import type { ViewRenderFunction } from "./instance-views";
 	import ComparisonViewTableHeader from "./ComparisonViewTableHeader.svelte";
@@ -37,12 +37,15 @@
 	// decide which model column to show sort icon
 	let sortModel = "";
 
-	let options = $status.completeColumns.filter(
-		(c) =>
-			c.model === "" ||
-			c.model === $model ||
-			(sortModel === "" && c.model === $model)
-	);
+	let options = $status.completeColumns
+		.filter(
+			(c) =>
+				c.model === "" ||
+				c.model === $model ||
+				(sortModel === "" && c.model === $model)
+		)
+		.sort(columnSort);
+
 	let selectColumn = options[0];
 
 	let currentPage = 0;

@@ -24,6 +24,7 @@
 	} from "../../zenoservice";
 	import ChipsWrapper from "../ChipsWrapper.svelte";
 	import SliceFinderCell from "../cells/SliceFinderCell.svelte";
+	import { columnSort } from "../../util/util";
 
 	let blur = function (ev) {
 		ev.target.blur();
@@ -45,18 +46,26 @@
 			d.metadataType !== MetadataType.DATETIME &&
 			completeColumns.includes(d)
 	);
-	let searchColumns = [searchColumnOptions[0]];
+	let postdistillColumnOptions = searchColumnOptions.filter(
+		(col) => col.columnType === ZenoColumnType.PREDISTILL
+	);
+	let searchColumns =
+		postdistillColumnOptions.length > 0
+			? postdistillColumnOptions
+			: [searchColumnOptions[0]];
 
 	// Column to use as the metric to compare slices.
-	let metricColumns = $status.completeColumns.filter((d) => {
-		return $tab !== "comparison"
-			? (d.metadataType === MetadataType.CONTINUOUS ||
-					d.metadataType === MetadataType.BOOLEAN) &&
-					completeColumns.includes(d)
-			: (d.columnType === ZenoColumnType.OUTPUT ||
-					d.columnType === ZenoColumnType.POSTDISTILL) &&
-					d.model === $model;
-	});
+	let metricColumns = $status.completeColumns
+		.filter((d) => {
+			return $tab !== "comparison"
+				? (d.metadataType === MetadataType.CONTINUOUS ||
+						d.metadataType === MetadataType.BOOLEAN) &&
+						completeColumns.includes(d)
+				: (d.columnType === ZenoColumnType.OUTPUT ||
+						d.columnType === ZenoColumnType.POSTDISTILL) &&
+						d.model === $model;
+		})
+		.sort(columnSort);
 	let metricColumn = metricColumns.length > 0 ? metricColumns[0] : null;
 	let compareColumn = undefined;
 	$: if (metricColumn && $tab === "comparison") {
