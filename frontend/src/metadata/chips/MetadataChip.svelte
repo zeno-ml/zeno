@@ -26,6 +26,8 @@
 			{:else}
 				from {chip[0].value.toLocaleString()} to {chip.values[1].toLocaleString()}
 			{/if}
+		{:else if chip[0].column.metadataType === MetadataType.NOMINAL}
+			{chip[0].column.name} {"=="} {chip[0].value}
 		{:else}
 			{chip[0].column.name}
 			{"("}
