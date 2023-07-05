@@ -2,15 +2,17 @@
 	import InstanceView from "./instance-views/InstanceView.svelte";
 	import MetadataPanel from "./metadata/MetadataPanel.svelte";
 	import FixSlicePopup from "./metadata/popups/FixSlicePopup.svelte";
+	import NewFolderPopup from "./metadata/popups/NewFolderPopup.svelte";
 	import NewSlicePopup from "./metadata/popups/NewSlicePopup.svelte";
 	import Popup from "./metadata/popups/Popup.svelte";
 	import SliceFinderPopup from "./metadata/popups/SliceFinderPopup.svelte";
 	import {
 		ready,
-		showNewSlice,
 		showFixSlice,
-		showSliceFinder,
 		status,
+		showSliceFinder,
+		showNewSlice,
+		showNewFolder,
 	} from "./stores";
 </script>
 
@@ -29,6 +31,9 @@
 		<Popup on:close={() => showSliceFinder.set(false)}>
 			<SliceFinderPopup />
 		</Popup>
+	{/if}
+	{#if $showNewFolder}
+		<NewFolderPopup />
 	{/if}
 	<div class="container">
 		<MetadataPanel />
