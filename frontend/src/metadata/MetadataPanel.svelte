@@ -371,9 +371,8 @@
 					compare={true}
 					slice={undefined}
 					sliceModel={$comparisonModel} />
-			{:else}
-				<div style:width="36px" />
 			{/if}
+			<div style:width="36px" />
 		</div>
 	</div>
 
