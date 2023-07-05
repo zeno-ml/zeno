@@ -3,15 +3,14 @@
 	import MetadataPanel from "./metadata/MetadataPanel.svelte";
 	import FixSlicePopup from "./metadata/popups/FixSlicePopup.svelte";
 	import NewFolderPopup from "./metadata/popups/NewFolderPopup.svelte";
-	import FixSlicePopup from "./metadata/popups/FixSlicePopup.svelte";
 	import NewSlicePopup from "./metadata/popups/NewSlicePopup.svelte";
 	import Popup from "./metadata/popups/Popup.svelte";
 	import SliceFinderPopup from "./metadata/popups/SliceFinderPopup.svelte";
 	import {
 		ready,
+		showFixSlice,
 		showNewFolder,
 		showNewSlice,
-		showFixSlice,
 		showSliceFinder,
 		status,
 	} from "./stores";

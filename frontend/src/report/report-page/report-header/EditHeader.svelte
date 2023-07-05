@@ -53,7 +53,7 @@
 			style="width: -webkit-fill-available"
 			variant="outlined"
 			bind:value={currentReport.name}
-			label="Report Name" />
+			label="Chart Name" />
 	</div>
 </div>
 

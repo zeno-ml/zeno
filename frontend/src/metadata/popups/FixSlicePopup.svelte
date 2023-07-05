@@ -39,7 +39,7 @@
 	}
 </script>
 
-<Content style={dialogStep === 1 ? "width: 800px;" : "width: 500px;"}>
+<Content style={dialogStep === 0 ? "width: 800px;" : "width: 500px;"}>
 	{#if dialogStep < 3}
 		<div class="horizontal">
 			{#if dialogStep > 0}
