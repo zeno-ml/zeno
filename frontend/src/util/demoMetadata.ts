@@ -87,7 +87,7 @@ export const tasks = [
 
 export const datasets = [
 	{
-		name: "gneubig/dstc11",
+		name: "dstc11",
 		href: "https://huggingface.co/datasets/gneubig/dstc11",
 		description: "",
 	},
@@ -104,13 +104,13 @@ export const datasets = [
 			"Multi-Domain Wizard-of-Oz dataset (MultiWOZ), a fully-labeled collection of human-human written conversations spanning over multiple domains and topics.",
 	},
 	{
-		name: "allenai/prosocial-dialog",
+		name: "prosocial-dialog",
 		href: "https://huggingface.co/datasets/allenai/prosocial-dialog",
 		description:
 			"The first large-scale multi-turn English dialogue dataset to teach conversational agents to respond to problematic content following social norms.",
 	},
 	{
-		name: "LL1234/CustomerService",
+		name: "CustomerService",
 		href: "https://huggingface.co/datasets/LL1234/CustomerService",
 		description: "",
 	},
