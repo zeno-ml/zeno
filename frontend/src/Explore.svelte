@@ -1,7 +1,7 @@
 <script lang="ts">
 	import InstanceView from "./instance-views/InstanceView.svelte";
 	import MetadataPanel from "./metadata/MetadataPanel.svelte";
-	import NewFolderPopup from "./metadata/popups/FolderPopup.svelte";
+	import NewFolderPopup from "./metadata/popups/NewFolderPopup.svelte";
 	import NewSlicePopup from "./metadata/popups/NewSlicePopup.svelte";
 	import SliceFinderPopup from "./metadata/popups/SliceFinderPopup.svelte";
 	import NewTagPopup from "./metadata/popups/NewTagPopup.svelte";

@@ -4,18 +4,17 @@
 	import IconButton, { Icon } from "@smui/icon-button";
 	import Paper, { Content } from "@smui/paper";
 	import type { HistogramEntry } from "../../api/metadata";
-	import { selections, folders, slices } from "../../stores";
+	import { selections } from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 	import { columnHash } from "../../util/util";
 	import {
 		MetadataType,
 		ZenoColumnType,
-		ZenoService,
 		type FilterPredicate,
 		type FilterPredicateGroup,
-		type Slice,
 		type ZenoColumn,
 	} from "../../zenoservice";
+	import { createSlices } from "./MetadataCellUtil";
 	import BinaryMetadataCell from "./metadata-cells/BinaryMetadataCell.svelte";
 	import ContinuousMetadataCell from "./metadata-cells/ContinuousMetadataCell.svelte";
 	import NominalMetadataCell from "./metadata-cells/NominalMetadataCell.svelte";
@@ -52,44 +51,6 @@
 			tags: mets.tags,
 		}));
 	}
-
-	function createSlices() {
-		// NomialMetadataCell
-		if (col.metadataType === MetadataType.NOMINAL) {
-			let folderName = col.name + "s";
-			folders.update((f) => {
-				f.push(folderName);
-				return [...f];
-			});
-			histogram.forEach((h) => {
-				let preds: FilterPredicate[] = [];
-				let slicePredGroup: FilterPredicateGroup = { predicates: [], join: "" };
-				preds.push({
-					column: col,
-					operation: "==",
-					value: h.bucket,
-					join: "",
-				});
-				slicePredGroup.predicates = preds;
-
-				let sliceName = folderName + "/" + col.name + " == " + h.bucket;
-				ZenoService.createNewSlice({
-					sliceName,
-					filterPredicates: slicePredGroup,
-					folder: folderName,
-				}).then(() => {
-					slices.update((s) => {
-						s.set(sliceName, <Slice>{
-							sliceName,
-							folder: folderName,
-							filterPredicates: slicePredGroup,
-						});
-						return s;
-					});
-				});
-			});
-		}
-	}
 </script>
 
 {#if histogram}
@@ -118,7 +79,7 @@
 								on:click={(e) => {
 									e.stopPropagation();
 									showOptions = false;
-									createSlices();
+									createSlices(col, histogram);
 								}}>
 								<Icon style="font-size: 18px;" class="material-icons">edit</Icon
 								>&nbsp;
