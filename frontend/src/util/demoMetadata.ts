@@ -165,7 +165,7 @@ export const metrics = [
 			"Calculates the similarity between a target and reference text based on similarity of character and word n-grams.",
 	},
 	{
-		name: "Embedding similarity (BERTScore)",
+		name: "Semantic similarity (BERTScore)",
 		checked: true,
 		explanation:
 			"Measures similarity between target and reference text using the similarity between embeddings calculated by the BERT model.",
