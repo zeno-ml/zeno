@@ -136,6 +136,7 @@
 	{/each}
 	<Button
 		color="secondary"
+		style="align-self: start;"
 		on:click={() => {
 			let examples = [
 				...prompt.examples,
@@ -153,7 +154,11 @@
 <style>
 	.prompt-parent {
 		width: 100%;
-		margin-bottom: 30px;
+		padding-bottom: 30px;
+		padding-top: 10px;
+		overflow-y: auto;
+		display: flex;
+		flex-direction: column;
 	}
 
 	.spacing-bot {
@@ -166,6 +171,7 @@
 
 	.indent {
 		margin-left: 30px;
+		position: relative;
 	}
 
 	.horizontal {

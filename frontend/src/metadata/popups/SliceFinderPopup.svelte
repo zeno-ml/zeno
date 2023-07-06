@@ -346,11 +346,13 @@
 		<span class="message">{sliceFinderMessage}</span>
 	</div>
 {/if}
-{#each sliceFinderReturn.slices as slice, idx}
-	{@const metric = sliceFinderReturn.metrics[idx].toFixed(2)}
-	{@const size = sliceFinderReturn.sizes[idx]}
-	<SliceFinderCell {slice} {metric} {size} />
-{/each}
+<div class="slices">
+	{#each sliceFinderReturn.slices as slice, idx}
+		{@const metric = sliceFinderReturn.metrics[idx].toFixed(2)}
+		{@const size = sliceFinderReturn.sizes[idx]}
+		<SliceFinderCell {slice} {metric} {size} />
+	{/each}
+</div>
 
 <style>
 	.intial-text {
@@ -411,5 +413,10 @@
 		height: 24px;
 		cursor: help;
 		fill: var(--G2);
+	}
+	.slices {
+		display: flex;
+		flex-direction: column;
+		overflow-y: auto;
 	}
 </style>

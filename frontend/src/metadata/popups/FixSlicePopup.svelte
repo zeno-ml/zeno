@@ -39,7 +39,11 @@
 	}
 </script>
 
-<Content style={dialogStep === 0 ? "width: 800px;" : "width: 500px;"}>
+<Content
+	style="display: flex; flex-direction: column; min-height: 0px; {dialogStep ===
+	0
+		? 'width: 800px;'
+		: 'width: 500px;'}">
 	{#if dialogStep < 3}
 		<div class="horizontal">
 			{#if dialogStep > 0}
@@ -109,6 +113,7 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
+		min-height: 0px;
 	}
 	.horizontal {
 		display: flex;

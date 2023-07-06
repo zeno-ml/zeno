@@ -15,7 +15,7 @@
 	on:mousedown={() => dispatch("close")}
 	on:keydown={() => undefined}>
 	<Paper
-		style="max-height: 90%; overflow-y: auto;"
+		style="max-height: 90%; display: flex; flex-direction: column;"
 		elevation={7}
 		on:mousedown={(e) => e.stopPropagation()}>
 		<slot />
