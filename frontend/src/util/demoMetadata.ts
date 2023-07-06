@@ -43,8 +43,7 @@ export const textSnippets = [
 ];
 
 export const initialPrompt: Prompt = {
-	prompt:
-		"You are an agent at the Rivertown Insurance helpdesk that helps with resolving insurance claims.",
+	prompt: "You are a chatbot tasked with making small-talk with people.",
 	examples: [],
 };
 

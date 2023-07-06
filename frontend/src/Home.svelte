@@ -29,7 +29,7 @@
 	let task = null;
 	let selectedDataset = null;
 	let loading = false;
-	let prompt = "";
+	let prompt = promptToString(initialPrompt).replaceAll("\n", "");
 	let progress = 0;
 	let timer: NodeJS.Timer;
 	$: if (progress === 1) {
@@ -136,18 +136,14 @@
 							</FormField>
 						</div>
 					{/each}
-					<p class="full-width">Input your initial prompt:</p>
+					<p class="full-width">Input an initial prompt:</p>
 					<div class="margins">
 						<Textfield
 							textarea
 							style="width: 100%; height: 120px"
 							label="Prompt"
 							bind:value={prompt}
-							on:focus={() =>
-								setTimeout(() => {
-									$currentPrompt = initialPrompt;
-									prompt = promptToString(initialPrompt).replaceAll("\n", "");
-								}, 700)} />
+						/>
 					</div>
 				</div>
 				{#if prompt !== ""}
