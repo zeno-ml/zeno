@@ -14,7 +14,10 @@
 	bind:clientHeight={paperHeight}
 	on:mousedown={() => dispatch("close")}
 	on:keydown={() => undefined}>
-	<Paper elevation={7} on:mousedown={(e) => e.stopPropagation()}>
+	<Paper
+		style="max-height: 90%; overflow-y: auto;"
+		elevation={7}
+		on:mousedown={(e) => e.stopPropagation()}>
 		<slot />
 	</Paper>
 </div>
