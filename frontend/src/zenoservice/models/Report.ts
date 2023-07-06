@@ -6,10 +6,12 @@ import type { ChartType } from "./ChartType";
 import type { Parameters } from "./Parameters";
 
 export type Report = {
+	id: number;
 	name: string;
 	type?: ChartType;
 	slices?: Array<string>;
 	metrics?: Array<string>;
 	models?: Array<string>;
 	parameters?: Parameters;
+	createdAt: string;
 };

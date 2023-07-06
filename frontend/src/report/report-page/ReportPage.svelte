@@ -15,7 +15,9 @@
 	import { overrideItemIdKeyNameBeforeInitialisingDndZones } from "svelte-dnd-action";
 
 	export let params;
+
 	let isReportEdit = false;
+	let reportIndex = $reports.findIndex((rep) => rep.id === Number(params.id));
 
 	overrideItemIdKeyNameBeforeInitialisingDndZones("value");
 
@@ -33,7 +35,7 @@
 		}
 	});
 
-	$: report.set(params.id);
+	$: report.set(reportIndex);
 	$: currentReport = $reports[$report];
 </script>
 
