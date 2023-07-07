@@ -37,6 +37,9 @@
 
 	$: report.set(reportIndex);
 	$: currentReport = $reports[$report];
+	$: if (isReportEdit) {
+		$reports[$report].lasteditAt = new Date().toLocaleString();
+	}
 </script>
 
 <main>

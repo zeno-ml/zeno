@@ -23,7 +23,7 @@
 	let rowsPerPage = 10;
 	let currentPage = 0;
 	let sortCol = ["", false];
-	let header = ["type", "name", "slices", "models", "metrics", "createdAt"];
+	let header = ["type", "name", "slices", "models", "metrics", "lasteditAt"];
 
 	$: start = currentPage * rowsPerPage;
 	$: end = Math.min(start + rowsPerPage, $reports.length);
@@ -95,7 +95,7 @@
 								fixedDimension: "y",
 								secondSlices: [...Array.from($slices.keys()).slice(0, 2)],
 							},
-							createdAt: new Date().toLocaleString(),
+							lasteditAt: new Date().toLocaleString(),
 						});
 						return reps;
 					});
@@ -118,8 +118,8 @@
 							on:keydown={() => ({})}
 							on:click={() => updateSort(h)}>
 							<div style="display: flex; align-items: center">
-								{h === "createdAt"
-									? "Created At"
+								{h === "lasteditAt"
+									? "Last Edited At"
 									: h[0].toUpperCase() + h.slice(1).toLowerCase()}
 								<Icon class="material-icons" style="font-size: 25px;">
 									{#if sortCol[0] === h && sortCol[1]}

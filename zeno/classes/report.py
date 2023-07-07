@@ -29,4 +29,4 @@ class Report(CamelModel):
     metrics: Union[List[str], None] = None
     models: Union[List[str], None] = None
     parameters: Union[Parameters, None] = None
-    created_at: str
+    lastedit_at: str

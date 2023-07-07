@@ -13,5 +13,5 @@ export type Report = {
 	metrics?: Array<string>;
 	models?: Array<string>;
 	parameters?: Parameters;
-	createdAt: string;
+	lasteditAt: string;
 };

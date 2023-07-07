@@ -60,7 +60,7 @@
 		</div>
 	</Cell>
 	<Cell>
-		<p>{report.createdAt}</p>
+		<p>{report.lasteditAt}</p>
 	</Cell>
 	<Cell style="overflow:visible">
 		<div class="inline">
@@ -82,7 +82,7 @@
 								models: report.models,
 								metrics: report.metrics,
 								parameters: report.parameters,
-								createdAt: new Date().toLocaleString(),
+								lasteditAt: new Date().toLocaleString(),
 							});
 							return reps;
 						});
