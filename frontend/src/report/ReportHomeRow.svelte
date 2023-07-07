@@ -8,7 +8,6 @@
 		mdiViewGrid,
 	} from "@mdi/js";
 	import IconButton, { Icon } from "@smui/icon-button";
-	import Button from "@smui/button";
 	import { Row, Cell } from "@smui/data-table";
 	import { Svg } from "@smui/common";
 	import { tooltip } from "@svelte-plugins/tooltips";
@@ -32,7 +31,7 @@
 	};
 </script>
 
-<Row>
+<Row style="cursor:pointer" on:click={() => updateTab("report/" + report.id)}>
 	<Cell>
 		<div class="report-type">
 			<Icon style="outline:none" component={Svg} viewBox="0 0 24 24">
@@ -43,12 +42,6 @@
 	<Cell>
 		<div class="inline">
 			<p class="report-name">{report.name}</p>
-			<Button
-				style="background-color: white; height: 25px"
-				variant="outlined"
-				on:click={() => updateTab("report/" + report.id)}>
-				View
-			</Button>
 		</div>
 	</Cell>
 	<Cell>
@@ -67,9 +60,7 @@
 		</div>
 	</Cell>
 	<Cell>
-		<div class="report-slice">
-			<p>{report.createdAt}</p>
-		</div>
+		<p>{report.createdAt}</p>
 	</Cell>
 	<Cell style="overflow:visible">
 		<div class="inline">
@@ -80,7 +71,8 @@
 					theme: "zeno-tooltip",
 				}}>
 				<IconButton
-					on:click={() => {
+					on:click={(e) => {
+						e.stopPropagation();
 						reports.update((reps) => {
 							reps.push({
 								id: reps.length,
@@ -109,7 +101,8 @@
 					theme: "zeno-tooltip",
 				}}>
 				<IconButton
-					on:click={() => {
+					on:click={(e) => {
+						e.stopPropagation();
 						reports.update((reps) => {
 							let reportIndex = $reports.findIndex(
 								(rep) => rep.id === report.id

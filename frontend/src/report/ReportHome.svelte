@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { mdiPlus } from "@mdi/js";
 	import DataTable, {
 		Head,
 		Body,
@@ -7,9 +6,10 @@
 		Cell,
 		Pagination,
 	} from "@smui/data-table";
-	import { Label, Svg } from "@smui/common";
+	import { Label } from "@smui/common";
 	import Select, { Option } from "@smui/select";
 	import IconButton, { Icon } from "@smui/icon-button";
+	import Button from "@smui/button";
 	import { tooltip } from "@svelte-plugins/tooltips";
 	import { reports, slices, models, metrics } from "../stores";
 	import { ChartType } from "../zenoservice";
@@ -72,10 +72,12 @@
 		<div
 			use:tooltip={{
 				content: "create a new report",
-				position: "right",
+				position: "left",
 				theme: "zeno-tooltip",
 			}}>
-			<IconButton
+			<Button
+				style="background-color:var(--logo); color:white"
+				variant="outlined"
 				on:click={() => {
 					reports.update((reps) => {
 						updateTab("report/" + reps.length + "/new");
@@ -100,10 +102,8 @@
 				}}
 				on:mouseleave={blur}
 				on:focusout={blur}>
-				<Icon style="outline:none" component={Svg} viewBox="0 -1 24 24">
-					<path fill="black" d={mdiPlus} />
-				</Icon>
-			</IconButton>
+				New Report
+			</Button>
 		</div>
 	</div>
 	<div class="reports">
@@ -131,7 +131,7 @@
 							</div>
 						</Cell>
 					{/each}
-					<Cell>Options</Cell>
+					<Cell />
 				</Row>
 			</Head>
 			<Body>
@@ -197,6 +197,7 @@
 	}
 	.header {
 		display: flex;
+		justify-content: space-between;
 		align-items: center;
 	}
 </style>
