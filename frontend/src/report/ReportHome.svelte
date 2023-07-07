@@ -68,10 +68,10 @@
 
 <div id="reports-container">
 	<div class="header">
-		<h3>Reports</h3>
+		<h3>Charts</h3>
 		<div
 			use:tooltip={{
-				content: "create a new report",
+				content: "create a new chart",
 				position: "left",
 				theme: "zeno-tooltip",
 			}}>
@@ -83,7 +83,7 @@
 						updateTab("report/" + reps.length + "/new");
 						reps.push({
 							id: reps.length,
-							name: "New Report",
+							name: "New Chart",
 							type: ChartType.BAR,
 							slices: [...Array.from($slices.keys()).slice(0, 2)],
 							models: [...$models.values()],
@@ -102,7 +102,7 @@
 				}}
 				on:mouseleave={blur}
 				on:focusout={blur}>
-				New Report
+				New Chart
 			</Button>
 		</div>
 	</div>
