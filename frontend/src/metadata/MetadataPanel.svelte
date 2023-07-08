@@ -56,6 +56,7 @@
 
 	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
 		new InternMap([], columnHash);
+	let body: HTMLElement;
 
 	// Get histogram buckets, counts, and metrics when columns update.
 	status.subscribe((s) => {
@@ -259,7 +260,7 @@
 	});
 </script>
 
-<div class="side-container">
+<div class="side-container" bind:this={body}>
 	<MetadataHeader />
 	<div id="slice-header" class="inline">
 		<div class="inline">
@@ -486,16 +487,16 @@
 			<MetricRange />
 		</div>
 		{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.METADATA) as col (columnHash(col))}
-			<MetadataCell {col} histogram={metadataHistograms.get(col)} />
+			<MetadataCell {col} histogram={metadataHistograms.get(col)} bind:body />
 		{/each}
 
 		{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL) as col (columnHash(col))}
-			<MetadataCell {col} histogram={metadataHistograms.get(col)} />
+			<MetadataCell {col} histogram={metadataHistograms.get(col)} bind:body />
 		{/each}
 
 		{#if $model}
 			{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.POSTDISTILL && m.model === $model) as col (columnHash(col))}
-				<MetadataCell {col} histogram={metadataHistograms.get(col)} />
+				<MetadataCell {col} histogram={metadataHistograms.get(col)} bind:body />
 			{/each}
 
 			{@const outputCol = $status.completeColumns.filter(
@@ -504,7 +505,8 @@
 			{#if outputCol.length > 0}
 				<MetadataCell
 					col={outputCol[0]}
-					histogram={metadataHistograms.get(outputCol[0])} />
+					histogram={metadataHistograms.get(outputCol[0])}
+					bind:body />
 			{/if}
 		{/if}
 	{/if}

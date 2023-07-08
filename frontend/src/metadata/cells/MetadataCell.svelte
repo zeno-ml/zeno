@@ -22,6 +22,7 @@
 
 	export let col: ZenoColumn;
 	export let histogram: HistogramEntry[];
+	export let body: HTMLElement;
 
 	const columnMap = {
 		[MetadataType.NOMINAL]: NominalMetadataCell,
@@ -80,6 +81,9 @@
 									e.stopPropagation();
 									showOptions = false;
 									createSlices(col, histogram);
+									if (body) {
+										body.scrollTop = 0;
+									}
 								}}>
 								<Icon style="font-size: 18px;" class="material-icons">edit</Icon
 								>&nbsp;
