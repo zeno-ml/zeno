@@ -16,6 +16,7 @@
 	import { updateTab } from "../util/util";
 
 	export let report;
+	export let reportIndex;
 
 	let iconMap = {
 		[ChartType.TABLE]: mdiTable,
@@ -31,7 +32,7 @@
 	};
 </script>
 
-<Row style="cursor:pointer" on:click={() => updateTab("report/" + report.id)}>
+<Row style="cursor:pointer" on:click={() => updateTab("report/" + reportIndex)}>
 	<Cell>
 		<div class="report-type">
 			<Icon style="outline:none" component={Svg} viewBox="0 0 24 24">
@@ -59,9 +60,6 @@
 			{report.metrics ? report.metrics.length : 0}
 		</div>
 	</Cell>
-	<Cell>
-		<p>{report.lasteditAt}</p>
-	</Cell>
 	<Cell style="overflow:visible">
 		<div class="inline">
 			<div
@@ -75,14 +73,12 @@
 						e.stopPropagation();
 						reports.update((reps) => {
 							reps.push({
-								id: reps.length,
 								name: "Copy of " + report.name,
 								type: report.type,
 								slices: report.slices,
 								models: report.models,
 								metrics: report.metrics,
 								parameters: report.parameters,
-								lasteditAt: new Date().toLocaleString(),
 							});
 							return reps;
 						});
@@ -104,11 +100,7 @@
 					on:click={(e) => {
 						e.stopPropagation();
 						reports.update((reps) => {
-							let reportIndex = $reports.findIndex(
-								(rep) => rep.id === report.id
-							);
 							reps.splice(reportIndex, 1);
-							reps.map((rep, i) => (rep.id = i));
 							return reps;
 						});
 					}}

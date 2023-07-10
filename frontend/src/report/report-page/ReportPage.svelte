@@ -17,7 +17,6 @@
 	export let params;
 
 	let isReportEdit = false;
-	let reportIndex = $reports.findIndex((rep) => rep.id === Number(params.id));
 
 	overrideItemIdKeyNameBeforeInitialisingDndZones("value");
 
@@ -35,11 +34,8 @@
 		}
 	});
 
-	$: report.set(reportIndex);
+	$: report.set(params.id);
 	$: currentReport = $reports[$report];
-	$: if (isReportEdit) {
-		$reports[$report].lasteditAt = new Date().toLocaleString();
-	}
 </script>
 
 <main>

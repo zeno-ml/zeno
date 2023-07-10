@@ -23,7 +23,8 @@
 	let rowsPerPage = 10;
 	let currentPage = 0;
 	let sortCol = ["", false];
-	let header = ["type", "name", "slices", "models", "metrics", "lasteditAt"];
+	let header = ["type", "name", "slices", "models", "metrics"];
+	let originalReports = Object.assign([], $reports);
 
 	$: start = currentPage * rowsPerPage;
 	$: end = Math.min(start + rowsPerPage, $reports.length);
@@ -42,10 +43,11 @@
 		} else {
 			sortCol = [undefined, false];
 		}
+
 		if (sortCol[0]) {
 			sortByCol($reports, sortCol);
 		} else {
-			sortByCol($reports, ["createdAt", true]);
+			$reports = originalReports;
 		}
 	}
 
@@ -82,7 +84,6 @@
 					reports.update((reps) => {
 						updateTab("report/" + reps.length + "/new");
 						reps.push({
-							id: reps.length,
 							name: "New Chart",
 							type: ChartType.BAR,
 							slices: [...Array.from($slices.keys()).slice(0, 2)],
@@ -95,7 +96,6 @@
 								fixedDimension: "y",
 								secondSlices: [...Array.from($slices.keys()).slice(0, 2)],
 							},
-							lasteditAt: new Date().toLocaleString(),
 						});
 						return reps;
 					});
@@ -135,8 +135,8 @@
 				</Row>
 			</Head>
 			<Body>
-				{#each content as report}
-					<ReportHomeRow {report} />
+				{#each content as report, reportIndex}
+					<ReportHomeRow {report} {reportIndex} />
 				{/each}
 			</Body>
 

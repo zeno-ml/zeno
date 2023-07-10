@@ -22,11 +22,9 @@ class Parameters(CamelModel):
 
 
 class Report(CamelModel):
-    id: int
     name: str
     type: Union[ChartType, None] = None
     slices: Union[List[str], None] = None
     metrics: Union[List[str], None] = None
     models: Union[List[str], None] = None
     parameters: Union[Parameters, None] = None
-    lastedit_at: str
