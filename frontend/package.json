@@ -33,7 +33,7 @@
         "@svelte-plugins/tooltips": "^0.1.6",
         "@sveltejs/vite-plugin-svelte": "1.4.0",
         "@testing-library/jest-dom": "^5.16.5",
-        "@testing-library/svelte": "^3.2.2",
+        "@testing-library/svelte": "^4.0.3",
         "@testing-library/user-event": "^14.4.3",
         "@types/jest": "^29.5.3",
         "@typescript-eslint/eslint-plugin": "^5.61.0",
