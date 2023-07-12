@@ -4,7 +4,7 @@
 
 	let options = [];
 	let value = 0;
-	let folder = "";
+	let folder = "-- Select Folder --";
 	let refresh = 0;
 
 	function initialOptions(optionsArray: string[]) {
@@ -31,22 +31,22 @@
 	<Svelecte
 		style="width: 280px; flex:none;"
 		bind:value={folder}
-		options={$folders}
+		options={["-- Select Folder --", ...$folders.values()]}
 		labelAsValue
 		placeholder="Select Folder..."
 		on:change={(e) => {
-			if (e.detail) {
+			if (e.detail && e.detail.label !== "-- Select Folder --") {
 				options = [];
 				let slicesInFolder = [...$slices.values()]
 					.filter((s) => s.folder === e.detail.label)
 					.map((s) => s.sliceName);
 				initialOptions(slicesInFolder);
-				value = 0;
-				refresh++;
 			} else {
 				// show all slices if not selected any folder
 				initialOptions([...$slices.keys()]);
 			}
+			value = 0;
+			refresh++;
 		}} />
 </div>
 
