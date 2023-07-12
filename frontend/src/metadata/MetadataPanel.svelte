@@ -286,7 +286,7 @@
 							: "Find slices with the largest output differences between models",
 					position: "left",
 					theme: "zeno-tooltip",
-					maxWidth: $tab !== "comparison" ? "150" : "200",
+					maxWidth: 150,
 				}}>
 				<IconButton
 					on:click={() => {
