@@ -236,7 +236,11 @@
 			? "s"
 			: ""}. Continue?</Content>
 	<Actions>
-		<Button on:click={() => (confirmDelete = false)}>
+		<Button
+			on:click={() => {
+				confirmDelete = false;
+				relatedReports = 0;
+			}}>
 			<Label>No</Label>
 		</Button>
 		<Button use={[InitialFocus]} on:click={() => removeSlice()}>

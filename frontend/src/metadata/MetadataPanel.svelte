@@ -260,7 +260,7 @@
 	});
 </script>
 
-<div class="side-container" bind:this={body}>
+<div id="side-container" bind:this={body}>
 	<MetadataHeader />
 	<div id="slice-header" class="inline">
 		<div class="inline">
@@ -487,16 +487,16 @@
 			<MetricRange />
 		</div>
 		{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.METADATA) as col (columnHash(col))}
-			<MetadataCell {col} histogram={metadataHistograms.get(col)} bind:body />
+			<MetadataCell {col} histogram={metadataHistograms.get(col)} />
 		{/each}
 
 		{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.PREDISTILL) as col (columnHash(col))}
-			<MetadataCell {col} histogram={metadataHistograms.get(col)} bind:body />
+			<MetadataCell {col} histogram={metadataHistograms.get(col)} />
 		{/each}
 
 		{#if $model}
 			{#each $status.completeColumns.filter((m) => m.columnType === ZenoColumnType.POSTDISTILL && m.model === $model) as col (columnHash(col))}
-				<MetadataCell {col} histogram={metadataHistograms.get(col)} bind:body />
+				<MetadataCell {col} histogram={metadataHistograms.get(col)} />
 			{/each}
 
 			{@const outputCol = $status.completeColumns.filter(
@@ -505,8 +505,7 @@
 			{#if outputCol.length > 0}
 				<MetadataCell
 					col={outputCol[0]}
-					histogram={metadataHistograms.get(outputCol[0])}
-					bind:body />
+					histogram={metadataHistograms.get(outputCol[0])} />
 			{/if}
 		{/if}
 	{/if}
@@ -530,7 +529,7 @@
 		border-bottom: 0.5px solid var(--G5);
 		background-color: var(--Y2);
 	}
-	.side-container {
+	#side-container {
 		height: calc(100vh - 65px);
 		width: 360px;
 		min-width: 360px;

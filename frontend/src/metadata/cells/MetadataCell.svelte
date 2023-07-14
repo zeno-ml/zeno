@@ -1,12 +1,15 @@
 <script lang="ts">
 	import { mdiDotsHorizontal } from "@mdi/js";
-	import Button, { Label } from "@smui/button";
-	import Dialog, { Actions, Content, InitialFocus, Title } from "@smui/dialog";
 	import { Svg } from "@smui/common";
 	import IconButton, { Icon } from "@smui/icon-button";
-	import Paper from "@smui/paper";
+	import Paper, { Content } from "@smui/paper";
 	import type { HistogramEntry } from "../../api/metadata";
-	import { folders, selections, slices } from "../../stores";
+	import {
+		selections,
+		showMetadataSlices,
+		metadataColumn,
+		metadataHistogram,
+	} from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 	import { columnHash } from "../../util/util";
 	import {
@@ -16,7 +19,6 @@
 		type FilterPredicateGroup,
 		type ZenoColumn,
 	} from "../../zenoservice";
-	import { createSlices } from "./MetadataCellUtil";
 	import BinaryMetadataCell from "./metadata-cells/BinaryMetadataCell.svelte";
 	import ContinuousMetadataCell from "./metadata-cells/ContinuousMetadataCell.svelte";
 	import NominalMetadataCell from "./metadata-cells/NominalMetadataCell.svelte";
@@ -24,7 +26,6 @@
 
 	export let col: ZenoColumn;
 	export let histogram: HistogramEntry[];
-	export let body: HTMLElement;
 
 	const columnMap = {
 		[MetadataType.NOMINAL]: NominalMetadataCell,
@@ -36,9 +37,6 @@
 
 	let hovering = false;
 	let showOptions = false;
-	let duplicateSlices = false;
-	let duplicateFolders = false;
-	let duplicateNames = [];
 
 	let filterPredicates: FilterPredicateGroup;
 	$: filterPredicates = $selections.metadata[columnHash(col)]
@@ -56,40 +54,6 @@
 			},
 			tags: mets.tags,
 		}));
-	}
-
-	function checkSliceNames() {
-		let sliceName = "";
-		let duplicateNames = [];
-		histogram.forEach((h) => {
-			$slices.forEach((slice) => {
-				if (col.metadataType === MetadataType.NOMINAL) {
-					sliceName = col.name + " == " + h.bucket;
-				} else if (col.metadataType === MetadataType.CONTINUOUS) {
-					sliceName =
-						Number(h.bucket).toFixed(2) +
-						" <= " +
-						col.name +
-						" < " +
-						Number(h.bucketEnd).toFixed(2);
-				} else if (col.metadataType === MetadataType.BOOLEAN) {
-					const value = h.bucket ? "true" : "false";
-					sliceName = col.name + " == " + value;
-				}
-				if (slice.sliceName === sliceName) {
-					duplicateNames.push(slice.sliceName);
-				}
-			});
-		});
-		return duplicateNames;
-	}
-
-	function confirmCreate() {
-		duplicateNames = [];
-		createSlices(col, histogram);
-		if (body) {
-			body.scrollTop = 0;
-		}
 	}
 </script>
 
@@ -119,19 +83,9 @@
 								on:click={(e) => {
 									e.stopPropagation();
 									showOptions = false;
-									$folders.forEach((f) => {
-										if (f === col.name + "s") {
-											duplicateFolders = true;
-										}
-									});
-									if (!duplicateFolders) {
-										duplicateNames = checkSliceNames();
-										if (duplicateNames.length > 0) {
-											duplicateSlices = true;
-										} else {
-											confirmCreate();
-										}
-									}
+									showMetadataSlices.set(true);
+									metadataColumn.set(col);
+									metadataHistogram.set(histogram);
 								}}>
 								<Icon style="font-size: 18px;" class="material-icons">edit</Icon
 								>&nbsp;
@@ -172,40 +126,6 @@
 			{histogram} />
 	</div>
 {/if}
-
-<Dialog bind:open={duplicateSlices} scrimClickAction="" escapeKeyAction="">
-	<Title>Create Metadata Slices</Title>
-	<Content>
-		These slices "{duplicateNames.join(", ")}" already exists. Replace them &
-		Continue?
-	</Content>
-	<Actions>
-		<Button on:click={() => (duplicateSlices = false)}>
-			<Label>No</Label>
-		</Button>
-		<Button use={[InitialFocus]} on:click={() => confirmCreate()}>
-			<Label>Yes</Label>
-		</Button>
-	</Actions>
-</Dialog>
-
-<Dialog bind:open={duplicateFolders}>
-	<Title>Create Metadata Slices</Title>
-	<Content>
-		There is an existing folder named "{col.name + "s"}".<br /> Please change the
-		naming before creating metadata slices.
-	</Content>
-	<Actions>
-		<Button
-			use={[InitialFocus]}
-			on:click={() => {
-				duplicateFolders = false;
-				duplicateSlices = false;
-			}}>
-			<Label>Got It!</Label>
-		</Button>
-	</Actions>
-</Dialog>
 
 <style>
 	.cell {

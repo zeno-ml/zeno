@@ -10,10 +10,13 @@ import {
 } from "../../zenoservice";
 
 /** Create slices from metadata histogram buckets **/
-export function createSlices(col: ZenoColumn, histogram: HistogramEntry[]) {
-	const folderName = col.name + "s";
+export function createSlices(
+	col: ZenoColumn,
+	histogram: HistogramEntry[],
+	folder: string
+) {
 	folders.update((f) => {
-		f.push(folderName);
+		f.push(folder);
 		return [...f];
 	});
 
@@ -65,12 +68,12 @@ export function createSlices(col: ZenoColumn, histogram: HistogramEntry[]) {
 		ZenoService.createNewSlice({
 			sliceName,
 			filterPredicates: slicePredGroup,
-			folder: folderName,
+			folder: folder,
 		}).then(() => {
 			slices.update((s) => {
 				s.set(sliceName, <Slice>{
 					sliceName,
-					folder: folderName,
+					folder: folder,
 					filterPredicates: slicePredGroup,
 				});
 				return s;
