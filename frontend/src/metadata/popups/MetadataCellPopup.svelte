@@ -6,7 +6,7 @@
 	import { folders, showMetadataSlices } from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 	import { type ZenoColumn } from "../../zenoservice";
-	import { createSlices } from "../cells/MetadataCellUtil";
+	import { bucketName, createSlices } from "../cells/MetadataCellUtil";
 
 	export let col: ZenoColumn;
 	export let histogram: HistogramEntry[];
@@ -16,6 +16,14 @@
 	let folderName = col.name + "s";
 	let input;
 	let originalFolderName = "";
+
+	let sliceNames: string[] = [];
+	let selectedSlices: boolean[] = [];
+
+	histogram.forEach((h) => {
+		sliceNames.push(bucketName(col, h));
+		selectedSlices.push(true);
+	});
 
 	$: invalidName =
 		($folders.includes(folderName) && folderName !== originalFolderName) ||
@@ -56,14 +64,25 @@
 					label="Folder Name"
 					bind:this={input} />
 				<div id="buckets">
-					<div style="display: flex; flex-wrap: wrap;padding: 10px">
-						{#each histogram as h}
-							<div class="slice-cell">
-								<span>label == cat</span>
-								<span class="metric">
-									<span>85.76</span>
-									<span class="size">(1000)</span>
-								</span>
+					<div style="display: flex; flex-wrap: wrap; padding: 10px">
+						{#each histogram as h, i}
+							<div style="display: flex; flex-direction: column">
+								<div
+									class="slice-cell {selectedSlices[i] ? 'selected' : ''}"
+									on:keydown={() => ({})}
+									on:click={() => (selectedSlices[i] = !selectedSlices[i])}>
+									<Textfield
+										style="height: 30px; margin-right: 10px;"
+										on:click={(e) => e.stopPropagation()}
+										bind:value={sliceNames[i]} />
+									<span class="metric">
+										<span>{h.metric.toFixed(2)}</span>
+										<span class="size">
+											({h.filteredCount ? h.filteredCount.toLocaleString() : 0})
+										</span>
+									</span>
+								</div>
+								<p class="message">slice already exists</p>
 							</div>
 						{/each}
 					</div>
@@ -73,7 +92,7 @@
 						style="margin-left: 5px;"
 						variant="outlined"
 						disabled={invalidName}
-						on:click={() => createFolder}>
+						on:click={createFolder}>
 						Create
 					</Button>
 					<Button
@@ -105,7 +124,7 @@
 	}
 	#buckets {
 		display: flex;
-		width: 720px;
+		width: calc(50vw);
 		max-height: 50vh;
 		flex-direction: column;
 		overflow: auto;
@@ -117,7 +136,6 @@
 		justify-content: space-around;
 		align-items: center;
 		text-transform: none;
-		width: 200px;
 		margin: 5px;
 		padding: 5px;
 		border: 1px solid var(--G4);
@@ -125,14 +143,14 @@
 		cursor: pointer;
 	}
 	.metric {
-		font-size: 12px;
+		font-size: 13px;
 		color: black;
 	}
 	.size {
 		font-style: italic;
 		color: var(--G3);
 	}
-	.slice-cell:hover {
+	.selected {
 		background-color: var(--P3);
 	}
 	.message {

@@ -9,6 +9,24 @@ import {
 	type ZenoColumn,
 } from "../../zenoservice";
 
+/** Return default slice name of histogram buckets **/
+export function bucketName(col: ZenoColumn, h: HistogramEntry) {
+	if (col.metadataType === MetadataType.NOMINAL) {
+		return col.name + " == " + h.bucket;
+	} else if (col.metadataType === MetadataType.CONTINUOUS) {
+		return (
+			Number(h.bucket).toFixed(2) +
+			" <= " +
+			col.name +
+			" < " +
+			Number(h.bucketEnd).toFixed(2)
+		);
+	} else if (col.metadataType === MetadataType.BOOLEAN) {
+		const value = h.bucket ? "true" : "false";
+		return col.name + " == " + value;
+	}
+}
+
 /** Create slices from metadata histogram buckets **/
 export function createSlices(
 	col: ZenoColumn,
@@ -24,7 +42,7 @@ export function createSlices(
 		const preds: FilterPredicate[] = [];
 		const slicePredGroup: FilterPredicateGroup = { predicates: [], join: "" };
 
-		let sliceName = "";
+		const sliceName = bucketName(col, h);
 
 		if (col.metadataType === MetadataType.NOMINAL) {
 			preds.push({
@@ -33,7 +51,6 @@ export function createSlices(
 				value: h.bucket,
 				join: "",
 			});
-			sliceName = col.name + " == " + h.bucket;
 		} else if (col.metadataType === MetadataType.CONTINUOUS) {
 			preds.push({
 				column: col,
@@ -47,24 +64,17 @@ export function createSlices(
 				value: h.bucketEnd,
 				join: "&",
 			});
-			sliceName =
-				Number(h.bucket).toFixed(2) +
-				" <= " +
-				col.name +
-				" < " +
-				Number(h.bucketEnd).toFixed(2);
 		} else if (col.metadataType === MetadataType.BOOLEAN) {
-			const value = h.bucket ? "true" : "false";
 			preds.push({
 				column: col,
 				operation: "==",
-				value: value,
+				value: h.bucket ? "true" : "false",
 				join: "",
 			});
-			sliceName = col.name + " == " + value;
 		}
 
 		slicePredGroup.predicates = preds;
+
 		ZenoService.createNewSlice({
 			sliceName,
 			filterPredicates: slicePredGroup,
