@@ -33,7 +33,7 @@ black = "^23.7.0"
 httpx = "^0.24.1"
 pyright = "^1.1.317"
 pytest = "^7.4.0"
-ruff = "^0.0.277"
+ruff = "^0.0.278"
 
 [tool.poetry.scripts]
 zeno = "zeno.runner:command_line"
