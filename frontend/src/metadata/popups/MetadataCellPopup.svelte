@@ -3,7 +3,7 @@
 	import Paper, { Content } from "@smui/paper";
 	import Textfield from "@smui/textfield";
 	import type { HistogramEntry } from "../../api/metadata";
-	import { folders, showMetadataSlices } from "../../stores";
+	import { folders, showMetadataSlices, slices } from "../../stores";
 	import { clickOutside } from "../../util/clickOutside";
 	import { type ZenoColumn } from "../../zenoservice";
 	import { bucketName, createSlices } from "../cells/MetadataCellUtil";
@@ -25,7 +25,12 @@
 		selectedSlices.push(true);
 	});
 
-	$: invalidName =
+	$: invalidSliceName =
+		sliceNames.filter(
+			(s, i) => selectedSlices[i] && ($slices.has(s) || s.length === 0)
+		).length > 0;
+
+	$: invalidFolderName =
 		($folders.includes(folderName) && folderName !== originalFolderName) ||
 		folderName.length === 0;
 
@@ -34,7 +39,7 @@
 	}
 
 	function createFolder() {
-		createSlices(col, histogram, folderName);
+		createSlices(col, histogram, folderName, sliceNames, selectedSlices);
 		showMetadataSlices.set(false);
 		MetadataPanel.scrollTop = 0;
 	}
@@ -44,7 +49,12 @@
 		if ($showMetadataSlices && e.key === "Escape") {
 			showMetadataSlices.set(false);
 		}
-		if ($showMetadataSlices && e.key === "Enter" && !invalidName) {
+		if (
+			$showMetadataSlices &&
+			e.key === "Enter" &&
+			!invalidFolderName &&
+			!invalidSliceName
+		) {
 			createFolder();
 		}
 	}
@@ -82,7 +92,13 @@
 										</span>
 									</span>
 								</div>
-								<p class="message">slice already exists</p>
+								{#if selectedSlices[i]}
+									{#if $slices.has(sliceNames[i])}
+										<p class="message">slice already exists</p>
+									{:else if sliceNames[i].length === 0}
+										<p class="message">slice name can't be empty</p>
+									{/if}
+								{/if}
 							</div>
 						{/each}
 					</div>
@@ -91,7 +107,7 @@
 					<Button
 						style="margin-left: 5px;"
 						variant="outlined"
-						disabled={invalidName}
+						disabled={invalidFolderName || invalidSliceName}
 						on:click={createFolder}>
 						Create
 					</Button>
@@ -101,8 +117,12 @@
 						on:click={() => showMetadataSlices.set(false)}>
 						Cancel
 					</Button>
-					{#if invalidName && folderName.length > 0}
-						<p class="message">folder already exists</p>
+					{#if invalidFolderName}
+						{#if folderName.length > 0}
+							<p class="message">folder already exists</p>
+						{:else}
+							<p class="message">folder name can't be empty</p>
+						{/if}
 					{/if}
 				</div>
 			</Content>

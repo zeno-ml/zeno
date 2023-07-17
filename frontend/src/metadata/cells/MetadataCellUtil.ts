@@ -31,63 +31,65 @@ export function bucketName(col: ZenoColumn, h: HistogramEntry) {
 export function createSlices(
 	col: ZenoColumn,
 	histogram: HistogramEntry[],
-	folder: string
+	folder: string,
+	sliceNames: string[],
+	selected: boolean[]
 ) {
 	folders.update((f) => {
 		f.push(folder);
 		return [...f];
 	});
 
-	histogram.forEach((h) => {
-		const preds: FilterPredicate[] = [];
-		const slicePredGroup: FilterPredicateGroup = { predicates: [], join: "" };
+	histogram.forEach((h, i) => {
+		if (selected[i]) {
+			const preds: FilterPredicate[] = [];
+			const slicePredGroup: FilterPredicateGroup = { predicates: [], join: "" };
 
-		const sliceName = bucketName(col, h);
+			if (col.metadataType === MetadataType.NOMINAL) {
+				preds.push({
+					column: col,
+					operation: "==",
+					value: h.bucket,
+					join: "",
+				});
+			} else if (col.metadataType === MetadataType.CONTINUOUS) {
+				preds.push({
+					column: col,
+					operation: ">=",
+					value: h.bucket,
+					join: "",
+				});
+				preds.push({
+					column: col,
+					operation: "<",
+					value: h.bucketEnd,
+					join: "&",
+				});
+			} else if (col.metadataType === MetadataType.BOOLEAN) {
+				preds.push({
+					column: col,
+					operation: "==",
+					value: h.bucket ? "true" : "false",
+					join: "",
+				});
+			}
 
-		if (col.metadataType === MetadataType.NOMINAL) {
-			preds.push({
-				column: col,
-				operation: "==",
-				value: h.bucket,
-				join: "",
-			});
-		} else if (col.metadataType === MetadataType.CONTINUOUS) {
-			preds.push({
-				column: col,
-				operation: ">=",
-				value: h.bucket,
-				join: "",
-			});
-			preds.push({
-				column: col,
-				operation: "<",
-				value: h.bucketEnd,
-				join: "&",
-			});
-		} else if (col.metadataType === MetadataType.BOOLEAN) {
-			preds.push({
-				column: col,
-				operation: "==",
-				value: h.bucket ? "true" : "false",
-				join: "",
+			slicePredGroup.predicates = preds;
+
+			ZenoService.createNewSlice({
+				sliceName: sliceNames[i],
+				filterPredicates: slicePredGroup,
+				folder: folder,
+			}).then(() => {
+				slices.update((s) => {
+					s.set(sliceNames[i], <Slice>{
+						sliceName: sliceNames[i],
+						folder: folder,
+						filterPredicates: slicePredGroup,
+					});
+					return s;
+				});
 			});
 		}
-
-		slicePredGroup.predicates = preds;
-
-		ZenoService.createNewSlice({
-			sliceName,
-			filterPredicates: slicePredGroup,
-			folder: folder,
-		}).then(() => {
-			slices.update((s) => {
-				s.set(sliceName, <Slice>{
-					sliceName,
-					folder: folder,
-					filterPredicates: slicePredGroup,
-				});
-				return s;
-			});
-		});
 	});
 }
