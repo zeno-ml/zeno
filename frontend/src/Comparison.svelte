@@ -8,8 +8,8 @@
 		ready,
 		status,
 		showSliceFinder,
-		showNewFolder,
 		showNewSlice,
+		showNewFolder,
 	} from "./stores";
 </script>
 
@@ -22,6 +22,9 @@
 	{/if}
 	{#if $showSliceFinder}
 		<SliceFinderPopup />
+	{/if}
+	{#if $showNewFolder}
+		<NewFolderPopup />
 	{/if}
 	<div class="container">
 		<MetadataPanel />

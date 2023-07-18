@@ -303,48 +303,46 @@
 					</Icon>
 				</IconButton>
 			</div>
-			{#if $tab !== "comparison"}
-				<div
-					use:tooltip={{
-						content: "Create a new folder.",
-						position: "left",
-						theme: "zeno-tooltip",
+			<div
+				use:tooltip={{
+					content: "Create a new folder.",
+					position: "left",
+					theme: "zeno-tooltip",
+				}}>
+				<IconButton
+					on:click={() => {
+						folderToEdit.set(undefined);
+						showNewSlice.set(false);
+						showNewFolder.update((b) => !b);
+						showSliceFinder.set(false);
 					}}>
-					<IconButton
-						on:click={() => {
-							folderToEdit.set(undefined);
-							showNewSlice.set(false);
-							showNewFolder.update((b) => !b);
-							showSliceFinder.set(false);
-						}}>
-						<Icon component={Svg} viewBox="0 0 24 24">
-							<path fill="var(--G1)" d={mdiFolderPlusOutline} />
-						</Icon>
-					</IconButton>
-				</div>
-				<div
-					use:tooltip={{
-						content: "Create a new slice.",
-						position: "left",
-						theme: "zeno-tooltip",
+					<Icon component={Svg} viewBox="0 0 24 24">
+						<path fill="var(--G1)" d={mdiFolderPlusOutline} />
+					</Icon>
+				</IconButton>
+			</div>
+			<div
+				use:tooltip={{
+					content: "Create a new slice.",
+					position: "left",
+					theme: "zeno-tooltip",
+				}}>
+				<IconButton
+					on:click={() => {
+						sliceToEdit.set(undefined);
+						showNewSlice.update((d) => !d);
+						showNewFolder.set(false);
+						showSliceFinder.set(false);
 					}}>
-					<IconButton
-						on:click={() => {
-							sliceToEdit.set(undefined);
-							showNewSlice.update((d) => !d);
-							showNewFolder.set(false);
-							showSliceFinder.set(false);
-						}}>
-						<Icon component={Svg} viewBox="0 0 24 24">
-							{#if $selectionPredicates.predicates.length > 0}
-								<path fill="#6a1a9a" d={mdiPlusCircle} />
-							{:else}
-								<path fill="var(--G1)" d={mdiPlus} />
-							{/if}
-						</Icon>
-					</IconButton>
-				</div>
-			{/if}
+					<Icon component={Svg} viewBox="0 0 24 24">
+						{#if $selectionPredicates.predicates.length > 0}
+							<path fill="#6a1a9a" d={mdiPlusCircle} />
+						{:else}
+							<path fill="var(--G1)" d={mdiPlus} />
+						{/if}
+					</Icon>
+				</IconButton>
+			</div>
 		</div>
 	</div>
 	<div
