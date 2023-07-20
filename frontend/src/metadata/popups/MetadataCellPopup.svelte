@@ -38,6 +38,7 @@
 		input.getElement().focus();
 	}
 
+	/** Create metadata slices folder **/
 	function createFolder() {
 		createSlices(col, histogram, folderName, sliceNames, selectedSlices);
 		showMetadataSlices.set(false);

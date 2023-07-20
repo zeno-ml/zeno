@@ -84,6 +84,7 @@
 									e.stopPropagation();
 									showOptions = false;
 									showMetadataSlices.set(true);
+									// pass metadata column & histogram to MetadataCellPopup
 									metadataColumn.set(col);
 									metadataHistogram.set(histogram);
 								}}>
