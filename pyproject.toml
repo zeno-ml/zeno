@@ -13,7 +13,7 @@ include = ["zeno/frontend/**/*"]
 exclude = ["zeno/tests/*"]
 
 [tool.poetry.dependencies]
-fastapi = ">=0.95.1,<0.100.0"
+fastapi = ">=0.95.1,<0.101.0"
 inquirer = "^3.1.2"
 nest-asyncio = "^1.5.6"
 opentsne = ">=0.7.1,<1.1.0"
@@ -24,16 +24,16 @@ requests = "^2.28.1"
 setuptools = "*"
 tomli = "^2.0.1"
 tqdm = "^4.64.0"
-uvicorn = "^0.22.0"
+uvicorn = ">=0.22,<0.24"
 websockets = "^11.0"
 zeno-sliceline = "^0.0.1"
 
 [tool.poetry.dev-dependencies]
-black = "^23.3.0"
+black = "^23.7.0"
 httpx = "^0.24.1"
-pyright = "^1.1.316"
+pyright = "^1.1.317"
 pytest = "^7.4.0"
-ruff = "^0.0.276"
+ruff = "^0.0.278"
 
 [tool.poetry.scripts]
 zeno = "zeno.runner:command_line"
