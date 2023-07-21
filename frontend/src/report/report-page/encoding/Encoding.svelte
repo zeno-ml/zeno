@@ -2,7 +2,6 @@
 	import { report, reports } from "../../../stores";
 	import SlicesEncodingDropdown from "./SlicesEncodingDropdown.svelte";
 	import SlicesEncodingMultiChoice from "./SlicesEncodingMultiChoice.svelte";
-	import SecondSlicesEncoding from "./SecondSlicesEncoding.svelte";
 	import MetricsEncodingDropdown from "./MetricsEncodingDropdown.svelte";
 	import MetricsEncodingMultiChoice from "./MetricsEncodingMultiChoice.svelte";
 	import ModelsEncodingDropdown from "./ModelsEncodingDropdown.svelte";
@@ -216,7 +215,7 @@
 				<FixDimension value={"y"} />
 			{/if}
 			{#if chartType === ChartType.HEATMAP && parameters.yEncoding === "slices"}
-				<SecondSlicesEncoding />
+				<SlicesEncodingMultiChoice secondSlice={true} />
 			{:else}
 				<svelte:component
 					this={fixed_dimension === "y"

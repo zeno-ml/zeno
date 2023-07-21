@@ -1,18 +1,33 @@
 <script lang="ts">
-	import { report, reports, slices } from "../../../stores";
+	import { folders, report, reports, slices } from "../../../stores";
 	import Svelecte from "svelecte";
 	import { dndzone } from "svelte-dnd-action";
 
+	export let secondSlice = false;
+
 	let options = [];
 	let value = [];
+	let folder = "-- Select Folder --";
+	let refresh = 0;
 
 	// initial options & values
 	[...$slices.keys()].forEach((s, i) => {
 		options[i] = { value: i, label: s };
 	});
-	$reports[$report].slices.forEach((s, i) => {
+	let initialSlices = secondSlice
+		? $reports[$report].parameters.secondSlices
+		: $reports[$report].slices;
+	initialSlices.forEach((s, i) => {
 		value[i] = options.find((o) => o.label === s).value;
 	});
+
+	function updateReportSlices(slices) {
+		if (secondSlice) {
+			$reports[$report].parameters.secondSlices = slices;
+		} else {
+			$reports[$report].slices = slices;
+		}
+	}
 
 	function updateDragOrder(val) {
 		// check if all elements are numbers (dndzone's place holder)
@@ -22,7 +37,7 @@
 			val.forEach((v, i) => {
 				tmp[i] = options[v].label;
 			});
-			$reports[$report].slices = tmp;
+			updateReportSlices(tmp);
 		}
 	}
 
@@ -33,19 +48,44 @@
 	<h4 class="select-label">&nbsp;</h4>
 	<Svelecte
 		style="width: 280px; flex:none;"
-		bind:value
-		{options}
-		{dndzone}
-		multiple
+		bind:value={folder}
+		options={["-- Select Folder --", ...$folders.values()]}
+		labelAsValue
+		placeholder="Select Folder..."
 		on:change={(e) => {
-			let s = [];
-			e.detail.forEach((ed) => {
-				s.push(ed.label);
-			});
-			$reports[$report].slices = s;
-		}}
-		placeholder="Select Slices..." />
+			if (e.detail && e.detail.label !== "-- Select Folder --") {
+				let sls = [...$slices.values()]
+					.filter((s) => s.folder === e.detail.label)
+					.map((s) => s.sliceName);
+				value = [];
+				sls.forEach((s, i) => {
+					value[i] = options.find((o) => o.label === s).value;
+				});
+				updateReportSlices(sls);
+				refresh++;
+			}
+		}} />
 </div>
+
+{#key refresh}
+	<div class="parameters">
+		<h4 class="select-label">&nbsp;</h4>
+		<Svelecte
+			style="width: 280px; flex:none;"
+			bind:value
+			{options}
+			{dndzone}
+			multiple
+			on:change={(e) => {
+				let s = [];
+				e.detail.forEach((ed) => {
+					s.push(ed.label);
+				});
+				updateReportSlices(s);
+			}}
+			placeholder="Select Slices..." />
+	</div>
+{/key}
 
 <style>
 	.parameters {
