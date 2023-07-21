@@ -1,19 +1,19 @@
 <script lang="ts">
-	import DataTable, {
-		Head,
-		Body,
-		Row,
-		Cell,
-		Pagination,
-	} from "@smui/data-table";
-	import { Label } from "@smui/common";
-	import Select, { Option } from "@smui/select";
-	import IconButton, { Icon } from "@smui/icon-button";
 	import Button from "@smui/button";
+	import { Label } from "@smui/common";
+	import DataTable, {
+		Body,
+		Cell,
+		Head,
+		Pagination,
+		Row,
+	} from "@smui/data-table";
+	import IconButton, { Icon } from "@smui/icon-button";
+	import Select, { Option } from "@smui/select";
 	import { tooltip } from "@svelte-plugins/tooltips";
-	import { reports, slices, models, metrics } from "../stores";
-	import { ChartType } from "../zenoservice";
+	import { metrics, models, reports, slices } from "../stores";
 	import { updateTab } from "../util/util";
+	import { ChartType } from "../zenoservice";
 	import ReportHomeRow from "./ReportHomeRow.svelte";
 
 	let blur = function (ev) {
@@ -73,7 +73,7 @@
 		<h3>Charts</h3>
 		<div
 			use:tooltip={{
-				content: "create a new chart",
+				content: "Create a new chart.",
 				position: "left",
 				theme: "zeno-tooltip",
 			}}>

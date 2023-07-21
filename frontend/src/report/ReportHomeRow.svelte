@@ -7,13 +7,13 @@
 		mdiTable,
 		mdiViewGrid,
 	} from "@mdi/js";
-	import IconButton, { Icon } from "@smui/icon-button";
-	import { Row, Cell } from "@smui/data-table";
 	import { Svg } from "@smui/common";
+	import { Cell, Row } from "@smui/data-table";
+	import IconButton, { Icon } from "@smui/icon-button";
 	import { tooltip } from "@svelte-plugins/tooltips";
 	import { reports } from "../stores";
-	import { ChartType } from "../zenoservice";
 	import { updateTab } from "../util/util";
+	import { ChartType } from "../zenoservice";
 
 	export let report;
 	export let reportIndex;
@@ -64,7 +64,7 @@
 		<div class="inline">
 			<div
 				use:tooltip={{
-					content: "Make a copy",
+					content: "Duplicate chart.",
 					position: "left",
 					theme: "zeno-tooltip",
 				}}>
@@ -92,7 +92,7 @@
 			</div>
 			<div
 				use:tooltip={{
-					content: "Remove",
+					content: "Delete chart.",
 					position: "left",
 					theme: "zeno-tooltip",
 				}}>
