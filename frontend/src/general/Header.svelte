@@ -55,7 +55,7 @@
 				on:keydown={() => ({})}
 				on:click={() => updateTab("comparison")}
 				use:tooltip={{
-					content: "Qualitatively compare model outputs",
+					content: "Qualitatively compare model outputs.",
 					position: "right",
 					theme: "zeno-tooltip",
 				}}>
@@ -72,7 +72,7 @@
 				on:keydown={() => ({})}
 				on:click={() => updateTab("report")}
 				use:tooltip={{
-					content: "Create reports from your slices and metrics.",
+					content: "Create charts from your slices and metrics.",
 					position: "right",
 					theme: "zeno-tooltip",
 				}}>
