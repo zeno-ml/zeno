@@ -65,7 +65,7 @@
         "internmap": "^2.0.3",
         "regl-scatterplot": "^1.6.10",
         "sirv-cli": "^2.0.0",
-        "svelte-dnd-action": "^0.9.22",
+        "svelte-dnd-action": "^0.9.24",
         "svelte-spa-router": "^3.3.0",
         "svelte-vega": "^2.0.0"
     },
