@@ -32,7 +32,7 @@ zeno-sliceline = "^0.0.1"
 [tool.poetry.dev-dependencies]
 black = "^23.7.0"
 httpx = "^0.24.1"
-pyright = "^1.1.324"
+pyright = "^1.1.325"
 pytest = "^7.4.1"
 ruff = "^0.0.287"
 
