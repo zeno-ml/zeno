@@ -56,6 +56,7 @@
 
 	let metadataHistograms: InternMap<ZenoColumn, HistogramEntry[]> =
 		new InternMap([], columnHash);
+	let body: HTMLElement;
 
 	// Get histogram buckets, counts, and metrics when columns update.
 	status.subscribe((s) => {
@@ -259,7 +260,7 @@
 	});
 </script>
 
-<div class="side-container">
+<div id="side-container" bind:this={body}>
 	<MetadataHeader />
 	<div id="slice-header" class="inline">
 		<div class="inline">
@@ -526,7 +527,7 @@
 		border-bottom: 0.5px solid var(--G5);
 		background-color: var(--Y2);
 	}
-	.side-container {
+	#side-container {
 		height: calc(100vh - 65px);
 		width: 360px;
 		min-width: 360px;
