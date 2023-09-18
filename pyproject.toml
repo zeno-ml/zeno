@@ -30,7 +30,7 @@ websockets = "^11.0"
 zeno-sliceline = "^0.0.1"
 
 [tool.poetry.dev-dependencies]
-black = "^23.7.0"
+black = "^23.9.1"
 httpx = "^0.25.0"
 pyright = "^1.1.326"
 pytest = "^7.4.1"
