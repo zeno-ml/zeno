@@ -730,13 +730,13 @@ email = ["email-validator (>=1.0.3)"]
 
 [[package]]
 name = "pyright"
-version = "1.1.326"
+version = "1.1.327"
 description = "Command line wrapper for pyright"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pyright-1.1.326-py3-none-any.whl", hash = "sha256:f3c5047465138558d3d106a9464cc097cf2c3611da6edcf5b535cc1fdebd45db"},
-    {file = "pyright-1.1.326.tar.gz", hash = "sha256:cecbe026b14034ba0750db605718a8c2605552387c5772dfaf7f3e632cb7212a"},
+    {file = "pyright-1.1.327-py3-none-any.whl", hash = "sha256:3462cda239e9140276238bbdbd0b59d77406f1c2e14d8cb8c20c8e25639c6b3c"},
+    {file = "pyright-1.1.327.tar.gz", hash = "sha256:ba74148ad64f22020dbbed6781c4bdb38ecb8a7ca90dc3c87a4f08d1c0e11592"},
 ]
 
 [package.dependencies]
@@ -1210,4 +1210,4 @@ scikit-learn = ">=1.2.2,<2.0.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "bd3df2fa02b8830deb8e32ecb756281906927e1e55b79db897c9553b633f2392"
+content-hash = "415b34e4828266e24b269c2236e9c93fa42cebfe9d57abd92ee46bfa041c77ca"
