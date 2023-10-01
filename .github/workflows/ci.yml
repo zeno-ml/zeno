@@ -10,7 +10,7 @@ jobs:
   lint-ts:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install modules
         run: cd frontend && npm i
       - name: TS linting
@@ -19,7 +19,7 @@ jobs:
   format-python:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: psf/black@stable
         with:
           options: "--check --verbose"
@@ -28,7 +28,7 @@ jobs:
   lint-python:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: jpetrucciani/ruff-check@main
         with:
           path: "zeno/"
@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
       - uses: actions/setup-python@v4
         with:
