@@ -1,3 +1,5 @@
+# This repository has been deprecated in favor of [ZenoHub](https://github.com/zeno-ml/zeno-hub) and is no longer actively maintained.
+
 <img src="https://zenoml.com/img/zeno.png" width="250px"/>
 
 [![PyPI version](https://badge.fury.io/py/zenoml.svg)](https://badge.fury.io/py/zenoml)
