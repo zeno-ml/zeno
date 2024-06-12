@@ -18,6 +18,7 @@ import type {
 	ZenoColumn,
 	ZenoSettings,
 } from "./zenoservice";
+import type { HistogramEntry } from "./api/metadata";
 
 interface WSResponse {
 	status: string;
@@ -157,6 +158,10 @@ export const showNewTag: Writable<boolean> = writable(false);
 export const sliceToEdit: Writable<Slice> = writable(null);
 export const folderToEdit: Writable<string> = writable(null);
 export const showSliceFinder: Writable<boolean> = writable(false);
+export const showMetadataSlices: Writable<boolean> = writable(false);
+
+export const metadataColumn: Writable<ZenoColumn> = writable(undefined);
+export const metadataHistogram: Writable<HistogramEntry[]> = writable([]);
 
 export const metricRange: Writable<[number, number]> = writable([
 	Infinity,

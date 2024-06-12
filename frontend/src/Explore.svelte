@@ -5,11 +5,15 @@
 	import NewSlicePopup from "./metadata/popups/NewSlicePopup.svelte";
 	import SliceFinderPopup from "./metadata/popups/SliceFinderPopup.svelte";
 	import NewTagPopup from "./metadata/popups/NewTagPopup.svelte";
+	import MetadataCellPopup from "./metadata/popups/MetadataCellPopup.svelte";
 	import {
+		metadataColumn,
+		metadataHistogram,
 		ready,
 		showNewFolder,
 		showNewSlice,
 		showSliceFinder,
+		showMetadataSlices,
 		showNewTag,
 		status,
 	} from "./stores";
@@ -25,6 +29,9 @@
 	{/if}
 	{#if $showSliceFinder}
 		<SliceFinderPopup />
+	{/if}
+	{#if $showMetadataSlices}
+		<MetadataCellPopup histogram={$metadataHistogram} col={$metadataColumn} />
 	{/if}
 	{#if $showNewTag}
 		<NewTagPopup />

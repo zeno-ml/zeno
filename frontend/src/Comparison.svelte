@@ -17,6 +17,9 @@
 	{#if $showNewSlice}
 		<NewSlicePopup />
 	{/if}
+	{#if $showNewFolder}
+		<NewFolderPopup />
+	{/if}
 	{#if $showSliceFinder}
 		<SliceFinderPopup />
 	{/if}

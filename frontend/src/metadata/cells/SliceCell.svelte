@@ -128,99 +128,96 @@
 	{/if}
 
 	<div class="group" style:width="100%">
-		<div class="group" style:width="100%">
-			<div class="inline">
-				<div
-					class="group"
-					style:color="var(--G1)"
-					on:mouseover={() => (showTooltip = true)}
-					on:mouseout={() => (showTooltip = false)}
-					on:focus={() => (showTooltip = true)}
-					on:blur={() => (showTooltip = false)}>
-					{slice.sliceName}
-				</div>
-			</div>
+		<div class="inline">
 			<div
 				class="group"
-				use:clickOutside
-				on:click_outside={() => {
-					showOptions = false;
-				}}>
-				{#if showOptions}
-					<div id="options-container">
-						<Paper style="padding: 3px 0px;" elevation={7}>
-							<Content>
-								<div
-									class="option"
-									on:keydown={() => ({})}
-									on:click={(e) => {
-										e.stopPropagation();
-										showOptions = false;
-										sliceToEdit.set(slice);
-										showNewSlice.set(true);
-									}}>
-									<Icon style="font-size: 18px;" class="material-icons"
-										>edit</Icon
-									>&nbsp;
-									<span>Edit</span>
-								</div>
-								<div
-									class="option"
-									on:keydown={() => ({})}
-									on:click={(e) => {
-										e.stopPropagation();
-										showOptions = false;
-										$reports.forEach((r) => {
-											let hasSlice = false;
-											r.slices.forEach((p) => {
-												if (p === slice.sliceName) {
-													hasSlice = true;
-												}
-											});
-											if (hasSlice) {
-												relatedReports++;
-											}
-										});
-										if (relatedReports > 0) {
-											confirmDelete = true;
-										} else {
-											removeSlice();
-										}
-									}}>
-									<Icon style="font-size: 18px;" class="material-icons"
-										>delete_outline</Icon
-									>&nbsp;
-									<span>Remove</span>
-								</div>
-							</Content>
-						</Paper>
-					</div>
-				{/if}
-				<SliceCellResult {compare} {slice} sliceModel={$model} />
-				{#if compare}
-					<SliceCellResult {compare} {slice} sliceModel={$comparisonModel} />
-				{/if}
-				<div class="inline" style:cursor="pointer">
-					<div
-						style:width="36px"
-						use:clickOutside
-						on:click_outside={() => {
-							hovering = false;
-						}}>
-						{#if hovering}
-							<IconButton
-								size="button"
-								style="padding: 0px"
+				style:color="var(--G1)"
+				on:mouseover={() => (showTooltip = true)}
+				on:mouseout={() => (showTooltip = false)}
+				on:focus={() => (showTooltip = true)}
+				on:blur={() => (showTooltip = false)}>
+				{slice.sliceName}
+			</div>
+		</div>
+		<div
+			class="group"
+			use:clickOutside
+			on:click_outside={() => {
+				showOptions = false;
+			}}>
+			{#if showOptions}
+				<div id="options-container">
+					<Paper style="padding: 3px 0px;" elevation={7}>
+						<Content>
+							<div
+								class="option"
+								on:keydown={() => ({})}
 								on:click={(e) => {
 									e.stopPropagation();
-									showOptions = !showOptions;
+									showOptions = false;
+									sliceToEdit.set(slice);
+									showNewSlice.set(true);
 								}}>
-								<Icon component={Svg} viewBox="0 0 24 24">
-									<path fill="black" d={mdiDotsHorizontal} />
-								</Icon>
-							</IconButton>
-						{/if}
-					</div>
+								<Icon style="font-size: 18px;" class="material-icons">edit</Icon
+								>&nbsp;
+								<span>Edit</span>
+							</div>
+							<div
+								class="option"
+								on:keydown={() => ({})}
+								on:click={(e) => {
+									e.stopPropagation();
+									showOptions = false;
+									$reports.forEach((r) => {
+										let hasSlice = false;
+										r.slices.forEach((p) => {
+											if (p === slice.sliceName) {
+												hasSlice = true;
+											}
+										});
+										if (hasSlice) {
+											relatedReports++;
+										}
+									});
+									if (relatedReports > 0) {
+										confirmDelete = true;
+									} else {
+										removeSlice();
+									}
+								}}>
+								<Icon style="font-size: 18px;" class="material-icons"
+									>delete_outline</Icon
+								>&nbsp;
+								<span>Remove</span>
+							</div>
+						</Content>
+					</Paper>
+				</div>
+			{/if}
+			<SliceCellResult {compare} {slice} sliceModel={$model} />
+			{#if compare}
+				<SliceCellResult {compare} {slice} sliceModel={$comparisonModel} />
+			{/if}
+			<div class="inline" style:cursor="pointer">
+				<div
+					style:width="36px"
+					use:clickOutside
+					on:click_outside={() => {
+						hovering = false;
+					}}>
+					{#if hovering}
+						<IconButton
+							size="button"
+							style="padding: 0px"
+							on:click={(e) => {
+								e.stopPropagation();
+								showOptions = !showOptions;
+							}}>
+							<Icon component={Svg} viewBox="0 0 24 24">
+								<path fill="black" d={mdiDotsHorizontal} />
+							</Icon>
+						</IconButton>
+					{/if}
 				</div>
 			</div>
 		</div>
@@ -302,6 +299,7 @@
 	.inline {
 		display: flex;
 		flex-direction: row;
+		margin-right: 5px;
 	}
 	.in-folder {
 		margin-left: 35px;
