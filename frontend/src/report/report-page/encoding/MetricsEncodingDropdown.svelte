@@ -24,7 +24,7 @@
 		bind:value
 		{options}
 		on:change={(e) => {
-			if (e.detail.label !== $reports[$report].metrics[0]) {
+			if (e.detail && e.detail.label !== $reports[$report].metrics[0]) {
 				let tmpMetrics = $reports[$report].metrics;
 				if (tmpMetrics.includes(e.detail.label)) {
 					tmpMetrics.splice(tmpMetrics.indexOf(e.detail.label), 1);
